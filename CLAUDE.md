@@ -63,6 +63,9 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
 - **Die Reihenfolge in `data/vokabeln.json` ist der Lehrplan** — je zwölf Wörter ein
   Päckchen (`PAKET_GROESSE`, `PAKET_STUFE`). Einfügen in der Mitte verschiebt alle
   folgenden Päckchen; Ergänzungen ans Ende des Themas.
+- **Jeder Satz nennt in `benoetigt` seine Voraussetzungen als Grundformen** («книгу» →
+  `книга`). Ein Satz mit unbekanntem Wort lässt den Build scheitern — das Wort gehört
+  zuerst in den Lehrplan.
 - **Commits:** einer je logischer Änderung, Nachricht auf Deutsch, Betreffzeile im
   Imperativ. Im Rumpf steht, *warum*.
 - **Branches:** neue Branches nur auf meine ausdrückliche Ansage. Direkte Arbeit auf

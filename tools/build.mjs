@@ -89,22 +89,43 @@ for (const [thema, liste] of Object.entries(vokabeln)) {
   });
 }
 
-// Sätze: Stufen 1..n lückenlos, [russisch, deutsch]
-const stufen = Object.keys(saetze);
-if (!stufen.every((s) => /^[1-9][0-9]*$/.test(s))) {
-  meckern('saetze.json: Stufen müssen positive Ganzzahlen sein');
+// Sätze: { ru, de, stufe, benoetigt } — «benoetigt» nennt die Grundformen aus
+// dem Lehrplan, die ein Satz voraussetzt. Erst wenn die sitzen, wird er angeboten.
+const platz = {};
+Object.values(vokabeln).flat().forEach((w, i) => { if (Array.isArray(w)) platz[w[0]] = i; });
+
+if (!Array.isArray(saetze) || saetze.length === 0) {
+  meckern('saetze.json: erwartet eine nicht-leere Liste von Sätzen');
 } else {
-  const sortiert = stufen.map(Number).sort((a, b) => a - b);
-  sortiert.forEach((n, i) => {
+  const gesehen = new Set();
+  const stufen = new Set();
+  saetze.forEach((s, i) => {
+    const wo = 'saetze.json #' + (i + 1);
+    if (!s || typeof s !== 'object' || Array.isArray(s)) return meckern(wo + ': erwartet ein Objekt');
+    ['ru', 'de'].forEach((feld) => {
+      if (typeof s[feld] !== 'string' || s[feld] === '') meckern(wo + ': «' + feld + '» fehlt oder ist leer');
+      else if (s[feld] !== s[feld].trim()) meckern(wo + ': «' + feld + '» hat Leerzeichen am Rand');
+    });
+    if (typeof s.ru === 'string') {
+      if (!istKyrillisch(s.ru)) meckern(wo + ': «ru» enthält kein Kyrillisch');
+      if (gesehen.has(s.ru)) meckern(wo + ': Dublette «' + s.ru + '»');
+      gesehen.add(s.ru);
+    }
+    if (!Number.isInteger(s.stufe) || s.stufe < 1) meckern(wo + ': «stufe» muss eine ganze Zahl ab 1 sein');
+    else stufen.add(s.stufe);
+    if (!Array.isArray(s.benoetigt) || s.benoetigt.length === 0) {
+      meckern(wo + ': «benoetigt» muss die vorausgesetzten Grundformen nennen');
+    } else {
+      s.benoetigt.forEach((w) => {
+        if (platz[w] === undefined) meckern(wo + ': «' + w + '» steht nicht in vokabeln.json');
+      });
+      if (new Set(s.benoetigt).size !== s.benoetigt.length) meckern(wo + ': doppelte Voraussetzung');
+    }
+  });
+  const liste = [...stufen].sort((a, b) => a - b);
+  liste.forEach((n, i) => {
     if (n !== i + 1) meckern('saetze.json: Stufe ' + (i + 1) + ' fehlt (Stufen müssen lückenlos bei 1 beginnen)');
   });
-}
-for (const [stufe, liste] of Object.entries(saetze)) {
-  if (!Array.isArray(liste) || liste.length === 0) {
-    meckern('saetze.json » Stufe ' + stufe + ': leer');
-    continue;
-  }
-  liste.forEach((s, i) => pruefeTupel('saetze.json » Stufe ' + stufe + ' #' + (i + 1), s, 2));
 }
 
 // Fakten: nicht leer, keine Dubletten
@@ -165,11 +186,22 @@ const listenBlock = (name, liste, alsTupel) => {
   return zeilen.join('\n');
 };
 
+// Sätze als Liste von Objekten, ein Satz je Zeile.
+const satzBlock = (name, liste) => {
+  const zeilen = ['var ' + name + ' = ['];
+  liste.forEach((s, i) => {
+    zeilen.push('  { ru: ' + jsStr(s.ru) + ', de: ' + jsStr(s.de) + ', stufe: ' + s.stufe +
+      ', benoetigt: [' + s.benoetigt.map(jsStr).join(', ') + '] }' + (i < liste.length - 1 ? ',' : ''));
+  });
+  zeilen.push('];');
+  return zeilen.join('\n');
+};
+
 const block = [
   START,
   objektBlock('VOCAB_THEMES', vokabeln, false),
   '',
-  objektBlock('SENTENCES', saetze, true),
+  satzBlock('SENTENCES', saetze),
   '',
   listenBlock('FACTS', fakten, false),
   '',
@@ -202,9 +234,23 @@ const jsonListe = (liste, alsTupel) => {
   return zeilen.join('\n') + '\n';
 };
 
+const jsonSaetze = (liste) => {
+  const zeilen = ['['];
+  liste.forEach((s, i) => {
+    zeilen.push('  {');
+    zeilen.push('    "ru": ' + jsonStr(s.ru) + ',');
+    zeilen.push('    "de": ' + jsonStr(s.de) + ',');
+    zeilen.push('    "stufe": ' + s.stufe + ',');
+    zeilen.push('    "benoetigt": [' + s.benoetigt.map(jsonStr).join(', ') + ']');
+    zeilen.push('  }' + (i < liste.length - 1 ? ',' : ''));
+  });
+  zeilen.push(']');
+  return zeilen.join('\n') + '\n';
+};
+
 const dateien = [
   ['data/vokabeln.json', jsonObjekt(vokabeln)],
-  ['data/saetze.json', jsonObjekt(saetze)],
+  ['data/saetze.json', jsonSaetze(saetze)],
   ['data/fakten.json', jsonListe(fakten, false)],
   ['data/tastatur.json', jsonListe(tastatur, true)]
 ];
@@ -238,6 +284,8 @@ if (nurPruefen) {
 }
 
 const anzahl = (o) => Object.values(o).reduce((n, a) => n + a.length, 0);
-console.log('Themen ' + Object.keys(vokabeln).length + ' · Vokabeln ' + anzahl(vokabeln) +
-  ' · Satzstufen ' + Object.keys(saetze).length + ' · Sätze ' + anzahl(saetze) +
+const woerter = anzahl(vokabeln);
+console.log('Themen ' + Object.keys(vokabeln).length + ' · Vokabeln ' + woerter +
+  ' · Päckchen ' + Math.ceil(woerter / 12) +
+  ' · Sätze ' + saetze.length + ' in ' + new Set(saetze.map((s) => s.stufe)).size + ' Stufen' +
   ' · Fakten ' + fakten.length + ' · Tasten ' + tastatur.flat().length);

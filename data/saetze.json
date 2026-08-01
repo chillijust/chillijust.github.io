@@ -1,63 +1,332 @@
-{
-  "1": [
-    ["Это дом.", "Das ist ein Haus."],
-    ["Я читаю книгу.", "Ich lese ein Buch."],
-    ["Мама дома.", "Mama ist zu Hause."],
-    ["Кот спит.", "Die Katze schläft."],
-    ["Я люблю чай.", "Ich mag Tee."],
-    ["Это моя семья.", "Das ist meine Familie."],
-    ["Он работает.", "Er arbeitet."],
-    ["Мы идём домой.", "Wir gehen nach Hause."],
-    ["Сегодня холодно.", "Heute ist es kalt."],
-    ["Я пью кофе.", "Ich trinke Kaffee."],
-    ["Она пишет письмо.", "Sie schreibt einen Brief."],
-    ["Хлеб на столе.", "Das Brot ist auf dem Tisch."],
-    ["Вода холодная.", "Das Wasser ist kalt."],
-    ["Это мой брат.", "Das ist mein Bruder."],
-    ["Я живу в городе.", "Ich wohne in der Stadt."],
-    ["Собака бежит.", "Der Hund rennt."],
-    ["Утром я ем кашу.", "Morgens esse ich Brei."],
-    ["Мы смотрим фильм.", "Wir schauen einen Film."],
-    ["Папа читает газету.", "Papa liest die Zeitung."],
-    ["Дети играют.", "Die Kinder spielen."]
-  ],
-  "2": [
-    ["Каждый день я учу русский язык.", "Jeden Tag lerne ich Russisch."],
-    ["Моя сестра живёт в Москве.", "Meine Schwester wohnt in Moskau."],
-    ["В магазине много фруктов.", "Im Laden gibt es viel Obst."],
-    ["Летом мы едем на море.", "Im Sommer fahren wir ans Meer."],
-    ["Я не понимаю этот вопрос.", "Ich verstehe diese Frage nicht."],
-    ["Вечером мы гуляем в парке.", "Abends spazieren wir im Park."],
-    ["Мой друг работает инженером.", "Mein Freund arbeitet als Ingenieur."],
-    ["Сколько стоит этот билет?", "Wie viel kostet dieses Ticket?"],
-    ["Она говорит по-русски очень хорошо.", "Sie spricht sehr gut Russisch."],
-    ["Зимой в России идёт снег.", "Im Winter schneit es in Russland."],
-    ["Я хочу купить новую книгу.", "Ich möchte ein neues Buch kaufen."],
-    ["Мы завтракаем в восемь часов.", "Wir frühstücken um acht Uhr."],
-    ["Где находится ближайшая аптека?", "Wo ist die nächste Apotheke?"],
-    ["У меня есть кошка и собака.", "Ich habe eine Katze und einen Hund."],
-    ["Поезд отправляется через десять минут.", "Der Zug fährt in zehn Minuten ab."],
-    ["Мне нравится слушать музыку.", "Ich höre gern Musik."],
-    ["Он часто пишет письма бабушке.", "Er schreibt der Oma oft Briefe."],
-    ["Сегодня на улице тепло и солнечно.", "Heute ist es draußen warm und sonnig."],
-    ["Мы учимся в университете.", "Wir studieren an der Universität."],
-    ["Она готовит ужин на кухне.", "Sie kocht das Abendessen in der Küche."]
-  ],
-  "3": [
-    ["Если завтра будет хорошая погода, мы поедем за город.", "Wenn morgen gutes Wetter ist, fahren wir aufs Land."],
-    ["Когда я был ребёнком, мы часто ездили к бабушке в деревню.", "Als ich ein Kind war, fuhren wir oft zur Oma ins Dorf."],
-    ["Я думаю, что русский язык трудный, но очень интересный.", "Ich denke, dass Russisch schwierig, aber sehr interessant ist."],
-    ["Мой брат сказал, что купит билеты на поезд.", "Mein Bruder sagte, dass er Zugtickets kaufen wird."],
-    ["Хотя было холодно, дети играли во дворе.", "Obwohl es kalt war, spielten die Kinder im Hof."],
-    ["Каждое утро она пьёт кофе и читает новости.", "Jeden Morgen trinkt sie Kaffee und liest die Nachrichten."],
-    ["Мы долго искали гостиницу, потому что город был большой.", "Wir suchten lange ein Hotel, weil die Stadt groß war."],
-    ["Учитель объяснил правило, и все всё поняли.", "Der Lehrer erklärte die Regel, und alle verstanden alles."],
-    ["В следующем году я хочу поехать в Санкт-Петербург.", "Nächstes Jahr möchte ich nach Sankt Petersburg fahren."],
-    ["Он не только говорит по-русски, но и пишет стихи.", "Er spricht nicht nur Russisch, sondern schreibt auch Gedichte."],
-    ["После работы мы встретились с друзьями в кафе.", "Nach der Arbeit trafen wir uns mit Freunden im Café."],
-    ["Чтобы хорошо читать, нужно много практиковаться.", "Um gut zu lesen, muss man viel üben."],
-    ["Врач посоветовал мне больше спать и меньше работать.", "Der Arzt riet mir, mehr zu schlafen und weniger zu arbeiten."],
-    ["Эта книга была написана сто лет назад.", "Dieses Buch wurde vor hundert Jahren geschrieben."],
-    ["Мне кажется, что зима в этом году будет долгой.", "Mir scheint, dass der Winter dieses Jahr lang sein wird."]
-  ]
-}
+[
+  {
+    "ru": "Это мой брат.",
+    "de": "Das ist mein Bruder.",
+    "stufe": 1,
+    "benoetigt": ["это", "мой", "брат"]
+  },
+  {
+    "ru": "Это моя семья.",
+    "de": "Das ist meine Familie.",
+    "stufe": 1,
+    "benoetigt": ["это", "моя", "семья"]
+  },
+  {
+    "ru": "Он работает.",
+    "de": "Er arbeitet.",
+    "stufe": 1,
+    "benoetigt": ["он", "работать"]
+  },
+  {
+    "ru": "Я читаю книгу.",
+    "de": "Ich lese ein Buch.",
+    "stufe": 1,
+    "benoetigt": ["я", "читать", "книга"]
+  },
+  {
+    "ru": "Папа читает газету.",
+    "de": "Papa liest die Zeitung.",
+    "stufe": 1,
+    "benoetigt": ["папа", "читать", "газета"]
+  },
+  {
+    "ru": "Она пишет письмо.",
+    "de": "Sie schreibt einen Brief.",
+    "stufe": 1,
+    "benoetigt": ["она", "писать", "письмо"]
+  },
+  {
+    "ru": "Я живу в городе.",
+    "de": "Ich wohne in der Stadt.",
+    "stufe": 1,
+    "benoetigt": ["я", "жить", "в", "город"]
+  },
+  {
+    "ru": "Это дом.",
+    "de": "Das ist ein Haus.",
+    "stufe": 1,
+    "benoetigt": ["это", "дом"]
+  },
+  {
+    "ru": "Мама дома.",
+    "de": "Mama ist zu Hause.",
+    "stufe": 1,
+    "benoetigt": ["мама", "дом"]
+  },
+  {
+    "ru": "Мы идём домой.",
+    "de": "Wir gehen nach Hause.",
+    "stufe": 1,
+    "benoetigt": ["мы", "идти", "домой"]
+  },
+  {
+    "ru": "Хлеб на столе.",
+    "de": "Das Brot ist auf dem Tisch.",
+    "stufe": 1,
+    "benoetigt": ["хлеб", "на", "стол"]
+  },
+  {
+    "ru": "Я люблю чай.",
+    "de": "Ich mag Tee.",
+    "stufe": 1,
+    "benoetigt": ["я", "любить", "чай"]
+  },
+  {
+    "ru": "Я пью кофе.",
+    "de": "Ich trinke Kaffee.",
+    "stufe": 1,
+    "benoetigt": ["я", "пить", "кофе"]
+  },
+  {
+    "ru": "Утром я ем кашу.",
+    "de": "Morgens esse ich Brei.",
+    "stufe": 1,
+    "benoetigt": ["утро", "я", "есть", "каша"]
+  },
+  {
+    "ru": "Мы смотрим новости.",
+    "de": "Wir schauen die Nachrichten.",
+    "stufe": 1,
+    "benoetigt": ["мы", "смотреть", "новости"]
+  },
+  {
+    "ru": "Кошка спит.",
+    "de": "Die Katze schläft.",
+    "stufe": 1,
+    "benoetigt": ["кошка", "спать"]
+  },
+  {
+    "ru": "Дети играют.",
+    "de": "Die Kinder spielen.",
+    "stufe": 1,
+    "benoetigt": ["ребёнок", "играть"]
+  },
+  {
+    "ru": "Собака бежит.",
+    "de": "Der Hund rennt.",
+    "stufe": 1,
+    "benoetigt": ["собака", "бежать"]
+  },
+  {
+    "ru": "Вода холодная.",
+    "de": "Das Wasser ist kalt.",
+    "stufe": 1,
+    "benoetigt": ["вода", "холодный"]
+  },
+  {
+    "ru": "Сегодня холодно.",
+    "de": "Heute ist es kalt.",
+    "stufe": 1,
+    "benoetigt": ["сегодня", "холодно"]
+  },
+  {
+    "ru": "У меня есть кошка и собака.",
+    "de": "Ich habe eine Katze und einen Hund.",
+    "stufe": 2,
+    "benoetigt": ["у", "я", "есть", "кошка", "и", "собака"]
+  },
+  {
+    "ru": "В магазине много фруктов.",
+    "de": "Im Laden gibt es viel Obst.",
+    "stufe": 2,
+    "benoetigt": ["в", "магазин", "много", "фрукты"]
+  },
+  {
+    "ru": "Мы едим в восемь часов.",
+    "de": "Wir essen um acht Uhr.",
+    "stufe": 2,
+    "benoetigt": ["мы", "есть", "в", "восемь", "час"]
+  },
+  {
+    "ru": "Сегодня на улице тепло и хорошо.",
+    "de": "Heute ist es draußen warm und schön.",
+    "stufe": 2,
+    "benoetigt": ["сегодня", "на", "улица", "тепло", "и", "хорошо"]
+  },
+  {
+    "ru": "Он часто пишет письма бабушке.",
+    "de": "Er schreibt der Oma oft Briefe.",
+    "stufe": 2,
+    "benoetigt": ["он", "часто", "писать", "письмо", "бабушка"]
+  },
+  {
+    "ru": "Мы учимся в университете.",
+    "de": "Wir studieren an der Universität.",
+    "stufe": 2,
+    "benoetigt": ["мы", "учиться", "в", "университет"]
+  },
+  {
+    "ru": "Поезд идёт через десять минут.",
+    "de": "Der Zug fährt in zehn Minuten.",
+    "stufe": 2,
+    "benoetigt": ["поезд", "идти", "через", "десять", "минута"]
+  },
+  {
+    "ru": "Где здесь аптека?",
+    "de": "Wo ist hier eine Apotheke?",
+    "stufe": 2,
+    "benoetigt": ["где", "здесь", "аптека"]
+  },
+  {
+    "ru": "Я хочу купить новую книгу.",
+    "de": "Ich möchte ein neues Buch kaufen.",
+    "stufe": 2,
+    "benoetigt": ["я", "хотеть", "покупать", "новый", "книга"]
+  },
+  {
+    "ru": "Она готовит ужин на кухне.",
+    "de": "Sie kocht das Abendessen in der Küche.",
+    "stufe": 2,
+    "benoetigt": ["она", "готовить", "ужин", "на", "кухня"]
+  },
+  {
+    "ru": "Вечером мы гуляем в парке.",
+    "de": "Abends spazieren wir im Park.",
+    "stufe": 2,
+    "benoetigt": ["вечер", "мы", "гулять", "в", "парк"]
+  },
+  {
+    "ru": "Каждый день я учу русский язык.",
+    "de": "Jeden Tag lerne ich Russisch.",
+    "stufe": 2,
+    "benoetigt": ["каждый", "день", "я", "учить", "русский", "язык"]
+  },
+  {
+    "ru": "Она говорит по-русски очень хорошо.",
+    "de": "Sie spricht sehr gut Russisch.",
+    "stufe": 2,
+    "benoetigt": ["она", "говорить", "русский", "очень", "хорошо"]
+  },
+  {
+    "ru": "Мне нравится слушать музыку.",
+    "de": "Ich höre gern Musik.",
+    "stufe": 2,
+    "benoetigt": ["я", "нравиться", "слушать", "музыка"]
+  },
+  {
+    "ru": "Я не понимаю этот вопрос.",
+    "de": "Ich verstehe diese Frage nicht.",
+    "stufe": 2,
+    "benoetigt": ["я", "не", "понимать", "этот", "вопрос"]
+  },
+  {
+    "ru": "Мой друг работает инженером.",
+    "de": "Mein Freund arbeitet als Ingenieur.",
+    "stufe": 2,
+    "benoetigt": ["мой", "друг", "работать", "инженер"]
+  },
+  {
+    "ru": "Сколько стоит этот билет?",
+    "de": "Wie viel kostet dieses Ticket?",
+    "stufe": 2,
+    "benoetigt": ["сколько", "стоить", "этот", "билет"]
+  },
+  {
+    "ru": "Моя сестра живёт в Москве.",
+    "de": "Meine Schwester wohnt in Moskau.",
+    "stufe": 2,
+    "benoetigt": ["моя", "сестра", "жить", "в", "Москва"]
+  },
+  {
+    "ru": "Зимой в России идёт снег.",
+    "de": "Im Winter schneit es in Russland.",
+    "stufe": 2,
+    "benoetigt": ["зима", "в", "Россия", "идти", "снег"]
+  },
+  {
+    "ru": "Летом мы едем на море.",
+    "de": "Im Sommer fahren wir ans Meer.",
+    "stufe": 2,
+    "benoetigt": ["лето", "мы", "ехать", "на", "море"]
+  },
+  {
+    "ru": "Каждое утро она пьёт кофе и читает новости.",
+    "de": "Jeden Morgen trinkt sie Kaffee und liest die Nachrichten.",
+    "stufe": 3,
+    "benoetigt": ["каждый", "утро", "она", "пить", "кофе", "и", "читать", "новости"]
+  },
+  {
+    "ru": "Я думаю, что зима в этом году будет холодной.",
+    "de": "Ich denke, dass der Winter dieses Jahr kalt wird.",
+    "stufe": 3,
+    "benoetigt": ["я", "думать", "что", "зима", "в", "этот", "год", "быть", "холодный"]
+  },
+  {
+    "ru": "Эту книгу я читал, когда был молодой.",
+    "de": "Dieses Buch las ich, als ich jung war.",
+    "stufe": 3,
+    "benoetigt": ["этот", "книга", "я", "читать", "когда", "быть", "молодой"]
+  },
+  {
+    "ru": "Хотя было холодно, дети играли на улице.",
+    "de": "Obwohl es kalt war, spielten die Kinder auf der Straße.",
+    "stufe": 3,
+    "benoetigt": ["хотя", "быть", "холодно", "ребёнок", "играть", "на", "улица"]
+  },
+  {
+    "ru": "Чтобы хорошо читать, нужно много работать.",
+    "de": "Um gut zu lesen, muss man viel arbeiten.",
+    "stufe": 3,
+    "benoetigt": ["чтобы", "хорошо", "читать", "нужно", "много", "работать"]
+  },
+  {
+    "ru": "Вечером мы встретили друзей в ресторане.",
+    "de": "Am Abend trafen wir Freunde im Restaurant.",
+    "stufe": 3,
+    "benoetigt": ["вечер", "мы", "встретить", "друг", "в", "ресторан"]
+  },
+  {
+    "ru": "Он не только говорит по-русски, но и пишет письма.",
+    "de": "Er spricht nicht nur Russisch, sondern schreibt auch Briefe.",
+    "stufe": 3,
+    "benoetigt": ["он", "не", "только", "говорить", "русский", "но", "и", "писать", "письмо"]
+  },
+  {
+    "ru": "Я думаю, что русский язык трудный, но очень интересный.",
+    "de": "Ich denke, dass Russisch schwierig, aber sehr interessant ist.",
+    "stufe": 3,
+    "benoetigt": ["я", "думать", "что", "русский", "язык", "трудный", "но", "очень", "интересный"]
+  },
+  {
+    "ru": "Учитель говорил медленно, и все поняли.",
+    "de": "Der Lehrer sprach langsam, und alle verstanden.",
+    "stufe": 3,
+    "benoetigt": ["учитель", "говорить", "медленный", "и", "все", "понимать"]
+  },
+  {
+    "ru": "Врач сказал, что нужно спать и не работать.",
+    "de": "Der Arzt sagte, dass man schlafen und nicht arbeiten muss.",
+    "stufe": 3,
+    "benoetigt": ["врач", "сказать", "что", "нужно", "спать", "и", "не", "работать"]
+  },
+  {
+    "ru": "Мой брат сказал, что купит билеты на поезд.",
+    "de": "Mein Bruder sagte, dass er Zugtickets kaufen wird.",
+    "stufe": 3,
+    "benoetigt": ["мой", "брат", "сказать", "что", "покупать", "билет", "на", "поезд"]
+  },
+  {
+    "ru": "Мы долго искали гостиницу, потому что город был большой.",
+    "de": "Wir suchten lange ein Hotel, weil die Stadt groß war.",
+    "stufe": 3,
+    "benoetigt": ["мы", "долго", "искать", "гостиница", "потому что", "город", "быть", "большой"]
+  },
+  {
+    "ru": "В этом году я хочу поехать в Россию.",
+    "de": "Dieses Jahr möchte ich nach Russland fahren.",
+    "stufe": 3,
+    "benoetigt": ["в", "этот", "год", "я", "хотеть", "ехать", "Россия"]
+  },
+  {
+    "ru": "Когда я был ребёнком, мы часто ездили к бабушке в деревню.",
+    "de": "Als ich ein Kind war, fuhren wir oft zur Oma ins Dorf.",
+    "stufe": 3,
+    "benoetigt": ["когда", "я", "быть", "ребёнок", "мы", "часто", "ехать", "к", "бабушка", "в", "деревня"]
+  },
+  {
+    "ru": "Если завтра будет хорошая погода, мы поедем на море.",
+    "de": "Wenn morgen gutes Wetter ist, fahren wir ans Meer.",
+    "stufe": 3,
+    "benoetigt": ["если", "завтра", "быть", "хороший", "погода", "мы", "ехать", "на", "море"]
+  }
+]

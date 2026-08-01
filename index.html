@@ -360,25 +360,173 @@ textarea:focus { outline: none; border-color: var(--ice); }
 // ── DATEN ────────────────────────────────────────────────────
 /* == DATEN:START — generiert aus /data durch tools/build.mjs, nicht von Hand ändern == */
 var VOCAB_THEMES = {
-  'Grundlagen': [
+  'Ich & Du': [
+    ['я', 'ich', 'ja'],
+    ['ты', 'du', 'ty'],
+    ['он', 'er', 'on'],
+    ['она', 'sie (Einzahl)', 'ana'],
+    ['оно', 'es', 'ano'],
+    ['мы', 'wir', 'my'],
+    ['вы', 'ihr / Sie', 'wy'],
+    ['они', 'sie (Mehrzahl)', 'ani'],
+    ['это', 'das (ist)', 'eta'],
+    ['кто', 'wer', 'kto'],
+    ['что', 'was / dass', 'schto'],
+    ['где', 'wo', 'gdje']
+  ],
+  'Erste Wörter': [
     ['привет', 'hallo', 'priwjet'],
-    ['спасибо', 'danke', 'spassiba'],
-    ['пожалуйста', 'bitte', 'poschalujsta'],
+    ['пока', 'tschüss', 'paka'],
     ['да', 'ja', 'da'],
     ['нет', 'nein', 'njet'],
+    ['спасибо', 'danke', 'spassiba'],
+    ['пожалуйста', 'bitte', 'poschalujsta'],
     ['извините', 'Entschuldigung', 'iswinitje'],
-    ['до свидания', 'auf Wiedersehen', 'da swidanija'],
-    ['пока', 'tschüss', 'paka'],
-    ['доброе утро', 'guten Morgen', 'dobroje utro'],
-    ['добрый день', 'guten Tag', 'dobryj djen'],
-    ['добрый вечер', 'guten Abend', 'dobryj wetscher'],
-    ['как дела', 'wie geht\'s', 'kak djela'],
     ['хорошо', 'gut', 'harascho'],
     ['плохо', 'schlecht', 'ploha'],
     ['конечно', 'natürlich', 'konjeschno'],
-    ['может быть', 'vielleicht', 'moschet byt'],
     ['ничего', 'nichts / macht nichts', 'nitschewo'],
+    ['может быть', 'vielleicht', 'moschet byt'],
+    ['доброе утро', 'guten Morgen', 'dobroje utro'],
+    ['добрый день', 'guten Tag', 'dobryj djen'],
+    ['добрый вечер', 'guten Abend', 'dobryj wetscher'],
+    ['до свидания', 'auf Wiedersehen', 'da swidanija'],
+    ['как дела', 'wie geht\'s', 'kak djela'],
     ['добро пожаловать', 'willkommen', 'dobro poschalowat']
+  ],
+  'Kleine Wörter': [
+    ['в', 'in', 'w'],
+    ['на', 'auf / an', 'na'],
+    ['у', 'bei', 'u'],
+    ['с', 'mit', 's'],
+    ['к', 'zu', 'k'],
+    ['из', 'aus', 'is'],
+    ['о', 'über', 'o'],
+    ['через', 'in / durch', 'tscheres'],
+    ['и', 'und', 'i'],
+    ['но', 'aber', 'no'],
+    ['не', 'nicht', 'nje'],
+    ['здесь', 'hier', 'sdjes'],
+    ['там', 'dort', 'tam']
+  ],
+  'Mein & Dein': [
+    ['мой', 'mein', 'moj'],
+    ['моя', 'meine', 'maja'],
+    ['твой', 'dein', 'twoj'],
+    ['наш', 'unser', 'nasch'],
+    ['ваш', 'euer / Ihr', 'wasch'],
+    ['этот', 'dieser', 'etat'],
+    ['каждый', 'jeder', 'kaschdyj'],
+    ['все', 'alle', 'wsje'],
+    ['много', 'viel', 'mnoga'],
+    ['мало', 'wenig', 'mala'],
+    ['очень', 'sehr', 'otschen'],
+    ['сколько', 'wie viel', 'skolka']
+  ],
+  'Familie': [
+    ['мама', 'Mama', 'mama'],
+    ['папа', 'Papa', 'papa'],
+    ['брат', 'Bruder', 'brat'],
+    ['сестра', 'Schwester', 'sestra'],
+    ['сын', 'Sohn', 'syn'],
+    ['дочь', 'Tochter', 'dotsch'],
+    ['бабушка', 'Oma', 'babuschka'],
+    ['дедушка', 'Opa', 'djeduschka'],
+    ['ребёнок', 'Kind', 'rebjonok'],
+    ['друг', 'Freund', 'druk'],
+    ['подруга', 'Freundin', 'padruga'],
+    ['семья', 'Familie', 'semja'],
+    ['муж', 'Ehemann', 'musch'],
+    ['жена', 'Ehefrau', 'schena'],
+    ['родители', 'Eltern', 'raditjeli'],
+    ['внук', 'Enkel', 'wnuk'],
+    ['тётя', 'Tante', 'tjotja'],
+    ['дядя', 'Onkel', 'djadja']
+  ],
+  'Verben I': [
+    ['быть', 'sein', 'byt'],
+    ['жить', 'leben/wohnen', 'schyt'],
+    ['идти', 'gehen', 'idti'],
+    ['есть', 'essen', 'jest'],
+    ['пить', 'trinken', 'pit'],
+    ['читать', 'lesen', 'tschitat'],
+    ['писать', 'schreiben', 'pissat'],
+    ['говорить', 'sprechen', 'gawarit'],
+    ['работать', 'arbeiten', 'rabotat'],
+    ['знать', 'wissen/kennen', 'snat'],
+    ['любить', 'lieben/mögen', 'ljubit'],
+    ['делать', 'machen', 'djelat']
+  ],
+  'Erste Dinge': [
+    ['книга', 'Buch', 'kniga'],
+    ['газета', 'Zeitung', 'gasjeta'],
+    ['письмо', 'Brief', 'pismo'],
+    ['новости', 'Nachrichten', 'nowosti'],
+    ['работа', 'Arbeit', 'rabota'],
+    ['город', 'Stadt', 'gorat'],
+    ['улица', 'Straße', 'uliza'],
+    ['магазин', 'Geschäft', 'magasin'],
+    ['школа', 'Schule', 'schkola'],
+    ['кошка', 'Katze', 'koschka'],
+    ['собака', 'Hund', 'sabaka'],
+    ['деньги', 'Geld', 'djengi']
+  ],
+  'Zuhause': [
+    ['дом', 'Haus', 'dom'],
+    ['домой', 'nach Hause', 'damoj'],
+    ['квартира', 'Wohnung', 'kwartira'],
+    ['комната', 'Zimmer', 'komnata'],
+    ['кухня', 'Küche', 'kuchnja'],
+    ['окно', 'Fenster', 'akno'],
+    ['дверь', 'Tür', 'dwjer'],
+    ['стол', 'Tisch', 'stol'],
+    ['стул', 'Stuhl', 'stul'],
+    ['кровать', 'Bett', 'krawat'],
+    ['диван', 'Sofa', 'diwan'],
+    ['шкаф', 'Schrank', 'schkaf'],
+    ['полка', 'Regal', 'polka'],
+    ['зеркало', 'Spiegel', 'sjerkalo'],
+    ['холодильник', 'Kühlschrank', 'chaladilnik'],
+    ['лампа', 'Lampe', 'lampa'],
+    ['ключ', 'Schlüssel', 'kljutsch'],
+    ['ванная', 'Badezimmer', 'wannaja'],
+    ['туалет', 'Toilette', 'tualjet']
+  ],
+  'Essen': [
+    ['хлеб', 'Brot', 'hljep'],
+    ['молоко', 'Milch', 'malako'],
+    ['сыр', 'Käse', 'syr'],
+    ['мясо', 'Fleisch', 'mjasso'],
+    ['рыба', 'Fisch', 'ryba'],
+    ['яблоко', 'Apfel', 'jabloko'],
+    ['суп', 'Suppe', 'sup'],
+    ['каша', 'Brei', 'kascha'],
+    ['рис', 'Reis', 'ris'],
+    ['масло', 'Butter/Öl', 'maslo'],
+    ['яйцо', 'Ei', 'jajzo'],
+    ['сахар', 'Zucker', 'sachar'],
+    ['соль', 'Salz', 'sol'],
+    ['картошка', 'Kartoffel', 'kartoschka'],
+    ['овощи', 'Gemüse', 'owoschtschi'],
+    ['фрукты', 'Obst', 'frukty'],
+    ['колбаса', 'Wurst', 'kolbassa'],
+    ['курица', 'Hähnchen', 'kuriza'],
+    ['ужин', 'Abendessen', 'uschin'],
+    ['пирог', 'Kuchen/Pirogge', 'pirok'],
+    ['мороженое', 'Eis (Speiseeis)', 'moroschenoje']
+  ],
+  'Getränke': [
+    ['вода', 'Wasser', 'wada'],
+    ['чай', 'Tee', 'tschaj'],
+    ['кофе', 'Kaffee', 'kofje'],
+    ['сок', 'Saft', 'sok'],
+    ['пиво', 'Bier', 'piwo'],
+    ['вино', 'Wein', 'wino'],
+    ['водка', 'Wodka', 'wodka'],
+    ['квас', 'Kwas', 'kwas'],
+    ['кефир', 'Kefir', 'kefir'],
+    ['компот', 'Kompott (Getränk)', 'kampot'],
+    ['лимонад', 'Limonade', 'limonad']
   ],
   'Zahlen': [
     ['ноль', 'null', 'nol'],
@@ -399,60 +547,74 @@ var VOCAB_THEMES = {
     ['сто', 'hundert', 'sto'],
     ['тысяча', 'tausend', 'tysjatscha']
   ],
-  'Familie': [
-    ['мама', 'Mama', 'mama'],
-    ['папа', 'Papa', 'papa'],
-    ['брат', 'Bruder', 'brat'],
-    ['сестра', 'Schwester', 'sestra'],
-    ['сын', 'Sohn', 'syn'],
-    ['дочь', 'Tochter', 'dotsch'],
-    ['бабушка', 'Oma', 'babuschka'],
-    ['дедушка', 'Opa', 'djeduschka'],
-    ['тётя', 'Tante', 'tjotja'],
-    ['дядя', 'Onkel', 'djadja'],
-    ['родители', 'Eltern', 'raditjeli'],
-    ['внук', 'Enkel', 'wnuk'],
-    ['семья', 'Familie', 'semja'],
-    ['муж', 'Ehemann', 'musch'],
-    ['жена', 'Ehefrau', 'schena'],
-    ['ребёнок', 'Kind', 'rebjonok'],
-    ['друг', 'Freund', 'druk'],
-    ['подруга', 'Freundin', 'padruga']
+  'Zeit & Tage': [
+    ['сегодня', 'heute', 'sewodnja'],
+    ['завтра', 'morgen', 'sawtra'],
+    ['вчера', 'gestern', 'wtschera'],
+    ['сейчас', 'jetzt', 'sejtschas'],
+    ['утро', 'Morgen', 'utro'],
+    ['день', 'Tag', 'djen'],
+    ['вечер', 'Abend', 'wjetscher'],
+    ['ночь', 'Nacht', 'notsch'],
+    ['час', 'Stunde', 'tschas'],
+    ['минута', 'Minute', 'minuta'],
+    ['неделя', 'Woche', 'nedjelja'],
+    ['месяц', 'Monat', 'mjessjaz'],
+    ['год', 'Jahr', 'got'],
+    ['понедельник', 'Montag', 'panedjelnik'],
+    ['вторник', 'Dienstag', 'wtornik'],
+    ['среда', 'Mittwoch', 'sreda'],
+    ['четверг', 'Donnerstag', 'tschetwerk'],
+    ['пятница', 'Freitag', 'pjatniza'],
+    ['суббота', 'Samstag', 'subbota'],
+    ['воскресенье', 'Sonntag', 'woskresjenje'],
+    ['полдень', 'Mittag', 'poldjen'],
+    ['секунда', 'Sekunde', 'sekunda'],
+    ['весна', 'Frühling', 'wjesna'],
+    ['лето', 'Sommer', 'ljeto'],
+    ['осень', 'Herbst', 'ossjen'],
+    ['зима', 'Winter', 'sima']
   ],
-  'Essen': [
-    ['хлеб', 'Brot', 'hljep'],
-    ['молоко', 'Milch', 'malako'],
-    ['сыр', 'Käse', 'syr'],
-    ['мясо', 'Fleisch', 'mjasso'],
-    ['колбаса', 'Wurst', 'kolbassa'],
-    ['курица', 'Hähnchen', 'kuriza'],
-    ['рыба', 'Fisch', 'ryba'],
-    ['яблоко', 'Apfel', 'jabloko'],
-    ['суп', 'Suppe', 'sup'],
-    ['каша', 'Brei', 'kascha'],
-    ['рис', 'Reis', 'ris'],
-    ['масло', 'Butter/Öl', 'maslo'],
-    ['яйцо', 'Ei', 'jajzo'],
-    ['сахар', 'Zucker', 'sachar'],
-    ['соль', 'Salz', 'sol'],
-    ['картошка', 'Kartoffel', 'kartoschka'],
-    ['овощи', 'Gemüse', 'owoschtschi'],
-    ['фрукты', 'Obst', 'frukty'],
-    ['пирог', 'Kuchen/Pirogge', 'pirok'],
-    ['мороженое', 'Eis (Speiseeis)', 'moroschenoje']
+  'Verben II': [
+    ['слушать', 'hören', 'sluschat'],
+    ['смотреть', 'schauen', 'smatrjet'],
+    ['спать', 'schlafen', 'spat'],
+    ['учить', 'lernen/lehren', 'utschit'],
+    ['учиться', 'lernen / studieren', 'utschitsja'],
+    ['понимать', 'verstehen', 'panimat'],
+    ['хотеть', 'wollen', 'chatjet'],
+    ['мочь', 'können', 'motsch'],
+    ['видеть', 'sehen', 'widjet'],
+    ['играть', 'spielen', 'igrat'],
+    ['ехать', 'fahren', 'jechat'],
+    ['бежать', 'rennen', 'beschat'],
+    ['думать', 'denken', 'dumat']
   ],
-  'Getränke': [
-    ['вода', 'Wasser', 'wada'],
-    ['чай', 'Tee', 'tschaj'],
-    ['кофе', 'Kaffee', 'kofje'],
-    ['сок', 'Saft', 'sok'],
-    ['пиво', 'Bier', 'piwo'],
-    ['вино', 'Wein', 'wino'],
-    ['водка', 'Wodka', 'wodka'],
-    ['квас', 'Kwas', 'kwas'],
-    ['кефир', 'Kefir', 'kefir'],
-    ['компот', 'Kompott (Getränk)', 'kampot'],
-    ['лимонад', 'Limonade', 'limonad']
+  'Adjektive': [
+    ['большой', 'groß', 'balschoj'],
+    ['маленький', 'klein', 'malenkij'],
+    ['новый', 'neu', 'nowyj'],
+    ['старый', 'alt', 'staryj'],
+    ['молодой', 'jung', 'maladoj'],
+    ['хороший', 'gut', 'haroschij'],
+    ['плохой', 'schlecht', 'plachoj'],
+    ['красивый', 'schön', 'krassiwyj'],
+    ['горячий', 'heiß', 'garjatschij'],
+    ['холодный', 'kalt', 'chalodnyj'],
+    ['холодно', 'kalt (es ist)', 'cholodno'],
+    ['тепло', 'warm (es ist)', 'teplo'],
+    ['жарко', 'heiß (es ist)', 'scharko'],
+    ['быстрый', 'schnell', 'bystryj'],
+    ['медленный', 'langsam', 'mjedlennyj'],
+    ['интересный', 'interessant', 'interjesnyj'],
+    ['умный', 'klug', 'umnyj'],
+    ['сильный', 'stark', 'silnyj'],
+    ['слабый', 'schwach', 'slabyj'],
+    ['важный', 'wichtig', 'waschnyj'],
+    ['дорогой', 'teuer', 'daragoj'],
+    ['дешёвый', 'billig', 'deschowyj'],
+    ['лёгкий', 'leicht', 'ljochkij'],
+    ['трудный', 'schwierig', 'trudnyj']
   ],
   'Farben': [
     ['цвет', 'Farbe', 'zwjet'],
@@ -472,143 +634,54 @@ var VOCAB_THEMES = {
     ['светлый', 'hell', 'swjetlyj'],
     ['яркий', 'leuchtend/grell', 'jarkij']
   ],
-  'Zeit & Tage': [
-    ['понедельник', 'Montag', 'panedjelnik'],
-    ['вторник', 'Dienstag', 'wtornik'],
-    ['среда', 'Mittwoch', 'sreda'],
-    ['четверг', 'Donnerstag', 'tschetwerk'],
-    ['пятница', 'Freitag', 'pjatniza'],
-    ['суббота', 'Samstag', 'subbota'],
-    ['воскресенье', 'Sonntag', 'woskresjenje'],
-    ['сегодня', 'heute', 'sewodnja'],
-    ['завтра', 'morgen', 'sawtra'],
-    ['вчера', 'gestern', 'wtschera'],
-    ['сейчас', 'jetzt', 'sejtschas'],
-    ['утро', 'Morgen', 'utro'],
-    ['день', 'Tag', 'djen'],
-    ['вечер', 'Abend', 'wjetscher'],
-    ['ночь', 'Nacht', 'notsch'],
-    ['полдень', 'Mittag', 'poldjen'],
-    ['секунда', 'Sekunde', 'sekunda'],
-    ['минута', 'Minute', 'minuta'],
-    ['час', 'Stunde', 'tschas'],
-    ['неделя', 'Woche', 'nedjelja'],
-    ['месяц', 'Monat', 'mjessjaz'],
-    ['год', 'Jahr', 'got'],
-    ['весна', 'Frühling', 'wjesna'],
-    ['лето', 'Sommer', 'ljeto'],
-    ['осень', 'Herbst', 'ossjen'],
-    ['зима', 'Winter', 'sima']
-  ],
-  'Zuhause': [
-    ['дом', 'Haus', 'dom'],
-    ['квартира', 'Wohnung', 'kwartira'],
-    ['комната', 'Zimmer', 'komnata'],
-    ['кухня', 'Küche', 'kuchnja'],
-    ['окно', 'Fenster', 'akno'],
-    ['дверь', 'Tür', 'dwjer'],
-    ['стол', 'Tisch', 'stol'],
-    ['стул', 'Stuhl', 'stul'],
-    ['кровать', 'Bett', 'krawat'],
-    ['диван', 'Sofa', 'diwan'],
-    ['шкаф', 'Schrank', 'schkaf'],
-    ['полка', 'Regal', 'polka'],
-    ['зеркало', 'Spiegel', 'sjerkalo'],
-    ['холодильник', 'Kühlschrank', 'chaladilnik'],
-    ['лампа', 'Lampe', 'lampa'],
-    ['ключ', 'Schlüssel', 'kljutsch'],
-    ['ванная', 'Badezimmer', 'wannaja'],
-    ['туалет', 'Toilette', 'tualjet']
+  'Satzbau': [
+    ['если', 'wenn / falls', 'jesli'],
+    ['когда', 'wann / als', 'kagda'],
+    ['потому что', 'weil', 'patamu schto'],
+    ['чтобы', 'damit / um zu', 'schtoby'],
+    ['хотя', 'obwohl', 'chatja'],
+    ['нужно', 'man muss / nötig', 'nuschna'],
+    ['тоже', 'auch', 'toschе'],
+    ['только', 'nur', 'tolka'],
+    ['уже', 'schon', 'usche'],
+    ['ещё', 'noch', 'jeschtscho'],
+    ['тогда', 'dann / damals', 'tagda'],
+    ['часто', 'oft', 'tschasta'],
+    ['долго', 'lange', 'dolga'],
+    ['сказать', 'sagen', 'skasat']
   ],
   'Stadt & Verkehr': [
-    ['город', 'Stadt', 'gorat'],
-    ['улица', 'Straße', 'uliza'],
     ['площадь', 'Platz', 'ploschtschad'],
     ['парк', 'Park', 'park'],
-    ['мост', 'Brücke', 'most'],
-    ['церковь', 'Kirche', 'zerkow'],
-    ['музей', 'Museum', 'musej'],
-    ['ресторан', 'Restaurant', 'restoran'],
-    ['магазин', 'Geschäft', 'magasin'],
     ['рынок', 'Markt', 'rynok'],
+    ['университет', 'Universität', 'universitjet'],
+    ['вокзал', 'Bahnhof', 'waksal'],
+    ['поезд', 'Zug', 'pojest'],
+    ['автобус', 'Bus', 'awtobus'],
+    ['машина', 'Auto', 'maschina'],
+    ['метро', 'U-Bahn', 'metro'],
+    ['аэропорт', 'Flughafen', 'aeroport'],
     ['банк', 'Bank', 'bank'],
     ['аптека', 'Apotheke', 'aptjeka'],
     ['больница', 'Krankenhaus', 'balniza'],
-    ['школа', 'Schule', 'schkola'],
-    ['университет', 'Universität', 'universitjet'],
-    ['вокзал', 'Bahnhof', 'waksal'],
-    ['аэропорт', 'Flughafen', 'aeroport'],
-    ['метро', 'U-Bahn', 'metro'],
-    ['автобус', 'Bus', 'awtobus'],
-    ['машина', 'Auto', 'maschina'],
-    ['поезд', 'Zug', 'pojest']
+    ['ресторан', 'Restaurant', 'restoran'],
+    ['музей', 'Museum', 'musej'],
+    ['церковь', 'Kirche', 'zerkow'],
+    ['мост', 'Brücke', 'most']
   ],
-  'Verben': [
-    ['быть', 'sein', 'byt'],
-    ['идти', 'gehen', 'idti'],
-    ['говорить', 'sprechen', 'gawarit'],
-    ['читать', 'lesen', 'tschitat'],
-    ['писать', 'schreiben', 'pissat'],
-    ['слушать', 'hören', 'sluschat'],
-    ['смотреть', 'schauen', 'smatrjet'],
-    ['есть', 'essen', 'jest'],
-    ['пить', 'trinken', 'pit'],
-    ['спать', 'schlafen', 'spat'],
-    ['работать', 'arbeiten', 'rabotat'],
-    ['учить', 'lernen/lehren', 'utschit'],
-    ['знать', 'wissen/kennen', 'snat'],
-    ['понимать', 'verstehen', 'panimat'],
-    ['любить', 'lieben/mögen', 'ljubit'],
-    ['жить', 'leben/wohnen', 'schyt'],
-    ['хотеть', 'wollen', 'chatjet'],
-    ['мочь', 'können', 'motsch'],
-    ['делать', 'machen', 'djelat'],
-    ['видеть', 'sehen', 'widjet'],
+  'Verben III': [
     ['давать', 'geben', 'dawat'],
     ['брать', 'nehmen', 'brat'],
     ['покупать', 'kaufen', 'pakupat'],
     ['платить', 'zahlen', 'platit'],
     ['ждать', 'warten', 'schdat'],
-    ['помогать', 'helfen', 'pamagat']
-  ],
-  'Adjektive': [
-    ['большой', 'groß', 'balschoj'],
-    ['маленький', 'klein', 'malenkij'],
-    ['новый', 'neu', 'nowyj'],
-    ['старый', 'alt', 'staryj'],
-    ['молодой', 'jung', 'maladoj'],
-    ['хороший', 'gut', 'haroschij'],
-    ['плохой', 'schlecht', 'plachoj'],
-    ['красивый', 'schön', 'krassiwyj'],
-    ['интересный', 'interessant', 'interjesnyj'],
-    ['умный', 'klug', 'umnyj'],
-    ['сильный', 'stark', 'silnyj'],
-    ['слабый', 'schwach', 'slabyj'],
-    ['важный', 'wichtig', 'waschnyj'],
-    ['быстрый', 'schnell', 'bystryj'],
-    ['медленный', 'langsam', 'mjedlennyj'],
-    ['горячий', 'heiß', 'garjatschij'],
-    ['холодный', 'kalt', 'chalodnyj'],
-    ['дорогой', 'teuer', 'daragoj'],
-    ['дешёвый', 'billig', 'deschowyj'],
-    ['лёгкий', 'leicht', 'ljochkij'],
-    ['трудный', 'schwierig', 'trudnyj']
-  ],
-  'Tiere': [
-    ['кошка', 'Katze', 'koschka'],
-    ['собака', 'Hund', 'sabaka'],
-    ['птица', 'Vogel', 'ptiza'],
-    ['лошадь', 'Pferd', 'loschad'],
-    ['корова', 'Kuh', 'karowa'],
-    ['свинья', 'Schwein', 'swinja'],
-    ['коза', 'Ziege', 'kasa'],
-    ['утка', 'Ente', 'utka'],
-    ['медведь', 'Bär', 'medwjed'],
-    ['волк', 'Wolf', 'wolk'],
-    ['лиса', 'Fuchs', 'lissa'],
-    ['заяц', 'Hase', 'sajaz'],
-    ['мышь', 'Maus', 'mysch'],
-    ['слон', 'Elefant', 'slon']
+    ['помогать', 'helfen', 'pamagat'],
+    ['готовить', 'kochen / zubereiten', 'gatowit'],
+    ['гулять', 'spazieren gehen', 'guljat'],
+    ['нравиться', 'gefallen', 'nrawitsja'],
+    ['стоить', 'kosten', 'stoit'],
+    ['искать', 'suchen', 'iskat'],
+    ['встретить', 'treffen', 'wstretit']
   ],
   'Körper': [
     ['голова', 'Kopf', 'galawa'],
@@ -651,19 +724,47 @@ var VOCAB_THEMES = {
     ['погода', 'Wetter', 'pagoda'],
     ['солнце', 'Sonne', 'sonze'],
     ['небо', 'Himmel', 'njebo'],
-    ['звезда', 'Stern', 'swjesda'],
-    ['луна', 'Mond', 'luna'],
     ['дождь', 'Regen', 'doschd'],
     ['снег', 'Schnee', 'snjek'],
     ['ветер', 'Wind', 'wjeter'],
     ['облако', 'Wolke', 'oblako'],
+    ['звезда', 'Stern', 'swjesda'],
+    ['луна', 'Mond', 'luna'],
     ['гроза', 'Gewitter', 'grasa'],
     ['гром', 'Donner', 'grom'],
     ['туман', 'Nebel', 'tuman'],
-    ['мороз', 'Frost', 'maros'],
-    ['тепло', 'warm (es ist)', 'teplo'],
-    ['холодно', 'kalt (es ist)', 'cholodno'],
-    ['жарко', 'heiß (es ist)', 'scharko']
+    ['мороз', 'Frost', 'maros']
+  ],
+  'Tiere': [
+    ['птица', 'Vogel', 'ptiza'],
+    ['лошадь', 'Pferd', 'loschad'],
+    ['корова', 'Kuh', 'karowa'],
+    ['свинья', 'Schwein', 'swinja'],
+    ['коза', 'Ziege', 'kasa'],
+    ['утка', 'Ente', 'utka'],
+    ['медведь', 'Bär', 'medwjed'],
+    ['волк', 'Wolf', 'wolk'],
+    ['лиса', 'Fuchs', 'lissa'],
+    ['заяц', 'Hase', 'sajaz'],
+    ['мышь', 'Maus', 'mysch'],
+    ['слон', 'Elefant', 'slon']
+  ],
+  'Arbeit & Alltag': [
+    ['язык', 'Sprache / Zunge', 'jasyk'],
+    ['русский', 'russisch', 'russkij'],
+    ['музыка', 'Musik', 'musyka'],
+    ['ручка', 'Stift', 'rutschka'],
+    ['бумага', 'Papier', 'bumaga'],
+    ['телефон', 'Telefon', 'telefon'],
+    ['компьютер', 'Computer', 'kompjuter'],
+    ['офис', 'Büro', 'ofis'],
+    ['вопрос', 'Frage', 'wapros'],
+    ['сумка', 'Tasche', 'sumka'],
+    ['учитель', 'Lehrer', 'utschitel'],
+    ['студент', 'Student', 'studjent'],
+    ['врач', 'Arzt', 'wratsch'],
+    ['инженер', 'Ingenieur', 'inschener'],
+    ['время', 'Zeit', 'wremja']
   ],
   'Reisen & Natur': [
     ['путешествие', 'Reise', 'puteschestwije'],
@@ -674,6 +775,8 @@ var VOCAB_THEMES = {
     ['карта', 'Karte', 'karta'],
     ['дорога', 'Weg/Straße', 'daroga'],
     ['граница', 'Grenze', 'graniza'],
+    ['Москва', 'Moskau', 'Maskwa'],
+    ['Россия', 'Russland', 'Rassija'],
     ['деревня', 'Dorf', 'derjewnja'],
     ['море', 'Meer', 'morje'],
     ['гора', 'Berg', 'gara'],
@@ -684,92 +787,66 @@ var VOCAB_THEMES = {
     ['озеро', 'See', 'osero'],
     ['пляж', 'Strand', 'pljasch'],
     ['остров', 'Insel', 'ostrow']
-  ],
-  'Arbeit & Alltag': [
-    ['работа', 'Arbeit', 'rabota'],
-    ['офис', 'Büro', 'ofis'],
-    ['компьютер', 'Computer', 'kompjuter'],
-    ['телефон', 'Telefon', 'telefon'],
-    ['книга', 'Buch', 'kniga'],
-    ['газета', 'Zeitung', 'gasjeta'],
-    ['новости', 'Nachrichten', 'nowosti'],
-    ['вопрос', 'Frage', 'wapros'],
-    ['ручка', 'Stift', 'rutschka'],
-    ['бумага', 'Papier', 'bumaga'],
-    ['письмо', 'Brief', 'pismo'],
-    ['сумка', 'Tasche', 'sumka'],
-    ['учитель', 'Lehrer', 'utschitel'],
-    ['студент', 'Student', 'studjent'],
-    ['врач', 'Arzt', 'wratsch'],
-    ['инженер', 'Ingenieur', 'inschener'],
-    ['деньги', 'Geld', 'djengi'],
-    ['время', 'Zeit', 'wremja']
   ]
 };
 
-var SENTENCES = {
-  1: [
-    ['Это дом.', 'Das ist ein Haus.'],
-    ['Я читаю книгу.', 'Ich lese ein Buch.'],
-    ['Мама дома.', 'Mama ist zu Hause.'],
-    ['Кот спит.', 'Die Katze schläft.'],
-    ['Я люблю чай.', 'Ich mag Tee.'],
-    ['Это моя семья.', 'Das ist meine Familie.'],
-    ['Он работает.', 'Er arbeitet.'],
-    ['Мы идём домой.', 'Wir gehen nach Hause.'],
-    ['Сегодня холодно.', 'Heute ist es kalt.'],
-    ['Я пью кофе.', 'Ich trinke Kaffee.'],
-    ['Она пишет письмо.', 'Sie schreibt einen Brief.'],
-    ['Хлеб на столе.', 'Das Brot ist auf dem Tisch.'],
-    ['Вода холодная.', 'Das Wasser ist kalt.'],
-    ['Это мой брат.', 'Das ist mein Bruder.'],
-    ['Я живу в городе.', 'Ich wohne in der Stadt.'],
-    ['Собака бежит.', 'Der Hund rennt.'],
-    ['Утром я ем кашу.', 'Morgens esse ich Brei.'],
-    ['Мы смотрим фильм.', 'Wir schauen einen Film.'],
-    ['Папа читает газету.', 'Papa liest die Zeitung.'],
-    ['Дети играют.', 'Die Kinder spielen.']
-  ],
-  2: [
-    ['Каждый день я учу русский язык.', 'Jeden Tag lerne ich Russisch.'],
-    ['Моя сестра живёт в Москве.', 'Meine Schwester wohnt in Moskau.'],
-    ['В магазине много фруктов.', 'Im Laden gibt es viel Obst.'],
-    ['Летом мы едем на море.', 'Im Sommer fahren wir ans Meer.'],
-    ['Я не понимаю этот вопрос.', 'Ich verstehe diese Frage nicht.'],
-    ['Вечером мы гуляем в парке.', 'Abends spazieren wir im Park.'],
-    ['Мой друг работает инженером.', 'Mein Freund arbeitet als Ingenieur.'],
-    ['Сколько стоит этот билет?', 'Wie viel kostet dieses Ticket?'],
-    ['Она говорит по-русски очень хорошо.', 'Sie spricht sehr gut Russisch.'],
-    ['Зимой в России идёт снег.', 'Im Winter schneit es in Russland.'],
-    ['Я хочу купить новую книгу.', 'Ich möchte ein neues Buch kaufen.'],
-    ['Мы завтракаем в восемь часов.', 'Wir frühstücken um acht Uhr.'],
-    ['Где находится ближайшая аптека?', 'Wo ist die nächste Apotheke?'],
-    ['У меня есть кошка и собака.', 'Ich habe eine Katze und einen Hund.'],
-    ['Поезд отправляется через десять минут.', 'Der Zug fährt in zehn Minuten ab.'],
-    ['Мне нравится слушать музыку.', 'Ich höre gern Musik.'],
-    ['Он часто пишет письма бабушке.', 'Er schreibt der Oma oft Briefe.'],
-    ['Сегодня на улице тепло и солнечно.', 'Heute ist es draußen warm und sonnig.'],
-    ['Мы учимся в университете.', 'Wir studieren an der Universität.'],
-    ['Она готовит ужин на кухне.', 'Sie kocht das Abendessen in der Küche.']
-  ],
-  3: [
-    ['Если завтра будет хорошая погода, мы поедем за город.', 'Wenn morgen gutes Wetter ist, fahren wir aufs Land.'],
-    ['Когда я был ребёнком, мы часто ездили к бабушке в деревню.', 'Als ich ein Kind war, fuhren wir oft zur Oma ins Dorf.'],
-    ['Я думаю, что русский язык трудный, но очень интересный.', 'Ich denke, dass Russisch schwierig, aber sehr interessant ist.'],
-    ['Мой брат сказал, что купит билеты на поезд.', 'Mein Bruder sagte, dass er Zugtickets kaufen wird.'],
-    ['Хотя было холодно, дети играли во дворе.', 'Obwohl es kalt war, spielten die Kinder im Hof.'],
-    ['Каждое утро она пьёт кофе и читает новости.', 'Jeden Morgen trinkt sie Kaffee und liest die Nachrichten.'],
-    ['Мы долго искали гостиницу, потому что город был большой.', 'Wir suchten lange ein Hotel, weil die Stadt groß war.'],
-    ['Учитель объяснил правило, и все всё поняли.', 'Der Lehrer erklärte die Regel, und alle verstanden alles.'],
-    ['В следующем году я хочу поехать в Санкт-Петербург.', 'Nächstes Jahr möchte ich nach Sankt Petersburg fahren.'],
-    ['Он не только говорит по-русски, но и пишет стихи.', 'Er spricht nicht nur Russisch, sondern schreibt auch Gedichte.'],
-    ['После работы мы встретились с друзьями в кафе.', 'Nach der Arbeit trafen wir uns mit Freunden im Café.'],
-    ['Чтобы хорошо читать, нужно много практиковаться.', 'Um gut zu lesen, muss man viel üben.'],
-    ['Врач посоветовал мне больше спать и меньше работать.', 'Der Arzt riet mir, mehr zu schlafen und weniger zu arbeiten.'],
-    ['Эта книга была написана сто лет назад.', 'Dieses Buch wurde vor hundert Jahren geschrieben.'],
-    ['Мне кажется, что зима в этом году будет долгой.', 'Mir scheint, dass der Winter dieses Jahr lang sein wird.']
-  ]
-};
+var SENTENCES = [
+  { ru: 'Это мой брат.', de: 'Das ist mein Bruder.', stufe: 1, benoetigt: ['это', 'мой', 'брат'] },
+  { ru: 'Это моя семья.', de: 'Das ist meine Familie.', stufe: 1, benoetigt: ['это', 'моя', 'семья'] },
+  { ru: 'Он работает.', de: 'Er arbeitet.', stufe: 1, benoetigt: ['он', 'работать'] },
+  { ru: 'Я читаю книгу.', de: 'Ich lese ein Buch.', stufe: 1, benoetigt: ['я', 'читать', 'книга'] },
+  { ru: 'Папа читает газету.', de: 'Papa liest die Zeitung.', stufe: 1, benoetigt: ['папа', 'читать', 'газета'] },
+  { ru: 'Она пишет письмо.', de: 'Sie schreibt einen Brief.', stufe: 1, benoetigt: ['она', 'писать', 'письмо'] },
+  { ru: 'Я живу в городе.', de: 'Ich wohne in der Stadt.', stufe: 1, benoetigt: ['я', 'жить', 'в', 'город'] },
+  { ru: 'Это дом.', de: 'Das ist ein Haus.', stufe: 1, benoetigt: ['это', 'дом'] },
+  { ru: 'Мама дома.', de: 'Mama ist zu Hause.', stufe: 1, benoetigt: ['мама', 'дом'] },
+  { ru: 'Мы идём домой.', de: 'Wir gehen nach Hause.', stufe: 1, benoetigt: ['мы', 'идти', 'домой'] },
+  { ru: 'Хлеб на столе.', de: 'Das Brot ist auf dem Tisch.', stufe: 1, benoetigt: ['хлеб', 'на', 'стол'] },
+  { ru: 'Я люблю чай.', de: 'Ich mag Tee.', stufe: 1, benoetigt: ['я', 'любить', 'чай'] },
+  { ru: 'Я пью кофе.', de: 'Ich trinke Kaffee.', stufe: 1, benoetigt: ['я', 'пить', 'кофе'] },
+  { ru: 'Утром я ем кашу.', de: 'Morgens esse ich Brei.', stufe: 1, benoetigt: ['утро', 'я', 'есть', 'каша'] },
+  { ru: 'Мы смотрим новости.', de: 'Wir schauen die Nachrichten.', stufe: 1, benoetigt: ['мы', 'смотреть', 'новости'] },
+  { ru: 'Кошка спит.', de: 'Die Katze schläft.', stufe: 1, benoetigt: ['кошка', 'спать'] },
+  { ru: 'Дети играют.', de: 'Die Kinder spielen.', stufe: 1, benoetigt: ['ребёнок', 'играть'] },
+  { ru: 'Собака бежит.', de: 'Der Hund rennt.', stufe: 1, benoetigt: ['собака', 'бежать'] },
+  { ru: 'Вода холодная.', de: 'Das Wasser ist kalt.', stufe: 1, benoetigt: ['вода', 'холодный'] },
+  { ru: 'Сегодня холодно.', de: 'Heute ist es kalt.', stufe: 1, benoetigt: ['сегодня', 'холодно'] },
+  { ru: 'У меня есть кошка и собака.', de: 'Ich habe eine Katze und einen Hund.', stufe: 2, benoetigt: ['у', 'я', 'есть', 'кошка', 'и', 'собака'] },
+  { ru: 'В магазине много фруктов.', de: 'Im Laden gibt es viel Obst.', stufe: 2, benoetigt: ['в', 'магазин', 'много', 'фрукты'] },
+  { ru: 'Мы едим в восемь часов.', de: 'Wir essen um acht Uhr.', stufe: 2, benoetigt: ['мы', 'есть', 'в', 'восемь', 'час'] },
+  { ru: 'Сегодня на улице тепло и хорошо.', de: 'Heute ist es draußen warm und schön.', stufe: 2, benoetigt: ['сегодня', 'на', 'улица', 'тепло', 'и', 'хорошо'] },
+  { ru: 'Он часто пишет письма бабушке.', de: 'Er schreibt der Oma oft Briefe.', stufe: 2, benoetigt: ['он', 'часто', 'писать', 'письмо', 'бабушка'] },
+  { ru: 'Мы учимся в университете.', de: 'Wir studieren an der Universität.', stufe: 2, benoetigt: ['мы', 'учиться', 'в', 'университет'] },
+  { ru: 'Поезд идёт через десять минут.', de: 'Der Zug fährt in zehn Minuten.', stufe: 2, benoetigt: ['поезд', 'идти', 'через', 'десять', 'минута'] },
+  { ru: 'Где здесь аптека?', de: 'Wo ist hier eine Apotheke?', stufe: 2, benoetigt: ['где', 'здесь', 'аптека'] },
+  { ru: 'Я хочу купить новую книгу.', de: 'Ich möchte ein neues Buch kaufen.', stufe: 2, benoetigt: ['я', 'хотеть', 'покупать', 'новый', 'книга'] },
+  { ru: 'Она готовит ужин на кухне.', de: 'Sie kocht das Abendessen in der Küche.', stufe: 2, benoetigt: ['она', 'готовить', 'ужин', 'на', 'кухня'] },
+  { ru: 'Вечером мы гуляем в парке.', de: 'Abends spazieren wir im Park.', stufe: 2, benoetigt: ['вечер', 'мы', 'гулять', 'в', 'парк'] },
+  { ru: 'Каждый день я учу русский язык.', de: 'Jeden Tag lerne ich Russisch.', stufe: 2, benoetigt: ['каждый', 'день', 'я', 'учить', 'русский', 'язык'] },
+  { ru: 'Она говорит по-русски очень хорошо.', de: 'Sie spricht sehr gut Russisch.', stufe: 2, benoetigt: ['она', 'говорить', 'русский', 'очень', 'хорошо'] },
+  { ru: 'Мне нравится слушать музыку.', de: 'Ich höre gern Musik.', stufe: 2, benoetigt: ['я', 'нравиться', 'слушать', 'музыка'] },
+  { ru: 'Я не понимаю этот вопрос.', de: 'Ich verstehe diese Frage nicht.', stufe: 2, benoetigt: ['я', 'не', 'понимать', 'этот', 'вопрос'] },
+  { ru: 'Мой друг работает инженером.', de: 'Mein Freund arbeitet als Ingenieur.', stufe: 2, benoetigt: ['мой', 'друг', 'работать', 'инженер'] },
+  { ru: 'Сколько стоит этот билет?', de: 'Wie viel kostet dieses Ticket?', stufe: 2, benoetigt: ['сколько', 'стоить', 'этот', 'билет'] },
+  { ru: 'Моя сестра живёт в Москве.', de: 'Meine Schwester wohnt in Moskau.', stufe: 2, benoetigt: ['моя', 'сестра', 'жить', 'в', 'Москва'] },
+  { ru: 'Зимой в России идёт снег.', de: 'Im Winter schneit es in Russland.', stufe: 2, benoetigt: ['зима', 'в', 'Россия', 'идти', 'снег'] },
+  { ru: 'Летом мы едем на море.', de: 'Im Sommer fahren wir ans Meer.', stufe: 2, benoetigt: ['лето', 'мы', 'ехать', 'на', 'море'] },
+  { ru: 'Каждое утро она пьёт кофе и читает новости.', de: 'Jeden Morgen trinkt sie Kaffee und liest die Nachrichten.', stufe: 3, benoetigt: ['каждый', 'утро', 'она', 'пить', 'кофе', 'и', 'читать', 'новости'] },
+  { ru: 'Я думаю, что зима в этом году будет холодной.', de: 'Ich denke, dass der Winter dieses Jahr kalt wird.', stufe: 3, benoetigt: ['я', 'думать', 'что', 'зима', 'в', 'этот', 'год', 'быть', 'холодный'] },
+  { ru: 'Эту книгу я читал, когда был молодой.', de: 'Dieses Buch las ich, als ich jung war.', stufe: 3, benoetigt: ['этот', 'книга', 'я', 'читать', 'когда', 'быть', 'молодой'] },
+  { ru: 'Хотя было холодно, дети играли на улице.', de: 'Obwohl es kalt war, spielten die Kinder auf der Straße.', stufe: 3, benoetigt: ['хотя', 'быть', 'холодно', 'ребёнок', 'играть', 'на', 'улица'] },
+  { ru: 'Чтобы хорошо читать, нужно много работать.', de: 'Um gut zu lesen, muss man viel arbeiten.', stufe: 3, benoetigt: ['чтобы', 'хорошо', 'читать', 'нужно', 'много', 'работать'] },
+  { ru: 'Вечером мы встретили друзей в ресторане.', de: 'Am Abend trafen wir Freunde im Restaurant.', stufe: 3, benoetigt: ['вечер', 'мы', 'встретить', 'друг', 'в', 'ресторан'] },
+  { ru: 'Он не только говорит по-русски, но и пишет письма.', de: 'Er spricht nicht nur Russisch, sondern schreibt auch Briefe.', stufe: 3, benoetigt: ['он', 'не', 'только', 'говорить', 'русский', 'но', 'и', 'писать', 'письмо'] },
+  { ru: 'Я думаю, что русский язык трудный, но очень интересный.', de: 'Ich denke, dass Russisch schwierig, aber sehr interessant ist.', stufe: 3, benoetigt: ['я', 'думать', 'что', 'русский', 'язык', 'трудный', 'но', 'очень', 'интересный'] },
+  { ru: 'Учитель говорил медленно, и все поняли.', de: 'Der Lehrer sprach langsam, und alle verstanden.', stufe: 3, benoetigt: ['учитель', 'говорить', 'медленный', 'и', 'все', 'понимать'] },
+  { ru: 'Врач сказал, что нужно спать и не работать.', de: 'Der Arzt sagte, dass man schlafen und nicht arbeiten muss.', stufe: 3, benoetigt: ['врач', 'сказать', 'что', 'нужно', 'спать', 'и', 'не', 'работать'] },
+  { ru: 'Мой брат сказал, что купит билеты на поезд.', de: 'Mein Bruder sagte, dass er Zugtickets kaufen wird.', stufe: 3, benoetigt: ['мой', 'брат', 'сказать', 'что', 'покупать', 'билет', 'на', 'поезд'] },
+  { ru: 'Мы долго искали гостиницу, потому что город был большой.', de: 'Wir suchten lange ein Hotel, weil die Stadt groß war.', stufe: 3, benoetigt: ['мы', 'долго', 'искать', 'гостиница', 'потому что', 'город', 'быть', 'большой'] },
+  { ru: 'В этом году я хочу поехать в Россию.', de: 'Dieses Jahr möchte ich nach Russland fahren.', stufe: 3, benoetigt: ['в', 'этот', 'год', 'я', 'хотеть', 'ехать', 'Россия'] },
+  { ru: 'Когда я был ребёнком, мы часто ездили к бабушке в деревню.', de: 'Als ich ein Kind war, fuhren wir oft zur Oma ins Dorf.', stufe: 3, benoetigt: ['когда', 'я', 'быть', 'ребёнок', 'мы', 'часто', 'ехать', 'к', 'бабушка', 'в', 'деревня'] },
+  { ru: 'Если завтра будет хорошая погода, мы поедем на море.', de: 'Wenn morgen gutes Wetter ist, fahren wir ans Meer.', stufe: 3, benoetigt: ['если', 'завтра', 'быть', 'хороший', 'погода', 'мы', 'ехать', 'на', 'море'] }
+];
 
 var FACTS = [
   '«Бутерброд» kommt vom deutschen „Butterbrot" — bezeichnet aber jedes belegte Brot, auch ganz ohne Butter.',
@@ -900,6 +977,7 @@ function mergeState(parsed) {
   Object.keys(d).forEach(function (k) { if (parsed[k] !== undefined) d[k] = parsed[k]; });
   d.boxes = migriereIds(d.boxes);
   d.lastSeen = migriereIds(d.lastSeen);
+  d.readSeen = migriereSaetze(d.readSeen);
   d.settings = defaultSettings();
   if (parsed.settings && typeof parsed.settings === 'object') {
     Object.keys(d.settings).forEach(function (k) {
@@ -911,6 +989,17 @@ function mergeState(parsed) {
   }
   return d;
 }
+// Bis Version 3 waren Sätze über «Stufe-Nummer» vermerkt. Die Nummer hing an der
+// Reihenfolge in der Datei; jetzt zählt der Satz selbst. Unbekannte Schlüssel fallen weg.
+function migriereSaetze(obj) {
+  if (!obj || typeof obj !== 'object') return {};
+  var bekannt = {};
+  SENTENCES.forEach(function (s) { bekannt[s.ru] = true; });
+  var neu = {};
+  Object.keys(obj).forEach(function (k) { if (bekannt[k]) neu[k] = obj[k]; });
+  return neu;
+}
+
 // Bis Version 3 lautete die Wort-Kennung «Thema::wort». Sie hing damit am
 // Themennamen; eine Umbenennung hätte den Lernstand gelöscht. Jetzt zählt nur
 // das russische Wort — alte Stände werden beim Laden umgeschrieben.
@@ -1361,21 +1450,40 @@ function renderUeben() {
 }
 
 // ── ÜBERSETZEN ──────────────────────────────────────────────
+// Ein Satz wird erst angeboten, wenn jede seiner Voraussetzungen (Grundformen
+// aus dem Lehrplan) mindestens SATZ_STUFE erreicht hat.
+var SATZ_STUFE = 2;
 var trLevel = 1, trIdx = 0, trDir = 'ru-de';
 var trTask = null, trBuilt = [], trPhase = 'ask', trCorrect = null, trRevealed = false;
 
+function satzFrei(s) {
+  return s.benoetigt.every(function (w) { return (state.boxes[w] || 0) >= SATZ_STUFE; });
+}
+function satzFehlt(s) {
+  return s.benoetigt.filter(function (w) { return (state.boxes[w] || 0) < SATZ_STUFE; });
+}
+function stufenSaetze(stufe) {
+  return SENTENCES.filter(function (s) { return s.stufe === stufe; });
+}
+function freieSaetze(stufe) {
+  return stufenSaetze(stufe).filter(satzFrei);
+}
+
 function buildTransTask() {
-  var pair = SENTENCES[trLevel][trIdx];
-  var ru = pair[0], de = pair[1];
+  var liste = freieSaetze(trLevel);
+  if (!liste.length) { trTask = null; return; }
+  if (trIdx >= liste.length) trIdx = 0;
+  var satz = liste[trIdx];
+  var ru = satz.ru, de = satz.de;
   var prompt = trDir === 'ru-de' ? ru : de;
   var targetTokens = tokenize(trDir === 'ru-de' ? de : ru);
   var solution = trDir === 'ru-de' ? de : ru;
   var targetNorm = {};
   targetTokens.forEach(function (w) { targetNorm[normalize(w)] = true; });
   var otherWords = [];
-  SENTENCES[trLevel].forEach(function (p, i) {
+  liste.forEach(function (p, i) {
     if (i === trIdx) return;
-    tokenize(trDir === 'ru-de' ? p[1] : p[0]).forEach(function (w) {
+    tokenize(trDir === 'ru-de' ? p.de : p.ru).forEach(function (w) {
       if (!targetNorm[normalize(w)]) otherWords.push(w);
     });
   });
@@ -1386,7 +1494,7 @@ function buildTransTask() {
   var tiles = shuffle(targetTokens.concat(distractors)).map(function (word, i) {
     return { word: word, key: i };
   });
-  trTask = { prompt: prompt, targetTokens: targetTokens, solution: solution, tiles: tiles, ru: ru };
+  trTask = { prompt: prompt, targetTokens: targetTokens, solution: solution, tiles: tiles, ru: ru, satz: satz };
   trBuilt = [];
   trPhase = 'ask';
   trCorrect = null;
@@ -1415,26 +1523,75 @@ function trPruefen() {
 function trFinish(ok) {
   trCorrect = ok;
   trPhase = 'feedback';
-  state.readSeen[trLevel + '-' + trIdx] = true;
+  state.readSeen[trTask.satz.ru] = true;
   state.transStats.correct += ok ? 1 : 0;
   state.transStats.wrong += ok ? 0 : 1;
   save();
 }
 
-function renderUebersetzen() {
-  if (!trTask) buildTransTask();
-  var t = trTask;
-  var promptIsRu = trDir === 'ru-de';
-  var list = SENTENCES[trLevel];
-  var seenCount = Object.keys(state.readSeen).filter(function (k) {
-    return k.indexOf(trLevel + '-') === 0;
-  }).length;
+// Kein Satz frei: zeigen, welche W\u00f6rter dem n\u00e4chstgelegenen noch fehlen.
+function renderUebersetzenLeer() {
+  var stufe = stufenSaetze(trLevel);
+  var naechster = stufe.slice().sort(function (a, b) {
+    return satzFehlt(a).length - satzFehlt(b).length;
+  })[0];
+  var fehlt = naechster ? satzFehlt(naechster) : [];
 
-  var html = '<section><div class="controls">';
-  [1, 2, 3].forEach(function (l) {
-    html += '<button class="chip' + (trLevel === l ? ' active' : '') + '" data-level="' + l + '">Stufe ' + l + '</button>';
+  var html = '<section>' + stufenLeisteHtml() +
+    '<div class="leer"><h3>Noch kein Satz auf Stufe ' + trLevel + '</h3>' +
+    '<p>Ein Satz erscheint, sobald alle seine W\u00f6rter in \u00ab\u00dcben\u00bb mindestens Stufe ' + SATZ_STUFE +
+    ' erreicht haben.</p>';
+  if (fehlt.length) {
+    html += '<p class="naechste">Dem n\u00e4chsten Satz fehlen noch: ' + fehlt.slice(0, 6).map(function (w) {
+      return '<span class="cyr">' + esc(w) + '</span>';
+    }).join(' \u00b7 ') + (fehlt.length > 6 ? ' \u2026' : '') + '</p>';
+  }
+  html += '<div class="btn-row"><button class="btn primary" id="trZuUeben">Zu \u00ab\u00dcben\u00bb</button></div>' +
+    '</div></section>';
+  main.innerHTML = html;
+  bindeStufenLeiste();
+  document.getElementById('trZuUeben').addEventListener('click', function () { setTab('ueben'); });
+}
+
+// Stufenwahl mit Angabe, wie viele S\u00e4tze je Stufe schon offen sind.
+function stufenLeisteHtml() {
+  var stufen = [];
+  SENTENCES.forEach(function (s) { if (stufen.indexOf(s.stufe) === -1) stufen.push(s.stufe); });
+  stufen.sort(function (a, b) { return a - b; });
+  var html = '<div class="controls">';
+  stufen.forEach(function (l) {
+    html += '<button class="chip' + (trLevel === l ? ' active' : '') + '" data-level="' + l + '">' +
+      'Stufe ' + l + ' \u00b7 ' + freieSaetze(l).length + '/' + stufenSaetze(l).length + '</button>';
   });
   html += '<button class="chip" id="trDir">' + (trDir === 'ru-de' ? 'RU \u2192 DE' : 'DE \u2192 RU') + '</button></div>';
+  return html;
+}
+function bindeStufenLeiste() {
+  main.querySelectorAll('[data-level]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      trLevel = parseInt(b.dataset.level, 10);
+      trIdx = 0;
+      buildTransTask();
+      renderUebersetzen();
+    });
+  });
+  var dir = document.getElementById('trDir');
+  if (dir) dir.addEventListener('click', function () {
+    trDir = trDir === 'ru-de' ? 'de-ru' : 'ru-de';
+    buildTransTask();
+    renderUebersetzen();
+  });
+}
+
+function renderUebersetzen() {
+  if (!trTask) buildTransTask();
+  if (!trTask) { renderUebersetzenLeer(); return; }
+  var t = trTask;
+  var promptIsRu = trDir === 'ru-de';
+  var list = freieSaetze(trLevel);
+  var seenCount = stufenSaetze(trLevel).filter(function (s) { return state.readSeen[s.ru]; }).length;
+
+  var html = '<section>' + stufenLeisteHtml();
 
   html += '<div class="card"><p class="task-label">Übersetzen Sie</p>' +
     '<p class="sentence' + (promptIsRu ? ' cyr' : '') + '">' + esc(t.prompt) +
@@ -1494,19 +1651,7 @@ function renderUebersetzen() {
 
   main.innerHTML = html;
 
-  main.querySelectorAll('[data-level]').forEach(function (b) {
-    b.addEventListener('click', function () {
-      trLevel = parseInt(b.dataset.level, 10);
-      trIdx = 0;
-      buildTransTask();
-      renderUebersetzen();
-    });
-  });
-  document.getElementById('trDir').addEventListener('click', function () {
-    trDir = trDir === 'ru-de' ? 'de-ru' : 'ru-de';
-    buildTransTask();
-    renderUebersetzen();
-  });
+  bindeStufenLeiste();
   var sp = document.getElementById('trSpeak');
   if (sp) sp.addEventListener('click', function () { speak(trTask.ru); });
 
@@ -1543,7 +1688,8 @@ function renderUebersetzen() {
     });
   } else {
     document.getElementById('trNext').addEventListener('click', function () {
-      trIdx = (trIdx + 1) % list.length;
+      var frei = freieSaetze(trLevel);
+      trIdx = frei.length ? (trIdx + 1) % frei.length : 0;
       buildTransTask();
       renderUebersetzen();
     });
@@ -1767,8 +1913,9 @@ function renderBilanz() {
   var mastered = counts[BOX_MAX];
   var started = ALL_VOCAB.length - counts[0];
   var readTotal = 0;
-  Object.keys(SENTENCES).forEach(function (l) { readTotal += SENTENCES[l].length; });
-  var readSeen = Object.keys(state.readSeen).length;
+  readTotal = SENTENCES.length;
+  var readSeen = SENTENCES.filter(function (s) { return state.readSeen[s.ru]; }).length;
+  var readFrei = SENTENCES.filter(satzFrei).length;
 
   function stat(label, value, accent) {
     return '<div class="stat' + (accent ? ' accent' : '') + '"><span class="stat-value">' + value +
@@ -1779,7 +1926,7 @@ function renderBilanz() {
     stat('Wörter gesamt', ALL_VOCAB.length) +
     stat('Begonnen', started) +
     stat('Gemeistert', mastered, true) +
-    stat('Sätze übersetzt', readSeen + '/' + readTotal) +
+    stat('Sätze übersetzt', readSeen + '/' + readFrei) +
     stat('Beantwortet', state.answered) +
     stat('Beste Serie', state.bestStreak, true) +
     '</div>';
@@ -1795,7 +1942,10 @@ function renderBilanz() {
     '<span class="theme-count">' + frei.length + '</span></div>' +
     '<div class="theme-row"><span class="theme-name">Im Tippen</span>' +
     '<div class="theme-bar"><div class="theme-fill" style="width:' + (tippenPool().length / ALL_VOCAB.length * 100) + '%"></div></div>' +
-    '<span class="theme-count">' + tippenPool().length + '</span></div></div>' +
+    '<span class="theme-count">' + tippenPool().length + '</span></div>' +
+    '<div class="theme-row"><span class="theme-name">Sätze offen</span>' +
+    '<div class="theme-bar"><div class="theme-fill" style="width:' + (readFrei / readTotal * 100) + '%"></div></div>' +
+    '<span class="theme-count">' + readFrei + '/' + readTotal + '</span></div></div>' +
     '<p class="backup-note">Aktuell: Päckchen ' + (aktuell + 1) + ' · ' + esc(paketName(aktuell)) +
     ' · ' + faelligeAnzahl(frei) + ' Wiederholungen fällig</p>';
 

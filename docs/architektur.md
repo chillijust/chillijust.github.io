@@ -90,7 +90,7 @@ sie sehen:
 | --- | --- |
 | Üben | das laufende Päckchen (12 Wörter), wahlweise ein früheres oder alle freigeschalteten |
 | Tippen | nur Wörter ab `settings.tippenAbStufe` (Vorgabe 4, also gemeistert) |
-| Übersetzen | eigene Satzdaten, noch unabhängig vom Vokabelstand |
+| Übersetzen | nur Sätze, deren Voraussetzungen alle mindestens `SATZ_STUFE` (2) haben |
 
 - **Päckchen** sind fortlaufende Abschnitte von `PAKET_GROESSE` (12) Wörtern in der
   Reihenfolge der Daten. `aktuellesPaket()` ist das erste, in dem noch nicht jedes Wort
@@ -106,6 +106,12 @@ sie sehen:
 - **Tippen** ist gesperrt, bis Wörter die Schwelle erreichen; der Leerzustand nennt die
   drei Wörter, die am nächsten dran sind. Während der Rückmeldung bleibt das Wort stehen,
   auch wenn ein Fehler es unter die Schwelle geworfen hat.
+
+- **Übersetzen** hängt am selben Lernstand: `satzFrei()` prüft die Liste `benoetigt`
+  eines Satzes gegen `state.boxes`. Die Stufenleiste zeigt je Stufe, wie viele Sätze
+  offen sind (`3/20`); ist keiner frei, nennt der Leerzustand die fehlenden Wörter des
+  am nächsten liegenden Satzes. Geübte Sätze merkt sich `state.readSeen` unter ihrem
+  russischen Text — nicht unter einer Nummer, die sich beim Umsortieren verschiebt.
 
 Die Wort-Kennung ist seit dieser Fassung **das russische Wort selbst**, nicht mehr
 `Thema::wort`. Damit überlebt der Lernstand jede Umbenennung und jede Umsortierung der

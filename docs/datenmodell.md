@@ -45,20 +45,33 @@ Thema → Liste von Tripeln `[russisch, deutsch, transliteration]`.
 
 ### `data/saetze.json`
 
-Schwierigkeitsstufe → Liste von Paaren `[russisch, deutsch]`.
+Geordnete Liste von Sätzen. Jeder nennt seine **Voraussetzungen**: die Grundformen aus
+`vokabeln.json`, die sitzen müssen, bevor der Satz in „Übersetzen" auftaucht.
 
 ```json
 {
-  "1": [["Это дом.", "Das ist ein Haus."]]
+  "ru": "Я читаю книгу.",
+  "de": "Ich lese ein Buch.",
+  "stufe": 1,
+  "benoetigt": ["я", "читать", "книга"]
 }
 ```
 
-- Stufen sind Ganzzahlen ab 1 und lückenlos.
-- Der Satzbau zerlegt am Leerzeichen. Sätze deshalb kurz halten und keine Wortgruppen
-  verwenden, die nur zusammen Sinn ergeben — jedes Wort wird eine eigene Kachel.
-- Satzzeichen bleiben am Wort hängen und sind Teil der Kachel.
-- Stufe 1: drei bis vier Wörter, Gegenwart. Stufe 2: fünf bis sechs Wörter, einfache
-  Fälle. Stufe 3: Nebensatz oder Vergangenheit.
+- `benoetigt` enthält **Grundformen**, nicht die Formen im Satz: «книгу» steht als
+  «книга», «читаю» als «читать». Nur so lässt sich prüfen, ob das Wort gelernt wurde —
+  Russisch beugt zu stark für einen Zeichenkettenvergleich.
+- Jede Voraussetzung muss in `vokabeln.json` stehen; `build.mjs` bricht sonst ab. Wer
+  einen Satz mit neuem Wort schreibt, muss das Wort also zuerst in den Lehrplan
+  aufnehmen — genau das erzwingt den Aufbau.
+- **Alle inhaltstragenden Wörter gehören in `benoetigt`.** Wird eines vergessen, taucht
+  der Satz zu früh auf; das fällt beim Üben auf, nicht beim Bauen.
+- `stufe` ist die grammatische Schwierigkeit, nicht der Zeitpunkt: 1 = Aussagesatz in der
+  Gegenwart, 2 = Fälle, Zeitangaben, Fragen, 3 = Nebensatz, Vergangenheit, Zukunft.
+  *Wann* ein Satz erscheint, ergibt sich allein aus `benoetigt`.
+- Die Reihenfolge sortiert `build.mjs` nach Stufe und Reifegrad (Position des zuletzt
+  gelehrten Wortes) — ein Satz steht also dort, wo er erreichbar wird.
+- Der Satzbau zerlegt am Leerzeichen; Satzzeichen bleiben am Wort. Sätze deshalb kurz
+  halten.
 
 ### `data/fakten.json`
 
@@ -76,10 +89,13 @@ sollten nicht stark auseinanderlaufen, sonst bricht das Raster auf schmalen Ger�
 
 | Prüfung | Wirkung |
 | --- | --- |
-| Tupel-Länge (3 bzw. 2) | Abbruch |
+| Vokabel-Tupel mit drei Feldern | Abbruch |
 | leere Felder, führende/folgende Leerzeichen | Abbruch |
 | erstes Feld enthält Kyrillisch | Abbruch |
 | Vokabel-Dublette über **alle** Themen | Abbruch |
+| Satz ohne `benoetigt` | Abbruch |
+| `benoetigt` nennt ein Wort, das nicht im Lehrplan steht | Abbruch |
+| doppelte Voraussetzung, doppelter Satz | Abbruch |
 | Satzstufen lückenlos ab 1 | Abbruch |
 | doppelte oder nicht-kyrillische Taste | Abbruch |
 | doppelter Fakt | Abbruch |
@@ -87,6 +103,20 @@ sollten nicht stark auseinanderlaufen, sonst bricht das Raster auf schmalen Ger�
 Die Dublettenprüfung greift themenübergreifend: ein Wort gehört an genau eine Stelle.
 Passt es in zwei Themen, ist das ein Hinweis darauf, dass die Themen zu fein geschnitten
 sind.
+
+## Grundsätze des Lehrplans
+
+1. **Funktionswörter zuerst.** Ohne я, ты, в, на, не, и, что ist kein Satz lesbar; sie
+   stehen deshalb in den ersten Päckchen, noch vor den Sachgruppen.
+2. **Konkretes vor Abstraktem, Häufiges vor Seltenem.** Alltagsdinge (книга, город,
+   кошка) stehen früh, Fachliches spät.
+3. **Wörter folgen den Sätzen.** Braucht ein einfacher Satz ein Wort, gehört das Wort
+   nach vorn — nicht der Satz nach hinten. Deshalb steht «Erste Dinge» weit vor den
+   Themen, aus denen die Wörter ursprünglich kamen.
+4. **Kein Satz vor seinen Wörtern.** Der Aufbau ist keine Empfehlung, sondern eine
+   Sperre: `benoetigt` entscheidet, ob ein Satz erscheint.
+5. **Ein neues Wort kostet einen Platz im Lehrplan.** Ergänzungen ans Ende des passenden
+   Themas — mitten hinein verschiebt alle folgenden Päckchen.
 
 ## Lernstand im Browser
 
