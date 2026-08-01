@@ -53,6 +53,9 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   Anführungszeichen. Gliederung über Kommentarbalken.
 - **Alle Ausgaben durch `esc()`**, Ereignisbehandler nach dem Setzen von `innerHTML`
   anhängen, nie als `onclick`-Attribut.
+- **Neue Einstellung:** Vorgabe in `defaultSettings()`, Zeile in `renderEinstellungen()`,
+  Abfrage an der wirksamen Stelle. Gespeicherte Stände werden über `mergeState()`
+  aufgefüllt — `state.settings` nie als Ganzes aus dem Speicher übernehmen.
 - **Der Datenblock zwischen `DATEN:START` und `DATEN:ENDE` ist generiert.** Inhalte
   ausschließlich in `/data` ändern, danach `node tools/build.mjs`.
 - **Commits:** einer je logischer Änderung, Nachricht auf Deutsch, Betreffzeile im

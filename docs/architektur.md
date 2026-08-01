@@ -22,10 +22,36 @@ Ein einziges Objekt `state` hält den gesamten Lernstand:
 | `streak`, `bestStreak` | laufende und beste Antwortserie |
 | `answered` | Gesamtzahl beantworteter Fragen |
 | `factIdx` | Position im Fakten-Karussell |
+| `settings` | Einstellungen des Nutzers, siehe unten |
 
 Daneben existieren pro Rubrik einige Modulvariablen (`uebQ`, `uebPhase`, `trTask`,
 `tWord` …). Sie beschreiben die aktuelle Frage und sind bewusst **nicht** Teil von
 `state` — sie überleben einen Neustart nicht und sollen es auch nicht.
+
+## Einstellungen
+
+`state.settings` enthält ausschließlich Wahrheitswerte und liegt im selben
+`localStorage`-Eintrag wie der Fortschritt:
+
+| Schalter | Vorgabe | Wirkung |
+| --- | --- | --- |
+| `confirmUeben` | an | In „Üben" wird eine Antwort erst gewählt und dann über „Bestätigen" abgegeben. Aus: Der erste Tipp zählt sofort. |
+| `confirmUebersetzen` | an | In „Übersetzen" wird der Satz erst gelegt und dann bestätigt. Aus: Der Satz zählt, sobald das letzte Wort liegt. |
+| `requireComplete` | aus | „Bestätigen" ist erst möglich, wenn die Lösung vollständig ist. Verrät dadurch deren Länge. |
+
+Eine neue Einstellung braucht drei Dinge: einen Vorgabewert in `defaultSettings()`,
+eine Zeile in `renderEinstellungen()` und — falls sie das Verhalten einer Rubrik
+ändert — eine Abfrage an der betreffenden Stelle. `mergeState()` sorgt dafür, dass
+bestehende Lernstände die neue Einstellung mit ihrem Vorgabewert bekommen; deshalb darf
+`state.settings` nie als Ganzes aus dem gespeicherten Stand übernommen werden.
+
+Einstellungen sind kein Fortschritt: „Fortschritt zurücksetzen" in der Bilanz lässt sie
+stehen. Eine wiederhergestellte Sicherung bringt dagegen die dort gespeicherten
+Einstellungen mit, weil `mergeState()` auch auf dem Sicherungscode arbeitet.
+
+Erreichbar sind sie über das Zahnrad in der Kopfzeile. Es ist bewusst kein fünfter Tab:
+Die Tab-Leiste ist auf dem iPhone bereits voll, ein fünfter Eintrag läge außerhalb des
+Sichtbereichs.
 
 ## Persistenz
 
@@ -45,7 +71,9 @@ Ereignis → Zustand ändern → save() → render()
 ```
 
 `render()` verzweigt anhand von `currentTab` in `renderUeben()`, `renderUebersetzen()`,
-`renderTippen()` oder `renderBilanz()`. Jede dieser Funktionen baut eine
+`renderTippen()`, `renderEinstellungen()` oder `renderBilanz()`. Den Wechsel übernimmt
+immer `setTab()` — es merkt sich in `letzterTab` den Rückweg aus den Einstellungen und
+hält die Markierungen in Tab-Leiste und Zahnrad in Einklang. Jede dieser Funktionen baut eine
 HTML-Zeichenkette, setzt sie als `innerHTML` von `#main` und hängt anschließend die
 Ereignisbehandler an die frisch erzeugten Knoten. Es gibt kein virtuelles DOM und keine
 Teilaktualisierung: eine Rubrik wird immer vollständig neu gezeichnet.

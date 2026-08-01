@@ -55,7 +55,8 @@ header { display: flex; justify-content: space-between; align-items: flex-start;
 .eyebrow { display: block; font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--dim); margin-bottom: 4px; font-family: Georgia, serif; }
 h1 { font-family: Georgia, "Times New Roman", serif; font-size: 28px; margin: 0; font-weight: 600; }
 .title-dot { color: var(--gold); }
-.header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; padding-top: 12px; }
+.header-right { display: flex; align-items: center; gap: 4px; padding-top: 6px; }
+.header-status { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
 #streak { font-size: 12px; color: var(--gold); min-height: 15px; }
 #saveBadge { font-size: 11px; color: var(--dim); }
 #saveBadge.ok { color: var(--good); }
@@ -125,9 +126,11 @@ select {
 }
 .built-placeholder { font-size: 12px; color: var(--dim); }
 .built-word {
-  font-size: 17px; padding: 5px 9px; border-radius: 8px;
-  background: var(--card-2); border: 1px solid var(--gold);
+  font-size: 17px; min-height: 44px; padding: 8px 12px; border-radius: 8px;
+  background: var(--card-2); border: 1px solid var(--gold); color: var(--text);
 }
+button.built-word { cursor: pointer; }
+button.built-word:active { transform: scale(.95); }
 .wordtile {
   padding: 11px 13px; min-height: 44px; border-radius: 10px; font-size: 16px;
   border: 1px solid var(--line); background: var(--card-2); color: var(--text); cursor: pointer;
@@ -141,6 +144,7 @@ select {
   padding: 13px 14px; min-height: 48px; border-radius: 12px; border: 1px solid var(--line);
   background: var(--card-2); color: var(--text); font-size: 16px; cursor: pointer;
 }
+.option.picked { border-color: var(--gold); color: var(--gold); background: var(--card); }
 .option.right { border-color: var(--good); color: var(--good); }
 .option.wrong { border-color: var(--bad); color: var(--bad); }
 .option.muted { opacity: .35; }
@@ -170,6 +174,35 @@ input.err { border-color: var(--bad); }
 .btn.primary { background: var(--gold); color: var(--gold-ink); }
 .btn.ghost { background: none; border-color: var(--line); color: var(--dim); }
 .btn.danger { background: none; border-color: var(--bad); color: var(--bad); }
+
+#gear {
+  background: none; border: none; color: var(--dim); font-size: 19px; line-height: 1;
+  min-width: 44px; min-height: 44px; cursor: pointer; padding: 0;
+}
+#gear.active { color: var(--gold); }
+
+.setting {
+  display: flex; align-items: center; gap: 14px; padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.setting-text { flex: 1; }
+.setting-title { display: block; font-size: 15px; }
+.setting-note { display: block; font-size: 12px; color: var(--dim); margin-top: 3px; line-height: 1.45; }
+.switch {
+  flex: none; width: 52px; height: 32px; padding: 3px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--card-2); position: relative;
+}
+.switch::before {
+  content: ''; position: absolute; inset: -6px; /* Trefferfläche auf 44 px vergrößern */
+}
+.switch .knob {
+  display: block; width: 24px; height: 24px; border-radius: 50%;
+  background: var(--dim); transition: transform .15s, background .15s;
+}
+.switch:disabled { opacity: .35; cursor: default; }
+.switch.on { border-color: var(--gold); background: rgba(210, 162, 78, .18); }
+.switch.on .knob { transform: translateX(20px); background: var(--gold); }
+.settings-note { font-size: 12px; color: var(--dim); line-height: 1.5; margin: 16px 0 0; }
 
 .session-info { text-align: center; font-size: 12px; color: var(--dim); margin-top: 16px; }
 
@@ -227,8 +260,11 @@ textarea:focus { outline: none; border-color: var(--ice); }
     <h1>Russisch<span class="title-dot">.</span></h1>
   </div>
   <div class="header-right">
-    <span id="streak"></span>
-    <span id="saveBadge"></span>
+    <span class="header-status">
+      <span id="streak"></span>
+      <span id="saveBadge"></span>
+    </span>
+    <button id="gear" aria-label="Einstellungen" title="Einstellungen">⚙</button>
   </div>
 </header>
 
@@ -733,6 +769,13 @@ function speak(text) {
 }
 
 // ── Zustand & Speichern (localStorage) ──────────────────────
+function defaultSettings() {
+  return {
+    confirmUeben: true,        // in «Üben» erst auswählen, dann bestätigen
+    confirmUebersetzen: true,  // in «Übersetzen» erst legen, dann bestätigen
+    requireComplete: false     // Bestätigen erst bei vollständiger Lösung
+  };
+}
 function defaultState() {
   return {
     boxes: {},
@@ -742,8 +785,22 @@ function defaultState() {
     streak: 0,
     bestStreak: 0,
     answered: 0,
-    factIdx: 0
+    factIdx: 0,
+    settings: defaultSettings()
   };
+}
+// Gespeicherten Stand mit den Vorgaben verschmelzen: fehlende Felder behalten
+// ihren Standardwert, neu hinzugekommene Einstellungen ebenso.
+function mergeState(parsed) {
+  var d = defaultState();
+  Object.keys(d).forEach(function (k) { if (parsed[k] !== undefined) d[k] = parsed[k]; });
+  d.settings = defaultSettings();
+  if (parsed.settings && typeof parsed.settings === 'object') {
+    Object.keys(d.settings).forEach(function (k) {
+      if (typeof parsed.settings[k] === 'boolean') d.settings[k] = parsed.settings[k];
+    });
+  }
+  return d;
 }
 var state = defaultState();
 var saveTimer = null;
@@ -751,12 +808,7 @@ var saveTimer = null;
 function load() {
   try {
     var raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      var parsed = JSON.parse(raw);
-      var d = defaultState();
-      Object.keys(d).forEach(function (k) { if (parsed[k] !== undefined) d[k] = parsed[k]; });
-      state = d;
-    }
+    if (raw) state = mergeState(JSON.parse(raw));
     setBadge('ok', '\u25CF');
   } catch (e) {
     setBadge('err', 'Speicher nicht verfügbar');
@@ -795,20 +847,33 @@ function updateBox(id, correct) {
 var currentTab = 'ueben';
 var main = document.getElementById('main');
 
+var letzterTab = 'ueben'; // Rückweg aus den Einstellungen
+
+function setTab(name) {
+  if (currentTab !== 'einstellungen') letzterTab = currentTab;
+  currentTab = name;
+  document.querySelectorAll('#tabs button').forEach(function (b) {
+    b.classList.toggle('active', b.dataset.tab === name);
+  });
+  document.getElementById('gear').classList.toggle('active', name === 'einstellungen');
+  render();
+}
+
 document.getElementById('tabs').addEventListener('click', function (e) {
   var btn = e.target.closest('button[data-tab]');
   if (!btn) return;
-  currentTab = btn.dataset.tab;
-  document.querySelectorAll('#tabs button').forEach(function (b) {
-    b.classList.toggle('active', b === btn);
-  });
-  render();
+  setTab(btn.dataset.tab);
+});
+
+document.getElementById('gear').addEventListener('click', function () {
+  setTab(currentTab === 'einstellungen' ? letzterTab : 'einstellungen');
 });
 
 function render() {
   if (currentTab === 'ueben') renderUeben();
   else if (currentTab === 'uebersetzen') renderUebersetzen();
   else if (currentTab === 'tippen') renderTippen();
+  else if (currentTab === 'einstellungen') renderEinstellungen();
   else renderBilanz();
 }
 
@@ -867,6 +932,32 @@ function uebNext(skipFact) {
   uebPicked = null;
   uebCorrect = null;
   uebRevealed = false;
+  renderUeben();
+}
+
+// Ist genug gewählt oder gelegt, um abgeben zu dürfen?
+function uebAbgabeBereit() {
+  if (!uebQ) return false;
+  if (uebQ.mode === 'tiles') {
+    return state.settings.requireComplete
+      ? uebBuilt.length === uebQ.tiles.length
+      : uebBuilt.length > 0;
+  }
+  return uebPicked !== null;
+}
+
+function uebPruefen() {
+  var q = uebQ;
+  if (q.mode === 'tiles') {
+    var attempt = uebBuilt.map(function (k) {
+      return q.tiles.filter(function (t) { return t.key === k; })[0].ch;
+    }).join('');
+    uebCorrect = normalize(attempt) === normalize(q.word.ru);
+  } else {
+    uebCorrect = uebPicked === q.word.id;
+  }
+  updateBox(q.word.id, uebCorrect);
+  uebPhase = 'feedback';
   renderUeben();
 }
 
@@ -930,6 +1021,8 @@ function renderUeben() {
         if (opt.id === q.word.id) cls = ' right';
         else if (opt.id === uebPicked) cls = ' wrong';
         else cls = ' muted';
+      } else if (opt.id === uebPicked) {
+        cls = ' picked';
       }
       html += '<button class="option' + (q.mode === 'mc-ru' ? ' cyr' : '') + cls + '" data-opt="' + oi + '"' +
         (uebPhase !== 'ask' ? ' disabled' : '') + '>' +
@@ -948,8 +1041,15 @@ function renderUeben() {
   }
 
   html += '</div><div class="btn-row">';
-  if (uebPhase === 'ask') html += '<button class="btn ghost" id="uebReveal">Aufdecken</button>';
-  else html += '<button class="btn primary" id="uebNext">Weiter \u2192</button>';
+  if (uebPhase === 'ask') {
+    html += '<button class="btn ghost" id="uebReveal">Aufdecken</button>';
+    if (state.settings.confirmUeben) {
+      html += '<button class="btn primary" id="uebConfirm"' + (uebAbgabeBereit() ? '' : ' disabled') +
+        '>Best\u00e4tigen</button>';
+    }
+  } else {
+    html += '<button class="btn primary" id="uebNext">Weiter \u2192</button>';
+  }
   html += '</div>';
   html += '<p class="session-info">' + state.answered + ' beantwortet · Beste Serie: ' + state.bestStreak + '</p></section>';
 
@@ -972,12 +1072,9 @@ function renderUeben() {
     });
     main.querySelectorAll('[data-opt]').forEach(function (b) {
       b.addEventListener('click', function () {
-        var opt = q.options[parseInt(b.dataset.opt, 10)];
-        uebPicked = opt.id;
-        uebCorrect = opt.id === q.word.id;
-        updateBox(q.word.id, uebCorrect);
-        uebPhase = 'feedback';
-        renderUeben();
+        uebPicked = q.options[parseInt(b.dataset.opt, 10)].id;
+        if (state.settings.confirmUeben) renderUeben();
+        else uebPruefen();
       });
     });
     main.querySelectorAll('[data-tile]').forEach(function (b) {
@@ -985,16 +1082,13 @@ function renderUeben() {
         var key = parseInt(b.dataset.tile, 10);
         if (uebBuilt.indexOf(key) !== -1) return;
         uebBuilt.push(key);
-        if (uebBuilt.length === q.tiles.length) {
-          var attempt = uebBuilt.map(function (k) {
-            return q.tiles.filter(function (t) { return t.key === k; })[0].ch;
-          }).join('');
-          uebCorrect = normalize(attempt) === normalize(q.word.ru);
-          updateBox(q.word.id, uebCorrect);
-          uebPhase = 'feedback';
-        }
-        renderUeben();
+        if (!state.settings.confirmUeben && uebBuilt.length === q.tiles.length) uebPruefen();
+        else renderUeben();
       });
+    });
+    var confirmBtn = document.getElementById('uebConfirm');
+    if (confirmBtn) confirmBtn.addEventListener('click', function () {
+      if (uebAbgabeBereit()) uebPruefen();
     });
     var undo = document.getElementById('tileUndo');
     if (undo) undo.addEventListener('click', function () {
@@ -1039,6 +1133,25 @@ function buildTransTask() {
   trRevealed = false;
 }
 
+function trWort(key) {
+  return trTask.tiles.filter(function (x) { return x.key === key; })[0].word;
+}
+
+// Ist genug gelegt, um abgeben zu dürfen?
+function trAbgabeBereit() {
+  if (!trTask) return false;
+  return state.settings.requireComplete
+    ? trBuilt.length === trTask.targetTokens.length
+    : trBuilt.length > 0;
+}
+
+function trPruefen() {
+  var ok = trBuilt.length === trTask.targetTokens.length && trBuilt.every(function (k, i) {
+    return normalize(trWort(k)) === normalize(trTask.targetTokens[i]);
+  });
+  trFinish(ok);
+}
+
 function trFinish(ok) {
   trCorrect = ok;
   trPhase = 'feedback';
@@ -1071,14 +1184,18 @@ function renderUebersetzen() {
   if (trBuilt.length === 0 && trPhase === 'ask') {
     html += '<span class="built-placeholder">Wörter in der richtigen Reihenfolge antippen</span>';
   } else {
-    trBuilt.forEach(function (k) {
-      var w = t.tiles.filter(function (x) { return x.key === k; })[0].word;
-      html += '<span class="built-word">' + esc(w) + '</span>';
+    trBuilt.forEach(function (k, i) {
+      var w = esc(trWort(k));
+      // In der Frage-Phase ist jedes gelegte Wort einzeln antippbar zum Entfernen.
+      html += trPhase === 'ask'
+        ? '<button class="built-word" data-built="' + i + '" aria-label="«' + w + '» entfernen">' + w + '</button>'
+        : '<span class="built-word">' + w + '</span>';
     });
   }
   html += '</div>';
 
   if (trPhase === 'ask') {
+    if (trBuilt.length > 0) html += '<p class="hint">Zum Entfernen ein gelegtes Wort antippen.</p>';
     html += '<div class="tiles">';
     t.tiles.forEach(function (tile) {
       var used = trBuilt.indexOf(tile.key) !== -1;
@@ -1097,8 +1214,15 @@ function renderUebersetzen() {
   }
 
   html += '</div><div class="btn-row">';
-  if (trPhase === 'ask') html += '<button class="btn ghost" id="trReveal">Aufdecken</button>';
-  else html += '<button class="btn primary" id="trNext">Weiter \u2192</button>';
+  if (trPhase === 'ask') {
+    html += '<button class="btn ghost" id="trReveal">Aufdecken</button>';
+    if (state.settings.confirmUebersetzen) {
+      html += '<button class="btn primary" id="trConfirm"' + (trAbgabeBereit() ? '' : ' disabled') +
+        '>Best\u00e4tigen</button>';
+    }
+  } else {
+    html += '<button class="btn primary" id="trNext">Weiter \u2192</button>';
+  }
   html += '</div>';
 
   html += '<p class="session-info">Satz ' + (trIdx + 1) + ' / ' + list.length + ' · ' +
@@ -1132,15 +1256,21 @@ function renderUebersetzen() {
         var key = parseInt(b.dataset.wtile, 10);
         if (trBuilt.indexOf(key) !== -1) return;
         trBuilt.push(key);
-        if (trBuilt.length === trTask.targetTokens.length) {
-          var ok = trBuilt.every(function (k, i) {
-            var w = trTask.tiles.filter(function (x) { return x.key === k; })[0].word;
-            return normalize(w) === normalize(trTask.targetTokens[i]);
-          });
-          trFinish(ok);
-        }
+        if (!state.settings.confirmUebersetzen && trBuilt.length === trTask.targetTokens.length) trPruefen();
         renderUebersetzen();
       });
+    });
+    main.querySelectorAll('[data-built]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        trBuilt.splice(parseInt(b.dataset.built, 10), 1);
+        renderUebersetzen();
+      });
+    });
+    var trConfirm = document.getElementById('trConfirm');
+    if (trConfirm) trConfirm.addEventListener('click', function () {
+      if (!trAbgabeBereit()) return;
+      trPruefen();
+      renderUebersetzen();
     });
     document.getElementById('trUndo').addEventListener('click', function () {
       trBuilt.pop();
@@ -1260,6 +1390,45 @@ function renderTippen() {
   });
 }
 
+// ── EINSTELLUNGEN ───────────────────────────────────────────
+function renderEinstellungen() {
+  var s = state.settings;
+
+  function schalter(key, titel, hinweis, gesperrt) {
+    var an = s[key];
+    return '<div class="setting"><span class="setting-text">' +
+      '<span class="setting-title">' + esc(titel) + '</span>' +
+      '<span class="setting-note">' + esc(hinweis) + '</span></span>' +
+      '<button class="switch' + (an ? ' on' : '') + '" role="switch" aria-checked="' + (an ? 'true' : 'false') +
+      '" aria-label="' + esc(titel) + '" data-set="' + key + '"' + (gesperrt ? ' disabled' : '') +
+      '><span class="knob"></span></button></div>';
+  }
+
+  var ohneBestaetigung = !s.confirmUeben && !s.confirmUebersetzen;
+
+  main.innerHTML = '<section><h2>Abgabe</h2>' +
+    schalter('confirmUeben', 'Bestätigen in «Üben»',
+      'Antwort erst auswählen, dann mit «Bestätigen» abgeben. Aus: Der erste Tipp zählt sofort.') +
+    schalter('confirmUebersetzen', 'Bestätigen in «Übersetzen»',
+      'Satz erst zusammenstellen, dann mit «Bestätigen» abgeben. Aus: Der Satz zählt, sobald das letzte Wort liegt.') +
+    schalter('requireComplete', 'Erst bei vollständiger Lösung',
+      'Bestätigen ist erst möglich, wenn alle Buchstaben beziehungsweise Wörter liegen. Verrät dadurch die Länge der Lösung.',
+      ohneBestaetigung) +
+    '<p class="settings-note">Die Einstellungen gelten nur auf diesem Gerät und werden zusammen mit dem ' +
+    'Lernstand gespeichert. «Fortschritt zurücksetzen» in der Bilanz lässt sie unberührt.</p>' +
+    '<div class="btn-row"><button class="btn ghost" id="setBack">Zurück</button></div></section>';
+
+  main.querySelectorAll('[data-set]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var key = b.dataset.set;
+      state.settings[key] = !state.settings[key];
+      save();
+      renderEinstellungen();
+    });
+  });
+  document.getElementById('setBack').addEventListener('click', function () { setTab(letzterTab); });
+}
+
 // ── BILANZ ──────────────────────────────────────────────────
 var backupOpen = false, backupCode = '', backupMsg = '', confirmReset = false;
 
@@ -1357,9 +1526,7 @@ function renderBilanz() {
     try {
       var data = decodeBackup(code);
       if (!data || typeof data !== 'object' || !data.boxes) throw new Error('ungültig');
-      var d = defaultState();
-      Object.keys(d).forEach(function (k) { if (data[k] !== undefined) d[k] = data[k]; });
-      state = d;
+      state = mergeState(data);
       save();
       updateStreakUI();
       backupMsg = 'Sicherung wiederhergestellt.';
@@ -1374,7 +1541,9 @@ function renderBilanz() {
   if (rsNo) rsNo.addEventListener('click', function () { confirmReset = false; renderBilanz(); });
   var rsYes = document.getElementById('rsYes');
   if (rsYes) rsYes.addEventListener('click', function () {
+    var behalten = state.settings; // Einstellungen sind kein Fortschritt
     state = defaultState();
+    state.settings = behalten;
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
     confirmReset = false;
     backupOpen = false;
