@@ -10,6 +10,33 @@ Im Body stehen nur die Teile, die immer sichtbar sind: Kopfzeile mit Titel und
 Statusabzeichen, die Tab-Leiste (`#tabs`) und ein leerer Container `#main`. Alles
 Weitere erzeugt JavaScript.
 
+## Kopfbereich
+
+Der Kopf ist kein reines Logo, sondern Statusanzeige:
+
+- `updateKopf()` füllt die Fortschrittsleiste (Anteil gemeisterter Wörter, also
+  `state.boxes[id] >= BOX_MAX` gegen `ALL_VOCAB.length`) und schreibt das Label
+  darunter. Die Serie erscheint erst ab drei richtigen Antworten in Folge. Aufgerufen
+  wird die Funktion am Ende von `render()`, nach `updateBox()` und beim Start — sie ist
+  billig genug, um bei jedem Zeichnen mitzulaufen.
+- `zeigeStatus(art, text)` bespielt die Statuszeile rechts daneben. `'ok'` blendet
+  „gespeichert" mit Haken ein und nach zwei Sekunden wieder aus, `'err'` bleibt stehen.
+  Die Zeile ist `role="status"` mit `aria-live="polite"`, damit VoiceOver sie vorliest,
+  ohne die Bedienung zu unterbrechen.
+- Die Einstellungen hängen am Reglerknopf oben rechts, nicht an einem fünften Reiter —
+  siehe ADR 0005.
+
+## Symbole
+
+`ICON` (am Anfang des Skripts) hält alle Symbole als Inline-SVG, gezeichnet mit
+`stroke="currentColor"`, also immer in der Farbe des umgebenden Elements. **Keine
+Emoji-Zeichen im Auslieferungspfad:** iOS rendert Zeichen aus dem Emoji-Bereich als
+farbige Grafik, die in einer sonst einfarbigen Oberfläche wie aufgeklebt wirkt.
+`tools/pruefen.mjs` bricht ab, wenn ein solches Zeichen in `index.html` auftaucht.
+
+Typografische Zeichen wie `→` oder `␣` bleiben Text — sie sind keine Emoji und werden
+überall gleich dargestellt.
+
 ## Zustand
 
 Ein einziges Objekt `state` hält den gesamten Lernstand:

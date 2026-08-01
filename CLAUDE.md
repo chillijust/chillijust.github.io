@@ -22,7 +22,8 @@ Bildschirmtastatur), Bilanz (Leitner-Statistik, Sicherungscode).
 
 - Kein React, kein JSX, kein Build-Schritt, keine npm-Toolchain im Auslieferungspfad.
 - Keine externen Ressourcen: keine CDNs, keine Google Fonts, keine externen Bilder, keine
-  API-Aufrufe. Alles inline. Icons als Inline-SVG oder Unicode.
+  API-Aufrufe. Alles inline. Symbole als Inline-SVG über `ICON` — **keine Emoji-Zeichen**,
+  iOS rendert sie als farbige Grafik. `tools/pruefen.mjs` bricht darüber ab.
 - Persistenz ausschließlich über `localStorage`, jeder Zugriff in `try/catch`.
 - Mobile-first: Touch-Ziele ≥ 44 × 44 px, keine Hover-abhängige Bedienung,
   `-webkit-tap-highlight-color: transparent`, `env(safe-area-inset-*)` für Notch und
