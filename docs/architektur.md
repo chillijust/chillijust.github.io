@@ -80,6 +80,37 @@ Erreichbar sind sie über das Zahnrad in der Kopfzeile. Es ist bewusst kein fün
 Die Tab-Leiste ist auf dem iPhone bereits voll, ein fünfter Eintrag läge außerhalb des
 Sichtbereichs.
 
+## Lernweg: Päckchen, Fälligkeit, Freischaltung
+
+Alle drei Übungsrubriken ziehen aus demselben Bestand (`ALL_VOCAB`) und schreiben in
+denselben Leitner-Stand (`state.boxes`). Unterschiedlich ist nur, *welchen Ausschnitt*
+sie sehen:
+
+| Rubrik | Ausschnitt |
+| --- | --- |
+| Üben | das laufende Päckchen (12 Wörter), wahlweise ein früheres oder alle freigeschalteten |
+| Tippen | nur Wörter ab `settings.tippenAbStufe` (Vorgabe 4, also gemeistert) |
+| Übersetzen | eigene Satzdaten, noch unabhängig vom Vokabelstand |
+
+- **Päckchen** sind fortlaufende Abschnitte von `PAKET_GROESSE` (12) Wörtern in der
+  Reihenfolge der Daten. `aktuellesPaket()` ist das erste, in dem noch nicht jedes Wort
+  `PAKET_STUFE` (3) erreicht hat. Spätere Päckchen sind gesperrt, solange
+  `settings.paketSperre` gilt.
+- **Fälligkeit** steckt in `state.lastSeen[id]` (Zeitstempel) und `INTERVALL`
+  (neu · 1 · 3 · 7 · 21 Tage je Leitner-Stufe). `faellig()` entscheidet, ob ein Wort zur
+  Wiedervorlage ansteht.
+- **`waehleWort(pool, nurWiederholen)`** wählt in drei Stufen: fällige Wiederholungen,
+  dann noch nie gesehene Wörter, dann — innerhalb einer Sitzung der Regelfall — das am
+  längsten zurückliegende Wort mit der niedrigsten Stufe. Mit `nurWiederholen` (Ansicht
+  „Wiederholung") zählt allein das Alter: bereits Begonnenes, ältestes zuerst.
+- **Tippen** ist gesperrt, bis Wörter die Schwelle erreichen; der Leerzustand nennt die
+  drei Wörter, die am nächsten dran sind. Während der Rückmeldung bleibt das Wort stehen,
+  auch wenn ein Fehler es unter die Schwelle geworfen hat.
+
+Die Wort-Kennung ist seit dieser Fassung **das russische Wort selbst**, nicht mehr
+`Thema::wort`. Damit überlebt der Lernstand jede Umbenennung und jede Umsortierung der
+Themen. `migriereIds()` schreibt alte Stände beim Laden um.
+
 ## Persistenz
 
 `load()` und `save()` sprechen `localStorage` unter dem Schlüssel

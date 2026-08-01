@@ -30,9 +30,12 @@ Thema → Liste von Tripeln `[russisch, deutsch, transliteration]`.
 }
 ```
 
-- Das Thema ist zugleich die Überschrift im Filter und Teil der Vokabel-ID
-  (`Thema::русское слово`). **Ein Thema umzubenennen setzt den Leitner-Stand aller
-  enthaltenen Wörter zurück** — nur mit Bedacht und mit Hinweis im Commit.
+- **Die Reihenfolge in dieser Datei ist der Lehrplan.** Je zwölf aufeinanderfolgende
+  Wörter bilden ein Päckchen; das nächste öffnet erst, wenn alle zwölf Leitner-Stufe 3
+  erreicht haben. Wer Wörter einfügt oder umsortiert, verschiebt damit den Lernweg —
+  Ergänzungen deshalb ans Ende des passenden Themas, nicht mittendrin.
+- Der Themenname ist nur noch Überschrift. Die Vokabel-Kennung ist das russische Wort
+  selbst, ein Umbenennen des Themas kostet also keinen Lernstand mehr.
 - Transliteration in deutscher Lesart, wie man es aussprechen würde: `spassiba`, nicht
   `spasibo`. Keine wissenschaftliche Umschrift, keine diakritischen Zeichen.
 - Mehrere deutsche Bedeutungen mit Schrägstrich trennen: `nichts / macht nichts`.
@@ -87,7 +90,11 @@ sind.
 
 ## Lernstand im Browser
 
-Der Fortschritt liegt unter `localStorage['russisch_trainer_v1']` und ist an die
-Vokabel-ID gebunden. Neue Wörter starten in Stufe 0 („neu"), ohne den bestehenden Stand
-zu berühren. Entfernte Wörter hinterlassen verwaiste Einträge — die Bilanz zählt nur
-Wörter, die es noch gibt, also ist das unschädlich.
+Der Fortschritt liegt unter `localStorage['russisch_trainer_v1']` und ist an das
+russische Wort gebunden (`state.boxes`, dazu `state.lastSeen` für die Wiedervorlage).
+Neue Wörter starten in Stufe 0 („neu"), ohne den bestehenden Stand zu berühren.
+Entfernte Wörter hinterlassen verwaiste Einträge — die Bilanz zählt nur Wörter, die es
+noch gibt, also ist das unschädlich.
+
+Ein Wort umzubenennen ist dagegen ein Neuanfang für dieses Wort: Die alte Kennung
+verwaist, die neue startet bei Stufe 0. Tippfehlerkorrekturen also bewusst vornehmen.
