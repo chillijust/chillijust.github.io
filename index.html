@@ -299,8 +299,8 @@ button.built-word:active { transform: scale(.95); }
   width: 100%; height: 100%; display: block;
   filter: drop-shadow(0 6px 12px rgba(0, 0, 0, .4));
 }
-/* Der Sprung: ducken, Bogen, federn — bewusst gemächlich. */
-#chiliFigur.springt { animation: chiliSprung .78s cubic-bezier(.3, .85, .4, 1); }
+/* Der Sprung: ducken, Bogen, federn — kurz und schnell. */
+#chiliFigur.springt { animation: chiliSprung .23s cubic-bezier(.3, .85, .4, 1); }
 @keyframes chiliSprung {
   0%   { transform: translateY(0) rotate(0deg) scaleY(1); }
   14%  { transform: translateY(6px) rotate(-4deg) scaleY(.86); }
@@ -311,7 +311,7 @@ button.built-word:active { transform: scale(.95); }
 }
 /* Die Blase kommt kurz nach der Landung — sie wächst herein, als spräche die
    Chili, statt aufzuploppen. */
-.sprechblase { animation: blaseAuf .6s .8s both cubic-bezier(.2, .8, .3, 1); }
+.sprechblase { animation: blaseAuf .6s .26s both cubic-bezier(.2, .8, .3, 1); }
 @keyframes blaseAuf {
   from { opacity: 0; transform: translateY(10px) scale(.94); }
   60%  { opacity: 1; }
@@ -1189,9 +1189,9 @@ function chiliFlug(vorher, jetzt) {
       });
     }
     // Verzögerung und Dauer greifen in die Figur-Animation: erst ducken
-    // (bis 14 % von 0,78 s), dann fliegen, am Ende federn.
+    // (bis 14 % von 0,23 s), dann fliegen, am Ende federn.
     chiliBuehne.animate(bilder, {
-      duration: 640, delay: 100, easing: 'linear', fill: 'backwards'
+      duration: 190, delay: 30, easing: 'linear', fill: 'backwards'
     });
   } catch (e) { /* ohne Flug bleibt der Hüpfer */ }
 }
@@ -1230,7 +1230,7 @@ function chiliAktualisieren(ohneSprung) {
   if (chiliZeitgeber) clearTimeout(chiliZeitgeber);
   chiliZeitgeber = setTimeout(function () {
     chiliFigur.classList.remove('springt');
-  }, 900);
+  }, 300);
 }
 
 // ── Töne ────────────────────────────────────────────────────

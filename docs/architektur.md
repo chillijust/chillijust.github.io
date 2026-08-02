@@ -113,11 +113,11 @@ Lücke von rund 73 px zwischen Kopfzeile und Reitern (ADR 0013).
 merkt also jeden Ansichtswechsel, ohne dass eine Renderfunktion daran denken muss. Der
 Sprung besteht aus zwei Teilen auf zwei Elementen, die sich nicht ins Gehege kommen:
 
-- **Die Figur** bekommt die Klasse `springt` (Keyframes `chiliSprung`, 0,78 s): ducken,
+- **Die Figur** bekommt die Klasse `springt` (Keyframes `chiliSprung`, 0,23 s): ducken,
   Eigenhub, Rotation, federn. Ein Zeitgeber räumt die Klasse danach ab.
 - **Die Hülle** fliegt über `chiliFlug()` von der alten zur neuen Lage — waagerecht
   gleichförmig, senkrecht eine Parabel darüber, dazu der Größenwechsel. Neun Stützstellen
-  über `Element.animate()`, `linear`, 0,64 s nach 0,1 s Verzögerung: erst ducken, dann
+  über `Element.animate()`, `linear`, 0,19 s nach 0,03 s Verzögerung: erst ducken, dann
   fliegen, am Ende federn.
 
 Die alte Lage kommt aus `chiliLage()` in **Dokumentkoordinaten** — die Figur steht im
@@ -127,7 +127,7 @@ Ansichtswechsel ist sie fort, dann trägt die gemerkte `chiliSpur`. Unter 8 px l
 Flug nicht, über 900 px ist die alte Lage vermutlich veraltet — beides bleibt beim reinen
 Hüpfer.
 
-**Die Blase kommt kurz nach der Landung:** `.sprechblase` startet mit 0,8 s Verzögerung
+**Die Blase kommt kurz nach der Landung:** `.sprechblase` startet mit 0,26 s Verzögerung
 und wächst über `blaseAuf` (0,6 s) herein, statt aufzuploppen. Unter
 `prefers-reduced-motion: reduce` entfallen Sprung, Flug und Einblendung.
 
