@@ -23,6 +23,9 @@ Rubriken in dieser Reihenfolge:
 Dazu zwei Ansichten ohne Reiter: **Einstellungen** (Reglerknopf) und **Sprachfakten**
 (aus der Faktenkarte oder der Bilanz).
 
+Maskottchen ist die Chili aus `docs/IMG_2942.png`. Sie liegt einmal als App-Symbol im
+Kopf der Datei; `maskottchen(klasse)` liest sie von dort. Nie ein zweites Mal einbetten.
+
 ## Harte Rahmenbedingungen — nicht verhandelbar
 
 - Kein React, kein JSX, kein Build-Schritt, keine npm-Toolchain im Auslieferungspfad.

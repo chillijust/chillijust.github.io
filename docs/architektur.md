@@ -52,6 +52,25 @@ ist (`:root:not([data-theme])`), und `:root[data-theme="hell"]` setzt sie ausdr�
 `updateDarstellung()` schreibt das Attribut und färbt `meta[name=theme-color]` nach, damit
 die Statusleiste auf dem iPhone passt.
 
+## Maskottchen
+
+Die Chili aus dem App-Symbol tritt in der App an vier Stellen auf, immer über
+`maskottchen(klasse)`. Die Funktion liest das Bild aus dem `<link
+rel="apple-touch-icon">` — so liegt es **genau einmal** in der Datei, statt für jeden
+Auftritt neu eingebettet zu werden:
+
+| Ort | Größe | Zweck |
+| --- | --- | --- |
+| Faktenkarte | 38 px | die Chili erzählt den Sprachfakt |
+| Leerzustände (Tippen, Übersetzen, Faktensammlung) | 96 px | nimmt der Sperre die Härte |
+| Jubelkarte nach einem geschafften Lernset | 96 px | der Moment, auf den das Lernen zuläuft |
+
+Die Jubelkarte (`uebPhase === 'setfertig'`) erscheint, sobald eine Antwort das laufende
+Set vollmacht — allerdings erst beim nächsten «Weiter», damit sie nicht die Auflösung
+verdeckt. Sie nennt die freigeschalteten Sätze und führt mit einem Knopf direkt nach
+„Übersetzen". `uebZuruecksetzen()` räumt die Frage dabei auf; ohne das stünde „Üben" bei
+der Rückkehr noch in der Jubelphase und zeigte eine Frage ohne Knöpfe.
+
 ## Symbole
 
 Das App-Symbol für „Zum Home-Bildschirm" liegt als PNG-Daten-URI im `<link
