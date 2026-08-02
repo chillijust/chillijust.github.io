@@ -23,8 +23,10 @@ Rubriken in dieser Reihenfolge:
 Dazu zwei Ansichten ohne Reiter: **Einstellungen** (Reglerknopf) und **Sprachfakten**
 (aus der Faktenkarte oder der Bilanz).
 
-Maskottchen ist die Chili aus `docs/IMG_2942.png`. Sie liegt einmal als App-Symbol im
-Kopf der Datei; `maskottchen(klasse)` liest sie von dort. Nie ein zweites Mal einbetten.
+Maskottchen ist die Chili — freigestellt aus `docs/IMG_2942.png` mit
+`tools/freistellen.py`, abgelegt als `docs/maskottchen-freigestellt.png`. In der App
+liegt sie einmal als verstecktes `#chiliQuelle` im Body; `maskottchen(klasse)` reicht
+ihre Quelle weiter. Nie ein zweites Mal einbetten.
 
 ## Harte Rahmenbedingungen — nicht verhandelbar
 
@@ -48,6 +50,8 @@ index.html                die App — genau diese Datei wird ausgeliefert
 data/*.json               Lerninhalte, einzige Quelle für Vokabeln/Sätze/Fakten/Tastatur
 tools/build.mjs           /data prüfen und in index.html einbetten (--check = nur prüfen)
 tools/pruefen.mjs         Vor-Push-Prüfung von index.html
+tools/freistellen.py      Maskottchen aus einem Bild freistellen (ohne Bildbibliothek)
+tools/skaliere.py         PNG auf Icon-Größe bringen (ohne Bildbibliothek)
 docs/                     Architektur, Datenmodell, Deploy, Entscheidungen (ADRs)
 docs/decisions/           kurze ADRs, fortlaufend nummeriert
 ```

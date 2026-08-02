@@ -54,16 +54,20 @@ die Statusleiste auf dem iPhone passt.
 
 ## Maskottchen
 
-Die Chili aus dem App-Symbol tritt in der App an vier Stellen auf, immer über
-`maskottchen(klasse)`. Die Funktion liest das Bild aus dem `<link
-rel="apple-touch-icon">` — so liegt es **genau einmal** in der Datei, statt für jeden
-Auftritt neu eingebettet zu werden:
+Die Chili ist aus dem Icon freigestellt (`tools/freistellen.py`) und liegt als
+verstecktes `<img id="chiliQuelle">` ganz oben im Body — **genau einmal**.
+`maskottchen(klasse)` reicht ihre Quelle weiter, statt sie je Auftritt neu einzubetten.
+Sie tritt an vier Stellen auf:
 
 | Ort | Größe | Zweck |
 | --- | --- | --- |
-| Faktenkarte | 38 px | die Chili erzählt den Sprachfakt |
+| Faktenkarte | 76 px | die Chili spricht den Fakt aus einer Sprechblase |
 | Leerzustände (Tippen, Übersetzen, Faktensammlung) | 96 px | nimmt der Sperre die Härte |
 | Jubelkarte nach einem geschafften Lernset | 96 px | der Moment, auf den das Lernen zuläuft |
+
+Die Sprechblase (`.sprechblase`) ist eine Karte mit goldenem Rahmen; der Zipfel ist ein
+um 45° gedrehtes Quadrat mit zwei Rahmenkanten, das unten links aus der Blase ragt und
+auf die Chili zeigt. Figur und Stern stehen darunter in einer Reihe.
 
 Die Jubelkarte (`uebPhase === 'setfertig'`) erscheint, sobald eine Antwort das laufende
 Set vollmacht — allerdings erst beim nächsten «Weiter», damit sie nicht die Auflösung

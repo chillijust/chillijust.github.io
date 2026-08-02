@@ -11,10 +11,15 @@ eine Stelle, an der etwas zu feiern wäre, aber nichts passierte: das geschaffte
 
 ## Entscheidung
 
-1. **Ein Bild, vier Auftritte.** `maskottchen(klasse)` liest das Bild aus dem
-   `<link rel="apple-touch-icon">` statt es erneut einzubetten. Die 30 KB liegen damit
-   genau einmal in der Datei, gleich wie oft die Chili auftritt.
-2. **Faktenkarte:** die Chili links neben „Wussten Sie?" — sie erzählt den Fakt.
+1. **Ein Bild, vier Auftritte.** Die Chili ist aus dem Icon freigestellt und liegt als
+   verstecktes `<img id="chiliQuelle">` im Body; `maskottchen(klasse)` reicht ihre Quelle
+   weiter. Die 20 KB liegen damit genau einmal in der Datei, gleich wie oft sie auftritt.
+   Freigestellt wird mit `tools/freistellen.py`: Hintergrund vom Rand her fluten — aber
+   nur über Pixel, die wirklich türkis sind —, dann die größte zusammenhängende Fläche
+   behalten. Reines Wachsen über Farbabstände lief über die weichen Wangen-Ovale in die
+   Figur hinein und ließ nur die Sprechblase übrig.
+2. **Faktenkarte:** Die Chili steht unter einer Sprechblase, aus der sie den Fakt sagt.
+   Der Zipfel ist ein gedrehtes Quadrat mit zwei Rahmenkanten und zeigt auf ihren Kopf.
 3. **Leerzustände:** die Chili über der Überschrift. Eine Sperre bleibt eine Sperre, wirkt
    aber freundlicher, wenn jemand sie überbringt.
 4. **Jubelkarte:** Macht eine Antwort das laufende Lernset voll, erscheint beim nächsten
