@@ -68,6 +68,7 @@ Platzhalter in `#main` — fehlt er, gilt der im Kopf — und hängt die Bühne 
 | Station | Größe | Anlass |
 | --- | --- | --- |
 | Kopfzeile, mittig zwischen Titel und Reglerknopf | 52 px | Grundzustand |
+| Kompakte Zone über den Reitern, links | 30 px | wenn die Kopfzeile weggescrollt ist |
 | Sprechblase der Faktenkarte | 76 px | alle fünf Antworten |
 | Leerzustände (Tippen, Übersetzen, Faktensammlung) | 104 px | wenn nichts freigeschaltet ist |
 | Jubelkarte | 104 px | wenn ein Lernset voll wird |
@@ -75,9 +76,38 @@ Platzhalter in `#main` — fehlt er, gilt der im Kopf — und hängt die Bühne 
 Der Platz im Kopf hängt über `position: absolute; left: 50%` mittig an der Kopfzeile —
 unabhängig davon, wie breit Titel und Reglerknopf gerade sind.
 
-**Kein Nachrechnen.** Es gibt keine Scroll- oder Resize-Behandlung und keine
-Positionsrechnung je Bild. Weil die Figur ein Kind ihres Platzhalters ist, scrollt sie
-starr mit dem Inhalt (ADR 0012).
+Ein Platzhalter in `#main` geht immer vor: steht die Figur in einer Karte, gehört sie
+dorthin — auch beim Scrollen. Nur wenn die Ansicht keinen aufstellt, entscheidet der
+Scrollzustand zwischen kompakter Zone und Kopfzeile.
+
+**Kein Nachrechnen.** Es gibt keine Positionsrechnung je Bild. Weil die Figur ein Kind
+ihres Platzhalters ist, scrollt sie starr mit dem Inhalt (ADR 0012). Der einzige
+Scroll-Horcher schaltet eine Klasse um, mehr nicht.
+
+## Kopfzeile und kompakte Zone
+
+Die Reiterleiste (`#navbar`) klebt **nicht** am Viewport-Rand, sondern
+`--kompakt-hoehe` darunter (`calc(env(safe-area-inset-top) + 14px + 46px)`). Genau
+diesen Platz füllt `#kompakt`: ein festes Element am oberen Rand mit der Chili links und
+einem zweiten Reglerknopf rechts.
+
+`kompaktPruefen()` vergleicht `navbar.getBoundingClientRect().top` mit dem gesetzten
+`top` — sind sie gleich, klebt die Leiste, also ist die Kopfzeile weg. Dann bekommt
+`<body>` die Klasse `kompakt`, die Zone wird von `display: none` auf `flex` geschaltet
+und die Chili dorthin umgehängt (ohne Sprung). Der Horcher ist über
+`requestAnimationFrame` gedrosselt und rechnet keine Position.
+
+Die Zone selbst schaltet **hart**; nur ihr Inhalt blendet über `kompaktAuf` weich ein.
+Ein Übergang auf der Zone ließe den durchlaufenden Inhalt kurz durchschimmern.
+
+Beide Reglerknöpfe tragen `data-regler`: `setTab()` setzt die Klasse `active` auf allen,
+Klick und Symbol hängen ebenfalls an allen. Ein dritter Knopf würde ohne Codeänderung
+mitlaufen.
+
+**Warum die Leiste keinen festen Innenabstand mehr trägt:** Früher hielt
+`padding-top: var(--pad-oben)` den Streifen dauerhaft frei. Im Browser fiel das kaum auf
+(`env(safe-area-inset-top)` ist dort 0), im Vollbild vom Home-Bildschirm stand dort eine
+Lücke von rund 73 px zwischen Kopfzeile und Reitern (ADR 0013).
 
 **Springen.** `chiliAktualisieren()` läuft über einen `MutationObserver` auf `#main`,
 merkt also jeden Ansichtswechsel, ohne dass eine Renderfunktion daran denken muss.
