@@ -55,8 +55,10 @@ die Statusleiste auf dem iPhone passt.
 ## Symbole
 
 Das App-Symbol für „Zum Home-Bildschirm" liegt als PNG-Daten-URI im `<link
-rel="apple-touch-icon">` — erzeugt aus dem kyrillischen «Ч» mit dem Goldpunkt. Damit
-bleibt die Datei allein, ohne dass ein Bild danebenliegen muss.
+rel="apple-touch-icon">`: das Maskottchen — eine Chili mit «Я»-Sprechblase — aus
+`docs/IMG_2942.png`, auf 180 px verkleinert. Ein 32-px-Zwilling dient als Symbol im
+Browser-Reiter. Damit bleibt die ausgelieferte Datei allein, ohne dass ein Bild
+danebenliegen muss. Das Original bleibt in `docs/` als Quelle für spätere Größen.
 
 `ICON` (am Anfang des Skripts) hält alle Symbole als Inline-SVG, gezeichnet mit
 `stroke="currentColor"`, also immer in der Farbe des umgebenden Elements. **Keine

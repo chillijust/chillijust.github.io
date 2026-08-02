@@ -26,10 +26,11 @@ Drei Wünsche aus der Nutzung, dazu ein Fehler:
    Sicherungscode bliebe sonst um Kilobytes länger.
 3. **Darstellung als Einstellung** (`system`, `dunkel`, `hell`) über `data-theme` am
    `<html>`-Element. Die Medienabfrage greift nur noch, solange nichts gewählt ist.
-4. **App-Symbol als PNG-Daten-URI** im `<link rel="apple-touch-icon">` — ein kyrillisches
-   «Ч» mit dem Goldpunkt aus dem Schriftzug, gezeichnet in reinem Python (zlib), damit
-   keine Bilddatei danebenliegen muss. Dazu `apple-mobile-web-app-title`, damit unter dem
-   Symbol „Chillingo" steht und nicht der volle Seitentitel.
+4. **App-Symbol als PNG-Daten-URI** im `<link rel="apple-touch-icon">`: das Maskottchen
+   (Chili mit «Я»-Sprechblase, `docs/IMG_2942.png`), auf 180 px verkleinert — die
+   Verkleinerung läuft in reinem Python über zlib, ohne Bildbibliothek. Dazu
+   `apple-mobile-web-app-title`, damit unter dem Symbol „Chillingo" steht und nicht der
+   volle Seitentitel. Kosten: rund 30 KB in `index.html`.
 5. **Die klebende Leiste bekommt einen eigenen Rahmen** (`#navbar`). Der Rahmen trägt
    Hintergrund und Abstand zur Notch, die Leiste darin darf scrollen.
 
@@ -40,12 +41,12 @@ auto`. Ein Scrollbereich beschneidet, was über seinen Rand hinausragt — die A
 oberhalb der Leiste wurde also weggeschnitten. Das ließ sich nur durch Trennung von
 Rahmen und Scrollbereich lösen.
 
-Zum Symbol: Ob iOS Daten-URIs für `apple-touch-icon` annimmt, ist nicht in jeder Version
-verlässlich. Die Alternative — eine `icon.png` neben `index.html` — bricht die
-Ein-Datei-Vorgabe aus ADR 0001 für etwas, das nur beim Ablegen auf dem Home-Bildschirm
-gebraucht wird. Deshalb zuerst der Weg, der die Vorgabe hält; zeigt das iPhone weiterhin
-ein Bildschirmfoto, ist die separate Datei der nächste Schritt — dann bewusst und mit
-Notiz in ADR 0001.
+Zum Symbol: Ob iOS Daten-URIs für `apple-touch-icon` in jeder Version annimmt, ist nicht
+verlässlich dokumentiert. Die Alternative — eine `icon.png` neben `index.html` — bricht
+die Ein-Datei-Vorgabe aus ADR 0001 für etwas, das nur beim Ablegen auf dem
+Home-Bildschirm gebraucht wird. Deshalb zuerst der Weg, der die Vorgabe hält; zeigt das
+iPhone weiterhin ein Bildschirmfoto, ist die separate Datei der nächste Schritt — dann
+bewusst und mit Notiz in ADR 0001.
 
 ## Folgen
 
