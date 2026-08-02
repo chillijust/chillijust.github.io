@@ -7,8 +7,14 @@ drei Abschnitte — `<style>`, statisches Grundgerüst im `<body>`, ein einzelne
 ## Grundgerüst
 
 Im Body stehen nur die Teile, die immer sichtbar sind: Kopfzeile mit Titel und
-Statusabzeichen, die Tab-Leiste (`#tabs`) und ein leerer Container `#main`. Alles
-Weitere erzeugt JavaScript.
+Statuszeile, die Tab-Leiste und ein leerer Container `#main`. Alles Weitere erzeugt
+JavaScript.
+
+Die Tab-Leiste steckt in einem eigenen Rahmen `#navbar`: Der Rahmen klebt beim Scrollen
+(`position: sticky`), trägt den Hintergrund und zieht sich über die Innenabstände des
+Body bis unter die Notch. Die eigentliche Leiste `#tabs` darf waagerecht scrollen. Läge
+der Hintergrund auf `#tabs`, würde `overflow-x` ihn oben abschneiden — dann scrollt der
+Inhalt sichtbar durch den Streifen über den Reitern.
 
 ## Kopfbereich
 
@@ -26,7 +32,31 @@ Der Kopf ist kein reines Logo, sondern Statusanzeige:
 - Die Einstellungen hängen am Reglerknopf oben rechts, nicht an einem fünften Reiter —
   siehe ADR 0005.
 
+## Sprachfakten
+
+Nach je fünf Antworten erscheint ein Fakt (`naechsterFakt()` bevorzugt Ungesehenes, dann
+das am seltensten Gezeigte). Gemerkt wird er unter `faktId()` — einem kurzen Hash über den
+Text statt des Textes selbst, damit der Sicherungscode nicht aufbläht und ein Umsortieren
+der Datei nichts zerstört. `saubereFakten()` wirft beim Laden Einträge weg, zu denen es
+keinen Fakt mehr gibt.
+
+Die Sammlung (`renderFakten()`) ist eine eigene Ansicht ohne Reiter — erreichbar über die
+Faktenkarte und über die Bilanz, zurück über `letzterTab`. Sie filtert nach Gesehenem,
+Favoriten oder allen und zeigt je Fakt, wie oft er dran war.
+
+## Darstellung
+
+Dunkel ist die Grundeinstellung im `:root`. Die helle Palette hängt an zwei Stellen:
+`@media (prefers-color-scheme: light)` greift nur, solange **kein** `data-theme` gesetzt
+ist (`:root:not([data-theme])`), und `:root[data-theme="hell"]` setzt sie ausdrücklich.
+`updateDarstellung()` schreibt das Attribut und färbt `meta[name=theme-color]` nach, damit
+die Statusleiste auf dem iPhone passt.
+
 ## Symbole
+
+Das App-Symbol für „Zum Home-Bildschirm" liegt als PNG-Daten-URI im `<link
+rel="apple-touch-icon">` — erzeugt aus dem kyrillischen «Ч» mit dem Goldpunkt. Damit
+bleibt die Datei allein, ohne dass ein Bild danebenliegen muss.
 
 `ICON` (am Anfang des Skripts) hält alle Symbole als Inline-SVG, gezeichnet mit
 `stroke="currentColor"`, also immer in der Farbe des umgebenden Elements. **Keine
@@ -49,7 +79,8 @@ Ein einziges Objekt `state` hält den gesamten Lernstand:
 | `readSeen` | bereits geübte Sätze, unter ihrem russischen Text |
 | `streak`, `bestStreak` | laufende und beste Antwortserie |
 | `answered` | Gesamtzahl beantworteter Fragen |
-| `factIdx` | Position im Fakten-Karussell |
+| `factIdx` | Zähler der gezeigten Fakten |
+| `fakten` | je Sprachfakt `{ n: wie oft gezeigt, f: Favorit }`, unter einer kurzen Kennung |
 | `settings` | Einstellungen des Nutzers, siehe unten |
 
 Daneben existieren pro Rubrik einige Modulvariablen (`uebQ`, `uebPhase`, `trTask`,
@@ -69,6 +100,7 @@ auf einen sinnvollen Bereich:
 | `requireComplete` | aus | „Bestätigen" ist erst möglich, wenn die Lösung vollständig ist. Verrät dadurch deren Länge. |
 | `tippenAbStufe` | 4 | Ab welcher Leitner-Stufe ein Wort in „Tippen" erscheint (2, 3 oder 4). |
 | `tastaturAn` | aus | Zeigt die eingebaute Tastatur in „Tippen" gleich beim Öffnen. |
+| `darstellung` | `system` | `system`, `dunkel` oder `hell`. Steuert `data-theme` am `<html>`-Element. |
 
 Eine neue Einstellung braucht drei Dinge: einen Vorgabewert in `defaultSettings()`,
 eine Zeile in `renderEinstellungen()` und — falls sie das Verhalten einer Rubrik

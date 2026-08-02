@@ -20,6 +20,8 @@ Rubriken in dieser Reihenfolge:
 **Tippen** (Eingabequiz mit kyrillischer Tastatur, nur ab Leitner-Stufe 4),
 **Übersetzen** (Satzbau aus Wort-Kacheln, nur Sätze, deren Wörter sitzen),
 **Bilanz** (Leitner-Statistik, Lernweg, Sicherungscode).
+Dazu zwei Ansichten ohne Reiter: **Einstellungen** (Reglerknopf) und **Sprachfakten**
+(aus der Faktenkarte oder der Bilanz).
 
 ## Harte Rahmenbedingungen — nicht verhandelbar
 
@@ -31,7 +33,8 @@ Rubriken in dieser Reihenfolge:
 - Mobile-first: Touch-Ziele ≥ 44 × 44 px, keine Hover-abhängige Bedienung,
   `-webkit-tap-highlight-color: transparent`, `env(safe-area-inset-*)` für Notch und
   Home-Indicator.
-- Dark Mode als Standard, heller Modus über `prefers-color-scheme`.
+- Dark Mode als Standard, hell über `prefers-color-scheme` — oder ausdrücklich über die
+  Einstellung `darstellung` (`data-theme` am `<html>`-Element).
 - Die App muss offline funktionieren, nachdem sie einmal geladen wurde.
 
 ## Verzeichnisse

@@ -30,10 +30,10 @@ Thema → Liste von Tripeln `[russisch, deutsch, transliteration]`.
 }
 ```
 
-- **Die Reihenfolge in dieser Datei ist der Lehrplan.** Je zwölf aufeinanderfolgende
-  Wörter bilden ein Päckchen; das nächste öffnet erst, wenn alle zwölf Leitner-Stufe 3
-  erreicht haben. Wer Wörter einfügt oder umsortiert, verschiebt damit den Lernweg —
-  Ergänzungen deshalb ans Ende des passenden Themas, nicht mittendrin.
+- **Die Reihenfolge in dieser Datei ist der Lehrplan.** Sie bestimmt, in welcher Folge
+  die Lernsets entstehen und in welcher Reihenfolge Freestyle die Themen anbietet. Wer
+  Wörter einfügt oder umsortiert, verschiebt damit den Lernweg — Ergänzungen deshalb ans
+  Ende des passenden Themas, nicht mittendrin.
 - Der Themenname ist nur noch Überschrift. Die Vokabel-Kennung ist das russische Wort
   selbst, ein Umbenennen des Themas kostet also keinen Lernstand mehr.
 - Transliteration in deutscher Lesart, wie man es aussprechen würde: `spassiba`, nicht
@@ -75,9 +75,19 @@ Geordnete Liste von Sätzen. Jeder nennt seine **Voraussetzungen**: die Grundfor
 
 ### `data/fakten.json`
 
-Liste von Sätzen, die nach einer richtigen Antwort eingeblendet werden. Ein Fakt ist ein
-in sich abgeschlossener Satz, höchstens zwei Zeilen. Deutsche Anführung „…" für deutsche
-Wörter, «…» für russische.
+Liste von Sätzen, die nach einer richtigen Antwort eingeblendet werden und sich in der
+Faktensammlung wiederfinden. Aktuell 101 Stück.
+
+- Ein Fakt ist ein abgeschlossener Satz, höchstens zwei Zeilen — er wird auch in der
+  Liste vollständig angezeigt.
+- Deutsche Anführung „…" für deutsche Wörter, «…» für russische. Der Build prüft nichts
+  davon; die Gleichförmigkeit hält die Sammlung lesbar.
+- Themen, die sich bewährt haben: deutsche Lehnwörter im Russischen, falsche Freunde,
+  Schrift- und Aussprachefallen, Grammatik in einem Satz, Wortgeschichte und Alltag.
+- **Nur schreiben, was stimmt.** Etymologien sind ein Minenfeld; im Zweifel weglassen
+  oder vorsichtig formulieren.
+- Die App merkt sich Fakten über einen Hash ihres Textes. Wird ein Fakt umformuliert,
+  gilt er als neu — Zähler und Favorit des alten fallen beim nächsten Laden weg.
 
 ### `data/tastatur.json`
 
@@ -107,7 +117,7 @@ sind.
 ## Grundsätze des Lehrplans
 
 1. **Funktionswörter zuerst.** Ohne я, ты, в, на, не, и, что ist kein Satz lesbar; sie
-   stehen deshalb in den ersten Päckchen, noch vor den Sachgruppen.
+   stehen deshalb ganz vorn, noch vor den Sachgruppen.
 2. **Konkretes vor Abstraktem, Häufiges vor Seltenem.** Alltagsdinge (книга, город,
    кошка) stehen früh, Fachliches spät.
 3. **Wörter folgen den Sätzen.** Braucht ein einfacher Satz ein Wort, gehört das Wort
@@ -116,7 +126,8 @@ sind.
 4. **Kein Satz vor seinen Wörtern.** Der Aufbau ist keine Empfehlung, sondern eine
    Sperre: `benoetigt` entscheidet, ob ein Satz erscheint.
 5. **Ein neues Wort kostet einen Platz im Lehrplan.** Ergänzungen ans Ende des passenden
-   Themas — mitten hinein verschiebt alle folgenden Päckchen.
+   Themas. Ein Wort, das kein Satz braucht, taucht in keinem Lernset auf — es lebt dann
+   in Freestyle.
 
 ## Lernstand im Browser
 
