@@ -1,6 +1,10 @@
 # 0014 · Tickets über eine vorausgefüllte GitHub-Adresse
 
-**Status:** angenommen · 2026-08-02
+**Status:** überholt durch ADR 0016 · 2026-08-02
+
+> Die Tickets bleiben inzwischen auf dem Gerät und werden gebündelt kopiert, statt
+> einzeln über GitHub zu laufen. Die Sicherheitsüberlegungen unten gelten weiter — die
+> Antwort ist nur noch einfacher geworden.
 
 ## Kontext
 

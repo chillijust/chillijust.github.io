@@ -1314,15 +1314,13 @@ function ton(richtig) {
 }
 
 // ── Tickets ─────────────────────────────────────────────────
-// Fehler und Wünsche werden hier nur *geschrieben* und aufbewahrt. Verschickt
-// wird nichts: der Knopf öffnet ein vorausgefülltes GitHub-Formular, und erst
-// dort schickt man ab. Damit kommt die App ohne Zugangsschlüssel aus — es gibt
-// kein Geheimnis, das in einer öffentlich lesbaren Datei liegen müsste, und
-// anlegen kann ein Ticket nur, wer bei GitHub im Zielrepo angemeldet ist.
+// Fehler und Wünsche werden hier gesammelt und bleiben auf dem Gerät. Ein
+// Knopf bündelt sie zu einem Text, den man kopiert und Claude Code vorlegt.
+// Nichts wird verschickt, nichts geladen — die App braucht dafür weder Netz
+// noch einen Zugangsschlüssel, und fremde Besucher der öffentlichen Seite
+// sehen ihren eigenen, leeren Speicher.
 // Eigener Speicherschlüssel, damit der Sicherungscode schlank bleibt.
-var TICKET_REPO = 'chillijust/chillingo-tickets';
 var TICKET_KEY = 'chillingo_tickets_v1';
-var TICKET_MAX = 1400;   // Zeichen im Rumpf; darüber wird die Adresse unhandlich
 var tickets = [];
 
 function ticketsLaden() {
@@ -1333,6 +1331,12 @@ function ticketsLaden() {
   } catch (e) {
     tickets = [];
   }
+  // Frühere Stände kannten «gesendet» (an GitHub). Jetzt heißt der Zustand
+  // «übergeben» — an Claude Code weitergereicht.
+  tickets.forEach(function (t) {
+    if (t.uebergeben === undefined) t.uebergeben = t.gesendet || null;
+    delete t.gesendet;
+  });
 }
 
 function ticketsSichern() {
@@ -1354,49 +1358,75 @@ function datumKurz(ms) {
   try { return new Date(ms).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }); }
   catch (e) { return ''; }
 }
-
-// Der Rumpf des Issues: erst der Text, darunter das, was mir bei einem Bericht
-// sonst fehlt — Rubrik, Stand der App, Gerät.
-function ticketRumpf(t) {
-  var text = t.text || '_(keine Beschreibung)_';
-  if (text.length > TICKET_MAX) {
-    text = text.slice(0, TICKET_MAX) + '\n\n… gekürzt, damit die Adresse nicht zu lang wird.';
-  }
-  var zeit = '';
-  try { zeit = new Date(t.erstellt).toISOString().slice(0, 16).replace('T', ' ') + ' UTC'; } catch (e) {}
-  return text + '\n\n---\n' +
-    '- Rubrik: ' + t.reiter + '\n' +
-    '- App-Stand: ' + t.stand + '\n' +
-    '- Erstellt: ' + zeit + '\n' +
-    '- Gerät: ' + t.geraet + '\n';
+function datumLang(ms) {
+  try { return new Date(ms).toISOString().slice(0, 16).replace('T', ' ') + ' UTC'; }
+  catch (e) { return ''; }
 }
 
-function ticketUrl(t) {
-  return 'https://github.com/' + TICKET_REPO + '/issues/new' +
-    '?title=' + encodeURIComponent((t.art === 'bug' ? 'Fehler: ' : 'Wunsch: ') + t.titel) +
-    '&labels=' + encodeURIComponent(t.art === 'bug' ? 'bug' : 'enhancement') +
-    '&body=' + encodeURIComponent(ticketRumpf(t));
+// Ein Ticket als Textabschnitt. Markdown, weil das gebündelt gut lesbar ist —
+// für mich beim Überfliegen wie für Claude Code beim Abarbeiten.
+function ticketAbschnitt(t, nr) {
+  return '## ' + nr + ' · ' + (t.art === 'bug' ? 'Fehler' : 'Wunsch') + ': ' + t.titel + '\n\n' +
+    (t.text ? t.text + '\n\n' : '') +
+    '- Rubrik: ' + t.reiter + '\n' +
+    '- App-Stand: ' + t.stand + '\n' +
+    '- Erstellt: ' + datumLang(t.erstellt) + '\n';
+}
+
+// Alles in einem Rutsch: älteste zuerst, damit die Nummern der Reihenfolge
+// folgen, in der die Dinge aufgefallen sind. Das Gerät steht einmal am Ende
+// statt bei jedem Ticket — es ist ohnehin immer dasselbe.
+function ticketsAlsText(liste) {
+  if (!liste.length) return '';
+  var reihe = liste.slice().sort(function (a, b) { return a.erstellt - b.erstellt; });
+  var kopf = '# Chillingo · ' + reihe.length + (reihe.length === 1 ? ' Ticket' : ' Tickets') + '\n\n';
+  var koerper = reihe.map(function (t, i) { return ticketAbschnitt(t, i + 1); }).join('\n');
+  return kopf + koerper + '\n---\nGerät: ' + reihe[reihe.length - 1].geraet + '\n';
+}
+
+function ticketsOffen() {
+  return tickets.filter(function (t) { return !t.uebergeben; });
 }
 
 function ticketAnlegen(art, titel, text, reiter) {
   var geraet = '';
   try { geraet = String(navigator.userAgent).slice(0, 180); } catch (e) {}
+  // Zwei Tickets in derselben Millisekunde wären in der Reihenfolge nicht mehr
+  // zu unterscheiden. Der Zeitstempel rückt darum notfalls um eins vor — damit
+  // ist er streng steigend und jede Sortierung danach eindeutig.
+  var jetzt = Date.now();
+  tickets.forEach(function (x) { if (x.erstellt >= jetzt) jetzt = x.erstellt + 1; });
   var t = {
     id: Date.now().toString(36) + Math.floor(Math.random() * 1296).toString(36),
     art: art === 'bug' ? 'bug' : 'feature',
     // Getrimmt wird hier, nicht erst im Formular: sonst hinge der Rand
-    // ungewollt im Issue-Titel und in der Adresse.
+    // ungewollt in der Überschrift des gebündelten Textes.
     titel: String(titel).replace(/^\s+|\s+$/g, '').slice(0, 120),
     text: String(text).replace(/\s+$/, '').slice(0, 4000),
     reiter: RUBRIK[reiter] || String(reiter),
     stand: APP_STAND,
     geraet: geraet,
-    erstellt: Date.now(),
-    gesendet: null
+    erstellt: jetzt,
+    uebergeben: null
   };
   tickets.unshift(t);
   ticketsSichern();
   return t;
+}
+
+// In die Zwischenablage legen. Klappt das nicht (kein sicherer Kontext, keine
+// Berechtigung), bleibt der Text sichtbar zum Markieren von Hand — deshalb ist
+// das Ergebnis nur eine Meldung, nie eine Voraussetzung.
+function inZwischenablage(text) {
+  try {
+    navigator.clipboard.writeText(text).then(function () {
+      zeigeStatus('ok', 'kopiert');
+    }, function () {
+      zeigeStatus('err', 'Kopieren nicht erlaubt — bitte den Text unten markieren.');
+    });
+  } catch (e) {
+    zeigeStatus('err', 'Kopieren nicht möglich — bitte den Text unten markieren.');
+  }
 }
 
 // ── Kompakte Kopfzeile ──────────────────────────────────────
@@ -2979,6 +3009,7 @@ function renderEinstellungen() {
   document.getElementById('setTickets').addEventListener('click', function () {
     tkHerkunft = letzterTab;   // die Rubrik, aus der man kam — die ist gemeint
     tkForm = null;
+    tkAusgabe = '';
     setTab('tickets');
   });
   document.getElementById('setBack').addEventListener('click', function () { setTab(letzterTab); });
@@ -3044,12 +3075,24 @@ function renderFakten() {
 
 // ── TICKETS ─────────────────────────────────────────────────
 var tkForm = null;      // null = Liste, sonst { art, titel, text }
+var tkAusgabe = '';     // gebündelter Text, sichtbar bis «Fertig»
 var tkHerkunft = 'lernsets';
 
 function renderTickets() {
+  var offen = ticketsOffen();
+  var uebergeben = tickets.length - offen.length;
   var html = '<section>';
 
-  if (tkForm) {
+  if (tkAusgabe) {
+    html += '<div class="card">' +
+      '<p class="task-label">Kopierfertig</p>' +
+      '<p class="backup-note">Alles markiert und in der Zwischenablage. Klappt das Kopieren ' +
+      'nicht, markieren Sie den Text hier von Hand.</p>' +
+      '<textarea class="fliess" id="tkAusgabe" rows="10" readonly></textarea>' +
+      '</div><div class="btn-row">' +
+      '<button class="btn ghost" id="tkNochmal">Nochmal kopieren</button>' +
+      '<button class="btn primary" id="tkFertig">Fertig</button></div>';
+  } else if (tkForm) {
     html += '<div class="card">' +
       '<p class="task-label">' + (tkForm.art === 'bug' ? 'Fehler melden' : 'Wunsch melden') + '</p>' +
       '<input type="text" class="zeile" id="tkTitel" maxlength="120" ' +
@@ -3071,34 +3114,55 @@ function renderTickets() {
     if (!tickets.length) {
       html += '<div class="leer">' + maskottchen('gross') +
         '<h3>Noch kein Ticket</h3>' +
-        '<p>Halten Sie hier fest, was hakt oder fehlt — auch ohne Netz. Verschickt wird ' +
-        'erst, wenn Sie auf «Senden» tippen.</p></div>';
+        '<p>Halten Sie hier fest, was hakt oder fehlt — auch ohne Netz. Später bündelt ' +
+        'ein Knopf alles zu einem Text, den Sie kopieren und weitergeben.</p></div>';
     } else {
       html += '<div class="tkliste">';
       tickets.forEach(function (t, i) {
-        html += '<div class="tkzeile' + (t.gesendet ? ' gesendet' : '') + '">' +
+        html += '<div class="tkzeile' + (t.uebergeben ? ' gesendet' : '') + '">' +
           '<span class="tktext"><span class="tkart ' + t.art + '">' +
           (t.art === 'bug' ? 'Fehler' : 'Wunsch') + '</span>' + esc(t.titel) +
           '<span class="tkmeta">' + esc(datumKurz(t.erstellt)) + ' · ' + esc(t.reiter) + ' · ' +
-          (t.gesendet ? 'gesendet' : 'offen') + '</span></span>' +
-          '<a class="tksenden" data-senden="' + i + '" target="_blank" rel="noopener noreferrer">' +
-          (t.gesendet ? 'Nochmal' : 'Senden') + '</a>' +
+          (t.uebergeben ? 'übergeben ' + esc(datumKurz(t.uebergeben)) : 'offen') + '</span></span>' +
           '<button class="sternbtn" data-tkweg="' + i + '" aria-label="Ticket löschen">' +
           ICON.kreuz + '</button></div>';
       });
+      html += '</div><div class="btn-row">';
+      if (offen.length) {
+        html += '<button class="btn primary" id="tkKopieren">' + offen.length +
+          (offen.length === 1 ? ' offenes kopieren' : ' offene kopieren') + '</button>';
+      }
+      if (uebergeben) {
+        html += '<button class="btn ghost" id="tkAlle">Alle ' + tickets.length + ' kopieren</button>';
+      }
       html += '</div>';
-      html += '<div class="btn-row"><button class="btn ghost" id="tkKopieren">Alle als Text kopieren</button></div>';
+      if (uebergeben) {
+        html += '<div class="btn-row"><button class="btn ghost" id="tkAufraeumen">' +
+          'Übergebene löschen (' + uebergeben + ')</button></div>';
+      }
     }
 
-    html += '<p class="settings-note">Tickets liegen nur auf diesem Gerät, bis Sie sie senden. ' +
-      '«Senden» öffnet ein vorausgefülltes Formular in ' + esc(TICKET_REPO) + ' — anlegen kann ' +
-      'es nur, wer dort angemeldet ist. Die App selbst verschickt nichts.</p>';
+    html += '<p class="settings-note">Tickets liegen nur auf diesem Gerät und verlassen es nie ' +
+      'von selbst. «Kopieren» legt alles als einen Text in die Zwischenablage — den geben Sie ' +
+      'Claude Code, und was kopiert wurde, gilt als übergeben.</p>';
   }
 
   html += '<div class="btn-row"><button class="btn ghost" id="tkBack">Zurück</button></div></section>';
   main.innerHTML = html;
 
-  if (tkForm) {
+  if (tkAusgabe) {
+    var feld = document.getElementById('tkAusgabe');
+    feld.value = tkAusgabe;
+    try { feld.setSelectionRange(0, tkAusgabe.length); } catch (e) {}
+    document.getElementById('tkNochmal').addEventListener('click', function () {
+      inZwischenablage(tkAusgabe);
+      feld.select();
+    });
+    document.getElementById('tkFertig').addEventListener('click', function () {
+      tkAusgabe = '';
+      renderTickets();
+    });
+  } else if (tkForm) {
     var titel = document.getElementById('tkTitel');
     var text = document.getElementById('tkText');
     titel.value = tkForm.titel;
@@ -3110,9 +3174,8 @@ function renderTickets() {
       renderTickets();
     });
     document.getElementById('tkSichern').addEventListener('click', function () {
-      var t = titel.value.replace(/^\s+|\s+$/g, '');
-      if (!t) { titel.focus(); return; }
-      ticketAnlegen(tkForm.art, t, text.value, tkHerkunft);
+      if (!titel.value.replace(/^\s+|\s+$/g, '')) { titel.focus(); return; }
+      ticketAnlegen(tkForm.art, titel.value, text.value, tkHerkunft);
       tkForm = null;
       renderTickets();
     });
@@ -3123,16 +3186,6 @@ function renderTickets() {
         renderTickets();
       });
     });
-    // Die Adresse wird erst hier gesetzt, nie als Attribut in den Text gebaut.
-    main.querySelectorAll('[data-senden]').forEach(function (a) {
-      var t = tickets[parseInt(a.dataset.senden, 10)];
-      a.href = ticketUrl(t);
-      a.addEventListener('click', function () {
-        t.gesendet = Date.now();
-        ticketsSichern();
-        setTimeout(renderTickets, 0); // erst folgen lassen, dann neu zeichnen
-      });
-    });
     main.querySelectorAll('[data-tkweg]').forEach(function (b) {
       b.addEventListener('click', function () {
         tickets.splice(parseInt(b.dataset.tkweg, 10), 1);
@@ -3140,17 +3193,28 @@ function renderTickets() {
         renderTickets();
       });
     });
+    // Bündeln heißt zugleich übergeben — sonst müsste man den Zustand zweimal
+    // pflegen und wüsste beim nächsten Mal nicht, was neu ist.
     var kop = document.getElementById('tkKopieren');
     if (kop) kop.addEventListener('click', function () {
-      var alles = tickets.map(function (t) {
-        return '## ' + (t.art === 'bug' ? 'Fehler: ' : 'Wunsch: ') + t.titel + '\n\n' + ticketRumpf(t);
-      }).join('\n');
-      try {
-        navigator.clipboard.writeText(alles);
-        zeigeStatus('ok', 'kopiert');
-      } catch (e) {
-        zeigeStatus('err', 'Kopieren nicht möglich — bitte «Senden» verwenden.');
-      }
+      var jetzt = Date.now();
+      tkAusgabe = ticketsAlsText(offen);
+      offen.forEach(function (t) { t.uebergeben = jetzt; });
+      ticketsSichern();
+      inZwischenablage(tkAusgabe);
+      renderTickets();
+    });
+    var allesBtn = document.getElementById('tkAlle');
+    if (allesBtn) allesBtn.addEventListener('click', function () {
+      tkAusgabe = ticketsAlsText(tickets);
+      inZwischenablage(tkAusgabe);
+      renderTickets();
+    });
+    var weg = document.getElementById('tkAufraeumen');
+    if (weg) weg.addEventListener('click', function () {
+      tickets = ticketsOffen();
+      ticketsSichern();
+      renderTickets();
     });
   }
 

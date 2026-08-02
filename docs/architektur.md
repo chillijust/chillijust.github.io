@@ -196,31 +196,35 @@ entfällt — eine feste Reihenfolge verträgt sich nicht mit zwei Stapeln.
 
 ## Tickets
 
-Fehler und Wünsche werden in der App **geschrieben und aufbewahrt**, nicht verschickt.
-Der Knopf «Senden» ist ein gewöhnlicher Verweis auf ein vorausgefülltes GitHub-Formular:
-
-```
-https://github.com/chillijust/chillingo-tickets/issues/new?title=…&labels=…&body=…
-```
-
-Abgeschickt wird dort, nicht hier. Das hat zwei Folgen, die den Ausschlag gaben: Die App
-braucht **keinen Zugangsschlüssel** — es gibt kein Geheimnis, das in einer öffentlich
-lesbaren Datei liegen müsste — und die Zugangskontrolle macht GitHub. Ein Issue im
-privaten Zielrepo kann nur anlegen, wer dort angemeldet und berechtigt ist (ADR 0014).
+Fehler und Wünsche werden in der App gesammelt und **bleiben auf dem Gerät**. Ein Knopf
+bündelt sie zu einem Text, den man kopiert und Claude Code vorlegt. Nichts wird
+verschickt, nichts geladen — die App braucht dafür weder Netz noch einen Zugangsschlüssel
+(ADR 0016).
 
 | Baustein | Aufgabe |
 | --- | --- |
-| `TICKET_REPO` | Zielrepo, privat, getrennt von der öffentlichen App |
 | `TICKET_KEY` | eigener `localStorage`-Schlüssel (`chillingo_tickets_v1`) |
 | `ticketAnlegen()` | legt an, trimmt, begrenzt, ergänzt Rubrik, Stand und Gerät |
-| `ticketRumpf()` | baut den Issue-Text, kürzt bei `TICKET_MAX` Zeichen |
-| `ticketUrl()` | baut die Adresse, alles über `encodeURIComponent` |
-| `renderTickets()` | Liste, Formular, Löschen, «Alle als Text kopieren» |
+| `ticketAbschnitt()` | ein Ticket als Markdown-Abschnitt |
+| `ticketsAlsText()` | bündelt eine Liste, älteste zuerst nummeriert |
+| `inZwischenablage()` | Kopierversuch; scheitert er, bleibt der Text zum Markieren |
+| `renderTickets()` | Liste, Formular, Ausgabe, Aufräumen |
 
 Ein Ticket hält `id`, `art` (`bug`/`feature`), `titel`, `text`, `reiter`, `stand`,
-`geraet`, `erstellt` und `gesendet`. Der **eigene Speicherschlüssel** hält den
-Sicherungscode schlank: Tickets gehören nicht zum Lernstand und sollen ihn nicht
-aufblähen.
+`geraet`, `erstellt` und `uebergeben`. Der **eigene Speicherschlüssel** hält den
+Sicherungscode schlank: Tickets gehören nicht zum Lernstand.
+
+**`erstellt` ist streng steigend.** Zwei Tickets in derselben Millisekunde wären in der
+Reihenfolge nicht mehr zu unterscheiden; `ticketAnlegen()` rückt den Zeitstempel darum
+notfalls um eins vor. Damit ist die Nummerierung im gebündelten Text eindeutig.
+
+**Bündeln heißt übergeben.** Wer «offene kopieren» tippt, bekommt den Text *und* setzt
+damit `uebergeben` auf allen betroffenen Tickets — sonst müsste man den Zustand zweimal
+pflegen und wüsste beim nächsten Mal nicht, was neu ist. «Alle kopieren» nimmt auch
+Übergebene mit, ohne etwas zu ändern; «Übergebene löschen» räumt auf.
+
+Der Text ist Markdown: ein Kopf mit der Anzahl, je Ticket ein Abschnitt mit Überschrift,
+Beschreibung und den drei Metazeilen, am Ende einmal das Gerät.
 
 `APP_STAND` ist das Datum der ausgelieferten Datei. `tools/build.mjs` stempelt es bei
 jedem Schreiblauf; `--check` vergleicht bewusst *ohne* diesen Wert, sonst wäre die Datei
@@ -237,22 +241,20 @@ Die ausgelieferte Datei ist öffentlich lesbar. Daraus folgen drei Regeln, die
 
 1. **Kein Geheimnis in der Datei.** Kein Token, kein Passwort, kein Schlüssel — Prüfung
    auf die bekannten GitHub-Tokenformen und auf `Authorization:`/`Bearer`.
-2. **Genau eine Fremdadresse**, `https://github.com/`, und die wird nicht *geladen*,
-   sondern angetippt.
+2. **Keine Fremdadresse.** Die Datei verweist nirgendwohin und lädt nichts.
 3. **Content-Security-Policy als `<meta>`**:
    `default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'`.
    Damit ist «keine externen Ressourcen» für den Browser erzwingbar statt nur
    verabredet: Käme je fremder Code in die Seite, könnte er nichts nachladen und nichts
-   nach außen senden. Verweise, die man antippt, bleiben unberührt — CSP regelt geladene
-   Ressourcen und Formularziele, nicht Navigation über `<a>`.
+   nach außen senden.
 
-Ticketeingaben laufen wie alle Ausgaben durch `esc()`; die Zieladresse wird per
-`a.href = …` gesetzt, nie als Attribut in eine Zeichenkette gebaut. Der Verweis trägt
-`rel="noopener noreferrer"`.
+Ticketeingaben laufen wie alle Ausgaben durch `esc()`.
 
-Was **nicht** geschützt ist und auch nicht sein kann: Eine Abfrage im Client wäre eine
-Türklingel, kein Schloss — der Quelltext ist öffentlich, jede Prüfung darin lässt sich
-umgehen. Deshalb liegt die Kontrolle bei GitHub und nicht bei uns.
+**Dass die Seite öffentlich ist, spielt für die Daten keine Rolle.** Lernstand und
+Tickets liegen im `localStorage` des Geräts, nicht auf dem Server. Ein fremder Besucher
+sieht seinen eigenen, leeren Speicher — es gibt nichts, worauf er zugreifen könnte, und
+nichts, was er anlegen könnte. Eine Zugangsabfrage wäre darum nicht nur wirkungslos
+(der Quelltext ist lesbar, jede Prüfung darin umgehbar), sondern gegenstandslos.
 
 ## Symbole
 

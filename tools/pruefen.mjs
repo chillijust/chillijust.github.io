@@ -36,14 +36,12 @@ if (extern.length) fehler.push('Externe Ressourcen verlinkt: ' + extern.join(', 
 const fetches = [...html.matchAll(/\b(?:fetch|XMLHttpRequest|importScripts|EventSource|WebSocket)\s*\(/g)];
 if (fetches.length) hinweise.push('Netzwerkaufrufe im Quelltext gefunden (' + fetches.length + ') — die App soll offline laufen.');
 
-// 4b · genau eine erlaubte Fremdadresse: das Ticket-Ziel auf GitHub. Sie wird
-// nicht geladen, sondern nur verlinkt — angetippt öffnet sie ein Formular.
-const ERLAUBT = ['https://github.com/'];
+// 4b · gar keine Fremdadresse. Die App verweist nirgendwohin und lädt nichts;
+// Tickets werden kopiert, nicht verschickt.
 const adressen = [...new Set([...html.matchAll(/https?:\/\/[^\s'"<>)]+/g)].map((m) => m[0]))];
-const fremd = adressen.filter((a) => !ERLAUBT.some((e) => a.startsWith(e)));
-if (fremd.length) {
-  fehler.push('Unerwartete Fremdadressen im Quelltext: ' + fremd.join(', ') +
-    ' — erlaubt ist nur ' + ERLAUBT.join(', ') + ' als antippbarer Verweis.');
+if (adressen.length) {
+  fehler.push('Fremdadressen im Quelltext: ' + adressen.join(', ') +
+    ' — die Datei soll ohne jede Aussenverbindung auskommen.');
 }
 
 // 4c · Kein Zugangsschlüssel in der Datei. Sie ist öffentlich lesbar; ein

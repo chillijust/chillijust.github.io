@@ -40,9 +40,10 @@ zweites Mal einbetten, und nie über Scroll-Rechnung positionieren — sie steht
   bleibt drin.
 - **Die ausgelieferte Datei ist öffentlich lesbar.** Nie ein Token, ein Passwort oder
   einen Schlüssel hineinschreiben — auch nicht verschleiert, auch nicht «nur zum Testen».
-  Zugangskontrolle gehört auf die Gegenseite (bei Tickets: GitHub). `pruefen.mjs` sucht
-  nach tokenähnlichem Text und nach unerwarteten Fremdadressen; erlaubt ist einzig
-  `https://github.com/` als **antippbarer** Verweis, nicht als geladene Ressource.
+  `pruefen.mjs` sucht nach tokenähnlichem Text und bricht bei **jeder** Fremdadresse ab —
+  die Datei verweist nirgendwohin und lädt nichts. Dass die Seite öffentlich ist, ist für
+  die Daten belanglos: Lernstand und Tickets liegen im `localStorage` des Geräts, ein
+  fremder Besucher sieht seinen eigenen, leeren Speicher.
 - Persistenz ausschließlich über `localStorage`, jeder Zugriff in `try/catch`.
 - Mobile-first: Touch-Ziele ≥ 44 × 44 px, keine Hover-abhängige Bedienung,
   `-webkit-tap-highlight-color: transparent`, `env(safe-area-inset-*)` für Notch und
@@ -90,7 +91,8 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
 - **`APP_STAND` setzt `tools/build.mjs`**, nicht die Hand. Der Wert geht in jedes Ticket
   ein. `--check` vergleicht ohne ihn, sonst wäre die Datei jeden Tag «nicht auf Stand».
 - **Tickets liegen in `chillingo_tickets_v1`**, nicht im Lernstand — der Sicherungscode
-  soll schlank bleiben. Ziel ist das private Repo `chillijust/chillingo-tickets`.
+  soll schlank bleiben. Sie verlassen das Gerät nie von selbst: ein Knopf bündelt sie zu
+  einem Text zum Kopieren (ADR 0016).
 - **Die Reihenfolge in `data/vokabeln.json` ist der Lehrplan.** Aus ihr und den
   Satzvoraussetzungen bauen sich die Lernsets (`SET_MAX`, `SATZ_STUFE`); Ergänzungen ans
   Ende des passenden Themas.
