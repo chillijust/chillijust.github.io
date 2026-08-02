@@ -1,4 +1,4 @@
-# Russisch · Тренажёр
+# Chillingo
 
 Eine Web-App zum Russischlernen — Kyrillisch lesen, schreiben und übersetzen.
 Gebaut als **eine einzige, offline lauffähige HTML-Datei** aus reinem HTML, CSS und
@@ -10,10 +10,11 @@ Vanilla-JavaScript. Kein Framework, kein Build-Schritt, keine externen Ressource
 
 | Rubrik | Inhalt |
 | --- | --- |
-| **Üben** | Multiple Choice, Buchstaben-Kacheln und Sprachfakten zu Lehnwörtern, falschen Freunden und Schriftfallen |
-| **Übersetzen** | Sätze aus Wort-Kacheln zusammensetzen, in beide Richtungen (RU→DE und DE→RU) |
-| **Tippen** | Eingabequiz mit eingebauter kyrillischer Bildschirmtastatur |
-| **Bilanz** | Leitner-Statistik, Serie und Sicherungscode zum Übertragen des Lernstands |
+| **Lernsets** | Zwölf Wörter je Set — genau die, die die nächsten Sätze brauchen. Wer ein Set schafft, schaltet diese Sätze in „Übersetzen" frei |
+| **Freestyle** | Freies Vokabeltraining nach Thema, ohne Sperren: Multiple Choice, Buchstaben-Kacheln, Sprachfakten |
+| **Tippen** | Eingabequiz mit eingebauter kyrillischer Bildschirmtastatur — nur für Wörter, die schon sitzen |
+| **Übersetzen** | Sätze aus Wort-Kacheln zusammensetzen, in beide Richtungen; ein Satz erscheint, sobald seine Wörter gelernt sind |
+| **Bilanz** | Leitner-Statistik, Lernweg und Sicherungscode zum Übertragen des Lernstands |
 
 Der Lernstand liegt ausschließlich im `localStorage` des Geräts — es gibt kein Konto,
 keinen Server und keine Datenübertragung. Der Sicherungscode in der Bilanz ist der einzige

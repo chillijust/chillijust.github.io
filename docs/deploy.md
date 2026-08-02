@@ -47,6 +47,41 @@ ist. Den Status zeigt der Reiter **Actions** („pages build and deployment") od
    und nicht an der Verknüpfung — sicherheitshalber vorher trotzdem den Sicherungscode
    aus der Bilanz notieren.
 
+## Eigene Domain (geplant: chillingo.…)
+
+Custom Domains gibt es auch im kostenlosen Tarif, solange das Repository öffentlich ist.
+Der Ablauf, **bevor** etwas im Repository passiert:
+
+1. **Domain kaufen** (beliebiger Anbieter). Erst danach lassen sich die Einträge setzen.
+2. **DNS beim Anbieter setzen** — je nachdem, welche Form die Adresse haben soll:
+   - `www.chillingo.de` → ein **CNAME**-Eintrag `www` mit dem Ziel `chillijust.github.io`
+     (mit Punkt am Ende, falls der Anbieter das verlangt).
+   - `chillingo.de` ohne „www" (Apex) → vier **A**-Einträge auf
+     `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
+     und, wenn IPv6 unterstützt wird, vier **AAAA**-Einträge auf
+     `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`,
+     `2606:50c0:8003::153`. Manche Anbieter bieten stattdessen ALIAS/ANAME auf
+     `chillijust.github.io` an — das ist die bequemere Variante.
+   - **Die Adressen vor dem Eintragen in der GitHub-Dokumentation gegenprüfen**
+     (`docs.github.com/de/pages` → „Apex-Domain konfigurieren"); GitHub hat sie in der
+     Vergangenheit geändert.
+3. **In GitHub eintragen:** Settings → Pages → Custom domain → Domain eintragen und
+   speichern. GitHub legt dabei selbst eine Datei `CNAME` im Repository an — die gehört
+   dorthin und darf nicht gelöscht werden.
+4. **Warten**, bis die DNS-Prüfung durchläuft (Minuten bis Stunden), dann **Enforce
+   HTTPS** aktivieren. Das Zertifikat stellt GitHub kostenlos aus; es kann bis zu 24
+   Stunden dauern, bis der Haken setzbar ist.
+5. Optional, aber sinnvoll: die Domain unter Settings → Pages → „Verify domain"
+   bestätigen, damit sie niemand anderes für seine Seite beanspruchen kann.
+
+**Wichtig für den Lernstand:** Der Fortschritt liegt im `localStorage` und hängt am
+Ursprung der Seite. Unter einer neuen Domain ist die App zunächst leer. Vor dem Umzug
+den Sicherungscode aus der Bilanz kopieren und auf der neuen Adresse wieder einspielen —
+und die Home-Bildschirm-Verknüpfung neu anlegen.
+
+Die alte Adresse `chillijust.github.io` leitet nach dem Eintragen automatisch auf die
+neue Domain um.
+
 ## Einstellungen, die niemand aus dem Repository heraus sieht
 
 Publishing-Quelle und ein eventuell in der Oberfläche gesetztes Theme stehen in den

@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#101418">
-<title>Russisch · Тренажёр</title>
+<title>Chillingo · Russisch lernen</title>
 <style>
 :root {
   --bg: #101418;
@@ -43,6 +43,8 @@
   }
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+/* Doppeltipp vergrößert nicht mehr; Aufziehen mit zwei Fingern bleibt möglich. */
+html { touch-action: manipulation; }
 html, body { margin: 0; padding: 0; }
 body {
   background: var(--bg);
@@ -274,6 +276,10 @@ input.err { border-color: var(--bad); }
 .switch.on { border-color: var(--gold); background: rgba(210, 162, 78, .18); }
 .switch.on .knob { transform: translateX(20px); background: var(--gold); }
 .settings-note { font-size: 12px; color: var(--dim); line-height: 1.5; margin: 16px 0 0; }
+.mehr {
+  display: block; margin: 12px auto 0; background: none; border: none; color: var(--ice);
+  font-size: 12px; min-height: 44px; cursor: pointer; text-decoration: underline;
+}
 .seg { flex: none; display: flex; gap: 4px; }
 .seg .chip { min-width: 44px; padding: 10px 0; text-align: center; }
 
@@ -334,7 +340,7 @@ textarea:focus { outline: none; border-color: var(--ice); }
   <div class="masthead">
     <div>
       <span class="eyebrow">Русский · Тренажёр</span>
-      <h1>Russisch<span class="title-dot">.</span></h1>
+      <h1>Chillingo<span class="title-dot">.</span></h1>
     </div>
     <button id="gear" class="iconbtn" aria-label="Einstellungen" title="Einstellungen"><!-- Symbol wird gesetzt --></button>
   </div>
@@ -346,7 +352,8 @@ textarea:focus { outline: none; border-color: var(--ice); }
 </header>
 
 <nav id="tabs">
-  <button data-tab="ueben" class="active">Üben</button>
+  <button data-tab="lernsets" class="active">Lernsets</button>
+  <button data-tab="freestyle">Freestyle</button>
   <button data-tab="tippen">Tippen</button>
   <button data-tab="uebersetzen">Übersetzen</button>
   <button data-tab="bilanz">Bilanz</button>
@@ -884,15 +891,21 @@ var KB_ROWS = [
 
 // aus VOCAB_THEMES abgeleitet, kein Inhalt
 var ALL_VOCAB = [];
+var VOKABEL = {};
 Object.keys(VOCAB_THEMES).forEach(function (theme) {
   VOCAB_THEMES[theme].forEach(function (w) {
     // Kennung ist das russische Wort selbst — unabhängig vom Themennamen,
     // damit ein Umbenennen den Lernstand nicht löscht.
-    ALL_VOCAB.push({ id: w[0], theme: theme, ru: w[0], de: w[1], tr: w[2], nr: ALL_VOCAB.length });
+    var v = { id: w[0], theme: theme, ru: w[0], de: w[1], tr: w[2], nr: ALL_VOCAB.length };
+    ALL_VOCAB.push(v);
+    VOKABEL[v.id] = v;
   });
 });
 
 var BOX_MAX = 4;
+// Ab dieser Leitner-Stufe gilt ein Wort als sitzend: Sätze werden damit
+// freigeschaltet, Lernsets damit abgeschlossen.
+var SATZ_STUFE = 2;
 var STORAGE_KEY = 'russisch_trainer_v1';
 
 // ── Symbole ─────────────────────────────────────────────────
@@ -949,11 +962,11 @@ function speak(text) {
 // ── Zustand & Speichern (localStorage) ──────────────────────
 function defaultSettings() {
   return {
-    confirmUeben: true,        // in «Üben» erst auswählen, dann bestätigen
+    confirmUeben: true,        // beim Vokabeltraining erst auswählen, dann bestätigen
     confirmUebersetzen: true,  // in «Übersetzen» erst legen, dann bestätigen
     requireComplete: false,    // Bestätigen erst bei vollständiger Lösung
     tippenAbStufe: BOX_MAX,    // ab welcher Leitner-Stufe ein Wort im Tippen erscheint
-    paketSperre: true          // Päckchen der Reihe nach freischalten
+    tastaturAn: false          // eingebaute Tastatur in «Tippen» beim Start zeigen
   };
 }
 function defaultState() {
@@ -1072,47 +1085,66 @@ function updateBox(id, correct) {
   save();
 }
 
-// ── Päckchen und Fälligkeit ─────────────────────────────────
-// Gelernt wird in Päckchen von PAKET_GROESSE Wörtern in der Reihenfolge der
-// Daten. Das nächste Päckchen öffnet, wenn jedes Wort des laufenden mindestens
-// PAKET_STUFE erreicht hat.
-var PAKET_GROESSE = 12;
-var PAKET_STUFE = 3;
+// ── Lernsets und Fälligkeit ─────────────────────────────────
+// Ein Lernset bündelt die Wörter, die die nächsten Sätze brauchen. Wer ein Set
+// schafft, schaltet damit genau diese Sätze in «Übersetzen» frei — das ist der
+// kurze Weg vom Vokabeltraining zum ganzen Satz.
+var SET_MAX = 12;
 var TAG = 86400000;
 // Wiedervorlage je Leitner-Stufe: neu · 1 Tag · 3 · 7 · 21
 var INTERVALL = [0, TAG, 3 * TAG, 7 * TAG, 21 * TAG];
 
-function paketAnzahl() {
-  return Math.ceil(ALL_VOCAB.length / PAKET_GROESSE);
-}
-function paketWoerter(nr) {
-  return ALL_VOCAB.slice(nr * PAKET_GROESSE, (nr + 1) * PAKET_GROESSE);
-}
-function paketName(nr) {
-  var themen = [];
-  paketWoerter(nr).forEach(function (v) {
-    if (themen.indexOf(v.theme) === -1) themen.push(v.theme);
+var LERNSETS = (function () {
+  // Sätze in der Reihenfolge, in der sie erreichbar werden: nach dem im Lehrplan
+  // spätesten Wort, das sie voraussetzen.
+  var reife = function (satz) {
+    return Math.max.apply(null, satz.benoetigt.map(function (w) {
+      return VOKABEL[w] ? VOKABEL[w].nr : 0;
+    }));
+  };
+  var sortiert = SENTENCES.slice().sort(function (a, b) { return reife(a) - reife(b); });
+  var gesehen = {};
+  var sets = [];
+  var offen = { woerter: [], saetze: [] };
+  sortiert.forEach(function (satz) {
+    var neue = satz.benoetigt.filter(function (w) { return !gesehen[w] && VOKABEL[w]; });
+    if (offen.woerter.length && offen.woerter.length + neue.length > SET_MAX) {
+      sets.push(offen);
+      offen = { woerter: [], saetze: [] };
+    }
+    neue.forEach(function (w) { gesehen[w] = true; offen.woerter.push(VOKABEL[w]); });
+    offen.saetze.push(satz);
   });
-  return themen.slice(0, 2).join(' & ');
+  if (offen.woerter.length || offen.saetze.length) sets.push(offen);
+  return sets.map(function (set, i) {
+    return { nr: i, woerter: set.woerter, saetze: set.saetze };
+  });
+})();
+
+function setReif(nr) {
+  return LERNSETS[nr].woerter.filter(function (v) { return (state.boxes[v.id] || 0) >= SATZ_STUFE; }).length;
 }
-// Ein Päckchen ist geschafft, wenn jedes Wort mindestens PAKET_STUFE hat.
-function paketGeschafft(nr) {
-  return paketWoerter(nr).every(function (v) { return (state.boxes[v.id] || 0) >= PAKET_STUFE; });
+function setGeschafft(nr) {
+  return setReif(nr) === LERNSETS[nr].woerter.length;
 }
-function paketReif(nr) {
-  return paketWoerter(nr).filter(function (v) { return (state.boxes[v.id] || 0) >= PAKET_STUFE; }).length;
+// Nummer des ersten nicht geschafften Sets — dort wird gelernt.
+function aktuellesSet() {
+  for (var i = 0; i < LERNSETS.length; i++) if (!setGeschafft(i)) return i;
+  return LERNSETS.length - 1;
 }
-// Nummer des ersten nicht geschafften Päckchens — dort wird gelernt.
-function aktuellesPaket() {
-  for (var i = 0; i < paketAnzahl(); i++) if (!paketGeschafft(i)) return i;
-  return paketAnzahl() - 1;
+function setFrei(nr) {
+  return nr <= aktuellesSet();
 }
-function paketFrei(nr) {
-  return !state.settings.paketSperre || nr <= aktuellesPaket();
-}
-// Alle Wörter bis einschließlich des laufenden Päckchens.
+// Alle Wörter bis einschließlich des laufenden Sets.
 function freigeschalteteWoerter() {
-  return ALL_VOCAB.slice(0, (aktuellesPaket() + 1) * PAKET_GROESSE);
+  var liste = [];
+  for (var i = 0; i <= aktuellesSet(); i++) liste = liste.concat(LERNSETS[i].woerter);
+  return liste;
+}
+// Wörter, mit denen schon gearbeitet wurde — Quelle für Ablenker.
+function verwechslungsPool() {
+  var begonnen = ALL_VOCAB.filter(function (v) { return (state.boxes[v.id] || 0) > 0; });
+  return begonnen.length >= 8 ? begonnen : ALL_VOCAB;
 }
 function faellig(v, jetzt) {
   var box = state.boxes[v.id] || 0;
@@ -1126,10 +1158,10 @@ function faelligeAnzahl(liste) {
 }
 
 // ── Tabs ────────────────────────────────────────────────────
-var currentTab = 'ueben';
+var currentTab = 'lernsets';
 var main = document.getElementById('main');
 
-var letzterTab = 'ueben'; // Rückweg aus den Einstellungen
+var letzterTab = 'lernsets'; // Rückweg aus den Einstellungen
 
 function setTab(name) {
   if (currentTab !== 'einstellungen') letzterTab = currentTab;
@@ -1152,7 +1184,11 @@ document.getElementById('gear').addEventListener('click', function () {
 });
 
 function render() {
-  if (currentTab === 'ueben') renderUeben();
+  if (currentTab === 'lernsets' || currentTab === 'freestyle') {
+    var modus = currentTab;
+    if (modus !== uebModus) { uebModus = modus; uebQ = null; uebPhase = 'ask'; uebBuilt = []; uebPicked = null; }
+    renderUeben();
+  }
   else if (currentTab === 'uebersetzen') renderUebersetzen();
   else if (currentTab === 'tippen') renderTippen();
   else if (currentTab === 'einstellungen') renderEinstellungen();
@@ -1160,8 +1196,12 @@ function render() {
   updateKopf();
 }
 
-// ── ÜBEN ────────────────────────────────────────────────────
-var uebAuswahl = 'paket'; // 'paket' · 'alle' · Nummer eines freigeschalteten Päckchens
+// ── ÜBEN: LERNSETS UND FREESTYLE ────────────────────────────
+// Beide Rubriken teilen sich Fragelogik und Zustand; unterschiedlich sind nur
+// der Wortvorrat und der Kopf über der Frage.
+var uebModus = 'lernsets';   // 'lernsets' · 'freestyle'
+var uebAuswahl = 'aktuell';  // 'aktuell' · 'alle' · Nummer eines freien Sets
+var uebThema = 'Alle';       // nur im Freestyle
 var uebQ = null;
 var uebPhase = 'ask'; // ask | feedback | fact
 var uebBuilt = [];
@@ -1170,11 +1210,16 @@ var uebCorrect = null;
 var uebRevealed = false;
 var uebFactText = '';
 
+// «Lernsets» arbeiten das laufende Set ab, «Freestyle» ein Thema freier Wahl.
 function uebPool() {
+  if (uebModus === 'freestyle') {
+    if (uebThema === 'Alle') return ALL_VOCAB;
+    return ALL_VOCAB.filter(function (v) { return v.theme === uebThema; });
+  }
   if (uebAuswahl === 'alle') return freigeschalteteWoerter();
-  var nr = uebAuswahl === 'paket' ? aktuellesPaket() : uebAuswahl;
-  if (!paketFrei(nr)) nr = aktuellesPaket();
-  return paketWoerter(nr);
+  var nr = uebAuswahl === 'aktuell' ? aktuellesSet() : uebAuswahl;
+  if (!setFrei(nr)) nr = aktuellesSet();
+  return LERNSETS[nr].woerter;
 }
 
 // Auswahl in drei Stufen: erstens fällige Wiederholungen, zweitens noch nie
@@ -1207,9 +1252,21 @@ function waehleWort(pool, nurWiederholen) {
   var fenster = sortiert.slice(0, Math.min(5, sortiert.length));
   return fenster[Math.floor(Math.random() * fenster.length)];
 }
+// Zwei bis drei Buchstaben, die nicht im Wort stehen — bevorzugt solche, die
+// dem Wort ähnlich sehen könnten.
+function zusatzBuchstaben(wort) {
+  var drin = {};
+  wort.split('').forEach(function (c) { drin[c] = true; });
+  var alphabet = KB_ROWS.reduce(function (a, reihe) { return a.concat(reihe); }, []);
+  var frei = alphabet.filter(function (c) { return !drin[c]; });
+  var wieviele = wort.length <= 4 ? 2 : 3;
+  return shuffle(frei).slice(0, Math.min(wieviele, frei.length));
+}
+
 function buildQuestion() {
   var pool = uebPool();
-  var word = waehleWort(pool, uebAuswahl === 'alle');
+  var word = waehleWort(pool, uebModus === 'lernsets' && uebAuswahl === 'alle');
+  if (!word) return null;
   var box = state.boxes[word.id] || 0;
   var canTile = word.ru.indexOf(' ') === -1 && word.ru.length <= 12;
   var mode;
@@ -1217,13 +1274,21 @@ function buildQuestion() {
   else mode = canTile ? 'tiles' : 'mc-ru';
 
   if (mode === 'tiles') {
-    var tiles = word.ru.split('');
-    for (var i = 0; i < 10 && tiles.join('') === word.ru; i++) tiles = shuffle(tiles);
-    return { word: word, mode: mode, tiles: tiles.map(function (ch, k) { return { ch: ch, key: k }; }) };
+    // Mehr Kacheln als Buchstaben: erst dadurch zeigt sich, ob die Schreibweise
+    // wirklich sitzt, statt dass man die vorhandenen Kacheln durchprobiert.
+    var buchstaben = word.ru.split('');
+    var tiles = shuffle(buchstaben.concat(zusatzBuchstaben(word.ru)));
+    for (var i = 0; i < 10 && tiles.slice(0, buchstaben.length).join('') === word.ru; i++) {
+      tiles = shuffle(tiles);
+    }
+    return {
+      word: word, mode: mode, laenge: buchstaben.length,
+      tiles: tiles.map(function (ch, k) { return { ch: ch, key: k }; })
+    };
   }
-  // Ablenker aus allen freigeschalteten Wörtern, sonst wiederholen sich innerhalb
-  // eines Päckchens immer dieselben drei. Gleiches Thema zuerst — das fordert mehr.
-  var quelle = freigeschalteteWoerter();
+  // Ablenker aus allem, womit schon gearbeitet wurde — sonst wiederholen sich
+  // innerhalb eines Sets immer dieselben drei. Gleiches Thema zuerst, das fordert mehr.
+  var quelle = verwechslungsPool();
   if (quelle.length < 4) quelle = ALL_VOCAB;
   var sameTheme = quelle.filter(function (v) { return v.theme === word.theme && v.id !== word.id; });
   var others = quelle.filter(function (v) { return v.theme !== word.theme && v.id !== word.id; });
@@ -1248,40 +1313,60 @@ function uebNext(skipFact) {
   renderUeben();
 }
 
-// Kopf über der Frage: Auswahl des Päckchens, Fortschritt darin, Fälligkeit.
-function paketKopfHtml() {
-  var aktuell = aktuellesPaket();
-  var nr = uebAuswahl === 'alle' ? aktuell : (uebAuswahl === 'paket' ? aktuell : uebAuswahl);
+// Kopf über der Frage — je nach Rubrik das Lernset oder die Themenwahl.
+function uebKopfHtml() {
+  return uebModus === 'lernsets' ? setKopfHtml() : themaKopfHtml();
+}
+
+function setKopfHtml() {
+  var aktuell = aktuellesSet();
+  var nr = uebAuswahl === 'alle' ? aktuell : (uebAuswahl === 'aktuell' ? aktuell : uebAuswahl);
   var html = '<div class="controls"><select id="uebWahl">' +
-    '<option value="paket"' + (uebAuswahl === 'paket' ? ' selected' : '') + '>' +
-    'Päckchen ' + (aktuell + 1) + ' · ' + esc(paketName(aktuell)) + '</option>' +
+    '<option value="aktuell"' + (uebAuswahl === 'aktuell' ? ' selected' : '') + '>' +
+    'Set ' + (aktuell + 1) + ' von ' + LERNSETS.length + '</option>' +
     '<option value="alle"' + (uebAuswahl === 'alle' ? ' selected' : '') + '>' +
     'Wiederholung · alle freigeschalteten</option>';
-  for (var i = 0; i < paketAnzahl(); i++) {
-    var frei = paketFrei(i);
+  LERNSETS.forEach(function (set, i) {
+    var frei = setFrei(i);
     html += '<option value="' + i + '"' + (uebAuswahl === i ? ' selected' : '') + (frei ? '' : ' disabled') + '>' +
-      'Päckchen ' + (i + 1) + ' · ' + esc(paketName(i)) + (frei ? '' : ' · gesperrt') + '</option>';
-  }
+      'Set ' + (i + 1) + ' · ' + set.woerter.length + ' Wörter, ' + set.saetze.length + ' Sätze' +
+      (frei ? '' : ' · gesperrt') + '</option>';
+  });
   html += '</select></div>';
 
-  var woerter = uebAuswahl === 'alle' ? freigeschalteteWoerter() : paketWoerter(nr);
-  var reif = uebAuswahl === 'alle'
-    ? woerter.filter(function (v) { return (state.boxes[v.id] || 0) >= PAKET_STUFE; }).length
-    : paketReif(nr);
+  var woerter = uebAuswahl === 'alle' ? freigeschalteteWoerter() : LERNSETS[nr].woerter;
+  var reif = woerter.filter(function (v) { return (state.boxes[v.id] || 0) >= SATZ_STUFE; }).length;
   var offen = faelligeAnzahl(woerter);
 
-  html += '<div class="paket">';
-  html += '<div class="paket-punkte" aria-hidden="true">';
-  woerter.slice(0, PAKET_GROESSE * 2).forEach(function (v) {
-    var box = state.boxes[v.id] || 0;
-    html += '<span class="pp s' + box + '"></span>';
+  html += '<div class="paket"><div class="paket-punkte" aria-hidden="true">';
+  woerter.slice(0, 40).forEach(function (v) {
+    html += '<span class="pp s' + (state.boxes[v.id] || 0) + '"></span>';
   });
-  html += '</div><p class="paket-text">' + reif + ' von ' + woerter.length + ' auf Stufe ' + PAKET_STUFE;
-  if (uebAuswahl !== 'alle' && state.settings.paketSperre) {
+  html += '</div><p class="paket-text">' + reif + ' von ' + woerter.length + ' auf Stufe ' + SATZ_STUFE;
+  if (uebAuswahl !== 'alle') {
+    var saetze = LERNSETS[nr].saetze.length;
     html += reif === woerter.length
-      ? ' · <span class="paket-frei">Päckchen geschafft</span>'
-      : ' · noch ' + (woerter.length - reif) + ' bis zum nächsten Päckchen';
+      ? ' · <span class="paket-frei">' + saetze + ' Sätze freigeschaltet</span>'
+      : ' · noch ' + (woerter.length - reif) + ' bis zu ' + saetze + ' Sätzen';
   }
+  if (offen > 0) html += ' · ' + offen + ' fällig';
+  html += '</p></div>';
+  return html;
+}
+
+function themaKopfHtml() {
+  var html = '<div class="controls"><select id="uebThemaWahl"><option>Alle</option>';
+  Object.keys(VOCAB_THEMES).forEach(function (t) {
+    html += '<option' + (t === uebThema ? ' selected' : '') + '>' + esc(t) + '</option>';
+  });
+  html += '</select></div>';
+
+  var woerter = uebPool();
+  var begonnen = woerter.filter(function (v) { return (state.boxes[v.id] || 0) > 0; }).length;
+  var gemeistert = woerter.filter(function (v) { return (state.boxes[v.id] || 0) >= BOX_MAX; }).length;
+  html += '<div class="paket"><p class="paket-text">' + woerter.length + ' Wörter · ' +
+    begonnen + ' begonnen · ' + gemeistert + ' gemeistert';
+  var offen = faelligeAnzahl(woerter);
   if (offen > 0) html += ' · ' + offen + ' fällig';
   html += '</p></div>';
   return html;
@@ -1292,7 +1377,7 @@ function uebAbgabeBereit() {
   if (!uebQ) return false;
   if (uebQ.mode === 'tiles') {
     return state.settings.requireComplete
-      ? uebBuilt.length === uebQ.tiles.length
+      ? uebBuilt.length === uebQ.laenge
       : uebBuilt.length > 0;
   }
   return uebPicked !== null;
@@ -1325,6 +1410,7 @@ function renderUeben() {
     return;
   }
   if (!uebQ) uebQ = buildQuestion();
+  if (!uebQ) { main.innerHTML = '<section>' + uebKopfHtml() + '</section>'; return; }
   var q = uebQ;
   var box = state.boxes[q.word.id] || 0;
   var promptRu = q.mode === 'mc-de';
@@ -1334,7 +1420,7 @@ function renderUeben() {
   var dots = '';
   for (var i = 0; i <= BOX_MAX; i++) dots += '<span class="' + (i <= box && box > 0 ? 'on' : '') + '"></span>';
 
-  var html = '<section>' + paketKopfHtml();
+  var html = '<section>' + uebKopfHtml();
 
   html += '<div class="card">' +
     '<div class="card-meta"><span class="boxdots">' + dots + '</span>' +
@@ -1345,7 +1431,7 @@ function renderUeben() {
 
   if (q.mode === 'tiles') {
     html += '<div class="slots cyr">';
-    for (var s = 0; s < q.tiles.length; s++) {
+    for (var s = 0; s < q.laenge; s++) {
       var filled = s < uebBuilt.length;
       var ch = filled ? q.tiles.filter(function (t) { return t.key === uebBuilt[s]; })[0].ch : '';
       html += '<span class="slot' + (filled ? ' filled' : '') + '">' + esc(ch) + '</span>';
@@ -1403,9 +1489,15 @@ function renderUeben() {
 
   main.innerHTML = html;
 
-  document.getElementById('uebWahl').addEventListener('change', function (e) {
+  var wahl = document.getElementById('uebWahl');
+  if (wahl) wahl.addEventListener('change', function (e) {
     var w = e.target.value;
-    uebAuswahl = (w === 'paket' || w === 'alle') ? w : parseInt(w, 10);
+    uebAuswahl = (w === 'aktuell' || w === 'alle') ? w : parseInt(w, 10);
+    uebNext(true);
+  });
+  var themaWahl = document.getElementById('uebThemaWahl');
+  if (themaWahl) themaWahl.addEventListener('change', function (e) {
+    uebThema = e.target.value;
     uebNext(true);
   });
   var sp = document.getElementById('speakBtn');
@@ -1429,9 +1521,9 @@ function renderUeben() {
     main.querySelectorAll('[data-tile]').forEach(function (b) {
       b.addEventListener('click', function () {
         var key = parseInt(b.dataset.tile, 10);
-        if (uebBuilt.indexOf(key) !== -1) return;
+        if (uebBuilt.indexOf(key) !== -1 || uebBuilt.length >= q.laenge) return;
         uebBuilt.push(key);
-        if (!state.settings.confirmUeben && uebBuilt.length === q.tiles.length) uebPruefen();
+        if (!state.settings.confirmUeben && uebBuilt.length === q.laenge) uebPruefen();
         else renderUeben();
       });
     });
@@ -1550,7 +1642,7 @@ function renderUebersetzenLeer() {
     '</div></section>';
   main.innerHTML = html;
   bindeStufenLeiste();
-  document.getElementById('trZuUeben').addEventListener('click', function () { setTab('ueben'); });
+  document.getElementById('trZuUeben').addEventListener('click', function () { setTab('lernsets'); });
 }
 
 // Stufenwahl mit Angabe, wie viele S\u00e4tze je Stufe schon offen sind.
@@ -1697,8 +1789,8 @@ function renderUebersetzen() {
 }
 
 // ── TIPPEN ──────────────────────────────────────────────────
-// Getippt wird nur, was in «Üben» sitzt: ab Leitner-Stufe settings.tippenAbStufe.
-var tWord = null, tResult = null, tHint = false, tKb = true;
+// Getippt wird nur, was beim Vokabeltraining sitzt: ab settings.tippenAbStufe.
+var tWord = null, tResult = null, tHint = false, tKb = null;
 
 function tippenPool() {
   var schwelle = state.settings.tippenAbStufe;
@@ -1714,22 +1806,23 @@ function renderTippenLeer() {
   }).sort(function (a, b) { return (state.boxes[b.id] || 0) - (state.boxes[a.id] || 0); });
 
   var html = '<section><div class="leer"><h3>Noch kein Wort freigeschaltet</h3>' +
-    '<p>Hier tippen Sie nur Wörter, die in «Üben» sitzen — ab Stufe ' + schwelle +
+    '<p>Hier tippen Sie nur Wörter, die in «Lernsets» oder «Freestyle» sitzen — ab Stufe ' + schwelle +
     ' von ' + BOX_MAX + ', also ' + schwelle + '× nacheinander richtig beantwortet.</p>';
   if (fast.length) {
     html += '<p class="naechste">Am nächsten dran: ' + fast.slice(0, 3).map(function (v) {
       return '<span class="cyr">' + esc(v.ru) + '</span> (Stufe ' + (state.boxes[v.id] || 0) + ')';
     }).join(' · ') + '</p>';
   } else {
-    html += '<p class="naechste">Noch kein Wort begonnen — fangen Sie mit dem ersten Päckchen an.</p>';
+    html += '<p class="naechste">Noch kein Wort begonnen — fangen Sie mit dem ersten Lernset an.</p>';
   }
-  html += '<div class="btn-row"><button class="btn primary" id="tZuUeben">Zu «Üben»</button></div>';
+  html += '<div class="btn-row"><button class="btn primary" id="tZuUeben">Zu «Lernsets»</button></div>';
   html += '</div><p class="session-info">Schwelle änderbar in den Einstellungen.</p></section>';
   main.innerHTML = html;
-  document.getElementById('tZuUeben').addEventListener('click', function () { setTab('ueben'); });
+  document.getElementById('tZuUeben').addEventListener('click', function () { setTab('lernsets'); });
 }
 
 function renderTippen() {
+  if (tKb === null) tKb = state.settings.tastaturAn;
   var pool = tippenPool();
   // Während der Rückmeldung bleibt das Wort stehen, auch wenn es nach einem
   // Fehler unter die Schwelle gerutscht ist — sonst verschwände die Auflösung.
@@ -1860,14 +1953,13 @@ function renderEinstellungen() {
   var ohneBestaetigung = !s.confirmUeben && !s.confirmUebersetzen;
 
   main.innerHTML = '<section><h2>Lernweg</h2>' +
-    schalter('paketSperre', 'Päckchen der Reihe nach',
-      'Es wird in Päckchen zu ' + PAKET_GROESSE + ' Wörtern gelernt; das nächste öffnet, wenn alle Wörter Stufe ' +
-      PAKET_STUFE + ' erreicht haben. Aus: Sie können jederzeit in jedes Päckchen springen.') +
     wahl('tippenAbStufe', 'Tippen ab Stufe',
       'Ab welcher Leitner-Stufe ein Wort in «Tippen» erscheint. Stufe 4 heißt: vier Mal nacheinander richtig — dafür sitzt es dann auch.',
       [{ wert: 2, text: '2' }, { wert: 3, text: '3' }, { wert: 4, text: '4' }]) +
+    schalter('tastaturAn', 'Tastatur gleich einblenden',
+      'Zeigt die eingebaute kyrillische Tastatur in «Tippen» sofort. Aus: Sie klappen sie bei Bedarf auf.') +
     '<h2>Abgabe</h2>' +
-    schalter('confirmUeben', 'Bestätigen in «Üben»',
+    schalter('confirmUeben', 'Bestätigen beim Vokabeltraining',
       'Antwort erst auswählen, dann mit «Bestätigen» abgeben. Aus: Der erste Tipp zählt sofort.') +
     schalter('confirmUebersetzen', 'Bestätigen in «Übersetzen»',
       'Satz erst zusammenstellen, dann mit «Bestätigen» abgeben. Aus: Der Satz zählt, sobald das letzte Wort liegt.') +
@@ -1898,6 +1990,7 @@ function renderEinstellungen() {
 
 // ── BILANZ ──────────────────────────────────────────────────
 var backupOpen = false, backupCode = '', backupMsg = '', confirmReset = false;
+var themenOffen = false; // «alle Themen anzeigen» in der Bilanz
 
 function encodeBackup() {
   return btoa(unescape(encodeURIComponent(JSON.stringify(state))));
@@ -1931,23 +2024,22 @@ function renderBilanz() {
     stat('Beste Serie', state.bestStreak, true) +
     '</div>';
 
-  var aktuell = aktuellesPaket();
+  var aktuell = aktuellesSet();
   var frei = freigeschalteteWoerter();
   html += '<h2>Lernweg</h2><div class="theme-list">' +
-    '<div class="theme-row"><span class="theme-name">Päckchen</span>' +
-    '<div class="theme-bar"><div class="theme-fill" style="width:' + ((aktuell + 1) / paketAnzahl() * 100) + '%"></div></div>' +
-    '<span class="theme-count">' + (aktuell + 1) + '/' + paketAnzahl() + '</span></div>' +
-    '<div class="theme-row"><span class="theme-name">Freigeschaltet</span>' +
-    '<div class="theme-bar"><div class="theme-fill" style="width:' + (frei.length / ALL_VOCAB.length * 100) + '%"></div></div>' +
-    '<span class="theme-count">' + frei.length + '</span></div>' +
+    '<div class="theme-row"><span class="theme-name">Lernset</span>' +
+    '<div class="theme-bar"><div class="theme-fill" style="width:' + ((aktuell + 1) / LERNSETS.length * 100) + '%"></div></div>' +
+    '<span class="theme-count">' + (aktuell + 1) + '/' + LERNSETS.length + '</span></div>' +
     '<div class="theme-row"><span class="theme-name">Im Tippen</span>' +
     '<div class="theme-bar"><div class="theme-fill" style="width:' + (tippenPool().length / ALL_VOCAB.length * 100) + '%"></div></div>' +
     '<span class="theme-count">' + tippenPool().length + '</span></div>' +
     '<div class="theme-row"><span class="theme-name">Sätze offen</span>' +
     '<div class="theme-bar"><div class="theme-fill" style="width:' + (readFrei / readTotal * 100) + '%"></div></div>' +
     '<span class="theme-count">' + readFrei + '/' + readTotal + '</span></div></div>' +
-    '<p class="backup-note">Aktuell: Päckchen ' + (aktuell + 1) + ' · ' + esc(paketName(aktuell)) +
-    ' · ' + faelligeAnzahl(frei) + ' Wiederholungen fällig</p>';
+    '<p class="backup-note">Im laufenden Set fehlen noch ' +
+    (LERNSETS[aktuell].woerter.length - setReif(aktuell)) + ' Wörter bis zu ' +
+    LERNSETS[aktuell].saetze.length + ' weiteren Sätzen · ' + faelligeAnzahl(frei) +
+    ' Wiederholungen fällig</p>';
 
   html += '<h2>Leitner-Stufen</h2><div class="boxes">';
   counts.forEach(function (n, bi) {
@@ -1958,15 +2050,36 @@ function renderBilanz() {
   });
   html += '</div>';
 
-  html += '<h2>Nach Themen (gemeistert)</h2><div class="theme-list">';
-  Object.keys(VOCAB_THEMES).forEach(function (t) {
+  // Nur Themen mit Fortschritt; der Rest steht hinter «alle anzeigen».
+  var themen = Object.keys(VOCAB_THEMES).map(function (t) {
     var ids = VOCAB_THEMES[t].map(function (w) { return w[0]; });
-    var m = ids.filter(function (id) { return (state.boxes[id] || 0) >= BOX_MAX; }).length;
-    html += '<div class="theme-row"><span class="theme-name">' + esc(t) + '</span>' +
-      '<div class="theme-bar"><div class="theme-fill" style="width:' + (m / ids.length * 100) + '%"></div></div>' +
-      '<span class="theme-count">' + m + '/' + ids.length + '</span></div>';
+    return {
+      name: t,
+      gesamt: ids.length,
+      gemeistert: ids.filter(function (id) { return (state.boxes[id] || 0) >= BOX_MAX; }).length,
+      begonnen: ids.filter(function (id) { return (state.boxes[id] || 0) > 0; }).length
+    };
+  });
+  var mitFortschritt = themen.filter(function (t) { return t.gemeistert > 0; });
+  var zeigen = themenOffen ? themen : mitFortschritt;
+
+  html += '<h2>Nach Themen (gemeistert)</h2>';
+  if (!zeigen.length) {
+    html += '<p class="backup-note">Noch kein Thema gemeistert — hier erscheint jedes Thema, sobald ' +
+      'das erste Wort daraus Stufe ' + BOX_MAX + ' erreicht.</p>';
+  }
+  html += '<div class="theme-list">';
+  zeigen.forEach(function (t) {
+    html += '<div class="theme-row"><span class="theme-name">' + esc(t.name) + '</span>' +
+      '<div class="theme-bar"><div class="theme-fill" style="width:' + (t.gemeistert / t.gesamt * 100) + '%"></div></div>' +
+      '<span class="theme-count">' + t.gemeistert + '/' + t.gesamt + '</span></div>';
   });
   html += '</div>';
+  if (themen.length > mitFortschritt.length) {
+    html += '<button class="mehr" id="themenMehr">' +
+      (themenOffen ? 'Nur Themen mit Fortschritt' : 'Alle ' + themen.length + ' Themen anzeigen') +
+      '</button>';
+  }
 
   html += '<h2>Sicherung</h2>' +
     '<p class="backup-note">Ihr Fortschritt als kopierbarer Code — unabhängig vom automatischen Speichern.</p>' +
@@ -2021,6 +2134,8 @@ function renderBilanz() {
     }
     renderBilanz();
   });
+  var mehr = document.getElementById('themenMehr');
+  if (mehr) mehr.addEventListener('click', function () { themenOffen = !themenOffen; renderBilanz(); });
   var rsAsk = document.getElementById('rsAsk');
   if (rsAsk) rsAsk.addEventListener('click', function () { confirmReset = true; renderBilanz(); });
   var rsNo = document.getElementById('rsNo');

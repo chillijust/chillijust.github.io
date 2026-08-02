@@ -9,15 +9,17 @@ mir, statt still eine Seite zu wählen.
 
 ## Projekt
 
-Web-App zum Russischlernen (Kyrillisch lesen, schreiben, übersetzen) als **eine einzelne,
-offline lauffähige HTML-Datei**. Gehostet über GitHub Pages unter
+**Chillingo** — Web-App zum Russischlernen (Kyrillisch lesen, schreiben, übersetzen) als
+**eine einzelne, offline lauffähige HTML-Datei**. Gehostet über GitHub Pages unter
 https://chillijust.github.io/. Zielgerät: iPhone 15 Pro Max (iOS 26.5.2), installiert über
 „Zum Home-Bildschirm" als PWA im Vollbild.
 
-Rubriken in dieser Reihenfolge: Üben (Päckchen zu 12 Wörtern, Multiple Choice,
-Buchstaben-Kacheln, Sprachfakten), Tippen (Eingabequiz mit kyrillischer
-Bildschirmtastatur, nur für Wörter ab Leitner-Stufe 4), Übersetzen (Satzbau aus
-Wort-Kacheln, beide Richtungen), Bilanz (Leitner-Statistik, Lernweg, Sicherungscode).
+Rubriken in dieser Reihenfolge:
+**Lernsets** (zielgerichtet: die Wörter der nächsten Sätze, schaltet «Übersetzen» frei),
+**Freestyle** (freies Vokabeltraining nach Thema, ohne Sperren),
+**Tippen** (Eingabequiz mit kyrillischer Tastatur, nur ab Leitner-Stufe 4),
+**Übersetzen** (Satzbau aus Wort-Kacheln, nur Sätze, deren Wörter sitzen),
+**Bilanz** (Leitner-Statistik, Lernweg, Sicherungscode).
 
 ## Harte Rahmenbedingungen — nicht verhandelbar
 
@@ -60,9 +62,9 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   aufgefüllt — `state.settings` nie als Ganzes aus dem Speicher übernehmen.
 - **Der Datenblock zwischen `DATEN:START` und `DATEN:ENDE` ist generiert.** Inhalte
   ausschließlich in `/data` ändern, danach `node tools/build.mjs`.
-- **Die Reihenfolge in `data/vokabeln.json` ist der Lehrplan** — je zwölf Wörter ein
-  Päckchen (`PAKET_GROESSE`, `PAKET_STUFE`). Einfügen in der Mitte verschiebt alle
-  folgenden Päckchen; Ergänzungen ans Ende des Themas.
+- **Die Reihenfolge in `data/vokabeln.json` ist der Lehrplan.** Aus ihr und den
+  Satzvoraussetzungen bauen sich die Lernsets (`SET_MAX`, `SATZ_STUFE`); Ergänzungen ans
+  Ende des passenden Themas.
 - **Jeder Satz nennt in `benoetigt` seine Voraussetzungen als Grundformen** («книгу» →
   `книга`). Ein Satz mit unbekanntem Wort lässt den Build scheitern — das Wort gehört
   zuerst in den Lehrplan.
