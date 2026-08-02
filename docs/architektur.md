@@ -55,39 +55,55 @@ die Statusleiste auf dem iPhone passt.
 ## Maskottchen
 
 Die Chili ist aus dem Icon freigestellt (`tools/freistellen.py`) und existiert **genau
-einmal**: als `#chiliFigur` auf einer festen Bühne über der Seite
-(`#chiliBuehne`, `position: fixed`, `pointer-events: none`). Sie liegt damit außerhalb
-des Layouts und kann sich frei bewegen.
+einmal**: als `#chiliFigur` in der Hülle `#chiliBuehne`
+(`position: absolute; inset: 0; pointer-events: none`). Die Hülle steht **im Fluss** —
+sie steckt immer in genau einem Platzhalter und füllt ihn aus.
 
 Ansichten zeichnen die Figur nicht, sie stellen nur einen **Platzhalter** auf:
-`maskottchen(klasse)` liefert ein leeres `div[data-chili]` in der gewünschten Größe.
-`positioniereChili()` sucht den Platzhalter in `#main` — fehlt er, gilt der im Kopf —
-und setzt die Figur per `transform` genau dorthin.
+`maskottchen(klasse)` liefert ein leeres `div.chili-platz[data-chili]`
+(`position: relative`) in der gewünschten Größe. `chiliAktualisieren()` sucht den
+Platzhalter in `#main` — fehlt er, gilt der im Kopf — und hängt die Bühne per
+`appendChild` dorthin um.
 
 | Station | Größe | Anlass |
 | --- | --- | --- |
-| Kopfzeile, zwischen Titel und Reglerknopf | 52 px | Grundzustand |
-| Streifen über der Reiterleiste | 30 px | wenn der Kopf weggescrollt ist |
+| Kopfzeile, mittig zwischen Titel und Reglerknopf | 52 px | Grundzustand |
 | Sprechblase der Faktenkarte | 76 px | alle fünf Antworten |
 | Leerzustände (Tippen, Übersetzen, Faktensammlung) | 104 px | wenn nichts freigeschaltet ist |
 | Jubelkarte | 104 px | wenn ein Lernset voll wird |
 
-**Andocken.** Nur der Platz im Kopf dockt an. `dockY` misst sich an der *angehefteten*
-Leiste (deren `padding-top` trägt den Streifen), nicht an ihrer aktuellen Lage — sonst
-säße die Figur schon beim Seitenanfang im Streifen. Der Anteil `p` (1 = im Kopf,
-0 = angedockt) ergibt sich aus dem noch offenen Weg und steuert Position und Größe
-zugleich, sodass die Figur beim Scrollen weich hinüberwandert.
+Der Platz im Kopf hängt über `position: absolute; left: 50%` mittig an der Kopfzeile —
+unabhängig davon, wie breit Titel und Reglerknopf gerade sind.
+
+**Kein Nachrechnen.** Es gibt keine Scroll- oder Resize-Behandlung und keine
+Positionsrechnung je Bild. Weil die Figur ein Kind ihres Platzhalters ist, scrollt sie
+starr mit dem Inhalt (ADR 0012).
 
 **Springen.** `chiliAktualisieren()` läuft über einen `MutationObserver` auf `#main`,
 merkt also jeden Ansichtswechsel, ohne dass eine Renderfunktion daran denken muss.
-Wechselt die Station, bekommt der Wagen für eine halbe Sekunde einen Übergang und die
-Figur die Klasse `springt` (Keyframes `chiliSprung`: ducken, Bogen, federn). Danach
-werden beide entfernt — während des Scrollens darf **kein** Übergang aktiv sein, sonst
-hinkt die Figur hinterher.
+Wechselt die Station, bekommt die Figur die Klasse `springt` (Keyframes `chiliSprung`,
+0,78 s: ducken, Bogen, federn). Ein Zeitgeber räumt die Klasse danach wieder ab.
 
-**Die Blase kommt nach der Landung:** `.sprechblase` startet mit 0,34 s Verzögerung und
-wächst über `blaseAuf` herein, statt aufzuploppen. Unter
-`prefers-reduced-motion: reduce` entfallen Sprung und Einblendung.
+**Die Blase kommt nach der Landung:** `.sprechblase` startet mit 1 s Verzögerung — also
+nach dem Sprung plus einer kurzen Pause — und wächst über `blaseAuf` (0,6 s) herein,
+statt aufzuploppen. Unter `prefers-reduced-motion: reduce` entfallen Sprung und
+Einblendung.
+
+## Töne
+
+`ton(richtig)` spielt nach jeder bewerteten Antwort einen kurzen Klang: eine aufsteigende
+Terz (A5 → E6, Sinus) für richtig, einen fallenden tiefen Ton (G3 → D♯3, Dreieck) für
+falsch. Erzeugt wird er in der Web Audio API — Klangdateien verbieten sich in einer
+einzelnen Datei ohne externe Ressourcen.
+
+`tonBereit()` kapselt alles Heikle: Einstellung `ton` aus, kein `AudioContext`, ein
+angehaltener Kontext. Der Kontext wird einmal angelegt und danach wiederverwendet; iOS
+gibt ihn erst nach einer Nutzergeste frei, was hier von selbst passt, weil der erste Ton
+auf einen Tipp folgt. Alles steht in `try/catch` — der Ton begleitet, er trägt nie.
+
+Ausgelöst wird er an genau drei Stellen: `uebPruefen()` (Lernsets/Freestyle),
+`trFinish()` (Übersetzen) und `check()` in `renderTippen()`. «Aufdecken» bleibt still,
+weil das keine Antwort ist.
 
 ## Symbole
 

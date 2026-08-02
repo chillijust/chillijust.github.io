@@ -25,9 +25,10 @@ Dazu zwei Ansichten ohne Reiter: **Einstellungen** (Reglerknopf) und **Sprachfak
 
 Maskottchen ist die Chili — freigestellt aus `docs/IMG_2942.png` mit
 `tools/freistellen.py`, abgelegt als `docs/maskottchen-freigestellt.png`. In der App gibt es sie
-genau einmal als `#chiliFigur` auf der festen Bühne `#chiliBuehne`; Ansichten stellen mit
-`maskottchen(klasse)` nur einen Platzhalter auf, zu dem sie wandert. Nie ein zweites Mal
-einbetten.
+genau einmal als `#chiliFigur` in der Hülle `#chiliBuehne`; Ansichten stellen mit
+`maskottchen(klasse)` nur einen Platzhalter auf, in den sie umgehängt wird. Nie ein
+zweites Mal einbetten, und nie über Scroll-Rechnung positionieren — sie steht im Fluss
+(ADR 0012).
 
 ## Harte Rahmenbedingungen — nicht verhandelbar
 
@@ -70,7 +71,13 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   anhängen, nie als `onclick`-Attribut.
 - **Neue Einstellung:** Vorgabe in `defaultSettings()`, Zeile in `renderEinstellungen()`,
   Abfrage an der wirksamen Stelle. Gespeicherte Stände werden über `mergeState()`
-  aufgefüllt — `state.settings` nie als Ganzes aus dem Speicher übernehmen.
+  aufgefüllt — `state.settings` nie als Ganzes aus dem Speicher übernehmen. Die
+  Einstellungen sind nach Fragen gegliedert: **Lernweg**, **Abgabe**, **Eingabe**,
+  **Darstellung und Ton**. Soll eine geänderte Vorgabe auch bestehende Geräte
+  erreichen, den Schlüssel umbenennen — der alte Wert fällt in `mergeState()` weg.
+- **Klang nur über `ton(richtig)`.** Erzeugt in der Web Audio API, nie als Datei, immer
+  in `try/catch`, abschaltbar über die Einstellung `ton`. Kein Ablauf darf Ton
+  voraussetzen.
 - **Der Datenblock zwischen `DATEN:START` und `DATEN:ENDE` ist generiert.** Inhalte
   ausschließlich in `/data` ändern, danach `node tools/build.mjs`.
 - **Die Reihenfolge in `data/vokabeln.json` ist der Lehrplan.** Aus ihr und den
