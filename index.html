@@ -309,9 +309,9 @@ button.built-word:active { transform: scale(.95); }
   88%  { transform: translateY(-4px) rotate(1deg) scaleY(1.02); }
   100% { transform: translateY(0) rotate(0deg) scaleY(1); }
 }
-/* Die Blase kommt nach dem Sprung und einer kurzen Pause — sie wächst herein,
-   als spräche die Chili, statt aufzuploppen. */
-.sprechblase { animation: blaseAuf .6s 1s both cubic-bezier(.2, .8, .3, 1); }
+/* Die Blase kommt kurz nach der Landung — sie wächst herein, als spräche die
+   Chili, statt aufzuploppen. */
+.sprechblase { animation: blaseAuf .6s .8s both cubic-bezier(.2, .8, .3, 1); }
 @keyframes blaseAuf {
   from { opacity: 0; transform: translateY(10px) scale(.94); }
   60%  { opacity: 1; }
@@ -1148,6 +1148,53 @@ var chiliBuehne = document.getElementById('chiliBuehne');
 var chiliFigur = document.getElementById('chiliFigur');
 var chiliStation = null; // Platzhalter, in dem die Figur gerade steckt
 var chiliZeitgeber = null;
+var chiliSpur = null;    // letzte bekannte Lage, in Dokumentkoordinaten
+
+// Dokumentkoordinaten statt Viewport: die Figur steht im Fluss und scrollt mit,
+// ihre Lage im Dokument bleibt also gültig, auch wenn zwischendurch gescrollt
+// wurde. Ist der Platz unsichtbar (Breite 0), gibt es keine Lage.
+function chiliLage(el) {
+  var r = el.getBoundingClientRect();
+  if (!r.width) return null;
+  return {
+    x: r.left + (window.pageXOffset || document.documentElement.scrollLeft || 0),
+    y: r.top + (window.pageYOffset || document.documentElement.scrollTop || 0),
+    b: r.width
+  };
+}
+
+// Der eigentliche Sprung: die Figur startet dort, wo sie stand, und fliegt in
+// einem Bogen zum neuen Platz. Waagerecht gleichförmig, senkrecht eine Parabel
+// darüber — das ist ein Wurf. Das Ducken und Federn steuert weiterhin die
+// Keyframe-Animation auf der Figur; hier bewegt sich nur die Hülle.
+function chiliFlug(vorher, jetzt) {
+  if (!vorher || !jetzt || !chiliBuehne.animate) return;
+  try {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var dx = vorher.x - jetzt.x;
+    var dy = vorher.y - jetzt.y;
+    var ds = vorher.b / jetzt.b;
+    var weite = Math.sqrt(dx * dx + dy * dy);
+    // Zu kurz lohnt nicht, zu weit heißt: die alte Lage ist veraltet.
+    if (weite < 8 || weite > 900) return;
+    var bogen = Math.min(46, 14 + weite * 0.12);
+    var bilder = [];
+    for (var i = 0; i <= 8; i++) {
+      var t = i / 8;
+      var x = dx * (1 - t);
+      var y = dy * (1 - t) - bogen * 4 * t * (1 - t);
+      var g = ds + (1 - ds) * t;
+      bilder.push({
+        transform: 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px) scale(' + g.toFixed(3) + ')'
+      });
+    }
+    // Verzögerung und Dauer greifen in die Figur-Animation: erst ducken
+    // (bis 14 % von 0,78 s), dann fliegen, am Ende federn.
+    chiliBuehne.animate(bilder, {
+      duration: 640, delay: 100, easing: 'linear', fill: 'backwards'
+    });
+  } catch (e) { /* ohne Flug bleibt der Hüpfer */ }
+}
 
 // Ein Platz in der Ansicht geht vor — steht die Chili in einer Karte, gehört
 // sie dorthin. Sonst: in die kompakte Zone, solange die Reiter kleben, und in
@@ -1165,9 +1212,17 @@ function chiliAktualisieren(ohneSprung) {
   var platz = chiliPlatzhalter();
   if (!platz || platz === chiliStation) return;
   var ersterAuftritt = chiliStation === null;
+  // Die alte Station lässt sich nur messen, solange sie im Dokument hängt —
+  // nach einem Ansichtswechsel ist sie fort, dann trägt die gemerkte Lage.
+  var vorher = chiliStation && document.contains(chiliStation)
+    ? chiliLage(chiliStation) : chiliSpur;
   chiliStation = platz;
   platz.appendChild(chiliBuehne);
+  var jetzt = chiliLage(platz);
+  if (jetzt) chiliSpur = jetzt;
   if (ersterAuftritt || ohneSprung) return;
+
+  chiliFlug(vorher, jetzt);
 
   chiliFigur.classList.remove('springt');
   void chiliFigur.offsetWidth; // Neustart der Sprunganimation erzwingen
