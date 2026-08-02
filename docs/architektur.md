@@ -194,6 +194,46 @@ zuerst, bei Gleichstand das am längsten Zurückliegende, ausgelost aus den vord
 vieren; der gerade gelöste Satz kommt nicht sofort wieder. Der frühere Laufindex `trIdx`
 entfällt — eine feste Reihenfolge verträgt sich nicht mit zwei Stapeln.
 
+## Sicherungscode
+
+Format **2** (`CHG2~…`), eine einzige Zeile aus `A–Z a–z 0–9 . ~`:
+
+```
+CHG2~<Wörter>~<Sätze>~<Fakten>~<Zahlen>~<Einstellungen>~<Prüfsumme>
+```
+
+Ein Wort belegt zehn Zeichen: sechs für die **Kennung**, eines für die Stufe, drei für
+das Alter in Tagen seit `BK_BEZUG` (1. Januar 2026). Sätze genauso, Fakten neun Zeichen
+(Kennung, Zähler, Favorit). Bei vollem Lernstand ergibt das rund **5 KB statt 35 KB** —
+Format 1 war der ganze Zustand als JSON in Base64, mit 380 kyrillischen Schlüsseln und
+Millisekunden-Zeitstempeln.
+
+**Die Kennung ist ein Hash des Textes, nicht seine Position.** Eine Position wäre kürzer,
+aber jede neue Vokabel würde alle folgenden verschieben und alte Codes still verfälschen.
+`tools/build.mjs` prüft, dass keine zwei Vokabeln, Sätze oder Fakten dieselbe Kennung
+tragen, und bricht sonst ab — die Wahrscheinlichkeit ist winzig, die Folge wäre lautlos.
+
+**Tagesgenau reicht**, weil alle Fristen in Tagen rechnen (`INTERVALL`, `auffrischen`).
+
+**Die Prüfsumme** über die ersten sechs Felder erkennt abgeschnittenes oder verändertes
+Einfügen. Ohne sie hätte ein halb kopierter Code stillschweigend einen halben Lernstand
+geladen. Fehler werden unterschieden: beschädigt, abgebrochen, oder gar kein Code dieser
+App.
+
+**Format 1 bleibt lesbar.** `decodeBackup()` erkennt am fehlenden Kopf, dass ein alter
+Code vorliegt, und liest ihn wie bisher.
+
+Unbekannte Kennungen — Inhalte, die es nicht mehr gibt — werden übersprungen, wie
+`migriereIds()` es beim normalen Laden tut.
+
+### Nach dem Wiederherstellen
+
+`ansichtenZuruecksetzen()` stellt **jede Rubrik** auf Anfang: die laufende Frage, das
+getippte Wort, den gelegten Satz, Stufe und Stapel in «Übersetzen», Filter und Aufklapper.
+Ohne das zeigte eine Rubrik nach dem Einspielen weiter ihren alten Stand — jede hält
+ihren eigenen Zustand in Modulvariablen, und `state` auszutauschen rührt die nicht an.
+Dieselbe Funktion läuft beim Zurücksetzen des Fortschritts.
+
 ## Tickets
 
 Fehler und Wünsche werden in der App gesammelt und **bleiben auf dem Gerät**. Ein Knopf

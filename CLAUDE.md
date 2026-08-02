@@ -138,6 +138,13 @@ zehn.
   anlegen.
 - **Touch-Ziele und `:hover`.** Auf iOS bleibt ein Hover-Zustand nach dem Tippen hängen;
   Zustände deshalb über Klassen setzen, nicht über `:hover`.
+- **Neuer Ansichtszustand** (eine Variable, die eine Rubrik zwischen zwei Renderläufen
+  hält) gehört in `ansichtenZuruecksetzen()`. Sonst zeigt die Rubrik nach dem
+  Wiederherstellen einer Sicherung weiter den alten Stand — genau dieser Fehler war da
+  (ADR 0017).
+- **Der Sicherungscode führt Inhalte über eine Kennung** (Hash des Textes, sechs
+  Zeichen). `tools/build.mjs` bricht ab, wenn zwei Vokabeln, Sätze oder Fakten dieselbe
+  tragen; dann einen der Texte ändern.
 - **Wort umbenennen** setzt dessen Leitner-Stand zurück — die Kennung ist das russische
   Wort. Themen umzubenennen ist dagegen folgenlos. **Einen Satz umzuformulieren** setzt
   genauso seinen Stand in `satzBox`/`satzSeen` zurück; die Kennung ist der russische Satz.

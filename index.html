@@ -1970,6 +1970,35 @@ function uebZuruecksetzen() {
   uebRevealed = false;
 }
 
+// Wechselt der Lernstand als Ganzes — beim Wiederherstellen einer Sicherung
+// oder beim Zurücksetzen —, müssen *alle* Rubriken neu aufbauen. Jede hält
+// ihren eigenen Zustand: die laufende Frage, das getippte Wort, den gelegten
+// Satz. Bleibt davon etwas stehen, zeigt die Rubrik den alten Stand weiter.
+function ansichtenZuruecksetzen() {
+  uebZuruecksetzen();
+  uebModus = 'lernsets';
+  uebAuswahl = 'aktuell';
+  uebThema = 'Alle';
+  uebFactText = '';
+
+  tWord = null;
+  tResult = null;
+  tHint = false;
+  tKb = null;
+  tippenModus = 'lernen';
+
+  trTask = null;
+  trBuilt = [];
+  trPhase = 'ask';
+  trCorrect = null;
+  trRevealed = false;
+  trLevel = 1;
+  trModus = 'lernen';
+
+  faktenFilter = 'gesehen';
+  themenOffen = false;
+}
+
 function uebNext(skipFact) {
   if (uebGeschafftesSet !== null) {
     uebPhase = 'setfertig';
@@ -3225,11 +3254,163 @@ function renderTickets() {
 var backupOpen = false, backupCode = '', backupMsg = '', confirmReset = false;
 var themenOffen = false; // «alle Themen anzeigen» in der Bilanz
 
-function encodeBackup() {
-  return btoa(unescape(encodeURIComponent(JSON.stringify(state))));
+// ── Sicherungscode ──────────────────────────────────────────
+// Der alte Code war der ganze Lernstand als JSON in Base64 — mit 380
+// kyrillischen Schlüsseln und Millisekunden-Zeitstempeln ein Klumpen von rund
+// zwanzig Kilobyte, den niemand gern von Hand markiert.
+//
+// Format 2 kodiert stattdessen nur, was sich nicht ausrechnen lässt, und zwar
+// in fester Breite:
+//
+//   CHG2~<Wörter>~<Sätze>~<Fakten>~<Zahlen>~<Einstellungen>~<Prüfsumme>
+//
+// Ein Wort belegt zehn Zeichen: sechs für eine **stabile Kennung** (Hash des
+// russischen Wortes, nicht seine Position — sonst verschöbe eine neue Vokabel
+// alle Stände), eines für die Stufe, drei für das Alter in Tagen. Tagesgenau
+// genügt, weil alle Fristen in Tagen rechnen. Das ergibt etwa ein Fünftel der
+// alten Länge und obendrein eine Prüfsumme, die abgeschnittenes Einfügen
+// erkennt, statt still Unsinn zu laden.
+var BK_KOPF = 'CHG2';
+var BK_BEZUG = Date.UTC(2026, 0, 1);   // Tag 0 der Zeitrechnung im Code
+var BK_KENNUNG = 6;                    // Zeichen je Kennung
+var BK_TAGE = 3;                       // Zeichen je Alter
+var BK_EINTRAG = BK_KENNUNG + 1 + BK_TAGE;
+
+function bkFuellen(text, breite) {
+  var t = String(text);
+  while (t.length < breite) t = '0' + t;
+  return t.slice(-breite);
 }
+// Dieselbe Streuung wie bei den Fakten, nur auf feste Breite gebracht.
+function bkKennung(text) {
+  return bkFuellen(faktId(text), BK_KENNUNG);
+}
+function bkTag(ms) {
+  if (!ms) return 0;
+  return Math.max(0, Math.min(46655, Math.floor((ms - BK_BEZUG) / TAG)));
+}
+function bkAusTag(t) {
+  return BK_BEZUG + t * TAG;
+}
+function bkPruefsumme(text) {
+  var h = 0;
+  for (var i = 0; i < text.length; i++) h = (h * 31 + text.charCodeAt(i)) | 0;
+  return bkFuellen((h >>> 0).toString(36), 7);
+}
+
+// Kennung → Inhalt. Einmal gebaut, danach nachgeschlagen.
+var bkTabelle = null;
+function bkNachschlagen() {
+  if (bkTabelle) return bkTabelle;
+  bkTabelle = { woerter: {}, saetze: {}, fakten: {} };
+  ALL_VOCAB.forEach(function (v) { bkTabelle.woerter[bkKennung(v.id)] = v.id; });
+  SENTENCES.forEach(function (x) { bkTabelle.saetze[bkKennung(x.ru)] = x.ru; });
+  FACTS.forEach(function (f) { bkTabelle.fakten[bkKennung(f)] = faktId(f); });
+  return bkTabelle;
+}
+
+function bkStaendeAus(boxen, zeiten, kennungVon) {
+  var teile = [];
+  Object.keys(boxen).forEach(function (k) {
+    var box = boxen[k] || 0;
+    if (!box && !zeiten[k]) return;
+    teile.push(kennungVon(k) +
+      bkFuellen(Math.min(9, box).toString(36), 1) +
+      bkFuellen(bkTag(zeiten[k]).toString(36), BK_TAGE));
+  });
+  return teile.join('');
+}
+
+function bkStaendeNach(text, tabelle, boxen, zeiten) {
+  for (var i = 0; i + BK_EINTRAG <= text.length; i += BK_EINTRAG) {
+    var kennung = text.slice(i, i + BK_KENNUNG);
+    var ziel = tabelle[kennung];
+    if (!ziel) continue;   // Inhalt gibt es nicht mehr — wie bei migriereIds
+    boxen[ziel] = parseInt(text.slice(i + BK_KENNUNG, i + BK_KENNUNG + 1), 36) || 0;
+    var tag = parseInt(text.slice(i + BK_KENNUNG + 1, i + BK_EINTRAG), 36) || 0;
+    if (tag) zeiten[ziel] = bkAusTag(tag);
+  }
+}
+
+// Die Einstellungen in fester Reihenfolge — Namen wären hier reine Länge.
+var BK_SETTINGS = ['confirmUeben', 'confirmUebersetzen', 'requireComplete', 'ton', 'tastaturAn'];
+
+function encodeBackup() {
+  var woerter = bkStaendeAus(state.boxes, state.lastSeen, bkKennung);
+  var saetze = bkStaendeAus(state.satzBox, state.satzSeen, bkKennung);
+
+  var fakten = [];
+  Object.keys(state.fakten).forEach(function (id) {
+    var st = state.fakten[id];
+    if (!st || (!st.n && !st.f)) return;
+    // Der Fakt ist schon über faktId gespeichert; für den Code wird auf feste
+    // Breite gebracht, damit sich alles ohne Trennzeichen lesen lässt.
+    fakten.push(bkFuellen(id, BK_KENNUNG) +
+      bkFuellen(Math.min(1295, st.n || 0).toString(36), 2) + (st.f ? '1' : '0'));
+  });
+
+  var zahlen = [state.streak, state.bestStreak, state.answered, state.factIdx,
+    state.typingStats.correct, state.typingStats.wrong,
+    state.transStats.correct, state.transStats.wrong]
+    .map(function (n) { return Math.max(0, n | 0).toString(36); }).join('.');
+
+  var s = state.settings;
+  var einst = BK_SETTINGS.map(function (k) { return s[k] ? '1' : '0'; }).join('') +
+    '.' + s.tippenStufe + '.' + s.auffrischen + '.' +
+    ['system', 'dunkel', 'hell'].indexOf(s.darstellung);
+
+  var rumpf = [BK_KOPF, woerter, saetze, fakten.join(''), zahlen, einst].join('~');
+  return rumpf + '~' + bkPruefsumme(rumpf);
+}
+
+// Was steckt in einem Stand? Sagt sowohl beim Erzeugen als auch nach dem
+// Einlesen, worüber man gerade redet — sonst ist der Code eine Blackbox.
+function bkUeberblick(st) {
+  var w = 0, sa = 0;
+  Object.keys(st.boxes).forEach(function (k) { if (st.boxes[k] > 0) w++; });
+  Object.keys(st.satzBox).forEach(function (k) { if (st.satzBox[k] > 0) sa++; });
+  var fa = Object.keys(st.fakten).length;
+  return w + (w === 1 ? ' Wort' : ' Wörter') + ' · ' +
+    sa + (sa === 1 ? ' Satz' : ' Sätze') + ' · ' +
+    fa + (fa === 1 ? ' Fakt' : ' Fakten');
+}
+
 function decodeBackup(code) {
-  return JSON.parse(decodeURIComponent(escape(atob(code.trim()))));
+  var roh = String(code).replace(/\s+/g, '');
+  // Ein Code aus Format 1 ist Base64 und trägt weder Kopf noch Trennzeichen.
+  if (roh.indexOf(BK_KOPF + '~') !== 0) return JSON.parse(decodeURIComponent(escape(atob(roh))));
+
+  var teile = roh.split('~');
+  if (teile.length !== 7) throw new Error('unvollständig');
+  if (bkPruefsumme(teile.slice(0, 6).join('~')) !== teile[6]) throw new Error('Prüfsumme');
+
+  var t = bkNachschlagen();
+  var d = defaultState();
+  bkStaendeNach(teile[1], t.woerter, d.boxes, d.lastSeen);
+  bkStaendeNach(teile[2], t.saetze, d.satzBox, d.satzSeen);
+
+  var f = teile[3];
+  for (var i = 0; i + BK_KENNUNG + 3 <= f.length; i += BK_KENNUNG + 3) {
+    var id = t.fakten[f.slice(i, i + BK_KENNUNG)];
+    if (!id) continue;
+    d.fakten[id] = {
+      n: parseInt(f.slice(i + BK_KENNUNG, i + BK_KENNUNG + 2), 36) || 0,
+      f: f.charAt(i + BK_KENNUNG + 2) === '1'
+    };
+  }
+
+  var z = teile[4].split('.').map(function (x) { return parseInt(x, 36) || 0; });
+  d.streak = z[0]; d.bestStreak = z[1]; d.answered = z[2]; d.factIdx = z[3];
+  d.typingStats = { correct: z[4] || 0, wrong: z[5] || 0 };
+  d.transStats = { correct: z[6] || 0, wrong: z[7] || 0 };
+
+  var e = teile[5].split('.');
+  var schalter = e[0] || '';
+  BK_SETTINGS.forEach(function (k, n) { d.settings[k] = schalter.charAt(n) === '1'; });
+  d.settings.tippenStufe = parseInt(e[1], 10) || 3;
+  d.settings.auffrischen = parseInt(e[2], 10) || 21;
+  d.settings.darstellung = ['system', 'dunkel', 'hell'][parseInt(e[3], 10)] || 'system';
+  return d;
 }
 
 function renderBilanz() {
@@ -3322,10 +3503,16 @@ function renderBilanz() {
     '<div class="btn-row"><button class="btn ghost" id="zuFakten">Fakten durchgehen</button></div>';
 
   html += '<h2>Sicherung</h2>' +
-    '<p class="backup-note">Ihr Fortschritt als kopierbarer Code — unabhängig vom automatischen Speichern.</p>' +
-    '<div class="btn-row"><button class="btn ghost" id="bkMake">Sicherungscode erzeugen</button></div>' +
-    (backupOpen ? '<textarea id="bkOut" readonly rows="3" aria-label="Sicherungscode">' + esc(backupCode) + '</textarea>' : '') +
-    '<textarea id="bkIn" rows="2" placeholder="Sicherungscode hier einfügen \u2026" aria-label="Sicherungscode einfügen"></textarea>' +
+    '<p class="backup-note">Ihr Fortschritt als kopierbarer Code — unabhängig vom automatischen ' +
+    'Speichern. Er trägt eine Prüfsumme: unvollständig eingefügt wird er abgewiesen statt ' +
+    'halb übernommen.</p>' +
+    '<div class="btn-row"><button class="btn ghost" id="bkMake">Sicherungscode erzeugen</button></div>';
+  if (backupOpen) {
+    html += '<p class="backup-note">' + esc(bkUeberblick(state)) + ' · ' +
+      (backupCode.length / 1024).toFixed(1) + ' KB</p>' +
+      '<textarea id="bkOut" readonly rows="3" aria-label="Sicherungscode">' + esc(backupCode) + '</textarea>';
+  }
+  html += '<textarea id="bkIn" rows="2" placeholder="Sicherungscode hier einf\u00fcgen \u2026" aria-label="Sicherungscode einfügen"></textarea>' +
     '<div class="btn-row"><button class="btn ghost" id="bkImport">Sicherung wiederherstellen</button></div>' +
     (backupMsg ? '<p class="session-info">' + esc(backupMsg) + '</p>' : '');
 
@@ -3364,13 +3551,22 @@ function renderBilanz() {
     if (!code.trim()) { backupMsg = 'Bitte zuerst einen Code einfügen.'; renderBilanz(); return; }
     try {
       var data = decodeBackup(code);
-      if (!data || typeof data !== 'object' || !data.boxes) throw new Error('ungültig');
+      if (!data || typeof data !== 'object' || !data.boxes) throw new Error('unlesbar');
       state = mergeState(data);
+      // Der Lernstand ist ein anderer — jede Rubrik muss neu aufbauen. Sonst
+      // stünde in «Tippen» noch das alte Wort und in «Übersetzen» der alte Satz.
+      ansichtenZuruecksetzen();
+      backupOpen = false;
       save();
+      updateDarstellung();
       updateKopf();
-      backupMsg = 'Sicherung wiederhergestellt.';
+      backupMsg = 'Wiederhergestellt: ' + bkUeberblick(state) + '.';
     } catch (e) {
-      backupMsg = 'Code ungültig — bitte vollständig einfügen.';
+      backupMsg = e.message === 'Prüfsumme'
+        ? 'Der Code ist beschädigt oder unvollständig — bitte noch einmal ganz einfügen.'
+        : e.message === 'unvollständig'
+          ? 'Der Code bricht mittendrin ab — bitte noch einmal ganz einfügen.'
+          : 'Das ist kein Sicherungscode dieser App.';
     }
     renderBilanz();
   });
@@ -3387,6 +3583,7 @@ function renderBilanz() {
     state = defaultState();
     state.settings = behalten;
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    ansichtenZuruecksetzen();
     confirmReset = false;
     backupOpen = false;
     backupMsg = '';

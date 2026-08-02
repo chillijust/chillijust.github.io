@@ -255,6 +255,37 @@ const dateien = [
   ['data/tastatur.json', jsonListe(tastatur, true)]
 ];
 
+// ── Kennungen für den Sicherungscode ────────────────────────
+// Der Code führt Wörter, Sätze und Fakten über eine sechsstellige Kennung —
+// den Hash ihres Textes, nicht ihre Position. Zwei gleiche Kennungen würden
+// zwei Stände vermischen. Die Wahrscheinlichkeit ist winzig, die Folge wäre
+// still und nicht behebbar; darum wird sie hier ausgeschlossen statt gehofft.
+const kennung = (text) => {
+  let h = 0;
+  for (let i = 0; i < text.length; i++) h = (h * 31 + text.charCodeAt(i)) | 0;
+  return (h >>> 0).toString(36).padStart(6, '0').slice(-6);
+};
+for (const [was, texte] of [
+  ['Vokabeln', Object.values(vokabeln).flat().map((v) => v[0])],
+  ['Sätze', saetze.map((s) => s.ru)],
+  ['Fakten', fakten]
+]) {
+  const gesehen = new Map();
+  for (const t of texte) {
+    const k = kennung(t);
+    if (gesehen.has(k)) {
+      meckern(was + ': «' + gesehen.get(k) + '» und «' + t + '» teilen die Kennung ' + k +
+        ' — im Sicherungscode wären ihre Stände nicht zu trennen. Einen der beiden Texte ändern.');
+    }
+    gesehen.set(k, t);
+  }
+}
+
+if (fehler.length) {
+  console.error('Prüfung fehlgeschlagen:\n' + fehler.map((f) => '  · ' + f).join('\n'));
+  process.exit(1);
+}
+
 // ── Schreiben oder vergleichen ──────────────────────────────
 const html = readFileSync(HTML, 'utf8');
 const von = html.indexOf(START);
