@@ -17,7 +17,7 @@ https://chillijust.github.io/. Zielgerät: iPhone 15 Pro Max (iOS 26.5.2), insta
 Rubriken in dieser Reihenfolge:
 **Lernsets** (zielgerichtet: die Wörter der nächsten Sätze, schaltet «Übersetzen» frei),
 **Freestyle** (freies Vokabeltraining nach Thema, ohne Sperren),
-**Tippen** (Eingabequiz mit kyrillischer Tastatur, nur ab Leitner-Stufe 4),
+**Tippen** (Eingabequiz mit kyrillischer Tastatur, ab Leitner-Stufe 3),
 **Übersetzen** (Satzbau aus Wort-Kacheln, nur Sätze, deren Wörter sitzen),
 **Bilanz** (Leitner-Statistik, Lernweg, Sicherungscode).
 Dazu drei Ansichten ohne Reiter: **Einstellungen** (Reglerknopf), **Sprachfakten**
@@ -137,7 +137,13 @@ zehn.
 - **Touch-Ziele und `:hover`.** Auf iOS bleibt ein Hover-Zustand nach dem Tippen hängen;
   Zustände deshalb über Klassen setzen, nicht über `:hover`.
 - **Wort umbenennen** setzt dessen Leitner-Stand zurück — die Kennung ist das russische
-  Wort. Themen umzubenennen ist dagegen folgenlos.
+  Wort. Themen umzubenennen ist dagegen folgenlos. **Einen Satz umzuformulieren** setzt
+  genauso seinen Stand in `satzBox`/`satzSeen` zurück; die Kennung ist der russische Satz.
+- **«Tippen» und «Übersetzen» sind zweigeteilt** (ADR 0015): Lernen und Wiederholung.
+  Fertig Gelerntes verlässt beide Stapel, bis die Frist `auffrischen` um ist. Wer dort
+  etwas ändert, muss beide Stapel und die drei Leerzustände mitdenken — «noch nichts
+  freigeschaltet», «alles gelernt», «gerade nichts fällig» fühlen sich verschieden an
+  und sagen Verschiedenes.
 
 ## Offen
 

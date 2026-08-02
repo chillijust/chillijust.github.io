@@ -1523,6 +1523,7 @@ function defaultSettings() {
     confirmUebersetzen: true,  // in «Übersetzen» erst legen, dann bestätigen
     requireComplete: false,    // Bestätigen erst bei vollständiger Lösung
     tippenStufe: 3,            // ab welcher Leitner-Stufe ein Wort im Tippen erscheint
+    auffrischen: 21,           // Tage, bis Fertiges zur Sicherheit noch einmal drankommt
     tastaturAn: false,         // eingebaute Tastatur in «Tippen» beim Start zeigen
     darstellung: 'system',     // 'system' · 'dunkel' · 'hell'
     ton: true                  // kurzer Klang bei richtig und falsch
@@ -1534,7 +1535,8 @@ function defaultState() {
     lastSeen: {},              // Zeitstempel je Wort, Grundlage der Fälligkeit
     typingStats: { correct: 0, wrong: 0 },
     transStats: { correct: 0, wrong: 0 },
-    readSeen: {},
+    satzBox: {},               // Leitner-Stufe je Satz, Kennung ist der russische Satz
+    satzSeen: {},              // Zeitstempel je Satz, Grundlage der Fälligkeit
     streak: 0,
     bestStreak: 0,
     answered: 0,
@@ -1550,7 +1552,17 @@ function mergeState(parsed) {
   Object.keys(d).forEach(function (k) { if (parsed[k] !== undefined) d[k] = parsed[k]; });
   d.boxes = migriereIds(d.boxes);
   d.lastSeen = migriereIds(d.lastSeen);
-  d.readSeen = migriereSaetze(d.readSeen);
+  d.satzBox = migriereSaetze(d.satzBox);
+  d.satzSeen = migriereSaetze(d.satzSeen);
+  // Ältere Stände kannten nur «gesehen», keine Stufe. Ein gesehener Satz
+  // startet auf Stufe 1 und gilt als sofort fällig — nichts geht verloren,
+  // aber als sitzend wird auch nichts verbucht, was nie geprüft wurde.
+  if (parsed.readSeen && typeof parsed.readSeen === 'object' && !parsed.satzBox) {
+    Object.keys(migriereSaetze(parsed.readSeen)).forEach(function (ru) {
+      d.satzBox[ru] = 1;
+      d.satzSeen[ru] = 0;
+    });
+  }
   d.fakten = saubereFakten(d.fakten);
   d.settings = defaultSettings();
   if (parsed.settings && typeof parsed.settings === 'object') {
@@ -1560,6 +1572,7 @@ function mergeState(parsed) {
     });
     var stufe = d.settings.tippenStufe;
     if (!(stufe >= 1 && stufe <= BOX_MAX)) d.settings.tippenStufe = 3;
+    if ([7, 14, 21, 30].indexOf(d.settings.auffrischen) === -1) d.settings.auffrischen = 21;
     if (['system', 'dunkel', 'hell'].indexOf(d.settings.darstellung) === -1) d.settings.darstellung = 'system';
   }
   return d;
@@ -1735,11 +1748,31 @@ function verwechslungsPool() {
   var begonnen = ALL_VOCAB.filter(function (v) { return (state.boxes[v.id] || 0) > 0; });
   return begonnen.length >= 8 ? begonnen : ALL_VOCAB;
 }
+// Auf der Endstufe entscheidet die Einstellung, sonst die Leitner-Leiter.
+function intervallFuer(box) {
+  if (box >= BOX_MAX) return (state.settings.auffrischen || 21) * TAG;
+  return INTERVALL[Math.min(box, INTERVALL.length - 1)];
+}
 function faellig(v, jetzt) {
-  var box = state.boxes[v.id] || 0;
   var seit = state.lastSeen[v.id];
   if (!seit) return true;
-  return jetzt - seit >= INTERVALL[Math.min(box, INTERVALL.length - 1)];
+  return jetzt - seit >= intervallFuer(state.boxes[v.id] || 0);
+}
+
+// ── Stand eines Satzes ──────────────────────────────────────
+// Sätze führen dieselbe Leiter wie Wörter: BOX_MAX Mal richtig heißt «sitzt».
+// Kennung ist der russische Satz, wie bei Wörtern das russische Wort.
+function satzBox(s) { return state.satzBox[s.ru] || 0; }
+function satzGeuebt(s) { return state.satzSeen[s.ru] !== undefined; }
+function satzFaellig(s, jetzt) {
+  var seit = state.satzSeen[s.ru];
+  if (!seit) return true;
+  return jetzt - seit >= intervallFuer(satzBox(s));
+}
+function satzUpdate(s, richtig) {
+  var cur = satzBox(s);
+  state.satzBox[s.ru] = richtig ? Math.min(BOX_MAX, cur + 1) : Math.max(0, cur - 1);
+  state.satzSeen[s.ru] = Date.now();
 }
 function faelligeAnzahl(liste) {
   var jetzt = Date.now();
@@ -2050,7 +2083,7 @@ function renderUeben() {
       // Frage neu aufsetzen, bevor wir gehen — sonst steht «Üben» bei der
       // Rückkehr noch in der Jubelphase und zeigt eine Frage ohne Knöpfe.
       uebZuruecksetzen();
-      trIdx = 0;
+      trTask = null;
       buildTransTask();
       setTab('uebersetzen');
     });
@@ -2213,7 +2246,8 @@ function renderUeben() {
 // Ein Satz wird erst angeboten, wenn jede seiner Voraussetzungen (Grundformen
 // aus dem Lehrplan) mindestens SATZ_STUFE erreicht hat.
 var SATZ_STUFE = 2;
-var trLevel = 1, trIdx = 0, trDir = 'ru-de';
+var trLevel = 1, trDir = 'ru-de';
+var trModus = 'lernen';   // 'lernen' · 'wiederholung' — wie in «Tippen»
 var trTask = null, trBuilt = [], trPhase = 'ask', trCorrect = null, trRevealed = false;
 
 function satzFrei(s) {
@@ -2229,20 +2263,79 @@ function freieSaetze(stufe) {
   return stufenSaetze(stufe).filter(satzFrei);
 }
 
-function buildTransTask() {
+// Dieselbe Teilung wie in «Tippen»: was noch nicht sitzt, und was sitzt, aber
+// nach der Auffrischfrist einmal zur Sicherheit drankommt. Beim Lernen wird
+// nicht nach Fälligkeit gefiltert — wer üben will, soll üben dürfen.
+function trLernen(stufe) {
+  return freieSaetze(stufe).filter(function (s) { return satzBox(s) < BOX_MAX; });
+}
+function trWiederholung(stufe) {
+  var jetzt = Date.now();
+  return freieSaetze(stufe).filter(function (s) {
+    return satzBox(s) >= BOX_MAX && satzFaellig(s, jetzt);
+  });
+}
+function trRuhend(stufe) {
+  var jetzt = Date.now();
+  return freieSaetze(stufe).filter(function (s) {
+    return satzBox(s) >= BOX_MAX && !satzFaellig(s, jetzt);
+  });
+}
+function trPool() {
+  return trModus === 'wiederholung' ? trWiederholung(trLevel) : trLernen(trLevel);
+}
+function trNaechsteAuffrischung() {
+  var jetzt = Date.now();
+  var frist = intervallFuer(BOX_MAX);
+  var beste = null;
+  trRuhend(trLevel).forEach(function (s) {
+    var wann = (state.satzSeen[s.ru] || 0) + frist;
+    if (beste === null || wann < beste) beste = wann;
+  });
+  if (beste === null) return '';
+  var tage = Math.max(1, Math.ceil((beste - jetzt) / TAG));
+  return tage === 1 ? 'morgen' : 'in ' + tage + ' Tagen';
+}
+
+// Niedrigste Stufe zuerst, bei Gleichstand das am längsten Zurückliegende.
+// Aus den vordersten vieren wird gelost, damit sich nicht jede Sitzung gleich
+// anfühlt; der gerade gelöste Satz kommt nicht sofort wieder.
+function waehleSatz(pool, ausser) {
+  if (!pool.length) return null;
+  var sortiert = pool.slice().sort(function (a, b) {
+    var ba = satzBox(a), bb = satzBox(b);
+    if (ba !== bb) return ba - bb;
+    return (state.satzSeen[a.ru] || 0) - (state.satzSeen[b.ru] || 0);
+  });
+  if (ausser && sortiert.length > 1) {
+    sortiert = sortiert.filter(function (s) { return s !== ausser; });
+  }
+  var fenster = sortiert.slice(0, Math.min(4, sortiert.length));
+  return fenster[Math.floor(Math.random() * fenster.length)];
+}
+
+// Ohne Argument wird der nächste Satz gewählt; mit Argument ein bestimmter.
+function buildTransTask(vorgabe) {
+  // Ist der gewählte Stapel leer und der andere nicht, dorthin wechseln.
+  if (!vorgabe && !trPool().length) {
+    var anderer = trModus === 'lernen' ? 'wiederholung' : 'lernen';
+    trModus = anderer;
+    if (!trPool().length) trModus = 'lernen';
+  }
   var liste = freieSaetze(trLevel);
-  if (!liste.length) { trTask = null; return; }
-  if (trIdx >= liste.length) trIdx = 0;
-  var satz = liste[trIdx];
+  var satz = vorgabe || waehleSatz(trPool(), trTask ? trTask.satz : null);
+  if (!satz) { trTask = null; return; }
   var ru = satz.ru, de = satz.de;
   var prompt = trDir === 'ru-de' ? ru : de;
   var targetTokens = tokenize(trDir === 'ru-de' ? de : ru);
   var solution = trDir === 'ru-de' ? de : ru;
   var targetNorm = {};
   targetTokens.forEach(function (w) { targetNorm[normalize(w)] = true; });
+  // Ablenker kommen aus allen freigeschalteten Sätzen der Stufe, nicht nur aus
+  // dem aktuellen Stapel — sonst wird die Auswahl mit der Zeit dünn.
   var otherWords = [];
-  liste.forEach(function (p, i) {
-    if (i === trIdx) return;
+  liste.forEach(function (p) {
+    if (p === satz) return;
     tokenize(trDir === 'ru-de' ? p.de : p.ru).forEach(function (w) {
       if (!targetNorm[normalize(w)]) otherWords.push(w);
     });
@@ -2284,36 +2377,83 @@ function trFinish(ok) {
   trCorrect = ok;
   ton(ok);
   trPhase = 'feedback';
-  state.readSeen[trTask.satz.ru] = true;
+  satzUpdate(trTask.satz, ok);
   state.transStats.correct += ok ? 1 : 0;
   state.transStats.wrong += ok ? 0 : 1;
   save();
 }
 
-// Kein Satz frei: zeigen, welche W\u00f6rter dem n\u00e4chstgelegenen noch fehlen.
+// Drei Gr\u00fcnde f\u00fcr eine leere Ansicht, die sich sehr verschieden anf\u00fchlen:
+// noch kein Satz freigeschaltet, alle S\u00e4tze sitzen, oder nichts f\u00e4llig.
 function renderUebersetzenLeer() {
-  var stufe = stufenSaetze(trLevel);
-  var naechster = stufe.slice().sort(function (a, b) {
-    return satzFehlt(a).length - satzFehlt(b).length;
-  })[0];
-  var fehlt = naechster ? satzFehlt(naechster) : [];
+  var frei = freieSaetze(trLevel);
+  var offen = trLernen(trLevel).length;
+  var frisch = trWiederholung(trLevel).length;
+  var ruhend = trRuhend(trLevel).length;
 
-  var html = '<section>' + stufenLeisteHtml() +
-    '<div class="leer">' + maskottchen('gross') +
-    '<h3>Noch kein Satz auf Stufe ' + trLevel + '</h3>' +
-    '<p>Ein Satz erscheint, sobald alle seine W\u00f6rter in \u00ab\u00dcben\u00bb mindestens Stufe ' + SATZ_STUFE +
-    ' erreicht haben.</p>';
-  if (fehlt.length) {
-    html += '<p class="naechste">Dem n\u00e4chsten Satz fehlen noch: ' + fehlt.slice(0, 6).map(function (w) {
-      return '<span class="cyr">' + esc(w) + '</span>';
-    }).join(' \u00b7 ') + (fehlt.length > 6 ? ' \u2026' : '') + '</p>';
+  var html = '<section>' + stufenLeisteHtml() + trKacheln() +
+    '<div class="leer">' + maskottchen('gross');
+
+  if (!frei.length) {
+    var stufe = stufenSaetze(trLevel);
+    var naechster = stufe.slice().sort(function (a, b) {
+      return satzFehlt(a).length - satzFehlt(b).length;
+    })[0];
+    var fehlt = naechster ? satzFehlt(naechster) : [];
+    html += '<h3>Noch kein Satz auf Stufe ' + trLevel + '</h3>' +
+      '<p>Ein Satz erscheint, sobald alle seine W\u00f6rter in \u00abLernsets\u00bb oder \u00abFreestyle\u00bb ' +
+      'mindestens Stufe ' + SATZ_STUFE + ' erreicht haben.</p>';
+    if (fehlt.length) {
+      html += '<p class="naechste">Dem n\u00e4chsten Satz fehlen noch: ' + fehlt.slice(0, 6).map(function (w) {
+        return '<span class="cyr">' + esc(w) + '</span>';
+      }).join(' \u00b7 ') + (fehlt.length > 6 ? ' \u2026' : '') + '</p>';
+    }
+    html += '<div class="btn-row"><button class="btn primary" id="trZuUeben">Zu \u00abLernsets\u00bb</button></div>';
+  } else if (trModus === 'wiederholung') {
+    html += '<h3>' + (ruhend ? 'Gerade nichts f\u00e4llig' : 'Noch nichts zum Auffrischen') + '</h3>' +
+      '<p>' + (ruhend
+        ? ruhend + (ruhend === 1 ? ' Satz sitzt und ruht.' : ' S\u00e4tze sitzen und ruhen.') +
+          ' Der n\u00e4chste kommt ' + esc(trNaechsteAuffrischung()) + ' zur Sicherheit noch einmal.'
+        : 'Hier erscheinen S\u00e4tze, die Sie ' + BOX_MAX + '\u00d7 richtig \u00fcbersetzt haben \u2014 nach ' +
+          (state.settings.auffrischen || 21) + ' Tagen einmal zur Sicherheit.') + '</p>';
+    if (offen) {
+      html += '<div class="btn-row"><button class="btn primary" id="trZuLernen">' +
+        offen + (offen === 1 ? ' Satz offen' : ' S\u00e4tze offen') + '</button></div>';
+    }
+  } else {
+    html += '<h3>Stufe ' + trLevel + ' sitzt</h3>' +
+      '<p>Alle ' + frei.length + ' freigeschalteten S\u00e4tze dieser Stufe haben Sie ' + BOX_MAX +
+      '\u00d7 richtig \u00fcbersetzt. ' +
+      (frisch
+        ? frisch + (frisch === 1 ? ' wartet' : ' warten') + ' zum Auffrischen.'
+        : 'Die n\u00e4chste Auffrischung kommt ' + esc(trNaechsteAuffrischung()) + '.') + '</p>' +
+      '<div class="btn-row">' +
+      (frisch ? '<button class="btn primary" id="trZuFrisch">Wiederholen</button>' : '') +
+      '<button class="btn ghost" id="trZuUeben">Neue W\u00f6rter lernen</button></div>';
   }
-  html += '<div class="btn-row"><button class="btn primary" id="trZuUeben">Zu \u00ab\u00dcben\u00bb</button></div>' +
-    '</div></section>';
+
+  html += '</div></section>';
   main.innerHTML = html;
+
   bindeStufenLeiste();
-  document.getElementById('trZuUeben').addEventListener('click', function () { setTab('lernsets'); });
+  var zu = document.getElementById('trZuUeben');
+  if (zu) zu.addEventListener('click', function () { setTab('lernsets'); });
+  var frischBtn = document.getElementById('trZuFrisch');
+  if (frischBtn) frischBtn.addEventListener('click', function () {
+    trModus = 'wiederholung';
+    trTask = null;
+    buildTransTask();
+    renderUebersetzen();
+  });
+  var lernBtn = document.getElementById('trZuLernen');
+  if (lernBtn) lernBtn.addEventListener('click', function () {
+    trModus = 'lernen';
+    trTask = null;
+    buildTransTask();
+    renderUebersetzen();
+  });
 }
+
 
 // Stufenwahl mit Angabe, wie viele S\u00e4tze je Stufe schon offen sind.
 function stufenLeisteHtml() {
@@ -2328,11 +2468,35 @@ function stufenLeisteHtml() {
   html += '<button class="chip" id="trDir">' + (trDir === 'ru-de' ? 'RU \u2192 DE' : 'DE \u2192 RU') + '</button></div>';
   return html;
 }
+// Zweite Reihe: derselbe Gedanke wie in «Tippen» — was noch offen ist und was
+// nur zur Sicherheit noch einmal kommt.
+function trKacheln() {
+  var offen = trLernen(trLevel).length;
+  var frisch = trWiederholung(trLevel).length;
+  return '<div class="controls">' +
+    '<button class="chip' + (trModus === 'lernen' ? ' active' : '') +
+    '" data-trmodus="lernen">Lernen \u00b7 ' + offen + '</button>' +
+    '<button class="chip' + (trModus === 'wiederholung' ? ' active' : '') +
+    '" data-trmodus="wiederholung">Wiederholung \u00b7 ' + frisch + '</button></div>';
+}
+
 function bindeStufenLeiste() {
+  main.querySelectorAll('[data-trmodus]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      if (trModus === b.dataset.trmodus) return;
+      trModus = b.dataset.trmodus;
+      trTask = null;
+      trBuilt = [];
+      trPhase = 'ask';
+      trRevealed = false;
+      buildTransTask();
+      renderUebersetzen();
+    });
+  });
   main.querySelectorAll('[data-level]').forEach(function (b) {
     b.addEventListener('click', function () {
       trLevel = parseInt(b.dataset.level, 10);
-      trIdx = 0;
+      trTask = null;
       buildTransTask();
       renderUebersetzen();
     });
@@ -2350,10 +2514,9 @@ function renderUebersetzen() {
   if (!trTask) { renderUebersetzenLeer(); return; }
   var t = trTask;
   var promptIsRu = trDir === 'ru-de';
-  var list = freieSaetze(trLevel);
-  var seenCount = stufenSaetze(trLevel).filter(function (s) { return state.readSeen[s.ru]; }).length;
+  var liste = freieSaetze(trLevel);
 
-  var html = '<section>' + stufenLeisteHtml();
+  var html = '<section>' + stufenLeisteHtml() + trKacheln();
 
   html += '<div class="card"><p class="task-label">Übersetzen Sie</p>' +
     '<p class="sentence' + (promptIsRu ? ' cyr' : '') + '">' + esc(t.prompt) +
@@ -2404,8 +2567,10 @@ function renderUebersetzen() {
   }
   html += '</div>';
 
-  html += '<p class="session-info">Satz ' + (trIdx + 1) + ' / ' + list.length + ' · ' +
-    seenCount + ' von ' + list.length + ' geübt';
+  var sitzt = liste.filter(function (x) { return satzBox(x) >= BOX_MAX; }).length;
+  html += '<p class="session-info">' + trPool().length +
+    (trModus === 'wiederholung' ? ' zum Auffrischen' : ' offen') + ' · ' +
+    sitzt + ' von ' + liste.length + ' sitzt';
   if (state.transStats.correct + state.transStats.wrong > 0) {
     html += ' · ' + state.transStats.correct + ' richtig, ' + state.transStats.wrong + ' falsch';
   }
@@ -2450,8 +2615,6 @@ function renderUebersetzen() {
     });
   } else {
     document.getElementById('trNext').addEventListener('click', function () {
-      var frei = freieSaetze(trLevel);
-      trIdx = frei.length ? (trIdx + 1) % frei.length : 0;
       buildTransTask();
       renderUebersetzen();
     });
@@ -2459,41 +2622,156 @@ function renderUebersetzen() {
 }
 
 // ── TIPPEN ──────────────────────────────────────────────────
-// Getippt wird nur, was beim Vokabeltraining sitzt: ab settings.tippenStufe.
+// Getippt wird, was beim Vokabeltraining angefangen hat zu sitzen — ab
+// settings.tippenStufe. Wer ein Wort richtig tippt, macht damit die letzte
+// Stufe voll; danach ist es **aus dem Pool**. Nach der Auffrischfrist kommt es
+// einmal zur Sicherheit wieder — richtig getippt, und es ist wieder draußen.
 var tWord = null, tResult = null, tHint = false, tKb = null;
+var tippenModus = 'lernen';   // 'lernen' · 'wiederholung'
 
-function tippenPool() {
+// Offen: begonnen, aber noch nicht fertig. Ohne Fälligkeitsfilter — wer üben
+// will, soll üben dürfen, nicht auf den nächsten Tag warten.
+function tippenLernen() {
   var schwelle = state.settings.tippenStufe;
-  return ALL_VOCAB.filter(function (v) { return (state.boxes[v.id] || 0) >= schwelle; });
+  return ALL_VOCAB.filter(function (v) {
+    var b = state.boxes[v.id] || 0;
+    return b >= schwelle && b < BOX_MAX;
+  });
+}
+// Fertig und die Frist ist um: einmal zur Sicherheit.
+function tippenWiederholung() {
+  var jetzt = Date.now();
+  return ALL_VOCAB.filter(function (v) {
+    return (state.boxes[v.id] || 0) >= BOX_MAX && faellig(v, jetzt);
+  });
+}
+function tippenPool() {
+  return tippenModus === 'wiederholung' ? tippenWiederholung() : tippenLernen();
+}
+// Fertig, aber noch nicht fällig — das sind die, die gerade ruhen.
+function tippenRuhend() {
+  var jetzt = Date.now();
+  return ALL_VOCAB.filter(function (v) {
+    return (state.boxes[v.id] || 0) >= BOX_MAX && !faellig(v, jetzt);
+  });
+}
+// Wann wird das nächste ruhende Wort wieder fällig?
+function naechsteAuffrischung() {
+  var jetzt = Date.now();
+  var frist = intervallFuer(BOX_MAX);
+  var beste = null;
+  tippenRuhend().forEach(function (v) {
+    var wann = (state.lastSeen[v.id] || 0) + frist;
+    if (beste === null || wann < beste) beste = wann;
+  });
+  if (beste === null) return '';
+  var tage = Math.max(1, Math.ceil((beste - jetzt) / TAG));
+  return tage === 1 ? 'morgen' : 'in ' + tage + ' Tagen';
 }
 
-// Leerzustand: sagen, woran es liegt und was als Nächstes ansteht.
+// Die Kachelreihe: Lernen und Wiederholung mit ihren Beständen.
+function tippenKacheln() {
+  var offen = tippenLernen().length;
+  var frisch = tippenWiederholung().length;
+  return '<div class="controls">' +
+    '<button class="chip' + (tippenModus === 'lernen' ? ' active' : '') +
+    '" data-tmodus="lernen">Lernen \u00b7 ' + offen + '</button>' +
+    '<button class="chip' + (tippenModus === 'wiederholung' ? ' active' : '') +
+    '" data-tmodus="wiederholung">Wiederholung \u00b7 ' + frisch + '</button></div>';
+}
+function bindeTippenKacheln() {
+  main.querySelectorAll('[data-tmodus]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      if (tippenModus === b.dataset.tmodus) return;
+      tippenModus = b.dataset.tmodus;
+      tWord = null;
+      tResult = null;
+      tHint = false;
+      renderTippen();
+    });
+  });
+}
+
+// Leerzustand: drei Fälle, die sich sehr verschieden anfühlen — noch nichts
+// freigeschaltet, alles getippt, oder gerade nichts fällig.
 function renderTippenLeer() {
   var schwelle = state.settings.tippenStufe;
+  var ruhend = tippenRuhend().length;
+  var offen = tippenLernen().length;
+  var frisch = tippenWiederholung().length;
   var fast = ALL_VOCAB.filter(function (v) {
     var b = state.boxes[v.id] || 0;
     return b > 0 && b < schwelle;
   }).sort(function (a, b) { return (state.boxes[b.id] || 0) - (state.boxes[a.id] || 0); });
 
-  var html = '<section><div class="leer">' + maskottchen('gross') +
-    '<h3>Noch kein Wort freigeschaltet</h3>' +
-    '<p>Hier tippen Sie nur Wörter, die in «Lernsets» oder «Freestyle» sitzen — ab Stufe ' + schwelle +
-    ' von ' + BOX_MAX + ', also ' + schwelle + '× nacheinander richtig beantwortet.</p>';
-  if (fast.length) {
-    html += '<p class="naechste">Am nächsten dran: ' + fast.slice(0, 3).map(function (v) {
-      return '<span class="cyr">' + esc(v.ru) + '</span> (Stufe ' + (state.boxes[v.id] || 0) + ')';
-    }).join(' · ') + '</p>';
+  var html = '<section>' + tippenKacheln() + '<div class="leer">' + maskottchen('gross');
+
+  if (tippenModus === 'wiederholung') {
+    html += '<h3>' + (ruhend ? 'Gerade nichts fällig' : 'Noch nichts zum Auffrischen') + '</h3>' +
+      '<p>' + (ruhend
+        ? ruhend + (ruhend === 1 ? ' Wort sitzt' : ' Wörter sitzen') + ' und ruhen. Das nächste kommt ' +
+          esc(naechsteAuffrischung()) + ' zur Sicherheit noch einmal.'
+        : 'Hier erscheinen Wörter, die Sie fertig gelernt haben — nach ' +
+          (state.settings.auffrischen || 21) + ' Tagen einmal zur Sicherheit.') + '</p>';
+    if (offen) {
+      html += '<div class="btn-row"><button class="btn primary" id="tZuLernen">' +
+        offen + (offen === 1 ? ' Wort offen' : ' Wörter offen') + '</button></div>';
+    }
+  } else if (ruhend || frisch) {
+    html += '<h3>Alles getippt</h3>' +
+      '<p>Auf der Lernstufe wartet kein Wort mehr. ' +
+      (ruhend ? ruhend + (ruhend === 1 ? ' Wort sitzt und ruht. ' : ' Wörter sitzen und ruhen. ') : '') +
+      (frisch
+        ? frisch + (frisch === 1 ? ' ist' : ' sind') + ' zum Auffrischen bereit.'
+        : 'Die nächste Auffrischung kommt ' + esc(naechsteAuffrischung()) + '.') +
+      '</p>';
+    html += '<div class="btn-row">' +
+      (frisch ? '<button class="btn primary" id="tZuFrisch">Wiederholen</button>' : '') +
+      '<button class="btn ghost" id="tZuUeben">Neue Wörter lernen</button></div>';
   } else {
-    html += '<p class="naechste">Noch kein Wort begonnen — fangen Sie mit dem ersten Lernset an.</p>';
+    html += '<h3>Noch kein Wort freigeschaltet</h3>' +
+      '<p>Hier tippen Sie nur Wörter, die in «Lernsets» oder «Freestyle» angefangen haben zu sitzen — ' +
+      'ab Stufe ' + schwelle + ' von ' + BOX_MAX + ', also ' + schwelle +
+      '× nacheinander richtig beantwortet.</p>';
+    if (fast.length) {
+      html += '<p class="naechste">Am nächsten dran: ' + fast.slice(0, 3).map(function (v) {
+        return '<span class="cyr">' + esc(v.ru) + '</span> (Stufe ' + (state.boxes[v.id] || 0) + ')';
+      }).join(' · ') + '</p>';
+    } else {
+      html += '<p class="naechste">Noch kein Wort begonnen — fangen Sie mit dem ersten Lernset an.</p>';
+    }
+    html += '<div class="btn-row"><button class="btn primary" id="tZuUeben">Zu «Lernsets»</button></div>';
   }
-  html += '<div class="btn-row"><button class="btn primary" id="tZuUeben">Zu «Lernsets»</button></div>';
-  html += '</div><p class="session-info">Schwelle änderbar in den Einstellungen.</p></section>';
+
+  html += '</div><p class="session-info">Schwelle und Auffrischfrist stehen in den Einstellungen.</p></section>';
   main.innerHTML = html;
-  document.getElementById('tZuUeben').addEventListener('click', function () { setTab('lernsets'); });
+
+  bindeTippenKacheln();
+  var zu = document.getElementById('tZuUeben');
+  if (zu) zu.addEventListener('click', function () { setTab('lernsets'); });
+  var frischBtn = document.getElementById('tZuFrisch');
+  if (frischBtn) frischBtn.addEventListener('click', function () {
+    tippenModus = 'wiederholung';
+    tWord = null;
+    renderTippen();
+  });
+  var lernBtn = document.getElementById('tZuLernen');
+  if (lernBtn) lernBtn.addEventListener('click', function () {
+    tippenModus = 'lernen';
+    tWord = null;
+    renderTippen();
+  });
 }
 
 function renderTippen() {
   if (tKb === null) tKb = state.settings.tastaturAn;
+  // Ist der gewählte Stapel leer und der andere nicht, dorthin wechseln —
+  // sonst stünde man vor einem Leerzustand, obwohl es etwas zu tun gibt.
+  if (!tResult && !tippenPool().length) {
+    var anderer = tippenModus === 'lernen' ? 'wiederholung' : 'lernen';
+    tippenModus = anderer;
+    if (!tippenPool().length) tippenModus = 'lernen';
+  }
   var pool = tippenPool();
   // Während der Rückmeldung bleibt das Wort stehen, auch wenn es nach einem
   // Fehler unter die Schwelle gerutscht ist — sonst verschwände die Auflösung.
@@ -2503,8 +2781,9 @@ function renderTippen() {
   var stats = state.typingStats;
   var total = stats.correct + stats.wrong;
 
-  var html = '<section><div class="card">' +
-    '<p class="task-label">Schreiben Sie auf Russisch</p>' +
+  var html = '<section>' + tippenKacheln() + '<div class="card">' +
+    '<p class="task-label">' + (tippenModus === 'wiederholung'
+      ? 'Zur Sicherheit noch einmal' : 'Schreiben Sie auf Russisch') + '</p>' +
     '<p class="word">' + esc(w.de) + '</p>' +
     (tHint ? '<p class="translit">[' + esc(w.tr) + ']</p>' : '') +
     '<input type="text" id="tInput" class="cyr' + (tResult === 'right' ? ' ok' : tResult === 'wrong' ? ' err' : '') + '"' +
@@ -2537,10 +2816,13 @@ function renderTippen() {
     });
     html += '</div>';
   }
-  html += '<p class="session-info">' + stats.correct + ' richtig · ' + stats.wrong + ' falsch' +
+  html += '<p class="session-info">' + pool.length +
+    (tippenModus === 'wiederholung' ? ' zum Auffrischen' : ' offen') + ' · ' +
+    stats.correct + ' richtig · ' + stats.wrong + ' falsch' +
     (total > 0 ? ' · Quote ' + Math.round(stats.correct / total * 100) + ' %' : '') + '</p></section>';
 
   main.innerHTML = html;
+  bindeTippenKacheln();
 
   var input = document.getElementById('tInput');
 
@@ -2642,6 +2924,9 @@ function renderEinstellungen() {
     wahl('tippenStufe', 'Tippen ab Stufe',
       'Ab welcher Leitner-Stufe ein Wort in «Tippen» erscheint. Stufe 3 heißt: drei Mal nacheinander richtig — richtig getippt macht es dann Stufe 4 voll.',
       [{ wert: 2, text: '2' }, { wert: 3, text: '3' }, { wert: 4, text: '4' }]) +
+    wahl('auffrischen', 'Auffrischen nach',
+      'Fertig Gelerntes verschwindet aus «Tippen» und «Übersetzen». Nach dieser Frist kommt es einmal zur Sicherheit zurück — richtig beantwortet, und es ist wieder draußen.',
+      [{ wert: 7, text: '7 T' }, { wert: 14, text: '14 T' }, { wert: 21, text: '21 T' }, { wert: 30, text: '30 T' }]) +
     '<h2>Abgabe</h2>' +
     schalter('confirmUeben', 'Bestätigen beim Vokabeltraining',
       'Antwort erst auswählen, dann mit «Bestätigen» abgeben. Aus: Der erste Tipp zählt sofort.') +
@@ -2891,7 +3176,7 @@ function renderBilanz() {
   var started = ALL_VOCAB.length - counts[0];
   var readTotal = 0;
   readTotal = SENTENCES.length;
-  var readSeen = SENTENCES.filter(function (s) { return state.readSeen[s.ru]; }).length;
+  var satzSitzt = SENTENCES.filter(function (s) { return satzBox(s) >= BOX_MAX; }).length;
   var readFrei = SENTENCES.filter(satzFrei).length;
 
   function stat(label, value, accent) {
@@ -2903,7 +3188,7 @@ function renderBilanz() {
     stat('Wörter gesamt', ALL_VOCAB.length) +
     stat('Begonnen', started) +
     stat('Gemeistert', mastered, true) +
-    stat('Sätze übersetzt', readSeen + '/' + readFrei) +
+    stat('Sätze sitzen', satzSitzt + '/' + readFrei) +
     stat('Beantwortet', state.answered) +
     stat('Beste Serie', state.bestStreak, true) +
     '</div>';

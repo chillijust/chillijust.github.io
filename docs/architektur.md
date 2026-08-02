@@ -147,6 +147,53 @@ Ausgelöst wird er an genau drei Stellen: `uebPruefen()` (Lernsets/Freestyle),
 `trFinish()` (Übersetzen) und `check()` in `renderTippen()`. «Aufdecken» bleibt still,
 weil das keine Antwort ist.
 
+## Fertig heißt raus — und einmal zurück
+
+«Tippen» und «Übersetzen» teilen ihren Bestand in **zwei Stapel**, sichtbar als zwei
+Kacheln mit ihren Beständen:
+
+| Stapel | Wörter | Sätze |
+| --- | --- | --- |
+| **Lernen** | `tippenStufe <= box < BOX_MAX` | `satzBox < BOX_MAX` |
+| **Wiederholung** | `box === BOX_MAX` **und** fällig | `satzBox === BOX_MAX` **und** fällig |
+| *(ruhend, nicht sichtbar)* | `box === BOX_MAX`, noch nicht fällig | `satzBox === BOX_MAX`, noch nicht fällig |
+
+Wer etwas fertig lernt, sieht es also **nicht mehr** — bis die Auffrischfrist um ist.
+Dann kommt es einmal zur Sicherheit; richtig beantwortet ruht es wieder, falsch fällt es
+eine Stufe zurück und steht damit von selbst im Lernstapel.
+
+**Beim Lernen gilt keine Fälligkeit.** Wer üben will, soll üben dürfen, nicht auf den
+nächsten Tag warten. Gefiltert wird erst auf der Endstufe — dort ist Warten der Sinn der
+Sache.
+
+`intervallFuer(box)` liefert für die Endstufe die Einstellung `auffrischen`
+(7/14/21/30 Tage, Vorgabe 21), darunter die feste Leitner-Leiter `INTERVALL`.
+
+**Umschalten geschieht von selbst:** Ist der gewählte Stapel leer und der andere nicht,
+wechseln `renderTippen()` beziehungsweise `buildTransTask()` hinüber. Sind beide leer,
+nennt der Leerzustand, wann das Nächste fällig wird (`naechsteAuffrischung()`,
+`trNaechsteAuffrischung()`).
+
+### Sätze führen dieselbe Leiter
+
+Bis hierher kannte ein Satz nur `readSeen[ru] = true` — «wurde gezeigt». Das reicht für
+eine Wiederholungslogik nicht: es fehlten Stufe und Zeitstempel. Sätze haben deshalb
+jetzt `state.satzBox` und `state.satzSeen`, gebaut wie `boxes`/`lastSeen` bei Wörtern,
+mit derselben Skala 0…`BOX_MAX` und denselben Intervallen. Kennung ist der russische
+Satz.
+
+`satzUpdate(satz, richtig)` schreibt beides, aufgerufen aus `trFinish()` — also auch beim
+Aufdecken, das als «falsch» zählt.
+
+**Migration:** Ein alter Stand mit `readSeen` wird beim Einlesen übernommen — jeder
+gesehene Satz startet auf Stufe 1 mit Zeitstempel 0, gilt also als sofort fällig. Nichts
+geht verloren, aber als sitzend wird auch nichts verbucht, was nie geprüft wurde.
+
+`buildTransTask(vorgabe)` wählt ohne Argument über `waehleSatz()`: niedrigste Stufe
+zuerst, bei Gleichstand das am längsten Zurückliegende, ausgelost aus den vordersten
+vieren; der gerade gelöste Satz kommt nicht sofort wieder. Der frühere Laufindex `trIdx`
+entfällt — eine feste Reihenfolge verträgt sich nicht mit zwei Stapeln.
+
 ## Tickets
 
 Fehler und Wünsche werden in der App **geschrieben und aufbewahrt**, nicht verschickt.
