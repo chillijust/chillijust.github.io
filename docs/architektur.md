@@ -147,6 +147,66 @@ Ausgelöst wird er an genau drei Stellen: `uebPruefen()` (Lernsets/Freestyle),
 `trFinish()` (Übersetzen) und `check()` in `renderTippen()`. «Aufdecken» bleibt still,
 weil das keine Antwort ist.
 
+## Tickets
+
+Fehler und Wünsche werden in der App **geschrieben und aufbewahrt**, nicht verschickt.
+Der Knopf «Senden» ist ein gewöhnlicher Verweis auf ein vorausgefülltes GitHub-Formular:
+
+```
+https://github.com/chillijust/chillingo-tickets/issues/new?title=…&labels=…&body=…
+```
+
+Abgeschickt wird dort, nicht hier. Das hat zwei Folgen, die den Ausschlag gaben: Die App
+braucht **keinen Zugangsschlüssel** — es gibt kein Geheimnis, das in einer öffentlich
+lesbaren Datei liegen müsste — und die Zugangskontrolle macht GitHub. Ein Issue im
+privaten Zielrepo kann nur anlegen, wer dort angemeldet und berechtigt ist (ADR 0014).
+
+| Baustein | Aufgabe |
+| --- | --- |
+| `TICKET_REPO` | Zielrepo, privat, getrennt von der öffentlichen App |
+| `TICKET_KEY` | eigener `localStorage`-Schlüssel (`chillingo_tickets_v1`) |
+| `ticketAnlegen()` | legt an, trimmt, begrenzt, ergänzt Rubrik, Stand und Gerät |
+| `ticketRumpf()` | baut den Issue-Text, kürzt bei `TICKET_MAX` Zeichen |
+| `ticketUrl()` | baut die Adresse, alles über `encodeURIComponent` |
+| `renderTickets()` | Liste, Formular, Löschen, «Alle als Text kopieren» |
+
+Ein Ticket hält `id`, `art` (`bug`/`feature`), `titel`, `text`, `reiter`, `stand`,
+`geraet`, `erstellt` und `gesendet`. Der **eigene Speicherschlüssel** hält den
+Sicherungscode schlank: Tickets gehören nicht zum Lernstand und sollen ihn nicht
+aufblähen.
+
+`APP_STAND` ist das Datum der ausgelieferten Datei. `tools/build.mjs` stempelt es bei
+jedem Schreiblauf; `--check` vergleicht bewusst *ohne* diesen Wert, sonst wäre die Datei
+jeden Tag «nicht auf Stand».
+
+Erreichbar über **Einstellungen → Rückmeldung → Tickets**. `tkHerkunft` merkt sich die
+Rubrik, aus der man kam — die ist gemeint, wenn ein Fehler gemeldet wird, nicht
+«Einstellungen».
+
+## Absicherung
+
+Die ausgelieferte Datei ist öffentlich lesbar. Daraus folgen drei Regeln, die
+`tools/pruefen.mjs` prüft statt sie nur zu behaupten:
+
+1. **Kein Geheimnis in der Datei.** Kein Token, kein Passwort, kein Schlüssel — Prüfung
+   auf die bekannten GitHub-Tokenformen und auf `Authorization:`/`Bearer`.
+2. **Genau eine Fremdadresse**, `https://github.com/`, und die wird nicht *geladen*,
+   sondern angetippt.
+3. **Content-Security-Policy als `<meta>`**:
+   `default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'`.
+   Damit ist «keine externen Ressourcen» für den Browser erzwingbar statt nur
+   verabredet: Käme je fremder Code in die Seite, könnte er nichts nachladen und nichts
+   nach außen senden. Verweise, die man antippt, bleiben unberührt — CSP regelt geladene
+   Ressourcen und Formularziele, nicht Navigation über `<a>`.
+
+Ticketeingaben laufen wie alle Ausgaben durch `esc()`; die Zieladresse wird per
+`a.href = …` gesetzt, nie als Attribut in eine Zeichenkette gebaut. Der Verweis trägt
+`rel="noopener noreferrer"`.
+
+Was **nicht** geschützt ist und auch nicht sein kann: Eine Abfrage im Client wäre eine
+Türklingel, kein Schloss — der Quelltext ist öffentlich, jede Prüfung darin lässt sich
+umgehen. Deshalb liegt die Kontrolle bei GitHub und nicht bei uns.
+
 ## Symbole
 
 Das App-Symbol für „Zum Home-Bildschirm" liegt als PNG-Daten-URI im `<link

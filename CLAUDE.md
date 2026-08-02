@@ -20,8 +20,8 @@ Rubriken in dieser Reihenfolge:
 **Tippen** (Eingabequiz mit kyrillischer Tastatur, nur ab Leitner-Stufe 4),
 **Übersetzen** (Satzbau aus Wort-Kacheln, nur Sätze, deren Wörter sitzen),
 **Bilanz** (Leitner-Statistik, Lernweg, Sicherungscode).
-Dazu zwei Ansichten ohne Reiter: **Einstellungen** (Reglerknopf) und **Sprachfakten**
-(aus der Faktenkarte oder der Bilanz).
+Dazu drei Ansichten ohne Reiter: **Einstellungen** (Reglerknopf), **Sprachfakten**
+(aus der Faktenkarte oder der Bilanz) und **Tickets** (aus den Einstellungen).
 
 Maskottchen ist die Chili — freigestellt aus `docs/IMG_2942.png` mit
 `tools/freistellen.py`, abgelegt als `docs/maskottchen-freigestellt.png`. In der App gibt es sie
@@ -35,7 +35,14 @@ zweites Mal einbetten, und nie über Scroll-Rechnung positionieren — sie steht
 - Kein React, kein JSX, kein Build-Schritt, keine npm-Toolchain im Auslieferungspfad.
 - Keine externen Ressourcen: keine CDNs, keine Google Fonts, keine externen Bilder, keine
   API-Aufrufe. Alles inline. Symbole als Inline-SVG über `ICON` — **keine Emoji-Zeichen**,
-  iOS rendert sie als farbige Grafik. `tools/pruefen.mjs` bricht darüber ab.
+  iOS rendert sie als farbige Grafik. `tools/pruefen.mjs` bricht darüber ab. Die
+  Content-Security-Policy im `<head>` macht die Regel für den Browser erzwingbar; sie
+  bleibt drin.
+- **Die ausgelieferte Datei ist öffentlich lesbar.** Nie ein Token, ein Passwort oder
+  einen Schlüssel hineinschreiben — auch nicht verschleiert, auch nicht «nur zum Testen».
+  Zugangskontrolle gehört auf die Gegenseite (bei Tickets: GitHub). `pruefen.mjs` sucht
+  nach tokenähnlichem Text und nach unerwarteten Fremdadressen; erlaubt ist einzig
+  `https://github.com/` als **antippbarer** Verweis, nicht als geladene Ressource.
 - Persistenz ausschließlich über `localStorage`, jeder Zugriff in `try/catch`.
 - Mobile-first: Touch-Ziele ≥ 44 × 44 px, keine Hover-abhängige Bedienung,
   `-webkit-tap-highlight-color: transparent`, `env(safe-area-inset-*)` für Notch und
@@ -80,6 +87,10 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   voraussetzen.
 - **Der Datenblock zwischen `DATEN:START` und `DATEN:ENDE` ist generiert.** Inhalte
   ausschließlich in `/data` ändern, danach `node tools/build.mjs`.
+- **`APP_STAND` setzt `tools/build.mjs`**, nicht die Hand. Der Wert geht in jedes Ticket
+  ein. `--check` vergleicht ohne ihn, sonst wäre die Datei jeden Tag «nicht auf Stand».
+- **Tickets liegen in `chillingo_tickets_v1`**, nicht im Lernstand — der Sicherungscode
+  soll schlank bleiben. Ziel ist das private Repo `chillijust/chillingo-tickets`.
 - **Die Reihenfolge in `data/vokabeln.json` ist der Lehrplan.** Aus ihr und den
   Satzvoraussetzungen bauen sich die Lernsets (`SET_MAX`, `SATZ_STUFE`); Ergänzungen ans
   Ende des passenden Themas.

@@ -263,10 +263,23 @@ if (von === -1 || bis === -1 || bis < von) {
   console.error('index.html: Datenmarker nicht gefunden. Erwartet werden die Zeilen\n  ' + START + '\n  ' + ENDE);
   process.exit(1);
 }
-const neu = html.slice(0, von) + block + html.slice(bis + ENDE.length);
+// Der Stand landet in jedem Ticket, das aus der App kommt. Er wird hier
+// mitgeschrieben, damit ihn niemand von Hand pflegen muss.
+const heute = new Date().toISOString().slice(0, 10);
+const stempeln = (t) => t.replace(/var APP_STAND = '[^']*';/, "var APP_STAND = '" + heute + "';");
 
+const neu = stempeln(html.slice(0, von) + block + html.slice(bis + ENDE.length));
+
+if (!/var APP_STAND = '\d{4}-\d{2}-\d{2}';/.test(neu)) {
+  console.error('index.html: APP_STAND nicht gefunden — der Stand kann nicht gestempelt werden.');
+  process.exit(1);
+}
+
+// Der Stand allein ist kein Grund, «nicht auf Stand» zu melden: er ändert sich
+// jeden Tag von selbst. Verglichen wird darum ohne ihn.
+const ohneStand = (t) => t.replace(/var APP_STAND = '[^']*';/, '');
 const abweichungen = [];
-if (neu !== html) abweichungen.push('index.html');
+if (ohneStand(neu) !== ohneStand(html)) abweichungen.push('index.html');
 for (const [pfad, inhalt] of dateien) {
   if (readFileSync(join(ROOT, pfad), 'utf8') !== inhalt) abweichungen.push(pfad);
 }

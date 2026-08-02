@@ -6,6 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Chillingo">
+<!-- Die Regel «keine externen Ressourcen» wird hier für den Browser
+     erzwingbar: nichts darf geladen und nichts gesendet werden. Erlaubt sind
+     nur eingebettete Bilder (data:) und der eigene Inline-Code. Verweise, die
+     man antippt, bleiben davon unberührt — nur das Ticket-Ziel auf GitHub. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+<meta name="referrer" content="no-referrer">
 <!-- App-Symbol für «Zum Home-Bildschirm»: das Maskottchen aus docs/IMG_2942.png,
      auf 180 px verkleinert und als Daten-URI eingebettet, damit die Datei allein
      bleibt. Der kleine Zwilling dient als Symbol im Browser-Reiter. -->
@@ -465,6 +471,34 @@ textarea {
 }
 textarea:focus { outline: none; border-color: var(--ice); }
 .danger-zone { margin-top: 34px; }
+
+/* Tickets: Eingabefelder für Fließtext statt für Kennungen und Codes. */
+input.zeile {
+  font-size: 16px; text-align: left; margin-top: 12px; padding: 12px; min-height: 44px;
+  background: var(--card-2);
+}
+textarea.fliess { font-family: inherit; word-break: normal; line-height: 1.5; background: var(--card-2); }
+.tkliste { display: flex; flex-direction: column; gap: 10px; }
+.tkzeile {
+  display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+  box-shadow: inset 0 1px 0 var(--lip);
+}
+.tkzeile.gesendet { opacity: .6; }
+.tktext { flex: 1; font-size: 14px; line-height: 1.45; min-width: 0; }
+.tkmeta { display: block; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); margin-top: 6px; }
+.tkart {
+  display: inline-block; font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px; margin-right: 8px; color: var(--dim);
+}
+.tkart.bug { border-color: var(--bad); color: var(--bad); }
+.tkart.feature { border-color: var(--ice); color: var(--ice); }
+.tksenden {
+  flex: none; min-height: 44px; display: inline-flex; align-items: center; padding: 0 14px;
+  border-radius: 10px; border: 1px solid var(--gold); background: var(--gold); color: var(--gold-ink);
+  font-size: 13px; text-decoration: none;
+}
+.tkzeile.gesendet .tksenden { background: none; color: var(--dim); border-color: var(--line); }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
@@ -1128,6 +1162,9 @@ var BOX_MAX = 4;
 // freigeschaltet, Lernsets damit abgeschlossen.
 var SATZ_STUFE = 2;
 var STORAGE_KEY = 'russisch_trainer_v1';
+// Stand der ausgelieferten Datei. Wird von tools/build.mjs gesetzt und geht in
+// jedes Ticket ein, damit ein Bericht sagt, welcher Stand gemeint war.
+var APP_STAND = '2026-08-02'; /* == STAND == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -1274,6 +1311,92 @@ function ton(richtig) {
       o.stop(t + dauer + 0.05);
     });
   } catch (e) { /* Ton ist Beiwerk, nie Voraussetzung */ }
+}
+
+// ── Tickets ─────────────────────────────────────────────────
+// Fehler und Wünsche werden hier nur *geschrieben* und aufbewahrt. Verschickt
+// wird nichts: der Knopf öffnet ein vorausgefülltes GitHub-Formular, und erst
+// dort schickt man ab. Damit kommt die App ohne Zugangsschlüssel aus — es gibt
+// kein Geheimnis, das in einer öffentlich lesbaren Datei liegen müsste, und
+// anlegen kann ein Ticket nur, wer bei GitHub im Zielrepo angemeldet ist.
+// Eigener Speicherschlüssel, damit der Sicherungscode schlank bleibt.
+var TICKET_REPO = 'chillijust/chillingo-tickets';
+var TICKET_KEY = 'chillingo_tickets_v1';
+var TICKET_MAX = 1400;   // Zeichen im Rumpf; darüber wird die Adresse unhandlich
+var tickets = [];
+
+function ticketsLaden() {
+  try {
+    var roh = localStorage.getItem(TICKET_KEY);
+    var d = roh ? JSON.parse(roh) : null;
+    tickets = (d && Object.prototype.toString.call(d.tickets) === '[object Array]') ? d.tickets : [];
+  } catch (e) {
+    tickets = [];
+  }
+}
+
+function ticketsSichern() {
+  try {
+    localStorage.setItem(TICKET_KEY, JSON.stringify({ tickets: tickets }));
+    zeigeStatus('ok', 'gespeichert');
+  } catch (e) {
+    zeigeStatus('err', 'Ticket nicht gespeichert — Speicher voll oder privater Modus.');
+  }
+}
+
+var RUBRIK = {
+  lernsets: 'Lernsets', freestyle: 'Freestyle', tippen: 'Tippen',
+  uebersetzen: 'Übersetzen', bilanz: 'Bilanz', einstellungen: 'Einstellungen',
+  fakten: 'Sprachfakten', tickets: 'Tickets'
+};
+
+function datumKurz(ms) {
+  try { return new Date(ms).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }); }
+  catch (e) { return ''; }
+}
+
+// Der Rumpf des Issues: erst der Text, darunter das, was mir bei einem Bericht
+// sonst fehlt — Rubrik, Stand der App, Gerät.
+function ticketRumpf(t) {
+  var text = t.text || '_(keine Beschreibung)_';
+  if (text.length > TICKET_MAX) {
+    text = text.slice(0, TICKET_MAX) + '\n\n… gekürzt, damit die Adresse nicht zu lang wird.';
+  }
+  var zeit = '';
+  try { zeit = new Date(t.erstellt).toISOString().slice(0, 16).replace('T', ' ') + ' UTC'; } catch (e) {}
+  return text + '\n\n---\n' +
+    '- Rubrik: ' + t.reiter + '\n' +
+    '- App-Stand: ' + t.stand + '\n' +
+    '- Erstellt: ' + zeit + '\n' +
+    '- Gerät: ' + t.geraet + '\n';
+}
+
+function ticketUrl(t) {
+  return 'https://github.com/' + TICKET_REPO + '/issues/new' +
+    '?title=' + encodeURIComponent((t.art === 'bug' ? 'Fehler: ' : 'Wunsch: ') + t.titel) +
+    '&labels=' + encodeURIComponent(t.art === 'bug' ? 'bug' : 'enhancement') +
+    '&body=' + encodeURIComponent(ticketRumpf(t));
+}
+
+function ticketAnlegen(art, titel, text, reiter) {
+  var geraet = '';
+  try { geraet = String(navigator.userAgent).slice(0, 180); } catch (e) {}
+  var t = {
+    id: Date.now().toString(36) + Math.floor(Math.random() * 1296).toString(36),
+    art: art === 'bug' ? 'bug' : 'feature',
+    // Getrimmt wird hier, nicht erst im Formular: sonst hinge der Rand
+    // ungewollt im Issue-Titel und in der Adresse.
+    titel: String(titel).replace(/^\s+|\s+$/g, '').slice(0, 120),
+    text: String(text).replace(/\s+$/, '').slice(0, 4000),
+    reiter: RUBRIK[reiter] || String(reiter),
+    stand: APP_STAND,
+    geraet: geraet,
+    erstellt: Date.now(),
+    gesendet: null
+  };
+  tickets.unshift(t);
+  ticketsSichern();
+  return t;
 }
 
 // ── Kompakte Kopfzeile ──────────────────────────────────────
@@ -1630,7 +1753,9 @@ var main = document.getElementById('main');
 var letzterTab = 'lernsets'; // Rückweg aus den Einstellungen
 
 function setTab(name) {
-  if (currentTab !== 'einstellungen' && currentTab !== 'fakten') letzterTab = currentTab;
+  if (currentTab !== 'einstellungen' && currentTab !== 'fakten' && currentTab !== 'tickets') {
+    letzterTab = currentTab;
+  }
   currentTab = name;
   document.querySelectorAll('#tabs button').forEach(function (b) {
     b.classList.toggle('active', b.dataset.tab === name);
@@ -1664,6 +1789,7 @@ function render() {
   else if (currentTab === 'tippen') renderTippen();
   else if (currentTab === 'einstellungen') renderEinstellungen();
   else if (currentTab === 'fakten') renderFakten();
+  else if (currentTab === 'tickets') renderTickets();
   else renderBilanz();
   updateKopf();
 }
@@ -2533,6 +2659,11 @@ function renderEinstellungen() {
       [{ wert: 'system', text: 'System' }, { wert: 'dunkel', text: 'Dunkel' }, { wert: 'hell', text: 'Hell' }]) +
     schalter('ton', 'Ton bei richtig und falsch',
       'Ein kurzer Klang nach jeder Antwort. Der Stummschalter des iPhones hat Vorrang.') +
+    '<h2>Rückmeldung</h2>' +
+    '<div class="setting"><span class="setting-text">' +
+    '<span class="setting-title">Tickets</span>' +
+    '<span class="setting-note">Fehler und Wünsche festhalten und an GitHub schicken.</span></span>' +
+    '<button class="chip" id="setTickets">Öffnen</button></div>' +
     '<p class="settings-note">Die Einstellungen gelten nur auf diesem Gerät und werden zusammen mit dem ' +
     'Lernstand gespeichert. «Fortschritt zurücksetzen» in der Bilanz lässt sie unberührt.</p>' +
     '<div class="btn-row"><button class="btn ghost" id="setBack">Zurück</button></div></section>';
@@ -2559,6 +2690,11 @@ function renderEinstellungen() {
       save();
       renderEinstellungen();
     });
+  });
+  document.getElementById('setTickets').addEventListener('click', function () {
+    tkHerkunft = letzterTab;   // die Rubrik, aus der man kam — die ist gemeint
+    tkForm = null;
+    setTab('tickets');
   });
   document.getElementById('setBack').addEventListener('click', function () { setTab(letzterTab); });
 }
@@ -2619,6 +2755,121 @@ function renderFakten() {
     });
   });
   document.getElementById('faktenBack').addEventListener('click', function () { setTab(letzterTab); });
+}
+
+// ── TICKETS ─────────────────────────────────────────────────
+var tkForm = null;      // null = Liste, sonst { art, titel, text }
+var tkHerkunft = 'lernsets';
+
+function renderTickets() {
+  var html = '<section>';
+
+  if (tkForm) {
+    html += '<div class="card">' +
+      '<p class="task-label">' + (tkForm.art === 'bug' ? 'Fehler melden' : 'Wunsch melden') + '</p>' +
+      '<input type="text" class="zeile" id="tkTitel" maxlength="120" ' +
+      'placeholder="Worum geht es? Kurz und knapp." autocapitalize="sentences" spellcheck="false">' +
+      '<textarea class="fliess" id="tkText" rows="6" ' +
+      'placeholder="' + (tkForm.art === 'bug'
+        ? 'Was ist passiert, was hatten Sie erwartet?'
+        : 'Was soll die App können?') + '"></textarea>' +
+      '<p class="hint">Mitgeschickt werden Rubrik (' + esc(RUBRIK[tkHerkunft] || tkHerkunft) +
+      '), App-Stand (' + esc(APP_STAND) + ') und Gerät.</p>' +
+      '</div><div class="btn-row">' +
+      '<button class="btn ghost" id="tkAbbruch">Abbrechen</button>' +
+      '<button class="btn primary" id="tkSichern">Sichern</button></div>';
+  } else {
+    html += '<div class="controls">' +
+      '<button class="chip" data-neu="bug">Fehler melden</button>' +
+      '<button class="chip" data-neu="feature">Wunsch melden</button></div>';
+
+    if (!tickets.length) {
+      html += '<div class="leer">' + maskottchen('gross') +
+        '<h3>Noch kein Ticket</h3>' +
+        '<p>Halten Sie hier fest, was hakt oder fehlt — auch ohne Netz. Verschickt wird ' +
+        'erst, wenn Sie auf «Senden» tippen.</p></div>';
+    } else {
+      html += '<div class="tkliste">';
+      tickets.forEach(function (t, i) {
+        html += '<div class="tkzeile' + (t.gesendet ? ' gesendet' : '') + '">' +
+          '<span class="tktext"><span class="tkart ' + t.art + '">' +
+          (t.art === 'bug' ? 'Fehler' : 'Wunsch') + '</span>' + esc(t.titel) +
+          '<span class="tkmeta">' + esc(datumKurz(t.erstellt)) + ' · ' + esc(t.reiter) + ' · ' +
+          (t.gesendet ? 'gesendet' : 'offen') + '</span></span>' +
+          '<a class="tksenden" data-senden="' + i + '" target="_blank" rel="noopener noreferrer">' +
+          (t.gesendet ? 'Nochmal' : 'Senden') + '</a>' +
+          '<button class="sternbtn" data-tkweg="' + i + '" aria-label="Ticket löschen">' +
+          ICON.kreuz + '</button></div>';
+      });
+      html += '</div>';
+      html += '<div class="btn-row"><button class="btn ghost" id="tkKopieren">Alle als Text kopieren</button></div>';
+    }
+
+    html += '<p class="settings-note">Tickets liegen nur auf diesem Gerät, bis Sie sie senden. ' +
+      '«Senden» öffnet ein vorausgefülltes Formular in ' + esc(TICKET_REPO) + ' — anlegen kann ' +
+      'es nur, wer dort angemeldet ist. Die App selbst verschickt nichts.</p>';
+  }
+
+  html += '<div class="btn-row"><button class="btn ghost" id="tkBack">Zurück</button></div></section>';
+  main.innerHTML = html;
+
+  if (tkForm) {
+    var titel = document.getElementById('tkTitel');
+    var text = document.getElementById('tkText');
+    titel.value = tkForm.titel;
+    text.value = tkForm.text;
+    titel.addEventListener('input', function () { tkForm.titel = titel.value; });
+    text.addEventListener('input', function () { tkForm.text = text.value; });
+    document.getElementById('tkAbbruch').addEventListener('click', function () {
+      tkForm = null;
+      renderTickets();
+    });
+    document.getElementById('tkSichern').addEventListener('click', function () {
+      var t = titel.value.replace(/^\s+|\s+$/g, '');
+      if (!t) { titel.focus(); return; }
+      ticketAnlegen(tkForm.art, t, text.value, tkHerkunft);
+      tkForm = null;
+      renderTickets();
+    });
+  } else {
+    main.querySelectorAll('[data-neu]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        tkForm = { art: b.dataset.neu, titel: '', text: '' };
+        renderTickets();
+      });
+    });
+    // Die Adresse wird erst hier gesetzt, nie als Attribut in den Text gebaut.
+    main.querySelectorAll('[data-senden]').forEach(function (a) {
+      var t = tickets[parseInt(a.dataset.senden, 10)];
+      a.href = ticketUrl(t);
+      a.addEventListener('click', function () {
+        t.gesendet = Date.now();
+        ticketsSichern();
+        setTimeout(renderTickets, 0); // erst folgen lassen, dann neu zeichnen
+      });
+    });
+    main.querySelectorAll('[data-tkweg]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        tickets.splice(parseInt(b.dataset.tkweg, 10), 1);
+        ticketsSichern();
+        renderTickets();
+      });
+    });
+    var kop = document.getElementById('tkKopieren');
+    if (kop) kop.addEventListener('click', function () {
+      var alles = tickets.map(function (t) {
+        return '## ' + (t.art === 'bug' ? 'Fehler: ' : 'Wunsch: ') + t.titel + '\n\n' + ticketRumpf(t);
+      }).join('\n');
+      try {
+        navigator.clipboard.writeText(alles);
+        zeigeStatus('ok', 'kopiert');
+      } catch (e) {
+        zeigeStatus('err', 'Kopieren nicht möglich — bitte «Senden» verwenden.');
+      }
+    });
+  }
+
+  document.getElementById('tkBack').addEventListener('click', function () { setTab(letzterTab); });
 }
 
 // ── BILANZ ──────────────────────────────────────────────────
@@ -2799,6 +3050,7 @@ function renderBilanz() {
 // ── Start ───────────────────────────────────────────────────
 document.querySelectorAll('[data-regler]').forEach(function (b) { b.innerHTML = ICON.regler; });
 load();
+ticketsLaden();
 updateDarstellung();
 
 // Jede Ansicht setzt #main neu; der Beobachter merkt das und schickt die Chili
