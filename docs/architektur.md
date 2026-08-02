@@ -54,26 +54,40 @@ die Statusleiste auf dem iPhone passt.
 
 ## Maskottchen
 
-Die Chili ist aus dem Icon freigestellt (`tools/freistellen.py`) und liegt als
-verstecktes `<img id="chiliQuelle">` ganz oben im Body — **genau einmal**.
-`maskottchen(klasse)` reicht ihre Quelle weiter, statt sie je Auftritt neu einzubetten.
-Sie tritt an vier Stellen auf:
+Die Chili ist aus dem Icon freigestellt (`tools/freistellen.py`) und existiert **genau
+einmal**: als `#chiliFigur` auf einer festen Bühne über der Seite
+(`#chiliBuehne`, `position: fixed`, `pointer-events: none`). Sie liegt damit außerhalb
+des Layouts und kann sich frei bewegen.
 
-| Ort | Größe | Zweck |
+Ansichten zeichnen die Figur nicht, sie stellen nur einen **Platzhalter** auf:
+`maskottchen(klasse)` liefert ein leeres `div[data-chili]` in der gewünschten Größe.
+`positioniereChili()` sucht den Platzhalter in `#main` — fehlt er, gilt der im Kopf —
+und setzt die Figur per `transform` genau dorthin.
+
+| Station | Größe | Anlass |
 | --- | --- | --- |
-| Faktenkarte | 76 px | die Chili spricht den Fakt aus einer Sprechblase |
-| Leerzustände (Tippen, Übersetzen, Faktensammlung) | 96 px | nimmt der Sperre die Härte |
-| Jubelkarte nach einem geschafften Lernset | 96 px | der Moment, auf den das Lernen zuläuft |
+| Kopfzeile, zwischen Titel und Reglerknopf | 52 px | Grundzustand |
+| Streifen über der Reiterleiste | 30 px | wenn der Kopf weggescrollt ist |
+| Sprechblase der Faktenkarte | 76 px | alle fünf Antworten |
+| Leerzustände (Tippen, Übersetzen, Faktensammlung) | 104 px | wenn nichts freigeschaltet ist |
+| Jubelkarte | 104 px | wenn ein Lernset voll wird |
 
-Die Sprechblase (`.sprechblase`) ist eine Karte mit goldenem Rahmen; der Zipfel ist ein
-um 45° gedrehtes Quadrat mit zwei Rahmenkanten, das unten links aus der Blase ragt und
-auf die Chili zeigt. Figur und Stern stehen darunter in einer Reihe.
+**Andocken.** Nur der Platz im Kopf dockt an. `dockY` misst sich an der *angehefteten*
+Leiste (deren `padding-top` trägt den Streifen), nicht an ihrer aktuellen Lage — sonst
+säße die Figur schon beim Seitenanfang im Streifen. Der Anteil `p` (1 = im Kopf,
+0 = angedockt) ergibt sich aus dem noch offenen Weg und steuert Position und Größe
+zugleich, sodass die Figur beim Scrollen weich hinüberwandert.
 
-Die Jubelkarte (`uebPhase === 'setfertig'`) erscheint, sobald eine Antwort das laufende
-Set vollmacht — allerdings erst beim nächsten «Weiter», damit sie nicht die Auflösung
-verdeckt. Sie nennt die freigeschalteten Sätze und führt mit einem Knopf direkt nach
-„Übersetzen". `uebZuruecksetzen()` räumt die Frage dabei auf; ohne das stünde „Üben" bei
-der Rückkehr noch in der Jubelphase und zeigte eine Frage ohne Knöpfe.
+**Springen.** `chiliAktualisieren()` läuft über einen `MutationObserver` auf `#main`,
+merkt also jeden Ansichtswechsel, ohne dass eine Renderfunktion daran denken muss.
+Wechselt die Station, bekommt der Wagen für eine halbe Sekunde einen Übergang und die
+Figur die Klasse `springt` (Keyframes `chiliSprung`: ducken, Bogen, federn). Danach
+werden beide entfernt — während des Scrollens darf **kein** Übergang aktiv sein, sonst
+hinkt die Figur hinterher.
+
+**Die Blase kommt nach der Landung:** `.sprechblase` startet mit 0,34 s Verzögerung und
+wächst über `blaseAuf` herein, statt aufzuploppen. Unter
+`prefers-reduced-motion: reduce` entfallen Sprung und Einblendung.
 
 ## Symbole
 

@@ -24,9 +24,10 @@ Dazu zwei Ansichten ohne Reiter: **Einstellungen** (Reglerknopf) und **Sprachfak
 (aus der Faktenkarte oder der Bilanz).
 
 Maskottchen ist die Chili — freigestellt aus `docs/IMG_2942.png` mit
-`tools/freistellen.py`, abgelegt als `docs/maskottchen-freigestellt.png`. In der App
-liegt sie einmal als verstecktes `#chiliQuelle` im Body; `maskottchen(klasse)` reicht
-ihre Quelle weiter. Nie ein zweites Mal einbetten.
+`tools/freistellen.py`, abgelegt als `docs/maskottchen-freigestellt.png`. In der App gibt es sie
+genau einmal als `#chiliFigur` auf der festen Bühne `#chiliBuehne`; Ansichten stellen mit
+`maskottchen(klasse)` nur einen Platzhalter auf, zu dem sie wandert. Nie ein zweites Mal
+einbetten.
 
 ## Harte Rahmenbedingungen — nicht verhandelbar
 
