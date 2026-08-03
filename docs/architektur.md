@@ -78,13 +78,42 @@ Der Platz im Kopf steht im Fluss, zwischen Titel und Menüknopf. Mittig über de
 wäre er nur auf Home sichtbar — dort hat aber die Empfehlung immer Vorrang —, und
 unterwegs liefe ein langer Name wie «Einstellungen» darunter hindurch.
 
-Ein Platzhalter in `#main` geht immer vor: steht die Figur in einer Karte oder auf der
-Empfehlung, gehört sie dorthin. Stellt eine Ansicht keinen auf, entscheidet die Ansicht:
-im Menübereich der Knopf, sonst der Kopf.
+`chiliPlatzhalter()` entscheidet in drei Stufen:
+
+1. **Menü aufgeklappt** → der Knopf. Die Striche stehen dann unten, er wäre sonst ein
+   leerer Kreis — auch auf Home, wo sonst die Empfehlung Vorrang hätte.
+2. **Die Ansicht stellt einen Platz auf** (Karte, Empfehlung, Leerzustand) → dorthin.
+3. Sonst: im Menübereich der Knopf, überall sonst der Kopf.
 
 **Kein Nachrechnen.** Es gibt keine Positionsrechnung je Bild. Weil die Figur ein Kind
-ihres Platzhalters ist, scrollt sie starr mit dem Inhalt (ADR 0012). Der einzige
-Scroll-Horcher schaltet eine Klasse um, mehr nicht.
+ihres Platzhalters ist, scrollt sie starr mit dem Inhalt (ADR 0012).
+
+### Der Sprung
+
+`chiliAktualisieren()` läuft über einen `MutationObserver` auf `#main`, merkt also jeden
+Ansichtswechsel, ohne dass eine Renderfunktion daran denken muss. Der Sprung besteht aus
+zwei Teilen auf zwei Elementen, die sich nicht ins Gehege kommen:
+
+- **Die Figur** bekommt die Klasse `springt` (Keyframes `chiliSprung`, 0,23 s): ducken,
+  Eigenhub, Rotation, federn. Ein Zeitgeber räumt die Klasse danach ab.
+- **Die Hülle** fliegt über `chiliFlug()` von der alten zur neuen Lage — waagerecht
+  gleichförmig, senkrecht eine Parabel darüber, dazu der Größenwechsel. Neun Stützstellen
+  über `Element.animate()`, `linear`, 0,19 s nach 0,03 s Verzögerung: erst ducken, dann
+  fliegen, am Ende federn.
+
+Ein noch laufender Flug wird zu Beginn **abgebrochen**: zwei Animationen mit
+`fill: 'backwards'` überlagerten sich sonst und stellten die Figur irgendwo dazwischen ab.
+
+Die alte Lage kommt aus `chiliLage()` in **Dokumentkoordinaten** — die Figur steht im
+Fluss und scrollt mit, ihre Lage im Dokument bleibt also gültig. Hängt die alte Station
+noch im Dokument (typisch: der Platz im Kopf), wird sie direkt gemessen; nach einem
+Ansichtswechsel ist sie fort, dann trägt die gemerkte `chiliSpur`. Unter 8 px lohnt der
+Flug nicht, über 900 px ist die alte Lage vermutlich veraltet — beides bleibt beim reinen
+Hüpfer.
+
+**Die Blase kommt kurz nach der Landung:** `.sprechblase` startet mit 0,26 s Verzögerung
+und wächst über `blaseAuf` (0,6 s) herein, statt aufzuploppen. Unter
+`prefers-reduced-motion: reduce` entfallen Sprung, Flug und Einblendung.
 
 ## Navigation: Home, Kopf, Menü
 
@@ -133,11 +162,18 @@ Fallstricke stecken darin:
 
 **Im Menübereich bleiben die Striche verschwunden.** Die Klasse `im-menu` am `<body>`
 (gesetzt für Bilanz, Einstellungen, Tickets, Sprachfakten) hält sie unten und färbt den
-Knopf golden. Statt ihrer springt die **Chili in den Knopf** — `chiliPlatzhalter()`
-liefert dort `#chiliKnopf`, und der Flug schrumpft sie auf dessen Größe. Wird sie in der
-Ansicht selbst gebraucht (Leerzustand in Tickets oder Sprachfakten), tritt an ihre Stelle
-ein ruhender goldener Punkt; `chiliAktualisieren()` schaltet über die Klasse `mit-chili`
-zwischen beiden um.
+Knopf golden. Statt ihrer trägt er die **Chili**, die per Flug hineinspringt und dabei auf
+seine Größe schrumpft — die Platzwahl steht im Abschnitt «Maskottchen». Schon das
+**Aufklappen** genügt dafür: ab da sind die Striche unten, der Knopf wäre sonst leer.
+
+Braucht die Ansicht die Figur selbst (Leerzustand in Tickets oder Sprachfakten), tritt im
+Knopf ein ruhender goldener Punkt an ihre Stelle. Die Klasse `mit-chili` schaltet zwischen
+beiden um und wird bei **jedem** `chiliAktualisieren()` gesetzt, nicht nur beim
+Stationswechsel — sonst bliebe sie stehen, wenn sich bloß der Inhalt der Ansicht ändert
+(etwa wenn das erste Ticket den Leerzustand ablöst).
+
+`menuSetzen()` ruft `chiliAktualisieren()` mit auf; `setTab()` schließt das Menü darum
+**nach** `render()`, sonst liefe die Platzwahl noch über den Inhalt der alten Ansicht.
 
 Geschlossen wird bei Auswahl, bei einem Tipp daneben, mit `Escape` oder erneutem Druck.
 Zugeklappt bekommen die Einträge `tabindex="-1"`, damit der Fokus nicht in ein
