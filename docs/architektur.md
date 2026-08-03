@@ -105,7 +105,10 @@ Ein noch laufender Flug wird zu Beginn **abgebrochen**: zwei Animationen mit
 `fill: 'backwards'` überlagerten sich sonst und stellten die Figur irgendwo dazwischen ab.
 
 Die alte Lage kommt aus `chiliLage()` in **Dokumentkoordinaten** — die Figur steht im
-Fluss und scrollt mit, ihre Lage im Dokument bleibt also gültig. Hängt die alte Station
+Fluss und scrollt mit, ihre Lage im Dokument bleibt also gültig. Gemessen wird der
+**Mittelpunkt**, nicht die Ecke: `scale` wirkt um die Mitte, und bei wechselnder Größe
+(76 px in der Empfehlung, 30 px im Menüknopf) läge der Startpunkt sonst um die halbe
+Differenz daneben. Hängt die alte Station
 noch im Dokument (typisch: der Platz im Kopf), wird sie direkt gemessen; nach einem
 Ansichtswechsel ist sie fort, dann trägt die gemerkte `chiliSpur`. Unter 8 px lohnt der
 Flug nicht, über 900 px ist die alte Lage vermutlich veraltet — beides bleibt beim reinen
@@ -159,6 +162,11 @@ Fallstricke stecken darin:
   zugeklappt ein Streifen von 26 px stehen.
 - Das Panel liegt **über** der Seite (`position: absolute` unter dem Knopf, rechtsbündig,
   232 px breit). Im Fluss schöbe es beim Aufklappen den ganzen Inhalt nach unten.
+
+**Der Knopf lässt überstehen.** Geblendet wird in einer eigenen Hülle
+(`.striche`, `overflow: hidden`), nicht am Knopf selbst — sonst wäre die einfliegende
+Chili bis zur Landung unsichtbar, weil sie den ganzen Flug über außerhalb des Kreises
+liegt. `z-index: 40` hält den Knopf über dem Panel.
 
 **Im Menübereich bleiben die Striche verschwunden.** Die Klasse `im-menu` am `<body>`
 (gesetzt für Bilanz, Einstellungen, Tickets, Sprachfakten) hält sie unten und färbt den

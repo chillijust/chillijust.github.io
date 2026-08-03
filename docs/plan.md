@@ -32,6 +32,8 @@ Bilanz, Einstellungen und Tickets sind keine Übungen — sie stehen im **Menü*
       Auswahl — er ist ja ab dem Öffnen leer
 - [x] Laufende Flüge werden abgebrochen, bevor ein neuer startet (überlagerten sich)
 - [x] Der ruhende Punkt wird bei jedem Lauf neu bewertet, nicht nur beim Stationswechsel
+- [x] Der Knopf clippt den Flug nicht mehr weg — geblendet wird in einer eigenen Hülle
+- [x] Der Flug rechnet mit Mittelpunkten statt Ecken (`scale` wirkt um die Mitte)
 
 ---
 
