@@ -29,8 +29,8 @@ Der Kopf ist kein reines Logo, sondern Statusanzeige:
   „gespeichert" mit Haken ein und nach zwei Sekunden wieder aus, `'err'` bleibt stehen.
   Die Zeile ist `role="status"` mit `aria-live="polite"`, damit VoiceOver sie vorliest,
   ohne die Bedienung zu unterbrechen.
-- Die Einstellungen hängen am Reglerknopf oben rechts, nicht an einem fünften Reiter —
-  siehe ADR 0005.
+- Die Fortschrittsleiste zeigt sich nur auf Home; unterwegs trägt der Kopf den Rückweg
+  und den Namen der Ansicht (siehe «Navigation»).
 
 ## Sprachfakten
 
@@ -67,69 +67,81 @@ Platzhalter in `#main` — fehlt er, gilt der im Kopf — und hängt die Bühne 
 
 | Station | Größe | Anlass |
 | --- | --- | --- |
-| Kopfzeile, mittig zwischen Titel und Reglerknopf | 52 px | Grundzustand |
-| Kompakte Zone über den Reitern, links | 30 px | wenn die Kopfzeile weggescrollt ist |
+| Empfehlung auf Home, links | 76 px | Grundzustand auf Home |
+| Kopfzeile, zwischen Titel und Menüknopf | 34 px | in einer Übung ohne eigenen Platz |
+| Menüknopf | 32 px | in Bilanz, Einstellungen, Tickets, Sprachfakten |
 | Sprechblase der Faktenkarte | 76 px | alle fünf Antworten |
 | Leerzustände (Tippen, Übersetzen, Faktensammlung) | 104 px | wenn nichts freigeschaltet ist |
 | Jubelkarte | 104 px | wenn ein Lernset voll wird |
 
-Der Platz im Kopf hängt über `position: absolute; left: 50%` mittig an der Kopfzeile —
-unabhängig davon, wie breit Titel und Reglerknopf gerade sind.
+Der Platz im Kopf steht im Fluss, zwischen Titel und Menüknopf. Mittig über der Zeile
+wäre er nur auf Home sichtbar — dort hat aber die Empfehlung immer Vorrang —, und
+unterwegs liefe ein langer Name wie «Einstellungen» darunter hindurch.
 
-Ein Platzhalter in `#main` geht immer vor: steht die Figur in einer Karte, gehört sie
-dorthin — auch beim Scrollen. Nur wenn die Ansicht keinen aufstellt, entscheidet der
-Scrollzustand zwischen kompakter Zone und Kopfzeile.
+Ein Platzhalter in `#main` geht immer vor: steht die Figur in einer Karte oder auf der
+Empfehlung, gehört sie dorthin. Stellt eine Ansicht keinen auf, entscheidet die Ansicht:
+im Menübereich der Knopf, sonst der Kopf.
 
 **Kein Nachrechnen.** Es gibt keine Positionsrechnung je Bild. Weil die Figur ein Kind
 ihres Platzhalters ist, scrollt sie starr mit dem Inhalt (ADR 0012). Der einzige
 Scroll-Horcher schaltet eine Klasse um, mehr nicht.
 
-## Kopfzeile und kompakte Zone
+## Navigation: Home, Kopf, Menü
 
-Die Reiterleiste (`#navbar`) klebt **nicht** am Viewport-Rand, sondern
-`--kompakt-hoehe` darunter (`calc(env(safe-area-inset-top) + 14px + 46px)`). Genau
-diesen Platz füllt `#kompakt`: ein festes Element am oberen Rand mit der Chili links und
-einem zweiten Reglerknopf rechts.
+Die App hat **Übungen** (Lernsets, Freestyle, Tippen, Übersetzen — Buchstaben folgen) und
+drei Ansichten, die keine sind: Bilanz, Einstellungen, Tickets. Der Begriff «Rubrik» ist
+hinfällig; im Nutzertext wie im Code heißt es **Übung**.
 
-`kompaktPruefen()` vergleicht `navbar.getBoundingClientRect().top` mit dem gesetzten
-`top` — sind sie gleich, klebt die Leiste, also ist die Kopfzeile weg. Dann bekommt
-`<body>` die Klasse `kompakt`, die Zone wird von `display: none` auf `flex` geschaltet
-und die Chili dorthin umgehängt (ohne Sprung). Der Horcher ist über
-`requestAnimationFrame` gedrosselt und rechnet keine Position.
+**Home** (`renderHome()`, Startansicht) ist kein Verzeichnis, sondern ein Lagebild. Jede
+Kachel nennt über `uebungsStand()`, was dort ansteht — «Set 1 · 11 offen», «21 fällig»,
+«noch gesperrt». Darüber steht `empfehlung()`: der eine Knopf, der immer richtig ist.
+Seine Reihenfolge ist bewusst: erst auffrischen (wenn fünf oder mehr Dinge warten), dann
+das laufende Lernset, dann offene Sätze, dann Tippen, sonst Freestyle als Kür.
 
-Die Zone selbst schaltet **hart**; nur ihr Inhalt blendet über `kompaktAuf` weich ein.
-Ein Übergang auf der Zone ließe den durchlaufenden Inhalt kurz durchschimmern.
+**Der Kopf wechselt seinen Inhalt**, statt dass es zwei gäbe (`renderKopf()`):
 
-Beide Reglerknöpfe tragen `data-regler`: `setTab()` setzt die Klasse `active` auf allen,
-Klick und Symbol hängen ebenfalls an allen. Ein dritter Knopf würde ohne Codeänderung
-mitlaufen.
+| | Home | unterwegs |
+| --- | --- | --- |
+| Augenbraue | `Русский · Тренажёр` | `Übung` oder `Menü` |
+| Titel | `Chillingo.` | Name der Ansicht |
+| links | — | Zurück-Pfeil |
+| Fortschrittsleiste | ja | nein |
+| Position | `relative`, scrollt mit | `sticky` |
+| Hintergrund | durchsichtig | `--bg` |
 
-**Warum die Leiste keinen festen Innenabstand mehr trägt:** Früher hielt
-`padding-top: var(--pad-oben)` den Streifen dauerhaft frei. Im Browser fiel das kaum auf
-(`env(safe-area-inset-top)` ist dort 0), im Vollbild vom Home-Bildschirm stand dort eine
-Lücke von rund 73 px zwischen Kopfzeile und Reitern (ADR 0013).
+Die Klasse `unterwegs` am `<body>` schaltet das um. Eine Reiterleiste gibt es nicht mehr
+(ADR 0018) — und damit auch keine kompakte Zone, die den Streifen darüber füllen müsste.
 
-**Springen.** `chiliAktualisieren()` läuft über einen `MutationObserver` auf `#main`,
-merkt also jeden Ansichtswechsel, ohne dass eine Renderfunktion daran denken muss. Der
-Sprung besteht aus zwei Teilen auf zwei Elementen, die sich nicht ins Gehege kommen:
+**Auf Home ist der Kopf durchsichtig.** Ein eigener Grund deckte dort den radialen Schein
+des Hintergrunds ab, und über «Chillingo.» stand eine sichtbare Kante. Unterwegs deckt er,
+weil er dann klebt und Inhalt unter ihm durchläuft (ADR 0019).
 
-- **Die Figur** bekommt die Klasse `springt` (Keyframes `chiliSprung`, 0,23 s): ducken,
-  Eigenhub, Rotation, federn. Ein Zeitgeber räumt die Klasse danach ab.
-- **Die Hülle** fliegt über `chiliFlug()` von der alten zur neuen Lage — waagerecht
-  gleichförmig, senkrecht eine Parabel darüber, dazu der Größenwechsel. Neun Stützstellen
-  über `Element.animate()`, `linear`, 0,19 s nach 0,03 s Verzögerung: erst ducken, dann
-  fliegen, am Ende federn.
+**Das Menü** (`menuSetzen()`) sitzt hinter einem runden Knopf mit drei Strichen. Beim
+Öffnen wandern die Striche **gestaffelt nach unten aus dem Kreis** — `overflow: hidden`
+am Knopf sorgt dafür, dass nichts überragt; die `transition-delay` je Strich staffelt sie,
+und beim Schließen laufen sie in umgekehrter Reihenfolge zurück.
 
-Die alte Lage kommt aus `chiliLage()` in **Dokumentkoordinaten** — die Figur steht im
-Fluss und scrollt mit, ihre Lage im Dokument bleibt also gültig. Hängt die alte Station
-noch im Dokument (typisch: der Platz im Kopf), wird sie direkt gemessen; nach einem
-Ansichtswechsel ist sie fort, dann trägt die gemerkte `chiliSpur`. Unter 8 px lohnt der
-Flug nicht, über 900 px ist die alte Lage vermutlich veraltet — beides bleibt beim reinen
-Hüpfer.
+Das Panel wächst über `grid-template-rows: 0fr → 1fr` von oben nach unten heraus. Das
+braucht keine geratene Höhe und verzerrt den Inhalt nicht (anders als `scaleY`). Zwei
+Fallstricke stecken darin:
 
-**Die Blase kommt kurz nach der Landung:** `.sprechblase` startet mit 0,26 s Verzögerung
-und wächst über `blaseAuf` (0,6 s) herein, statt aufzuploppen. Unter
-`prefers-reduced-motion: reduce` entfallen Sprung, Flug und Einblendung.
+- Ränder und Innenabstände der Menükarte liegen in einem **Zwischenbehälter**
+  (`.menuwrap`, `min-height: 0`). Läge der Abstand auf der Rasterzeile selbst, bliebe
+  zugeklappt ein Streifen von 26 px stehen.
+- Das Panel liegt **über** der Seite (`position: absolute` unter dem Knopf, rechtsbündig,
+  232 px breit). Im Fluss schöbe es beim Aufklappen den ganzen Inhalt nach unten.
+
+**Im Menübereich bleiben die Striche verschwunden.** Die Klasse `im-menu` am `<body>`
+(gesetzt für Bilanz, Einstellungen, Tickets, Sprachfakten) hält sie unten und färbt den
+Knopf golden. Statt ihrer springt die **Chili in den Knopf** — `chiliPlatzhalter()`
+liefert dort `#chiliKnopf`, und der Flug schrumpft sie auf dessen Größe. Wird sie in der
+Ansicht selbst gebraucht (Leerzustand in Tickets oder Sprachfakten), tritt an ihre Stelle
+ein ruhender goldener Punkt; `chiliAktualisieren()` schaltet über die Klasse `mit-chili`
+zwischen beiden um.
+
+Geschlossen wird bei Auswahl, bei einem Tipp daneben, mit `Escape` oder erneutem Druck.
+Zugeklappt bekommen die Einträge `tabindex="-1"`, damit der Fokus nicht in ein
+unsichtbares Panel springt.
 
 ## Töne
 
