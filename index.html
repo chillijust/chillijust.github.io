@@ -1288,6 +1288,9 @@ function chiliLage(el) {
 function chiliFlug(vorher, jetzt) {
   if (!vorher || !jetzt || !chiliBuehne.animate) return;
   try {
+    // Ein noch laufender Flug würde sich mit dem neuen überlagern — und weil
+    // beide «backwards» füllen, stünde die Figur irgendwo dazwischen.
+    chiliBuehne.getAnimations().forEach(function (a) { a.cancel(); });
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     var dx = vorher.x - jetzt.x;
     var dy = vorher.y - jetzt.y;
@@ -1314,21 +1317,29 @@ function chiliFlug(vorher, jetzt) {
   } catch (e) { /* ohne Flug bleibt der Hüpfer */ }
 }
 
-// Ein Platz in der Ansicht geht vor — steht die Chili in einer Karte oder auf
-// der Empfehlung, gehört sie dorthin. Sonst: im Menübereich in den Knopf, wo
-// sie die verschwundenen Striche ersetzt; überall sonst wartet sie im Kopf.
+// Wo steht die Figur? Drei Regeln, in dieser Reihenfolge:
+//  1. Ist das Menü aufgeklappt, gehört sie in den Knopf — die Striche stehen
+//     dann unten, er wäre sonst ein leerer Kreis.
+//  2. Stellt die Ansicht einen Platz auf (Karte, Empfehlung, Leerzustand),
+//     gehört sie dorthin.
+//  3. Sonst: im Menübereich in den Knopf, überall sonst in den Kopf.
 function chiliPlatzhalter() {
+  var knopf = document.getElementById('chiliKnopf');
+  if (menuOffen) return knopf;
   var inhalt = main.querySelector('[data-chili]');
   if (inhalt) return inhalt;
-  return imMenu(currentTab)
-    ? document.getElementById('chiliKnopf')
-    : document.getElementById('chiliPlatz');
+  return imMenu(currentTab) ? knopf : document.getElementById('chiliPlatz');
 }
 
 function chiliAktualisieren(ohneSprung) {
   if (!chiliBuehne) return;
   var platz = chiliPlatzhalter();
-  if (!platz || platz === chiliStation) return;
+  if (!platz) return;
+  // Der Knopf zeigt seinen ruhenden Punkt nur, solange er die Figur nicht
+  // trägt — das gilt auch, wenn sich sonst nichts geändert hat.
+  document.getElementById('menuKnopf')
+    .classList.toggle('mit-chili', platz.id === 'chiliKnopf');
+  if (platz === chiliStation) return;
   var ersterAuftritt = chiliStation === null;
   // Die alte Station lässt sich nur messen, solange sie im Dokument hängt —
   // nach einem Ansichtswechsel ist sie fort, dann trägt die gemerkte Lage.
@@ -1336,9 +1347,6 @@ function chiliAktualisieren(ohneSprung) {
     ? chiliLage(chiliStation) : chiliSpur;
   chiliStation = platz;
   platz.appendChild(chiliBuehne);
-  // Trägt der Knopf die Figur, tritt der ruhende Punkt zurück.
-  document.getElementById('menuKnopf')
-    .classList.toggle('mit-chili', platz.id === 'chiliKnopf');
   var jetzt = chiliLage(platz);
   if (jetzt) chiliSpur = jetzt;
   if (ersterAuftritt || ohneSprung) return;
@@ -1901,10 +1909,10 @@ function menuSetzen(auf) {
   // Zugeklappt darf nichts darin erreichbar sein — sonst springt der Fokus
   // in ein unsichtbares Panel.
   document.getElementById('menuPanel').setAttribute('aria-hidden', auf ? 'false' : 'true');
-  main.querySelectorAll && void 0;
   document.querySelectorAll('.menueintrag').forEach(function (b) {
     b.tabIndex = auf ? 0 : -1;
   });
+  chiliAktualisieren();
 }
 
 // ── Kopfzeile ───────────────────────────────────────────────
@@ -1929,9 +1937,11 @@ function renderKopf() {
 function setTab(name) {
   if (UEBUNG_NAME[name] || name === 'home') letzterTab = name;
   currentTab = name;
-  menuSetzen(false);
   window.scrollTo(0, 0);
   render();
+  // Erst zeichnen, dann schließen: die Platzwahl der Chili liefe sonst noch
+  // über den Inhalt der alten Ansicht.
+  menuSetzen(false);
 }
 
 document.getElementById('zurueck').addEventListener('click', function () { setTab('home'); });

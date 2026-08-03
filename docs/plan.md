@@ -26,6 +26,13 @@ Bilanz, Einstellungen und Tickets sind keine Übungen — sie stehen im **Menü*
 - [x] Unterwegs sitzt die Chili neben dem Titel statt darüber (kollidierte mit
       «Einstellungen»)
 
+### Nachbesserungen aus dem zweiten Gerätetest — **erledigt**
+
+- [x] Schon beim **Aufklappen** springt die Chili in den Knopf, nicht erst nach der
+      Auswahl — er ist ja ab dem Öffnen leer
+- [x] Laufende Flüge werden abgebrochen, bevor ein neuer startet (überlagerten sich)
+- [x] Der ruhende Punkt wird bei jedem Lauf neu bewertet, nicht nur beim Stationswechsel
+
 ---
 
 ## Etappe 2 · Bilanz mit Tiefe — **offen**
