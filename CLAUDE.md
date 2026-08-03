@@ -14,14 +14,15 @@ mir, statt still eine Seite zu wählen.
 https://chillijust.github.io/. Zielgerät: iPhone 15 Pro Max (iOS 26.5.2), installiert über
 „Zum Home-Bildschirm" als PWA im Vollbild.
 
-Rubriken in dieser Reihenfolge:
+Einstieg ist **Home**: Empfehlung plus eine Kachel je Übung. Der Begriff ist **Übung**,
+nicht «Rubrik». In dieser Reihenfolge:
 **Lernsets** (zielgerichtet: die Wörter der nächsten Sätze, schaltet «Übersetzen» frei),
 **Freestyle** (freies Vokabeltraining nach Thema, ohne Sperren),
 **Tippen** (Eingabequiz mit kyrillischer Tastatur, ab Leitner-Stufe 3),
-**Übersetzen** (Satzbau aus Wort-Kacheln, nur Sätze, deren Wörter sitzen),
-**Bilanz** (Leitner-Statistik, Lernweg, Sicherungscode).
-Dazu drei Ansichten ohne Reiter: **Einstellungen** (Reglerknopf), **Sprachfakten**
-(aus der Faktenkarte oder der Bilanz) und **Tickets** (aus den Einstellungen).
+**Übersetzen** (Satzbau aus Wort-Kacheln, nur Sätze, deren Wörter sitzen).
+Keine Übungen, sondern **im Menü** (runder Knopf, drei Striche): **Bilanz**,
+**Einstellungen**, **Tickets**. Dazu **Sprachfakten** aus der Faktenkarte oder der
+Bilanz. Eine Reiterleiste gibt es nicht — der Kopf trägt unterwegs den Rückweg.
 
 Maskottchen ist die Chili — freigestellt aus `docs/IMG_2942.png` mit
 `tools/freistellen.py`, abgelegt als `docs/maskottchen-freigestellt.png`. In der App gibt es sie

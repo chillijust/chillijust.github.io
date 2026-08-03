@@ -228,9 +228,9 @@ Unbekannte Kennungen — Inhalte, die es nicht mehr gibt — werden übersprunge
 
 ### Nach dem Wiederherstellen
 
-`ansichtenZuruecksetzen()` stellt **jede Rubrik** auf Anfang: die laufende Frage, das
+`ansichtenZuruecksetzen()` stellt **jede Übung** auf Anfang: die laufende Frage, das
 getippte Wort, den gelegten Satz, Stufe und Stapel in «Übersetzen», Filter und Aufklapper.
-Ohne das zeigte eine Rubrik nach dem Einspielen weiter ihren alten Stand — jede hält
+Ohne das zeigte eine Übung nach dem Einspielen weiter ihren alten Stand — jede hält
 ihren eigenen Zustand in Modulvariablen, und `state` auszutauschen rührt die nicht an.
 Dieselbe Funktion läuft beim Zurücksetzen des Fortschritts.
 
@@ -244,7 +244,7 @@ verschickt, nichts geladen — die App braucht dafür weder Netz noch einen Zuga
 | Baustein | Aufgabe |
 | --- | --- |
 | `TICKET_KEY` | eigener `localStorage`-Schlüssel (`chillingo_tickets_v1`) |
-| `ticketAnlegen()` | legt an, trimmt, begrenzt, ergänzt Rubrik, Stand und Gerät |
+| `ticketAnlegen()` | legt an, trimmt, begrenzt, ergänzt Übung, Stand und Gerät |
 | `ticketAbschnitt()` | ein Ticket als Markdown-Abschnitt |
 | `ticketsAlsText()` | bündelt eine Liste, älteste zuerst nummeriert |
 | `inZwischenablage()` | Kopierversuch; scheitert er, bleibt der Text zum Markieren |
@@ -270,9 +270,8 @@ Beschreibung und den drei Metazeilen, am Ende einmal das Gerät.
 jedem Schreiblauf; `--check` vergleicht bewusst *ohne* diesen Wert, sonst wäre die Datei
 jeden Tag «nicht auf Stand».
 
-Erreichbar über **Einstellungen → Rückmeldung → Tickets**. `tkHerkunft` merkt sich die
-Rubrik, aus der man kam — die ist gemeint, wenn ein Fehler gemeldet wird, nicht
-«Einstellungen».
+Erreichbar über **Menü → Tickets**. `letzterTab` hält die Übung, aus der man kam — die
+ist gemeint, wenn ein Fehler gemeldet wird, nicht «Menü».
 
 ## Absicherung
 
@@ -329,7 +328,7 @@ Ein einziges Objekt `state` hält den gesamten Lernstand:
 | `fakten` | je Sprachfakt `{ n: wie oft gezeigt, f: Favorit }`, unter einer kurzen Kennung |
 | `settings` | Einstellungen des Nutzers, siehe unten |
 
-Daneben existieren pro Rubrik einige Modulvariablen (`uebQ`, `uebPhase`, `trTask`,
+Daneben existieren pro Übung einige Modulvariablen (`uebQ`, `uebPhase`, `trTask`,
 `tWord` …). Sie beschreiben die aktuelle Frage und sind bewusst **nicht** Teil von
 `state` — sie überleben einen Neustart nicht und sollen es auch nicht.
 
@@ -349,7 +348,7 @@ auf einen sinnvollen Bereich:
 | `darstellung` | `system` | `system`, `dunkel` oder `hell`. Steuert `data-theme` am `<html>`-Element. |
 
 Eine neue Einstellung braucht drei Dinge: einen Vorgabewert in `defaultSettings()`,
-eine Zeile in `renderEinstellungen()` und — falls sie das Verhalten einer Rubrik
+eine Zeile in `renderEinstellungen()` und — falls sie das Verhalten einer Übung
 ändert — eine Abfrage an der betreffenden Stelle. `mergeState()` sorgt dafür, dass
 bestehende Lernstände die neue Einstellung mit ihrem Vorgabewert bekommen; deshalb darf
 `state.settings` nie als Ganzes aus dem gespeicherten Stand übernommen werden.
@@ -359,14 +358,14 @@ stehen. Eine wiederhergestellte Sicherung bringt dagegen die dort gespeicherten
 Einstellungen mit, weil `mergeState()` auch auf dem Sicherungscode arbeitet.
 
 Erreichbar sind sie über den Reglerknopf in der Kopfzeile, nicht über einen eigenen Tab —
-die Tab-Leiste trägt bereits fünf Rubriken.
+Home trägt bereits vier Kacheln.
 
 ## Lernweg: Lernsets, Freestyle, Fälligkeit
 
 Alle Übungsrubriken ziehen aus demselben Bestand (`ALL_VOCAB`) und schreiben in denselben
 Leitner-Stand (`state.boxes`). Unterschiedlich ist nur, *welchen Ausschnitt* sie sehen:
 
-| Rubrik | Ausschnitt |
+| Übung | Ausschnitt |
 | --- | --- |
 | Lernsets | das laufende Set, wahlweise ein früheres oder alle freigeschalteten |
 | Freestyle | ein Thema freier Wahl oder der ganze Bestand, ohne Sperre |
@@ -383,8 +382,8 @@ Leitner-Stand (`state.boxes`). Unterschiedlich ist nur, *welchen Ausschnitt* sie
   ungeschaffte; spätere sind gesperrt.
 - **Freestyle** kennt keine Sperre: Thema wählen (oder „Alle") und üben. Es ist der Ort
   für die Wörter, die kein Satz braucht.
-- Beide Rubriken teilen sich Fragelogik und Zustand; `uebModus` entscheidet über
-  Wortvorrat und Kopfzeile, `render()` setzt beim Rubrikwechsel die Frage zurück.
+- Beide Übungen teilen sich Fragelogik und Zustand; `uebModus` entscheidet über
+  Wortvorrat und Kopfzeile, `render()` setzt beim Wechsel die Frage zurück.
 - **Fälligkeit** steckt in `state.lastSeen[id]` und `INTERVALL` (neu · 1 · 3 · 7 · 21 Tage
   je Leitner-Stufe). `waehleWort(pool, nurWiederholen)` wählt in drei Stufen: fällige
   Wiederholungen, dann noch nie gesehene Wörter, dann das am längsten zurückliegende Wort
@@ -427,7 +426,7 @@ immer `setTab()` — es merkt sich in `letzterTab` den Rückweg aus den Einstell
 hält die Markierungen in Tab-Leiste und Zahnrad in Einklang. Jede dieser Funktionen baut eine
 HTML-Zeichenkette, setzt sie als `innerHTML` von `#main` und hängt anschließend die
 Ereignisbehandler an die frisch erzeugten Knoten. Es gibt kein virtuelles DOM und keine
-Teilaktualisierung: eine Rubrik wird immer vollständig neu gezeichnet.
+Teilaktualisierung: eine Ansicht wird immer vollständig neu gezeichnet.
 
 Daraus folgen zwei Regeln:
 
