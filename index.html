@@ -1888,7 +1888,6 @@ function faellig(v, jetzt) {
 // Sätze führen dieselbe Leiter wie Wörter: BOX_MAX Mal richtig heißt «sitzt».
 // Kennung ist der russische Satz, wie bei Wörtern das russische Wort.
 function satzBox(s) { return state.satzBox[s.ru] || 0; }
-function satzGeuebt(s) { return state.satzSeen[s.ru] !== undefined; }
 function satzFaellig(s, jetzt) {
   var seit = state.satzSeen[s.ru];
   if (!seit) return true;
