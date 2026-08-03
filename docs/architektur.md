@@ -187,6 +187,33 @@ Geschlossen wird bei Auswahl, bei einem Tipp daneben, mit `Escape` oder erneutem
 Zugeklappt bekommen die Einträge `tabindex="-1"`, damit der Fokus nicht in ein
 unsichtbares Panel springt.
 
+## Auswahl in den Übungen
+
+Neben dem Menüknopf steht ein zweiter runder Knopf mit Trichter — die **Auswahl**. Er
+erscheint nur in den vier Übungen und öffnet dasselbe Aufklapp-Panel, nur breiter
+(284 px) und mit scrollbarem Inhalt (`max-height: 62vh`).
+
+| Übung | Gruppen im Panel |
+| --- | --- |
+| Lernsets | Auswahl (aktuelles Set · alles Freigeschaltete), einzelnes Set |
+| Freestyle | Thema |
+| Tippen | Stapel (Lernen · Wiederholung) |
+| Übersetzen | Stufe, Richtung, Stapel |
+
+`filterInhaltHtml()` baut die Gruppen, `filterWaehlen(gruppe, wert)` setzt den Wert,
+schließt das Panel, zeichnet die Übung neu und zieht den Knopf nach. Die Chips tragen
+`data-fw` (Gruppe) und `data-fv` (Wert) — mehr braucht die Verdrahtung nicht.
+
+**Der Knopf färbt sich, wenn etwas vom Regelfall abweicht** (`filterAktiv()`): anderes
+Set als das laufende, anderes Thema als «Alle», Wiederholungsstapel, andere Stufe oder
+Richtung. Gold wie ein gesetzter Chip — damit sieht man auf einen Blick, dass die Ansicht
+gefiltert ist, ohne die Auswahl offen zu haben.
+
+Die Übungen selbst tragen keine Auswahlzeile mehr; sie nennen nur noch in einem
+`.task-label`, was gerade gilt («Set 1 von 12», «Alle Themen», «Stufe 2»). Klappmenüs
+(`<select>`) gibt es in der Datei überhaupt nicht mehr — auf iOS öffnen sie ein
+systemeigenes Rad, das mit dem Rest der Oberfläche nichts zu tun hat (ADR 0020).
+
 ## Töne
 
 `ton(richtig)` spielt nach jeder bewerteten Antwort einen kurzen Klang: eine aufsteigende

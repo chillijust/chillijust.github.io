@@ -35,6 +35,13 @@ Bilanz, Einstellungen und Tickets sind keine Übungen — sie stehen im **Menü*
 - [x] Der Knopf clippt den Flug nicht mehr weg — geblendet wird in einer eigenen Hülle
 - [x] Der Flug rechnet mit Mittelpunkten statt Ecken (`scale` wirkt um die Mitte)
 
+### Nachbesserungen aus dem dritten Gerätetest — **erledigt** (ADR 0020)
+
+- [x] Die App startete auf «Lernsets» statt auf Home (`currentTab` stand noch falsch)
+- [x] Klappmenüs und Chip-Reihen in den Übungen durch **einen Auswahlknopf** ersetzt;
+      dahinter dasselbe Aufklapp-Panel wie beim Menü
+- [x] Der Knopf färbt sich golden, sobald etwas vom Regelfall abweicht
+
 ---
 
 ## Etappe 2 · Bilanz mit Tiefe — **offen**
