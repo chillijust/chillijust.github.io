@@ -91,7 +91,9 @@ ihres Platzhalters ist, scrollt sie starr mit dem Inhalt (ADR 0012).
 ### Der Sprung
 
 `chiliAktualisieren()` läuft über einen `MutationObserver` auf `#main`, merkt also jeden
-Ansichtswechsel, ohne dass eine Renderfunktion daran denken muss. Der Sprung besteht aus
+Ansichtswechsel, ohne dass eine Renderfunktion daran denken muss. **Beim Start wird erst
+gezeichnet, dann platziert** — sonst stünde die Figur kurz im Kopf (`#main` ist noch
+leer) und spränge danach sichtbar auf ihren Platz in der Empfehlung. Der Sprung besteht aus
 zwei Teilen auf zwei Elementen, die sich nicht ins Gehege kommen:
 
 - **Die Figur** bekommt die Klasse `springt` (Keyframes `chiliSprung`, 0,23 s): ducken,
@@ -352,6 +354,24 @@ Beschreibung und den drei Metazeilen, am Ende einmal das Gerät.
 `APP_STAND` ist das Datum der ausgelieferten Datei. `tools/build.mjs` stempelt es bei
 jedem Schreiblauf; `--check` vergleicht bewusst *ohne* diesen Wert, sonst wäre die Datei
 jeden Tag «nicht auf Stand».
+
+### Melden von überall
+
+Neue Tickets entstehen nicht in der Ticket-Ansicht, sondern über einen **schwebenden
+Knopf unten rechts**, der über jeder Ansicht liegt. Er öffnet ein **Blatt von unten**
+(`#meldeBlatt`), das nur den unteren Teil des Bildschirms einnimmt — man sieht weiter,
+worüber man gerade redet. Der Fußabstand des `<body>` (96 px) hält dem Knopf Platz frei,
+damit er nie über einer Knopfzeile liegt.
+
+Im Blatt: Art (Fehler/Wunsch), Titel, Beschreibung und ein **Haken für den
+Ansichtsbezug**, vorbelegt mit der Ansicht darunter. Abgehakt bleibt `reiter` leer, und
+der gebündelte Text lässt die Zeile weg, statt «null» zu behaupten.
+
+**Das Blatt lässt sich schieben und federt zurück.** `meldeZiehenBinden()` hängt an
+Pointer-Ereignissen: beim Ziehen folgt es gedämpft (`|d|^0,72 · 1,6` — je weiter, desto
+zäher), beim Loslassen räumt es sein `transform` ab und der CSS-Übergang federt es
+zurück. Es schließt dabei **nie**; der einzige Weg hinaus sind die beiden Knöpfe. Auf
+Eingabefeldern und Knöpfen greift das Ziehen nicht, sonst käme man nicht ins Textfeld.
 
 Erreichbar über **Menü → Tickets**. `letzterTab` hält die Übung, aus der man kam — die
 ist gemeint, wenn ein Fehler gemeldet wird, nicht «Menü».

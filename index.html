@@ -87,7 +87,8 @@ body {
   background-attachment: fixed;
   color: var(--text);
   font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  padding: var(--pad-oben) var(--pad-rechts) calc(48px + env(safe-area-inset-bottom)) var(--pad-links);
+  /* Der Fußabstand hält dem schwebenden Meldeknopf Platz frei. */
+  padding: var(--pad-oben) var(--pad-rechts) calc(96px + env(safe-area-inset-bottom)) var(--pad-links);
   max-width: 560px;
   margin: 0 auto;
   -webkit-text-size-adjust: 100%;
@@ -605,7 +606,75 @@ textarea.fliess { font-family: inherit; word-break: normal; line-height: 1.5; ba
 }
 .tkzeile.gesendet .tksenden { background: none; color: var(--dim); border-color: var(--line); }
 
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+/* ── Melden ────────────────────────────────────────────────
+   Der Knopf schwebt unten rechts; der Fußabstand des Körpers hält ihm den
+   Platz frei, damit er nie über einer Knopfzeile liegt. */
+#meldeKnopf {
+  position: fixed; z-index: 50;
+  right: calc(16px + env(safe-area-inset-right));
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  width: 52px; height: 52px; border-radius: 50%; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--line); background: var(--card-2); color: var(--dim);
+  cursor: pointer; box-shadow: 0 8px 22px var(--shade), inset 0 1px 0 var(--lip);
+  transition: transform .2s, opacity .2s;
+}
+#meldeKnopf .icon { width: 23px; height: 23px; }
+#meldeKnopf:active { transform: scale(.93); }
+body.melden-offen #meldeKnopf { opacity: 0; pointer-events: none; transform: scale(.8); }
+
+#meldeHof {
+  position: fixed; inset: 0; z-index: 55; background: rgba(0, 0, 0, .38);
+  opacity: 0; transition: opacity .28s;
+}
+#meldeHof[hidden] { display: none; }
+body.melden-offen #meldeHof { opacity: 1; }
+
+#meldeBlatt {
+  position: fixed; z-index: 60; left: 0; right: 0; bottom: 0;
+  margin: 0 auto; max-width: 560px;
+  padding: 8px var(--pad-rechts) calc(16px + env(safe-area-inset-bottom)) var(--pad-links);
+  background: var(--card); border: 1px solid var(--line); border-bottom: none;
+  border-radius: 22px 22px 0 0;
+  box-shadow: 0 -14px 40px var(--shade), inset 0 1px 0 var(--lip);
+  transform: translateY(110%);
+  transition: transform .34s cubic-bezier(.25, .9, .3, 1);
+  touch-action: none;   /* das Blatt zieht selbst, es soll nicht mitscrollen */
+}
+body.melden-offen #meldeBlatt { transform: translateY(0); }
+/* Während der Finger zieht, folgt das Blatt sofort — erst beim Loslassen
+   federt es mit Übergang zurück. */
+#meldeBlatt.zieht { transition: none; }
+.blatt-griff {
+  width: 42px; height: 5px; border-radius: 999px; background: var(--line);
+  margin: 4px auto 12px;
+}
+.blatt-inhalt { display: block; }
+#meldeBlatt .btn-row { margin-top: 14px; }
+
+.bezug {
+  display: flex; align-items: center; gap: 12px;
+  margin-top: 14px; min-height: 44px; cursor: pointer;
+}
+.bezug input { position: absolute; opacity: 0; width: 0; height: 0; }
+.bezug-kasten {
+  flex: none; width: 24px; height: 24px; border-radius: 8px;
+  border: 1px solid var(--line); background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+}
+.bezug-kasten::after {
+  content: ''; width: 11px; height: 6px; margin-top: -3px;
+  border-left: 2px solid var(--gold-ink); border-bottom: 2px solid var(--gold-ink);
+  transform: rotate(-45deg) scale(.6); opacity: 0; transition: opacity .15s, transform .15s;
+}
+.bezug input:checked + .bezug-kasten { background: var(--gold); border-color: var(--gold); }
+.bezug input:checked + .bezug-kasten::after { opacity: 1; transform: rotate(-45deg) scale(1); }
+.bezug-text { font-size: 14px; color: var(--dim); }
+.bezug input:checked ~ .bezug-text strong { color: var(--gold); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
 </style>
 </head>
 <body>
@@ -645,6 +714,28 @@ textarea.fliess { font-family: inherit; word-break: normal; line-height: 1.5; ba
 </header>
 
 <main id="main"></main>
+
+<!-- Melden von überall: der Knopf schwebt, das Blatt kommt von unten. -->
+<button id="meldeKnopf" aria-label="Rückmeldung geben" aria-expanded="false" aria-controls="meldeBlatt"></button>
+<div id="meldeHof" hidden></div>
+<div id="meldeBlatt" role="dialog" aria-modal="false" aria-label="Rückmeldung" aria-hidden="true">
+  <div class="blatt-griff" aria-hidden="true"></div>
+  <div class="blatt-inhalt">
+    <div class="controls" id="meldeArt"></div>
+    <input type="text" class="zeile" id="meldeTitel" maxlength="120"
+      placeholder="Worum geht es? Kurz und knapp." autocapitalize="sentences" spellcheck="false">
+    <textarea class="fliess" id="meldeText" rows="4" placeholder="Was ist passiert, was hatten Sie erwartet?"></textarea>
+    <label class="bezug" for="meldeBezug">
+      <input type="checkbox" id="meldeBezug" checked>
+      <span class="bezug-kasten" aria-hidden="true"></span>
+      <span class="bezug-text">Betrifft <strong id="meldeBezugName">Home</strong></span>
+    </label>
+    <div class="btn-row">
+      <button class="btn ghost" id="meldeAbbruch">Abbrechen</button>
+      <button class="btn primary" id="meldeSichern">Sichern</button>
+    </div>
+  </div>
+</div>
 
 
 <script>
@@ -1272,7 +1363,7 @@ var SATZ_STUFE = 2;
 var STORAGE_KEY = 'russisch_trainer_v1';
 // Stand der ausgelieferten Datei. Wird von tools/build.mjs gesetzt und geht in
 // jedes Ticket ein, damit ein Bericht sagt, welcher Stand gemeint war.
-var APP_STAND = '2026-08-03'; /* == STAND == */
+var APP_STAND = '2026-08-04'; /* == STAND == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -1483,7 +1574,7 @@ function datumLang(ms) {
 function ticketAbschnitt(t, nr) {
   return '## ' + nr + ' · ' + (t.art === 'bug' ? 'Fehler' : 'Wunsch') + ': ' + t.titel + '\n\n' +
     (t.text ? t.text + '\n\n' : '') +
-    '- Übung: ' + t.reiter + '\n' +
+    (t.reiter ? '- Übung: ' + t.reiter + '\n' : '') +
     '- App-Stand: ' + t.stand + '\n' +
     '- Erstellt: ' + datumLang(t.erstellt) + '\n';
 }
@@ -1518,7 +1609,9 @@ function ticketAnlegen(art, titel, text, reiter) {
     // ungewollt in der Überschrift des gebündelten Textes.
     titel: String(titel).replace(/^\s+|\s+$/g, '').slice(0, 120),
     text: String(text).replace(/\s+$/, '').slice(0, 4000),
-    reiter: ansichtName(reiter),
+    // Ohne Bezug bleibt das Feld leer — der gebündelte Text lässt die Zeile
+    // dann weg, statt «null» zu behaupten.
+    reiter: reiter ? ansichtName(reiter) : '',
     stand: APP_STAND,
     geraet: geraet,
     erstellt: jetzt,
@@ -1571,6 +1664,9 @@ var ICON = {
   // Trichter: als Filter eindeutiger als drei Regler, die schon die
   // Einstellungen tragen.
   filter: svg('<path d="M3.5 5.5h17l-6.6 7.6v5.6l-3.8 2.3v-7.9z"/>'),
+  // Sprechblase mit Stift: melden, nicht bloß reden.
+  melden: svg('<path d="M20.5 13.4a2.6 2.6 0 0 1-2.6 2.6H9.4L5 19.4v-3.4H4.1a2.6 2.6 0 0 1-2.6-2.6V6.6A2.6 2.6 0 0 1 4.1 4h13.8a2.6 2.6 0 0 1 2.6 2.6z"/>' +
+    '<path d="M8 10h8M8 7.2h5"/>'),
   bilanz: svg('<path d="M4 19.5h16"/><path d="M7 19.5V11M12 19.5V5.5M17 19.5v-5.5"/>'),
   kreuz: svg('<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>')
 };
@@ -2103,6 +2199,30 @@ function setTab(name) {
 }
 
 document.getElementById('zurueck').addEventListener('click', function () { setTab('home'); });
+
+document.getElementById('meldeKnopf').innerHTML = ICON.melden;
+document.getElementById('meldeKnopf').addEventListener('click', function () {
+  menuSetzen(false);
+  filterSetzen(false);
+  meldeSetzen(true);
+});
+document.getElementById('meldeAbbruch').addEventListener('click', function () {
+  meldeSetzen(false);
+  meldeLeeren();
+});
+document.getElementById('meldeBezug').addEventListener('change', function (e) {
+  meldeBezugAn = e.target.checked;
+});
+document.getElementById('meldeSichern').addEventListener('click', function () {
+  var titel = document.getElementById('meldeTitel');
+  if (!titel.value.replace(/^\s+|\s+$/g, '')) { titel.focus(); return; }
+  ticketAnlegen(meldeArt, titel.value, document.getElementById('meldeText').value,
+    meldeBezugAn ? meldeBezugQuelle() : null);
+  meldeSetzen(false);
+  meldeLeeren();
+  if (currentTab === 'tickets') renderTickets();
+});
+meldeZiehenBinden();
 
 document.getElementById('menuKnopf').addEventListener('click', function (e) {
   e.stopPropagation();
@@ -3385,8 +3505,106 @@ function renderFakten() {
   document.getElementById('faktenBack').addEventListener('click', function () { setTab(letzterTab); });
 }
 
+// ── Melden ──────────────────────────────────────────────────
+// Ein Ticket schreibt man dort, wo einem etwas auffällt — nicht erst nach dem
+// Weg über das Menü. Der Knopf schwebt darum über jeder Ansicht, und das Blatt
+// deckt nur den unteren Teil ab, damit man weiter sieht, worum es geht.
+var meldeOffen = false;
+var meldeArt = 'bug';
+var meldeBezugAn = true;
+
+function meldeBezugQuelle() {
+  // Die Ansicht, über der man steht — die ist gemeint, nicht «Tickets».
+  return currentTab === 'tickets' ? letzterTab : currentTab;
+}
+
+function meldeArtHtml() {
+  return [['bug', 'Fehler'], ['feature', 'Wunsch']].map(function (a) {
+    return '<button class="chip' + (meldeArt === a[0] ? ' active' : '') +
+      '" data-melde-art="' + a[0] + '">' + a[1] + '</button>';
+  }).join('');
+}
+
+function meldeFuellen() {
+  document.getElementById('meldeArt').innerHTML = meldeArtHtml();
+  document.querySelectorAll('[data-melde-art]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      meldeArt = b.dataset.meldeArt;
+      document.getElementById('meldeText').placeholder = meldeArt === 'bug'
+        ? 'Was ist passiert, was hatten Sie erwartet?'
+        : 'Was soll die App können?';
+      meldeFuellen();
+    });
+  });
+  document.getElementById('meldeBezugName').textContent = ansichtName(meldeBezugQuelle());
+  document.getElementById('meldeBezug').checked = meldeBezugAn;
+}
+
+function meldeSetzen(auf) {
+  meldeOffen = auf;
+  document.body.classList.toggle('melden-offen', auf);
+  var blatt = document.getElementById('meldeBlatt');
+  blatt.setAttribute('aria-hidden', auf ? 'false' : 'true');
+  document.getElementById('meldeKnopf').setAttribute('aria-expanded', auf ? 'true' : 'false');
+  var hof = document.getElementById('meldeHof');
+  if (auf) {
+    hof.hidden = false;
+    meldeFuellen();
+  } else {
+    blatt.style.transform = '';
+    // Der Hof verschwindet erst, wenn er ausgeblendet ist — sonst blitzt er weg.
+    setTimeout(function () { if (!meldeOffen) hof.hidden = true; }, 300);
+  }
+  document.querySelectorAll('#meldeBlatt button, #meldeBlatt input, #meldeBlatt textarea')
+    .forEach(function (el) { el.tabIndex = auf ? 0 : -1; });
+}
+
+function meldeLeeren() {
+  document.getElementById('meldeTitel').value = '';
+  document.getElementById('meldeText').value = '';
+  meldeArt = 'bug';
+  meldeBezugAn = true;
+}
+
+// Das Blatt lässt sich schieben und federt zurück. Es schließt dabei nie —
+// gewollt: der einzige Weg hinaus sind die beiden Knöpfe.
+function meldeZiehenBinden() {
+  var blatt = document.getElementById('meldeBlatt');
+  var start = null;
+
+  function daempfen(d) {
+    // Je weiter, desto zäher: die Wurzel wächst langsamer als der Weg.
+    var s = d < 0 ? -1 : 1;
+    return s * Math.pow(Math.abs(d), 0.72) * 1.6;
+  }
+  function los(e) {
+    if (!meldeOffen) return;
+    var z = e.target;
+    // Auf Eingabefeldern hat das Ziehen nichts zu suchen.
+    if (z.closest('input, textarea, button')) return;
+    start = { x: e.clientX, y: e.clientY };
+    blatt.classList.add('zieht');
+    try { blatt.setPointerCapture(e.pointerId); } catch (err) {}
+  }
+  function bewegt(e) {
+    if (!start) return;
+    blatt.style.transform = 'translate(' + daempfen(e.clientX - start.x).toFixed(1) + 'px,' +
+      daempfen(e.clientY - start.y).toFixed(1) + 'px)';
+  }
+  function fertig() {
+    if (!start) return;
+    start = null;
+    blatt.classList.remove('zieht');
+    blatt.style.transform = '';   // der Übergang federt zurück
+  }
+
+  blatt.addEventListener('pointerdown', los);
+  blatt.addEventListener('pointermove', bewegt);
+  blatt.addEventListener('pointerup', fertig);
+  blatt.addEventListener('pointercancel', fertig);
+}
+
 // ── TICKETS ─────────────────────────────────────────────────
-var tkForm = null;      // null = Liste, sonst { art, titel, text }
 var tkAusgabe = '';     // gebündelter Text, sichtbar bis «Fertig»
 
 function renderTickets() {
@@ -3403,37 +3621,21 @@ function renderTickets() {
       '</div><div class="btn-row">' +
       '<button class="btn ghost" id="tkNochmal">Nochmal kopieren</button>' +
       '<button class="btn primary" id="tkFertig">Fertig</button></div>';
-  } else if (tkForm) {
-    html += '<div class="card">' +
-      '<p class="task-label">' + (tkForm.art === 'bug' ? 'Fehler melden' : 'Wunsch melden') + '</p>' +
-      '<input type="text" class="zeile" id="tkTitel" maxlength="120" ' +
-      'placeholder="Worum geht es? Kurz und knapp." autocapitalize="sentences" spellcheck="false">' +
-      '<textarea class="fliess" id="tkText" rows="6" ' +
-      'placeholder="' + (tkForm.art === 'bug'
-        ? 'Was ist passiert, was hatten Sie erwartet?'
-        : 'Was soll die App können?') + '"></textarea>' +
-      '<p class="hint">Mitgeschickt werden Übung (' + esc(ansichtName(letzterTab)) +
-      '), App-Stand (' + esc(APP_STAND) + ') und Gerät.</p>' +
-      '</div><div class="btn-row">' +
-      '<button class="btn ghost" id="tkAbbruch">Abbrechen</button>' +
-      '<button class="btn primary" id="tkSichern">Sichern</button></div>';
   } else {
-    html += '<div class="controls">' +
-      '<button class="chip" data-neu="bug">Fehler melden</button>' +
-      '<button class="chip" data-neu="feature">Wunsch melden</button></div>';
-
     if (!tickets.length) {
       html += '<div class="leer">' + maskottchen('gross') +
         '<h3>Noch kein Ticket</h3>' +
-        '<p>Halten Sie hier fest, was hakt oder fehlt — auch ohne Netz. Später bündelt ' +
-        'ein Knopf alles zu einem Text, den Sie kopieren und weitergeben.</p></div>';
+        '<p>Der Knopf unten rechts ist von überall erreichbar — halten Sie fest, was hakt ' +
+        'oder fehlt, gleich dort, wo es Ihnen auffällt. Später bündelt ein Knopf alles zu ' +
+        'einem Text zum Weitergeben.</p></div>';
     } else {
       html += '<div class="tkliste">';
       tickets.forEach(function (t, i) {
         html += '<div class="tkzeile' + (t.uebergeben ? ' gesendet' : '') + '">' +
           '<span class="tktext"><span class="tkart ' + t.art + '">' +
           (t.art === 'bug' ? 'Fehler' : 'Wunsch') + '</span>' + esc(t.titel) +
-          '<span class="tkmeta">' + esc(datumKurz(t.erstellt)) + ' · ' + esc(t.reiter) + ' · ' +
+          '<span class="tkmeta">' + esc(datumKurz(t.erstellt)) +
+          (t.reiter ? ' · ' + esc(t.reiter) : '') + ' · ' +
           (t.uebergeben ? 'übergeben ' + esc(datumKurz(t.uebergeben)) : 'offen') + '</span></span>' +
           '<button class="sternbtn" data-tkweg="' + i + '" aria-label="Ticket löschen">' +
           ICON.kreuz + '</button></div>';
@@ -3453,9 +3655,10 @@ function renderTickets() {
       }
     }
 
-    html += '<p class="settings-note">Tickets liegen nur auf diesem Gerät und verlassen es nie ' +
-      'von selbst. «Kopieren» legt alles als einen Text in die Zwischenablage — den geben Sie ' +
-      'Claude Code, und was kopiert wurde, gilt als übergeben.</p>';
+    html += '<p class="settings-note">Neue Tickets schreiben Sie über den Knopf unten rechts — ' +
+      'von jeder Ansicht aus. Sie liegen nur auf diesem Gerät und verlassen es nie von selbst. ' +
+      '«Kopieren» legt alles als einen Text in die Zwischenablage; was kopiert wurde, gilt als ' +
+      'übergeben.</p>';
   }
 
   html += '<div class="btn-row"><button class="btn ghost" id="tkBack">Zurück</button></div></section>';
@@ -3473,30 +3676,7 @@ function renderTickets() {
       tkAusgabe = '';
       renderTickets();
     });
-  } else if (tkForm) {
-    var titel = document.getElementById('tkTitel');
-    var text = document.getElementById('tkText');
-    titel.value = tkForm.titel;
-    text.value = tkForm.text;
-    titel.addEventListener('input', function () { tkForm.titel = titel.value; });
-    text.addEventListener('input', function () { tkForm.text = text.value; });
-    document.getElementById('tkAbbruch').addEventListener('click', function () {
-      tkForm = null;
-      renderTickets();
-    });
-    document.getElementById('tkSichern').addEventListener('click', function () {
-      if (!titel.value.replace(/^\s+|\s+$/g, '')) { titel.focus(); return; }
-      ticketAnlegen(tkForm.art, titel.value, text.value, letzterTab);
-      tkForm = null;
-      renderTickets();
-    });
   } else {
-    main.querySelectorAll('[data-neu]').forEach(function (b) {
-      b.addEventListener('click', function () {
-        tkForm = { art: b.dataset.neu, titel: '', text: '' };
-        renderTickets();
-      });
-    });
     main.querySelectorAll('[data-tkweg]').forEach(function (b) {
       b.addEventListener('click', function () {
         tickets.splice(parseInt(b.dataset.tkweg, 10), 1);
@@ -3889,10 +4069,12 @@ updateDarstellung();
 if (window.MutationObserver) {
   new MutationObserver(function () { chiliAktualisieren(); }).observe(main, { childList: true });
 }
+// Erst zeichnen, dann die Chili das erste Mal setzen: sonst stünde sie kurz im
+// Kopf (main ist noch leer) und spränge danach sichtbar auf ihren Platz in der
+// Empfehlung — beim Neuladen sah das aus wie ein Fehler.
+render();
 menuSetzen(false);
 chiliAktualisieren();
-updateKopf();
-render();
 </script>
 </body>
 </html>

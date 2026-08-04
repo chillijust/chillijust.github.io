@@ -42,6 +42,15 @@ Bilanz, Einstellungen und Tickets sind keine Übungen — sie stehen im **Menü*
       dahinter dasselbe Aufklapp-Panel wie beim Menü
 - [x] Der Knopf färbt sich golden, sobald etwas vom Regelfall abweicht
 
+### Aus dem vierten Gerätetest — **erledigt** (ADR 0021)
+
+- [x] Beim Neuladen sprang die Chili von der Kopfzeile auf die Empfehlung
+      (erst zeichnen, dann platzieren)
+- [x] **Meldeknopf** unten rechts, von jeder Ansicht aus erreichbar
+- [x] Blatt von unten statt ganzer Ansicht; die Ansicht darunter bleibt sichtbar
+- [x] Haken für den Ansichtsbezug, vorbelegt mit der Ansicht darunter
+- [x] Das Blatt lässt sich schieben und federt zurück, ohne zu schließen
+
 ---
 
 ## Etappe 2 · Bilanz mit Tiefe — **offen**
