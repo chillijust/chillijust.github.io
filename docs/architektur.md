@@ -93,7 +93,13 @@ ihres Platzhalters ist, scrollt sie starr mit dem Inhalt (ADR 0012).
 `chiliAktualisieren()` läuft über einen `MutationObserver` auf `#main`, merkt also jeden
 Ansichtswechsel, ohne dass eine Renderfunktion daran denken muss. **Beim Start wird erst
 gezeichnet, dann platziert** — sonst stünde die Figur kurz im Kopf (`#main` ist noch
-leer) und spränge danach sichtbar auf ihren Platz in der Empfehlung. Der Sprung besteht aus
+leer) und spränge danach sichtbar auf ihren Platz in der Empfehlung.
+
+Das allein genügt nicht: Das Markup hält die Figur im Kopf, und der Browser zeichnet den
+Kopf, **bevor** das Skript am Ende des Body überhaupt läuft. Beim Neuladen blitzte sie
+darum kurz neben dem Menüknopf auf. `#chiliBuehne` startet deshalb mit
+`visibility: hidden`; sichtbar wird sie erst über `body.chili-steht`, die
+`chiliAktualisieren()` beim ersten Platzieren setzt (ADR 0025). Der Sprung besteht aus
 zwei Teilen auf zwei Elementen, die sich nicht ins Gehege kommen:
 
 - **Die Figur** bekommt die Klasse `springt` (Keyframes `chiliSprung`, 0,23 s): ducken,
@@ -122,9 +128,9 @@ und wächst über `blaseAuf` (0,6 s) herein, statt aufzuploppen. Unter
 
 ## Navigation: Home, Kopf, Menü
 
-Die App hat **Übungen** (Lernsets, Freestyle, Tippen, Übersetzen — Buchstaben folgen) und
-drei Ansichten, die keine sind: Bilanz, Einstellungen, Tickets. Der Begriff «Rubrik» ist
-hinfällig; im Nutzertext wie im Code heißt es **Übung**.
+Die App hat fünf **Übungen** (Lernsets, Freestyle, Tippen, Übersetzen, Buchstaben) und
+vier Ansichten, die keine sind: Bilanz, Sicherung, Einstellungen, Tickets. Der Begriff
+«Rubrik» ist hinfällig; im Nutzertext wie im Code heißt es **Übung**.
 
 **Home** (`renderHome()`, Startansicht) ist kein Verzeichnis, sondern ein Lagebild. Jede
 Kachel nennt über `uebungsStand()`, was dort ansteht — «Set 1 · 11 offen», «21 fällig»,
@@ -192,8 +198,13 @@ unsichtbares Panel springt.
 ## Auswahl in den Übungen
 
 Neben dem Menüknopf steht ein zweiter runder Knopf mit Trichter — die **Auswahl**. Er
-erscheint nur in den vier Übungen und öffnet dasselbe Aufklapp-Panel, nur breiter
+erscheint nur in den fünf Übungen und öffnet dasselbe Aufklapp-Panel, nur breiter
 (284 px) und mit scrollbarem Inhalt (`max-height: 62vh`).
+
+Links daneben sitzt in «Buchstaben» ein **dritter** Knopf: der Weg zur Tafel
+(`renderTafelKnopf()`). Er ist keine Einstellung, sondern ein zweiter Ort — darum steht
+er nicht im Auswahlpanel und färbt sich eisblau statt golden: Er meldet nicht «etwas
+weicht ab», sondern «hier stehen Sie».
 
 | Übung | Gruppen im Panel |
 | --- | --- |
@@ -279,6 +290,19 @@ zuerst, bei Gleichstand das am längsten Zurückliegende, ausgelost aus den vord
 vieren; der gerade gelöste Satz kommt nicht sofort wieder. Der frühere Laufindex `trIdx`
 entfällt — eine feste Reihenfolge verträgt sich nicht mit zwei Stapeln.
 
+## Sicherung als eigene Rubrik
+
+Der Sicherungscode stand früher als Anhang unter der Bilanz. Er hat dort nichts zu
+suchen: Wer seinen Stand sichern oder auf ein anderes Gerät holen will, sucht ihn nicht
+unter Zahlen zum Lernfortschritt. Seit ADR 0025 ist er ein **eigener Menüpunkt**
+(`renderSicherung()`), zwischen «Bilanz» und «Einstellungen».
+
+Das **Zurücksetzen** steht dort mit — es ist die Kehrseite derselben Sache und gehört
+neben den Code, der es auffangen kann. Die Bilanz behält nur einen Verweis dorthin.
+
+`backupOpen`, `backupMsg` und `confirmReset` sind Ansichtszustand dieser Rubrik und
+gehören nach der Regel aus ADR 0017 in `ansichtenZuruecksetzen()`.
+
 ## Sicherungscode
 
 Format **2** (`CHG2~…`), eine einzige Zeile aus `A–Z a–z 0–9 . ~`:
@@ -330,12 +354,14 @@ Der Lernstand liegt in einem **eigenen Topf** (`state.abcBox`, `state.abcSeen`) 
 derselben Leiter und denselben Fristen wie Wörter und Sätze. Er taucht in der Bilanz nur
 als eine Zeile im Lernweg auf, nicht in den Kacheln.
 
-Zwei Teile, umschaltbar über den Auswahlknopf:
+Zwei Teile. **Geübt wird ohne Umweg** — die Übung ist der Einstieg; die Tafel liegt
+hinter dem runden Knopf links neben der Auswahl:
 
+- **Üben** — derselbe Aufbau wie das Vokabeltraining (siehe unten).
 - **Tafel** — alle 33 Buchstaben als Raster mit Groß-, Kleinform und Laut. Ein Balken am
   Fuß jeder Kachel zeigt die Stufe (dieselben Farben wie überall). Antippen klappt die
-  Merkhilfe auf.
-- **Üben** — derselbe Aufbau wie das Vokabeltraining (siehe unten).
+  Merkhilfe auf, samt Hörknopf. Ein Nachschlagewerk, keine Einstellung — darum ein
+  eigener Ort und kein Eintrag im Auswahlpanel (ADR 0025).
 
 ### Sitzen und meistern — dieselbe Mechanik wie bei den Wörtern
 
@@ -380,6 +406,36 @@ mindestens 20 Zeichen — und dass Alphabet und Tastatur **dieselben** Zeichen f
 Der Sicherungscode trägt die Buchstaben als achtes Feld. Ältere Codes haben sieben;
 `decodeBackup()` liest die Prüfsumme darum immer aus dem letzten Feld und behandelt das
 achte als optional.
+
+## Vorlesen
+
+`speak(text, sprache)` meldet einen Text bei der Sprachausgabe an — `ru-RU`, wenn nichts
+anderes gesagt wird, sonst `de-DE`; russisch etwas langsamer, weil man es mitbuchstabiert
+statt mitliest. Alles in `try/catch`: iOS braucht eine Nutzergeste, liefert Stimmen
+verzögert und schweigt im Stummschalter-Modus. **Kein Ablauf darf Ton voraussetzen.**
+
+Die Knöpfe erzeugt `hoerknopf(text, sprache)`; der Text hängt als `data-say` am Knopf.
+Ein **einziger Zuhörer auf `#main`** fängt jeden Tipp ab — weil er am gleichbleibenden
+Container hängt und nicht an den Knöpfen, überlebt er jeden Renderlauf, und keine Ansicht
+muss ihre Knöpfe verdrahten.
+
+`hoerzeile(ru, de)` setzt nach der Auflösung beide Seiten nebeneinander, **beschriftet**:
+Zwei gleiche Lautsprecher sagen nicht, welcher welche Sprache spricht.
+
+| Ort | Wann | Was |
+| --- | --- | --- |
+| Lernsets, Freestyle | an der Frage | die Frageseite, in ihrer Sprache |
+| Lernsets, Freestyle | nach der Auflösung | Wort und Bedeutung |
+| Tippen | an der Vorgabe | das deutsche Wort |
+| Tippen | nach der Abgabe | beide Seiten |
+| Übersetzen | am Satz | die Frageseite |
+| Übersetzen | nach der Auflösung | beide Sätze |
+| Buchstaben | nach der Auflösung | das Zeichen |
+| Buchstaben | Merkhilfe in der Tafel | das Zeichen |
+
+**Vor der Abgabe schweigt, was die Antwort wäre.** In «Tippen» ist das russische Wort
+erst nach dem Prüfen zu hören, in «Buchstaben» der Laut erst nach der Auflösung — sonst
+wäre der Hörknopf die halbe Lösung.
 
 ## Bilanz im Detail
 
@@ -439,6 +495,13 @@ Sicherungscode schlank: Tickets gehören nicht zum Lernstand.
 Reihenfolge nicht mehr zu unterscheiden; `ticketAnlegen()` rückt den Zeitstempel darum
 notfalls um eins vor. Damit ist die Nummerierung im gebündelten Text eindeutig.
 
+**Ein Ticket lässt sich ändern.** Ein Tipp auf die Zeile holt es ins Blatt zurück
+(`meldeBearbeiten()`); «Sichern» heißt dann «Ändern» und ruft `ticketAendern()` statt
+`ticketAnlegen()`. `erstellt` bleibt stehen — die Reihenfolge soll sich beim Nachbessern
+nicht verschieben —, `geaendert` kommt dazu und steht im gebündelten Text. **Ein
+geändertes Ticket ist wieder offen:** Was übergeben wurde, stimmt so nicht mehr, und die
+neue Fassung soll beim nächsten Bündeln mitgehen.
+
 **Bündeln heißt übergeben.** Wer «offene kopieren» tippt, bekommt den Text *und* setzt
 damit `uebergeben` auf allen betroffenen Tickets — sonst müsste man den Zustand zweimal
 pflegen und wüsste beim nächsten Mal nicht, was neu ist. «Alle kopieren» nimmt auch
@@ -463,11 +526,17 @@ Im Blatt: Art (Fehler/Wunsch), Titel, Beschreibung und ein **Haken für den
 Ansichtsbezug**, vorbelegt mit der Ansicht darunter. Abgehakt bleibt `reiter` leer, und
 der gebündelte Text lässt die Zeile weg, statt «null» zu behaupten.
 
-**Das Blatt lässt sich schieben und federt zurück.** `meldeZiehenBinden()` hängt an
-Pointer-Ereignissen: beim Ziehen folgt es gedämpft (`|d|^0,72 · 1,6` — je weiter, desto
-zäher), beim Loslassen räumt es sein `transform` ab und der CSS-Übergang federt es
-zurück. Es schließt dabei **nie**; der einzige Weg hinaus sind die beiden Knöpfe. Auf
+**Das Blatt folgt dem Finger — nach unten.** `meldeZiehenBinden()` hängt an
+Pointer-Ereignissen: beim Ziehen folgt es gedämpft (`d^0,72 · 1,6` — je weiter, desto
+zäher), nach oben gibt es gar nicht nach; dorthin führt kein Weg. Ab
+`MELDE_SCHWELLE` (90 px) gilt das Loslassen als «zu», darunter federt es zurück. Auf
 Eingabefeldern und Knöpfen greift das Ziehen nicht, sonst käme man nicht ins Textfeld.
+
+**Zuklappen wirft nichts weg.** Weder das Ziehen noch ein Tipp auf den Hof neben dem
+Blatt löscht den Entwurf — er steht beim nächsten Öffnen wieder da, und der schwebende
+Knopf trägt so lange einen goldenen Punkt (`hat-entwurf`). Verworfen wird ausschließlich
+über «Abbrechen»; ein halb geschriebenes Ticket durch eine Handbewegung zu verlieren wäre
+der schlechtere Tausch (ADR 0025).
 
 Erreichbar über **Menü → Tickets**. `letzterTab` hält die Übung, aus der man kam — die
 ist gemeint, wenn ein Fehler gemeldet wird, nicht «Menü».

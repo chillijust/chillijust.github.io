@@ -21,9 +21,9 @@ nicht «Rubrik». In dieser Reihenfolge:
 **Tippen** (Eingabequiz mit kyrillischer Tastatur, ab Leitner-Stufe 3),
 **Übersetzen** (Satzbau aus Wort-Kacheln, nur Sätze, deren Wörter sitzen),
 **Buchstaben** (das kyrillische Alphabet — freiwillig, eigener Lernstand, zählt nicht in
-Serie und Fortschritt).
+Serie und Fortschritt; Einstieg ist das Üben, die Tafel liegt hinter einem eigenen Knopf).
 Keine Übungen, sondern **im Menü** (runder Knopf, drei Striche): **Bilanz**,
-**Einstellungen**, **Tickets**. Dazu **Sprachfakten** aus der Faktenkarte oder der
+**Sicherung**, **Einstellungen**, **Tickets**. Dazu **Sprachfakten** aus der Faktenkarte oder der
 Bilanz. Eine Reiterleiste gibt es nicht — der Kopf trägt unterwegs den Rückweg.
 
 Maskottchen ist die Chili — freigestellt aus `docs/IMG_2942.png` mit
@@ -87,6 +87,9 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   Einstellungen sind nach Fragen gegliedert: **Lernweg**, **Abgabe**, **Eingabe**,
   **Darstellung und Ton**. Soll eine geänderte Vorgabe auch bestehende Geräte
   erreichen, den Schlüssel umbenennen — der alte Wert fällt in `mergeState()` weg.
+- **Vorlesen nur über `hoerknopf(text, sprache)`** — der Text hängt als `data-say` am
+  Knopf, ein einziger Zuhörer auf `#main` bedient alle. Nie einen eigenen Zuhörer je
+  Knopf anhängen. Was die Antwort wäre, schweigt bis zur Auflösung.
 - **Klang nur über `ton(richtig)`.** Erzeugt in der Web Audio API, nie als Datei, immer
   in `try/catch`, abschaltbar über die Einstellung `ton`. Kein Ablauf darf Ton
   voraussetzen.
@@ -94,6 +97,9 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   ausschließlich in `/data` ändern, danach `node tools/build.mjs`.
 - **`APP_STAND` setzt `tools/build.mjs`**, nicht die Hand. Der Wert geht in jedes Ticket
   ein. `--check` vergleicht ohne ihn, sonst wäre die Datei jeden Tag «nicht auf Stand».
+- **Ein Entwurf im Meldeblatt überlebt das Zuklappen.** Nur «Abbrechen» wirft ihn weg;
+  Ziehen und Danebentippen schließen bloß. Wer das ändert, nimmt dem Blatt seinen Sinn
+  (ADR 0025).
 - **Tickets liegen in `chillingo_tickets_v1`**, nicht im Lernstand — der Sicherungscode
   soll schlank bleiben. Sie verlassen das Gerät nie von selbst: ein Knopf bündelt sie zu
   einem Text zum Kopieren (ADR 0016).

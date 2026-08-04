@@ -96,6 +96,20 @@ Freiwillig: blockiert nichts, zählt nicht in den Lehrplan-Fortschritt.
 
 ---
 
+## Nachtrag · Sechs Tickets vom Gerät — **erledigt** (ADR 0025)
+
+- [x] **Buchstaben**: Üben ist der Einstieg, die Tafel liegt hinter einem eigenen Knopf
+- [x] **Meldeblatt**: zieht nur nach unten, schließt ab 90 px oder beim Tippen daneben
+- [x] Zuklappen behält den Entwurf; verworfen wird nur über «Abbrechen»
+- [x] Ein liegen gebliebener Entwurf zeigt sich am schwebenden Knopf
+- [x] **Tickets ändern**: Tipp auf die Zeile, «Sichern» heißt dann «Ändern»
+- [x] **Fehler**: kein Aufblitzen der Chili beim Neuladen mehr
+- [x] **Sicherung** als eigener Menüpunkt, samt Zurücksetzen
+- [x] **Vorlesen** in allen Übungen, russisch und deutsch
+- [x] Neue Testreihe `hoeren.mjs`; zusammen 602 Prüfungen
+
+---
+
 ## Danach zu prüfen
 
 - Sicherungscode Format 2 auf dem Gerät (steht beim Betreiber noch aus)
@@ -105,3 +119,7 @@ Freiwillig: blockiert nichts, zählt nicht in den Lehrplan-Fortschritt.
   muss
 - Ob der Kachelmodus bei «щ» (sieben Kacheln plus drei überzählige) auf dem Gerät noch
   angenehm zu treffen ist
+- Ob vier runde Knöpfe im Kopf («Buchstaben»: zurück, Tafel, Auswahl, Menü) neben der
+  Chili auf dem iPhone noch genug Luft haben
+- Ob die Sprachausgabe auf dem Gerät die russischen Stimmen findet — sie kommen auf iOS
+  verzögert und fehlen ohne geladenes Sprachpaket ganz

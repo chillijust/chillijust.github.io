@@ -249,6 +249,8 @@ body.filter-offen #filterPanel { grid-template-rows: 1fr; opacity: 1; pointer-ev
 /* Der Auswahlknopf steht neben dem Menü und öffnet dasselbe Aufklapp-Panel.
    Weicht die Auswahl vom Regelfall ab, färbt er sich wie ein gesetzter Chip. */
 #filterKnopf.aktiv { border-color: var(--gold); color: var(--gold); }
+/* Der Tafelknopf zeigt nicht «abweichend», sondern «hier stehen Sie». */
+#tafelKnopf.aktiv { border-color: var(--ice); color: var(--ice); }
 #filterKnopf[aria-expanded="true"] { border-color: var(--gold); color: var(--gold); }
 .filterpanel { width: 284px; max-width: 86vw; }
 .filterpanel .menuinhalt { max-height: 62vh; overflow-y: auto; padding: 12px; gap: 0; }
@@ -380,6 +382,10 @@ select {
   display: inline-flex; align-items: center; justify-content: center;
 }
 .speak:active { transform: scale(.92); }
+/* Nach der Auflösung beides zum Anhören — die Sprache steht am Knopf. */
+.hoerzeile { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.hoerzeile .chip { display: inline-flex; align-items: center; gap: 7px; color: var(--ice); }
+.hoerzeile .chip .icon { width: 17px; height: 17px; }
 .tile.fn, .wordtile.fn, .key.wide { display: inline-flex; align-items: center; justify-content: center; }
 .tile.fn .icon, .wordtile.fn .icon, .key.wide .icon { width: 18px; height: 18px; }
 
@@ -441,7 +447,11 @@ button.built-word:active { transform: scale(.95); }
 
 /* Die Figur steht im Fluss — im Platzhalter der jeweiligen Ansicht. Damit
    scrollt sie starr mit dem Inhalt; nichts wird je Bild nachgerechnet. */
-#chiliBuehne { position: absolute; inset: 0; pointer-events: none; }
+/* Vor dem ersten Renderlauf steht die Figur noch im Kopf, weil das Markup sie
+   dort hält. Sichtbar wird sie erst, wenn das Skript sie gesetzt hat — sonst
+   blitzt sie beim Neuladen kurz neben dem Menüknopf auf. */
+#chiliBuehne { position: absolute; inset: 0; pointer-events: none; visibility: hidden; }
+body.chili-steht #chiliBuehne { visibility: visible; }
 #chiliFigur {
   width: 100%; height: 100%; display: block;
   filter: drop-shadow(0 6px 12px rgba(0, 0, 0, .4));
@@ -662,7 +672,13 @@ textarea.fliess { font-family: inherit; word-break: normal; line-height: 1.5; ba
   box-shadow: inset 0 1px 0 var(--lip);
 }
 .tkzeile.gesendet { opacity: .6; }
-.tktext { flex: 1; font-size: 14px; line-height: 1.45; min-width: 0; }
+/* Die Zeile ist ein Knopf: Antippen holt das Ticket zum Bearbeiten zurück. */
+.tktext {
+  flex: 1; font-size: 14px; line-height: 1.45; min-width: 0; min-height: 44px;
+  border: 0; background: none; color: var(--text); font-family: inherit;
+  text-align: left; padding: 0; cursor: pointer;
+}
+.tktext:active { opacity: .6; }
 .tkmeta { display: block; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); margin-top: 6px; }
 .tkart {
   display: inline-block; font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
@@ -693,6 +709,12 @@ textarea.fliess { font-family: inherit; word-break: normal; line-height: 1.5; ba
 #meldeKnopf .icon { width: 23px; height: 23px; }
 #meldeKnopf:active { transform: scale(.93); }
 body.melden-offen #meldeKnopf { opacity: 0; pointer-events: none; transform: scale(.8); }
+/* Ein liegen gebliebener Entwurf zeigt sich am Knopf — sonst wäre er vergessen. */
+#meldeKnopf.hat-entwurf { border-color: var(--gold); color: var(--gold); }
+#meldeKnopf.hat-entwurf::after {
+  content: ''; position: absolute; top: 6px; right: 6px;
+  width: 8px; height: 8px; border-radius: 50%; background: var(--gold);
+}
 
 #meldeHof {
   position: fixed; inset: 0; z-index: 55; background: rgba(0, 0, 0, .38);
@@ -758,6 +780,8 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
     </div>
     <!-- Der Platz der Chili. Sie steckt hier, solange keine Ansicht sie ruft. -->
     <div id="chiliPlatz" class="chili-platz"><div id="chiliBuehne" aria-hidden="true"><img id="chiliFigur" alt="" src="data:image/png;base64,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"></div></div>
+    <!-- Nur in «Buchstaben»: der Weg zur Tafel. Geübt wird ohne Umweg. -->
+    <button id="tafelKnopf" class="rundbtn" aria-label="Alphabet-Tafel" aria-pressed="false" hidden></button>
     <button id="filterKnopf" class="rundbtn" aria-label="Auswahl" aria-expanded="false" aria-controls="filterPanel" hidden></button>
     <div id="filterPanel" class="menupanel filterpanel" role="group" aria-label="Auswahl">
       <div class="menuwrap"><div class="menuinhalt" id="filterInhalt"></div></div>
@@ -770,6 +794,7 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
     <div id="menuPanel" class="menupanel" role="menu" aria-label="Menü">
     <div class="menuwrap"><div class="menuinhalt">
       <button class="menueintrag" data-ziel="bilanz" data-symbol="bilanz" role="menuitem">Bilanz</button>
+      <button class="menueintrag" data-ziel="sicherung" data-symbol="schluessel" role="menuitem">Sicherung</button>
       <button class="menueintrag" data-ziel="einstellungen" data-symbol="regler" role="menuitem">Einstellungen</button>
       <button class="menueintrag" data-ziel="tickets" data-symbol="liste" role="menuitem">Tickets</button>
     </div></div>
@@ -1574,6 +1599,7 @@ function chiliAktualisieren(ohneSprung) {
     ? chiliLage(chiliStation) : chiliSpur;
   chiliStation = platz;
   platz.appendChild(chiliBuehne);
+  document.body.classList.add('chili-steht');
   var jetzt = chiliLage(platz);
   if (jetzt) chiliSpur = jetzt;
   if (ersterAuftritt || ohneSprung) return;
@@ -1683,7 +1709,8 @@ function ticketAbschnitt(t, nr) {
     (t.text ? t.text + '\n\n' : '') +
     (t.reiter ? '- Übung: ' + t.reiter + '\n' : '') +
     '- App-Stand: ' + t.stand + '\n' +
-    '- Erstellt: ' + datumLang(t.erstellt) + '\n';
+    '- Erstellt: ' + datumLang(t.erstellt) + '\n' +
+    (t.geaendert ? '- Geändert: ' + datumLang(t.geaendert) + '\n' : '');
 }
 
 // Alles in einem Rutsch: älteste zuerst, damit die Nummern der Reihenfolge
@@ -1699,6 +1726,23 @@ function ticketsAlsText(liste) {
 
 function ticketsOffen() {
   return tickets.filter(function (t) { return !t.uebergeben; });
+}
+
+// Ein vorhandenes Ticket ändern. Erstellt bleibt erstellt — die Reihenfolge
+// soll sich beim Nachbessern nicht verschieben.
+function ticketAendern(id, art, titel, text, reiter) {
+  var t = tickets.filter(function (x) { return x.id === id; })[0];
+  if (!t) return null;
+  t.art = art === 'bug' ? 'bug' : 'feature';
+  t.titel = String(titel).replace(/^\s+|\s+$/g, '').slice(0, 120);
+  t.text = String(text).replace(/\s+$/, '').slice(0, 4000);
+  t.reiter = reiter || '';
+  t.geaendert = Date.now();
+  // Ein geändertes Ticket ist wieder offen: Was übergeben wurde, stimmt so
+  // nicht mehr, und die neue Fassung soll beim nächsten Bündeln mitgehen.
+  t.uebergeben = null;
+  ticketsSichern();
+  return t;
 }
 
 function ticketAnlegen(art, titel, text, reiter) {
@@ -1775,7 +1819,10 @@ var ICON = {
   melden: svg('<path d="M20.5 13.4a2.6 2.6 0 0 1-2.6 2.6H9.4L5 19.4v-3.4H4.1a2.6 2.6 0 0 1-2.6-2.6V6.6A2.6 2.6 0 0 1 4.1 4h13.8a2.6 2.6 0 0 1 2.6 2.6z"/>' +
     '<path d="M8 10h8M8 7.2h5"/>'),
   bilanz: svg('<path d="M4 19.5h16"/><path d="M7 19.5V11M12 19.5V5.5M17 19.5v-5.5"/>'),
-  kreuz: svg('<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>')
+  kreuz: svg('<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>'),
+  tafel: svg('<rect x="3.5" y="4.5" width="17" height="15" rx="2"/>' +
+    '<path d="M3.5 9.5h17M9 9.5v10M14.5 9.5v10"/>'),
+  schluessel: svg('<circle cx="8" cy="8" r="3.6"/><path d="M10.6 10.6l8.4 8.4M16.4 16.4l2-2M14 14l2-2"/>')
 };
 
 // ── Sprachfakten ────────────────────────────────────────────
@@ -1833,15 +1880,40 @@ function tokenize(sentence) {
 function esc(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
-function speak(text) {
+// Vorlesen — russisch, wenn nichts anderes gesagt wird. iOS braucht dafür eine
+// Nutzergeste, liefert Stimmen verzögert und schweigt im Stummschalter-Modus;
+// kein Ablauf darf davon abhängen, darum alles in try/catch und ohne Rückgabe.
+function speak(text, sprache) {
   try {
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
     var u = new SpeechSynthesisUtterance(text);
-    u.lang = 'ru-RU';
-    u.rate = 0.85;
+    u.lang = sprache === 'de' ? 'de-DE' : 'ru-RU';
+    // Deutsch liest man mit, Russisch buchstabiert man mit — darum langsamer.
+    u.rate = sprache === 'de' ? 0.95 : 0.85;
     window.speechSynthesis.speak(u);
   } catch (e) {}
+}
+
+// Ein Hörknopf, überall derselbe: Der Text hängt am Knopf, ein einziger
+// Zuhörer auf #main fängt jeden Tipp ab — so muss keine Ansicht daran denken,
+// ihre Knöpfe zu verdrahten.
+function hoerknopf(text, sprache) {
+  if (!text) return '';
+  return '<button class="speak" data-say="' + esc(text) + '" data-lang="' +
+    (sprache === 'de' ? 'de' : 'ru') + '" aria-label="Anhören' +
+    (sprache === 'de' ? ', deutsch' : ', russisch') + '">' + ICON.lautsprecher + '</button>';
+}
+
+// Nach der Auflösung beide Seiten zum Anhören. Beschriftet, weil zwei gleiche
+// Lautsprecher nebeneinander nicht sagen, welcher welche Sprache spricht.
+function hoerzeile(ru, de) {
+  var chip = function (text, sprache, name) {
+    return '<button class="chip" data-say="' + esc(text) + '" data-lang="' + sprache + '">' +
+      ICON.lautsprecher + name + '</button>';
+  };
+  return '<div class="hoerzeile">' + (ru ? chip(ru, 'ru', 'Russisch') : '') +
+    (de ? chip(de, 'de', 'Deutsch') : '') + '</div>';
 }
 
 // ── Zustand & Speichern (localStorage) ──────────────────────
@@ -1975,7 +2047,7 @@ function save() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       zeigeStatus('ok', 'gespeichert');
     } catch (e) {
-      zeigeStatus('err', 'Speichern fehlgeschlagen — Sicherung unter Bilanz nutzen.');
+      zeigeStatus('err', 'Speichern fehlgeschlagen — Sicherungscode im Menü erzeugen.');
     }
   }, 400);
 }
@@ -2138,7 +2210,7 @@ var UEBUNGEN = [
 var UEBUNG_NAME = { home: 'Übersicht' };
 UEBUNGEN.forEach(function (u) { UEBUNG_NAME[u.id] = u.name; });
 var ANSICHT_NAME = {
-  bilanz: 'Bilanz', einstellungen: 'Einstellungen',
+  bilanz: 'Bilanz', sicherung: 'Sicherung', einstellungen: 'Einstellungen',
   fakten: 'Sprachfakten', tickets: 'Tickets'
 };
 var DETAIL_NAME = {
@@ -2195,9 +2267,7 @@ function filterAktiv() {
   if (currentTab === 'uebersetzen') {
     return trLevel !== 1 || trDir !== 'ru-de' || trModus !== 'lernen';
   }
-  if (currentTab === 'buchstaben') {
-    return abcAnsicht !== 'tafel' || abcRichtung !== 'gemischt';
-  }
+  if (currentTab === 'buchstaben') return abcRichtung !== 'gemischt';
   return false;
 }
 
@@ -2254,13 +2324,12 @@ function filterInhaltHtml() {
           trModus === 'wiederholung'));
   }
   if (currentTab === 'buchstaben') {
-    return filterGruppe('Ansicht',
-      filterChip('abcansicht', 'tafel', 'Tafel', abcAnsicht === 'tafel') +
-      filterChip('abcansicht', 'ueben', 'Üben · ' + abcPool().length, abcAnsicht === 'ueben')) +
-      filterGruppe('Gefragt wird',
-        filterChip('abcrichtung', 'gemischt', 'Gemischt', abcRichtung === 'gemischt') +
-        filterChip('abcrichtung', 'zeichen', 'Zeichen \u2192 Laut', abcRichtung === 'zeichen') +
-        filterChip('abcrichtung', 'laut', 'Laut \u2192 Zeichen', abcRichtung === 'laut'));
+    // Die Tafel steckt im eigenen Knopf daneben, nicht mehr hier — sie ist
+    // keine Einstellung, sondern ein zweiter Ort.
+    return filterGruppe('Gefragt wird',
+      filterChip('abcrichtung', 'gemischt', 'Gemischt', abcRichtung === 'gemischt') +
+      filterChip('abcrichtung', 'zeichen', 'Zeichen \u2192 Laut', abcRichtung === 'zeichen') +
+      filterChip('abcrichtung', 'laut', 'Laut \u2192 Zeichen', abcRichtung === 'laut'));
   }
   return '';
 }
@@ -2280,9 +2349,8 @@ function filterWaehlen(gruppe, wert) {
       tWord = null; tResult = null; tHint = false;
     }
     renderTippen();
-  } else if (gruppe === 'abcansicht' || gruppe === 'abcrichtung') {
-    if (gruppe === 'abcansicht') abcAnsicht = wert;
-    if (gruppe === 'abcrichtung' && abcRichtung !== wert) {
+  } else if (gruppe === 'abcrichtung') {
+    if (abcRichtung !== wert) {
       abcRichtung = wert;
       abcQ = null;   // die laufende Frage passt zur alten Richtung
     }
@@ -2335,7 +2403,22 @@ function renderKopf() {
   document.querySelectorAll('.menueintrag').forEach(function (b) {
     b.classList.toggle('active', b.dataset.ziel === currentTab);
   });
+  renderTafelKnopf();
   renderFilter();
+}
+
+// Der Tafelknopf gehört nur zu «Buchstaben» und zeigt, wo man gerade steht:
+// gedrückt heißt Tafel, sonst führt er dorthin.
+function renderTafelKnopf() {
+  var knopf = document.getElementById('tafelKnopf');
+  var da = currentTab === 'buchstaben';
+  knopf.hidden = !da;
+  if (!da) return;
+  var aufTafel = abcAnsicht === 'tafel';
+  knopf.innerHTML = ICON.tafel;
+  knopf.classList.toggle('aktiv', aufTafel);
+  knopf.setAttribute('aria-pressed', aufTafel ? 'true' : 'false');
+  knopf.setAttribute('aria-label', aufTafel ? 'Zurück zum Üben' : 'Alphabet-Tafel');
 }
 
 function setTab(name) {
@@ -2366,6 +2449,9 @@ document.getElementById('meldeKnopf').addEventListener('click', function () {
   filterSetzen(false);
   meldeSetzen(true);
 });
+// Der einzige Weg, einen Entwurf loszuwerden. Zuklappen allein reicht nicht —
+// ein halb geschriebenes Ticket durch eine Handbewegung zu verlieren wäre der
+// schlechtere Tausch.
 document.getElementById('meldeAbbruch').addEventListener('click', function () {
   meldeSetzen(false);
   meldeLeeren();
@@ -2373,11 +2459,22 @@ document.getElementById('meldeAbbruch').addEventListener('click', function () {
 document.getElementById('meldeBezug').addEventListener('change', function (e) {
   meldeBezugAn = e.target.checked;
 });
+// Der Knopf soll sofort zeigen, dass etwas angefangen ist — nicht erst, wenn
+// das Blatt zugeht.
+['meldeTitel', 'meldeText'].forEach(function (id) {
+  document.getElementById(id).addEventListener('input', meldeKnopfZeigen);
+});
 document.getElementById('meldeSichern').addEventListener('click', function () {
   var titel = document.getElementById('meldeTitel');
   if (!titel.value.replace(/^\s+|\s+$/g, '')) { titel.focus(); return; }
-  ticketAnlegen(meldeArt, titel.value, document.getElementById('meldeText').value,
-    meldeBezugAn ? meldeBezugQuelle() : null);
+  var text = document.getElementById('meldeText').value;
+  // Beim Ändern bleibt der schon vergebene Bezug stehen; wird der Haken erst
+  // jetzt gesetzt, trägt er die Ansicht ein, über der das Blatt steht.
+  if (meldeBearbeitet) {
+    ticketAendern(meldeBearbeitet, meldeArt, titel.value, text,
+      meldeBezugAn ? (meldeBezugName || ansichtName(meldeBezugQuelle())) : '');
+  }
+  else ticketAnlegen(meldeArt, titel.value, text, meldeBezugAn ? meldeBezugQuelle() : null);
   meldeSetzen(false);
   meldeLeeren();
   if (currentTab === 'tickets') renderTickets();
@@ -2394,6 +2491,15 @@ document.getElementById('filterKnopf').addEventListener('click', function (e) {
   menuSetzen(false);
   filterSetzen(!filterOffen);
   renderFilter();   // die Einträge sind nur im offenen Panel erreichbar
+});
+document.getElementById('tafelKnopf').addEventListener('click', function (e) {
+  e.stopPropagation();
+  menuSetzen(false);
+  filterSetzen(false);
+  abcAnsicht = abcAnsicht === 'tafel' ? 'ueben' : 'tafel';
+  abcOffen = null;
+  renderBuchstaben();
+  renderKopf();
 });
 document.querySelectorAll('.menueintrag').forEach(function (b) {
   b.addEventListener('click', function () { setTab(b.dataset.ziel); });
@@ -2543,6 +2649,7 @@ function render() {
   else if (currentTab === 'einstellungen') renderEinstellungen();
   else if (currentTab === 'fakten') renderFakten();
   else if (currentTab === 'tickets') renderTickets();
+  else if (currentTab === 'sicherung') renderSicherung();
   else renderBilanz();
   updateKopf();
 }
@@ -2685,7 +2792,7 @@ function ansichtenZuruecksetzen() {
   trLevel = 1;
   trModus = 'lernen';
 
-  abcAnsicht = 'tafel';
+  abcAnsicht = 'ueben';
   abcRichtung = 'gemischt';
   abcOffen = null;
   abcQ = null;
@@ -2698,6 +2805,12 @@ function ansichtenZuruecksetzen() {
   faktenFilter = 'gesehen';
   themenOffen = false;
   bilanzDetail = null;
+
+  backupOpen = false;
+  backupMsg = '';
+  confirmReset = false;
+  tkAusgabe = '';
+  meldeBearbeitet = null;
 }
 
 function uebNext(skipFact) {
@@ -2876,7 +2989,7 @@ function renderUeben() {
     '<span class="card-theme">' + esc(q.word.theme) + '</span></div>' +
     '<p class="task-label">' + taskLabel + '</p>' +
     '<p class="word' + (promptRu ? ' cyr' : '') + '">' + esc(prompt) +
-    (promptRu ? '<button class="speak" id="speakBtn" aria-label="Anhören">' + ICON.lautsprecher + '</button>' : '') + '</p>';
+    hoerknopf(prompt, promptRu ? 'ru' : 'de') + '</p>';
 
   if (q.mode === 'tiles') {
     html += '<div class="slots cyr">';
@@ -2920,7 +3033,7 @@ function renderUeben() {
     else html += '<p>' + ICON.kreuz + (uebRevealed ? 'Lösung: ' : 'Richtig wäre: ') +
       '<strong class="cyr">' + esc(q.word.ru) + '</strong> — ' + esc(q.word.de) +
       ' <span class="translit">[' + esc(q.word.tr) + ']</span></p>';
-    html += '</div>';
+    html += '</div>' + hoerzeile(q.word.ru, q.word.de);
   }
 
   html += '</div><div class="btn-row">';
@@ -2937,9 +3050,6 @@ function renderUeben() {
   html += '<p class="session-info">' + state.answered + ' beantwortet · Beste Serie: ' + state.bestStreak + '</p></section>';
 
   main.innerHTML = html;
-
-  var sp = document.getElementById('speakBtn');
-  if (sp) sp.addEventListener('click', function () { speak(q.word.ru); });
 
   if (uebPhase === 'ask') {
     document.getElementById('uebReveal').addEventListener('click', function () {
@@ -3084,7 +3194,7 @@ function buildTransTask(vorgabe) {
   var tiles = shuffle(targetTokens.concat(distractors)).map(function (word, i) {
     return { word: word, key: i };
   });
-  trTask = { prompt: prompt, targetTokens: targetTokens, solution: solution, tiles: tiles, ru: ru, satz: satz };
+  trTask = { prompt: prompt, targetTokens: targetTokens, solution: solution, tiles: tiles, ru: ru, de: de, satz: satz };
   trBuilt = [];
   trPhase = 'ask';
   trCorrect = null;
@@ -3203,7 +3313,7 @@ function renderUebersetzen() {
   html += '<div class="card"><p class="task-label">Stufe ' + trLevel +
     (trModus === 'wiederholung' ? ' · zur Sicherheit' : '') + '</p>' +
     '<p class="sentence' + (promptIsRu ? ' cyr' : '') + '">' + esc(t.prompt) +
-    (promptIsRu ? '<button class="speak" id="trSpeak" aria-label="Anhören">' + ICON.lautsprecher + '</button>' : '') + '</p>';
+    hoerknopf(t.prompt, promptIsRu ? 'ru' : 'de') + '</p>';
 
   html += '<div class="built' + (promptIsRu ? '' : ' cyr') + '">';
   if (trBuilt.length === 0 && trPhase === 'ask') {
@@ -3235,7 +3345,7 @@ function renderUebersetzen() {
     if (trCorrect) html += '<p>' + ICON.haken + 'Правильно — richtig übersetzt!</p>';
     else html += '<p>' + ICON.kreuz + (trRevealed ? 'Lösung: ' : 'Richtig wäre: ') +
       '<strong class="' + (promptIsRu ? '' : 'cyr') + '">' + esc(t.solution) + '</strong></p>';
-    html += '</div>';
+    html += '</div>' + hoerzeile(t.ru, t.de);
   }
 
   html += '</div><div class="btn-row">';
@@ -3261,8 +3371,6 @@ function renderUebersetzen() {
 
   main.innerHTML = html;
 
-  var sp = document.getElementById('trSpeak');
-  if (sp) sp.addEventListener('click', function () { speak(trTask.ru); });
 
   if (trPhase === 'ask') {
     main.querySelectorAll('[data-wtile]').forEach(function (b) {
@@ -3312,7 +3420,9 @@ function renderUebersetzen() {
 // B aussieht, ist eine Eigenschaft des *lateinischen* Alphabets, nicht des
 // russischen. Sie treten im Quiz bevorzugt als Ablenker gegeneinander an.
 var ABC_TUECKISCH = 'внрсух';
-var abcAnsicht = 'tafel';     // 'tafel' · 'ueben'
+// Geübt wird ohne Umweg; die Tafel ist ein Nachschlagewerk und liegt hinter
+// dem Knopf links neben der Auswahl.
+var abcAnsicht = 'ueben';     // 'ueben' · 'tafel'
 var abcRichtung = 'gemischt'; // 'zeichen' · 'laut' · 'gemischt'
 var abcOffen = null;          // Buchstabe, dessen Merkhilfe in der Tafel aufgeklappt ist
 var abcQ = null, abcPhase = 'ask', abcPicked = null, abcCorrect = null;
@@ -3471,7 +3581,8 @@ function abcTafelHtml() {
   if (abcOffen) {
     var gew = ALPHABET.filter(function (b) { return b[1] === abcOffen; })[0];
     if (gew) {
-      html += '<div class="card abc-hilfe"><p class="word cyr">' + esc(gew[0] + ' ' + gew[1]) + '</p>' +
+      html += '<div class="card abc-hilfe"><p class="word cyr">' + esc(gew[0] + ' ' + gew[1]) +
+        hoerknopf(gew[1], 'ru') + '</p>' +
         '<p class="task-label">klingt wie ' + esc(gew[2]) + '</p>' +
         '<p class="fact-text">' + esc(gew[3]) + '</p></div>';
     }
@@ -3579,7 +3690,8 @@ function abcUebenHtml() {
       : '<p>' + ICON.kreuz + (abcRevealed ? 'Lösung: ' : 'Richtig wäre: ') +
         '<strong class="cyr">' + esc(q.b[0] + ' ' + q.b[1]) +
         '</strong> — klingt wie ' + esc(q.b[2]) + '</p>';
-    html += '</div><p class="hint">' + esc(q.b[3]) + '</p>';
+    // Erst nach der Auflösung — vorher wäre der Laut die Antwort.
+    html += '</div>' + hoerzeile(q.b[1], null) + '<p class="hint">' + esc(q.b[3]) + '</p>';
   }
   html += '</div><div class="btn-row">';
   if (abcPhase === 'ask') {
@@ -3793,7 +3905,7 @@ function renderTippen() {
   var html = '<section><div class="card">' +
     '<p class="task-label">' + (tippenModus === 'wiederholung'
       ? 'Zur Sicherheit noch einmal' : 'Schreiben Sie auf Russisch') + '</p>' +
-    '<p class="word">' + esc(w.de) + '</p>' +
+    '<p class="word">' + esc(w.de) + hoerknopf(w.de, 'de') + '</p>' +
     (tHint ? '<p class="translit">[' + esc(w.tr) + ']</p>' : '') +
     '<input type="text" id="tInput" class="cyr' + (tResult === 'right' ? ' ok' : tResult === 'wrong' ? ' err' : '') + '"' +
     ' placeholder="кириллица \u2026" lang="ru" autocapitalize="off" autocorrect="off" spellcheck="false"' +
@@ -3801,6 +3913,8 @@ function renderTippen() {
 
   if (tResult === 'wrong') html += '<p class="feedback bad">' + ICON.kreuz + 'Richtig: <strong class="cyr">' + esc(w.ru) + '</strong></p>';
   if (tResult === 'right') html += '<p class="feedback good">' + ICON.haken + 'Правильно — richtig!</p>';
+  // Erst nach der Abgabe zu hören: vorher wäre die Aussprache die halbe Antwort.
+  if (tResult) html += hoerzeile(w.ru, w.de);
   html += '</div><div class="btn-row">';
   if (!tResult) {
     html += '<button class="btn ghost" id="tHintBtn">Hinweis</button>' +
@@ -4047,6 +4161,9 @@ function renderFakten() {
 var meldeOffen = false;
 var meldeArt = 'bug';
 var meldeBezugAn = true;
+// Die Kennung des Tickets, das gerade bearbeitet wird — sonst null.
+var meldeBearbeitet = null;
+var meldeBezugName = '';   // beim Bearbeiten der schon vergebene Bezug
 
 function meldeBezugQuelle() {
   // Die Ansicht, über der man steht — die ist gemeint, nicht «Tickets».
@@ -4071,8 +4188,42 @@ function meldeFuellen() {
       meldeFuellen();
     });
   });
-  document.getElementById('meldeBezugName').textContent = ansichtName(meldeBezugQuelle());
+  document.getElementById('meldeBezugName').textContent = meldeBearbeitet
+    ? (meldeBezugName || ansichtName(meldeBezugQuelle()))
+    : ansichtName(meldeBezugQuelle());
   document.getElementById('meldeBezug').checked = meldeBezugAn;
+  document.getElementById('meldeSichern').textContent = meldeBearbeitet ? 'Ändern' : 'Sichern';
+  document.getElementById('meldeAbbruch').textContent = meldeBearbeitet ? 'Verwerfen' : 'Abbrechen';
+}
+
+// Ein vorhandenes Ticket zum Bearbeiten ins Blatt holen.
+function meldeBearbeiten(id) {
+  var t = tickets.filter(function (x) { return x.id === id; })[0];
+  if (!t) return;
+  meldeBearbeitet = id;
+  meldeArt = t.art;
+  meldeBezugAn = !!t.reiter;
+  meldeBezugName = t.reiter;
+  document.getElementById('meldeTitel').value = t.titel;
+  document.getElementById('meldeText').value = t.text;
+  meldeSetzen(true);
+}
+
+// Ist ein angefangenes Ticket im Blatt? Dann bleibt es dort liegen, auch wenn
+// das Blatt zugeht — verworfen wird nur ausdrücklich.
+function meldeEntwurfDa() {
+  var t = document.getElementById('meldeTitel');
+  var x = document.getElementById('meldeText');
+  return !!((t && t.value.replace(/^\s+|\s+$/g, '')) || (x && x.value.replace(/^\s+|\s+$/g, '')));
+}
+
+function meldeKnopfZeigen() {
+  var knopf = document.getElementById('meldeKnopf');
+  var entwurf = meldeEntwurfDa();
+  knopf.classList.toggle('hat-entwurf', entwurf);
+  knopf.setAttribute('aria-label', entwurf
+    ? (meldeBearbeitet ? 'Ticket weiter bearbeiten' : 'Angefangenes Ticket weiterschreiben')
+    : 'Rückmeldung geben');
 }
 
 function meldeSetzen(auf) {
@@ -4092,6 +4243,7 @@ function meldeSetzen(auf) {
   }
   document.querySelectorAll('#meldeBlatt button, #meldeBlatt input, #meldeBlatt textarea')
     .forEach(function (el) { el.tabIndex = auf ? 0 : -1; });
+  meldeKnopfZeigen();
 }
 
 function meldeLeeren() {
@@ -4099,44 +4251,56 @@ function meldeLeeren() {
   document.getElementById('meldeText').value = '';
   meldeArt = 'bug';
   meldeBezugAn = true;
+  meldeBearbeitet = null;
+  meldeBezugName = '';
+  meldeKnopfZeigen();
 }
 
-// Das Blatt lässt sich schieben und federt zurück. Es schließt dabei nie —
-// gewollt: der einzige Weg hinaus sind die beiden Knöpfe.
+// Das Blatt folgt dem Finger — aber nur nach unten, dorthin, wo es ohnehin
+// verschwindet. Weit genug gezogen, geht es zu; der Entwurf bleibt dabei
+// stehen. Weggeworfen wird ein Ticket ausschließlich über «Verwerfen».
+var MELDE_SCHWELLE = 90;   // ab hier gilt das Ziehen als «zu»
 function meldeZiehenBinden() {
   var blatt = document.getElementById('meldeBlatt');
-  var start = null;
+  var start = null, weg = 0;
 
   function daempfen(d) {
     // Je weiter, desto zäher: die Wurzel wächst langsamer als der Weg.
-    var s = d < 0 ? -1 : 1;
-    return s * Math.pow(Math.abs(d), 0.72) * 1.6;
+    return Math.pow(d, 0.72) * 1.6;
   }
   function los(e) {
     if (!meldeOffen) return;
     var z = e.target;
     // Auf Eingabefeldern hat das Ziehen nichts zu suchen.
     if (z.closest('input, textarea, button')) return;
-    start = { x: e.clientX, y: e.clientY };
+    start = { y: e.clientY };
+    weg = 0;
     blatt.classList.add('zieht');
     try { blatt.setPointerCapture(e.pointerId); } catch (err) {}
   }
   function bewegt(e) {
     if (!start) return;
-    blatt.style.transform = 'translate(' + daempfen(e.clientX - start.x).toFixed(1) + 'px,' +
-      daempfen(e.clientY - start.y).toFixed(1) + 'px)';
+    // Nach oben gibt das Blatt nicht nach: dort ist kein Weg hin.
+    weg = Math.max(0, e.clientY - start.y);
+    blatt.style.transform = 'translateY(' + daempfen(weg).toFixed(1) + 'px)';
   }
   function fertig() {
     if (!start) return;
     start = null;
     blatt.classList.remove('zieht');
     blatt.style.transform = '';   // der Übergang federt zurück
+    if (weg >= MELDE_SCHWELLE) meldeSetzen(false);
+    weg = 0;
   }
 
   blatt.addEventListener('pointerdown', los);
   blatt.addEventListener('pointermove', bewegt);
   blatt.addEventListener('pointerup', fertig);
   blatt.addEventListener('pointercancel', fertig);
+  // Danebentippen schließt genauso — der Entwurf bleibt auch dann liegen.
+  document.getElementById('meldeHof').addEventListener('click', function () {
+    meldeSetzen(false);
+  });
 }
 
 // ── TICKETS ─────────────────────────────────────────────────
@@ -4167,11 +4331,13 @@ function renderTickets() {
       html += '<div class="tkliste">';
       tickets.forEach(function (t, i) {
         html += '<div class="tkzeile' + (t.uebergeben ? ' gesendet' : '') + '">' +
-          '<span class="tktext"><span class="tkart ' + t.art + '">' +
+          '<button class="tktext" data-tkedit="' + esc(t.id) + '">' +
+          '<span class="tkart ' + t.art + '">' +
           (t.art === 'bug' ? 'Fehler' : 'Wunsch') + '</span>' + esc(t.titel) +
           '<span class="tkmeta">' + esc(datumKurz(t.erstellt)) +
           (t.reiter ? ' · ' + esc(t.reiter) : '') + ' · ' +
-          (t.uebergeben ? 'übergeben ' + esc(datumKurz(t.uebergeben)) : 'offen') + '</span></span>' +
+          (t.uebergeben ? 'übergeben ' + esc(datumKurz(t.uebergeben)) : 'offen') +
+          (t.geaendert ? ' · geändert' : '') + '</span></button>' +
           '<button class="sternbtn" data-tkweg="' + i + '" aria-label="Ticket löschen">' +
           ICON.kreuz + '</button></div>';
       });
@@ -4191,9 +4357,10 @@ function renderTickets() {
     }
 
     html += '<p class="settings-note">Neue Tickets schreiben Sie über den Knopf unten rechts — ' +
-      'von jeder Ansicht aus. Sie liegen nur auf diesem Gerät und verlassen es nie von selbst. ' +
-      '«Kopieren» legt alles als einen Text in die Zwischenablage; was kopiert wurde, gilt als ' +
-      'übergeben.</p>';
+      'von jeder Ansicht aus. Ein Tipp auf eine Zeile holt das Ticket zum Ändern zurück; ' +
+      'geändert gilt es wieder als offen. Sie liegen nur auf diesem Gerät und verlassen es nie ' +
+      'von selbst. «Kopieren» legt alles als einen Text in die Zwischenablage; was kopiert ' +
+      'wurde, gilt als übergeben.</p>';
   }
 
   html += '<div class="btn-row"><button class="btn ghost" id="tkBack">Zurück</button></div></section>';
@@ -4218,6 +4385,9 @@ function renderTickets() {
         ticketsSichern();
         renderTickets();
       });
+    });
+    main.querySelectorAll('[data-tkedit]').forEach(function (b) {
+      b.addEventListener('click', function () { meldeBearbeiten(b.dataset.tkedit); });
     });
     // Bündeln heißt zugleich übergeben — sonst müsste man den Zustand zweimal
     // pflegen und wüsste beim nächsten Mal nicht, was neu ist.
@@ -4696,9 +4866,37 @@ function renderBilanz() {
     '<div class="btn-row"><button class="btn ghost" id="zuFakten">Fakten durchgehen</button></div>';
 
   html += '<h2>Sicherung</h2>' +
-    '<p class="backup-note">Ihr Fortschritt als kopierbarer Code — unabhängig vom automatischen ' +
-    'Speichern. Er trägt eine Prüfsumme: unvollständig eingefügt wird er abgewiesen statt ' +
-    'halb übernommen.</p>' +
+    '<p class="backup-note">Ihr Fortschritt als kopierbarer Code steht im Men\u00fc unter \u00abSicherung\u00bb \u2014 dort wird er erzeugt und dort auch wieder eingespielt.</p>' +
+    '<div class="btn-row"><button class="btn ghost" id="zuSicherung">Zur Sicherung</button></div>';
+
+  html += '</section>';
+
+  main.innerHTML = html;
+
+  document.getElementById('zuSicherung').addEventListener('click', function () { setTab('sicherung'); });
+  main.querySelectorAll('[data-detail]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      bilanzDetail = b.dataset.detail;
+      window.scrollTo(0, 0);
+      renderBilanz();
+      renderKopf();
+    });
+  });
+  document.getElementById('zuFakten').addEventListener('click', function () { setTab('fakten'); });
+  var mehr = document.getElementById('themenMehr');
+  if (mehr) mehr.addEventListener('click', function () { themenOffen = !themenOffen; renderBilanz(); });
+}
+
+// ── SICHERUNG ───────────────────────────────────────────────
+// Eigene Rubrik im Menü statt eines Anhangs unter der Bilanz: Wer seinen
+// Stand sichern oder auf ein anderes Gerät holen will, sucht ihn nicht unter
+// Zahlen zum Lernfortschritt. Das Zurücksetzen steht hier mit — es ist die
+// Kehrseite derselben Sache und gehört neben den Code, der es auffangen kann.
+function renderSicherung() {
+  var html = '<section>';
+  html += '<p class="backup-note">Ihr Fortschritt als kopierbarer Code \u2014 unabh\u00e4ngig vom automatischen ' +
+    'Speichern. Er tr\u00e4gt eine Pr\u00fcfsumme: unvollst\u00e4ndig eingef\u00fcgt wird er abgewiesen statt ' +
+    'halb \u00fcbernommen.</p>' +
     '<div class="btn-row"><button class="btn ghost" id="bkMake">Sicherungscode erzeugen</button></div>';
   if (backupOpen) {
     html += '<p class="backup-note">' + esc(bkUeberblick(state)) + ' · ' +
@@ -4727,21 +4925,21 @@ function renderBilanz() {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(backupCode).then(function () {
         backupMsg = 'Code in die Zwischenablage kopiert.';
-        renderBilanz();
+        renderSicherung();
       }, function () {
         backupMsg = 'Bitte Code manuell markieren und kopieren.';
-        renderBilanz();
+        renderSicherung();
       });
     } else {
       backupMsg = 'Bitte Code manuell markieren und kopieren.';
-      renderBilanz();
+      renderSicherung();
     }
   });
   var out = document.getElementById('bkOut');
   if (out) out.addEventListener('focus', function () { out.select(); });
   document.getElementById('bkImport').addEventListener('click', function () {
     var code = document.getElementById('bkIn').value;
-    if (!code.trim()) { backupMsg = 'Bitte zuerst einen Code einfügen.'; renderBilanz(); return; }
+    if (!code.trim()) { backupMsg = 'Bitte zuerst einen Code einfügen.'; renderSicherung(); return; }
     try {
       var data = decodeBackup(code);
       if (!data || typeof data !== 'object' || !data.boxes) throw new Error('unlesbar');
@@ -4761,23 +4959,12 @@ function renderBilanz() {
           ? 'Der Code bricht mittendrin ab — bitte noch einmal ganz einfügen.'
           : 'Das ist kein Sicherungscode dieser App.';
     }
-    renderBilanz();
+    renderSicherung();
   });
-  main.querySelectorAll('[data-detail]').forEach(function (b) {
-    b.addEventListener('click', function () {
-      bilanzDetail = b.dataset.detail;
-      window.scrollTo(0, 0);
-      renderBilanz();
-      renderKopf();
-    });
-  });
-  document.getElementById('zuFakten').addEventListener('click', function () { setTab('fakten'); });
-  var mehr = document.getElementById('themenMehr');
-  if (mehr) mehr.addEventListener('click', function () { themenOffen = !themenOffen; renderBilanz(); });
   var rsAsk = document.getElementById('rsAsk');
-  if (rsAsk) rsAsk.addEventListener('click', function () { confirmReset = true; renderBilanz(); });
+  if (rsAsk) rsAsk.addEventListener('click', function () { confirmReset = true; renderSicherung(); });
   var rsNo = document.getElementById('rsNo');
-  if (rsNo) rsNo.addEventListener('click', function () { confirmReset = false; renderBilanz(); });
+  if (rsNo) rsNo.addEventListener('click', function () { confirmReset = false; renderSicherung(); });
   var rsYes = document.getElementById('rsYes');
   if (rsYes) rsYes.addEventListener('click', function () {
     var behalten = state.settings; // Einstellungen sind kein Fortschritt
@@ -4790,7 +4977,7 @@ function renderBilanz() {
     backupMsg = '';
     updateKopf();
     save();
-    renderBilanz();
+    renderSicherung();
   });
 }
 
@@ -4803,6 +4990,13 @@ load();
 ticketsLaden();
 updateDarstellung();
 
+// Ein Zuhörer für alle Hörknöpfe. Weil er am gleichbleibenden #main hängt und
+// nicht an den Knöpfen selbst, überlebt er jeden Renderlauf.
+main.addEventListener('click', function (e) {
+  var k = e.target.closest ? e.target.closest('[data-say]') : null;
+  if (k) speak(k.dataset.say, k.dataset.lang);
+});
+
 // Jede Ansicht setzt #main neu; der Beobachter merkt das und schickt die Chili
 // zur passenden Station, ohne dass jede Renderfunktion daran denken muss.
 if (window.MutationObserver) {
@@ -4814,6 +5008,7 @@ if (window.MutationObserver) {
 render();
 menuSetzen(false);
 chiliAktualisieren();
+meldeKnopfZeigen();
 </script>
 </body>
 </html>
