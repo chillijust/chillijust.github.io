@@ -142,6 +142,18 @@ Freiwillig: blockiert nichts, zählt nicht in den Lehrplan-Fortschritt.
 
 ---
 
+## Nachtrag · Richtung und Eingabefeld — **erledigt** (ADR 0029)
+
+- [x] **Fehler**: das Eingabefeld in «Übersetzen» steht linksbündig
+- [x] **«Gemischt» ist der Regelfall** — die Richtung wechselt mit der Stufe
+- [x] Vier Stufen, vier verschiedene Aufgaben: verstehen · bauen · formulieren · schreiben
+- [x] Die Auffrischung bleibt bei DE → RU getippt — die stärkste Behauptung
+- [x] Deutsche Artikel zählen beim Schreiben nicht mit, im Kachelmodus schon
+- [x] Der Kopf der Aufgabe nennt die Richtung
+- [x] 664 Prüfungen grün
+
+---
+
 ## Danach zu prüfen
 
 - Sicherungscode Format 2 auf dem Gerät (steht beim Betreiber noch aus)
@@ -159,3 +171,5 @@ Freiwillig: blockiert nichts, zählt nicht in den Lehrplan-Fortschritt.
   hat keinen Ton. Getestet ist, was die App plant, nicht wie es klingt. Was «Ton prüfen»
   in den Einstellungen anzeigt, sagt im Zweifel, woran es liegt
 - Ob zwei getippte Runden je Satz sich richtig anfühlen oder eine reicht
+- Ob die Stufe 2 (RU → DE getippt) auf Deutsch zu streng ist — Artikel sind nachgesehen,
+  Synonyme nicht («Ich lese ein Buch» ist die einzige gültige Fassung)

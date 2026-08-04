@@ -306,23 +306,42 @@ geleert, wo eine neue gebaut wird (`uebNext()`, `buildTransTask()`, `abcFrageBau
 müssen machte aus der Belohnung eine Hürde. Für ein ganzes Lernset gibt es weiter die
 Jubelkarte — das ist der seltenere, größere Anlass (ADR 0026).
 
-## Übersetzen: legen, dann schreiben
+## Übersetzen: die Leiter aus Form und Richtung
 
-Ein Satz wird **zweimal getippt**, bevor er sitzt. `trArt(satz)` entscheidet nach der
-Stufe:
+Ein Satz durchläuft **vier verschiedene Aufgaben**, bevor er sitzt. Zwei Achsen steigern
+sich dabei zugleich: die **Form** (`trArt()`) von der Vorlage zur freien Eingabe, und die
+**Richtung** (`trRichtungFuer()`) vom Verstehen zum Produzieren.
 
-| Stufe des Satzes | Aufgabe |
-| --- | --- |
-| 0–1 | Wortkacheln in die richtige Reihenfolge bringen |
-| ab `TR_TIPPEN` (2) | den Satz selbst schreiben |
-| `BOX_MAX` (Auffrischung) | ebenfalls schreiben |
+| Stufe | Richtung | Form | was geprüft wird |
+| --- | --- | --- | --- |
+| 0 | RU → DE | Kacheln | verstehen |
+| 1 | DE → RU | Kacheln | bauen |
+| 2 | RU → DE | getippt | selbst formulieren |
+| 3 | DE → RU | getippt | das Schwerste |
+| 4 (Auffrischung) | DE → RU | getippt | die stärkste Behauptung |
+
+**«Gemischt» ist der Regelfall und heißt nicht Zufall.** Würfelte die Richtung, hinge die
+Stufe am Losglück: Ein Satz, den man nur versteht, käme über eine glückliche RU→DE-Runde
+auf die Endstufe, ohne je auf Russisch geschrieben worden zu sein. Die feste Ordnung
+verhindert das und trainiert trotzdem beide Seiten. Wer will, stellt im Auswahlpanel eine
+Richtung fest ein — die schlägt dann die Staffelung.
 
 Kacheln zeigen nur, dass man die Wörter wiedererkennt und ihre Reihenfolge kennt — die
 Wörter stehen ja da. Erst das Schreiben prüft, ob der Satz wirklich sitzt. Zwei Runden,
 weil eine ein Zufallstreffer sein kann.
 
+**Die Richtung gehört zur Aufgabe, nicht zur Einstellung.** `trTask.dir` wird beim Bauen
+festgelegt; das Zeichnen liest nur von dort. Sonst verschöbe sich mitten in einer Aufgabe
+alles, wenn der Filter wechselt.
+
 Verglichen wird **wortweise über `normalize()`**: Groß- und Kleinschreibung, Satzzeichen
 und doppelte Leerzeichen sind egal. Wer den Inhalt trifft, hat den Satz.
+
+**Deutsche Artikel zählen beim Schreiben nicht mit** (`trVergleichbar()`). Das Russische
+hat keine — «Ich lese ein Buch» gegen «Ich lese das Buch» ist kein Übersetzungs-, sondern
+ein Ratefehler. Im **Kachelmodus** gilt das nicht: Dort steht der richtige Artikel zur
+Auswahl, man muss ihn also nicht erfinden. Im Russischen wird ohnehin jedes Wort
+gewertet.
 
 Die **eingebaute kyrillische Tastatur** (dieselben `KB_ROWS` wie in «Tippen») erscheint
 nur, wenn die Lösung russisch ist — einen deutschen Satz schreibt man mit der

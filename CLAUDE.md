@@ -19,7 +19,8 @@ nicht «Rubrik». In dieser Reihenfolge:
 **Lernsets** (zielgerichtet: die Wörter der nächsten Sätze, schaltet «Übersetzen» frei),
 **Freestyle** (freies Vokabeltraining nach Thema, ohne Sperren),
 **Tippen** (Eingabequiz mit kyrillischer Tastatur, ab Leitner-Stufe 3),
-**Übersetzen** (Satzbau aus Wort-Kacheln, nur Sätze, deren Wörter sitzen),
+**Übersetzen** (nur Sätze, deren Wörter sitzen; Form und Richtung steigern sich mit der
+Stufe — Kacheln vor Tippen, RU→DE vor DE→RU),
 **Buchstaben** (das kyrillische Alphabet — freiwillig, eigener Lernstand, zählt nicht in
 Serie und Fortschritt; Einstieg ist das Üben, die Tafel liegt hinter einem eigenen Knopf).
 Keine Übungen, sondern **im Menü** (runder Knopf, drei Striche): **Bilanz**,
@@ -166,6 +167,9 @@ zehn.
   «gemeistert» ab `BOX_MAX`. `abcPool()` fragt nach **gemeistert** — wer das auf «sitzt»
   umstellt, wirft die Buchstaben schon auf Stufe 2 aus der Übung und überspringt damit
   genau den Kachelmodus, der das Können prüft.
+- **In «Übersetzen» hängt die Richtung an der Stufe** (ADR 0029), nicht am Zufall — sonst
+  käme ein Satz über Losglück auf die Endstufe, ohne je geschrieben worden zu sein. Die
+  Richtung steht in `trTask.dir`, nie beim Zeichnen aus `trDir` gelesen.
 - **Gemeistert meldet nur der Übergang** auf `BOX_MAX` (ADR 0026). Wer `meisterPruefen()`
   auch beim Auffrischen auslösen lässt, macht aus der Meldung Rauschen.
 - **«Tippen» und «Übersetzen» sind zweigeteilt** (ADR 0015): Lernen und Wiederholung.

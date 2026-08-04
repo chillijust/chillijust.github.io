@@ -548,10 +548,12 @@ input[type="text"]:focus { outline: none; border-color: var(--ice); }
 input.ok, textarea.ok { border-color: var(--good); }
 input.err, textarea.err { border-color: var(--bad); }
 
-/* Der getippte Satz in «Übersetzen»: mittig und größer als ein Formularfeld —
-   er ist die Antwort, nicht eine Nebenangabe. */
+/* Der getippte Satz in «Übersetzen»: größer als ein Formularfeld — er ist die
+   Antwort, nicht eine Nebenangabe. Linksbündig wie im Meldeblatt: Ein Satz
+   wächst beim Schreiben, und mittig zentriert rutscht er dabei unter dem
+   Finger hin und her. */
 #trInput {
-  margin-top: 16px; font-size: 19px; text-align: center; line-height: 1.5;
+  margin-top: 16px; font-size: 19px; text-align: left; line-height: 1.5;
   background: var(--bg); border-radius: 12px;
 }
 #trInput:focus { outline: none; border-color: var(--ice); }
@@ -2455,7 +2457,7 @@ function filterAktiv() {
   if (currentTab === 'freestyle') return uebThema !== 'Alle';
   if (currentTab === 'tippen') return tippenModus !== 'lernen';
   if (currentTab === 'uebersetzen') {
-    return trLevel !== 1 || trDir !== 'ru-de' || trModus !== 'lernen';
+    return trLevel !== 1 || trDir !== 'gemischt' || trModus !== 'lernen';
   }
   if (currentTab === 'buchstaben') return abcRichtung !== 'gemischt';
   return false;
@@ -2506,6 +2508,7 @@ function filterInhaltHtml() {
     });
     return filterGruppe('Stufe', st) +
       filterGruppe('Richtung',
+        filterChip('richtung', 'gemischt', 'Gemischt', trDir === 'gemischt') +
         filterChip('richtung', 'ru-de', 'RU \u2192 DE', trDir === 'ru-de') +
         filterChip('richtung', 'de-ru', 'DE \u2192 RU', trDir === 'de-ru')) +
       filterGruppe('Stapel',
@@ -2980,6 +2983,7 @@ function ansichtenZuruecksetzen() {
   trCorrect = null;
   trRevealed = false;
   trLevel = 1;
+  trDir = 'gemischt';
   trModus = 'lernen';
   trEingabe = '';
   trKb = null;
@@ -3292,8 +3296,9 @@ function renderUeben() {
 // Ein Satz wird erst angeboten, wenn jede seiner Voraussetzungen (Grundformen
 // aus dem Lehrplan) mindestens SATZ_STUFE erreicht hat.
 var SATZ_STUFE = 2;
-var trLevel = 1, trDir = 'ru-de';
+var trLevel = 1, trDir = 'gemischt';   // 'gemischt' · 'ru-de' · 'de-ru'
 var trModus = 'lernen';   // 'lernen' · 'wiederholung' — wie in «Tippen»
+// 'gemischt' ist der Regelfall: die Richtung wechselt dann mit der Stufe.
 var trTask = null, trBuilt = [], trPhase = 'ask', trCorrect = null, trRevealed = false;
 // Der getippte Satz und die eingeblendete Tastatur. Beides gehört an die
 // Ansicht, nicht ins Feld: Zwischen zwei Renderläufen wäre der Wert sonst weg.
@@ -3306,6 +3311,36 @@ var trEingabe = '', trKb = null;
 var TR_TIPPEN = 2;
 function trArt(satz) {
   return satzBox(satz) >= TR_TIPPEN ? 'tippen' : 'kacheln';
+}
+
+// **Die Richtung wechselt mit der Stufe.** «Gemischt» heißt hier nicht Zufall:
+// Ein Satz, den man nur versteht, ist nicht derselbe wie einer, den man
+// hinschreiben kann — beides muss dran sein, und beides in fester Ordnung,
+// sonst hinge die Stufe vom Losglück ab (ADR 0029).
+//
+//   Stufe 0  RU → DE  Kacheln    verstehen
+//   Stufe 1  DE → RU  Kacheln    bauen
+//   Stufe 2  RU → DE  getippt    selbst formulieren
+//   Stufe 3  DE → RU  getippt    das Schwerste
+//   Stufe 4  DE → RU  getippt    Auffrischung — prüft die stärkste Behauptung
+function trRichtungFuer(satz) {
+  if (trDir !== 'gemischt') return trDir;
+  var box = satzBox(satz);
+  if (box >= BOX_MAX) return 'de-ru';
+  return box % 2 === 0 ? 'ru-de' : 'de-ru';
+}
+
+// Deutsche Artikel zählen beim Vergleich nicht mit: Das Russische hat keine,
+// und «Ich lese ein Buch» gegen «Ich lese das Buch» ist kein Übersetzungs-,
+// sondern ein Ratefehler. Im Russischen wird dagegen jedes Wort gewertet.
+var DE_ARTIKEL = {
+  der: 1, die: 1, das: 1, den: 1, dem: 1, des: 1,
+  ein: 1, eine: 1, einen: 1, einem: 1, einer: 1, eines: 1
+};
+function trVergleichbar(text, deutsch) {
+  var worte = tokenize(normalize(text));
+  if (deutsch) worte = worte.filter(function (w) { return !DE_ARTIKEL[w]; });
+  return worte.join(' ');
 }
 
 function satzFrei(s) {
@@ -3384,9 +3419,13 @@ function buildTransTask(vorgabe) {
   var satz = vorgabe || waehleSatz(trPool(), trTask ? trTask.satz : null);
   if (!satz) { trTask = null; return; }
   var ru = satz.ru, de = satz.de;
-  var prompt = trDir === 'ru-de' ? ru : de;
-  var targetTokens = tokenize(trDir === 'ru-de' ? de : ru);
-  var solution = trDir === 'ru-de' ? de : ru;
+  // Ab hier zählt die Richtung *dieser* Aufgabe, nicht die eingestellte: Beim
+  // Zeichnen darf sich nichts mehr verschieben, auch wenn der Filter wechselt.
+  var richtung = trRichtungFuer(satz);
+  var nachDe = richtung === 'ru-de';
+  var prompt = nachDe ? ru : de;
+  var targetTokens = tokenize(nachDe ? de : ru);
+  var solution = nachDe ? de : ru;
   var targetNorm = {};
   targetTokens.forEach(function (w) { targetNorm[normalize(w)] = true; });
   // Ablenker kommen aus allen freigeschalteten Sätzen der Stufe, nicht nur aus
@@ -3394,7 +3433,7 @@ function buildTransTask(vorgabe) {
   var otherWords = [];
   liste.forEach(function (p) {
     if (p === satz) return;
-    tokenize(trDir === 'ru-de' ? p.de : p.ru).forEach(function (w) {
+    tokenize(nachDe ? p.de : p.ru).forEach(function (w) {
       if (!targetNorm[normalize(w)]) otherWords.push(w);
     });
   });
@@ -3407,9 +3446,9 @@ function buildTransTask(vorgabe) {
   });
   trTask = {
     prompt: prompt, targetTokens: targetTokens, solution: solution, tiles: tiles,
-    ru: ru, de: de, satz: satz, art: trArt(satz),
+    ru: ru, de: de, satz: satz, art: trArt(satz), dir: richtung,
     // Getippt wird in der Sprache der Lösung — die Tastatur richtet sich danach.
-    loesungRu: trDir !== 'ru-de'
+    loesungRu: !nachDe
   };
   trBuilt = [];
   trEingabe = '';
@@ -3437,9 +3476,9 @@ function trPruefen() {
   if (trTask.art === 'tippen') {
     // Wortweise verglichen, nicht Zeichen für Zeichen: `normalize()` räumt
     // Satzzeichen und Groß-/Kleinschreibung weg, ein doppeltes Leerzeichen
-    // soll keinen Fehler bedeuten.
-    ok = tokenize(normalize(trEingabe)).join(' ') ===
-      tokenize(normalize(trTask.solution)).join(' ');
+    // soll keinen Fehler bedeuten. Ins Deutsche zählen Artikel nicht mit.
+    var deutsch = !trTask.loesungRu;
+    ok = trVergleichbar(trEingabe, deutsch) === trVergleichbar(trTask.solution, deutsch);
   } else {
     ok = trBuilt.length === trTask.targetTokens.length && trBuilt.every(function (k, i) {
       return normalize(trWort(k)) === normalize(trTask.targetTokens[i]);
@@ -3541,13 +3580,14 @@ function renderUebersetzen() {
   if (!trTask) buildTransTask();
   if (!trTask) { renderUebersetzenLeer(); return; }
   var t = trTask;
-  var promptIsRu = trDir === 'ru-de';
+  var promptIsRu = t.dir === 'ru-de';
   var liste = freieSaetze(trLevel);
 
   var html = '<section>';
 
   var getippt = t.art === 'tippen';
-  html += '<div class="card"><p class="task-label">Stufe ' + trLevel +
+  html += '<div class="card"><p class="task-label">Stufe ' + trLevel + ' · ' +
+    (promptIsRu ? 'RU → DE' : 'DE → RU') +
     (trModus === 'wiederholung' ? ' · zur Sicherheit' : '') +
     (getippt ? ' · selbst schreiben' : '') + '</p>' +
     '<p class="sentence' + (promptIsRu ? ' cyr' : '') + '">' + esc(t.prompt) +
@@ -3560,6 +3600,9 @@ function renderUebersetzen() {
       ' autocorrect="off" spellcheck="false"' + (trPhase === 'feedback' ? ' readonly' : '') +
       ' placeholder="' + (t.loesungRu ? 'Den Satz auf Russisch schreiben …'
         : 'Den Satz auf Deutsch schreiben …') + '">' + esc(trEingabe) + '</textarea>';
+    if (!t.loesungRu && trPhase === 'ask') {
+      html += '<p class="hint">Artikel zählen nicht mit — das Russische hat keine.</p>';
+    }
   } else {
     html += '<div class="built' + (promptIsRu ? '' : ' cyr') + '">';
     if (trBuilt.length === 0 && trPhase === 'ask') {
