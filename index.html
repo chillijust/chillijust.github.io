@@ -261,6 +261,42 @@ body.filter-offen #filterPanel { grid-template-rows: 1fr; opacity: 1; pointer-ev
 .filter-reihe .chip { font-size: 12px; padding: 8px 11px; min-height: 38px; }
 .filter-reihe .chip[disabled] { opacity: .4; }
 
+/* ── Buchstaben ────────────────────────────────────────────── */
+.abc-tafel {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 8px; margin-bottom: 18px;
+}
+.abc-kachel {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  min-height: 62px; padding: 8px 4px; cursor: pointer;
+  background: var(--card); color: var(--text);
+  border: 1px solid var(--line); border-radius: 12px;
+  box-shadow: inset 0 1px 0 var(--lip);
+}
+.abc-kachel:active { transform: scale(.96); }
+.abc-kachel.offen { border-color: var(--ice); }
+/* Die sechs falschen Freunde stechen hervor — sie kosten die meiste Mühe. */
+.abc-kachel.tueckisch .abc-zeichen { color: var(--bad); }
+.abc-zeichen { font-family: Georgia, serif; font-size: 17px; }
+.abc-laut { font-size: 11px; color: var(--dim); }
+/* Ein Balken am Fuß zeigt die Stufe — dieselben Farben wie überall. */
+.abc-kachel { position: relative; overflow: hidden; }
+.abc-kachel::after {
+  content: ''; position: absolute; left: 0; bottom: 0; height: 3px; width: 100%;
+  background: var(--line); transform: scaleX(0); transform-origin: left;
+}
+.abc-kachel.s1::after { transform: scaleX(.25); background: var(--dim); }
+.abc-kachel.s2::after { transform: scaleX(.5); background: var(--ice); opacity: .6; }
+.abc-kachel.s3::after { transform: scaleX(.75); background: var(--ice); }
+.abc-kachel.s4::after { transform: scaleX(1); background: var(--gold); }
+/* Zwei Klassen, damit die Regel die allgemeine .options-Regel schlägt — die
+   steht weiter unten im Stylesheet und gewönne sonst bei gleicher Stärke. */
+.options.abc-optionen { grid-template-columns: 1fr 1fr; }
+.options.abc-optionen .option { min-height: 58px; font-size: 17px; }
+.abc-hilfe { text-align: center; }
+.abc-hilfe .word { font-size: 34px; margin-bottom: 2px; }
+.abc-hilfe .fact-text { text-align: center; margin-top: 10px; }
+
 /* ── Home ─────────────────────────────────────────────────── */
 .empfehlung {
   display: flex; align-items: center; gap: 14px;
@@ -1376,6 +1412,42 @@ var KB_ROWS = [
   ['ф', 'ы', 'в', 'а', 'п', 'р', 'о', 'л', 'д', 'ж', 'э'],
   ['я', 'ч', 'с', 'м', 'и', 'т', 'ь', 'б', 'ю', 'ё']
 ];
+
+var ALPHABET = [
+  ['А', 'а', 'a', 'Wie das a in «Vater». Sieht aus wie A und klingt auch so.'],
+  ['Б', 'б', 'b', 'Wie in «Boot». Die 6 mit dem Hut — nicht mit В verwechseln.'],
+  ['В', 'в', 'w', 'Wie das w in «Wasser», nicht wie B! Einer der sechs falschen Freunde.'],
+  ['Г', 'г', 'g', 'Wie in «gut». Ein umgedrehtes L.'],
+  ['Д', 'д', 'd', 'Wie in «Dach». Das Häuschen mit den zwei Füßchen.'],
+  ['Е', 'е', 'je', 'Wie «je» in «jetzt» — nicht einfach e.'],
+  ['Ё', 'ё', 'jo', 'Wie «jo» in «Jonas». Die zwei Punkte sind Pflicht, werden im Druck aber oft weggelassen.'],
+  ['Ж', 'ж', 'sch', 'Weiches sch wie in «Journal» oder «Garage». Der Käfer mit sechs Beinen.'],
+  ['З', 'з', 's', 'Stimmhaftes s wie in «Sonne». Sieht aus wie eine 3.'],
+  ['И', 'и', 'i', 'Wie das i in «Kino». Ein gespiegeltes N.'],
+  ['Й', 'й', 'j', 'Kurzes j am Silbenende — «мой» klingt wie «moj». И mit Häkchen.'],
+  ['К', 'к', 'k', 'Wie in «Kaffee». Sieht aus wie K und klingt auch so.'],
+  ['Л', 'л', 'l', 'Wie in «Lampe». Das Zelt.'],
+  ['М', 'м', 'm', 'Wie in «Mutter». Sieht aus wie M und klingt auch so.'],
+  ['Н', 'н', 'n', 'Wie das n in «nein», nicht wie H! Einer der sechs falschen Freunde.'],
+  ['О', 'о', 'o', 'Wie das o in «Oper». Unbetont klingt es fast wie a.'],
+  ['П', 'п', 'p', 'Wie in «Post». Das Tor — von griechisch Pi.'],
+  ['Р', 'р', 'r', 'Gerolltes r wie im Italienischen, nicht wie P! Einer der sechs falschen Freunde.'],
+  ['С', 'с', 's', 'Stimmloses s wie in «Bus», nicht wie K! Einer der sechs falschen Freunde.'],
+  ['Т', 'т', 't', 'Wie in «Tafel». Sieht aus wie T und klingt auch so.'],
+  ['У', 'у', 'u', 'Wie das u in «Uhr», nicht wie Y! Einer der sechs falschen Freunde.'],
+  ['Ф', 'ф', 'f', 'Wie in «Fenster». Die Brille.'],
+  ['Х', 'х', 'ch', 'Raues ch wie in «Bach», nicht wie X! Einer der sechs falschen Freunde.'],
+  ['Ц', 'ц', 'z', 'Wie das z in «Zahn». Mit dem Schwänzchen unten rechts.'],
+  ['Ч', 'ч', 'tsch', 'Wie in «Tschüss». Sieht aus wie eine 4.'],
+  ['Ш', 'ш', 'sch', 'Hartes sch wie in «Schule». Drei Zacken nach oben.'],
+  ['Щ', 'щ', 'schtsch', 'Weiches, langes sch. Wie Ш, nur mit Schwänzchen.'],
+  ['Ъ', 'ъ', 'Härtezeichen', 'Spricht man nicht. Trennt die Silbe hart ab und kommt nie am Wortanfang.'],
+  ['Ы', 'ы', 'y', 'Dumpfes i, zwischen i und ü, weit hinten im Mund gebildet.'],
+  ['Ь', 'ь', 'Weichheitszeichen', 'Spricht man nicht. Macht den Buchstaben davor weich — «мать» statt «мат».'],
+  ['Э', 'э', 'e', 'Offenes e wie in «Ende». Das gespiegelte З.'],
+  ['Ю', 'ю', 'ju', 'Wie «ju» in «Juni». Ein I mit angehängtem O.'],
+  ['Я', 'я', 'ja', 'Wie «ja». Ein gespiegeltes R — und das letzte Zeichen im Alphabet.']
+];
 /* == DATEN:ENDE == */
 
 // aus VOCAB_THEMES abgeleitet, kein Inhalt
@@ -1793,6 +1865,8 @@ function defaultState() {
     transStats: { correct: 0, wrong: 0 },
     satzBox: {},               // Leitner-Stufe je Satz, Kennung ist der russische Satz
     satzSeen: {},              // Zeitstempel je Satz, Grundlage der Fälligkeit
+    abcBox: {},                // Leitner-Stufe je Buchstabe — freiwillig, eigener Topf
+    abcSeen: {},               // Zeitstempel je Buchstabe
     streak: 0,
     bestStreak: 0,
     answered: 0,
@@ -1810,6 +1884,8 @@ function mergeState(parsed) {
   d.lastSeen = migriereIds(d.lastSeen);
   d.satzBox = migriereSaetze(d.satzBox);
   d.satzSeen = migriereSaetze(d.satzSeen);
+  d.abcBox = nurBuchstaben(d.abcBox);
+  d.abcSeen = nurBuchstaben(d.abcSeen);
   // Ältere Stände kannten nur «gesehen», keine Stufe. Ein gesehener Satz
   // startet auf Stufe 1 und gilt als sofort fällig — nichts geht verloren,
   // aber als sitzend wird auch nichts verbucht, was nie geprüft wurde.
@@ -1849,6 +1925,16 @@ function saubereFakten(obj) {
 
 // Bis Version 3 waren Sätze über «Stufe-Nummer» vermerkt. Die Nummer hing an der
 // Reihenfolge in der Datei; jetzt zählt der Satz selbst. Unbekannte Schlüssel fallen weg.
+// Einträge zu Zeichen, die nicht im Alphabet stehen, fallen weg.
+function nurBuchstaben(obj) {
+  if (!obj || typeof obj !== 'object') return {};
+  var bekannt = {};
+  ALPHABET.forEach(function (b) { bekannt[b[1]] = true; });
+  var neu = {};
+  Object.keys(obj).forEach(function (k) { if (bekannt[k]) neu[k] = obj[k]; });
+  return neu;
+}
+
 function migriereSaetze(obj) {
   if (!obj || typeof obj !== 'object') return {};
   var bekannt = {};
@@ -2046,7 +2132,8 @@ var UEBUNGEN = [
   { id: 'lernsets', name: 'Lernsets', note: 'Die Wörter der nächsten Sätze, Päckchen für Päckchen.' },
   { id: 'freestyle', name: 'Freestyle', note: 'Freies Vokabeltraining nach Thema, ohne Sperren.' },
   { id: 'tippen', name: 'Tippen', note: 'Selbst schreiben, mit kyrillischer Tastatur.' },
-  { id: 'uebersetzen', name: 'Übersetzen', note: 'Ganze Sätze aus Wortkacheln bauen.' }
+  { id: 'uebersetzen', name: 'Übersetzen', note: 'Ganze Sätze aus Wortkacheln bauen.' },
+  { id: 'buchstaben', name: 'Buchstaben', note: 'Das kyrillische Alphabet — freiwillig.' }
 ];
 var UEBUNG_NAME = { home: 'Übersicht' };
 UEBUNGEN.forEach(function (u) { UEBUNG_NAME[u.id] = u.name; });
@@ -2096,7 +2183,8 @@ function filterSetzen(auf) {
 
 function filterHatWahl() {
   return currentTab === 'lernsets' || currentTab === 'freestyle' ||
-    currentTab === 'tippen' || currentTab === 'uebersetzen';
+    currentTab === 'tippen' || currentTab === 'uebersetzen' ||
+    currentTab === 'buchstaben';
 }
 
 // Weicht etwas vom Regelfall ab? Nur dann ist der Knopf farbig.
@@ -2106,6 +2194,9 @@ function filterAktiv() {
   if (currentTab === 'tippen') return tippenModus !== 'lernen';
   if (currentTab === 'uebersetzen') {
     return trLevel !== 1 || trDir !== 'ru-de' || trModus !== 'lernen';
+  }
+  if (currentTab === 'buchstaben') {
+    return abcAnsicht !== 'tafel' || abcRichtung !== 'gemischt';
   }
   return false;
 }
@@ -2162,6 +2253,15 @@ function filterInhaltHtml() {
         filterChip('trmodus', 'wiederholung', 'Wiederholung \u00b7 ' + trWiederholung(trLevel).length,
           trModus === 'wiederholung'));
   }
+  if (currentTab === 'buchstaben') {
+    return filterGruppe('Ansicht',
+      filterChip('abcansicht', 'tafel', 'Tafel', abcAnsicht === 'tafel') +
+      filterChip('abcansicht', 'ueben', 'Üben · ' + abcPool().length, abcAnsicht === 'ueben')) +
+      filterGruppe('Gefragt wird',
+        filterChip('abcrichtung', 'gemischt', 'Gemischt', abcRichtung === 'gemischt') +
+        filterChip('abcrichtung', 'zeichen', 'Zeichen \u2192 Laut', abcRichtung === 'zeichen') +
+        filterChip('abcrichtung', 'laut', 'Laut \u2192 Zeichen', abcRichtung === 'laut'));
+  }
   return '';
 }
 
@@ -2180,6 +2280,15 @@ function filterWaehlen(gruppe, wert) {
       tWord = null; tResult = null; tHint = false;
     }
     renderTippen();
+  } else if (gruppe === 'abcansicht' || gruppe === 'abcrichtung') {
+    if (gruppe === 'abcansicht') abcAnsicht = wert;
+    if (gruppe === 'abcrichtung' && abcRichtung !== wert) {
+      abcRichtung = wert;
+      abcQ = null;   // die laufende Frage passt zur alten Richtung
+    }
+    abcOffen = null;
+    renderBuchstaben();
+    renderKopf();
   } else {
     if (gruppe === 'stufe') trLevel = parseInt(wert, 10);
     if (gruppe === 'richtung') trDir = wert;
@@ -2347,6 +2456,12 @@ function uebungsStand(id) {
     if (!offen2 && !faellig2) return { text: 'alles übersetzt' };
     return { text: offen2 + ' offen' + (faellig2 ? ' · ' + faellig2 + ' fällig' : ''), warm: !!faellig2 };
   }
+  if (id === 'buchstaben') {
+    var sitzt = abcGelernt();
+    var offen2 = abcPool().length;
+    if (!offen2) return { text: 'alles erkannt' };
+    return { text: sitzt + ' von ' + ALPHABET.length + ' sitzen', warm: sitzt === 0 };
+  }
   void jetzt;
   return { text: '' };
 }
@@ -2418,6 +2533,7 @@ function render() {
   }
   else if (currentTab === 'uebersetzen') renderUebersetzen();
   else if (currentTab === 'tippen') renderTippen();
+  else if (currentTab === 'buchstaben') renderBuchstaben();
   else if (currentTab === 'einstellungen') renderEinstellungen();
   else if (currentTab === 'fakten') renderFakten();
   else if (currentTab === 'tickets') renderTickets();
@@ -2562,6 +2678,14 @@ function ansichtenZuruecksetzen() {
   trRevealed = false;
   trLevel = 1;
   trModus = 'lernen';
+
+  abcAnsicht = 'tafel';
+  abcRichtung = 'gemischt';
+  abcOffen = null;
+  abcQ = null;
+  abcPhase = 'ask';
+  abcPicked = null;
+  abcCorrect = null;
 
   faktenFilter = 'gesehen';
   themenOffen = false;
@@ -3169,6 +3293,205 @@ function renderUebersetzen() {
       renderUebersetzen();
     });
   }
+}
+
+// ── BUCHSTABEN ──────────────────────────────────────────────
+// Freiwillig: blockiert nichts, schaltet nichts frei und zählt weder in die
+// Serie noch in «beantwortet». Wer das Alphabet schon kann, verpasst nichts.
+// Eigener Topf (state.abcBox / abcSeen), damit der Wortschatz sauber bleibt.
+//
+// Die sechs falschen Freunde stehen hier und nicht in den Daten: Dass В wie ein
+// B aussieht, ist eine Eigenschaft des *lateinischen* Alphabets, nicht des
+// russischen. Sie treten im Quiz bevorzugt als Ablenker gegeneinander an.
+var ABC_TUECKISCH = 'внрсух';
+var abcAnsicht = 'tafel';     // 'tafel' · 'ueben'
+var abcRichtung = 'gemischt'; // 'zeichen' · 'laut' · 'gemischt'
+var abcOffen = null;          // Buchstabe, dessen Merkhilfe in der Tafel aufgeklappt ist
+var abcQ = null, abcPhase = 'ask', abcPicked = null, abcCorrect = null;
+
+function abcBox(b) { return state.abcBox[b[1]] || 0; }
+function abcFaellig(b, jetzt) {
+  var seit = state.abcSeen[b[1]];
+  if (!seit) return true;
+  return jetzt - seit >= intervallFuer(abcBox(b));
+}
+function abcSitzt(b) { return abcBox(b) >= BOX_MAX; }
+function abcGelernt() { return ALPHABET.filter(abcSitzt).length; }
+
+function abcUpdate(b, richtig) {
+  var cur = abcBox(b);
+  state.abcBox[b[1]] = richtig ? Math.min(BOX_MAX, cur + 1) : Math.max(0, cur - 1);
+  state.abcSeen[b[1]] = Date.now();
+  save();
+}
+
+// Offen ist, was noch nicht sitzt; dazu kommt Fertiges, dessen Frist um ist.
+function abcPool() {
+  var jetzt = Date.now();
+  var offen = ALPHABET.filter(function (b) { return !abcSitzt(b); });
+  var frisch = ALPHABET.filter(function (b) { return abcSitzt(b) && abcFaellig(b, jetzt); });
+  return offen.concat(frisch);
+}
+
+function abcWaehlen() {
+  var pool = abcPool();
+  if (!pool.length) return null;
+  var sortiert = pool.slice().sort(function (a, b) {
+    var ba = abcBox(a), bb = abcBox(b);
+    if (ba !== bb) return ba - bb;
+    return (state.abcSeen[a[1]] || 0) - (state.abcSeen[b[1]] || 0);
+  });
+  if (abcQ && sortiert.length > 1) {
+    sortiert = sortiert.filter(function (b) { return b[1] !== abcQ.b[1]; });
+  }
+  var fenster = sortiert.slice(0, Math.min(5, sortiert.length));
+  return fenster[Math.floor(Math.random() * fenster.length)];
+}
+
+function abcFrageBauen() {
+  var b = abcWaehlen();
+  if (!b) { abcQ = null; return; }
+  var modus = abcRichtung === 'gemischt'
+    ? (Math.random() < 0.5 ? 'zeichen' : 'laut')
+    : abcRichtung;
+
+  // Ablenker: bei einem falschen Freund die anderen falschen Freunde, sonst
+  // Buchstaben mit ähnlich langem Laut — beides ist schwerer als Zufall.
+  var tueckisch = ABC_TUECKISCH.indexOf(b[1]) !== -1;
+  var kandidaten = ALPHABET.filter(function (x) {
+    if (x[1] === b[1] || x[2] === b[2]) return false;
+    return tueckisch ? ABC_TUECKISCH.indexOf(x[1]) !== -1 : true;
+  });
+  if (kandidaten.length < 3) {
+    kandidaten = ALPHABET.filter(function (x) { return x[1] !== b[1] && x[2] !== b[2]; });
+  }
+  var optionen = shuffle(kandidaten).slice(0, 3).concat([b]);
+  abcQ = { b: b, modus: modus, options: shuffle(optionen) };
+  abcPhase = 'ask';
+  abcPicked = null;
+  abcCorrect = null;
+}
+
+function abcPruefen() {
+  abcCorrect = abcPicked === abcQ.b[1];
+  abcUpdate(abcQ.b, abcCorrect);
+  ton(abcCorrect);
+  abcPhase = 'feedback';
+  renderBuchstaben();
+}
+
+function abcTafelHtml() {
+  var html = '<p class="task-label">Das Alphabet · ' + abcGelernt() + ' von ' +
+    ALPHABET.length + ' sitzen</p><div class="abc-tafel">';
+  ALPHABET.forEach(function (b, i) {
+    var stufe = abcBox(b);
+    html += '<button class="abc-kachel s' + stufe +
+      (ABC_TUECKISCH.indexOf(b[1]) !== -1 ? ' tueckisch' : '') +
+      (abcOffen === b[1] ? ' offen' : '') + '" data-abc="' + i + '">' +
+      '<span class="abc-zeichen cyr">' + esc(b[0] + ' ' + b[1]) + '</span>' +
+      '<span class="abc-laut">' + esc(b[2]) + '</span></button>';
+  });
+  html += '</div>';
+  if (abcOffen) {
+    var gew = ALPHABET.filter(function (b) { return b[1] === abcOffen; })[0];
+    if (gew) {
+      html += '<div class="card abc-hilfe"><p class="word cyr">' + esc(gew[0] + ' ' + gew[1]) + '</p>' +
+        '<p class="task-label">klingt wie ' + esc(gew[2]) + '</p>' +
+        '<p class="fact-text">' + esc(gew[3]) + '</p></div>';
+    }
+  }
+  html += '<p class="session-info">Sechs Buchstaben sehen aus wie lateinische und ' +
+    'klingen anders — sie sind hervorgehoben. Antippen zeigt die Merkhilfe.</p>';
+  return html;
+}
+
+function abcUebenHtml() {
+  if (!abcQ) abcFrageBauen();
+  if (!abcQ) {
+    var jetzt = Date.now();
+    var ruhend = ALPHABET.filter(function (b) { return abcSitzt(b) && !abcFaellig(b, jetzt); }).length;
+    return '<div class="leer">' + maskottchen('gross') +
+      '<h3>Das Alphabet sitzt</h3><p>Alle ' + ALPHABET.length + ' Buchstaben sind ' +
+      BOX_MAX + '× richtig erkannt. ' + ruhend + ' ruhen bis zur nächsten Auffrischung.</p>' +
+      '<div class="btn-row"><button class="btn ghost" id="abcZurTafel">Tafel ansehen</button></div></div>';
+  }
+  var q = abcQ;
+  var zeichenFrage = q.modus === 'zeichen';
+  var html = '<div class="card">' +
+    '<p class="task-label">' + (zeichenFrage ? 'Wie klingt dieser Buchstabe?' : 'Welcher Buchstabe klingt so?') + '</p>' +
+    '<p class="word' + (zeichenFrage ? ' cyr' : '') + '">' +
+    esc(zeichenFrage ? q.b[0] + ' ' + q.b[1] : q.b[2]) + '</p>';
+
+  // Zwei Spalten: Laute wie «w» oder «tsch» füllen keine ganze Zeile, und ein
+  // Raster hält die Trefferflächen trotzdem groß.
+  html += '<div class="options abc-optionen">';
+  q.options.forEach(function (o, i) {
+    var gewaehlt = abcPicked === o[1];
+    var klasse = 'option';
+    if (abcPhase === 'feedback') {
+      if (o[1] === q.b[1]) klasse += ' right';
+      else if (gewaehlt) klasse += ' wrong';
+      else klasse += ' muted';
+    } else if (gewaehlt) klasse += ' picked';
+    html += '<button class="' + klasse + (zeichenFrage ? '' : ' cyr') + '" data-abcopt="' + i + '">' +
+      esc(zeichenFrage ? o[2] : o[0] + ' ' + o[1]) + '</button>';
+  });
+  html += '</div>';
+
+  if (abcPhase === 'feedback') {
+    html += '<div class="feedback ' + (abcCorrect ? 'good' : 'bad') + '">';
+    html += abcCorrect
+      ? '<p>' + ICON.haken + 'Richtig!</p>'
+      : '<p>' + ICON.kreuz + '<strong class="cyr">' + esc(q.b[0] + ' ' + q.b[1]) +
+        '</strong> klingt wie ' + esc(q.b[2]) + '</p>';
+    html += '</div><p class="hint">' + esc(q.b[3]) + '</p>';
+  }
+  html += '</div><div class="btn-row">';
+  if (abcPhase === 'ask') {
+    if (state.settings.confirmUeben) {
+      html += '<button class="btn primary" id="abcConfirm"' + (abcPicked ? '' : ' disabled') +
+        '>Best\u00e4tigen</button>';
+    }
+  } else {
+    html += '<button class="btn primary" id="abcNext">Weiter \u2192</button>';
+  }
+  html += '</div><p class="session-info">' + abcPool().length + ' offen · ' +
+    abcGelernt() + ' von ' + ALPHABET.length + ' sitzen</p>';
+  return html;
+}
+
+function renderBuchstaben() {
+  main.innerHTML = '<section>' +
+    (abcAnsicht === 'tafel' ? abcTafelHtml() : abcUebenHtml()) + '</section>';
+
+  main.querySelectorAll('[data-abc]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var gew = ALPHABET[parseInt(b.dataset.abc, 10)];
+      abcOffen = abcOffen === gew[1] ? null : gew[1];
+      renderBuchstaben();
+    });
+  });
+  var zurTafel = document.getElementById('abcZurTafel');
+  if (zurTafel) zurTafel.addEventListener('click', function () {
+    abcAnsicht = 'tafel';
+    renderBuchstaben();
+    renderKopf();
+  });
+  main.querySelectorAll('[data-abcopt]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      if (abcPhase !== 'ask') return;
+      abcPicked = abcQ.options[parseInt(b.dataset.abcopt, 10)][1];
+      if (state.settings.confirmUeben) renderBuchstaben();
+      else abcPruefen();
+    });
+  });
+  var conf = document.getElementById('abcConfirm');
+  if (conf) conf.addEventListener('click', function () { if (abcPicked) abcPruefen(); });
+  var next = document.getElementById('abcNext');
+  if (next) next.addEventListener('click', function () {
+    abcFrageBauen();
+    renderBuchstaben();
+  });
 }
 
 // ── TIPPEN ──────────────────────────────────────────────────
@@ -3864,10 +4187,11 @@ function bkPruefsumme(text) {
 var bkTabelle = null;
 function bkNachschlagen() {
   if (bkTabelle) return bkTabelle;
-  bkTabelle = { woerter: {}, saetze: {}, fakten: {} };
+  bkTabelle = { woerter: {}, saetze: {}, fakten: {}, buchstaben: {} };
   ALL_VOCAB.forEach(function (v) { bkTabelle.woerter[bkKennung(v.id)] = v.id; });
   SENTENCES.forEach(function (x) { bkTabelle.saetze[bkKennung(x.ru)] = x.ru; });
   FACTS.forEach(function (f) { bkTabelle.fakten[bkKennung(f)] = faktId(f); });
+  ALPHABET.forEach(function (b) { bkTabelle.buchstaben[bkKennung(b[1])] = b[1]; });
   return bkTabelle;
 }
 
@@ -3921,7 +4245,9 @@ function encodeBackup() {
     '.' + s.tippenStufe + '.' + s.auffrischen + '.' +
     ['system', 'dunkel', 'hell'].indexOf(s.darstellung);
 
-  var rumpf = [BK_KOPF, woerter, saetze, fakten.join(''), zahlen, einst].join('~');
+  var abc = bkStaendeAus(state.abcBox, state.abcSeen, bkKennung);
+
+  var rumpf = [BK_KOPF, woerter, saetze, fakten.join(''), zahlen, einst, abc].join('~');
   return rumpf + '~' + bkPruefsumme(rumpf);
 }
 
@@ -3932,9 +4258,12 @@ function bkUeberblick(st) {
   Object.keys(st.boxes).forEach(function (k) { if (st.boxes[k] > 0) w++; });
   Object.keys(st.satzBox).forEach(function (k) { if (st.satzBox[k] > 0) sa++; });
   var fa = Object.keys(st.fakten).length;
+  var ab = 0;
+  Object.keys(st.abcBox || {}).forEach(function (k) { if (st.abcBox[k] > 0) ab++; });
   return w + (w === 1 ? ' Wort' : ' Wörter') + ' · ' +
     sa + (sa === 1 ? ' Satz' : ' Sätze') + ' · ' +
-    fa + (fa === 1 ? ' Fakt' : ' Fakten');
+    fa + (fa === 1 ? ' Fakt' : ' Fakten') +
+    (ab ? ' · ' + ab + (ab === 1 ? ' Buchstabe' : ' Buchstaben') : '');
 }
 
 function decodeBackup(code) {
@@ -3942,14 +4271,18 @@ function decodeBackup(code) {
   // Ein Code aus Format 1 ist Base64 und trägt weder Kopf noch Trennzeichen.
   if (roh.indexOf(BK_KOPF + '~') !== 0) return JSON.parse(decodeURIComponent(escape(atob(roh))));
 
+  // Ältere Codes tragen sieben Felder, neuere acht (die Buchstaben kamen dazu).
+  // Die Prüfsumme steht immer zuletzt und deckt alles davor ab.
   var teile = roh.split('~');
-  if (teile.length !== 7) throw new Error('unvollständig');
-  if (bkPruefsumme(teile.slice(0, 6).join('~')) !== teile[6]) throw new Error('Prüfsumme');
+  if (teile.length < 7) throw new Error('unvollständig');
+  var letzte = teile.length - 1;
+  if (bkPruefsumme(teile.slice(0, letzte).join('~')) !== teile[letzte]) throw new Error('Prüfsumme');
 
   var t = bkNachschlagen();
   var d = defaultState();
   bkStaendeNach(teile[1], t.woerter, d.boxes, d.lastSeen);
   bkStaendeNach(teile[2], t.saetze, d.satzBox, d.satzSeen);
+  if (teile.length > 7) bkStaendeNach(teile[6], t.buchstaben, d.abcBox, d.abcSeen);
 
   var f = teile[3];
   for (var i = 0; i + BK_KENNUNG + 3 <= f.length; i += BK_KENNUNG + 3) {
@@ -4140,6 +4473,15 @@ function renderBilanz() {
     (LERNSETS[aktuell].woerter.length - setReif(aktuell)) + ' Wörter bis zu ' +
     LERNSETS[aktuell].saetze.length + ' weiteren Sätzen · ' + faelligeAnzahl(frei) +
     ' Wiederholungen fällig</p>';
+
+  var abcSitzen = abcGelernt();
+  if (abcSitzen > 0 || abcPool().length < ALPHABET.length) {
+    html += '<div class="theme-list"><div class="theme-row">' +
+      '<span class="theme-name">Buchstaben</span>' +
+      '<div class="theme-bar"><div class="theme-fill" style="width:' +
+      (abcSitzen / ALPHABET.length * 100) + '%"></div></div>' +
+      '<span class="theme-count">' + abcSitzen + '/' + ALPHABET.length + '</span></div></div>';
+  }
 
   html += '<h2>Leitner-Stufen</h2><div class="boxes">';
   counts.forEach(function (n, bi) {

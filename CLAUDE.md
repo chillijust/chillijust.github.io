@@ -19,7 +19,9 @@ nicht «Rubrik». In dieser Reihenfolge:
 **Lernsets** (zielgerichtet: die Wörter der nächsten Sätze, schaltet «Übersetzen» frei),
 **Freestyle** (freies Vokabeltraining nach Thema, ohne Sperren),
 **Tippen** (Eingabequiz mit kyrillischer Tastatur, ab Leitner-Stufe 3),
-**Übersetzen** (Satzbau aus Wort-Kacheln, nur Sätze, deren Wörter sitzen).
+**Übersetzen** (Satzbau aus Wort-Kacheln, nur Sätze, deren Wörter sitzen),
+**Buchstaben** (das kyrillische Alphabet — freiwillig, eigener Lernstand, zählt nicht in
+Serie und Fortschritt).
 Keine Übungen, sondern **im Menü** (runder Knopf, drei Striche): **Bilanz**,
 **Einstellungen**, **Tickets**. Dazu **Sprachfakten** aus der Faktenkarte oder der
 Bilanz. Eine Reiterleiste gibt es nicht — der Kopf trägt unterwegs den Rückweg.
@@ -58,7 +60,8 @@ zweites Mal einbetten, und nie über Scroll-Rechnung positionieren — sie steht
 ```
 index.html                die App — genau diese Datei wird ausgeliefert
 .nojekyll                 schaltet Jekyll ab, niemals löschen
-data/*.json               Lerninhalte, einzige Quelle für Vokabeln/Sätze/Fakten/Tastatur
+data/*.json               Lerninhalte, einzige Quelle für Vokabeln/Sätze/Fakten/
+                          Tastatur/Buchstaben
 tools/build.mjs           /data prüfen und in index.html einbetten (--check = nur prüfen)
 tools/pruefen.mjs         Vor-Push-Prüfung von index.html
 tools/freistellen.py      Maskottchen aus einem Bild freistellen (ohne Bildbibliothek)

@@ -73,6 +73,7 @@ const vokabeln = lies('vokabeln.json').wert;
 const saetze = lies('saetze.json').wert;
 const fakten = lies('fakten.json').wert;
 const tastatur = lies('tastatur.json').wert;
+const buchstaben = lies('buchstaben.json').wert;
 
 // Vokabeln: [russisch, deutsch, transliteration], keine Dubletten über alle Themen
 const gesehen = new Map();
@@ -155,6 +156,33 @@ else {
   });
 }
 
+// Buchstaben: [Groß, Klein, Laut, Merkhilfe] — das ganze Alphabet, in seiner
+// Reihenfolge, ohne Lücke und ohne Dublette.
+if (!Array.isArray(buchstaben) || buchstaben.length !== 33) {
+  meckern('buchstaben.json: erwartet genau 33 Einträge, gefunden ' +
+    (Array.isArray(buchstaben) ? buchstaben.length : 'keine Liste'));
+} else {
+  const kleine = new Set();
+  buchstaben.forEach((b, i) => {
+    const wo = 'buchstaben.json #' + (i + 1);
+    if (!pruefeTupel(wo, b, 4)) return;
+    if ([...b[0]].length !== 1 || [...b[1]].length !== 1) {
+      return meckern(wo + ': Groß- und Kleinform müssen je ein Zeichen sein');
+    }
+    if (!istKyrillisch(b[1])) return meckern(wo + ': «' + b[1] + '» ist nicht kyrillisch');
+    if (b[0].toLowerCase() !== b[1]) meckern(wo + ': «' + b[0] + '» und «' + b[1] + '» gehören nicht zusammen');
+    if (kleine.has(b[1])) meckern(wo + ': «' + b[1] + '» kommt mehrfach vor');
+    else kleine.add(b[1]);
+    if (b[3].length < 20) meckern(wo + ': die Merkhilfe ist zu knapp, um zu helfen');
+  });
+  // Die Tastatur zeigt dasselbe Alphabet — beide müssen dieselben Zeichen führen.
+  const tasten = new Set(tastatur.flat());
+  const fehlt = [...kleine].filter((c) => !tasten.has(c));
+  if (fehlt.length) meckern('buchstaben.json: auf der Tastatur fehlen ' + fehlt.join(' '));
+  const zuviel = [...tasten].filter((c) => !kleine.has(c));
+  if (zuviel.length) meckern('tastatur.json: «' + zuviel.join(' ') + '» steht nicht im Alphabet');
+}
+
 if (fehler.length) {
   console.error('Prüfung fehlgeschlagen:\n' + fehler.map((f) => '  · ' + f).join('\n'));
   process.exit(1);
@@ -206,6 +234,8 @@ const block = [
   listenBlock('FACTS', fakten, false),
   '',
   listenBlock('KB_ROWS', tastatur, true),
+  '',
+  listenBlock('ALPHABET', buchstaben, true),
   ENDE
 ].join('\n');
 
@@ -252,7 +282,8 @@ const dateien = [
   ['data/vokabeln.json', jsonObjekt(vokabeln)],
   ['data/saetze.json', jsonSaetze(saetze)],
   ['data/fakten.json', jsonListe(fakten, false)],
-  ['data/tastatur.json', jsonListe(tastatur, true)]
+  ['data/tastatur.json', jsonListe(tastatur, true)],
+  ['data/buchstaben.json', jsonListe(buchstaben, true)]
 ];
 
 // ── Kennungen für den Sicherungscode ────────────────────────
@@ -268,7 +299,8 @@ const kennung = (text) => {
 for (const [was, texte] of [
   ['Vokabeln', Object.values(vokabeln).flat().map((v) => v[0])],
   ['Sätze', saetze.map((s) => s.ru)],
-  ['Fakten', fakten]
+  ['Fakten', fakten],
+  ['Buchstaben', buchstaben.map((b) => b[1])]
 ]) {
   const gesehen = new Map();
   for (const t of texte) {
@@ -332,4 +364,5 @@ const woerter = anzahl(vokabeln);
 console.log('Themen ' + Object.keys(vokabeln).length + ' · Vokabeln ' + woerter +
   ' · Päckchen ' + Math.ceil(woerter / 12) +
   ' · Sätze ' + saetze.length + ' in ' + new Set(saetze.map((s) => s.stufe)).size + ' Stufen' +
-  ' · Fakten ' + fakten.length + ' · Tasten ' + tastatur.flat().length);
+  ' · Fakten ' + fakten.length + ' · Tasten ' + tastatur.flat().length +
+  ' · Buchstaben ' + buchstaben.length);

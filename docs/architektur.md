@@ -284,12 +284,13 @@ entfällt — eine feste Reihenfolge verträgt sich nicht mit zwei Stapeln.
 Format **2** (`CHG2~…`), eine einzige Zeile aus `A–Z a–z 0–9 . ~`:
 
 ```
-CHG2~<Wörter>~<Sätze>~<Fakten>~<Zahlen>~<Einstellungen>~<Prüfsumme>
+CHG2~<Wörter>~<Sätze>~<Fakten>~<Zahlen>~<Einstellungen>~<Buchstaben>~<Prüfsumme>
 ```
 
 Ein Wort belegt zehn Zeichen: sechs für die **Kennung**, eines für die Stufe, drei für
-das Alter in Tagen seit `BK_BEZUG` (1. Januar 2026). Sätze genauso, Fakten neun Zeichen
-(Kennung, Zähler, Favorit). Bei vollem Lernstand ergibt das rund **5 KB statt 35 KB** —
+das Alter in Tagen seit `BK_BEZUG` (1. Januar 2026). Sätze und Buchstaben genauso, Fakten
+neun Zeichen (Kennung, Zähler, Favorit). Die Buchstaben stehen im achten Feld; ältere
+Codes tragen nur sieben, darum wird die Prüfsumme immer aus dem letzten Feld gelesen. Bei vollem Lernstand ergibt das rund **5 KB statt 35 KB** —
 Format 1 war der ganze Zustand als JSON in Base64, mit 380 kyrillischen Schlüsseln und
 Millisekunden-Zeitstempeln.
 
@@ -318,6 +319,38 @@ getippte Wort, den gelegten Satz, Stufe und Stapel in «Übersetzen», Filter un
 Ohne das zeigte eine Übung nach dem Einspielen weiter ihren alten Stand — jede hält
 ihren eigenen Zustand in Modulvariablen, und `state` auszutauschen rührt die nicht an.
 Dieselbe Funktion läuft beim Zurücksetzen des Fortschritts.
+
+## Buchstaben — freiwillig und getrennt
+
+Die fünfte Übung lehrt das kyrillische Alphabet. **Freiwillig** heißt hier wörtlich: Sie
+blockiert nichts, schaltet nichts frei, und ihre Antworten zählen weder in die Serie noch
+in «beantwortet». Wer das Alphabet schon kann, verpasst nichts.
+
+Der Lernstand liegt in einem **eigenen Topf** (`state.abcBox`, `state.abcSeen`) mit
+derselben Leiter und denselben Fristen wie Wörter und Sätze. Er taucht in der Bilanz nur
+als eine Zeile im Lernweg auf, nicht in den Kacheln.
+
+Zwei Teile, umschaltbar über den Auswahlknopf:
+
+- **Tafel** — alle 33 Buchstaben als Raster mit Groß-, Kleinform und Laut. Ein Balken am
+  Fuß jeder Kachel zeigt die Stufe (dieselben Farben wie überall). Antippen klappt die
+  Merkhilfe auf.
+- **Üben** — Vierfachwahl in beide Richtungen (Zeichen → Laut, Laut → Zeichen oder
+  gemischt), mit derselben Bestätigen-Einstellung wie das Vokabeltraining.
+
+**Die sechs falschen Freunde** (В=w, Н=n, Р=r, С=s, У=u, Х=ch) stehen als
+`ABC_TUECKISCH` im Skript, nicht in den Daten: Dass В wie ein B aussieht, ist eine
+Eigenschaft des *lateinischen* Alphabets, nicht des russischen. In der Tafel sind sie
+hervorgehoben; im Quiz treten sie bevorzugt gegeneinander als Ablenker an — eine Frage,
+bei der man raten kann, lehrt nichts.
+
+`data/buchstaben.json` hält `[Groß, Klein, Laut, Merkhilfe]`. `tools/build.mjs` prüft:
+genau 33 Einträge, Groß- und Kleinform passen zusammen, keine Dublette, jede Merkhilfe
+mindestens 20 Zeichen — und dass Alphabet und Tastatur **dieselben** Zeichen führen.
+
+Der Sicherungscode trägt die Buchstaben als achtes Feld. Ältere Codes haben sieben;
+`decodeBackup()` liest die Prüfsumme darum immer aus dem letzten Feld und behandelt das
+achte als optional.
 
 ## Bilanz im Detail
 

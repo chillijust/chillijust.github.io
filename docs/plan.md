@@ -1,7 +1,7 @@
-# Plan: Home, Menü, Bilanz, Buchstaben
+# Plan: Home, Menü, Bilanz, Buchstaben — abgeschlossen
 
-**Stand:** 2026-08-02 · wird fortgeschrieben, bis alle Etappen erledigt sind.
-Zuletzt: Etappe 2 abgeschlossen (ADR 0022). Offen ist noch Etappe 3.
+**Stand:** 2026-08-03 · **alle drei Etappen erledigt.**
+Offen sind nur noch die Punkte unter «Danach zu prüfen».
 
 Vereinbarte Begriffe: die fünf Lernbereiche heißen **Übungen** (nicht «Rubriken»).
 Bilanz, Einstellungen und Tickets sind keine Übungen — sie stehen im **Menü**.
@@ -69,22 +69,28 @@ Bilanz, Einstellungen und Tickets sind keine Übungen — sie stehen im **Menü*
 
 ---
 
-## Etappe 3 · Übung «Buchstaben» — **offen**
+## Etappe 3 · Übung «Buchstaben» — **erledigt** (ADR 0023)
 
 Freiwillig: blockiert nichts, zählt nicht in den Lehrplan-Fortschritt.
 
-- [ ] `data/buchstaben.json` — 33 Buchstaben mit Laut, Transkription, Merkhilfe
-- [ ] Prüfung in `tools/build.mjs` (Vollständigkeit, eindeutige Kennungen)
-- [ ] **Alphabet-Tafel** zum Nachschlagen
-- [ ] **Quiz**: Buchstabe → Laut und zurück
-- [ ] Schwerpunkt auf den falschen Freunden: В=w, Н=n, Р=r, С=s, У=u, Х=ch
-- [ ] Eigener Lernstand, getrennt vom Wortschatz
-- [ ] Fünfte Kachel auf Home
-- [ ] Testreihe, Doku, ADR
+- [x] `data/buchstaben.json` — 33 Buchstaben mit Laut, Transkription, Merkhilfe
+- [x] Prüfung in `tools/build.mjs` (Vollständigkeit, Paare, Dubletten, Merkhilfen,
+      Abgleich mit der Tastatur, eindeutige Kennungen)
+- [x] **Alphabet-Tafel** zum Nachschlagen, mit Stufenbalken und aufklappbarer Merkhilfe
+- [x] **Quiz**: Zeichen → Laut, Laut → Zeichen oder gemischt
+- [x] Schwerpunkt auf den falschen Freunden: В=w, Н=n, Р=r, С=s, У=u, Х=ch — hervorgehoben
+      und im Quiz als Ablenker gegeneinander
+- [x] Eigener Lernstand, getrennt vom Wortschatz; keine Wirkung auf Serie und «beantwortet»
+- [x] Fünfte Kachel auf Home, eine Zeile im Lernweg der Bilanz
+- [x] Sicherungscode nimmt sie mit (achtes Feld, alte Codes bleiben lesbar)
+- [x] Testreihe (51 Prüfungen), Doku, ADR 0023
 
 ---
 
 ## Danach zu prüfen
 
 - Sicherungscode Format 2 auf dem Gerät (steht beim Betreiber noch aus)
+- Meldeknopf und Blatt auf dem Gerät (steht ebenfalls noch aus)
 - Ob die Empfehlung auf Home die richtigen Prioritäten setzt, sobald mehr Lernstand da ist
+- Ob die Buchstaben-Tafel auf dem iPhone in vier Spalten passt oder enger gesetzt werden
+  muss
