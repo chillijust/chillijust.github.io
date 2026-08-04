@@ -1739,26 +1739,21 @@ function tonBereit() {
   } catch (e) { return null; }
 }
 
-// Ein Anschlag aus mehreren Partialtönen. Das Glasige entsteht dadurch, dass
-// die hohen Teiltöne **schneller** ausklingen als der Grundton — so klingt eine
-// Glocke, und so klingen die Töne von iOS. Ein einzelner Sinus klingt dagegen
-// nach Prüfgerät.
-function tonAnschlag(werk, start, grund, laut, dauer, partials) {
-  partials.forEach(function (p) {
-    var o = werk.createOscillator();
-    var g = werk.createGain();
-    var d = dauer * p[2];
-    o.type = 'sine';
-    // Leichte Verstimmung der oberen Teiltöne: exakte Vielfache klingen tot.
-    o.frequency.value = grund * p[0];
-    g.gain.setValueAtTime(0.0001, start);
-    g.gain.exponentialRampToValueAtTime(laut * p[1], start + 0.006);
-    g.gain.exponentialRampToValueAtTime(0.0001, start + d);
-    o.connect(g);
-    g.connect(werk.destination);
-    o.start(start);
-    o.stop(start + d + 0.05);
-  });
+// Eine Note: ein Oszillator, eine Hüllkurve. Schlicht und gewollt so — der
+// glasige Glockenklang aus mehreren Teiltönen wurde erprobt und wieder
+// verworfen; der einfache Zweiklang trifft besser (ADR 0028).
+function tonNote(werk, start, freq, typ, laut, dauer) {
+  var o = werk.createOscillator();
+  var g = werk.createGain();
+  o.type = typ;
+  o.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, start);
+  g.gain.exponentialRampToValueAtTime(laut, start + 0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, start + dauer);
+  o.connect(g);
+  g.connect(werk.destination);
+  o.start(start);
+  o.stop(start + dauer + 0.05);
 }
 
 function tonSpielen(werk, richtig) {
@@ -1766,17 +1761,14 @@ function tonSpielen(werk, richtig) {
   // Hüllkurve schon in der Vergangenheit, wenn der Kontext gerade erst
   // aufgewacht ist — dann steht der Pegel sofort am Endwert und man hört nichts.
   var jetzt = werk.currentTime + 0.02;
-  if (richtig) {
-    // Zwei Anschläge, Quarte darüber — hell, kurz, mit Nachklang.
-    tonAnschlag(werk, jetzt, 1046.5, 0.15, 0.62,
-      [[1, 1, 1], [2.01, 0.3, 0.55], [3.02, 0.11, 0.3], [5.04, 0.05, 0.16]]);
-    tonAnschlag(werk, jetzt + 0.085, 1568, 0.13, 0.75,
-      [[1, 1, 1], [2.01, 0.28, 0.5], [3.02, 0.09, 0.28]]);
-  } else {
-    // Tief und fallend, ohne Schärfe: ein Hinweis, kein Tadel.
-    tonAnschlag(werk, jetzt, 196, 0.12, 0.3, [[1, 1, 1], [2, 0.18, 0.6]]);
-    tonAnschlag(werk, jetzt + 0.11, 155.6, 0.11, 0.36, [[1, 1, 1], [2, 0.15, 0.6]]);
-  }
+  // je Note: Frequenz in Hz, Einsatz in Sekunden
+  var noten = richtig ? [[880, 0], [1318.5, 0.09]] : [[196, 0], [155.6, 0.11]];
+  var typ = richtig ? 'sine' : 'triangle';
+  var laut = richtig ? 0.16 : 0.11;
+  var dauer = richtig ? 0.17 : 0.22;
+  noten.forEach(function (note) {
+    tonNote(werk, jetzt + note[1], note[0], typ, laut, dauer);
+  });
 }
 
 function ton(richtig) {
@@ -1797,16 +1789,16 @@ function ton(richtig) {
 }
 
 // Ein besonderer Klang für den Augenblick, in dem etwas fertig gelernt ist:
-// ein aufsteigender Dreiklang, derselbe glasige Anschlag.
+// derselbe Sinus wie bei «richtig», nur als aufsteigender Vierklang. Er soll
+// als Verwandter des gewöhnlichen «richtig» hörbar sein, nicht als Fremdkörper.
 function tonMeister() {
   var werk = tonBereit();
   if (!werk) return;
   try {
     var spiel = function () {
       var jetzt = werk.currentTime + 0.02;
-      [[1046.5, 0], [1318.5, 0.075], [1568, 0.15], [2093, 0.225]].forEach(function (n) {
-        tonAnschlag(werk, jetzt + n[1], n[0], 0.13, 0.7,
-          [[1, 1, 1], [2.01, 0.26, 0.5], [3.02, 0.09, 0.28]]);
+      [[880, 0], [1108.7, 0.075], [1318.5, 0.15], [1760, 0.225]].forEach(function (n) {
+        tonNote(werk, jetzt + n[1], n[0], 'sine', 0.15, 0.2);
       });
     };
     if (tonSchlaeft(werk)) {

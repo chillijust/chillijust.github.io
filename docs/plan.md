@@ -133,6 +133,15 @@ Freiwillig: blockiert nichts, zählt nicht in den Lehrplan-Fortschritt.
 
 ---
 
+## Nachtrag · Alter Klang wieder — **erledigt** (ADR 0028)
+
+- [x] «richtig» und «falsch» zurück auf den Stand vor ADR 0026
+- [x] «gemeistert» im selben schlichten Sinus, als aufsteigender Vierklang
+- [x] Die Reparaturen aus ADR 0026 und 0027 bleiben unberührt
+- [x] 653 Prüfungen grün
+
+---
+
 ## Danach zu prüfen
 
 - Sicherungscode Format 2 auf dem Gerät (steht beim Betreiber noch aus)
@@ -149,5 +158,4 @@ Freiwillig: blockiert nichts, zählt nicht in den Lehrplan-Fortschritt.
 - **Ob der Ton auf dem Gerät wieder kommt** — das lässt sich hier nicht prüfen, Headless
   hat keinen Ton. Getestet ist, was die App plant, nicht wie es klingt. Was «Ton prüfen»
   in den Einstellungen anzeigt, sagt im Zweifel, woran es liegt
-- Ob der neue «richtig»-Klang glasig genug ist oder noch heller/länger sein soll
 - Ob zwei getippte Runden je Satz sich richtig anfühlen oder eine reicht

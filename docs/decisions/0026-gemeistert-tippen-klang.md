@@ -1,6 +1,6 @@
 # 0026 · Gemeistert melden, Sätze tippen, den Klang reparieren
 
-**Status:** angenommen · 2026-08-04
+**Status:** angenommen · 2026-08-04 · **Klangteil überholt durch ADR 0028**
 
 ## Kontext
 

@@ -233,17 +233,16 @@ systemeigenes Rad, das mit dem Rest der Oberfläche nichts zu tun hat (ADR 0020)
 den längeren Dreiklang, wenn etwas fertig gelernt ist. Erzeugt wird alles in der Web
 Audio API — Klangdateien verbieten sich in einer einzelnen Datei ohne externe Ressourcen.
 
-**Der Klang ist glasig, nicht sinusrein.** `tonAnschlag()` legt je Anschlag mehrere
-Teiltöne übereinander (Grundton, ~2×, ~3×, ~5×) und lässt die **hohen schneller
-ausklingen** als den Grundton. Genau das macht den Unterschied zwischen einer Glocke und
-einem Prüfgerät; die leichte Verstimmung der Vielfachen (2,01 statt 2,00) nimmt dem Klang
-das Tote.
+**Der Klang ist schlicht:** `tonNote()` legt eine Note als ein Oszillator mit einer
+Hüllkurve an (Anstieg 12 ms, exponentieller Abfall). Ein glasiger Glockenklang aus
+mehreren Teiltönen wurde erprobt und wieder verworfen — er klang nach Benachrichtigung,
+nicht nach Rückmeldung (ADR 0028).
 
 | Anlass | Klang |
 | --- | --- |
-| richtig | C6, darüber G6 nach 85 ms |
-| falsch | G3, darunter D♯3 nach 110 ms — tief, ohne Schärfe |
-| gemeistert | C6 · E6 · G6 · C7, je 75 ms versetzt |
+| richtig | A5, darüber E6 nach 90 ms — Sinus, 0,17 s |
+| falsch | G3, darunter D♯3 nach 110 ms — Dreieck, 0,22 s |
+| gemeistert | A5 · C♯6 · E6 · A6, je 75 ms versetzt — derselbe Sinus wie «richtig» |
 
 ### Warum der Ton verstummte
 
