@@ -152,6 +152,10 @@ zehn.
 - **Wort umbenennen** setzt dessen Leitner-Stand zurück — die Kennung ist das russische
   Wort. Themen umzubenennen ist dagegen folgenlos. **Einen Satz umzuformulieren** setzt
   genauso seinen Stand in `satzBox`/`satzSeen` zurück; die Kennung ist der russische Satz.
+- **Buchstaben kennen zwei Schwellen** wie Wörter (ADR 0024): «sitzt» ab `SATZ_STUFE`,
+  «gemeistert» ab `BOX_MAX`. `abcPool()` fragt nach **gemeistert** — wer das auf «sitzt»
+  umstellt, wirft die Buchstaben schon auf Stufe 2 aus der Übung und überspringt damit
+  genau den Kachelmodus, der das Können prüft.
 - **«Tippen» und «Übersetzen» sind zweigeteilt** (ADR 0015): Lernen und Wiederholung.
   Fertig Gelerntes verlässt beide Stapel, bis die Frist `auffrischen` um ist. Wer dort
   etwas ändert, muss beide Stapel und die drei Leerzustände mitdenken — «noch nichts

@@ -85,6 +85,15 @@ Freiwillig: blockiert nichts, zählt nicht in den Lehrplan-Fortschritt.
 - [x] Sicherungscode nimmt sie mit (achtes Feld, alte Codes bleiben lesbar)
 - [x] Testreihe (51 Prüfungen), Doku, ADR 0023
 
+### Nachtrag · Buchstaben wie Vokabeln abfragen — **erledigt** (ADR 0024)
+
+- [x] Zwei Schwellen: «sitzt» ab Stufe 2, «gemeistert» ab Stufe 4
+- [x] Fortschrittspunkte im Kopf, Leiter des Buchstabens auf der Karte
+- [x] **Kachelmodus** ab Stufe 2 — den Laut aus lateinischen Kacheln zusammensetzen
+- [x] **Aufdecken** wie in den anderen Übungen
+- [x] Home-Kachel, Bilanz-Zeile, Leerzustand und Fußzeile nennen beide Zahlen
+- [x] Testreihe von 51 auf 81 Prüfungen erweitert
+
 ---
 
 ## Danach zu prüfen
@@ -94,3 +103,5 @@ Freiwillig: blockiert nichts, zählt nicht in den Lehrplan-Fortschritt.
 - Ob die Empfehlung auf Home die richtigen Prioritäten setzt, sobald mehr Lernstand da ist
 - Ob die Buchstaben-Tafel auf dem iPhone in vier Spalten passt oder enger gesetzt werden
   muss
+- Ob der Kachelmodus bei «щ» (sieben Kacheln plus drei überzählige) auf dem Gerät noch
+  angenehm zu treffen ist

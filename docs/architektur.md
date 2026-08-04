@@ -335,8 +335,37 @@ Zwei Teile, umschaltbar über den Auswahlknopf:
 - **Tafel** — alle 33 Buchstaben als Raster mit Groß-, Kleinform und Laut. Ein Balken am
   Fuß jeder Kachel zeigt die Stufe (dieselben Farben wie überall). Antippen klappt die
   Merkhilfe auf.
-- **Üben** — Vierfachwahl in beide Richtungen (Zeichen → Laut, Laut → Zeichen oder
-  gemischt), mit derselben Bestätigen-Einstellung wie das Vokabeltraining.
+- **Üben** — derselbe Aufbau wie das Vokabeltraining (siehe unten).
+
+### Sitzen und meistern — dieselbe Mechanik wie bei den Wörtern
+
+Ein Buchstabe kennt **zwei Schwellen**, genau wie eine Vokabel:
+
+| Schwelle | Stufe | Prüfung | Bedeutung |
+| --- | --- | --- | --- |
+| **sitzt** | ab `SATZ_STUFE` (2) | `abcSitzt()` | man erkennt ihn — er zählt in «x von 33 sitzen» |
+| **gemeistert** | ab `BOX_MAX` (4) | `abcGemeistert()` | er verlässt den Stapel bis zur Auffrischfrist |
+
+`abcPool()` fragt nach **gemeistert**, nicht nach «sitzt» — sonst fiele ein Buchstabe
+schon auf Stufe 2 aus der Übung heraus, und zwischen Erkennen und Können läge nichts mehr.
+
+Der Kopf über der Frage ist dasselbe **Paket** wie in «Lernsets» (`abcKopfHtml()`): ein
+Punkt je Buchstabe, gefärbt nach seiner Stufe, darunter «x von 33 auf Stufe 2 · y
+gemeistert · z fällig». Auf der Karte selbst stehen die **Fortschrittspunkte** des
+gefragten Buchstabens (`.boxdots`) und rechts, ob es einer der falschen Freunde ist.
+
+Drei Aufgabenformen, die Stufe entscheidet — wie `buildQuestion()` beim Wortschatz:
+
+- **Zeichen → Laut** und **Laut → Zeichen** als Vierfachwahl, solange der Buchstabe noch
+  nicht sitzt.
+- **Kacheln** ab Stufe 2: Das Zeichen steht da, der **Laut wird aus lateinischen Kacheln
+  zusammengesetzt** — `щ` also aus `s c h t s c h`, mit zwei bis drei überzähligen
+  Kacheln. Das greift nur, wo der Laut mehr als ein Zeichen hat (`abcKachelbar()`, neun
+  Buchstaben: е ё ж х ч ш щ ю я); Ъ und Ь tragen ein deutsches Wort statt einer
+  Lautschrift und fallen heraus. Wer die Richtung fest auf «Laut → Zeichen» stellt,
+  behält sie — das ist ohnehin schon die fordernde Seite.
+
+**Aufdecken** gibt es hier wie überall: Es zeigt die Auflösung und zählt als Fehler.
 
 **Die sechs falschen Freunde** (В=w, Н=n, Р=r, С=s, У=u, Х=ch) stehen als
 `ABC_TUECKISCH` im Skript, nicht in den Daten: Dass В wie ein B aussieht, ist eine
