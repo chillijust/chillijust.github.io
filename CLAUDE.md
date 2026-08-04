@@ -94,7 +94,9 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   Web Audio API, nie als Datei, immer in `try/catch`, abschaltbar über die Einstellung
   `ton`. Kein Ablauf darf Ton voraussetzen. **Ein schlafender Kontext heißt `suspended`
   *oder* `interrupted`, und `resume()` ist asynchron** — wer sofort danach Noten plant,
-  plant ins Leere (ADR 0026).
+  plant ins Leere (ADR 0026). Auf iOS schweigt Webton außerdem beim Stummschalter, solange
+  `navigator.audioSession.type` nicht auf `transient` steht, und ein Kontext gilt erst als
+  freigegeben, wenn er **in einer Geste** einmal etwas ausgegeben hat (ADR 0027).
 - **Der Datenblock zwischen `DATEN:START` und `DATEN:ENDE` ist generiert.** Inhalte
   ausschließlich in `/data` ändern, danach `node tools/build.mjs`.
 - **`APP_STAND` setzt `tools/build.mjs`**, nicht die Hand. Der Wert geht in jedes Ticket

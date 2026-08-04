@@ -123,6 +123,16 @@ Freiwillig: blockiert nichts, zählt nicht in den Lehrplan-Fortschritt.
 
 ---
 
+## Nachtrag · Stummschalter und Home-Bildschirm-App — **erledigt** (ADR 0027)
+
+- [x] `navigator.audioSession.type = 'transient'` — klingt trotz Stummschalter, ohne
+      laufende Musik anzuhalten
+- [x] Freigabe beim ersten Tipp über einen unhörbaren Ein-Sample-Puffer
+- [x] **«Ton prüfen»** in den Einstellungen: spielt und nennt darunter die Ursache
+- [x] Testreihe `meister.mjs` auf 48 Prüfungen erweitert; zusammen 649
+
+---
+
 ## Danach zu prüfen
 
 - Sicherungscode Format 2 auf dem Gerät (steht beim Betreiber noch aus)
@@ -137,6 +147,7 @@ Freiwillig: blockiert nichts, zählt nicht in den Lehrplan-Fortschritt.
 - Ob die Sprachausgabe auf dem Gerät die russischen Stimmen findet — sie kommen auf iOS
   verzögert und fehlen ohne geladenes Sprachpaket ganz
 - **Ob der Ton auf dem Gerät wieder kommt** — das lässt sich hier nicht prüfen, Headless
-  hat keinen Ton. Getestet ist, was die App plant, nicht wie es klingt
+  hat keinen Ton. Getestet ist, was die App plant, nicht wie es klingt. Was «Ton prüfen»
+  in den Einstellungen anzeigt, sagt im Zweifel, woran es liegt
 - Ob der neue «richtig»-Klang glasig genug ist oder noch heller/länger sein soll
 - Ob zwei getippte Runden je Satz sich richtig anfühlen oder eine reicht

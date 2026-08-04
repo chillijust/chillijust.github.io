@@ -1659,12 +1659,74 @@ function tonSchlaeft(werk) {
   return werk.state === 'suspended' || werk.state === 'interrupted';
 }
 
+// **Der Stummschalter.** Ohne Zutun läuft Webton auf iOS in der Sitzungsart
+// «ambient» — und die schweigt, sobald der seitliche Schalter auf stumm steht.
+// In der Home-Bildschirm-App fällt das doppelt auf, weil man sie oft aufmacht,
+// ohne vorher etwas zu hören. `navigator.audioSession` (Safari ab 16.4) hebt
+// das auf: «transient» ist genau für kurze Rückmeldungen gedacht — sie klingen
+// trotz Stummschalter und drängen laufende Musik nur für den Augenblick weg,
+// statt sie anzuhalten (ADR 0027).
+var tonSitzungGesetzt = false;
+function tonSitzung() {
+  if (tonSitzungGesetzt) return;
+  try {
+    if (!navigator.audioSession) return;
+    navigator.audioSession.type = 'transient';
+    // Kennt die Fassung «transient» nicht, bleibt der alte Wert stehen; dann
+    // ist «playback» die nächstbeste Wahl.
+    if (navigator.audioSession.type !== 'transient') {
+      navigator.audioSession.type = 'playback';
+    }
+    tonSitzungGesetzt = true;
+  } catch (e) {}
+}
+
 // Aufwecken darf jeder Tipp, nicht erst eine Antwort: `resume()` braucht auf
 // iOS eine Nutzergeste, und die Antwort selbst kommt dafür zu spät — sie soll
 // ja schon klingen.
 function tonWecken() {
   if (!tonWerk) return;
+  tonSitzung();
   try { if (tonSchlaeft(tonWerk)) tonWerk.resume(); } catch (e) {}
+}
+
+// Der erste Tipp irgendwo in der App richtet den Klang ein: Sitzungsart setzen,
+// Kontext anlegen, wecken und einen unhörbaren Puffer abspielen. Erst dieses
+// Abspielen **innerhalb einer Geste** gibt iOS den Ton wirklich frei; ohne das
+// bleibt der Kontext zwar «running», liefert aber nichts.
+var tonEntsperrt = false;
+function tonEntsperren() {
+  if (tonEntsperrt || !state.settings.ton) return;
+  tonSitzung();
+  var werk = tonBereit();
+  if (!werk) return;
+  tonEntsperrt = true;
+  try {
+    if (tonSchlaeft(werk)) werk.resume();
+    var puffer = werk.createBuffer(1, 1, werk.sampleRate || 22050);
+    var quelle = werk.createBufferSource();
+    quelle.buffer = puffer;
+    quelle.connect(werk.destination);
+    quelle.start(0);
+  } catch (e) { /* auch ohne Freigabe läuft die App weiter */ }
+}
+
+// Was der Klang gerade macht — für die Selbstauskunft in den Einstellungen.
+// Ohne sie bliebe bei «kein Ton» nur Raten: Schalter aus, Kontext schlafend,
+// Stummschalter oder gar keine Unterstützung sehen von außen gleich aus.
+function tonAuskunft() {
+  var teile = [];
+  teile.push(state.settings.ton ? 'Einstellung an' : 'Einstellung aus');
+  var AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return teile.concat(['kein Web-Audio']).join(' · ');
+  teile.push(tonWerk ? 'Kontext ' + tonWerk.state : 'Kontext noch nicht angelegt');
+  teile.push(tonEntsperrt ? 'freigegeben' : 'noch nicht freigegeben');
+  try {
+    teile.push(navigator.audioSession
+      ? 'Sitzung ' + navigator.audioSession.type
+      : 'ohne Sitzungssteuerung — Stummschalter hat Vorrang');
+  } catch (e) { teile.push('Sitzung unbekannt'); }
+  return teile.join(' · ');
 }
 
 function tonBereit() {
@@ -4321,9 +4383,16 @@ function renderEinstellungen() {
       'Dunkel ist die Vorgabe. «System» folgt der Einstellung des iPhones.',
       [{ wert: 'system', text: 'System' }, { wert: 'dunkel', text: 'Dunkel' }, { wert: 'hell', text: 'Hell' }]) +
     schalter('ton', 'Ton bei richtig und falsch',
-      'Ein kurzer Klang nach jeder Antwort. Der Stummschalter des iPhones hat Vorrang.') +
+      'Ein kurzer Klang nach jeder Antwort. Auf iOS klingt er auch bei gestelltem ' +
+      'Stummschalter, sofern das Gerät die Sitzungssteuerung kennt.') +
+    '<div class="setting"><span class="setting-text">' +
+    '<span class="setting-title">Ton prüfen</span>' +
+    '<span class="setting-note">Spielt den Klang für «richtig» und sagt darunter, was ' +
+    'gerade eingerichtet ist. Hören Sie nichts, steht dort, woran es liegt.</span></span>' +
+    '<button class="chip" id="tonTest">Abspielen</button></div>' +
+    '<p class="settings-note" id="tonStand">' + esc(tonAuskunft()) + '</p>' +
     '<p class="settings-note">Die Einstellungen gelten nur auf diesem Gerät und werden zusammen mit dem ' +
-    'Lernstand gespeichert. «Fortschritt zurücksetzen» in der Bilanz lässt sie unberührt.</p>' +
+    'Lernstand gespeichert. «Fortschritt zurücksetzen» in der Sicherung lässt sie unberührt.</p>' +
     '<div class="btn-row"><button class="btn ghost" id="setBack">Zurück</button></div></section>';
 
   main.querySelectorAll('[data-set]').forEach(function (b) {
@@ -4348,6 +4417,17 @@ function renderEinstellungen() {
       save();
       renderEinstellungen();
     });
+  });
+  document.getElementById('tonTest').addEventListener('click', function () {
+    // Der Tipp selbst ist die Geste, die iOS verlangt — erst entsperren, dann
+    // spielen, dann berichten. Die Auskunft kommt kurz verzögert, weil
+    // `resume()` asynchron ist und der Zustand sonst noch der alte wäre.
+    tonEntsperren();
+    ton(true);
+    var zeile = document.getElementById('tonStand');
+    setTimeout(function () {
+      if (zeile) zeile.textContent = tonAuskunft();
+    }, 150);
   });
   document.getElementById('setBack').addEventListener('click', function () { setTab(letzterTab); });
 }
@@ -5250,7 +5330,10 @@ updateDarstellung();
 // anhält und `resume()` eine Nutzergeste verlangt — die Antwort selbst kommt
 // dafür zu spät, sie soll ja schon klingen. Ein Aufwecken, das nichts zu tun
 // hat, kostet nichts.
-document.addEventListener('pointerdown', tonWecken, true);
+document.addEventListener('pointerdown', function () {
+  tonEntsperren();
+  tonWecken();
+}, true);
 document.addEventListener('visibilitychange', function () {
   if (!document.hidden) tonWecken();
 });

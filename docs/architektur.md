@@ -262,6 +262,29 @@ Dazu weckt jeder Tipp den Kontext (`pointerdown` auf `document`, in der Capture-
 und jede Rückkehr aus dem Hintergrund (`visibilitychange`). Ein Aufwecken, das nichts zu
 tun hat, kostet nichts — und die Antwort selbst käme zu spät, sie soll ja schon klingen.
 
+### Der Stummschalter und die Home-Bildschirm-App
+
+Ohne Zutun läuft Webton auf iOS in der Sitzungsart **`ambient`** — und die schweigt,
+sobald der seitliche Schalter auf stumm steht. In der zum Home-Bildschirm gelegten App
+(einem **Webclip**, der im **Standalone-Modus** läuft) fällt das doppelt auf: Man macht
+sie oft auf, ohne vorher etwas gehört zu haben, und merkt darum nicht, dass das Gerät
+stumm ist.
+
+`tonSitzung()` setzt darum `navigator.audioSession.type` (Safari ab 16.4) auf
+**`transient`** — die Art für kurze Rückmeldungen: Sie klingen trotz Stummschalter und
+drängen laufende Musik nur für den Augenblick weg, statt sie anzuhalten. Kennt eine
+Fassung `transient` nicht, bleibt der alte Wert stehen; dann greift `playback`.
+
+`tonEntsperren()` läuft beim **ersten Tipp irgendwo in der App**: Sitzungsart setzen,
+Kontext anlegen, wecken und einen unhörbaren Ein-Sample-Puffer abspielen. Erst dieses
+Abspielen *innerhalb einer Geste* gibt iOS den Ton wirklich frei — ohne das steht der
+Kontext zwar auf `running`, liefert aber nichts.
+
+**Die App sagt selbst, woran es liegt.** `tonAuskunft()` steht unter «Ton prüfen» in den
+Einstellungen und nennt Einstellung, Kontextzustand, Freigabe und Sitzungsart. Ohne sie
+sähen «Schalter aus», «Kontext schlafend», «Stummschalter» und «keine Unterstützung» von
+außen gleich aus — nämlich still (ADR 0027).
+
 Ausgelöst wird der Klang an genau vier Stellen: `uebPruefen()` (Lernsets/Freestyle),
 `trFinish()` (Übersetzen), `check()` in `renderTippen()` und `abcPruefen()`
 (Buchstaben) — jeweils über `meisterTon()`, das zwischen «richtig» und «gemeistert»
