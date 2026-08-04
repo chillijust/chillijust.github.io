@@ -440,6 +440,26 @@ button.built-word:active { transform: scale(.95); }
 .feedback.good { color: var(--good); }
 .feedback.bad strong { color: var(--bad); font-size: 18px; }
 
+/* Gemeistert — eine Zeile, kein Zwischenbildschirm. Sie soll auffallen, ohne
+   den Weg zur nächsten Frage zu verstellen. */
+.meister {
+  display: flex; align-items: center; gap: 10px; margin-top: 14px;
+  padding: 11px 14px; border-radius: 12px;
+  border: 1px solid var(--gold); background: var(--card-2);
+  animation: meisterAuf .42s cubic-bezier(.2, .9, .3, 1);
+}
+.meister .icon { width: 19px; height: 19px; color: var(--gold); flex: none; }
+.meister strong { display: block; font-size: 14px; color: var(--gold); }
+.meister-wort { display: block; font-size: 15px; margin-top: 2px; }
+.meister-note {
+  display: block; font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--dim); margin-top: 4px;
+}
+@keyframes meisterAuf {
+  from { opacity: 0; transform: translateY(8px) scale(.97); }
+  to { opacity: 1; transform: none; }
+}
+
 .chili { display: block; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .35)); }
 .chili.gross { width: 104px; height: 104px; margin: 0 auto 16px; }
 .chili.klein { width: 76px; height: 76px; flex: none; margin: 0; }
@@ -475,7 +495,7 @@ body.chili-steht #chiliBuehne { visibility: visible; }
   to   { opacity: 1; transform: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  #chiliFigur.springt, .sprechblase { animation: none; }
+  #chiliFigur.springt, .sprechblase, .meister { animation: none; }
   .burger .strich, .menupanel { transition: none; }
 }
 
@@ -525,8 +545,16 @@ input[type="text"] {
   border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--text);
 }
 input[type="text"]:focus { outline: none; border-color: var(--ice); }
-input.ok { border-color: var(--good); }
-input.err { border-color: var(--bad); }
+input.ok, textarea.ok { border-color: var(--good); }
+input.err, textarea.err { border-color: var(--bad); }
+
+/* Der getippte Satz in «Übersetzen»: mittig und größer als ein Formularfeld —
+   er ist die Antwort, nicht eine Nebenangabe. */
+#trInput {
+  margin-top: 16px; font-size: 19px; text-align: center; line-height: 1.5;
+  background: var(--bg); border-radius: 12px;
+}
+#trInput:focus { outline: none; border-color: var(--ice); }
 
 .btn-row { display: flex; gap: 10px; margin-top: 14px; }
 .btn {
@@ -1622,40 +1650,110 @@ function chiliAktualisieren(ohneSprung) {
 // iOS gibt Ton erst nach einer Nutzergeste frei und schweigt im
 // Stummschalter-Modus; beides ist unkritisch, weil der Ton nur begleitet.
 var tonWerk = null;
+
+// Der Kontext schläft ein — und zwar auf zwei Arten. `suspended` kennt jeder
+// Browser; Safari kennt zusätzlich `interrupted` (Anruf, Siri, Sperrbildschirm,
+// Wechsel des Stummschalters). Wer nur auf `suspended` prüft, hat nach dem
+// ersten Anruf für immer Ruhe — genau dieser Fehler war da (ADR 0026).
+function tonSchlaeft(werk) {
+  return werk.state === 'suspended' || werk.state === 'interrupted';
+}
+
+// Aufwecken darf jeder Tipp, nicht erst eine Antwort: `resume()` braucht auf
+// iOS eine Nutzergeste, und die Antwort selbst kommt dafür zu spät — sie soll
+// ja schon klingen.
+function tonWecken() {
+  if (!tonWerk) return;
+  try { if (tonSchlaeft(tonWerk)) tonWerk.resume(); } catch (e) {}
+}
+
 function tonBereit() {
   if (!state.settings.ton) return null;
   try {
     var AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return null;
     if (!tonWerk) tonWerk = new AC();
-    if (tonWerk.state === 'suspended') tonWerk.resume();
     return tonWerk;
   } catch (e) { return null; }
 }
+
+// Ein Anschlag aus mehreren Partialtönen. Das Glasige entsteht dadurch, dass
+// die hohen Teiltöne **schneller** ausklingen als der Grundton — so klingt eine
+// Glocke, und so klingen die Töne von iOS. Ein einzelner Sinus klingt dagegen
+// nach Prüfgerät.
+function tonAnschlag(werk, start, grund, laut, dauer, partials) {
+  partials.forEach(function (p) {
+    var o = werk.createOscillator();
+    var g = werk.createGain();
+    var d = dauer * p[2];
+    o.type = 'sine';
+    // Leichte Verstimmung der oberen Teiltöne: exakte Vielfache klingen tot.
+    o.frequency.value = grund * p[0];
+    g.gain.setValueAtTime(0.0001, start);
+    g.gain.exponentialRampToValueAtTime(laut * p[1], start + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.0001, start + d);
+    o.connect(g);
+    g.connect(werk.destination);
+    o.start(start);
+    o.stop(start + d + 0.05);
+  });
+}
+
+function tonSpielen(werk, richtig) {
+  // Immer mit Vorlauf planen. Genau auf `currentTime` liegt der Anfang der
+  // Hüllkurve schon in der Vergangenheit, wenn der Kontext gerade erst
+  // aufgewacht ist — dann steht der Pegel sofort am Endwert und man hört nichts.
+  var jetzt = werk.currentTime + 0.02;
+  if (richtig) {
+    // Zwei Anschläge, Quarte darüber — hell, kurz, mit Nachklang.
+    tonAnschlag(werk, jetzt, 1046.5, 0.15, 0.62,
+      [[1, 1, 1], [2.01, 0.3, 0.55], [3.02, 0.11, 0.3], [5.04, 0.05, 0.16]]);
+    tonAnschlag(werk, jetzt + 0.085, 1568, 0.13, 0.75,
+      [[1, 1, 1], [2.01, 0.28, 0.5], [3.02, 0.09, 0.28]]);
+  } else {
+    // Tief und fallend, ohne Schärfe: ein Hinweis, kein Tadel.
+    tonAnschlag(werk, jetzt, 196, 0.12, 0.3, [[1, 1, 1], [2, 0.18, 0.6]]);
+    tonAnschlag(werk, jetzt + 0.11, 155.6, 0.11, 0.36, [[1, 1, 1], [2, 0.15, 0.6]]);
+  }
+}
+
 function ton(richtig) {
   var werk = tonBereit();
   if (!werk) return;
   try {
-    var jetzt = werk.currentTime;
-    // je Note: Frequenz in Hz, Einsatz in Sekunden
-    var noten = richtig ? [[880, 0], [1318.5, 0.09]] : [[196, 0], [155.6, 0.11]];
-    var laut = richtig ? 0.16 : 0.11;
-    var dauer = richtig ? 0.17 : 0.22;
-    noten.forEach(function (note) {
-      var o = werk.createOscillator();
-      var g = werk.createGain();
-      var t = jetzt + note[1];
-      o.type = richtig ? 'sine' : 'triangle';
-      o.frequency.value = note[0];
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(laut, t + 0.012);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + dauer);
-      o.connect(g);
-      g.connect(werk.destination);
-      o.start(t);
-      o.stop(t + dauer + 0.05);
-    });
+    if (tonSchlaeft(werk)) {
+      // Erst wecken, dann spielen — nicht beides gleichzeitig. `resume()` ist
+      // asynchron; wer sofort danach plant, plant in eine stehende Zeit.
+      var p = werk.resume();
+      if (p && p.then) {
+        p.then(function () { try { tonSpielen(werk, richtig); } catch (e) {} }, function () {});
+      }
+      return;
+    }
+    tonSpielen(werk, richtig);
   } catch (e) { /* Ton ist Beiwerk, nie Voraussetzung */ }
+}
+
+// Ein besonderer Klang für den Augenblick, in dem etwas fertig gelernt ist:
+// ein aufsteigender Dreiklang, derselbe glasige Anschlag.
+function tonMeister() {
+  var werk = tonBereit();
+  if (!werk) return;
+  try {
+    var spiel = function () {
+      var jetzt = werk.currentTime + 0.02;
+      [[1046.5, 0], [1318.5, 0.075], [1568, 0.15], [2093, 0.225]].forEach(function (n) {
+        tonAnschlag(werk, jetzt + n[1], n[0], 0.13, 0.7,
+          [[1, 1, 1], [2.01, 0.26, 0.5], [3.02, 0.09, 0.28]]);
+      });
+    };
+    if (tonSchlaeft(werk)) {
+      var p = werk.resume();
+      if (p && p.then) p.then(function () { try { spiel(); } catch (e) {} }, function () {});
+      return;
+    }
+    spiel();
+  } catch (e) {}
 }
 
 // ── Tickets ─────────────────────────────────────────────────
@@ -2080,16 +2178,54 @@ function updateDarstellung() {
   if (meta) meta.setAttribute('content', dunkel ? '#101418' : '#F4F2ED');
 }
 
+function woerterGemeistert() {
+  var n = 0;
+  ALL_VOCAB.forEach(function (v) { if ((state.boxes[v.id] || 0) >= BOX_MAX) n++; });
+  return n;
+}
+
 // Kopfzeile: Anteil gemeisterter Wörter und laufende Serie.
 function updateKopf() {
-  var gemeistert = 0;
-  ALL_VOCAB.forEach(function (v) { if ((state.boxes[v.id] || 0) >= BOX_MAX) gemeistert++; });
+  var gemeistert = woerterGemeistert();
   var anteil = ALL_VOCAB.length ? gemeistert / ALL_VOCAB.length * 100 : 0;
   document.getElementById('kopfFill').style.width = anteil + '%';
   var text = gemeistert + ' von ' + ALL_VOCAB.length + ' gemeistert';
   if (state.streak >= 3) text += ' · <span class="kopf-serie">Serie ' + state.streak + '</span>';
   document.getElementById('kopfLabel').innerHTML = text;
 }
+// Wurde mit dieser Antwort die Endstufe **erreicht**? Nur der Übergang zählt:
+// Wer ein schon gemeistertes Wort auffrischt, hat es nicht noch einmal
+// gemeistert — eine Meldung dafür wäre schnell nichts mehr wert (ADR 0026).
+var meisterMeldung = null;   // { was: 'Wort'|'Satz'|'Buchstabe', text, hinweis }
+
+function meisterPruefen(vorher, nachher, was, text, hinweis, kyrillisch) {
+  if (vorher >= BOX_MAX || nachher < BOX_MAX) return false;
+  meisterMeldung = {
+    was: was, text: text, hinweis: hinweis || '', kyrillisch: kyrillisch !== false
+  };
+  return true;
+}
+
+// Die Meldung selbst: eine Zeile unter der Auflösung. Ein eigener Bildschirm
+// wäre im Weg — gemeistert wird oft, und jedes Mal wegtippen zu müssen macht
+// aus der Belohnung eine Hürde. Für ein ganzes Lernset gibt es weiter die
+// Jubelkarte; die ist der seltenere, größere Anlass.
+function meisterHtml() {
+  var m = meisterMeldung;
+  if (!m) return '';
+  return '<div class="meister">' + ICON.sternVoll +
+    '<span><strong>' + esc(m.was) + ' gemeistert</strong>' +
+    '<span class="meister-wort' + (m.kyrillisch ? ' cyr' : '') + '">' + esc(m.text) + '</span>' +
+    (m.hinweis ? '<span class="meister-note">' + esc(m.hinweis) + '</span>' : '') +
+    '</span></div>';
+}
+
+// Ein Klang für den Augenblick statt des gewöhnlichen «richtig».
+function meisterTon(richtig) {
+  if (meisterMeldung) tonMeister();
+  else ton(richtig);
+}
+
 function updateBox(id, correct) {
   var cur = state.boxes[id] || 0;
   state.boxes[id] = correct ? Math.min(BOX_MAX, cur + 1) : Math.max(0, cur - 1);
@@ -2791,6 +2927,8 @@ function ansichtenZuruecksetzen() {
   trRevealed = false;
   trLevel = 1;
   trModus = 'lernen';
+  trEingabe = '';
+  trKb = null;
 
   abcAnsicht = 'ueben';
   abcRichtung = 'gemischt';
@@ -2801,6 +2939,7 @@ function ansichtenZuruecksetzen() {
   abcCorrect = null;
   abcBuilt = [];
   abcRevealed = false;
+  meisterMeldung = null;
 
   faktenFilter = 'gesehen';
   themenOffen = false;
@@ -2811,6 +2950,7 @@ function ansichtenZuruecksetzen() {
   confirmReset = false;
   tkAusgabe = '';
   meldeBearbeitet = null;
+  meisterMeldung = null;
 }
 
 function uebNext(skipFact) {
@@ -2831,6 +2971,7 @@ function uebNext(skipFact) {
   uebQ = buildQuestion();
   uebPhase = 'ask';
   uebBuilt = [];
+  meisterMeldung = null;
   uebPicked = null;
   uebCorrect = null;
   uebRevealed = false;
@@ -2906,8 +3047,12 @@ function uebPruefen() {
   } else {
     uebCorrect = uebPicked === q.word.id;
   }
+  var vorher = state.boxes[q.word.id] || 0;
   updateBox(q.word.id, uebCorrect);
-  ton(uebCorrect);
+  meisterMeldung = null;
+  meisterPruefen(vorher, state.boxes[q.word.id], 'Wort', q.word.ru + ' — ' + q.word.de,
+    woerterGemeistert() + ' von ' + ALL_VOCAB.length + ' Wörtern');
+  meisterTon(uebCorrect);
   // Hat diese Antwort das laufende Set vollgemacht? Dann wartet der Jubel
   // auf das nächste «Weiter» — mitten in der Auflösung wäre er im Weg.
   if (aktuellesSet() !== setVorher && setGeschafft(setVorher)) uebGeschafftesSet = setVorher;
@@ -3033,7 +3178,7 @@ function renderUeben() {
     else html += '<p>' + ICON.kreuz + (uebRevealed ? 'Lösung: ' : 'Richtig wäre: ') +
       '<strong class="cyr">' + esc(q.word.ru) + '</strong> — ' + esc(q.word.de) +
       ' <span class="translit">[' + esc(q.word.tr) + ']</span></p>';
-    html += '</div>' + hoerzeile(q.word.ru, q.word.de);
+    html += '</div>' + hoerzeile(q.word.ru, q.word.de) + meisterHtml();
   }
 
   html += '</div><div class="btn-row">';
@@ -3096,6 +3241,18 @@ var SATZ_STUFE = 2;
 var trLevel = 1, trDir = 'ru-de';
 var trModus = 'lernen';   // 'lernen' · 'wiederholung' — wie in «Tippen»
 var trTask = null, trBuilt = [], trPhase = 'ask', trCorrect = null, trRevealed = false;
+// Der getippte Satz und die eingeblendete Tastatur. Beides gehört an die
+// Ansicht, nicht ins Feld: Zwischen zwei Renderläufen wäre der Wert sonst weg.
+var trEingabe = '', trKb = null;
+
+// Ein Satz wird **zweimal getippt**, bevor er sitzt: Kacheln zeigen nur, dass
+// man die Wörter wiedererkennt und ihre Reihenfolge kennt. Ab Stufe TR_TIPPEN
+// (2) schreibt man ihn selbst — das sind die letzten beiden Runden vor der
+// Endstufe, und dieselbe Form kommt in der Auffrischung wieder (ADR 0026).
+var TR_TIPPEN = 2;
+function trArt(satz) {
+  return satzBox(satz) >= TR_TIPPEN ? 'tippen' : 'kacheln';
+}
 
 function satzFrei(s) {
   return s.benoetigt.every(function (w) { return (state.boxes[w] || 0) >= SATZ_STUFE; });
@@ -3194,40 +3351,65 @@ function buildTransTask(vorgabe) {
   var tiles = shuffle(targetTokens.concat(distractors)).map(function (word, i) {
     return { word: word, key: i };
   });
-  trTask = { prompt: prompt, targetTokens: targetTokens, solution: solution, tiles: tiles, ru: ru, de: de, satz: satz };
+  trTask = {
+    prompt: prompt, targetTokens: targetTokens, solution: solution, tiles: tiles,
+    ru: ru, de: de, satz: satz, art: trArt(satz),
+    // Getippt wird in der Sprache der Lösung — die Tastatur richtet sich danach.
+    loesungRu: trDir !== 'ru-de'
+  };
   trBuilt = [];
+  trEingabe = '';
   trPhase = 'ask';
   trCorrect = null;
   trRevealed = false;
+  meisterMeldung = null;
 }
 
 function trWort(key) {
   return trTask.tiles.filter(function (x) { return x.key === key; })[0].word;
 }
 
-// Ist genug gelegt, um abgeben zu dürfen?
+// Ist genug gelegt oder geschrieben, um abgeben zu dürfen?
 function trAbgabeBereit() {
   if (!trTask) return false;
+  if (trTask.art === 'tippen') return normalize(trEingabe) !== '';
   return state.settings.requireComplete
     ? trBuilt.length === trTask.targetTokens.length
     : trBuilt.length > 0;
 }
 
 function trPruefen() {
-  var ok = trBuilt.length === trTask.targetTokens.length && trBuilt.every(function (k, i) {
-    return normalize(trWort(k)) === normalize(trTask.targetTokens[i]);
-  });
+  var ok;
+  if (trTask.art === 'tippen') {
+    // Wortweise verglichen, nicht Zeichen für Zeichen: `normalize()` räumt
+    // Satzzeichen und Groß-/Kleinschreibung weg, ein doppeltes Leerzeichen
+    // soll keinen Fehler bedeuten.
+    ok = tokenize(normalize(trEingabe)).join(' ') ===
+      tokenize(normalize(trTask.solution)).join(' ');
+  } else {
+    ok = trBuilt.length === trTask.targetTokens.length && trBuilt.every(function (k, i) {
+      return normalize(trWort(k)) === normalize(trTask.targetTokens[i]);
+    });
+  }
   trFinish(ok);
 }
 
 function trFinish(ok) {
   trCorrect = ok;
-  ton(ok);
   trPhase = 'feedback';
+  var vorher = satzBox(trTask.satz);
   satzUpdate(trTask.satz, ok);
+  meisterMeldung = null;
+  meisterPruefen(vorher, satzBox(trTask.satz), 'Satz', trTask.satz.ru,
+    saetzeGemeistert() + ' von ' + SENTENCES.length + ' Sätzen');
+  meisterTon(ok);
   state.transStats.correct += ok ? 1 : 0;
   state.transStats.wrong += ok ? 0 : 1;
   save();
+}
+
+function saetzeGemeistert() {
+  return SENTENCES.filter(function (s) { return satzBox(s) >= BOX_MAX; }).length;
 }
 
 // Drei Gr\u00fcnde f\u00fcr eine leere Ansicht, die sich sehr verschieden anf\u00fchlen:
@@ -3310,26 +3492,37 @@ function renderUebersetzen() {
 
   var html = '<section>';
 
+  var getippt = t.art === 'tippen';
   html += '<div class="card"><p class="task-label">Stufe ' + trLevel +
-    (trModus === 'wiederholung' ? ' · zur Sicherheit' : '') + '</p>' +
+    (trModus === 'wiederholung' ? ' · zur Sicherheit' : '') +
+    (getippt ? ' · selbst schreiben' : '') + '</p>' +
     '<p class="sentence' + (promptIsRu ? ' cyr' : '') + '">' + esc(t.prompt) +
     hoerknopf(t.prompt, promptIsRu ? 'ru' : 'de') + '</p>';
 
-  html += '<div class="built' + (promptIsRu ? '' : ' cyr') + '">';
-  if (trBuilt.length === 0 && trPhase === 'ask') {
-    html += '<span class="built-placeholder">Wörter in der richtigen Reihenfolge antippen</span>';
+  if (getippt) {
+    html += '<textarea id="trInput" rows="2" class="fliess' + (t.loesungRu ? ' cyr' : '') +
+      (trPhase === 'feedback' ? (trCorrect ? ' ok' : ' err') : '') + '"' +
+      ' lang="' + (t.loesungRu ? 'ru' : 'de') + '" autocapitalize="sentences"' +
+      ' autocorrect="off" spellcheck="false"' + (trPhase === 'feedback' ? ' readonly' : '') +
+      ' placeholder="' + (t.loesungRu ? 'Den Satz auf Russisch schreiben …'
+        : 'Den Satz auf Deutsch schreiben …') + '">' + esc(trEingabe) + '</textarea>';
   } else {
-    trBuilt.forEach(function (k, i) {
-      var w = esc(trWort(k));
-      // In der Frage-Phase ist jedes gelegte Wort einzeln antippbar zum Entfernen.
-      html += trPhase === 'ask'
-        ? '<button class="built-word" data-built="' + i + '" aria-label="«' + w + '» entfernen">' + w + '</button>'
-        : '<span class="built-word">' + w + '</span>';
-    });
+    html += '<div class="built' + (promptIsRu ? '' : ' cyr') + '">';
+    if (trBuilt.length === 0 && trPhase === 'ask') {
+      html += '<span class="built-placeholder">Wörter in der richtigen Reihenfolge antippen</span>';
+    } else {
+      trBuilt.forEach(function (k, i) {
+        var w = esc(trWort(k));
+        // In der Frage-Phase ist jedes gelegte Wort einzeln antippbar zum Entfernen.
+        html += trPhase === 'ask'
+          ? '<button class="built-word" data-built="' + i + '" aria-label="«' + w + '» entfernen">' + w + '</button>'
+          : '<span class="built-word">' + w + '</span>';
+      });
+    }
+    html += '</div>';
   }
-  html += '</div>';
 
-  if (trPhase === 'ask') {
+  if (trPhase === 'ask' && !getippt) {
     if (trBuilt.length > 0) html += '<p class="hint">Zum Entfernen ein gelegtes Wort antippen.</p>';
     html += '<div class="tiles">';
     t.tiles.forEach(function (tile) {
@@ -3345,20 +3538,45 @@ function renderUebersetzen() {
     if (trCorrect) html += '<p>' + ICON.haken + 'Правильно — richtig übersetzt!</p>';
     else html += '<p>' + ICON.kreuz + (trRevealed ? 'Lösung: ' : 'Richtig wäre: ') +
       '<strong class="' + (promptIsRu ? '' : 'cyr') + '">' + esc(t.solution) + '</strong></p>';
-    html += '</div>' + hoerzeile(t.ru, t.de);
+    html += '</div>' + hoerzeile(t.ru, t.de) + meisterHtml();
   }
 
   html += '</div><div class="btn-row">';
   if (trPhase === 'ask') {
     html += '<button class="btn ghost" id="trReveal">Aufdecken</button>';
-    if (state.settings.confirmUebersetzen) {
+    // Beim Schreiben braucht es die Abgabe immer \u2014 anders als bei den Kacheln
+    // gibt es keinen Augenblick, an dem die Antwort erkennbar fertig ist.
+    if (getippt || state.settings.confirmUebersetzen) {
       html += '<button class="btn primary" id="trConfirm"' + (trAbgabeBereit() ? '' : ' disabled') +
-        '>Best\u00e4tigen</button>';
+        '>' + (getippt ? 'Pr\u00fcfen' : 'Best\u00e4tigen') + '</button>';
     }
   } else {
     html += '<button class="btn primary" id="trNext">Weiter \u2192</button>';
   }
   html += '</div>';
+
+  // Die eingebaute Tastatur nur, wo sie hilft: Ein deutscher Satz l\u00e4sst sich
+  // mit der Ger\u00e4tetastatur schreiben, ein kyrillischer oft nicht.
+  if (getippt && t.loesungRu) {
+    html += '<button class="kb-toggle" id="trKbToggle">' +
+      (trKb ? 'Tastatur ausblenden' : 'Tastatur einblenden') + '</button>';
+    if (trKb && trPhase === 'ask') {
+      html += '<div>';
+      KB_ROWS.forEach(function (row, ri) {
+        html += '<div class="kb-row">';
+        row.forEach(function (ch) {
+          html += '<button class="key cyr" data-trkey="' + esc(ch) + '">' + esc(ch) + '</button>';
+        });
+        if (ri === 2) {
+          html += '<button class="key wide" data-trkey=" ">\u2423</button>' +
+            '<button class="key wide" data-trkey="BS" aria-label="Zeichen l\u00f6schen">' +
+            ICON.ruecktaste + '</button>';
+        }
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+  }
 
   var sitzt = liste.filter(function (x) { return satzBox(x) >= BOX_MAX; }).length;
   html += '<p class="session-info">' + trPool().length +
@@ -3371,6 +3589,33 @@ function renderUebersetzen() {
 
   main.innerHTML = html;
 
+
+  var eingabe = document.getElementById('trInput');
+  if (eingabe) {
+    eingabe.addEventListener('input', function () {
+      trEingabe = eingabe.value;
+      // Der Abgabeknopf hängt am Inhalt, aber neu zeichnen dürfen wir hier
+      // nicht — das nähme dem Feld den Fokus mitten im Schreiben.
+      var knopf = document.getElementById('trConfirm');
+      if (knopf) knopf.disabled = !trAbgabeBereit();
+    });
+  }
+  var kbToggle = document.getElementById('trKbToggle');
+  if (kbToggle) kbToggle.addEventListener('click', function () {
+    trKb = !trKb;
+    renderUebersetzen();
+  });
+  main.querySelectorAll('[data-trkey]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      if (trPhase !== 'ask') return;
+      var k = b.dataset.trkey;
+      trEingabe = k === 'BS' ? trEingabe.slice(0, -1) : trEingabe + k;
+      var feld = document.getElementById('trInput');
+      if (feld) feld.value = trEingabe;
+      var knopf = document.getElementById('trConfirm');
+      if (knopf) knopf.disabled = !trAbgabeBereit();
+    });
+  });
 
   if (trPhase === 'ask') {
     main.querySelectorAll('[data-wtile]').forEach(function (b) {
@@ -3394,7 +3639,8 @@ function renderUebersetzen() {
       trPruefen();
       renderUebersetzen();
     });
-    document.getElementById('trUndo').addEventListener('click', function () {
+    var undoTr = document.getElementById('trUndo');
+    if (undoTr) undoTr.addEventListener('click', function () {
       trBuilt.pop();
       renderUebersetzen();
     });
@@ -3560,8 +3806,12 @@ function abcPruefen() {
   } else {
     abcCorrect = abcPicked === q.b[1];
   }
+  var vorher = abcBox(q.b);
   abcUpdate(q.b, abcCorrect);
-  ton(abcCorrect);
+  meisterMeldung = null;
+  meisterPruefen(vorher, abcBox(q.b), 'Buchstabe', q.b[0] + ' ' + q.b[1] + ' — ' + q.b[2],
+    abcMeisterschaft() + ' von ' + ALPHABET.length + ' Buchstaben');
+  meisterTon(abcCorrect);
   abcPhase = 'feedback';
   renderBuchstaben();
 }
@@ -3691,7 +3941,8 @@ function abcUebenHtml() {
         '<strong class="cyr">' + esc(q.b[0] + ' ' + q.b[1]) +
         '</strong> — klingt wie ' + esc(q.b[2]) + '</p>';
     // Erst nach der Auflösung — vorher wäre der Laut die Antwort.
-    html += '</div>' + hoerzeile(q.b[1], null) + '<p class="hint">' + esc(q.b[3]) + '</p>';
+    html += '</div>' + hoerzeile(q.b[1], null) + '<p class="hint">' + esc(q.b[3]) + '</p>' +
+      meisterHtml();
   }
   html += '</div><div class="btn-row">';
   if (abcPhase === 'ask') {
@@ -3914,7 +4165,7 @@ function renderTippen() {
   if (tResult === 'wrong') html += '<p class="feedback bad">' + ICON.kreuz + 'Richtig: <strong class="cyr">' + esc(w.ru) + '</strong></p>';
   if (tResult === 'right') html += '<p class="feedback good">' + ICON.haken + 'Правильно — richtig!</p>';
   // Erst nach der Abgabe zu hören: vorher wäre die Aussprache die halbe Antwort.
-  if (tResult) html += hoerzeile(w.ru, w.de);
+  if (tResult) html += hoerzeile(w.ru, w.de) + meisterHtml();
   html += '</div><div class="btn-row">';
   if (!tResult) {
     html += '<button class="btn ghost" id="tHintBtn">Hinweis</button>' +
@@ -3952,8 +4203,12 @@ function renderTippen() {
     if (tResult) return;
     var ok = normalize(input.value) === normalize(w.ru);
     tResult = ok ? 'right' : 'wrong';
+    var vorher = state.boxes[w.id] || 0;
     updateBox(w.id, ok);
-    ton(ok);
+    meisterMeldung = null;
+    meisterPruefen(vorher, state.boxes[w.id], 'Wort', w.ru + ' — ' + w.de,
+      woerterGemeistert() + ' von ' + ALL_VOCAB.length + ' Wörtern');
+    meisterTon(ok);
     state.typingStats.correct += ok ? 1 : 0;
     state.typingStats.wrong += ok ? 0 : 1;
     save();
@@ -3964,6 +4219,7 @@ function renderTippen() {
   function next() {
     tResult = null;
     tHint = false;
+    meisterMeldung = null;
     tWord = waehleWort(tippenPool());
     renderTippen();
   }
@@ -4989,6 +5245,15 @@ document.getElementById('filterKnopf').innerHTML = ICON.filter;
 load();
 ticketsLaden();
 updateDarstellung();
+
+// Jeder Tipp weckt den Klang. Nötig, weil iOS den Kontext beim Wegschalten
+// anhält und `resume()` eine Nutzergeste verlangt — die Antwort selbst kommt
+// dafür zu spät, sie soll ja schon klingen. Ein Aufwecken, das nichts zu tun
+// hat, kostet nichts.
+document.addEventListener('pointerdown', tonWecken, true);
+document.addEventListener('visibilitychange', function () {
+  if (!document.hidden) tonWecken();
+});
 
 // Ein Zuhörer für alle Hörknöpfe. Weil er am gleichbleibenden #main hängt und
 // nicht an den Knöpfen selbst, überlebt er jeden Renderlauf.

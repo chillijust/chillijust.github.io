@@ -110,6 +110,19 @@ Freiwillig: blockiert nichts, zählt nicht in den Lehrplan-Fortschritt.
 
 ---
 
+## Nachtrag · Gemeistert, Tippen, Klang — **erledigt** (ADR 0026)
+
+- [x] **Gemeistert-Rückmeldung** für Wort, Satz und Buchstabe — goldene Zeile plus Klang
+- [x] Nur der **Übergang** auf die Endstufe meldet, nicht das Auffrischen
+- [x] **Übersetzen**: ab Stufe 2 und in der Auffrischung wird der Satz getippt
+- [x] Kyrillische Lösungen bekommen die eingebaute Tastatur zum Einblenden
+- [x] **Fehler**: `interrupted` weckt den Klang wieder; `resume()` wird abgewartet
+- [x] Jeder Tipp und jede Rückkehr aus dem Hintergrund wecken den Kontext
+- [x] Glasigerer Klang für «richtig» — Anschläge aus mehreren Teiltönen
+- [x] Neue Testreihe `meister.mjs`; zusammen 645 Prüfungen
+
+---
+
 ## Danach zu prüfen
 
 - Sicherungscode Format 2 auf dem Gerät (steht beim Betreiber noch aus)
@@ -123,3 +136,7 @@ Freiwillig: blockiert nichts, zählt nicht in den Lehrplan-Fortschritt.
   Chili auf dem iPhone noch genug Luft haben
 - Ob die Sprachausgabe auf dem Gerät die russischen Stimmen findet — sie kommen auf iOS
   verzögert und fehlen ohne geladenes Sprachpaket ganz
+- **Ob der Ton auf dem Gerät wieder kommt** — das lässt sich hier nicht prüfen, Headless
+  hat keinen Ton. Getestet ist, was die App plant, nicht wie es klingt
+- Ob der neue «richtig»-Klang glasig genug ist oder noch heller/länger sein soll
+- Ob zwei getippte Runden je Satz sich richtig anfühlen oder eine reicht

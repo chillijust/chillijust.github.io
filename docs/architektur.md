@@ -229,19 +229,89 @@ systemeigenes Rad, das mit dem Rest der Oberfläche nichts zu tun hat (ADR 0020)
 
 ## Töne
 
-`ton(richtig)` spielt nach jeder bewerteten Antwort einen kurzen Klang: eine aufsteigende
-Terz (A5 → E6, Sinus) für richtig, einen fallenden tiefen Ton (G3 → D♯3, Dreieck) für
-falsch. Erzeugt wird er in der Web Audio API — Klangdateien verbieten sich in einer
-einzelnen Datei ohne externe Ressourcen.
+`ton(richtig)` spielt nach jeder bewerteten Antwort einen kurzen Klang, `tonMeister()`
+den längeren Dreiklang, wenn etwas fertig gelernt ist. Erzeugt wird alles in der Web
+Audio API — Klangdateien verbieten sich in einer einzelnen Datei ohne externe Ressourcen.
 
-`tonBereit()` kapselt alles Heikle: Einstellung `ton` aus, kein `AudioContext`, ein
-angehaltener Kontext. Der Kontext wird einmal angelegt und danach wiederverwendet; iOS
-gibt ihn erst nach einer Nutzergeste frei, was hier von selbst passt, weil der erste Ton
-auf einen Tipp folgt. Alles steht in `try/catch` — der Ton begleitet, er trägt nie.
+**Der Klang ist glasig, nicht sinusrein.** `tonAnschlag()` legt je Anschlag mehrere
+Teiltöne übereinander (Grundton, ~2×, ~3×, ~5×) und lässt die **hohen schneller
+ausklingen** als den Grundton. Genau das macht den Unterschied zwischen einer Glocke und
+einem Prüfgerät; die leichte Verstimmung der Vielfachen (2,01 statt 2,00) nimmt dem Klang
+das Tote.
 
-Ausgelöst wird er an genau drei Stellen: `uebPruefen()` (Lernsets/Freestyle),
-`trFinish()` (Übersetzen) und `check()` in `renderTippen()`. «Aufdecken» bleibt still,
-weil das keine Antwort ist.
+| Anlass | Klang |
+| --- | --- |
+| richtig | C6, darüber G6 nach 85 ms |
+| falsch | G3, darunter D♯3 nach 110 ms — tief, ohne Schärfe |
+| gemeistert | C6 · E6 · G6 · C7, je 75 ms versetzt |
+
+### Warum der Ton verstummte
+
+Zwei Fehler, beide auf iOS (ADR 0026):
+
+1. **Safari kennt `interrupted`.** Nach einem Anruf, Siri oder dem Sperrbildschirm steht
+   der Kontext nicht auf `suspended`, sondern auf `interrupted`. Wer nur auf `suspended`
+   prüft, weckt ihn nie wieder — und hat für den Rest der Sitzung Ruhe. `tonSchlaeft()`
+   kennt beide Zustände.
+2. **`resume()` ist asynchron.** Wer sofort danach Noten plant, plant in eine stehende
+   Zeit: Die ganze Hüllkurve liegt dann in der Vergangenheit, der Pegel steht am Endwert,
+   man hört nichts. `ton()` spielt darum **im Callback** von `resume()`, und geplant wird
+   immer mit 20 ms Vorlauf statt genau auf `currentTime`.
+
+Dazu weckt jeder Tipp den Kontext (`pointerdown` auf `document`, in der Capture-Phase)
+und jede Rückkehr aus dem Hintergrund (`visibilitychange`). Ein Aufwecken, das nichts zu
+tun hat, kostet nichts — und die Antwort selbst käme zu spät, sie soll ja schon klingen.
+
+Ausgelöst wird der Klang an genau vier Stellen: `uebPruefen()` (Lernsets/Freestyle),
+`trFinish()` (Übersetzen), `check()` in `renderTippen()` und `abcPruefen()`
+(Buchstaben) — jeweils über `meisterTon()`, das zwischen «richtig» und «gemeistert»
+entscheidet. «Aufdecken» bleibt still, weil das keine Antwort ist.
+
+## Gemeistert — die Rückmeldung
+
+Wenn ein Wort, ein Satz oder ein Buchstabe mit dieser Antwort `BOX_MAX` **erreicht**,
+erscheint unter der Auflösung eine goldene Zeile: was gemeistert wurde und wie viele es
+nun sind. Dazu klingt `tonMeister()` statt des gewöhnlichen «richtig».
+
+`meisterPruefen(vorher, nachher, was, text, hinweis)` prüft ausdrücklich den **Übergang**:
+`vorher < BOX_MAX && nachher >= BOX_MAX`. Wer ein schon gemeistertes Wort auffrischt, hat
+es nicht noch einmal gemeistert — eine Meldung dafür wäre nach einer Woche nichts mehr
+wert. `meisterMeldung` hält das Ergebnis bis zur nächsten Frage und wird überall dort
+geleert, wo eine neue gebaut wird (`uebNext()`, `buildTransTask()`, `abcFrageBauen()`,
+`next()` in «Tippen») sowie in `ansichtenZuruecksetzen()`.
+
+**Eine Zeile, kein Zwischenbildschirm.** Gemeistert wird oft; jedes Mal wegtippen zu
+müssen machte aus der Belohnung eine Hürde. Für ein ganzes Lernset gibt es weiter die
+Jubelkarte — das ist der seltenere, größere Anlass (ADR 0026).
+
+## Übersetzen: legen, dann schreiben
+
+Ein Satz wird **zweimal getippt**, bevor er sitzt. `trArt(satz)` entscheidet nach der
+Stufe:
+
+| Stufe des Satzes | Aufgabe |
+| --- | --- |
+| 0–1 | Wortkacheln in die richtige Reihenfolge bringen |
+| ab `TR_TIPPEN` (2) | den Satz selbst schreiben |
+| `BOX_MAX` (Auffrischung) | ebenfalls schreiben |
+
+Kacheln zeigen nur, dass man die Wörter wiedererkennt und ihre Reihenfolge kennt — die
+Wörter stehen ja da. Erst das Schreiben prüft, ob der Satz wirklich sitzt. Zwei Runden,
+weil eine ein Zufallstreffer sein kann.
+
+Verglichen wird **wortweise über `normalize()`**: Groß- und Kleinschreibung, Satzzeichen
+und doppelte Leerzeichen sind egal. Wer den Inhalt trifft, hat den Satz.
+
+Die **eingebaute kyrillische Tastatur** (dieselben `KB_ROWS` wie in «Tippen») erscheint
+nur, wenn die Lösung russisch ist — einen deutschen Satz schreibt man mit der
+Gerätetastatur, einen kyrillischen oft nicht. Der geschriebene Text steht in `trEingabe`,
+nicht nur im Feld: Zwischen zwei Renderläufen wäre er sonst weg. Beim Tippen wird darum
+auch **nicht neu gezeichnet** — das nähme dem Feld mitten im Schreiben den Fokus; nur der
+Abgabeknopf wird nachgeführt.
+
+Beim Schreiben gibt es die Abgabe **immer**, unabhängig von der Einstellung
+«Bestätigen»: Anders als bei den Kacheln gibt es keinen Augenblick, an dem die Antwort
+erkennbar fertig ist.
 
 ## Fertig heißt raus — und einmal zurück
 

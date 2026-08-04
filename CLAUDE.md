@@ -90,9 +90,11 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
 - **Vorlesen nur über `hoerknopf(text, sprache)`** — der Text hängt als `data-say` am
   Knopf, ein einziger Zuhörer auf `#main` bedient alle. Nie einen eigenen Zuhörer je
   Knopf anhängen. Was die Antwort wäre, schweigt bis zur Auflösung.
-- **Klang nur über `ton(richtig)`.** Erzeugt in der Web Audio API, nie als Datei, immer
-  in `try/catch`, abschaltbar über die Einstellung `ton`. Kein Ablauf darf Ton
-  voraussetzen.
+- **Klang nur über `ton(richtig)`** beziehungsweise `meisterTon(richtig)`. Erzeugt in der
+  Web Audio API, nie als Datei, immer in `try/catch`, abschaltbar über die Einstellung
+  `ton`. Kein Ablauf darf Ton voraussetzen. **Ein schlafender Kontext heißt `suspended`
+  *oder* `interrupted`, und `resume()` ist asynchron** — wer sofort danach Noten plant,
+  plant ins Leere (ADR 0026).
 - **Der Datenblock zwischen `DATEN:START` und `DATEN:ENDE` ist generiert.** Inhalte
   ausschließlich in `/data` ändern, danach `node tools/build.mjs`.
 - **`APP_STAND` setzt `tools/build.mjs`**, nicht die Hand. Der Wert geht in jedes Ticket
@@ -162,6 +164,8 @@ zehn.
   «gemeistert» ab `BOX_MAX`. `abcPool()` fragt nach **gemeistert** — wer das auf «sitzt»
   umstellt, wirft die Buchstaben schon auf Stufe 2 aus der Übung und überspringt damit
   genau den Kachelmodus, der das Können prüft.
+- **Gemeistert meldet nur der Übergang** auf `BOX_MAX` (ADR 0026). Wer `meisterPruefen()`
+  auch beim Auffrischen auslösen lässt, macht aus der Meldung Rauschen.
 - **«Tippen» und «Übersetzen» sind zweigeteilt** (ADR 0015): Lernen und Wiederholung.
   Fertig Gelerntes verlässt beide Stapel, bis die Frist `auffrischen` um ist. Wer dort
   etwas ändert, muss beide Stapel und die drei Leerzustände mitdenken — «noch nichts
