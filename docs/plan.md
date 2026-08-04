@@ -1,7 +1,7 @@
 # Plan: Home, Menü, Bilanz, Buchstaben
 
 **Stand:** 2026-08-02 · wird fortgeschrieben, bis alle Etappen erledigt sind.
-Zuletzt: Nachbesserungen aus dem ersten Gerätetest (ADR 0019).
+Zuletzt: Etappe 2 abgeschlossen (ADR 0022). Offen ist noch Etappe 3.
 
 Vereinbarte Begriffe: die fünf Lernbereiche heißen **Übungen** (nicht «Rubriken»).
 Bilanz, Einstellungen und Tickets sind keine Übungen — sie stehen im **Menü**.
@@ -53,18 +53,19 @@ Bilanz, Einstellungen und Tickets sind keine Übungen — sie stehen im **Menü*
 
 ---
 
-## Etappe 2 · Bilanz mit Tiefe — **offen**
+## Etappe 2 · Bilanz mit Tiefe — **erledigt** (ADR 0022)
 
-- [ ] Kacheln der Bilanz antippbar machen
-- [ ] Detailansichten mit Donut-Diagrammen als Inline-SVG (`stroke-dasharray`)
-  - [ ] **Wörter** — Verteilung über die Leitner-Stufen
-  - [ ] **Sätze** — sitzt / offen / noch gesperrt, je Stufe
-  - [ ] **Beantwortet** — Trefferquote Tippen gegen Übersetzen
-  - [ ] **Serie** — aktuelle gegen beste
-- [ ] Themenliste nur für begonnene Themen
-- [ ] **Kein Leak:** nie eine Liste ungelernter Wörter oder Sätze; nur Aggregate und
+- [x] Kacheln der Bilanz antippbar machen
+- [x] Detailansichten mit Ringdiagrammen als Inline-SVG (`stroke-dasharray`)
+  - [x] **Wörter** — Verteilung über die Leitner-Stufen
+  - [x] **Sätze** — sitzt / offen / noch gesperrt, je Stufe
+  - [x] **Beantwortet** — Trefferquote Tippen gegen Übersetzen
+  - [x] **Serie** — aktuelle gegen beste
+- [x] Themenliste nur für begonnene Themen
+- [x] **Kein Leak:** nie eine Liste ungelernter Wörter oder Sätze; nur Aggregate und
       Inhalte, die schon begonnen wurden
-- [ ] Testreihe, Doku, ADR
+- [x] Kopf und Zurück-Pfeil kennen die Detailansicht
+- [x] Testreihe (34 Prüfungen), Doku, ADR 0022
 
 ---
 

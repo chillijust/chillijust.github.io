@@ -319,6 +319,40 @@ Ohne das zeigte eine Übung nach dem Einspielen weiter ihren alten Stand — jed
 ihren eigenen Zustand in Modulvariablen, und `state` auszutauschen rührt die nicht an.
 Dieselbe Funktion läuft beim Zurücksetzen des Fortschritts.
 
+## Bilanz im Detail
+
+Die sechs Kacheln der Bilanz sind **Knöpfe**; jede führt in eine Detailansicht mit einem
+Ringdiagramm. `bilanzDetail` (`null`, `'woerter'`, `'saetze'`, `'antworten'`, `'serie'`)
+hält den Zustand, `renderBilanz()` verzweigt darauf. Der Kopf trägt dann den Namen des
+Details und «Bilanz» darüber, und der Zurück-Pfeil führt zunächst zur Bilanz statt nach
+Home.
+
+| Detail | Ring | darunter |
+| --- | --- | --- |
+| Wörter | fünf Leitner-Stufen | begonnene Themen mit Balken, Fälliges |
+| Sätze | sitzt · offen · gesperrt | je Satzstufe eine Zeile |
+| Antworten | zwei kleine Ringe: Tippen, Übersetzen | Gesamtzahl |
+| Serie | laufende von bester | wie die Serie zählt |
+
+**Die Ringe sind Inline-SVG ohne Bibliothek.** Ein Segment ist ein `<circle>`, dessen
+Strich nur über einen Teil des Umfangs gezeichnet wird (`stroke-dasharray`) und der um
+die schon belegte Strecke versetzt beginnt (`stroke-dashoffset`). Bei `r = 42` ist der
+Umfang `2π·42 ≈ 263,9`; jedes Segment bekommt `anteil · Umfang`. Ein `rotate(-90deg)` auf
+dem SVG lässt den Ring oben anfangen. Segmente mit Wert 0 werden weggelassen.
+
+Die Farben stehen in `STUFEN_FARBE` und sind dieselben wie bei den Fortschrittspunkten
+(`.pp.s0…s4`) — Stufe 3 sieht überall gleich aus. Weil SVG-Präsentationsattribute keine
+CSS-Variablen auflösen, wird die Farbe über `style="stroke:…"` gesetzt.
+
+**Kein Leak:** Gezeigt werden ausschließlich Zahlen, Anteile und Themennamen — nie eine
+Liste von Wörtern oder Sätzen, die man noch nicht kennt. Die Themenliste zeigt nur
+Themen, in denen schon etwas begonnen wurde.
+
+**Konsistenz mit der Kachel:** Im Satz-Detail wird erst «sitzt» geprüft, dann «frei».
+Andernfalls zählte ein gelernter Satz, dessen Wörter zwischenzeitlich zurückgefallen
+sind, als gesperrt — und das Detail zeigte eine andere Zahl als die Kachel, die dorthin
+führt.
+
 ## Tickets
 
 Fehler und Wünsche werden in der App gesammelt und **bleiben auf dem Gerät**. Ein Knopf

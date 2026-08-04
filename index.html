@@ -554,6 +554,41 @@ input.err { border-color: var(--bad); }
 
 h2 { font-family: Georgia, serif; font-size: 16px; margin: 24px 0 12px; font-weight: 600; }
 .boxes { display: flex; gap: 10px; align-items: flex-end; }
+/* Die Kacheln der Bilanz führen in eine Detailansicht — deshalb Knöpfe. */
+.stat { width: 100%; cursor: pointer; color: inherit; font: inherit; }
+.stat:active { transform: scale(.98); }
+.stat-mehr { display: block; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); opacity: .6; margin-top: 5px; }
+
+/* Ringdiagramm aus Inline-SVG: je Segment ein Kreis mit eigener Strichlücke.
+   Die Farben sind dieselben wie bei den Fortschrittspunkten (.pp), damit
+   Stufe 3 überall gleich aussieht. */
+.donut { position: relative; width: 178px; margin: 0 auto 16px; }
+.donut.klein { width: 132px; margin-bottom: 10px; }
+.donut svg { width: 100%; height: auto; display: block; transform: rotate(-90deg); }
+.donut circle { fill: none; stroke-width: 13; }
+.donut.klein circle { stroke-width: 15; }
+.donut-grund { stroke: var(--line); opacity: .45; }
+.donut-mitte {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.donut-wert { font-family: Georgia, serif; font-size: 29px; line-height: 1; }
+.donut.klein .donut-wert { font-size: 22px; }
+.donut-text {
+  font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim);
+  margin-top: 5px; text-align: center; padding: 0 10px;
+}
+.donut-paar { display: flex; gap: 12px; justify-content: center; margin-bottom: 8px; }
+.donut-paar > div { flex: 1; max-width: 160px; }
+
+.legende { display: flex; flex-direction: column; gap: 7px; margin-bottom: 20px; }
+.leg { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.leg i { width: 11px; height: 11px; border-radius: 3px; flex: none; }
+.leg .leg-name { flex: 1; color: var(--dim); }
+.leg .leg-wert { font-variant-numeric: tabular-nums; }
+
+.detail-fuss { font-size: 13px; color: var(--dim); line-height: 1.55; margin: 0 0 18px; }
+
 .boxstat { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
 .boxbar-wrap { height: 90px; width: 100%; display: flex; align-items: flex-end; justify-content: center; }
 .boxbar { width: 55%; background: var(--ice); border-radius: 5px 5px 0 0; min-height: 4px; opacity: .85; }
@@ -2019,6 +2054,9 @@ var ANSICHT_NAME = {
   bilanz: 'Bilanz', einstellungen: 'Einstellungen',
   fakten: 'Sprachfakten', tickets: 'Tickets'
 };
+var DETAIL_NAME = {
+  woerter: 'Wörter', saetze: 'Sätze', antworten: 'Antworten', serie: 'Serie'
+};
 function imMenu(id) { return ANSICHT_NAME[id] !== undefined; }
 
 function ansichtName(id) {
@@ -2176,11 +2214,15 @@ function renderKopf() {
   document.body.classList.toggle('im-menu', imMenu(currentTab));
   document.getElementById('zurueck').hidden = daheim;
   document.getElementById('kopfFortschritt').hidden = !daheim;
+  // In einer Detailansicht der Bilanz trägt der Kopf deren Namen und nennt
+  // darüber, wo man ist — der Pfeil führt dann auch dorthin zurück.
+  var detail = currentTab === 'bilanz' && bilanzDetail;
   document.getElementById('kopfEyebrow').textContent = daheim
-    ? 'Русский · Тренажёр' : (UEBUNG_NAME[currentTab] ? 'Übung' : 'Menü');
+    ? 'Русский · Тренажёр'
+    : (detail ? 'Bilanz' : (UEBUNG_NAME[currentTab] ? 'Übung' : 'Menü'));
   var titel = document.getElementById('kopfTitel');
   if (daheim) titel.innerHTML = 'Chillingo<span class="title-dot">.</span>';
-  else titel.textContent = ansichtName(currentTab);
+  else titel.textContent = detail ? (DETAIL_NAME[bilanzDetail] || 'Bilanz') : ansichtName(currentTab);
   document.querySelectorAll('.menueintrag').forEach(function (b) {
     b.classList.toggle('active', b.dataset.ziel === currentTab);
   });
@@ -2198,7 +2240,16 @@ function setTab(name) {
   menuSetzen(false);
 }
 
-document.getElementById('zurueck').addEventListener('click', function () { setTab('home'); });
+document.getElementById('zurueck').addEventListener('click', function () {
+  // Aus einer Detailansicht der Bilanz führt der Pfeil zunächst dorthin zurück.
+  if (currentTab === 'bilanz' && bilanzDetail) {
+    bilanzDetail = null;
+    renderBilanz();
+    renderKopf();
+    return;
+  }
+  setTab('home');
+});
 
 document.getElementById('meldeKnopf').innerHTML = ICON.melden;
 document.getElementById('meldeKnopf').addEventListener('click', function () {
@@ -2514,6 +2565,7 @@ function ansichtenZuruecksetzen() {
 
   faktenFilter = 'gesehen';
   themenOffen = false;
+  bilanzDetail = null;
 }
 
 function uebNext(skipFact) {
@@ -3715,6 +3767,54 @@ function renderTickets() {
 // ── BILANZ ──────────────────────────────────────────────────
 var backupOpen = false, backupCode = '', backupMsg = '', confirmReset = false;
 var themenOffen = false; // «alle Themen anzeigen» in der Bilanz
+var bilanzDetail = null; // null · 'woerter' · 'saetze' · 'antworten' · 'serie'
+
+// ── Ringdiagramme ───────────────────────────────────────────
+// Ein Segment ist ein Kreis, dessen Strich nur über einen Teil des Umfangs
+// gezeichnet wird (stroke-dasharray) und der um die schon belegte Strecke
+// versetzt beginnt (stroke-dashoffset). Keine Bibliothek, kein Pfad-Rechnen.
+var DONUT_R = 42;
+var DONUT_U = 2 * Math.PI * DONUT_R;
+
+// Die Stufenfarben — dieselben wie bei den Fortschrittspunkten.
+var STUFEN_FARBE = ['var(--line)', 'var(--dim)', 'var(--ice);opacity:.6', 'var(--ice)', 'var(--gold)'];
+
+function donut(teile, wert, text, klein) {
+  var summe = 0;
+  teile.forEach(function (t) { summe += t.wert; });
+  var vorher = 0;
+  var kreise = '';
+  teile.forEach(function (t) {
+    if (!t.wert || !summe) return;
+    var laenge = t.wert / summe * DONUT_U;
+    kreise += '<circle cx="50" cy="50" r="' + DONUT_R + '" style="stroke:' + t.farbe + '" ' +
+      'stroke-dasharray="' + laenge.toFixed(2) + ' ' + DONUT_U.toFixed(2) + '" ' +
+      'stroke-dashoffset="' + (-vorher).toFixed(2) + '"/>';
+    vorher += laenge;
+  });
+  return '<div class="donut' + (klein ? ' klein' : '') + '">' +
+    '<svg viewBox="0 0 100 100" aria-hidden="true">' +
+    '<circle class="donut-grund" cx="50" cy="50" r="' + DONUT_R + '"/>' + kreise + '</svg>' +
+    '<div class="donut-mitte"><span class="donut-wert">' + esc(wert) + '</span>' +
+    '<span class="donut-text">' + esc(text) + '</span></div></div>';
+}
+
+function legende(teile) {
+  var html = '<div class="legende">';
+  teile.forEach(function (t) {
+    html += '<span class="leg"><i style="background:' + t.farbe + '"></i>' +
+      '<span class="leg-name">' + esc(t.name) + '</span>' +
+      '<span class="leg-wert">' + t.wert + '</span></span>';
+  });
+  return html + '</div>';
+}
+
+function balkenZeile(name, wert, gesamt) {
+  return '<div class="theme-row"><span class="theme-name">' + esc(name) + '</span>' +
+    '<div class="theme-bar"><div class="theme-fill" style="width:' +
+    (gesamt ? wert / gesamt * 100 : 0) + '%"></div></div>' +
+    '<span class="theme-count">' + wert + '/' + gesamt + '</span></div>';
+}
 
 // ── Sicherungscode ──────────────────────────────────────────
 // Der alte Code war der ganze Lernstand als JSON in Base64 — mit 380
@@ -3875,7 +3975,129 @@ function decodeBackup(code) {
   return d;
 }
 
+// ── Bilanz im Detail ────────────────────────────────────────
+// Gezeigt werden nur Zahlen und Themen — nie eine Liste von Wörtern oder
+// Sätzen, die man noch nicht kennt. Die Bilanz soll den Stand zeigen, nicht
+// den Lehrplan verraten.
+function renderBilanzDetail() {
+  var html = '<section>';
+
+  if (bilanzDetail === 'woerter') {
+    var counts = [];
+    for (var i = 0; i <= BOX_MAX; i++) counts.push(0);
+    ALL_VOCAB.forEach(function (v) { counts[state.boxes[v.id] || 0]++; });
+    var teile = counts.map(function (n, bi) {
+      return {
+        wert: n, farbe: STUFEN_FARBE[bi],
+        name: bi === 0 ? 'Noch nicht begonnen' : (bi === BOX_MAX ? 'Stufe ' + bi + ' · sitzt' : 'Stufe ' + bi)
+      };
+    });
+    html += donut(teile, counts[BOX_MAX], 'von ' + ALL_VOCAB.length + ' gemeistert') +
+      legende(teile.slice().reverse());
+
+    var faellig = faelligeAnzahl(ALL_VOCAB);
+    html += '<p class="detail-fuss">' +
+      (ALL_VOCAB.length - counts[0]) + ' Wörter begonnen, ' + counts[BOX_MAX] + ' sitzen. ' +
+      (faellig ? faellig + (faellig === 1 ? ' Wort ist' : ' Wörter sind') + ' zur Wiederholung fällig.'
+        : 'Gerade ist nichts fällig.') + '</p>';
+
+    var themen = Object.keys(VOCAB_THEMES).map(function (t) {
+      var ids = VOCAB_THEMES[t].map(function (w) { return w[0]; });
+      return {
+        name: t, gesamt: ids.length,
+        gemeistert: ids.filter(function (id) { return (state.boxes[id] || 0) >= BOX_MAX; }).length,
+        begonnen: ids.filter(function (id) { return (state.boxes[id] || 0) > 0; }).length
+      };
+    });
+    var angefangen = themen.filter(function (t) { return t.begonnen > 0; });
+    html += '<h2>Nach Themen</h2>';
+    if (!angefangen.length) {
+      html += '<p class="detail-fuss">Hier erscheint jedes Thema, sobald Sie das erste Wort ' +
+        'daraus angefangen haben.</p>';
+    } else {
+      html += '<div class="theme-list">';
+      angefangen.sort(function (a, b) { return b.gemeistert - a.gemeistert; }).forEach(function (t) {
+        html += balkenZeile(t.name, t.gemeistert, t.gesamt);
+      });
+      html += '</div><p class="detail-fuss">' + angefangen.length + ' von ' + themen.length +
+        ' Themen angefangen · der Balken zeigt, wie viel davon sitzt.</p>';
+    }
+  }
+
+  if (bilanzDetail === 'saetze') {
+    var sitzt = 0, offen = 0, gesperrt = 0;
+    // Erst «sitzt», dann «frei»: sonst zählte ein gelernter Satz, dessen Wörter
+    // zwischenzeitlich zurückgefallen sind, als gesperrt — und das Detail
+    // zeigte eine andere Zahl als die Kachel, die hierher führt.
+    SENTENCES.forEach(function (x) {
+      if (satzBox(x) >= BOX_MAX) sitzt++;
+      else if (satzFrei(x)) offen++;
+      else gesperrt++;
+    });
+    var st = [
+      { wert: sitzt, farbe: 'var(--gold)', name: 'Sitzt' },
+      { wert: offen, farbe: 'var(--ice)', name: 'Freigeschaltet, noch offen' },
+      { wert: gesperrt, farbe: 'var(--line)', name: 'Noch gesperrt' }
+    ];
+    html += donut(st, sitzt, 'von ' + SENTENCES.length + ' sitzen') + legende(st);
+
+    var stufen = [];
+    SENTENCES.forEach(function (x) { if (stufen.indexOf(x.stufe) === -1) stufen.push(x.stufe); });
+    stufen.sort(function (a, b) { return a - b; });
+    html += '<h2>Nach Stufen</h2><div class="theme-list">';
+    stufen.forEach(function (n) {
+      var liste = stufenSaetze(n);
+      var s2 = liste.filter(function (x) { return satzBox(x) >= BOX_MAX; }).length;
+      html += balkenZeile('Stufe ' + n, s2, liste.length);
+    });
+    html += '</div><p class="detail-fuss">Ein Satz wird frei, sobald jedes seiner Wörter ' +
+      'Stufe ' + SATZ_STUFE + ' erreicht hat, und gilt als sitzend nach ' + BOX_MAX +
+      ' richtigen Übersetzungen.</p>';
+  }
+
+  if (bilanzDetail === 'antworten') {
+    var tp = state.typingStats, tr = state.transStats;
+    var tpG = tp.correct + tp.wrong, trG = tr.correct + tr.wrong;
+    html += '<div class="donut-paar"><div>' +
+      donut([{ wert: tp.correct, farbe: 'var(--good)' }, { wert: tp.wrong, farbe: 'var(--bad)' }],
+        tpG ? Math.round(tp.correct / tpG * 100) + ' %' : '—', 'Tippen', true) +
+      '</div><div>' +
+      donut([{ wert: tr.correct, farbe: 'var(--good)' }, { wert: tr.wrong, farbe: 'var(--bad)' }],
+        trG ? Math.round(tr.correct / trG * 100) + ' %' : '—', 'Übersetzen', true) +
+      '</div></div>';
+    html += legende([
+      { wert: tp.correct + tr.correct, farbe: 'var(--good)', name: 'Richtig' },
+      { wert: tp.wrong + tr.wrong, farbe: 'var(--bad)', name: 'Falsch' }
+    ]);
+    html += '<p class="detail-fuss">' + state.answered + ' Antworten insgesamt — darin zählen ' +
+      'auch «Lernsets» und «Freestyle», die keine Fehlerquote führen. Die beiden Ringe zeigen ' +
+      'nur, wo mitgezählt wird.</p>';
+  }
+
+  if (bilanzDetail === 'serie') {
+    var jetzt = state.streak, best = state.bestStreak;
+    html += donut([
+      { wert: jetzt, farbe: 'var(--gold)' },
+      { wert: Math.max(0, best - jetzt), farbe: 'var(--line)' }
+    ], jetzt, best ? 'von ' + best + ' in Folge' : 'in Folge');
+    html += '<p class="detail-fuss">Die Serie zählt richtige Antworten hintereinander und ' +
+      'fällt bei jedem Fehler auf null. Ab drei erscheint sie oben auf Home.' +
+      (best > jetzt ? ' Ihre beste Reihe waren ' + best + '.' : '') +
+      (best && jetzt === best ? ' Das ist zugleich Ihre beste Reihe.' : '') + '</p>';
+  }
+
+  html += '<div class="btn-row"><button class="btn ghost" id="detailBack">Zurück zur Bilanz</button>' +
+    '</div></section>';
+  main.innerHTML = html;
+  document.getElementById('detailBack').addEventListener('click', function () {
+    bilanzDetail = null;
+    renderBilanz();
+    renderKopf();
+  });
+}
+
 function renderBilanz() {
+  if (bilanzDetail) { renderBilanzDetail(); return; }
   var counts = [];
   for (var i = 0; i <= BOX_MAX; i++) counts.push(0);
   ALL_VOCAB.forEach(function (v) { counts[state.boxes[v.id] || 0]++; });
@@ -3886,18 +4108,20 @@ function renderBilanz() {
   var satzSitzt = SENTENCES.filter(function (s) { return satzBox(s) >= BOX_MAX; }).length;
   var readFrei = SENTENCES.filter(satzFrei).length;
 
-  function stat(label, value, accent) {
-    return '<div class="stat' + (accent ? ' accent' : '') + '"><span class="stat-value">' + value +
-      '</span><span class="stat-label">' + label + '</span></div>';
+  function stat(label, value, ziel, accent) {
+    return '<button class="stat' + (accent ? ' accent' : '') + '" data-detail="' + ziel + '">' +
+      '<span class="stat-value">' + value + '</span>' +
+      '<span class="stat-label">' + label + '</span>' +
+      '<span class="stat-mehr">Mehr</span></button>';
   }
 
   var html = '<section><div class="stats-grid">' +
-    stat('Wörter gesamt', ALL_VOCAB.length) +
-    stat('Begonnen', started) +
-    stat('Gemeistert', mastered, true) +
-    stat('Sätze sitzen', satzSitzt + '/' + readFrei) +
-    stat('Beantwortet', state.answered) +
-    stat('Beste Serie', state.bestStreak, true) +
+    stat('Wörter gesamt', ALL_VOCAB.length, 'woerter') +
+    stat('Begonnen', started, 'woerter') +
+    stat('Gemeistert', mastered, 'woerter', true) +
+    stat('Sätze sitzen', satzSitzt + '/' + readFrei, 'saetze') +
+    stat('Beantwortet', state.answered, 'antworten') +
+    stat('Beste Serie', state.bestStreak, 'serie', true) +
     '</div>';
 
   var aktuell = aktuellesSet();
@@ -4031,6 +4255,14 @@ function renderBilanz() {
           : 'Das ist kein Sicherungscode dieser App.';
     }
     renderBilanz();
+  });
+  main.querySelectorAll('[data-detail]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      bilanzDetail = b.dataset.detail;
+      window.scrollTo(0, 0);
+      renderBilanz();
+      renderKopf();
+    });
   });
   document.getElementById('zuFakten').addEventListener('click', function () { setTab('fakten'); });
   var mehr = document.getElementById('themenMehr');
