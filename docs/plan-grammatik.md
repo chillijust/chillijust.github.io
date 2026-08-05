@@ -139,10 +139,11 @@ Umsetzung, sondern genau das, was ein Lernender auch im Lehrbuch auswendig lerne
 | weiblich `-я` | деревня | деревн**ю** | |
 | sächlich | письмо | письмо (unverändert) | Она пишет письмо |
 | männlich, Sache | дом | дом (unverändert) | |
-| männlich, Lebewesen | брат | брат**а** | Я вижу брат**а** |
+| männlich, Lebewesen | брат | брат(**а**) | Я вижу брат**а** |
 
-Die letzte Zeile ist der Grund, warum «Belebtheit» beim Akkusativ mitgeprüft werden muss —
-ein Zug, den Deutsch nicht kennt und der darum erklärt gehört.
+Die letzte Zeile ist ein Zug, den Deutsch nicht kennt. Sie wird ein **eigener Baustein**
+und bleibt aus dem Probelauf heraus — bis dahin fragt die Übung nie nach einem männlichen
+Lebewesen im Akkusativ (siehe «Geklärt am 2026-08-04»).
 
 ### Was der Probelauf kann — und was nicht
 
@@ -218,12 +219,64 @@ Die Reihenfolge folgt dem Ertrag in Ihren Sätzen, nicht der Lehrbuchsystematik:
 Nach Baustein 2 wären bereits 37 der 89 fremden Formen im Satz antippbar und erklärt, nach
 Baustein 4 rund 59.
 
+---
+
+## Geklärt am 2026-08-04
+
+### Belebtheit: Klammern ja — aber nur zum Zeigen, nicht zum Werten
+
+Vorgeschlagen war, die Belebtheit flexibel zu halten: «брат(а)» schreiben und bei der
+Eingabe **beide** Formen gelten lassen.
+
+**Die Klammer als Schreibweise ist gut** — sie zeigt in der Regelkarte auf einen Blick,
+was hinzukommt: `брат(а)`, `сестр(у)`. Genau so steht es künftig in den Tabellen.
+
+**Beide Formen gelten zu lassen wäre dagegen eine Unwahrheit.** «Я вижу брат» ist kein
+zweiter Weg, sondern falsch. Der Vergleich mit den deutschen Artikeln trägt hier nicht:
+Dort war Nachsicht richtig, **weil das Russische die Information gar nicht hergibt** — man
+kann sie nicht herleiten, nur raten. Die Belebtheit dagegen **kann** man herleiten: Ein
+Bruder ist ein Lebewesen, also `-а`. Eine App, die beides durchgehen lässt, bringt einem
+bei, dass es egal ist — und das ist der eine Fehler, den ein Grammatikteil nicht machen
+darf.
+
+**Der Ausweg ist besser als die Nachsicht:** Die Belebtheit wird ein **eigener Baustein
+mit eigener Karteikarte**. Solange er nicht dran war, fragt die Übung **nie** nach einem
+männlichen Lebewesen im Akkusativ — die Frage kommt schlicht nicht vor. Nichts muss
+großzügig durchgehen, weil nichts Ungelerntes verlangt wird.
+
+Im Satz erklärt sich `брата` trotzdem sofort, nur mit Vermerk:
+«männlich + Lebewesen → `-а`. Das erklärt der Baustein *Belebtheit* — noch nicht dran.»
+
+Für den Probelauf heißt das: Akkusativ **ohne** belebte männliche Nomen. Das hält ihn
+klein und lässt die Regel trotzdem vollständig stimmen.
+
+### Die Worterklärung heißt «Wissen»
+
+Nicht «Tipp» — der Begriff ist in dieser App bereits besetzt und zwar gegenteilig: Der
+Knopf **«Hinweis»** in «Tippen» zeigt die Umschrift, ist also eine Lösungshilfe. Ein
+«Tipp» wäre etwas, das man sich besser versagt; **Wissen soll man sich holen**. Genau
+dieser Unterschied ist der Sinn des Grammatikteils.
+
+**Das Fenster kommt wie das Menü** (`.menupanel`, Raster `0fr → 1fr`), zwei Wege hinein:
+
+1. **Ein Wort im Satz antippen** — der kürzeste Weg, und die Frage stellt sich ja an einem
+   bestimmten Wort. Der Satz steht in «Übersetzen» als schlichter Text (`.sentence`),
+   die Wortkacheln sind davon getrennt; ein Konflikt entsteht also nicht.
+2. **Ein Knopf «Wissen»** im Kopf — er öffnet dasselbe Fenster mit **allen** erklärbaren
+   Wörtern des Satzes untereinander. Für den Überblick, und weil ein Knopf auffindbar ist,
+   während «Wörter sind antippbar» erst entdeckt werden muss.
+
+### Der Sicherungscode bekommt ein neuntes Feld
+
+Wie die Buchstaben das achte (ADR 0023). `decodeBackup()` liest die Prüfsumme ohnehin aus
+dem **letzten** Feld — Codes mit sieben oder acht Feldern bleiben lesbar, ihr
+Grammatikstand ist dann leer. Getragen wird der Stand je Regel, nicht je Wort; das Feld
+bleibt darum winzig.
+
+---
+
 ## Offen — vor dem Bauen zu klären
 
 - Ob die Übung nach dem Probelauf tatsächlich weitergeht oder der Zuschnitt sich ändert.
-- Ob die Worterklärung auch in «Lernsets» und «Tippen» erscheinen soll oder nur in
-  «Übersetzen».
-- Ob «Belebtheit» (брат → брата) schon in den Probelauf gehört oder erst später — sie
-  macht den Akkusativ vollständig, aber auch spürbar größer.
-- Ob der Sicherungscode ein neuntes Feld für den Grammatikstand bekommt (Präzedenzfall:
-  die Buchstaben als achtes) — vermutlich ja, aber erst wenn der Zuschnitt steht.
+- Ob die Worterklärung auch in «Lernsets» und «Tippen» erscheinen soll oder zunächst nur
+  in «Übersetzen».
