@@ -50,9 +50,12 @@ const lies = (name) => {
 
 const istKyrillisch = (s) => /[Ѐ-ӿ]/.test(s);
 
+// «laenge» darf eine Zahl sein oder [mindestens, höchstens].
 const pruefeTupel = (wo, tupel, laenge) => {
-  if (!Array.isArray(tupel) || tupel.length !== laenge) {
-    meckern(wo + ': erwartet ein Array mit ' + laenge + ' Einträgen');
+  const [min, max] = Array.isArray(laenge) ? laenge : [laenge, laenge];
+  if (!Array.isArray(tupel) || tupel.length < min || tupel.length > max) {
+    meckern(wo + ': erwartet ein Array mit ' +
+      (min === max ? min : min + ' bis ' + max) + ' Einträgen');
     return false;
   }
   let ok = true;
@@ -75,7 +78,28 @@ const fakten = lies('fakten.json').wert;
 const tastatur = lies('tastatur.json').wert;
 const buchstaben = lies('buchstaben.json').wert;
 
-// Vokabeln: [russisch, deutsch, transliteration], keine Dubletten über alle Themen
+// ── Wortart und Geschlecht ───────────────────────────────────
+// Die Endung der Grundform verrät beides — meistens. Was die Regel liefert,
+// steht nirgends in den Daten; nur wo sie danebenliegt, trägt die Vokabel ein
+// viertes Feld. So bleibt die Ausnahmeliste kurz und ehrlich (ADR 0030).
+//
+//   m  männlich · mb  männlich und belebt · w  weiblich · s  sächlich
+//   pl nur Mehrzahl · v  Verb · a  Adjektiv · -  keine Formenlehre
+const WORTARTEN = ['m', 'mb', 'w', 's', 'pl', 'v', 'a', '-'];
+
+const wortartRegel = (ru) => {
+  if (/(ться|ть)$/.test(ru)) return 'v';
+  if (/(ый|ий|ой|ая|яя|ое|ее)$/.test(ru)) return 'a';
+  if (/[ая]$/.test(ru)) return 'w';
+  if (/[оеё]$/.test(ru)) return 's';
+  if (/[бвгджзйклмнпрстфхцчшщй]$/.test(ru)) return 'm';
+  // -ь ist zweideutig (день männlich, ночь weiblich), -и/-ы meist Mehrzahl.
+  return '';
+};
+
+const wortart = (w) => (w.length > 3 ? w[3] : '') || wortartRegel(w[0]);
+
+// Vokabeln: [russisch, deutsch, transliteration] plus wahlweise Wortart.
 const gesehen = new Map();
 for (const [thema, liste] of Object.entries(vokabeln)) {
   if (!Array.isArray(liste) || liste.length === 0) {
@@ -84,16 +108,49 @@ for (const [thema, liste] of Object.entries(vokabeln)) {
   }
   liste.forEach((w, i) => {
     const wo = 'vokabeln.json » ' + thema + ' #' + (i + 1);
-    if (!pruefeTupel(wo, w, 3)) return;
+    if (!pruefeTupel(wo, w, [3, 4])) return;
     if (gesehen.has(w[0])) meckern(wo + ': «' + w[0] + '» steht bereits in ' + gesehen.get(w[0]));
     else gesehen.set(w[0], thema);
+
+    const regel = wortartRegel(w[0]);
+    if (w.length > 3) {
+      if (!WORTARTEN.includes(w[3])) {
+        meckern(wo + ': unbekannte Wortart «' + w[3] + '» — erlaubt: ' + WORTARTEN.join(' '));
+      } else if (w[3] === regel) {
+        // Eine Angabe, die nur wiederholt, was die Endung ohnehin sagt, macht
+        // die Liste lang und verdeckt die echten Ausnahmen.
+        meckern(wo + ': «' + w[0] + '» trägt «' + w[3] + '», das sagt die Endung schon');
+      }
+    } else if (!regel) {
+      meckern(wo + ': «' + w[0] + '»: die Endung sagt die Wortart nicht — viertes Feld ' +
+        'nötig (' + WORTARTEN.join(' ') + ')');
+    }
   });
 }
+
+// ── Formenmaschine, zweite Fassung ──────────────────────────
+// Dieselben Regeln wie in index.html. Sie stehen absichtlich zweimal: Der Build
+// muss ohne die App laufen können — und weil beide Fassungen an denselben
+// vermerkten Formen gemessen werden, fällt jede Abweichung sofort auf.
+const akkusativ = (ru, art) => {
+  if (art === 'w') {
+    if (/а$/.test(ru)) return ru.slice(0, -1) + 'у';
+    if (/я$/.test(ru)) return ru.slice(0, -1) + 'ю';
+    return ru;
+  }
+  if (art === 'mb') return /[йь]$/.test(ru) ? ru.slice(0, -1) + 'я' : ru + 'а';
+  return ru;
+};
+const grammForm = (ru, art, rolle) => (rolle === 'akk' ? akkusativ(ru, art) : null);
+const ROLLEN = { akk: 'Akkusativ' };
 
 // Sätze: { ru, de, stufe, benoetigt } — «benoetigt» nennt die Grundformen aus
 // dem Lehrplan, die ein Satz voraussetzt. Erst wenn die sitzen, wird er angeboten.
 const platz = {};
-Object.values(vokabeln).flat().forEach((w, i) => { if (Array.isArray(w)) platz[w[0]] = i; });
+const wortIndex = {};
+Object.values(vokabeln).flat().forEach((w, i) => {
+  if (Array.isArray(w)) { platz[w[0]] = i; wortIndex[w[0]] = w; }
+});
 
 if (!Array.isArray(saetze) || saetze.length === 0) {
   meckern('saetze.json: erwartet eine nicht-leere Liste von Sätzen');
@@ -121,6 +178,42 @@ if (!Array.isArray(saetze) || saetze.length === 0) {
         if (platz[w] === undefined) meckern(wo + ': «' + w + '» steht nicht in vokabeln.json');
       });
       if (new Set(s.benoetigt).size !== s.benoetigt.length) meckern(wo + ': doppelte Voraussetzung');
+    }
+
+    // «formen» führt gebeugte Wörter auf Grundform und Rolle zurück. Hier fällt
+    // die Entscheidung, ob die Grammatik stimmt: Die Maschine muss jede
+    // vermerkte Form aus Grundform und Rolle **exakt** nachbauen.
+    if (s.formen !== undefined) {
+      if (typeof s.formen !== 'object' || Array.isArray(s.formen)) {
+        meckern(wo + ': «formen» erwartet ein Objekt Form → [Grundform, Rolle]');
+      } else {
+        Object.entries(s.formen).forEach(([form, angabe]) => {
+          const woF = wo + ' » ' + form;
+          if (!Array.isArray(angabe) || angabe.length !== 2) {
+            return meckern(woF + ': erwartet [Grundform, Rolle]');
+          }
+          const [grundform, rolle] = angabe;
+          if (typeof s.ru === 'string' && !new RegExp('(^|[^а-яёА-ЯЁ])' + form +
+              '([^а-яёА-ЯЁ]|$)').test(s.ru)) {
+            meckern(woF + ': steht gar nicht in diesem Satz');
+          }
+          const eintrag = wortIndex[grundform];
+          if (!eintrag) return meckern(woF + ': Grundform «' + grundform + '» fehlt im Lehrplan');
+          if (!ROLLEN[rolle]) {
+            return meckern(woF + ': unbekannte Rolle «' + rolle + '» — bekannt: ' +
+              Object.keys(ROLLEN).join(' '));
+          }
+          const art = wortart(eintrag);
+          const gebaut = grammForm(grundform, art, rolle);
+          // Groß-/Kleinschreibung ist Satzsache, nicht Grammatik: «Россию»
+          // steht am Satzanfang groß, die Maschine rechnet in Kleinschrift.
+          if (gebaut === null) {
+            meckern(woF + ': die Maschine kennt die Rolle «' + rolle + '» für Wortart «' + art + '» nicht');
+          } else if (gebaut.toLowerCase() !== form.toLowerCase()) {
+            meckern(woF + ': die Maschine baut «' + gebaut + '», im Satz steht «' + form + '»');
+          }
+        });
+      }
     }
   });
   const liste = [...stufen].sort((a, b) => a - b);
@@ -218,8 +311,13 @@ const listenBlock = (name, liste, alsTupel) => {
 const satzBlock = (name, liste) => {
   const zeilen = ['var ' + name + ' = ['];
   liste.forEach((s, i) => {
+    const formen = s.formen && Object.keys(s.formen).length
+      ? ', formen: { ' + Object.entries(s.formen).map(([f, a]) =>
+          jsStr(f) + ': [' + a.map(jsStr).join(', ') + ']').join(', ') + ' }'
+      : '';
     zeilen.push('  { ru: ' + jsStr(s.ru) + ', de: ' + jsStr(s.de) + ', stufe: ' + s.stufe +
-      ', benoetigt: [' + s.benoetigt.map(jsStr).join(', ') + '] }' + (i < liste.length - 1 ? ',' : ''));
+      ', benoetigt: [' + s.benoetigt.map(jsStr).join(', ') + ']' + formen + ' }' +
+      (i < liste.length - 1 ? ',' : ''));
   });
   zeilen.push('];');
   return zeilen.join('\n');
@@ -271,7 +369,18 @@ const jsonSaetze = (liste) => {
     zeilen.push('    "ru": ' + jsonStr(s.ru) + ',');
     zeilen.push('    "de": ' + jsonStr(s.de) + ',');
     zeilen.push('    "stufe": ' + s.stufe + ',');
-    zeilen.push('    "benoetigt": [' + s.benoetigt.map(jsonStr).join(', ') + ']');
+    const formen = s.formen && Object.keys(s.formen).length ? s.formen : null;
+    zeilen.push('    "benoetigt": [' + s.benoetigt.map(jsonStr).join(', ') + ']' +
+      (formen ? ',' : ''));
+    if (formen) {
+      zeilen.push('    "formen": {');
+      const paare = Object.entries(formen);
+      paare.forEach(([form, a], k) => {
+        zeilen.push('      ' + jsonStr(form) + ': [' + a.map(jsonStr).join(', ') + ']' +
+          (k < paare.length - 1 ? ',' : ''));
+      });
+      zeilen.push('    }');
+    }
     zeilen.push('  }' + (i < liste.length - 1 ? ',' : ''));
   });
   zeilen.push(']');
