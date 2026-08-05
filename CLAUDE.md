@@ -22,7 +22,8 @@ nicht «Rubrik». In dieser Reihenfolge:
 **Übersetzen** (nur Sätze, deren Wörter sitzen; Form und Richtung steigern sich mit der
 Stufe — Kacheln vor Tippen, RU→DE vor DE→RU),
 **Buchstaben** (das kyrillische Alphabet — freiwillig, eigener Lernstand, zählt nicht in
-Serie und Fortschritt; Einstieg ist das Üben, die Tafel liegt hinter einem eigenen Knopf).
+Serie und Fortschritt; Einstieg ist das Üben, die Tafel liegt hinter einem eigenen Knopf),
+**Grammatik** (warum ein Wort so dasteht — freiwillig, entdecken statt belehren).
 Keine Übungen, sondern **im Menü** (runder Knopf, drei Striche): **Bilanz**,
 **Sicherung**, **Einstellungen**, **Tickets**. Dazu **Sprachfakten** aus der Faktenkarte oder der
 Bilanz. Eine Reiterleiste gibt es nicht — der Kopf trägt unterwegs den Rückweg.
@@ -62,7 +63,7 @@ zweites Mal einbetten, und nie über Scroll-Rechnung positionieren — sie steht
 index.html                die App — genau diese Datei wird ausgeliefert
 .nojekyll                 schaltet Jekyll ab, niemals löschen
 data/*.json               Lerninhalte, einzige Quelle für Vokabeln/Sätze/Fakten/
-                          Tastatur/Buchstaben
+                          Tastatur/Buchstaben/Grammatik
 tools/build.mjs           /data prüfen und in index.html einbetten (--check = nur prüfen)
 tools/pruefen.mjs         Vor-Push-Prüfung von index.html
 tools/freistellen.py      Maskottchen aus einem Bild freistellen (ohne Bildbibliothek)
@@ -108,6 +109,12 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
 - **Tickets liegen in `chillingo_tickets_v1`**, nicht im Lernstand — der Sicherungscode
   soll schlank bleiben. Sie verlassen das Gerät nie von selbst: ein Knopf bündelt sie zu
   einem Text zum Kopieren (ADR 0016).
+- **Grammatik ist eine Funktion, kein Fakt** (ADR 0030). Die Karteikarte ist die **Regel**,
+  nicht das Wort, und die Aufgabe verlangt ein bekanntes Wort in einer nie gesehenen Form —
+  sonst prüft sie Auswendiglernen. Formen rechnet `grammForm()`; sie steht doppelt (App und
+  Build) und wird an den vermerkten Formen der Sätze gemessen. **Eine Wortart-Angabe, die
+  nur wiederholt, was die Endung sagt, lässt den Build scheitern** — sonst verdeckt die
+  Liste die echten Ausnahmen.
 - **Die Reihenfolge in `data/vokabeln.json` ist der Lehrplan.** Aus ihr und den
   Satzvoraussetzungen bauen sich die Lernsets (`SET_MAX`, `SATZ_STUFE`); Ergänzungen ans
   Ende des passenden Themas.

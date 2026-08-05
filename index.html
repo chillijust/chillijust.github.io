@@ -231,6 +231,7 @@ body.im-menu #menuKnopf.mit-chili .punkt { opacity: 0; transition-delay: 0s; }
 .menupanel > .menuwrap { min-height: 0; overflow: hidden; }
 body.menu-offen #menuPanel,
 body.filter-offen #filterPanel { grid-template-rows: 1fr; opacity: 1; pointer-events: auto; }
+body.wissen-offen #wissenPanel { grid-template-rows: 1fr; opacity: 1; pointer-events: auto; }
 .menuinhalt {
   display: flex; flex-direction: column; gap: 2px; padding: 6px;
   background: var(--card); border: 1px solid var(--line); border-radius: 16px;
@@ -439,6 +440,63 @@ button.built-word:active { transform: scale(.95); }
 .feedback .icon { width: 17px; height: 17px; }
 .feedback.good { color: var(--good); }
 .feedback.bad strong { color: var(--bad); font-size: 18px; }
+
+/* Ein Wort im Satz ist ein Knopf — ohne so auszusehen. Der Satz soll ein Satz
+   bleiben; erst der zarte Unterstrich verrät, dass dahinter etwas steckt. */
+.satzwort {
+  border: 0; background: none; padding: 0 1px; font: inherit; color: inherit;
+  cursor: pointer; border-bottom: 1px dashed var(--line);
+}
+.satzwort:active { color: var(--ice); }
+
+#wissenPanel { width: 300px; }
+.wissen-karte {
+  padding: 12px 0; border-bottom: 1px solid var(--line); text-align: left;
+}
+.wissen-karte:last-child { border-bottom: 0; }
+.wissen-wort { margin: 0 0 4px; font-size: 21px; display: flex; align-items: center; gap: 4px; }
+.wissen-zeile { margin: 0 0 6px; font-size: 13px; color: var(--dim); }
+.wissen-regel {
+  margin: 0; font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--gold);
+}
+.wissen-regel.offen { color: var(--dim); letter-spacing: 0; text-transform: none; font-size: 12px; }
+.wissen-warum { margin: 6px 0 0; font-size: 13px; line-height: 1.5; }
+.wissen-alle { margin-bottom: 4px; }
+
+/* ── Grammatik ─────────────────────────────────────────────
+   Das Entdecken zeigt Paare: links die Grundform, rechts, was daraus wird.
+   Der Pfeil dazwischen trägt die ganze Aussage — er bekommt darum Luft. */
+.gram-paare { display: flex; flex-direction: column; gap: 8px; margin: 14px 0 18px; }
+.gram-paar {
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 10px; background: var(--card-2);
+  border: 1px solid var(--line); font-size: 17px;
+}
+.gram-paar > :first-child { text-align: right; }
+.gram-pfeil { color: var(--dim); font-size: 14px; }
+.gram-deutung { font-size: 14px; color: var(--ice); }
+
+/* Die Regelkarte: erst der Satz, dann die Tabelle, dann der Merksatz. */
+.gram-regel { text-align: left; }
+.gram-tabelle {
+  display: flex; flex-direction: column; gap: 1px; margin: 16px 0 14px;
+  border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+}
+.gram-zeile {
+  display: grid; grid-template-columns: minmax(74px, auto) minmax(64px, auto) 1fr;
+  gap: 10px; align-items: baseline; padding: 10px 12px;
+  background: var(--card-2); font-size: 13px;
+}
+.gram-fall { color: var(--text); }
+.gram-was { color: var(--gold); font-size: 12px; }
+.gram-bsp { color: var(--dim); }
+.gram-merk {
+  margin: 0; padding: 11px 13px; border-radius: 10px;
+  border-left: 3px solid var(--gold); background: var(--card-2);
+  font-family: Georgia, serif; font-size: 15px; line-height: 1.5;
+}
+.gram-fuss { text-align: left; margin-top: 12px; }
 
 /* Gemeistert — eine Zeile, kein Zwischenbildschirm. Sie soll auffallen, ohne
    den Weg zur nächsten Frage zu verstellen. */
@@ -812,6 +870,11 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
     <div id="chiliPlatz" class="chili-platz"><div id="chiliBuehne" aria-hidden="true"><img id="chiliFigur" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAA6eklEQVR42u2dB3STZRv333PkyOH7vsN7Xl6hoviqb63s3dJ0pDPdK907TdOMppQRVkvZQzYulKViVRSNggiCDEFcQVDEF6uI4iBsLcjsYlzffadJm6YZz/PkSWma63/O/6iAhYfmd437up/7/sc/UCgUCoVCoVAW6i0t7tFbKmt1Mf1nsZlb/rsb/m2hUO4Me1FxNwJyT6MFfYqLBUOmSbRRT+dp017K0Ra9namVv5ehLd2ari3WZmjzXs/Uxq/K1vrPz9P6TCzU9Ca/3mjvB4plPfFvFIVyD/B7Env/p7RIErE8X1v6fqa2bFsGzD8khkVHqFPgqW9SYOHXzV5wOBnmUx9KhnlfJcFc6oNJMHVfMkg2pUHmhowawYI8bW+ZTEACwaDeGAxQqE4HfQ9iH5Ldq4o2Zes0uzL0cw+mwZJvxbCY+kgz/BT8p8zAX2AC/1BSM/wE/DkHE2GOLhFmE8/6MgFmfZEAM4krDySAYktKbcaGdF3i6owq7wmSCBIUvIixXUCh7hH43b2KpYLsDTnaSXsyYel3qbD0aCosIV5shL8F/Jas3wr+fBP4JviN4M/+shn+mUb4Z3weD1WfNXv6p3EGa3bHQ/orqTUjZuSRdoFUBrKS7vgdQaE6Dv5+gQsKNBM/yoRl36UZ4F9iDv+R9vBbzfpfWcn6JvgJ+JbwVx5odsUnsTCNeOr+WMh+TawfXFGgIUHAmxgrAhTKRdDfR+wVMK+gqnx71omlR9PaZ30j+IsYZf1Es6xvDn6CDfBjDeAb4CfgT90XY/CUj2Ng0p4YkL2boI9dlbaqj1zm07uk5H57z/IA+XniHtS9m42BA4Wyp37KInHJu9k1NOMvo+Cbsr5ZuW/K+rYW+Rz1+jPMsr6p3Ddk/AOt4Jvgn2KEf/LeaJhEvScaNHuioOidePCfn72wt0zm3S6IEdAJ9N6PjUtfOHxGmHb0nCDtkOki7cPqXA35OW8MBChU+8zvFfxUQVXF/oxaE/hLHZX7XztT7sdZLfen7Y8xAz8aJn9sBH9vM/ia3VEwkXjCLhGU74iCtFeS9EFLMqoI8L1M8A+YEl8hWOCnD1k6BEKXtZr+N/3xAVPjK2hFgN91FMoIf/Ka3Jol1sr9bx2V+8mMF/lmfGYl65uX+/vNMj6F3wr4E3c1wz/+IxGM2xlpcPmOSEhZn6Sj2d17olgTvGR4G/AtLVwyDAZMidOSX++F332Up8PfPbs6p9q0yLeUh0U+Zr2+eda3KPdN8O9pn/XN4S83wj92RwSM/TAC8t+MrQlbPrrGHvwt1QDxkEpRde8SOU4WUB4Kv1T6z8K3squf+jqtBfy2vb6VrH/YyiLfQeajPWtZ3wR/u6y/pz344z9qzfom8Muot4eDels4KLeGgXi9LzAJAsIlQ8F3bkB1X5VETALBffiJQHkS/N2zX82uthzttVnk4zjaa7PIZ7PXb5/1m8GPbgHfBP94KyU/hb8Z/AhQE/hLtzVb9UGYIQjkbQyAsOVDGAWCMfP9oV9Zrhg/FSiPCgCSt7KqOff6B53r9aey6PVbSv4dRviNWV9N4TeCX/pBK/zK98NA8X4o5LwhYBQAqEfPCdL3lsu98ZOB8hg9WCLtJ30nS29e7tvt9Z0Z7dlb4W+T9UXtwd/ZCv5Yy6xvBF+1tRl+Cj61fEsolGwOgYK3AiHm+RGMggBpB/SPjc8Q95aXYDuA8gw9IC32Lv8wXd9utHe4bbnPptev/NRKuW8v6++xUu636fUjzXr91qyvMsv6CmPWN4BvhF/2XrOL3xWC6JlhjIJAwFOj4T/l2dgOoDxHIUvzBFP3peq5LPLN4GGRb6L56r4Z+OVtFvnsl/sUfFPWl21uBb/onWBIXDOKcStgXBOofbi0UNxHjguDKE9pBxRSUgmk1bBd5Ktiucg3ycoin63RnvkiX5usb7Xcb836xWbwRz83ghX8LZXAQt+aB5VS3CeA8hz1VRV7a3an6Nss8nHYxtsu69uB31avX8ag17ea9Y3wS7VCSFozmhP8Jo+YGVbdR67AfQIoz5Fgfp5A/l6q3lTuOwK/0uYiXwxj8MfZAF/NYJGvNesLW8DPfzOU9PzhOuHSoU4FgODFw+HJyYkLSSuA24ZRnqPexTJv0dPZ2umfOl7kq2C5yNfa6zse7akc9fpmi3xSE/xvhcCoORkL+yjkPQdXRlU7EwBM24Z9JqVo+igU+AIRyqOCQM+4VVnV0z9l0Ovvt5L199rv9dvt5rPb61uHv9gM/iICf9qGSBg+I4vA2pyxCbReA6Ym1IQ4WQkIFvrBg6piH/xUoDwrCMhK/hm2LEcs1abU2gLf0YYeJuC3XeFvLfeVZuW+vaxfsCkEop6LP9C3VOZjmalJMPAaXBktJuV8rTNBYNRs4QEaUPBTgfLAQCAbFPVclnbshwntFvnY9PrlDHp9pdVFPitZX0uzfjAkr4+q8Zmcr3EE58Bp8WJaznMNALSKeGKSmPw+SlwURHlkEOjRT10kTlmXtlm+JYHnct/xIp/MtMhHLHlHCCnro/R+89NXUfCZ9Ofk19w3cFqcOGjRSD3XIEA3CT0+IVPSR6nA/QEoz5TxeC3BmPk52sJNiRYbepzfv2+v3Kd9fvzqWBg2M3thH6Xcm5jVwhwJAt0fLpVoKMhcg4DfvADwUspxPQDl4RVBSUnPPooSgXBZpjb15RQCexSDrG8B/9b28Fsr9yXvhEDsC3H6ARV5GgK9gJjzWI6W8IMrY5yaDgyqjK3CTwAK1RwIaEXgM2BagSR5XUpVxquJupzXEwjMUTY29ITZ6fWboc96LRJSX4nWi55N1AUvFVc9Nr5ITKDvxzbj25KXUvHP0XOE1ZZHhrHZKky+xiD87qNQ7QKCvGdvuVxA7TO5cGHw0nRt4tokbfZrsdq8jdHagk2iFudtFJEfj9KmbYjRxqxK1I6ak6V9dLxU0kdBsrzCUOK77IYgL6XS23duEOf1gIEV8VoSBPAGIxTKZjCQy3sQ9zS5j1xBLG+1wmSFuTtsw82gijgx1yqA7g3wIu0IfpdRKDcVbQWGzYjk3AoMnxmu66NU9sK/SRTKXYOASuk9cnZoDbe9AUPgsYlZeHYACuXO6quWCYIWc3ttePis8Oo+KhVuDkKh3LcKUPUYOStsM8e1gNo+KiVOBFAod9bDZUV0lyCnKuDJKWJNn1IVvi2IQrmrSBa/f/D02IVcFgT9F4zRe5Uq++HfIgrlzkGgVOXtNy+Q04Kgz2Qx7g5Eodx6LaBU1f2JSekaLlXAyNlh1fT/x79FFMqdg4BK1U+w0O8E++3BgloSAHAxEIVy9ypg6Az2R4nRquGRcfkar1I8LwCFcms9NjFXzOUYseGzIrQkgOD7ASiUW1cB6tJevvOCdOz3BIwBUgHg+wEolJu3Ad0e12RxWgx8YnI6rQLwGHEUys2DwCC6y4/14aFzQvRepaW4JwCFcvM2oOfwWZGs2wDh0mHQV12CR4ahUO6uIVUxVZy2Bk9NwU1BKJS7q9+4oojgJcPZ3yEwJ3QVqSDw3QAUys3bAK/Rc4Nr2L8b4K+jLQT+DaJQ7h0AegysTNSyDwAC8CpT4zgQhXJ39S1XCNi2AXQTUb9xxRJsA1Aot68C1N6+84JYtwEDK5O0XmXYBqBQ7h0AytQ9B01PYN0GjJ4r1JHggfsBUCh314NjlQK27wYEPOUHJADgOgAK1QWqAEHAU77s1gGIHx5XjAEAhXL7ADBW3W/MAgHrMwIGTk/UkuCB7wWgUO68BkDce8TsCB37Q0ICaQAQEHuTINLT4LI2xrMDUKjOA3tZT6MHUXD7lpcKhs+Ra6NfkGoL307W0ZuN6e3HU/fFwIzP4mHuwUSYfygJFhxOhqe+SYHF34ph4dcp5MeSDT8364skmLQ3nfw/GTUT96Rrx+7I0Ba/l6VNXJevHTVfpn1sklJjDBACU1DA7wIK1TGwdyPuRezTf7pKnLqhqCr3zULduI9ydBN359RWfZYFS46mwfL/pcEy6u9SYSn10VTy49RiA/DUi45QpxiCADUNAgu/ToYF1CQ4zKcmgWIe9VfNnnswCeaQIDFlXwoo3k8H5dY0XeorObqM17KrRs4vlpBg4EPs5VVWii0ECsUT9N2NGV4war5CU/xevm7G51mw8vt0WEF9jAB/zAr035mgT7WAXmwBvRH8w0bwDxnBp8CbbAR/ji4RZlN/mQCzqL9IgJlGz/g8Hsp3JEPeW+k1/oskWi91qYC4HzG2DCgUh0zvNXimMoJk+eqyD/N0VSboj9mB3mamb4W+TbZvyfSt0LeAT4G3C328AXrqqs+o42D6p82uPBBHWohEKHw79UTsi9nVw2ZLxcZggLsMUSi78I8t6zdkllJT8HZhzaIjGbYzPfFSC/CZQr/AJvSWmT6xGfov22b6Vujj20Df7Fio+CQWplHvj4Wp+2MM6w/Zr6fqB88o1pD2wJsYAwEKZQF+j77lakGRtkC39GgGi2zvuMRfYJHt5x1qC73jbO8YfAq9NfCnUH8cA5M/joaJu2Mg783kmmGziyS45RiF+gfdsVfW479TVOKSLfmb5xzMZAb9t2wX8yyyPRPoP7df4reHPsYq9JP3RsMkozV7ogxWb4+FjGqxzndBQdWDZaW98FOA8lD41V6RzxdrZ36RZQX6NMaLebZK/HlMoWdR4lccsJ/pLcHX7GkGf+LuVk/YJTKYjidjXsjQkSDgjZ8GlKfB7y3R5lcvdzrbMyzxda3gW0I/83N+Snxr2d4SehP446h3RkI5cfqryTUPj8MbilCeUfLfF7CkRCx/P0+/9Dv+SnxL6Ntkensl/me2SvxYziV+u0zfAn2kAXoD+DuoI2Dsh83O3RhXO3xOofhBtRoXCFFdV6ErZeI5BzNaS3wmi3nf2M/08/hczDvAINN/bBt6yxJ/vFmmb4Y+sgX6MurtEaDeHg50x2LxuyLwXZCneRDHhagumv29x3+Urbea7Y9wL/Edje5sZftKriX+HjvZ/qP2Jb4BerNsT6E3gV+6rdmqD6jDQPKOCAbPKBTjpwXVpdS3XN0vf1Oenhn0Zot5FltyrW7S0dmGvoqvEt8IvH3oI61C3ybTG7O9AXwj9KqtYaCkfj8MFO+HQuorcbVeZbgmgOo6C37dY1+UVHOd18+z0dfPatfXJzge3R1wbjFv4q4oi77eTom/vW2JbxX6rc3QU8u3NLtkcwgEL0uv8cLpAKqLBIBBE3dn1jrO9DbKe6fm9bG8reCbMv14O4t5zdmeWaa3hJ5a9l6zJW+HwdDZ+QtJELgfP0Eod+77e/oulGntLeY53qST6CDTx/OW6TUWmd5ybDeOwWIe80zfDL7MCH4x9btCkFJrhRD7YgI9qhyvLEO598Jf3lu5NQbwD7Mb3c1yMLqb7nB3HpfFvCi7fb1lia+2WMzjku0twS+ificYCjYJ4ZGJclwQRLlxACgvE0zYnW5/Me+gbehnsJnX77e2mBfNusR3tJjHuMTfYgd6Antb6IMN0Euo3w6GwreDDPZbmIl3FqLcOwBM/jjVal8/22aJbwk9/yX+BBuLeZxLfHuZfrP9TN8KfTP4BZuMfisIApakYQBAuXUA8C6pLKhZ9onj0Z2tvt5qib+fp3n9TstsH2kBPcMS36lsT7ypFfz8t6gDYc6cSOhfqsAWAOWG4I8b2y1PLZUcUKbqbyli4dy0WFi7zfbLNzNsQs+yxGcyr9/JbF7fCn2YAXplC/ShzKHX2i/xW6EPNDjvzUCYsC4QDpUI4UZcKBxNjqqVF+VVeZWp/4mfKpTbZH1ZWZHmD2Ui3CHwGyyPhdvEH62Js7JJx3Uv31j29ZYlfpnRamdKfJuLecEOS3wT9NS5GwNh4fIgOJ8aYoDf5CuxIbAsJ62anlSMny5Up5agTCF4pTRLf0MR1wK+ybdLYuAW8R8VMbB9bSzM+9jFi3k2Mv1Yxot5oY6hZ7iYZ1nem6DPI9DnvxEAKxYFwbFCIVyPbwX/OgHf5EuxobA2M0UfJC8We41V34efNFSn00Plau8vlGK9edY3h99gWauvTkqFD97Mgdkfx3N++cbW2M4l8/r3GCzmvWM70+ebQZ+7McDgZYuD4LcskvHNwLeE/3pMq48nREKRJA/XBVCdquTv9p+xaoFOJa6xC795ABifBbfnj4M7CydA/aJxsG9DAczdFc+9xGe4mGcLfAWTEp/JYp6dbJ9rBF+2IQBemhUEPxQIm8FnCP/16GZ/nyDSP6JWCUglgCcOo+49/Dll0opvlSnMwFclwu2ZCgP41LcXtPrW/PHw+9NK2PNKPry2KQMWbE9wfjFvWyv0KuNiHqcS395i3iZ70AdAyYZAWLQsCN6ZFgxfyYVQmxLSCj5L+KmvRQnhYGIUqQRyq0kQwMVB1L2D33esUvOLMgkYZX5FAtyeW2YV/tvzjZ7X6lvzxsPFSWL4emYUVK8RwezNBPydbUt8tpmeUYnfLtPbL/EtoVcQ4JcS4LdNEsLJPAJ7IoE7wcxOwm+wSAiXiVUFhiCAlQCq4zV0rFKsM2V+Rz2/PA5uz1Hbh99KAGhSp0NTYRQ0FTT7olIEh6eL4MPFIli3JhLmvBUB4z+wgN7s/XollxJfy2xeL9kYBJPWBcHiFUHwxsxgODA2BH4pICAnhcLNpDC4mdhqqwGABfwt4BvhN/loXCQMUSk0JAjgISKojsv8PmNV4r3K1FpGZX8J+fEZclbgm9xUltkCf1N+qxvzRM3OFUED8SVpJPxeGgk/jI+Ew1Mi4NPpEbB7Vjh8MC8c3n0qHN5cHAbVy8LgleVhsHZlGKxZGQovPh0Kq4xevSIEVi8PgbVLQ+DlRSFQvSAE3pwTAu/NCIFtFSGwZ1IofFEeCkeUoXBCGgrnssPgupjAnWx0kpkdgc8E/mjH8F+LbPY3cSJILSqswCCA6hA9XK72Pqg0Lvg5gp96uoxx5jeH/9ZcswBgA/4W57S6ITuy1Vlmzmx1fUZEq9ONTmt1XWp4q8VmTml1C/w2AgAr+GO4wU99NSIYvo+J0D+E5wegXC1RWYngkDJFz2TMZ3BFMafMT+E3BIDS9Pbg8wV/ugP4OYLPR8nPBn6Dw0kLEh+lj5QVib3KcJ8AyjWlv/ebqkw948w/PrN95mcB/605JAAo03iD32rWdybz30P4W8A3wm/y53FR8KQK3x9A8Q9/d7W6UHOT7vBjAn8x8SwV58zfEgBKUriX/Zn8ws858/NR9kc6hv9qWLPfTE6o9irDW4lR/MH/T5laUn1OkeC47C82emIuozGfLfBNbiyKZw5/Fs/wu6rfZzjm4wI/9amIECjMz6VBwAs/vSinJVYXiy8r4pnDr0om0I/nXPab3DR7HDSasr8V+Dkv9nXCnp9Vv28H/iuhQQbrw4WQLCnQ4E3EKGezf8/3VOk6RiW/yZUy5vDPtQ1/04wyl5b9fKz0t4E/vuN7fkvwDQ5p9t7YaHhIrcIzBVGc4b9/amn+wmvyOMbw36LZf/54xmM+m/DT7F+hwDGfLfjD7MNvsDAIXhAnHcBWAMVJgWVy8UV5AnP4pdFwa3KBUz2/CX5DAJgkda7sT+cZ/sR72POHs4ef+nSoEIJlUg0uCqJYr/q/r0yvZgU/9UwVL/A3zSIBYEJB5+n5eYaf757fGvzUfwcHwu6YKLxkBMUK/m4JZTLJGZL9HcHfAj61KqW5/HcG/lmtbizNwjEfx8xPwTf5MvHT4mQdCQK98NONYhIABNuV6dbhL7YBfxHx1CLe4DcEAJnYtWV/SieBn8ee3xL+v4OafYlYXJCPJwyj7MurvKzXSlWOjnHJb4K/OA5uzx3HesxnC35DACiIwzEfh5LfEn7qy8RbYmNOeKlL++GnHGVTOWqpuK4klh381OWZvMLfVFXW+cZ8CZ1rzMcGfuo/AwMhOy9PQ4IA7g1AWc3+3bcq06pZlf0mTyliN+O3Bz/N/hpp5+r5+Z7xu7Dnbwd/YLMvEe+OiqohAQDHgqh28HfzHlsq+UmeyC7zS5p9e9ZYTiv97Tyz3OAGZUbHj/mS7uFKP0fwbcF/2Qz+S2b+i7goN2eVl1qFVQCqTQDwXqHKqeEC/y1ZPK/wGwJAfmzHlv1uPOZjCn+t0dqYGD0JADgWRLXqkbGlAj0d+7Ep+00BQJHCK/yN05Tut7U3ml/4ne75A9sGABP8tQGB8EuwEB5RKQT4qUe1rPy/pszQ2Z3xWwOf2HBenzqd05jPGvxNM0j2V+fwXvZ39TEfk8z/VwB1gMFrEhJ0pArAiQDqH/8IKZOLr8tibWd+e/BTj8+xCj+TxT5L+A0BoDC+023tdcUJPh3R85tnfhP8fxLrya8Nkko0uBbg6dl/bFmPdcqszaxKfnP4qSfkc1rptwZ/4zSV2834eV/p57nk/8sCfoMFAfBqXJweqwCPDwBq76MlSXpO8JtO69VIeIG/qYoEgPLCDjvEoyuN+S6xhP8i8Vnyc6FFEjw+zIPh7zaoTKm5VhzLLfObAsBkKTf4Z7SFn7pBkdHx8PNR9ovu/Yy/TQBwAL/J88Qp1aQKwDcFPTQA9NqgyNQ5HPPZAt90XPfkYtYr/dbgp67Pj8MxHy/9fnv4zcG/YPR2kegEtgEeqr5jS31O0xm+g8xvF37qKTJe4G+cosAxHy89f4DdzG+C/4J/APwUGAx9S5U4EvREKVWFVZx6fouLOtoEAA5lvwF+Wv6rst3r+K57CD+Xnt8S/vNGl2RlaUkV0BOJ8Kzyv8eWkrTNrPv9Ais39NAAMMuJzE/hnz4W6nOiO/as/i405mPS75vgP28G/zni7ZEiOg0YhFR42Or/EVmSnlPPbxkAJhdzgr/RzA0aWec7vssd4A+wUfbbgN8885sCwGniAKkU9wR40ur/wDKl5JI0llPJ3+6WnknFjMd81uBvnF4O9fJMHPO5suS3kvkNHhMAZ4mXJybRnYF4YpCHBICe8xS5WsaZ3x781Joi1v2+OfyGAJAT2+Fbez1hzGct858z81ljANgXGgFeeIS455T/O2TiGs49v+VZ/RMknMp+E/wNkxWde8bP8RAPm/ALndzXH+Bcz2+e+U0+TRxYVISbgjxBD9E3/6Rx3Pr9PCuXdIwrYLzYZwm/IfsXiXnb2tvh/f492dobwGjGb63fN8/61GfMvCgpCc8M9ITV/yKVROtUz28ZAMpyOcPfoJG3gp8hgvppamhctQyaNrwITW+8BI1rn4XGpXOhXpHjVmO+q8kJcKNiCtQ9swLq162B+tUvws3Fi+D6+HFwJSaqQ8d89jJ/M/wCOO0ngOfj4nU4DvSAALBVlqp1KvNb3NTTqMrkBH9jJcn+sgxonDMZbn+2D+42NoI93Tl/Fpo2VcPNAnGnvJzzWmoS1K96Fm4f/9Huc9y91QRNh76Cm88+A39HRzkF/0WO8J+xgJ/645BwDAAeEAB89hWnsIPf0d188lTH8FuA37igEm7v3w13L/0FbHX39m24/eP30LB8AQkC4fd2zBchhBsTx0HTZwcI2LfYP8u1a9CwfTtclRS6bMxnu+xvhZ96X0gYeJWqcFdgV1a/slKfa5IY53p+y7P6i5KYZ/6qcXB793YCMXtYrFYFv/4MdeWye9LzX8tMhdu//MzLc9CgVvfyy3BJKLT7Hr+r4NcTnyQ//rAStwV3aUmUkirWYz5Hl3PmxTIr+RfPgDu//AR8i2bextdf7tAZ/835c+DOpUu8P8vt06fhilrNz0q/DfgtwTf5lK8A8rOytaQK6IGkdFFtkqVVsR7zMbiZt7GyzD78KxfA3bo6cKVufbqPVALhLh/z1a9e5dLnoH9PV0rVvI75WjK/HfipXxNFYwDowv1/z2dKMnW8ZX6zgzsbNTLb8JOy/87vJ6Ej1Lj+RZfu67+hVsDdhgaXP8fdmzfhb4WiQ+GnXhUTT9cBcENQVw0AO6RiHVv4mdzN16DMsg7/3Clw56cfoKNEJwn1C2a6ZKX/5qwql1cxlpXA5ZISHsZ89st+k/8g3i0MxwDQlQPAcUm8jnPmt3dRR26s1dV+ukjX4bpzB+oqNbzCf71YYvi6Ha1bv/0GFwMCeRnzOYKf+iRxP6UCA0AXDQCCL+iKPd/wG90wRdkG/qZX18C90p2LF+B6chRvM/7Gj3bes2e59syzjF/qsdzd5wj+P8z8++hmhxRKcEdgVw0AJwrj2Y/5mF7RVZLePOOnnk76/jN6uJdq2LCel7P6b0wo5zTj57Ot+Ssn1+kxn8G+9uGnlqdnYADoqgHgUn6MU4t9do/sziA/N1VtCAC3trwF91p3/74M1+MjndvaKwqHO+fP3fNnufn++4zHfOaLfacdlPyW8P9GvDQuAQNAV9TjZSpBA5+ZP6P90V0N6nxoINn/7uVL0BlU//RSp27pqVu+pFM8x53Lf8P5gCBeen578FM/FZ9Y7VWqxJOCu9oCYLSqWMtb5rdxXHd9diw0bdkEnUV3LpyHa0lRnE7wuRoVbvj/O4uurljp9JjPGvy/mflX4gXxSToSAPCdgK4WAGSKAi1X+Nmc1X+39k/oTKp/ehmn9/iva8Z3que4ffEinBMEOjXmswv/qGY/Gx2HAaArBoBZshwtY/g53spbP0XlfO9+9y5cvXIFNq3fAHPGTYYpUhVMK1HD0umzYevGt+HiOXZZ+fZPxzm9x9/w5hvOQ3vrFvz0/Q/w7LxFUKkYC5MkCpipngirF6+A3e9vgyuktGejS5rJTo35rJX85vBTb4iIxgDQFQPAWmmG1pkxH5NbehrXP8dbxtP/9jvEDB0Dg/5fn3aWJ2fCmT9OMf5a19OTWJ/gc+u7o7w9y5Y33rL6HL4PPg4vrXwebjGcMtz8cKfTYz578J8c5Q/vhkZgAOhyAaBM3XNjUZrWZfAbT++5tWMLr2XvudNnIPDRAVbhiRw4Cn478QszcCaMZX2CD98v+6yYOc/qc1BPlanhDoONRrf0p/nt+S3gp/5AGI4BoCsGgM0SsdaplX4GF3Xc/u4bTiW/PW1/+z2b4Izu8xi89sI6h1+jbsVSVhd1XE1Npn8wXp+lqbEJknyDbT5LQVSSoepx8BvA2Ygop8Z8lvCfNIP/F+IdwWEYALpiANhZmKx1dszn6MTeO2dOsYbmLMlq9nTj+nWb0Ji8e+t2+5uCXn+V1Ym9NyZNZP0cl/78C+rr6+3+GrqOYe85Qp8YCteuXLX7NS7k5DsF/6924P9lpD/sDgzV9cEA0PUCwL6CJK0r4ae+e/UKK2h+OlYDK2fNt9+/X7vmMADkRsTZf0tw6xZWV3TR8/vYSlNYYghWdgNA5WyHz1K9yv4W6j9Ly3jt+c3hp/44QIgBoOsFgNKee00BwMkxn71Te9m8KksXvtICI0hZLLS7CLb97XcdQmOoAt63XQU07trJ6qz+ulXPs4L/6KGvDX8G2q7YbgEa7bYAJkcN9oWmpiabX+eviZN46PfN4B/Z6p8NASAEA0BXDADbCkgL4CL4Taf1wl3mb8wd/epwy4feFjjnSHsQ+J8BjAJAsp/QNnz7P2Z1UUf9S+tZBYAlFbMMf4agRwfA5dpLrBcBLb1ryzbbAWBaJX89vwX81HswAHTNAPBGYarW2TGfo7P62VQAG559seUD7//QE4Zx2Onf/zBUA7Wkn37vtY0g/O9gxtBQn7OxnmCqAJhe1MG2AsgOjWn5M2SFRMMnO3fD1b+vQH1dPfz8w3GYP3Eaq+eYkFdsuwUgFQDXGb+1kv9nM58g3hWIAaBLBoClRZlaZ8d8ji7qYLMGQDf5sIGCiXWffGpzDYDNRR03Fz/FKgAI+vnw+hxhPsNsLwKqylwG/4kR/rADFwG7ZgCYXJyrdSX81HdOM58C0B1+fAeAvdt2WN8O/NqrrK7ouj5xAqsAMPSffXl9juG9+tneG5Gdz0vPbw1+6g8xAHTNAJAgL9LysdJv74qu20e/ZgwN3d7LdwDY9+FH1vcBLF/C6oquK8lJrPYBDO/1MK/PMarPozb3AejDRE6N+drBbwT/J6O3BIdjAOiKelStFNS5EH56Q0/Tts2MoWEyEmPr/x0+Yn2UWK5mDL/pYs47tbWMnyWi/whenyPFP9T6YuYpPb9l/4j2AeBtYYSujwoDQFesAgQXMkW8l/3md/M1rnmWMTRvrdvAewC4/Jd1aOldfWwv57x1lPm7AEWxYl6fY0ap9TcRr2//kPee3xz+48RvhETq+igxAHTJAPBNTpxTYz5HF3PWjVcwhubk8RO8QiNLSLf+Rt6PP7Yb8zG5krvu9dcZP8uLi5bz+izffHHQ6u9zccIk62X/KOZjPmvgm+A/PtwfXgkVYQDokgFAXer9aU683lXwm3znr4uMwVGl5vAGzbFvvrX+ItDSxdYzvx34qa+OG8f4Of44+Stvz5EeFGl949T5C/C7L/89vzn81KvDozEAdNEA0HNzXrLO6ZLfDvz0eq6G1czbAPoegGjgKKeh0RTKrZ8IdO4cXImKZFTyX7a8mDMsDG6fO9fhVcCuLR9Y/fq1S5a7pOQ3gf+j0StEcRgAumgA6L66IK3alfAbnMjuKC36Sq+v1+OcgaEzeFuHhNxcsphV2W95Mef1RezeCVigqXAKfrphyGobc/ky/O4X6BB+1mX/8PYBYH50AgaArqrpkuwq3st+K7fyNjy3nBU4b6xezxn+7w5/Y+MgzctwJSKMVea/1OZWXuKQELh99izzE4Bu34bCmGROz0LHovT/t6Zrm7fwMuP/yUH2/4F4ozACTwXuqhqtlEVcNgUAjpnfata3vJk3npTPv5xg9R79nq0fQuKoIFZlv73jwerXrbU75rMKvjn8xss5/1arWd0LQI/5ou8GMK1q/B9+Al63c6YBvRfgdHqO/bJ/JPMxnzXwTfD/MMwfXhWKMAB03TZA5bM9J5HzmI8R/MaLOetmTWP9Sm1DfQO8/uI6SPIT2twhN7W4FL796rD904DPn4crkeF2Mz8T+E2Xc9Z/+CGnI82mkD/rqN6P2tzss2z6HLhxzf4rxLXLVrq05zeH/4dhY+CFsCgMAF04APR4PTdFy2vPbwV+k29/9y3nI7RO1PwI7776Bqxb/gy88swqQ4Vga87fJmPeuQPXJ45nt+BnB356OeelvHzD1+WixoYG+Hzvfqh+fg2sWbIS3lr3ChzRfWX4cYf/78lf4TffALsn+PAJfw3xguh4DABdOADcHyqXLvxbHOE8+LbgN7+VNzUObh0+2GFHZ9Ny+cb0SkaLfebw2wLf/Eruvysq4e7Njrsd+M7Nm3CmUMb7mK8N/MPawk89LjEFA0AXDwKCd3OSeOv522R9a1dyx4TB7e+PdQg09DVebj1/QNsAYAG/6WLOWlkJq1eenYH/rFRuG34OG3xsZf4aM/i/J85Ow7sBu3oA6FlelKPlveS3Br/xcs7rOWK49fUh12X+ujqoe+5Z+JuO/FiM+ZhkfssruS9PmgJ3rl512bM0/vwLnE7PdtmYz7LkN4f/+6FjIDw3FwOAJ1QBJ1KjOI/52MBvfjln0/atLin7r0+dzG3MZwd+e1dyX0hMNhzRzbcavq+BP0SxLh3z2YOf+kmp1AcJ8YAq4GB6jI73nt8O/AZHhUDDK+vhrp0z71jdvHPiJ7gmlfAOf5sAYOVKblMQaPrpBD9B7NYtuLz2JfhtTBCv8P/IEv4j5Of7KOQYADwgAHRbmpe+yinwbcBvFXyLizmvpyVBw8bX4M6fFznBcuvYMbgxd05zye/EjN8EvyPwz9u4kvusf6DhlN66/Z+QoHaLfa9/7Rpc27oNzuQUdNiYzxr8x4ze5RtMAoACA4An6L8quVifEul8zx/NDv42V3QR39CMg6a9ux0urt05cxrqX3kZribGs9/X70TP7/hK7uYrus5GxcLfy1dAY02N/QBGqp+6L3VQu3QF/BES4fCijo6Cn3pjYDgGAA+qArxeyU6pcWXPbxd+y1t6IsnvoZLDzSVPQd0Lz0H9+rVQ9/QKuDlrBlzNTGP8Hv8ljvBfYAH/WQeXc56JioGL4zVwacky+HvVarj87Cr4a94COK8qgz+EEYxe6jk5ir/dfT9Ygm8F/v8RPxcWhQHAgwLAfYFyqeRMUoR1+KmTI+BmRjTU5cRCXV481BUkQH1BosF1+QlQlxsPNzNj4IZYZNj+yyjzM7iYk83xXXyO+Wz1+9au5OZ6Nx+jV3mtrPT/Qr7Gr0FC+CMiDE7HiOB0fBScSYyBs8kxhn/q46LgVLQIfgsPh58DhHCcfD1rYz5Tv28J//+GjIFVoVE6EgB6IR0etBi4Kz1O1wb+pHACdhw0KlKhSZ0BjeYutWJVeovrZWISMGLhWkzovYc/wEbmF3Dv+R1ey+2Cs/p/F4bA+dQ4qC0Ut/Nf1AXt/Sd1vhjOpMTBzyRoOMr8FP7viJ+KiNX2Uch7IBkepEW5aVUm+A3gl6YbwGcLv7kblGkkEMQ4LvvZwh/ELfP/ycOCnyP4+bqc0wT/SfJ7UfAvWQHfIfwWPpeZCD8Jgm3CbwoAqkQxBgBPU79Spc+hghRokItbwG9yBL4t+JWtbiCul6bA9RRRW/hZZH6nXuV1csznbNnP7Ny+9pn/pB/5PROjoTY/xSr4tuD/04YvUpNq4EJeCvxB2oSakYJm8M0yv8kR2bkYADyqBShVdi+boqpeU6GEOqZZ307mtwwABivS4UZaNDP4hezP7nMGfuaLfR3X81/MSLCZ9bnCb+7TqfFW4T9C/FCJTIBUeA7894snKBcuriyF5dNLYedkKeeS3yr4Rvip60vS4Hp8RHv4QzjAb3fMF+CyMZ9L+n1z+Mm/nxfH8lLy24L/gtGnkmINQcAE/1HivSMDoY9cjgHAY0p/ldJnXkUz/CafKs9xuuy3hL8lCBSLeYG/Y8d8NuC3Vfb7Mj+u23LMpxdF8AL/RQfwm/xzWHgL/EcHj4G3/UMxAHiSoserqpZXtg0AOydJXQK/yVejQ53q+Z2GX8Am8wvYwT/auSu6LmTE2y77ecr85j4tjm+Bn3qTf6ieBABvJMNDJJtkDABmfrpSBafG5jjV71u1PM3ga6QN8JQxH9tXef+ysujnisxPfZ74XG6KAfxvjX4tIFxHAgAeBuopyp7YPgBQr65QwlV1plM9v60AcDU23LVjvs4+47ezu+/PnCTn4M9nDj/1mcykFvipF4bHkgBQggHAU+Q3VileZiUAUO+grQAf8BvBp6YLgVfChTz2/AG8vdTjaMHvlIvhpz6bGONy+FsCQJ4YfouLboH/CPHciNhqEgC6IxmeMgVQKnspJ6l0LeBPbxsEjpfn8lL2m3wjLYbVmO+9AUOh8iFvqLB037aexsBTrfnBVk9p8X+terI1e7V6kh0veNjH4am9dD//z2MC4c/cJKfHfBccZH4KP83+/xsZYAD/yGA/gyfjWYCepweVSu+qqSq9tSpg7TQF3OQJ/pv5iax7/m0Dh4Hw/zzo9l7+SH/GJ/j8EhAMf+anuKzsp/Cfy0mB732DjJmfwD+o2WFZORgAPFFx45WCyVNUemvtwLuTi6FOxa3kN5X9N3MSmkt/liX/72P8Ifz/ujf89M//1ZDRrN7mOxkcAhdzknlZ7DMv+Q2ZPysJfggQtmZ+Av43xJ8N9Ye+smJ8C9Bj2wGV0ls8XqWZPU3VrhU4PD6f9WKfAf6iFLgWE+7UmG/mw0+4dQCYRtqKn1mc3Wd6jff4SAGcio0iYKc4X/Yb4f89IRaOEtAt4afeIAiD3iUlGAA8PAh0H1GmlCgnq2oWVpBAUKkyTgUUcF2VwRj+elkq3EiPbZP1ue7r/2zYKLcOADsHDHfq+K6fSUtwNi3eAD3Xnv9USjwcDwptWeyzhJ/6+eDIGhIAvJACjw8CqvtIIPCiLwilT1RWSTVKXeVUle7VScW6i/LmLb3m5X29VAx1BUlwIyserqdGwzUXjPnKvR53S/hz//WIAXo+DvE47hcIJ8PC4PcYEeiT4+BsRiKcz06GC7kpzbCTf54j/32G/Pgp8vMno0XwU0gYHBsV0Gal3xL+r42uEMVre5fI8CUglGVAUPRstrJnWU6m5s8IIfdXeTmO+Y6MHO2WAeDFRweyv6jD1gk+dg7xsHypx7S7z3zGbyvzmwLAmJw8DAAoB8GgVOn9WkqCvmPgb7vJp/jfj7pdANANGc0P/LYO8bB4o+8oF/gH+sH+IQLoLSvGdwBQjhUjKRDoYkR6V53gY2tP/zv9h7gV/HT2z+WKrhqOmd82/K1jPsusT+E/TLwqMIIEAHwNGMVQD6kUgvcTYvk9wSfA/tbe8/4CyCE9tTvAn9TzYfhxxBjmF3UMt39Wv63juxhlfgfwU68IFmlJAMAtwCjG04Jug+TF4s+jI2s78lXeg8NHgej/9u30AWAN6f0djfmYXtRhr+Tn2u8fNoP/EHF0WiYGABR7iQvyxD9FhHbo8V3LH+3fqeHP/9d/COhjeLmlh+li31EW8JtnfupPhvhD72Ls/1Ec1IdUArLcbM2ZUCGr47tqnTi+69hIv067O5D+ufYNHMlisc/f4UUd/2NR9rOB/5DRb/oKoXcJBgCUE0Hg5aT4iosWV3S56m0++hbfrkEjIOb/PdSp4I8grckWn2H3cMznxxr+QwP84HXfEB2pALD8RzkVBLykuVk1F4ODuPf8AnbHd+0ZPAJCO1EAWPlI/0475jtsA/6viKdFxGEAQPESBLzl2Vk1f3XA5Zym47sWP/Jkp4C/gPT9FGJnFvy4j/nYLfiZw09dGR6LbwCi+KsEZqeKD/wZxH7Mx+UQj998/WHOwz73FP7pDz4BR4f6deoxny34dcQBmTkS/OSi+AsCSqWXIiur5kJQEC/HdzG5qOMtnyEQcg/gn/OQD8MZv78L4G/u+b/hCP9B2v+PDqETAHwDEMV3EFB4F5MgcJ4EAVfDbzq6a+3jAzsUfnoKUI1x3Odod98PrtjdN5h75j9o9OJgUU3vYim+AYhySRDwWpKcvOp0YFCH3dKzbcAwyLOzWzDuX4/BlEEB8HpUJujyx8KpsplwfcoiaJq+HO7MWAkNlcugVjMfjsunwZ50OTwXlACSR9pWF3T6sO6xQc3Q89Xvu2DMZw7/V1bgP9jfD1KS07S9pVJ8AQjlsiDQTZOWpjkZHMwr/PbO6j8xagws6PckhJlBK+rZDzbF5cKtqhUAM59m7QsT5sLMYSEwq+8T8K2x3zdf7DvOcYPPMRfP+O3Bv31oABD4cf6Pcn0QKMnMEB8KDa3leksPm4s6TKf1Hh3uCyv+0x/WC5Pg6uSnOIFPfYVUBGfzSuF4cLRbjvmswa8jfloQoSMBoB9+QlEdorCCAvGnYeEuhd/aLT30iO4aYRScKRwL9RVLGUHfNH0ZnJZp4LgoxQA8133933eCMZ85/Lr+JvtCbEq6Fuf/qA6tBEYXSTRfhobZLfvPuvByzl9GB8AxYQzoxflwJl8Np6QT4FTJJDhVPBFOF5TB2TQJ1BDof/ANsnp813EXzfj52NfPpOw3BYC9g8ZAHyz/UfciCGRkZ0u+CA3Tc1np5/2iDgZn9bvzmM9a5v+SeL1fSO0DUukg/ESi7k0gUCi8VyQk1HQE/L9yvKWHzSEenWHM95VD+P0M8FNPD43WkQCA5T/q3gaB1bHxerY9/ykXXs7J5fiumo7s+Qdy7/m/NHN5JN4AhOoEekwmE7whiq7+kR59zXDMZw9+Nldy/8LirP7jrjjEY0jH9Pvm8H/xpC/sGuQPA3LzI/DTh+oklYC8uygvX/NVcAhr+H/nCP/PHDM/b/v6B9s+u88VPb/BTzYHgBX+ETUPFOHuP1TnCgLdMrKyJJ8Iw/Rsx3z24WfW73fFMd+XFpmf+nPixMS0hQ9Iiu7HTx2qMwYC7zdEUXquYz5W8HexMZ+1xT5z+KnfHB4EBH4c/6E6r56USsXbQyNquGb+k/cafp4O7vyaw+4+az2/efZ/aZRQ94BEgqv/qE5cBcjl93nJ5V4zEpOrvxEE45jPiX7fBL7JE8NiVj1QVNQNP2UodwgE3VMzsxeagoCzY76fPWjM94WVAPAx+fX9c/LE+MlCuVEQKOkRmZur+TAknHnPP5L5gh+f8H/HEf6vOwD+z3x8YZEggvT/Ejz8A+VuC4Ml3R6XSsUbw0UHfsUxn034v7BR9lP4DxCnxSUvJAEAV/9R7il6d700Nb3mR98A3uBnc1Y/1w0+3/J5iAfLnp/CT71yTBjN/rj6j3L/IDAlIbnik4AQTiv9P3XxMV8L/D6t8H9KnB+dSLM/nvyD6hJBoNtjUqlmY2hkDY757Gd+6ldHBMMDhZj9UV0qCMi6E3uvjYjSs93dd9yN4f+SJfw0+y8dE657oLAQZ/+orqdHi4oEz0dGV385Jsjjx3yW4H9qXPzLiEnCN/9QXbgakMm6D8sv0HwQGNYp4e+IMd/nVuCnXjU6hJT/hTj6Q3X9lkCUlS3ZJRBy7/mdvpzTDvyDuI75/DhlfkP2f8IXpJEJ2n8XFuLiH8oTgkDxfQMLC8TaoLAD7jDmO8TjmM8a/NXDgvQPFBTgsV8oDwsExTKviXFJNcdGCKzu63fJWf2D+bmogy/4PyEOT0rT/rsAF/9QHhkEir3EqelVH/kLa7v6mM8cfJPXjhDWEvgx+6M8WyNy88TVwRFdesxnWu03wU+zf1lobDUJAN3xE4Dy7EpAKu3Wt6hIsDoksoZzz+/Evv5DLLb2soH/UxuZn8K/vb8/DMjIxrf+UCizQOA1MyruwLekHehKYz5L+KmLI+J1/84v6IXfdRTKTA+QIKCMT9IcGBXYZcZ8lvA/PToU/p2fj9t+USgbQaB7dFqGZu/oQKfh7+ie3xH8+4lj4lO0JADgyj8KZScIdEtOSavYMypQ765jPnPwTfCvGx58gsCPt/2iUA6DQFFRt4cKCr23+Ar1TDb4uOzsvv78wL/fezRIw2Nxzz8KxUaJKWninaODbJf9HQQ/157/EyP8q4cHwwP5+bjnH4ViWQncJ0zPFL8QFKE/4ooxHx8zfpvgN8O//Uk/CElMXUjKfzzuC4XiFAgkEu9ngiP1R/g8vsuVPb8RfuqlvqE6XPhDoZzUsKxswUoSBL7hOOb7qgNLfup9xJsHjKHZX4LfPRSKj0qgsNB7vCiu5utOOuYzh/9j4mxRgvbfeXn4ui8KxWcQeNk/VM9ld5+r4DfP/KYAsGpEcA2B3xu/YygUz0pMEgs2jwzSu/KsfrZjPhP41O8NGFM7JC1DTAIAXvOFQvGtfxcWdnskL0+zZURgpxjzmcNPXSqMru6Vk4dv+6FQLgwC3SeFx1Y7e4IPV/j324D/xeFB0Ds7F2f+KJTL1wPyC/rNEkbp7+WYb5/Zot9LQwPBPylV0is37z787qBQHVEJ5Bd4b/AV1vB9gg+bnp9665N+MCo5VUPgx9IfherAANBtSHqWeOcQQS3blX4+Sn6a+T/+72gYGxS1mfT9OPJDoe5BEOg+Mziq2rVbe0dbLfsp/ItGh9YQ+L3wO4FC3SMNS88U7x3k76IZv69N+F8dHABeWTl4yAcKdU+rgLz8XhNCY3QdMeaj4FNv8/GDvPC4il45uTjvR6HutR7IzRVsHhbg0jGfKfPvID9fGBqjQfhRqE6iXnl53jODImu4rPSzgX8PcVpEfE2v7Bzc6otCdZoAkJvXbZg4XfLRwDG8j/lMZf9e4qn+EQcI/Ljoh0J1viCQ2/Npv1Adm4s67C32WYGfZP5shB+F6qyKjE+RvD9YwNuYz7DgR37NuMDI6l5ZmPlRqM5dBeTkdUuOTtTs7e/n9JjPlPnVQSIKP+7yQ6HcIwjkdl/kF1bNacxnBv8u8u95YbE12POjUG6m3pk5/xwfHFVdPTSQ9Uo/zfqvDRLopSHRFf/Cnh+FctNKIDunO7FgUqBI99GTfozgf35YEETEJmr/lZXtTeDHOT8K5faBICunX/+UdM3UgEjtilEhsLW/Xwv4u0hAWE+qhJl+YTXJongKvoAYT/JFobpYNdCNuAfJ6j7UD2Zk+jyemu7TKyvLhwBP7UWMb/ShUCgUCoVCuVz/H4ZBc6YvEGTDAAAAAElFTkSuQmCC"></div></div>
     <!-- Nur in «Buchstaben»: der Weg zur Tafel. Geübt wird ohne Umweg. -->
     <button id="tafelKnopf" class="rundbtn" aria-label="Alphabet-Tafel" aria-pressed="false" hidden></button>
+    <!-- Nur in «Übersetzen»: woher die Wortformen im Satz kommen. -->
+    <button id="wissenKnopf" class="rundbtn" aria-label="Wissen zum Satz" aria-expanded="false" aria-controls="wissenPanel" hidden></button>
+    <div id="wissenPanel" class="menupanel filterpanel" role="group" aria-label="Wissen" aria-hidden="true">
+      <div class="menuwrap"><div class="menuinhalt" id="wissenInhalt"></div></div>
+    </div>
     <button id="filterKnopf" class="rundbtn" aria-label="Auswahl" aria-expanded="false" aria-controls="filterPanel" hidden></button>
     <div id="filterPanel" class="menupanel filterpanel" role="group" aria-label="Auswahl">
       <div class="menuwrap"><div class="menuinhalt" id="filterInhalt"></div></div>
@@ -1503,6 +1566,29 @@ var ALPHABET = [
   ['Ю', 'ю', 'ju', 'Wie «ju» in «Juni». Ein I mit angehängtem O.'],
   ['Я', 'я', 'ja', 'Wie «ja». Ein gespiegeltes R — und das letzte Zeichen im Alphabet.']
 ];
+
+var GRAMMATIK = [
+  {
+    id: 'geschlecht', name: 'Geschlecht', kurz: 'Woran man es sieht', aufgabe: 'geschlecht',
+    frage: 'Drei Wörter, drei Geschlechter. Woran erkennt man, welches?',
+    deutungen: ['An der Endung der Grundform', 'An der Bedeutung des Wortes', 'Daran, ob es ein Lebewesen ist'], richtig: 0,
+    regel: 'Jedes russische Nomen ist männlich, weiblich oder sächlich — und die Endung der Grundform verrät fast immer, welches. Anders als im Deutschen muss man das Geschlecht also nicht mitlernen: Man sieht es dem Wort an.',
+    tabelle: [['Konsonant', 'männlich', 'дом · стол · город'], ['-а / -я', 'weiblich', 'книга · кухня · вода'], ['-о / -е', 'sächlich', 'окно · море · письмо'], ['-ь', 'beides möglich', 'день männlich · ночь weiblich']],
+    merksatz: 'Die Endung entscheidet, nicht die Bedeutung. Nur bei -ь muss man nachsehen.',
+    fussnote: 'Drei Wörter meinen Männer und enden trotzdem weiblich: папа, дедушка, дядя. Sie sind männlich — die Bedeutung schlägt hier die Endung.',
+    beispiele: ['дом', 'книга', 'окно', 'стол', 'кухня', 'море', 'город', 'вода', 'письмо']
+  },
+  {
+    id: 'akkusativ', name: 'Akkusativ', kurz: 'Wen? Was?', aufgabe: 'akk',
+    frage: 'Links die Grundform, rechts dasselbe Wort als Ziel der Handlung. Was passiert?',
+    deutungen: ['Weibliche Wörter tauschen -а gegen -у', 'Alle Wörter bekommen -у angehängt', 'Nichts ändert sich, nur die Betonung wandert'], richtig: 0,
+    regel: 'Der Akkusativ antwortet auf «wen?» oder «was?» — er zeigt, worauf die Handlung zielt. Sichtbar ändern sich nur die weiblichen Wörter; männliche Sachen und sächliche bleiben, wie sie sind.',
+    tabelle: [['weiblich -а', 'wird -у', 'книга → книгу'], ['weiblich -я', 'wird -ю', 'кухня → кухню'], ['sächlich', 'bleibt', 'окно → окно'], ['männlich, Sache', 'bleibt', 'стол → стол'], ['männlich, Lebewesen', 'nimmt (-а)', 'брат → брат(а) — eigener Baustein']],
+    merksatz: 'Im Deutschen ändert sich der Artikel, im Russischen das Wort selbst.',
+    fussnote: 'Darum ist die Wortstellung im Russischen frei: Die Endung sagt, wer wen liest — nicht der Platz im Satz.',
+    beispiele: ['книга', 'газета', 'каша', 'музыка', 'кухня', 'окно', 'стол', 'письмо']
+  }
+];
 /* == DATEN:ENDE == */
 
 // ── FORMENMASCHINE ──────────────────────────────────────────
@@ -2039,6 +2125,8 @@ var ICON = {
   kreuz: svg('<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>'),
   tafel: svg('<rect x="3.5" y="4.5" width="17" height="15" rx="2"/>' +
     '<path d="M3.5 9.5h17M9 9.5v10M14.5 9.5v10"/>'),
+  wissen: svg('<circle cx="12" cy="12" r="8.6"/><path d="M12 11v5.4"/>' +
+    '<circle cx="12" cy="7.9" r="0.2" fill="currentColor"/>'),
   schluessel: svg('<circle cx="8" cy="8" r="3.6"/><path d="M10.6 10.6l8.4 8.4M16.4 16.4l2-2M14 14l2-2"/>')
 };
 
@@ -2156,6 +2244,10 @@ function defaultState() {
     satzSeen: {},              // Zeitstempel je Satz, Grundlage der Fälligkeit
     abcBox: {},                // Leitner-Stufe je Buchstabe — freiwillig, eigener Topf
     abcSeen: {},               // Zeitstempel je Buchstabe
+    // Grammatik: die Karteikarte ist die **Regel**, nicht das Wort. Gemeistert
+    // ist eine Regel, wenn sie viermal auf verschiedene Wörter gewirkt hat.
+    gramBox: {},               // Leitner-Stufe je Baustein
+    gramSeen: {},              // Zeitstempel je Baustein; fehlt er, ist er noch unentdeckt
     streak: 0,
     bestStreak: 0,
     answered: 0,
@@ -2175,6 +2267,8 @@ function mergeState(parsed) {
   d.satzSeen = migriereSaetze(d.satzSeen);
   d.abcBox = nurBuchstaben(d.abcBox);
   d.abcSeen = nurBuchstaben(d.abcSeen);
+  d.gramBox = nurBausteine(d.gramBox);
+  d.gramSeen = nurBausteine(d.gramSeen);
   // Ältere Stände kannten nur «gesehen», keine Stufe. Ein gesehener Satz
   // startet auf Stufe 1 und gilt als sofort fällig — nichts geht verloren,
   // aber als sitzend wird auch nichts verbucht, was nie geprüft wurde.
@@ -2219,6 +2313,17 @@ function nurBuchstaben(obj) {
   if (!obj || typeof obj !== 'object') return {};
   var bekannt = {};
   ALPHABET.forEach(function (b) { bekannt[b[1]] = true; });
+  var neu = {};
+  Object.keys(obj).forEach(function (k) { if (bekannt[k]) neu[k] = obj[k]; });
+  return neu;
+}
+
+// Einträge zu Bausteinen, die es nicht mehr gibt, fallen weg — sonst trüge der
+// Sicherungscode Stände zu Regeln mit, die niemand mehr lernen kann.
+function nurBausteine(obj) {
+  if (!obj || typeof obj !== 'object') return {};
+  var bekannt = {};
+  GRAMMATIK.forEach(function (b) { bekannt[b.id] = true; });
   var neu = {};
   Object.keys(obj).forEach(function (k) { if (bekannt[k]) neu[k] = obj[k]; });
   return neu;
@@ -2460,7 +2565,8 @@ var UEBUNGEN = [
   { id: 'freestyle', name: 'Freestyle', note: 'Freies Vokabeltraining nach Thema, ohne Sperren.' },
   { id: 'tippen', name: 'Tippen', note: 'Selbst schreiben, mit kyrillischer Tastatur.' },
   { id: 'uebersetzen', name: 'Übersetzen', note: 'Ganze Sätze aus Wortkacheln bauen.' },
-  { id: 'buchstaben', name: 'Buchstaben', note: 'Das kyrillische Alphabet — freiwillig.' }
+  { id: 'buchstaben', name: 'Buchstaben', note: 'Das kyrillische Alphabet — freiwillig.' },
+  { id: 'grammatik', name: 'Grammatik', note: 'Warum ein Wort so dasteht — Regeln statt auswendig.' }
 ];
 var UEBUNG_NAME = { home: 'Übersicht' };
 UEBUNGEN.forEach(function (u) { UEBUNG_NAME[u.id] = u.name; });
@@ -2638,6 +2744,118 @@ function renderFilter() {
   });
 }
 
+// ── Wissen: warum steht dieses Wort so da? ──────────────────
+// Die Frage entsteht mitten im Satz — also wird sie dort beantwortet. Zwei Wege
+// hinein: ein Wort antippen oder der Knopf für den ganzen Satz. Er heißt
+// «Wissen» und nicht «Tipp»: Ein Tipp ist etwas, das man sich versagt, Wissen
+// soll man sich holen (ADR 0030).
+var wissenOffen = false;
+var wissenWort = null;   // angetipptes Wort, sonst alle
+
+function wissenSetzen(auf) {
+  wissenOffen = auf && wissenHatWas();
+  document.body.classList.toggle('wissen-offen', wissenOffen);
+  var knopf = document.getElementById('wissenKnopf');
+  knopf.setAttribute('aria-expanded', wissenOffen ? 'true' : 'false');
+  document.getElementById('wissenPanel').setAttribute('aria-hidden', wissenOffen ? 'false' : 'true');
+  if (!wissenOffen) wissenWort = null;
+}
+
+// Erklärt wird nur die russische Seite — und nur dann, wenn sie ohnehin
+// dasteht. In der Richtung DE → RU wäre jede Erklärung die halbe Lösung.
+function wissenHatWas() {
+  return currentTab === 'uebersetzen' && !!trTask &&
+    (trTask.dir === 'ru-de' || trPhase === 'feedback');
+}
+
+// Ein Wort des Satzes nachschlagen: erst als gebeugte Form, dann als Grundform.
+function wissenZuWort(wort) {
+  var rein = String(wort).replace(/[.,!?;:«»]/g, '');
+  var klein = rein.toLowerCase();
+  var formen = (trTask && trTask.satz && trTask.satz.formen) || {};
+  var schluessel = null;
+  Object.keys(formen).forEach(function (f) {
+    if (f.toLowerCase() === klein) schluessel = f;
+  });
+  if (schluessel) {
+    var grundform = formen[schluessel][0];
+    var rolle = formen[schluessel][1];
+    var v = VOKABEL[grundform];
+    return {
+      wort: rein, art: 'form', grundform: grundform, rolle: rolle,
+      vokabel: v, geschlecht: v ? geschlecht(v.art) : ''
+    };
+  }
+  var direkt = VOKABEL[klein] || VOKABEL[rein];
+  if (direkt) return { wort: rein, art: 'grundform', vokabel: direkt };
+  return { wort: rein, art: 'offen' };
+}
+
+var ROLLE_NAME = { akk: 'Akkusativ — wen? was?' };
+
+function wissenKarteHtml(e) {
+  if (e.art === 'grundform') {
+    var v = e.vokabel;
+    return '<div class="wissen-karte"><p class="wissen-wort cyr">' + esc(v.ru) +
+      hoerknopf(v.ru, 'ru') + '</p>' +
+      '<p class="wissen-zeile">' + esc(v.de) + ' · <span class="translit">[' +
+      esc(v.tr) + ']</span></p>' +
+      (istNomen(v.art)
+        ? '<p class="wissen-regel">Grundform · ' + GESCHLECHT_NAME[geschlecht(v.art)] + '</p>'
+        : '<p class="wissen-regel">Grundform</p>') + '</div>';
+  }
+  if (e.art === 'offen') {
+    return '<div class="wissen-karte"><p class="wissen-wort cyr">' + esc(e.wort) + '</p>' +
+      '<p class="wissen-regel offen">Diese Form ist noch nicht erklärt — sie kommt mit ' +
+      'einem späteren Baustein in «Grammatik».</p></div>';
+  }
+  var g = e.geschlecht;
+  var grund = e.grundform;
+  var gleich = e.wort.toLowerCase() === grund.toLowerCase();
+  return '<div class="wissen-karte"><p class="wissen-wort cyr">' + esc(e.wort) +
+    hoerknopf(e.wort, 'ru') + '</p>' +
+    '<p class="wissen-zeile"><span class="cyr">' + esc(grund) + '</span>' +
+    (e.vokabel ? ' · ' + esc(e.vokabel.de) : '') +
+    (g ? ' · ' + GESCHLECHT_NAME[g] : '') + '</p>' +
+    '<p class="wissen-regel">' + esc(ROLLE_NAME[e.rolle] || e.rolle) + '</p>' +
+    '<p class="wissen-warum">' + (gleich
+      ? 'Hier ändert sich nichts — die Form ist dieselbe wie die Grundform.'
+      : '<span class="cyr">' + esc(grund.slice(-1)) + '</span> wird zu <span class="cyr">' +
+        esc(e.wort.slice(-1).toLowerCase()) + '</span>.') + '</p></div>';
+}
+
+function wissenInhaltHtml() {
+  if (!trTask) return '';
+  var text = trTask.dir === 'ru-de' ? trTask.prompt : trTask.solution;
+  var worte = text.split(/\s+/).filter(Boolean);
+  var eintraege = wissenWort ? [wissenZuWort(wissenWort)] : worte.map(wissenZuWort);
+  var html = '';
+  if (wissenWort) {
+    html += '<button class="chip wissen-alle" id="wissenAlle">Ganzer Satz</button>';
+  }
+  eintraege.forEach(function (e) { html += wissenKarteHtml(e); });
+  return html;
+}
+
+function renderWissen() {
+  var knopf = document.getElementById('wissenKnopf');
+  var da = wissenHatWas();
+  knopf.hidden = !da;
+  if (!da) {
+    if (wissenOffen) wissenSetzen(false);
+    return;
+  }
+  knopf.innerHTML = ICON.wissen;
+  var panel = document.getElementById('wissenInhalt');
+  panel.innerHTML = wissenInhaltHtml();
+  panel.querySelectorAll('button').forEach(function (b) { b.tabIndex = wissenOffen ? 0 : -1; });
+  var alleKnopf = document.getElementById('wissenAlle');
+  if (alleKnopf) alleKnopf.addEventListener('click', function () {
+    wissenWort = null;
+    renderWissen();
+  });
+}
+
 // ── Kopfzeile ───────────────────────────────────────────────
 // Auf «Home» trägt sie Titel und Fortschritt, sonst den Namen der Ansicht und
 // den Rückweg. Sie klebt nur unterwegs; auf Home darf sie wegscrollen.
@@ -2660,6 +2878,7 @@ function renderKopf() {
     b.classList.toggle('active', b.dataset.ziel === currentTab);
   });
   renderTafelKnopf();
+  renderWissen();
   renderFilter();
 }
 
@@ -2685,6 +2904,7 @@ function setTab(name) {
   // Erst zeichnen, dann schließen: die Platzwahl der Chili liefe sonst noch
   // über den Inhalt der alten Ansicht.
   filterSetzen(false);
+  wissenSetzen(false);
   menuSetzen(false);
 }
 
@@ -2748,6 +2968,14 @@ document.getElementById('filterKnopf').addEventListener('click', function (e) {
   filterSetzen(!filterOffen);
   renderFilter();   // die Einträge sind nur im offenen Panel erreichbar
 });
+document.getElementById('wissenKnopf').addEventListener('click', function (e) {
+  e.stopPropagation();
+  menuSetzen(false);
+  filterSetzen(false);
+  wissenWort = null;
+  wissenSetzen(!wissenOffen);
+  renderWissen();
+});
 document.getElementById('tafelKnopf').addEventListener('click', function (e) {
   e.stopPropagation();
   menuSetzen(false);
@@ -2778,6 +3006,7 @@ document.addEventListener('keydown', function (e) {
   if (e.key !== 'Escape') return;
   if (menuOffen) menuSetzen(false);
   if (filterOffen) filterSetzen(false);
+  if (wissenOffen) wissenSetzen(false);
 });
 
 // ── Home ────────────────────────────────────────────────────
@@ -2829,6 +3058,18 @@ function uebungsStand(id) {
       text: sitzt + ' von ' + ALPHABET.length + ' sitzen' +
         (faelligAbc ? ' · ' + faelligAbc + ' fällig' : ''),
       warm: sitzt === 0 || !!faelligAbc
+    };
+  }
+  if (id === 'grammatik') {
+    var sitzen = gramMeisterschaft();
+    var offenG = gramPool().length;
+    if (!offenG) return { text: 'alle Regeln sitzen' };
+    var naechster = gramWaehlen();
+    return {
+      text: naechster && !gramEntdeckt(naechster)
+        ? naechster.name + ' · neu'
+        : sitzen + ' von ' + GRAMMATIK.length + ' Regeln',
+      warm: sitzen === 0
     };
   }
   return { text: '' };
@@ -2902,6 +3143,7 @@ function render() {
   else if (currentTab === 'uebersetzen') renderUebersetzen();
   else if (currentTab === 'tippen') renderTippen();
   else if (currentTab === 'buchstaben') renderBuchstaben();
+  else if (currentTab === 'grammatik') renderGrammatik();
   else if (currentTab === 'einstellungen') renderEinstellungen();
   else if (currentTab === 'fakten') renderFakten();
   else if (currentTab === 'tickets') renderTickets();
@@ -3060,6 +3302,16 @@ function ansichtenZuruecksetzen() {
   abcCorrect = null;
   abcBuilt = [];
   abcRevealed = false;
+
+  gramBaustein = null;
+  gramQ = null;
+  gramPhase = 'ask';
+  gramPicked = null;
+  gramCorrect = null;
+  gramEingabe = '';
+  gramKb = null;
+  gramRegelOffen = false;
+  gramRegelNeu = false;
   meisterMeldung = null;
 
   faktenFilter = 'gesehen';
@@ -3638,6 +3890,16 @@ function renderUebersetzenLeer() {
 }
 
 
+// Jedes Wort des russischen Satzes wird ein Knopf: Antippen fragt, warum es so
+// dasteht. Der Satz bleibt dabei lesbar — die Knöpfe tragen keine Ränder.
+function satzMitWissen(text) {
+  return text.split(/(\s+)/).map(function (teil) {
+    if (!/\S/.test(teil)) return teil;
+    return '<button class="satzwort" data-wissenwort="' + esc(teil) + '">' +
+      esc(teil) + '</button>';
+  }).join('');
+}
+
 // Stufenwahl mit Angabe, wie viele S\u00e4tze je Stufe schon offen sind.
 function renderUebersetzen() {
   if (!trTask) buildTransTask();
@@ -3653,7 +3915,8 @@ function renderUebersetzen() {
     (promptIsRu ? 'RU → DE' : 'DE → RU') +
     (trModus === 'wiederholung' ? ' · zur Sicherheit' : '') +
     (getippt ? ' · selbst schreiben' : '') + '</p>' +
-    '<p class="sentence' + (promptIsRu ? ' cyr' : '') + '">' + esc(t.prompt) +
+    '<p class="sentence' + (promptIsRu ? ' cyr' : '') + '">' +
+    (promptIsRu ? satzMitWissen(t.prompt) : esc(t.prompt)) +
     hoerknopf(t.prompt, promptIsRu ? 'ru' : 'de') + '</p>';
 
   if (getippt) {
@@ -3720,22 +3983,7 @@ function renderUebersetzen() {
   if (getippt && t.loesungRu) {
     html += '<button class="kb-toggle" id="trKbToggle">' +
       (trKb ? 'Tastatur ausblenden' : 'Tastatur einblenden') + '</button>';
-    if (trKb && trPhase === 'ask') {
-      html += '<div>';
-      KB_ROWS.forEach(function (row, ri) {
-        html += '<div class="kb-row">';
-        row.forEach(function (ch) {
-          html += '<button class="key cyr" data-trkey="' + esc(ch) + '">' + esc(ch) + '</button>';
-        });
-        if (ri === 2) {
-          html += '<button class="key wide" data-trkey=" ">\u2423</button>' +
-            '<button class="key wide" data-trkey="BS" aria-label="Zeichen l\u00f6schen">' +
-            ICON.ruecktaste + '</button>';
-        }
-        html += '</div>';
-      });
-      html += '</div>';
-    }
+    if (trKb && trPhase === 'ask') html += tastaturHtml('trkey');
   }
 
   var sitzt = liste.filter(function (x) { return satzBox(x) >= BOX_MAX; }).length;
@@ -3749,6 +3997,17 @@ function renderUebersetzen() {
 
   main.innerHTML = html;
 
+
+  main.querySelectorAll('[data-wissenwort]').forEach(function (b) {
+    b.addEventListener('click', function (e) {
+      e.stopPropagation();
+      menuSetzen(false);
+      filterSetzen(false);
+      wissenWort = b.dataset.wissenwort;
+      wissenSetzen(true);
+      renderWissen();
+    });
+  });
 
   var eingabe = document.getElementById('trInput');
   if (eingabe) {
@@ -3916,6 +4175,16 @@ function abcFrageBauen() {
   abcCorrect = null;
   abcBuilt = [];
   abcRevealed = false;
+
+  gramBaustein = null;
+  gramQ = null;
+  gramPhase = 'ask';
+  gramPicked = null;
+  gramCorrect = null;
+  gramEingabe = '';
+  gramKb = null;
+  gramRegelOffen = false;
+  gramRegelNeu = false;
 
   if (modus === 'kacheln') {
     var laut = b[2];
@@ -4174,6 +4443,495 @@ function renderBuchstaben() {
   if (next) next.addEventListener('click', function () {
     abcFrageBauen();
     renderBuchstaben();
+  });
+}
+
+// Die eingebaute kyrillische Tastatur. Sie steht in drei Übungen; das
+// Datenattribut sagt, wer die Tasten abholt.
+function tastaturHtml(attr) {
+  var html = '<div>';
+  KB_ROWS.forEach(function (row, ri) {
+    html += '<div class="kb-row">';
+    row.forEach(function (ch) {
+      html += '<button class="key cyr" data-' + attr + '="' + esc(ch) + '">' + esc(ch) + '</button>';
+    });
+    if (ri === 2) {
+      html += '<button class="key wide" data-' + attr + '=" ">\u2423</button>' +
+        '<button class="key wide" data-' + attr + '="BS" aria-label="Zeichen löschen">' +
+        ICON.ruecktaste + '</button>';
+    }
+    html += '</div>';
+  });
+  return html + '</div>';
+}
+
+// ── GRAMMATIK ───────────────────────────────────────────────
+// Vokabeln sind Fakten, Regeln sind Funktionen. Darum ist hier die Karteikarte
+// die **Regel** und nicht das Wort: Gemeistert ist sie, wenn sie viermal auf
+// verschiedene Wörter gewirkt hat. Und darum verlangt die Aufgabe ein bekanntes
+// Wort in einer nie gesehenen Form — wer auswendig gelernt hat, scheitert
+// daran, wer die Regel hat, nicht (ADR 0030).
+//
+// Freiwillig wie die Buchstaben: blockiert nichts, zählt nicht in Serie und
+// «beantwortet», eigener Topf.
+var gramBaustein = null;   // Kennung des laufenden Bausteins
+var gramQ = null;          // die laufende Aufgabe
+var gramPhase = 'ask';     // 'ask' · 'feedback'
+var gramPicked = null;
+var gramCorrect = null;
+var gramEingabe = '';
+var gramKb = null;
+var gramRegelOffen = false;   // Regelkarte über «Warum?» aufgeklappt
+var gramRegelNeu = false;     // frisch entdeckt: die Regel steht ganzseitig da
+
+function gramBox(b) { return state.gramBox[b.id] || 0; }
+function gramEntdeckt(b) { return state.gramSeen[b.id] !== undefined; }
+function gramGemeistert(b) { return gramBox(b) >= BOX_MAX; }
+function gramFaellig(b, jetzt) {
+  var seit = state.gramSeen[b.id];
+  if (!seit) return true;
+  return jetzt - seit >= intervallFuer(gramBox(b));
+}
+function gramMeisterschaft() { return GRAMMATIK.filter(gramGemeistert).length; }
+
+function gramFinde(id) {
+  return GRAMMATIK.filter(function (b) { return b.id === id; })[0] || null;
+}
+
+// Offen ist, was noch nicht gemeistert ist; dazu Fertiges, dessen Frist um ist.
+function gramPool() {
+  var jetzt = Date.now();
+  var offen = GRAMMATIK.filter(function (b) { return !gramGemeistert(b); });
+  var frisch = GRAMMATIK.filter(function (b) { return gramGemeistert(b) && gramFaellig(b, jetzt); });
+  return offen.concat(frisch);
+}
+
+// Der Reihe nach: Bausteine bauen aufeinander auf, ein Zufallsgriff wäre hier
+// falsch. Der erste, der noch nicht sitzt, ist dran.
+function gramWaehlen() {
+  var pool = gramPool();
+  return pool.length ? pool[0] : null;
+}
+
+function gramAktuell() {
+  var b = gramBaustein ? gramFinde(gramBaustein) : null;
+  if (!b) { b = gramWaehlen(); gramBaustein = b ? b.id : null; }
+  return b;
+}
+
+function gramUpdate(b, richtig) {
+  var cur = gramBox(b);
+  state.gramBox[b.id] = richtig ? Math.min(BOX_MAX, cur + 1) : Math.max(0, cur - 1);
+  state.gramSeen[b.id] = Date.now();
+  save();
+}
+
+// ── Die Wörter, an denen geübt wird ─────────────────────────
+// Aus dem begonnenen Wortschatz: Die Regel soll auf ein Wort wirken, das man
+// kennt — sonst prüft die Aufgabe zwei Dinge auf einmal. Ist noch nichts
+// begonnen, tun es die Beispiele des Bausteins.
+function gramWortPool(b) {
+  var stufe = gramBox(b);
+  var passt = function (v) {
+    if (!istNomen(v.art)) return false;
+    // Belebte männliche Nomen im Akkusativ bleiben draußen, bis ihr eigener
+    // Baustein dran ist — sonst verlangte die Übung eine ungelernte Regel.
+    if (b.aufgabe === 'akk' && v.art === 'mb') return false;
+    // Erst wenn die Regel sitzt, kommen die Wörter dazu, die sie nicht verrät.
+    if (b.aufgabe === 'geschlecht' && stufe < SATZ_STUFE &&
+      v.art !== wortartRegel(v.ru)) return false;
+    return true;
+  };
+  var begonnen = ALL_VOCAB.filter(function (v) {
+    return (state.boxes[v.id] || 0) > 0 && passt(v);
+  });
+  if (begonnen.length >= 6) return begonnen;
+  var aus = b.beispiele.map(function (ru) { return VOKABEL[ru]; })
+    .filter(function (v) { return v && passt(v); });
+  // Beispiele zuerst, damit auch ein leerer Lernstand sofort üben kann.
+  var drin = {};
+  aus.forEach(function (v) { drin[v.id] = true; });
+  begonnen.forEach(function (v) { if (!drin[v.id]) aus.push(v); });
+  return aus.length ? aus : ALL_VOCAB.filter(passt).slice(0, 12);
+}
+
+// Ablenker für den Akkusativ: dasselbe Wort mit anderen Endungen. Sie sind
+// keine erfundenen Wörter, sondern Formen, die es gibt — nur nicht hier.
+function gramAblenker(ru, richtig) {
+  var stamm = ru.replace(/[аяоеьйы]$/, '');
+  var enden = ['а', 'у', 'е', 'и', 'ы', 'о'];
+  var aus = [];
+  enden.forEach(function (e) {
+    var f = stamm + e;
+    // «ы» steht nie nach к г х ж ч ш щ — ein Ablenker, den die Rechtschreibung
+    // schon ausschließt, wäre kein Ablenker.
+    if (e === 'ы' && nachZischlaut(stamm)) return;
+    if (f !== richtig && f !== ru && aus.indexOf(f) === -1) aus.push(f);
+  });
+  if (ru !== richtig && aus.indexOf(ru) === -1) aus.push(ru);
+  return shuffle(aus).slice(0, 3);
+}
+
+function gramFrageBauen() {
+  var b = gramAktuell();
+  gramPhase = 'ask';
+  gramPicked = null;
+  gramCorrect = null;
+  gramEingabe = '';
+  meisterMeldung = null;
+  if (!b) { gramQ = null; return; }
+
+  var pool = gramWortPool(b);
+  if (!pool.length) { gramQ = null; return; }
+  var wort = pool[Math.floor(Math.random() * pool.length)];
+  if (gramQ && pool.length > 1) {
+    var ohne = pool.filter(function (v) { return v.id !== gramQ.wort.id; });
+    if (ohne.length) wort = ohne[Math.floor(Math.random() * ohne.length)];
+  }
+
+  if (b.aufgabe === 'geschlecht') {
+    gramQ = {
+      baustein: b.id, art: 'geschlecht', wort: wort,
+      loesung: geschlecht(wort.art),
+      optionen: ['m', 'w', 's']
+    };
+    return;
+  }
+  // Akkusativ: unter der Endstufe die Form wählen, darüber selbst schreiben.
+  var form = grammForm(wort.ru, wort.art, 'akk');
+  gramQ = {
+    baustein: b.id, art: 'akk', wort: wort, loesung: form,
+    tippen: gramBox(b) >= SATZ_STUFE,
+    optionen: shuffle([form].concat(gramAblenker(wort.ru, form)))
+  };
+}
+
+function gramAbgabeBereit() {
+  if (!gramQ) return false;
+  if (gramQ.tippen) return normalize(gramEingabe) !== '';
+  return gramPicked !== null;
+}
+
+function gramPruefen() {
+  var q = gramQ;
+  var b = gramFinde(q.baustein);
+  gramCorrect = q.tippen
+    ? normalize(gramEingabe) === normalize(q.loesung)
+    : gramPicked === q.loesung;
+  var vorher = gramBox(b);
+  gramUpdate(b, gramCorrect);
+  meisterMeldung = null;
+  meisterPruefen(vorher, gramBox(b), 'Regel', b.name,
+    gramMeisterschaft() + ' von ' + GRAMMATIK.length + ' Regeln', false);
+  meisterTon(gramCorrect);
+  gramPhase = 'feedback';
+  renderGrammatik();
+}
+
+// ── Entdecken ───────────────────────────────────────────────
+// Erst sehen, dann benennen, dann die Regel: Was man selbst gefunden hat,
+// behält man. Freie Eingabe wäre nicht bewertbar — die Wahl unter drei
+// Deutungen ist die bewertbare Form desselben Gedankens.
+// Die Beispiele müssen **kontrastieren**, sonst gibt es nichts zu entdecken:
+// Vier weibliche Wörter zeigen kein Muster, sie zeigen vier Mal dasselbe. Für
+// das Geschlecht also je eines pro Geschlecht; für den Akkusativ zwei, die sich
+// ändern, und eines, das bleibt — erst der Unterschied ist die Regel.
+function gramEntdeckenWoerter(b) {
+  var pool = gramWortPool(b);
+  var nach = function (g) {
+    return pool.filter(function (v) { return geschlecht(v.art) === g; });
+  };
+  var aus = [];
+  var nimm = function (liste, wieviele) {
+    liste.forEach(function (v) {
+      if (aus.length < 4 && wieviele > 0 && aus.indexOf(v) === -1) { aus.push(v); wieviele--; }
+    });
+  };
+  if (b.aufgabe === 'geschlecht') {
+    nimm(nach('w'), 1); nimm(nach('m'), 1); nimm(nach('s'), 1); nimm(pool, 1);
+  } else {
+    nimm(nach('w'), 2); nimm(nach('s'), 1); nimm(nach('m'), 1);
+  }
+  if (aus.length < 3) nimm(pool, 4 - aus.length);
+  return aus;
+}
+
+function gramEntdeckenHtml(b) {
+  var pool = gramEntdeckenWoerter(b);
+  var html = '<p class="task-label">' + esc(b.name) + ' · entdecken</p>' +
+    '<div class="card"><p class="hint">' + esc(b.frage) + '</p><div class="gram-paare">';
+  pool.forEach(function (v) {
+    var rechts = b.aufgabe === 'geschlecht'
+      ? GESCHLECHT_NAME[geschlecht(v.art)]
+      : grammForm(v.ru, v.art, 'akk');
+    html += '<div class="gram-paar"><span class="cyr">' + esc(v.ru) + '</span>' +
+      '<span class="gram-pfeil" aria-hidden="true">→</span>' +
+      '<span class="' + (b.aufgabe === 'geschlecht' ? 'gram-deutung' : 'cyr') + '">' +
+      esc(rechts) + '</span></div>';
+  });
+  html += '</div><div class="options">';
+  b.deutungen.forEach(function (d, i) {
+    var klasse = 'option';
+    if (gramPhase === 'feedback') {
+      if (i === b.richtig) klasse += ' right';
+      else if (gramPicked === i) klasse += ' wrong';
+      else klasse += ' muted';
+    } else if (gramPicked === i) klasse += ' picked';
+    html += '<button class="' + klasse + '" data-gramdeutung="' + i + '"' +
+      (gramPhase !== 'ask' ? ' disabled' : '') + '>' + esc(d) + '</button>';
+  });
+  html += '</div>';
+  if (gramPhase === 'feedback') {
+    html += '<div class="feedback ' + (gramCorrect ? 'good' : 'bad') + '"><p>' +
+      (gramCorrect ? ICON.haken + 'Genau das ist es.' : ICON.kreuz + 'Nicht ganz — so ist es:') +
+      '</p></div>';
+  }
+  html += '</div><div class="btn-row">';
+  html += gramPhase === 'ask'
+    ? '<button class="btn primary" id="gramDeutungAb"' + (gramPicked === null ? ' disabled' : '') +
+      '>Bestätigen</button>'
+    : '<button class="btn primary" id="gramZurRegel">Die Regel →</button>';
+  return html + '</div>';
+}
+
+// ── Die Regelkarte ──────────────────────────────────────────
+function gramRegelHtml(b, mitKnopf) {
+  var html = '<div class="card gram-regel"><p class="task-label">' + esc(b.name) +
+    ' · ' + esc(b.kurz) + '</p>' +
+    '<p class="fact-text">' + esc(b.regel) + '</p><div class="gram-tabelle">';
+  b.tabelle.forEach(function (z) {
+    html += '<div class="gram-zeile"><span class="gram-fall cyr">' + esc(z[0]) + '</span>' +
+      '<span class="gram-was">' + esc(z[1]) + '</span>' +
+      '<span class="gram-bsp cyr">' + esc(z[2]) + '</span></div>';
+  });
+  html += '</div><p class="gram-merk">' + esc(b.merksatz) + '</p>';
+  if (b.fussnote) html += '<p class="session-info gram-fuss">' + esc(b.fussnote) + '</p>';
+  html += '</div>';
+  if (mitKnopf) {
+    html += '<div class="btn-row"><button class="btn primary" id="gramZurUebung">' +
+      'Jetzt anwenden →</button></div>';
+  }
+  return html;
+}
+
+// ── Anwenden ────────────────────────────────────────────────
+function gramUebenHtml(b) {
+  if (!gramQ || gramQ.baustein !== b.id) gramFrageBauen();
+  if (!gramQ) {
+    return '<div class="leer">' + maskottchen('gross') +
+      '<h3>Nichts zu üben</h3><p>Für diese Regel fehlen noch passende Wörter. ' +
+      'Lernen Sie ein paar Vokabeln — dann kommt sie von selbst zurück.</p></div>';
+  }
+  var q = gramQ;
+  var stufe = gramBox(b);
+  var dots = '';
+  for (var i = 0; i <= BOX_MAX; i++) {
+    dots += '<span class="' + (i <= stufe && stufe > 0 ? 'on' : '') + '"></span>';
+  }
+  var html = gramKopfHtml(b) + '<div class="card">' +
+    '<div class="card-meta"><span class="boxdots">' + dots + '</span>' +
+    '<span class="card-theme">' + esc(b.name) + '</span></div>';
+
+  if (q.art === 'geschlecht') {
+    html += '<p class="task-label">Welches Geschlecht?</p>' +
+      '<p class="word cyr">' + esc(q.wort.ru) + hoerknopf(q.wort.ru, 'ru') + '</p>' +
+      '<p class="hint">' + esc(q.wort.de) + '</p><div class="options abc-optionen">';
+    q.optionen.forEach(function (g) {
+      var klasse = 'option';
+      if (gramPhase === 'feedback') {
+        if (g === q.loesung) klasse += ' right';
+        else if (gramPicked === g) klasse += ' wrong';
+        else klasse += ' muted';
+      } else if (gramPicked === g) klasse += ' picked';
+      html += '<button class="' + klasse + '" data-gramopt="' + esc(g) + '"' +
+        (gramPhase !== 'ask' ? ' disabled' : '') + '>' + GESCHLECHT_NAME[g] + '</button>';
+    });
+    html += '</div>';
+  } else {
+    html += '<p class="task-label">Wen? Was? — die Form dazu</p>' +
+      '<p class="word cyr">' + esc(q.wort.ru) + '</p>' +
+      '<p class="hint">' + esc(q.wort.de) + ' · ' +
+      GESCHLECHT_NAME[geschlecht(q.wort.art)] + '</p>';
+    if (q.tippen) {
+      html += '<textarea id="gramInput" rows="1" class="fliess cyr' +
+        (gramPhase === 'feedback' ? (gramCorrect ? ' ok' : ' err') : '') + '"' +
+        ' lang="ru" autocapitalize="off" autocorrect="off" spellcheck="false"' +
+        (gramPhase === 'feedback' ? ' readonly' : '') +
+        ' placeholder="Die Form schreiben …">' + esc(gramEingabe) + '</textarea>';
+    } else {
+      html += '<div class="options abc-optionen">';
+      q.optionen.forEach(function (f, i) {
+        var klasse = 'option cyr';
+        if (gramPhase === 'feedback') {
+          if (f === q.loesung) klasse += ' right';
+          else if (gramPicked === f) klasse += ' wrong';
+          else klasse += ' muted';
+        } else if (gramPicked === f) klasse += ' picked';
+        html += '<button class="' + klasse + '" data-gramopt="' + esc(f) + '"' +
+          (gramPhase !== 'ask' ? ' disabled' : '') + '>' + esc(f) + '</button>';
+        void i;
+      });
+      html += '</div>';
+    }
+  }
+
+  if (gramPhase === 'feedback') {
+    html += '<div class="feedback ' + (gramCorrect ? 'good' : 'bad') + '"><p>';
+    if (gramCorrect) html += ICON.haken + 'Richtig!';
+    else if (q.art === 'geschlecht') {
+      html += ICON.kreuz + '<strong>' + GESCHLECHT_NAME[q.loesung] + '</strong>';
+    } else {
+      html += ICON.kreuz + 'Richtig wäre <strong class="cyr">' + esc(q.loesung) + '</strong>';
+    }
+    html += '</p></div>' + gramWarumHtml(b, q) + meisterHtml();
+  }
+
+  html += '</div><div class="btn-row">';
+  if (gramPhase === 'ask') {
+    html += '<button class="btn ghost" id="gramWarum">Warum?</button>' +
+      '<button class="btn primary" id="gramConfirm"' + (gramAbgabeBereit() ? '' : ' disabled') +
+      '>' + (q.tippen ? 'Prüfen' : 'Bestätigen') + '</button>';
+  } else {
+    html += '<button class="btn primary" id="gramNext">Weiter →</button>';
+  }
+  html += '</div>';
+  if (gramRegelOffen) html += gramRegelHtml(b, false);
+  if (q.tippen && gramPhase === 'ask') {
+    html += '<button class="kb-toggle" id="gramKbToggle">' +
+      (gramKb ? 'Tastatur ausblenden' : 'Tastatur einblenden') + '</button>';
+    if (gramKb) html += tastaturHtml('gramkey');
+  }
+  html += '<p class="session-info">' + gramPool().length + ' offen · ' +
+    gramMeisterschaft() + ' von ' + GRAMMATIK.length + ' Regeln sitzen</p>';
+  return html;
+}
+
+// Die Begründung *zu dieser Antwort* — nicht die Regel im Allgemeinen. Sie
+// steht nach der Auflösung da, wo man sie braucht.
+function gramWarumHtml(b, q) {
+  var v = q.wort;
+  var g = geschlecht(v.art);
+  if (q.art === 'geschlecht') {
+    var ausRegel = v.art === wortartRegel(v.ru);
+    return '<p class="hint">' + (ausRegel
+      ? '«' + esc(v.ru) + '» endet auf <strong class="cyr">' +
+        esc(v.ru.slice(-1)) + '</strong> — also ' + GESCHLECHT_NAME[g] + '.'
+      : '«' + esc(v.ru) + '» ist eine Ausnahme: Die Endung sagt etwas anderes, ' +
+        'das Wort ist ' + GESCHLECHT_NAME[g] + '.') + '</p>';
+  }
+  var gleich = q.loesung === v.ru;
+  void b;
+  return '<p class="hint">' + esc(v.ru) + ' ist ' + GESCHLECHT_NAME[g] + ' — ' +
+    (gleich ? 'und bleibt im Akkusativ unverändert.'
+      : 'darum wird <strong class="cyr">' + esc(v.ru.slice(-1)) + '</strong> zu <strong class="cyr">' +
+        esc(q.loesung.slice(-1)) + '</strong>.') + '</p>';
+}
+
+// Kopf über der Aufgabe: ein Punkt je Baustein, wie das Paket in «Lernsets».
+function gramKopfHtml(b) {
+  var html = '<p class="task-label">Regeln</p><div class="paket">' +
+    '<div class="paket-punkte" aria-hidden="true">';
+  GRAMMATIK.forEach(function (x) {
+    html += '<span class="pp s' + gramBox(x) + '"></span>';
+  });
+  html += '</div><p class="paket-text">' + gramMeisterschaft() + ' von ' +
+    GRAMMATIK.length + ' sitzen · gerade: ' + esc(b.name) + '</p></div>';
+  return html;
+}
+
+function renderGrammatik() {
+  var b = gramAktuell();
+  if (!b) {
+    var jetzt = Date.now();
+    var ruhend = GRAMMATIK.filter(function (x) {
+      return gramGemeistert(x) && !gramFaellig(x, jetzt);
+    }).length;
+    main.innerHTML = '<section><div class="leer">' + maskottchen('gross') +
+      '<h3>Alle Regeln sitzen</h3><p>Alle ' + GRAMMATIK.length +
+      ' Bausteine sind ' + BOX_MAX + '× richtig angewandt. ' + ruhend +
+      ' ruhen bis zur nächsten Auffrischung.</p></div></section>';
+    return;
+  }
+
+  var html = '<section>';
+  if (!gramEntdeckt(b)) html += gramEntdeckenHtml(b);
+  else if (gramRegelNeu) html += gramKopfHtml(b) + gramRegelHtml(b, true);
+  else html += gramUebenHtml(b);
+  main.innerHTML = html + '</section>';
+
+  main.querySelectorAll('[data-gramdeutung]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      if (gramPhase !== 'ask') return;
+      gramPicked = parseInt(el.dataset.gramdeutung, 10);
+      renderGrammatik();
+    });
+  });
+  var ab = document.getElementById('gramDeutungAb');
+  if (ab) ab.addEventListener('click', function () {
+    if (gramPicked === null) return;
+    gramCorrect = gramPicked === b.richtig;
+    ton(gramCorrect);
+    gramPhase = 'feedback';
+    renderGrammatik();
+  });
+  var zurRegel = document.getElementById('gramZurRegel');
+  if (zurRegel) zurRegel.addEventListener('click', function () {
+    // Entdeckt ist entdeckt — die Stufe steigt erst beim Anwenden.
+    state.gramSeen[b.id] = Date.now();
+    save();
+    gramRegelNeu = true;
+    gramPhase = 'ask';
+    gramPicked = null;
+    renderGrammatik();
+  });
+  var zurUebung = document.getElementById('gramZurUebung');
+  if (zurUebung) zurUebung.addEventListener('click', function () {
+    gramRegelNeu = false;
+    gramFrageBauen();
+    renderGrammatik();
+  });
+
+  main.querySelectorAll('[data-gramopt]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      if (gramPhase !== 'ask') return;
+      gramPicked = el.dataset.gramopt;
+      if (state.settings.confirmUeben) renderGrammatik();
+      else gramPruefen();
+    });
+  });
+  var feld = document.getElementById('gramInput');
+  if (feld) feld.addEventListener('input', function () {
+    gramEingabe = feld.value;
+    var k = document.getElementById('gramConfirm');
+    if (k) k.disabled = !gramAbgabeBereit();
+  });
+  var kb = document.getElementById('gramKbToggle');
+  if (kb) kb.addEventListener('click', function () { gramKb = !gramKb; renderGrammatik(); });
+  main.querySelectorAll('[data-gramkey]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      if (gramPhase !== 'ask') return;
+      var k = el.dataset.gramkey;
+      gramEingabe = k === 'BS' ? gramEingabe.slice(0, -1) : gramEingabe + k;
+      var f = document.getElementById('gramInput');
+      if (f) f.value = gramEingabe;
+      var c = document.getElementById('gramConfirm');
+      if (c) c.disabled = !gramAbgabeBereit();
+    });
+  });
+  var warum = document.getElementById('gramWarum');
+  if (warum) warum.addEventListener('click', function () {
+    gramRegelOffen = !gramRegelOffen;
+    renderGrammatik();
+  });
+  var conf = document.getElementById('gramConfirm');
+  if (conf) conf.addEventListener('click', function () {
+    if (gramAbgabeBereit()) gramPruefen();
+  });
+  var next = document.getElementById('gramNext');
+  if (next) next.addEventListener('click', function () {
+    gramBaustein = null;    // gemeisterte Regel abgeben, sonst dieselbe weiter
+    gramFrageBauen();
+    renderGrammatik();
   });
 }
 
@@ -4951,11 +5709,12 @@ function bkPruefsumme(text) {
 var bkTabelle = null;
 function bkNachschlagen() {
   if (bkTabelle) return bkTabelle;
-  bkTabelle = { woerter: {}, saetze: {}, fakten: {}, buchstaben: {} };
+  bkTabelle = { woerter: {}, saetze: {}, fakten: {}, buchstaben: {}, regeln: {} };
   ALL_VOCAB.forEach(function (v) { bkTabelle.woerter[bkKennung(v.id)] = v.id; });
   SENTENCES.forEach(function (x) { bkTabelle.saetze[bkKennung(x.ru)] = x.ru; });
   FACTS.forEach(function (f) { bkTabelle.fakten[bkKennung(f)] = faktId(f); });
   ALPHABET.forEach(function (b) { bkTabelle.buchstaben[bkKennung(b[1])] = b[1]; });
+  GRAMMATIK.forEach(function (b) { bkTabelle.regeln[bkKennung(b.id)] = b.id; });
   return bkTabelle;
 }
 
@@ -5010,8 +5769,11 @@ function encodeBackup() {
     ['system', 'dunkel', 'hell'].indexOf(s.darstellung);
 
   var abc = bkStaendeAus(state.abcBox, state.abcSeen, bkKennung);
+  // Neuntes Feld: der Grammatikstand. Er führt Regeln, nicht Wörter — darum
+  // bleibt er winzig, egal wie viel gelernt wurde.
+  var regeln = bkStaendeAus(state.gramBox, state.gramSeen, bkKennung);
 
-  var rumpf = [BK_KOPF, woerter, saetze, fakten.join(''), zahlen, einst, abc].join('~');
+  var rumpf = [BK_KOPF, woerter, saetze, fakten.join(''), zahlen, einst, abc, regeln].join('~');
   return rumpf + '~' + bkPruefsumme(rumpf);
 }
 
@@ -5024,10 +5786,13 @@ function bkUeberblick(st) {
   var fa = Object.keys(st.fakten).length;
   var ab = 0;
   Object.keys(st.abcBox || {}).forEach(function (k) { if (st.abcBox[k] > 0) ab++; });
+  var re = 0;
+  Object.keys(st.gramBox || {}).forEach(function (k) { if (st.gramBox[k] > 0) re++; });
   return w + (w === 1 ? ' Wort' : ' Wörter') + ' · ' +
     sa + (sa === 1 ? ' Satz' : ' Sätze') + ' · ' +
     fa + (fa === 1 ? ' Fakt' : ' Fakten') +
-    (ab ? ' · ' + ab + (ab === 1 ? ' Buchstabe' : ' Buchstaben') : '');
+    (ab ? ' · ' + ab + (ab === 1 ? ' Buchstabe' : ' Buchstaben') : '') +
+    (re ? ' · ' + re + (re === 1 ? ' Regel' : ' Regeln') : '');
 }
 
 function decodeBackup(code) {
@@ -5047,6 +5812,8 @@ function decodeBackup(code) {
   bkStaendeNach(teile[1], t.woerter, d.boxes, d.lastSeen);
   bkStaendeNach(teile[2], t.saetze, d.satzBox, d.satzSeen);
   if (teile.length > 7) bkStaendeNach(teile[6], t.buchstaben, d.abcBox, d.abcSeen);
+  // Ältere Codes haben sieben oder acht Felder; ihr Grammatikstand bleibt leer.
+  if (teile.length > 8) bkStaendeNach(teile[7], t.regeln, d.gramBox, d.gramSeen);
 
   var f = teile[3];
   for (var i = 0; i + BK_KENNUNG + 3 <= f.length; i += BK_KENNUNG + 3) {

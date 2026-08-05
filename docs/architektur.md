@@ -128,7 +128,8 @@ und wächst über `blaseAuf` (0,6 s) herein, statt aufzuploppen. Unter
 
 ## Navigation: Home, Kopf, Menü
 
-Die App hat fünf **Übungen** (Lernsets, Freestyle, Tippen, Übersetzen, Buchstaben) und
+Die App hat sechs **Übungen** (Lernsets, Freestyle, Tippen, Übersetzen, Buchstaben,
+Grammatik) und
 vier Ansichten, die keine sind: Bilanz, Sicherung, Einstellungen, Tickets. Der Begriff
 «Rubrik» ist hinfällig; im Nutzertext wie im Code heißt es **Übung**.
 
@@ -419,13 +420,15 @@ gehören nach der Regel aus ADR 0017 in `ansichtenZuruecksetzen()`.
 Format **2** (`CHG2~…`), eine einzige Zeile aus `A–Z a–z 0–9 . ~`:
 
 ```
-CHG2~<Wörter>~<Sätze>~<Fakten>~<Zahlen>~<Einstellungen>~<Buchstaben>~<Prüfsumme>
+CHG2~<Wörter>~<Sätze>~<Fakten>~<Zahlen>~<Einstellungen>~<Buchstaben>~<Regeln>~<Prüfsumme>
 ```
 
 Ein Wort belegt zehn Zeichen: sechs für die **Kennung**, eines für die Stufe, drei für
 das Alter in Tagen seit `BK_BEZUG` (1. Januar 2026). Sätze und Buchstaben genauso, Fakten
-neun Zeichen (Kennung, Zähler, Favorit). Die Buchstaben stehen im achten Feld; ältere
-Codes tragen nur sieben, darum wird die Prüfsumme immer aus dem letzten Feld gelesen. Bei vollem Lernstand ergibt das rund **5 KB statt 35 KB** —
+neun Zeichen (Kennung, Zähler, Favorit). Die Buchstaben stehen im achten Feld, der Grammatikstand im neunten; ältere
+Codes tragen sieben oder acht, darum wird die Prüfsumme immer aus dem letzten Feld
+gelesen. Der Grammatikstand führt **Regeln**, nicht Wörter — er bleibt darum winzig,
+gleich wie viel gelernt wurde. Bei vollem Lernstand ergibt das rund **5 KB statt 35 KB** —
 Format 1 war der ganze Zustand als JSON in Base64, mit 380 kyrillischen Schlüsseln und
 Millisekunden-Zeitstempeln.
 
@@ -547,6 +550,96 @@ Zwei gleiche Lautsprecher sagen nicht, welcher welche Sprache spricht.
 **Vor der Abgabe schweigt, was die Antwort wäre.** In «Tippen» ist das russische Wort
 erst nach dem Prüfen zu hören, in «Buchstaben» der Laut erst nach der Auflösung — sonst
 wäre der Hörknopf die halbe Lösung.
+
+## Grammatik — verstehen statt auswendig
+
+Eine Vokabel ist ein **Fakt**, eine Regel ist eine **Funktion**. Daraus folgt der ganze
+Aufbau dieser Übung: **Die Karteikarte ist die Regel, nicht das Wort** (`state.gramBox`
+führt Bausteine, nicht Vokabeln). Gemeistert ist eine Regel, wenn sie viermal auf
+**verschiedene** Wörter gewirkt hat — und die Aufgabe verlangt ein bekanntes Wort in einer
+**nie gesehenen Form**. Wer auswendig gelernt hat, scheitert daran; wer die Regel hat,
+nicht. Das ist der einzige ehrliche Test (ADR 0030).
+
+Freiwillig wie die Buchstaben: blockiert nichts, zählt weder in die Serie noch in
+«beantwortet», eigener Topf.
+
+### Die Formenmaschine und ihr Beweis
+
+`grammForm(wort, art, rolle)` rechnet aus Grundform und Rolle die Form:
+«книга» + `akk` → «книгу». Regeln, keine Tabelle — nur so lässt sich eine Regel auf ein
+Wort anwenden, das nie in dieser Form dastand.
+
+**Sie steht zweimal**: in `index.html` und in `tools/build.mjs`. Das ist kein Versehen —
+der Build muss ohne die App laufen können, und weil beide Fassungen an denselben Formen
+gemessen werden, fällt jede Abweichung sofort auf.
+
+Der Beweis liegt in den Daten: `saetze.json` führt unter `formen` gebeugte Wörter auf
+Grundform und Rolle zurück. **Der Build lässt die Maschine jede davon nachbauen und
+bricht ab, wenn eine abweicht.** Die Grammatik ist damit nicht behauptet, sondern
+nachgewiesen.
+
+### Wortart und Geschlecht
+
+Die Endung der Grundform verrät beides — bei 239 der 380 Wörter. Wo sie schweigt (`-ь`,
+`-и`, `-ы`) oder irrt, trägt die Vokabel ein **viertes Feld**:
+
+| Code | bedeutet |
+| --- | --- |
+| `m` · `mb` | männlich · männlich und belebt |
+| `w` · `s` | weiblich · sächlich |
+| `pl` | nur in der Mehrzahl gebräuchlich |
+| `v` · `a` | Verb · Adjektiv |
+| `-` | keine Formenlehre (Adverb, Partikel, Zahlwort, Wendung) |
+
+Der Build erzwingt beide Richtungen: Ein Wort ohne ableitbare Wortart **muss** das Feld
+tragen, und ein Feld, das nur wiederholt, was die Endung ohnehin sagt, ist ein **Fehler**.
+Sonst würde die Ausnahmeliste still zur zweiten Datenquelle und verdeckte die echten
+Ausnahmen — `кровать` (Nomen trotz `-ть`), `кофе` (männlich), `время` (sächlich),
+`папа`/`дедушка`/`дядя` (männlich trotz `-а/-я`).
+
+Die Belebtheit ist nur bei männlichen Nomen vermerkt, weil nur dort eine Form davon
+abhängt. Kommt eine Regel dazu, die mehr braucht, verlangt der Build es dann.
+
+### Der Ablauf eines Bausteins
+
+1. **Entdecken.** Vier bekannte Wörter mit ihrer Form daneben, darunter drei Deutungen
+   zur Wahl. Wer richtig wählt, hat die Regel selbst gefunden. Freie Eingabe wäre nicht
+   bewertbar; die Wahl ist die bewertbare Form desselben Gedankens.
+   **Die Beispiele müssen kontrastieren** (`gramEntdeckenWoerter()`): je eines pro
+   Geschlecht, nicht vier weibliche. Vier gleiche Fälle zeigen kein Muster, sondern vier
+   Mal dasselbe.
+2. **Die Regelkarte.** Ein Satz, eine Tabelle, ein Merksatz, eine Fußnote für die
+   Ausnahmen. Später jederzeit über «Warum?» wieder da.
+3. **Anwenden**, gestaffelt wie überall: bis Stufe 1 die Form aus vier wählen, ab
+   `SATZ_STUFE` selbst tippen (kyrillische Tastatur einblendbar).
+
+Die Wörter kommen aus dem **begonnenen** Wortschatz — die Regel soll auf ein Wort wirken,
+das man kennt, sonst prüft die Aufgabe zwei Dinge auf einmal. Ist noch nichts begonnen,
+tun es die Beispiele des Bausteins. **Belebte männliche Nomen bleiben im Akkusativ
+draußen**, bis ihr eigener Baustein dran ist: Die Übung fragt nie nach einer ungelernten
+Regel, statt Falsches durchgehen zu lassen.
+
+### «Wissen» — die Erklärung im Satz
+
+In «Übersetzen» wird jedes Wort des russischen Satzes ein Knopf (`.satzwort`, zarter
+Unterstrich — der Satz soll ein Satz bleiben). Antippen öffnet dasselbe Aufklapp-Panel wie
+Menü und Auswahl; der runde Knopf `#wissenKnopf` zeigt darin den ganzen Satz.
+
+| angetippt | Antwort |
+| --- | --- |
+| Grundform | Bedeutung, Umschrift, Geschlecht, Hörknopf |
+| erklärte Form | `книгу ← книга · weiblich · Akkusativ — wen? was? · а wird zu у` |
+| noch nicht erklärte Form | «Diese Form ist noch nicht erklärt — sie kommt mit einem späteren Baustein.» |
+
+Der dritte Fall ist kein Mangel, sondern die ehrlichste Antwort, die die App geben kann.
+
+**Erklärt wird nur die russische Seite, und nur wenn sie ohnehin dasteht.** In der
+Richtung DE → RU schweigt das Fenster bis zur Auflösung — jede Erklärung wäre dort die
+halbe Lösung.
+
+Der Name ist mit Bedacht gewählt: **nicht «Tipp»**. Der Knopf «Hinweis» in «Tippen» zeigt
+die Umschrift, ist also Lösungshilfe. Ein Tipp ist etwas, das man sich versagt — Wissen
+soll man sich holen.
 
 ## Bilanz im Detail
 

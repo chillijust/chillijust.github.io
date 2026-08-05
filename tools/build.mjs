@@ -77,6 +77,7 @@ const saetze = lies('saetze.json').wert;
 const fakten = lies('fakten.json').wert;
 const tastatur = lies('tastatur.json').wert;
 const buchstaben = lies('buchstaben.json').wert;
+const grammatik = lies('grammatik.json').wert;
 
 // ── Wortart und Geschlecht ───────────────────────────────────
 // Die Endung der Grundform verrät beides — meistens. Was die Regel liefert,
@@ -307,6 +308,27 @@ const listenBlock = (name, liste, alsTupel) => {
   return zeilen.join('\n');
 };
 
+// Grammatik-Bausteine: je Baustein ein Objekt über mehrere Zeilen — sie tragen
+// zu viel Text für eine Zeile.
+const grammatikBlock = (name, liste) => {
+  const zeilen = ['var ' + name + ' = ['];
+  liste.forEach((b, i) => {
+    zeilen.push('  {');
+    zeilen.push('    id: ' + jsStr(b.id) + ', name: ' + jsStr(b.name) +
+      ', kurz: ' + jsStr(b.kurz) + ', aufgabe: ' + jsStr(b.aufgabe) + ',');
+    zeilen.push('    frage: ' + jsStr(b.frage) + ',');
+    zeilen.push('    deutungen: [' + b.deutungen.map(jsStr).join(', ') + '], richtig: ' + b.richtig + ',');
+    zeilen.push('    regel: ' + jsStr(b.regel) + ',');
+    zeilen.push('    tabelle: [' + b.tabelle.map((z) => '[' + z.map(jsStr).join(', ') + ']').join(', ') + '],');
+    zeilen.push('    merksatz: ' + jsStr(b.merksatz) + ',');
+    zeilen.push('    fussnote: ' + jsStr(b.fussnote || '') + ',');
+    zeilen.push('    beispiele: [' + b.beispiele.map(jsStr).join(', ') + ']');
+    zeilen.push('  }' + (i < liste.length - 1 ? ',' : ''));
+  });
+  zeilen.push('];');
+  return zeilen.join('\n');
+};
+
 // Sätze als Liste von Objekten, ein Satz je Zeile.
 const satzBlock = (name, liste) => {
   const zeilen = ['var ' + name + ' = ['];
@@ -334,6 +356,8 @@ const block = [
   listenBlock('KB_ROWS', tastatur, true),
   '',
   listenBlock('ALPHABET', buchstaben, true),
+  '',
+  grammatikBlock('GRAMMATIK', grammatik),
   ENDE
 ].join('\n');
 
@@ -387,13 +411,95 @@ const jsonSaetze = (liste) => {
   return zeilen.join('\n') + '\n';
 };
 
+// Bausteine lesbar halten: Listen bleiben auf einer Zeile, lange Texte stehen
+// für sich. So sieht man beim Durchsehen die Regel und nicht die Klammern.
+const jsonGrammatik = (liste) => {
+  const zeilen = ['['];
+  liste.forEach((b, i) => {
+    zeilen.push('  {');
+    const feld = (name, wert, komma) =>
+      zeilen.push('    ' + jsonStr(name) + ': ' + wert + (komma ? ',' : ''));
+    feld('id', jsonStr(b.id), true);
+    feld('name', jsonStr(b.name), true);
+    feld('kurz', jsonStr(b.kurz), true);
+    feld('aufgabe', jsonStr(b.aufgabe), true);
+    feld('frage', jsonStr(b.frage), true);
+    feld('deutungen', '[' + b.deutungen.map(jsonStr).join(', ') + ']', true);
+    feld('richtig', String(b.richtig), true);
+    feld('regel', jsonStr(b.regel), true);
+    zeilen.push('    "tabelle": [');
+    b.tabelle.forEach((z, k) => {
+      zeilen.push('      [' + z.map(jsonStr).join(', ') + ']' + (k < b.tabelle.length - 1 ? ',' : ''));
+    });
+    zeilen.push('    ],');
+    feld('merksatz', jsonStr(b.merksatz), true);
+    feld('fussnote', jsonStr(b.fussnote || ''), true);
+    feld('beispiele', '[' + b.beispiele.map(jsonStr).join(', ') + ']', false);
+    zeilen.push('  }' + (i < liste.length - 1 ? ',' : ''));
+  });
+  zeilen.push(']');
+  return zeilen.join('\n') + '\n';
+};
+
 const dateien = [
   ['data/vokabeln.json', jsonObjekt(vokabeln)],
   ['data/saetze.json', jsonSaetze(saetze)],
   ['data/fakten.json', jsonListe(fakten, false)],
   ['data/tastatur.json', jsonListe(tastatur, true)],
-  ['data/buchstaben.json', jsonListe(buchstaben, true)]
+  ['data/buchstaben.json', jsonListe(buchstaben, true)],
+  ['data/grammatik.json', jsonGrammatik(grammatik)]
 ];
+
+// ── Grammatik-Bausteine ─────────────────────────────────────
+// Ein Baustein ist eine Regel mit allem, was sie zum Lernen braucht: die Frage
+// zum Entdecken samt Deutungen, die Regel selbst, eine Tabelle und ein
+// Merksatz. Die Aufgabenart verweist auf eine Rolle, die die Maschine kennt.
+const AUFGABEN = ['geschlecht', 'akk'];
+if (!Array.isArray(grammatik) || grammatik.length === 0) {
+  meckern('grammatik.json: erwartet eine nicht-leere Liste von Bausteinen');
+} else {
+  const ids = new Set();
+  grammatik.forEach((b, i) => {
+    const wo = 'grammatik.json #' + (i + 1) + (b && b.id ? ' (' + b.id + ')' : '');
+    if (!b || typeof b !== 'object' || Array.isArray(b)) return meckern(wo + ': erwartet ein Objekt');
+    ['id', 'name', 'kurz', 'aufgabe', 'frage', 'regel', 'merksatz'].forEach((f) => {
+      if (typeof b[f] !== 'string' || b[f].trim() === '') meckern(wo + ': «' + f + '» fehlt oder ist leer');
+    });
+    if (!/^[a-z]+$/.test(String(b.id))) meckern(wo + ': «id» nur Kleinbuchstaben');
+    if (ids.has(b.id)) meckern(wo + ': doppelte Kennung «' + b.id + '»');
+    ids.add(b.id);
+    if (!AUFGABEN.includes(b.aufgabe)) {
+      meckern(wo + ': unbekannte Aufgabe «' + b.aufgabe + '» — bekannt: ' + AUFGABEN.join(' '));
+    }
+    // Entdecken heißt wählen: eine Deutung trifft, die anderen sind plausibel
+    // und falsch. Unter drei Möglichkeiten wäre es kein Erkennen mehr, sondern
+    // Raten mit halber Chance.
+    if (!Array.isArray(b.deutungen) || b.deutungen.length < 3) {
+      meckern(wo + ': «deutungen» braucht mindestens drei Möglichkeiten');
+    } else if (!Number.isInteger(b.richtig) || b.richtig < 0 || b.richtig >= b.deutungen.length) {
+      meckern(wo + ': «richtig» zeigt auf keine der Deutungen');
+    }
+    if (!Array.isArray(b.tabelle) || b.tabelle.length === 0) {
+      meckern(wo + ': «tabelle» fehlt');
+    } else {
+      b.tabelle.forEach((z, k) => {
+        if (!Array.isArray(z) || z.length !== 3) meckern(wo + ' » Zeile ' + (k + 1) + ': erwartet drei Spalten');
+      });
+    }
+    // Beispiele müssen aus dem Lehrplan kommen — eine Regel an Wörtern zu
+    // zeigen, die man nie lernt, erklärt nichts.
+    if (!Array.isArray(b.beispiele) || b.beispiele.length < 4) {
+      meckern(wo + ': «beispiele» braucht mindestens vier Wörter');
+    } else {
+      b.beispiele.forEach((w) => {
+        if (!wortIndex[w]) meckern(wo + ': Beispiel «' + w + '» steht nicht in vokabeln.json');
+        else if (b.aufgabe === 'akk' && !['m', 'mb', 'w', 's'].includes(wortart(wortIndex[w]))) {
+          meckern(wo + ': Beispiel «' + w + '» ist kein Nomen');
+        }
+      });
+    }
+  });
+}
 
 // ── Kennungen für den Sicherungscode ────────────────────────
 // Der Code führt Wörter, Sätze und Fakten über eine sechsstellige Kennung —

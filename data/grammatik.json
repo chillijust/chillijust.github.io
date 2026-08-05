@@ -1,0 +1,41 @@
+[
+  {
+    "id": "geschlecht",
+    "name": "Geschlecht",
+    "kurz": "Woran man es sieht",
+    "aufgabe": "geschlecht",
+    "frage": "Drei Wörter, drei Geschlechter. Woran erkennt man, welches?",
+    "deutungen": ["An der Endung der Grundform", "An der Bedeutung des Wortes", "Daran, ob es ein Lebewesen ist"],
+    "richtig": 0,
+    "regel": "Jedes russische Nomen ist männlich, weiblich oder sächlich — und die Endung der Grundform verrät fast immer, welches. Anders als im Deutschen muss man das Geschlecht also nicht mitlernen: Man sieht es dem Wort an.",
+    "tabelle": [
+      ["Konsonant", "männlich", "дом · стол · город"],
+      ["-а / -я", "weiblich", "книга · кухня · вода"],
+      ["-о / -е", "sächlich", "окно · море · письмо"],
+      ["-ь", "beides möglich", "день männlich · ночь weiblich"]
+    ],
+    "merksatz": "Die Endung entscheidet, nicht die Bedeutung. Nur bei -ь muss man nachsehen.",
+    "fussnote": "Drei Wörter meinen Männer und enden trotzdem weiblich: папа, дедушка, дядя. Sie sind männlich — die Bedeutung schlägt hier die Endung.",
+    "beispiele": ["дом", "книга", "окно", "стол", "кухня", "море", "город", "вода", "письмо"]
+  },
+  {
+    "id": "akkusativ",
+    "name": "Akkusativ",
+    "kurz": "Wen? Was?",
+    "aufgabe": "akk",
+    "frage": "Links die Grundform, rechts dasselbe Wort als Ziel der Handlung. Was passiert?",
+    "deutungen": ["Weibliche Wörter tauschen -а gegen -у", "Alle Wörter bekommen -у angehängt", "Nichts ändert sich, nur die Betonung wandert"],
+    "richtig": 0,
+    "regel": "Der Akkusativ antwortet auf «wen?» oder «was?» — er zeigt, worauf die Handlung zielt. Sichtbar ändern sich nur die weiblichen Wörter; männliche Sachen und sächliche bleiben, wie sie sind.",
+    "tabelle": [
+      ["weiblich -а", "wird -у", "книга → книгу"],
+      ["weiblich -я", "wird -ю", "кухня → кухню"],
+      ["sächlich", "bleibt", "окно → окно"],
+      ["männlich, Sache", "bleibt", "стол → стол"],
+      ["männlich, Lebewesen", "nimmt (-а)", "брат → брат(а) — eigener Baustein"]
+    ],
+    "merksatz": "Im Deutschen ändert sich der Artikel, im Russischen das Wort selbst.",
+    "fussnote": "Darum ist die Wortstellung im Russischen frei: Die Endung sagt, wer wen liest — nicht der Platz im Satz.",
+    "beispiele": ["книга", "газета", "каша", "музыка", "кухня", "окно", "стол", "письмо"]
+  }
+]

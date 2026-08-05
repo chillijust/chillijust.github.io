@@ -1,7 +1,7 @@
 # Plan: Grammatik — verstehen statt auswendig lernen
 
-**Stand:** 2026-08-04 · **Entwurf, noch nichts gebaut.**
-Bis zum Abschluss aktuell halten, wie `docs/plan.md`.
+**Stand:** 2026-08-04 · **Probelauf gebaut und ausgeliefert** (ADR 0030).
+Was danach kommt, steht unter «Etappen nach dem Probelauf».
 
 ---
 
@@ -272,6 +272,32 @@ Wie die Buchstaben das achte (ADR 0023). `decodeBackup()` liest die Prüfsumme o
 dem **letzten** Feld — Codes mit sieben oder acht Feldern bleiben lesbar, ihr
 Grammatikstand ist dann leer. Getragen wird der Stand je Regel, nicht je Wort; das Feld
 bleibt darum winzig.
+
+---
+
+---
+
+## Der Probelauf ist fertig — was daraus wurde
+
+| geplant | gebaut |
+| --- | --- |
+| Formenmaschine mit Build-Beweis | `grammForm()` in App **und** Build, 9 Formen in den Sätzen vermerkt, jede nachgebaut |
+| Wortart und Geschlecht in den Daten | viertes Feld bei **141** von 380 Vokabeln |
+| Übung «Grammatik», freiwillig | sechste Kachel, eigener Topf, entdecken → Regel → anwenden |
+| Abfrage gestaffelt | bis Stufe 1 wählen, ab Stufe 2 tippen mit kyrillischer Tastatur |
+| «Wissen» im Satz | Wörter antippbar plus runder Knopf für den ganzen Satz |
+| Neuntes Feld im Sicherungscode | drin, ältere Codes bleiben lesbar |
+| Testreihe | `grammatik.mjs`, 65 Prüfungen; zusammen 728 |
+
+**Zwei Korrekturen an diesem Plan**, die beim Bauen nötig wurden:
+
+- **141 statt «~40» Angaben.** Der Plan hatte nur an Nomen gedacht. Die Endungsregel
+  greift aber auch bei Adverbien und Partikeln: «хорошо» sähe sächlich aus, «пожалуйста»
+  weiblich. Ohne die Markierung `-` hätte die Übung nach dem Geschlecht von «bitte»
+  gefragt.
+- **Die Entdecken-Beispiele müssen kontrastieren.** Der erste Entwurf zeigte vier
+  weibliche Wörter — vier Mal dasselbe zeigt kein Muster. Jetzt steht je eines pro
+  Geschlecht da.
 
 ---
 
