@@ -102,5 +102,25 @@
     "merksatz": "Ein einziger Laut kippt, und nur in der Ich-Form.",
     "fussnote": "Das ist keine Unregelmäßigkeit, sondern Bequemlichkeit: Zwei Laute, die schlecht nebeneinander liegen, weichen einander aus. Wer die Regel hat, muss люблю nicht auswendig lernen.",
     "beispiele": ["любить", "готовить", "платить", "видеть", "встретить", "спать"]
+  },
+  {
+    "id": "praepositiv",
+    "name": "Präpositiv",
+    "kurz": "Wo? — der Ortsfall",
+    "aufgabe": "praep",
+    "frage": "Drei Geschlechter, dieselbe Endung. Was entscheidet hier?",
+    "deutungen": ["Nichts — nach в und на endet fast alles auf -е", "Das Geschlecht, wie im Akkusativ", "Ob das Wort ein Lebewesen ist"],
+    "richtig": 0,
+    "regel": "Der Präpositiv sagt, wo etwas ist. Er steht nach в und на — und nur nach ihnen, weshalb er seinen Namen trägt. Anders als im Akkusativ spielt das Geschlecht keine Rolle: Männlich, weiblich, sächlich, fast alles endet auf -е. Merken muss man sich nicht die Endung, sondern die Präposition.",
+    "tabelle": [
+      ["männlich", "+ -е", "город → в городе"],
+      ["weiblich -а / -я", "wird -е", "Москва → в Москве"],
+      ["sächlich -о", "wird -е", "окно → в окне"],
+      ["-ия · -ий · -ие", "wird -ии", "Россия → в России"],
+      ["weiblich -ь", "wird -и", "дверь → в двери"]
+    ],
+    "merksatz": "Im Akkusativ entscheidet das Geschlecht, im Präpositiv die Präposition.",
+    "fussnote": "в und на nehmen beide Fälle: mit dem Akkusativ heißen sie «wohin», mit dem Präpositiv «wo». «Я иду в город» — ich gehe in die Stadt. «Я живу в городе» — ich wohne in der Stadt. Eine Handvoll männlicher Wörter nimmt dabei -у statt -е: в году, в лесу, в аэропорту.",
+    "beispiele": ["город", "стол", "магазин", "школа", "дом", "квартира", "комната", "кухня", "окно", "парк", "университет", "вокзал", "банк", "аптека", "больница", "ресторан", "музей", "офис", "сумка", "гостиница", "деревня", "река", "озеро", "пляж", "остров", "Москва", "Россия", "книга", "письмо", "улица", "машина", "автобус", "поезд", "дорога"]
   }
 ]

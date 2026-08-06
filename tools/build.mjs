@@ -79,6 +79,7 @@ const tastatur = lies('tastatur.json').wert;
 const buchstaben = lies('buchstaben.json').wert;
 const grammatik = lies('grammatik.json').wert;
 const verben = lies('verben.json').wert;
+const nomen = lies('nomen.json').wert;
 
 // ── Wortart und Geschlecht ───────────────────────────────────
 // Die Endung der Grundform verrät beides — meistens. Was die Regel liefert,
@@ -87,7 +88,12 @@ const verben = lies('verben.json').wert;
 //
 //   m  männlich · mb  männlich und belebt · w  weiblich · s  sächlich
 //   pl nur Mehrzahl · v  Verb · a  Adjektiv · -  keine Formenlehre
-const WORTARTEN = ['m', 'mb', 'w', 's', 'pl', 'v', 'a', '-'];
+// m männlich · w weiblich · s sächlich, je mit b für belebt (Lebewesen).
+// pl nur Mehrzahl · v Verb · a Adjektiv · - keine Formenlehre.
+const WORTARTEN = ['m', 'mb', 'w', 'wb', 's', 'sb', 'pl', 'v', 'a', '-'];
+const GESCHLECHT_VON = { m: 'm', mb: 'm', w: 'w', wb: 'w', s: 's', sb: 's' };
+const geschlecht = (art) => GESCHLECHT_VON[art] || art;
+const belebt = (art) => art === 'mb' || art === 'wb' || art === 'sb';
 
 const wortartRegel = (ru) => {
   if (/(ться|ть)$/.test(ru)) return 'v';
@@ -135,14 +141,27 @@ for (const [thema, liste] of Object.entries(vokabeln)) {
 // muss ohne die App laufen können — und weil beide Fassungen an denselben
 // vermerkten Formen gemessen werden, fällt jede Abweichung sofort auf.
 const akkusativ = (ru, art) => {
-  if (art === 'w') {
+  if (geschlecht(art) === 'w') {
     if (/а$/.test(ru)) return ru.slice(0, -1) + 'у';
     if (/я$/.test(ru)) return ru.slice(0, -1) + 'ю';
     return ru;
   }
-  if (art === 'mb') return /[йь]$/.test(ru) ? ru.slice(0, -1) + 'я' : ru + 'а';
+  if (geschlecht(art) === 'm' && belebt(art)) {
+    return /[йь]$/.test(ru) ? ru.slice(0, -1) + 'я' : ru + 'а';
+  }
   return ru;
 };
+const praepositivMit = (ru, art, tab) => {
+  const eigen = tab[ru] || null;
+  if (eigen && eigen.starr) return ru;
+  if (eigen && eigen.praep) return eigen.praep;
+  if (/(ия|ий|ие)$/.test(ru)) return ru.slice(0, -1) + 'и';
+  if (/ь$/.test(ru)) return ru.slice(0, -1) + (geschlecht(art) === 'w' ? 'и' : 'е');
+  if (/е$/.test(ru)) return ru;
+  if (/[аяой]$/.test(ru)) return ru.slice(0, -1) + 'е';
+  return ru + 'е';
+};
+const praepositiv = (ru, art) => praepositivMit(ru, art, nomen);
 const PERSONEN = ['1s', '2s', '3s', '1p', '2p', '3p'];
 const nachZischlaut = (stamm) => /[кгхжчшщ]$/.test(stamm);
 const weicherStamm = (stamm) => /[аеёиоуыэюяьй]$/.test(stamm);
@@ -188,12 +207,14 @@ const praesens = (ru, person) => {
   const i = PERSONEN.indexOf(person);
   return i === -1 ? null : formen[i];
 };
+const istNomen = (art) => !!GESCHLECHT_VON[art];
 const grammForm = (ru, art, rolle) => {
-  if (rolle === 'akk') return akkusativ(ru, art);
+  if (rolle === 'akk') return istNomen(art) ? akkusativ(ru, art) : null;
+  if (rolle === 'praep') return istNomen(art) ? praepositiv(ru, art) : null;
   if (rolle.indexOf('praes') === 0) return art === 'v' ? praesens(ru, rolle.slice(5)) : null;
   return null;
 };
-const ROLLEN = { akk: 'Akkusativ' };
+const ROLLEN = { akk: 'Akkusativ', praep: 'Präpositiv' };
 PERSONEN.forEach((p) => { ROLLEN['praes' + p] = 'Präsens ' + p; });
 
 // Sätze: { ru, de, stufe, benoetigt } — «benoetigt» nennt die Grundformen aus
@@ -399,6 +420,22 @@ const verbenBlock = (name, obj) => {
   return zeilen.join('\n');
 };
 
+// Eigenwillige Nomen: ein Wort je Zeile.
+const nomenBlock = (name, obj) => {
+  const zeilen = ['var ' + name + ' = {'];
+  const schluessel = Object.keys(obj);
+  schluessel.forEach((k, i) => {
+    const a = obj[k];
+    const teile = [];
+    if (a.starr) teile.push('starr: true');
+    if (a.praep) teile.push('praep: ' + jsStr(a.praep));
+    zeilen.push('  ' + jsStr(k) + ': { ' + teile.join(', ') + ' }' +
+      (i < schluessel.length - 1 ? ',' : ''));
+  });
+  zeilen.push('};');
+  return zeilen.join('\n');
+};
+
 // Sätze als Liste von Objekten, ein Satz je Zeile.
 const satzBlock = (name, liste) => {
   const zeilen = ['var ' + name + ' = ['];
@@ -430,6 +467,8 @@ const block = [
   grammatikBlock('GRAMMATIK', grammatik),
   '',
   verbenBlock('VERBEN', verben),
+  '',
+  nomenBlock('NOMEN', nomen),
   ENDE
 ].join('\n');
 
@@ -533,6 +572,22 @@ const jsonGrammatik = (liste) => {
   return zeilen.join('\n') + '\n';
 };
 
+// Eigenwillige Nomen: ein Wort je Zeile.
+const jsonNomen = (obj) => {
+  const zeilen = ['{'];
+  const schluessel = Object.keys(obj);
+  schluessel.forEach((k, i) => {
+    const a = obj[k];
+    const teile = [];
+    if (a.starr) teile.push('"starr": true');
+    if (a.praep) teile.push('"praep": ' + jsonStr(a.praep));
+    zeilen.push('  ' + jsonStr(k) + ': { ' + teile.join(', ') + ' }' +
+      (i < schluessel.length - 1 ? ',' : ''));
+  });
+  zeilen.push('}');
+  return zeilen.join('\n') + '\n';
+};
+
 const dateien = [
   ['data/vokabeln.json', jsonObjekt(vokabeln)],
   ['data/saetze.json', jsonSaetze(saetze)],
@@ -540,7 +595,8 @@ const dateien = [
   ['data/tastatur.json', jsonListe(tastatur, true)],
   ['data/buchstaben.json', jsonListe(buchstaben, true)],
   ['data/grammatik.json', jsonGrammatik(grammatik)],
-  ['data/verben.json', jsonVerben(verben)]
+  ['data/verben.json', jsonVerben(verben)],
+  ['data/nomen.json', jsonNomen(nomen)]
 ];
 
 // ── Eigenwillige Verben ─────────────────────────────────────
@@ -579,11 +635,42 @@ if (!verben || typeof verben !== 'object' || Array.isArray(verben)) {
   });
 }
 
+// ── Eigenwillige Nomen ──────────────────────────────────────
+// Flüchtige Vokale (день → дне), eigene Stämme (время → времени), der Ortsfall
+// auf -у nach в/на (год → году) und unveränderliche Lehnwörter (метро). Auch
+// hier gilt: Was die Regel von allein trifft, gehört nicht in die Liste.
+if (!nomen || typeof nomen !== 'object' || Array.isArray(nomen)) {
+  meckern('nomen.json: erwartet ein Objekt Grundform → Angaben');
+} else {
+  Object.entries(nomen).forEach(([ru, a]) => {
+    const wo = 'nomen.json » ' + ru;
+    const eintrag = wortIndex[ru];
+    if (!eintrag) return meckern(wo + ': steht nicht in vokabeln.json');
+    const art = wortart(eintrag);
+    if (!istNomen(art)) meckern(wo + ': ist dort kein Nomen');
+    if (!a || typeof a !== 'object' || Array.isArray(a)) return meckern(wo + ': erwartet ein Objekt');
+    Object.keys(a).forEach((k) => {
+      if (k !== 'praep' && k !== 'starr') meckern(wo + ': unbekannte Angabe «' + k + '»');
+    });
+    if (a.starr && a.praep) meckern(wo + ': «starr» verträgt sich nicht mit «praep»');
+    if (!a.starr && !a.praep) return meckern(wo + ': sagt nichts aus');
+    if (a.praep !== undefined && (typeof a.praep !== 'string' || !istKyrillisch(a.praep))) {
+      meckern(wo + ': «praep» erwartet eine kyrillische Form');
+    }
+    // Die Probe: Was liefert die blanke Regel ohne diesen Eintrag?
+    const ohne = praepositivMit(ru, geschlecht(art), {});
+    const mit = a.starr ? ru : a.praep;
+    if (mit === ohne) {
+      meckern(wo + ': überflüssig — die Regel liefert von allein «' + ohne + '»');
+    }
+  });
+}
+
 // ── Grammatik-Bausteine ─────────────────────────────────────
 // Ein Baustein ist eine Regel mit allem, was sie zum Lernen braucht: die Frage
 // zum Entdecken samt Deutungen, die Regel selbst, eine Tabelle und ein
 // Merksatz. Die Aufgabenart verweist auf eine Rolle, die die Maschine kennt.
-const AUFGABEN = ['geschlecht', 'akk', 'praes', 'ichform'];
+const AUFGABEN = ['geschlecht', 'akk', 'praes', 'ichform', 'praep'];
 const verbKlasse = (ru) => {
   if (/ться$/.test(ru)) return verbKlasse(ru.slice(0, -2));
   const eigen = verben[ru] || null;
@@ -644,8 +731,17 @@ if (!Array.isArray(grammatik) || grammatik.length === 0) {
     } else {
       b.beispiele.forEach((w) => {
         if (!wortIndex[w]) return meckern(wo + ': Beispiel «' + w + '» steht nicht in vokabeln.json');
-        if (b.aufgabe === 'akk' && !['m', 'mb', 'w', 's'].includes(wortart(wortIndex[w]))) {
+        if ((b.aufgabe === 'akk' || b.aufgabe === 'praep') && !istNomen(wortart(wortIndex[w]))) {
           meckern(wo + ': Beispiel «' + w + '» ist kein Nomen');
+        }
+        if (b.aufgabe === 'praep') {
+          const art = wortart(wortIndex[w]);
+          if (nomen[w]) meckern(wo + ': Beispiel «' + w + '» ist eine Ausnahme — nicht herleitbar');
+          else if (belebt(art)) {
+            meckern(wo + ': Beispiel «' + w + '» ist ein Lebewesen — kein Ort');
+          } else if (praepositiv(w, geschlecht(art)) === w) {
+            meckern(wo + ': Beispiel «' + w + '» ändert sich im Präpositiv nicht');
+          }
         }
         if (b.aufgabe !== 'praes' && b.aufgabe !== 'ichform') return;
         // Ein Verb, an dem sich die Regel nicht zeigen lässt, taugt nicht als

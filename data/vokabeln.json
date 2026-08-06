@@ -63,23 +63,23 @@
     ["сколько", "wie viel", "skolka", "-"]
   ],
   "Familie": [
-    ["мама", "Mama", "mama"],
+    ["мама", "Mama", "mama", "wb"],
     ["папа", "Papa", "papa", "mb"],
     ["брат", "Bruder", "brat", "mb"],
-    ["сестра", "Schwester", "sestra"],
+    ["сестра", "Schwester", "sestra", "wb"],
     ["сын", "Sohn", "syn", "mb"],
-    ["дочь", "Tochter", "dotsch", "w"],
-    ["бабушка", "Oma", "babuschka"],
+    ["дочь", "Tochter", "dotsch", "wb"],
+    ["бабушка", "Oma", "babuschka", "wb"],
     ["дедушка", "Opa", "djeduschka", "mb"],
     ["ребёнок", "Kind", "rebjonok", "mb"],
     ["друг", "Freund", "druk", "mb"],
-    ["подруга", "Freundin", "padruga"],
+    ["подруга", "Freundin", "padruga", "wb"],
     ["семья", "Familie", "semja"],
     ["муж", "Ehemann", "musch", "mb"],
-    ["жена", "Ehefrau", "schena"],
+    ["жена", "Ehefrau", "schena", "wb"],
     ["родители", "Eltern", "raditjeli", "pl"],
     ["внук", "Enkel", "wnuk", "mb"],
-    ["тётя", "Tante", "tjotja"],
+    ["тётя", "Tante", "tjotja", "wb"],
     ["дядя", "Onkel", "djadja", "mb"]
   ],
   "Verben I": [
@@ -106,8 +106,8 @@
     ["улица", "Straße", "uliza"],
     ["магазин", "Geschäft", "magasin"],
     ["школа", "Schule", "schkola"],
-    ["кошка", "Katze", "koschka"],
-    ["собака", "Hund", "sabaka"],
+    ["кошка", "Katze", "koschka", "wb"],
+    ["собака", "Hund", "sabaka", "wb"],
     ["деньги", "Geld", "djengi", "pl"]
   ],
   "Zuhause": [
@@ -149,7 +149,7 @@
     ["овощи", "Gemüse", "owoschtschi", "pl"],
     ["фрукты", "Obst", "frukty", "pl"],
     ["колбаса", "Wurst", "kolbassa"],
-    ["курица", "Hähnchen", "kuriza"],
+    ["курица", "Hähnchen", "kuriza", "wb"],
     ["ужин", "Abendessen", "uschin"],
     ["пирог", "Kuchen/Pirogge", "pirok"],
     ["мороженое", "Eis (Speiseeis)", "moroschenoje", "-"]
@@ -375,17 +375,17 @@
     ["мороз", "Frost", "maros"]
   ],
   "Tiere": [
-    ["птица", "Vogel", "ptiza"],
-    ["лошадь", "Pferd", "loschad", "w"],
-    ["корова", "Kuh", "karowa"],
-    ["свинья", "Schwein", "swinja"],
-    ["коза", "Ziege", "kasa"],
-    ["утка", "Ente", "utka"],
+    ["птица", "Vogel", "ptiza", "wb"],
+    ["лошадь", "Pferd", "loschad", "wb"],
+    ["корова", "Kuh", "karowa", "wb"],
+    ["свинья", "Schwein", "swinja", "wb"],
+    ["коза", "Ziege", "kasa", "wb"],
+    ["утка", "Ente", "utka", "wb"],
     ["медведь", "Bär", "medwjed", "mb"],
     ["волк", "Wolf", "wolk", "mb"],
-    ["лиса", "Fuchs", "lissa"],
+    ["лиса", "Fuchs", "lissa", "wb"],
     ["заяц", "Hase", "sajaz", "mb"],
-    ["мышь", "Maus", "mysch", "w"],
+    ["мышь", "Maus", "mysch", "wb"],
     ["слон", "Elefant", "slon", "mb"]
   ],
   "Arbeit & Alltag": [

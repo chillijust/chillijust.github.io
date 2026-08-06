@@ -370,6 +370,8 @@ select {
 .card-theme { text-transform: uppercase; letter-spacing: .12em; }
 
 .task-label { font-size: 11px; text-transform: uppercase; letter-spacing: .14em; color: var(--dim); margin: 0 0 6px; }
+/* Kyrillisch in Versalien liest sich lateinisch: «в на» wird zu «B HA». */
+.task-label .cyr, .wissen-regel .cyr { text-transform: none; letter-spacing: normal; }
 .word { font-size: 30px; margin: 4px 0 6px; font-weight: 600; }
 .sentence { font-size: 22px; line-height: 1.45; margin: 4px 0 12px; }
 .answer { font-size: 17px; color: var(--ice); margin: 12px 0 0; }
@@ -997,23 +999,23 @@ var VOCAB_THEMES = {
     ['сколько', 'wie viel', 'skolka', '-']
   ],
   'Familie': [
-    ['мама', 'Mama', 'mama'],
+    ['мама', 'Mama', 'mama', 'wb'],
     ['папа', 'Papa', 'papa', 'mb'],
     ['брат', 'Bruder', 'brat', 'mb'],
-    ['сестра', 'Schwester', 'sestra'],
+    ['сестра', 'Schwester', 'sestra', 'wb'],
     ['сын', 'Sohn', 'syn', 'mb'],
-    ['дочь', 'Tochter', 'dotsch', 'w'],
-    ['бабушка', 'Oma', 'babuschka'],
+    ['дочь', 'Tochter', 'dotsch', 'wb'],
+    ['бабушка', 'Oma', 'babuschka', 'wb'],
     ['дедушка', 'Opa', 'djeduschka', 'mb'],
     ['ребёнок', 'Kind', 'rebjonok', 'mb'],
     ['друг', 'Freund', 'druk', 'mb'],
-    ['подруга', 'Freundin', 'padruga'],
+    ['подруга', 'Freundin', 'padruga', 'wb'],
     ['семья', 'Familie', 'semja'],
     ['муж', 'Ehemann', 'musch', 'mb'],
-    ['жена', 'Ehefrau', 'schena'],
+    ['жена', 'Ehefrau', 'schena', 'wb'],
     ['родители', 'Eltern', 'raditjeli', 'pl'],
     ['внук', 'Enkel', 'wnuk', 'mb'],
-    ['тётя', 'Tante', 'tjotja'],
+    ['тётя', 'Tante', 'tjotja', 'wb'],
     ['дядя', 'Onkel', 'djadja', 'mb']
   ],
   'Verben I': [
@@ -1040,8 +1042,8 @@ var VOCAB_THEMES = {
     ['улица', 'Straße', 'uliza'],
     ['магазин', 'Geschäft', 'magasin'],
     ['школа', 'Schule', 'schkola'],
-    ['кошка', 'Katze', 'koschka'],
-    ['собака', 'Hund', 'sabaka'],
+    ['кошка', 'Katze', 'koschka', 'wb'],
+    ['собака', 'Hund', 'sabaka', 'wb'],
     ['деньги', 'Geld', 'djengi', 'pl']
   ],
   'Zuhause': [
@@ -1083,7 +1085,7 @@ var VOCAB_THEMES = {
     ['овощи', 'Gemüse', 'owoschtschi', 'pl'],
     ['фрукты', 'Obst', 'frukty', 'pl'],
     ['колбаса', 'Wurst', 'kolbassa'],
-    ['курица', 'Hähnchen', 'kuriza'],
+    ['курица', 'Hähnchen', 'kuriza', 'wb'],
     ['ужин', 'Abendessen', 'uschin'],
     ['пирог', 'Kuchen/Pirogge', 'pirok'],
     ['мороженое', 'Eis (Speiseeis)', 'moroschenoje', '-']
@@ -1309,17 +1311,17 @@ var VOCAB_THEMES = {
     ['мороз', 'Frost', 'maros']
   ],
   'Tiere': [
-    ['птица', 'Vogel', 'ptiza'],
-    ['лошадь', 'Pferd', 'loschad', 'w'],
-    ['корова', 'Kuh', 'karowa'],
-    ['свинья', 'Schwein', 'swinja'],
-    ['коза', 'Ziege', 'kasa'],
-    ['утка', 'Ente', 'utka'],
+    ['птица', 'Vogel', 'ptiza', 'wb'],
+    ['лошадь', 'Pferd', 'loschad', 'wb'],
+    ['корова', 'Kuh', 'karowa', 'wb'],
+    ['свинья', 'Schwein', 'swinja', 'wb'],
+    ['коза', 'Ziege', 'kasa', 'wb'],
+    ['утка', 'Ente', 'utka', 'wb'],
     ['медведь', 'Bär', 'medwjed', 'mb'],
     ['волк', 'Wolf', 'wolk', 'mb'],
-    ['лиса', 'Fuchs', 'lissa'],
+    ['лиса', 'Fuchs', 'lissa', 'wb'],
     ['заяц', 'Hase', 'sajaz', 'mb'],
-    ['мышь', 'Maus', 'mysch', 'w'],
+    ['мышь', 'Maus', 'mysch', 'wb'],
     ['слон', 'Elefant', 'slon', 'mb']
   ],
   'Arbeit & Alltag': [
@@ -1370,11 +1372,11 @@ var SENTENCES = [
   { ru: 'Я читаю книгу.', de: 'Ich lese ein Buch.', stufe: 1, benoetigt: ['я', 'читать', 'книга'], formen: { 'книгу': ['книга', 'akk'], 'читаю': ['читать', 'praes1s'] } },
   { ru: 'Папа читает газету.', de: 'Papa liest die Zeitung.', stufe: 1, benoetigt: ['папа', 'читать', 'газета'], formen: { 'газету': ['газета', 'akk'], 'читает': ['читать', 'praes3s'] } },
   { ru: 'Она пишет письмо.', de: 'Sie schreibt einen Brief.', stufe: 1, benoetigt: ['она', 'писать', 'письмо'], formen: { 'пишет': ['писать', 'praes3s'] } },
-  { ru: 'Я живу в городе.', de: 'Ich wohne in der Stadt.', stufe: 1, benoetigt: ['я', 'жить', 'в', 'город'], formen: { 'живу': ['жить', 'praes1s'] } },
+  { ru: 'Я живу в городе.', de: 'Ich wohne in der Stadt.', stufe: 1, benoetigt: ['я', 'жить', 'в', 'город'], formen: { 'живу': ['жить', 'praes1s'], 'городе': ['город', 'praep'] } },
   { ru: 'Это дом.', de: 'Das ist ein Haus.', stufe: 1, benoetigt: ['это', 'дом'] },
   { ru: 'Мама дома.', de: 'Mama ist zu Hause.', stufe: 1, benoetigt: ['мама', 'дом'] },
   { ru: 'Мы идём домой.', de: 'Wir gehen nach Hause.', stufe: 1, benoetigt: ['мы', 'идти', 'домой'], formen: { 'идём': ['идти', 'praes1p'] } },
-  { ru: 'Хлеб на столе.', de: 'Das Brot ist auf dem Tisch.', stufe: 1, benoetigt: ['хлеб', 'на', 'стол'] },
+  { ru: 'Хлеб на столе.', de: 'Das Brot ist auf dem Tisch.', stufe: 1, benoetigt: ['хлеб', 'на', 'стол'], formen: { 'столе': ['стол', 'praep'] } },
   { ru: 'Я люблю чай.', de: 'Ich mag Tee.', stufe: 1, benoetigt: ['я', 'любить', 'чай'], formen: { 'люблю': ['любить', 'praes1s'] } },
   { ru: 'Я пью кофе.', de: 'Ich trinke Kaffee.', stufe: 1, benoetigt: ['я', 'пить', 'кофе'], formen: { 'пью': ['пить', 'praes1s'] } },
   { ru: 'Утром я ем кашу.', de: 'Morgens esse ich Brei.', stufe: 1, benoetigt: ['утро', 'я', 'есть', 'каша'], formen: { 'кашу': ['каша', 'akk'], 'ем': ['есть', 'praes1s'] } },
@@ -1385,38 +1387,38 @@ var SENTENCES = [
   { ru: 'Вода холодная.', de: 'Das Wasser ist kalt.', stufe: 1, benoetigt: ['вода', 'холодный'] },
   { ru: 'Сегодня холодно.', de: 'Heute ist es kalt.', stufe: 1, benoetigt: ['сегодня', 'холодно'] },
   { ru: 'У меня есть кошка и собака.', de: 'Ich habe eine Katze und einen Hund.', stufe: 2, benoetigt: ['у', 'я', 'есть', 'кошка', 'и', 'собака'] },
-  { ru: 'В магазине много фруктов.', de: 'Im Laden gibt es viel Obst.', stufe: 2, benoetigt: ['в', 'магазин', 'много', 'фрукты'] },
+  { ru: 'В магазине много фруктов.', de: 'Im Laden gibt es viel Obst.', stufe: 2, benoetigt: ['в', 'магазин', 'много', 'фрукты'], formen: { 'магазине': ['магазин', 'praep'] } },
   { ru: 'Мы едим в восемь часов.', de: 'Wir essen um acht Uhr.', stufe: 2, benoetigt: ['мы', 'есть', 'в', 'восемь', 'час'], formen: { 'едим': ['есть', 'praes1p'] } },
-  { ru: 'Сегодня на улице тепло и хорошо.', de: 'Heute ist es draußen warm und schön.', stufe: 2, benoetigt: ['сегодня', 'на', 'улица', 'тепло', 'и', 'хорошо'] },
+  { ru: 'Сегодня на улице тепло и хорошо.', de: 'Heute ist es draußen warm und schön.', stufe: 2, benoetigt: ['сегодня', 'на', 'улица', 'тепло', 'и', 'хорошо'], formen: { 'улице': ['улица', 'praep'] } },
   { ru: 'Он часто пишет письма бабушке.', de: 'Er schreibt der Oma oft Briefe.', stufe: 2, benoetigt: ['он', 'часто', 'писать', 'письмо', 'бабушка'], formen: { 'пишет': ['писать', 'praes3s'] } },
-  { ru: 'Мы учимся в университете.', de: 'Wir studieren an der Universität.', stufe: 2, benoetigt: ['мы', 'учиться', 'в', 'университет'], formen: { 'учимся': ['учиться', 'praes1p'] } },
+  { ru: 'Мы учимся в университете.', de: 'Wir studieren an der Universität.', stufe: 2, benoetigt: ['мы', 'учиться', 'в', 'университет'], formen: { 'учимся': ['учиться', 'praes1p'], 'университете': ['университет', 'praep'] } },
   { ru: 'Поезд идёт через десять минут.', de: 'Der Zug fährt in zehn Minuten.', stufe: 2, benoetigt: ['поезд', 'идти', 'через', 'десять', 'минута'], formen: { 'идёт': ['идти', 'praes3s'] } },
   { ru: 'Где здесь аптека?', de: 'Wo ist hier eine Apotheke?', stufe: 2, benoetigt: ['где', 'здесь', 'аптека'] },
   { ru: 'Я хочу купить новую книгу.', de: 'Ich möchte ein neues Buch kaufen.', stufe: 2, benoetigt: ['я', 'хотеть', 'покупать', 'новый', 'книга'], formen: { 'книгу': ['книга', 'akk'], 'хочу': ['хотеть', 'praes1s'] } },
-  { ru: 'Она готовит ужин на кухне.', de: 'Sie kocht das Abendessen in der Küche.', stufe: 2, benoetigt: ['она', 'готовить', 'ужин', 'на', 'кухня'], formen: { 'готовит': ['готовить', 'praes3s'] } },
-  { ru: 'Вечером мы гуляем в парке.', de: 'Abends spazieren wir im Park.', stufe: 2, benoetigt: ['вечер', 'мы', 'гулять', 'в', 'парк'], formen: { 'гуляем': ['гулять', 'praes1p'] } },
+  { ru: 'Она готовит ужин на кухне.', de: 'Sie kocht das Abendessen in der Küche.', stufe: 2, benoetigt: ['она', 'готовить', 'ужин', 'на', 'кухня'], formen: { 'готовит': ['готовить', 'praes3s'], 'кухне': ['кухня', 'praep'] } },
+  { ru: 'Вечером мы гуляем в парке.', de: 'Abends spazieren wir im Park.', stufe: 2, benoetigt: ['вечер', 'мы', 'гулять', 'в', 'парк'], formen: { 'гуляем': ['гулять', 'praes1p'], 'парке': ['парк', 'praep'] } },
   { ru: 'Каждый день я учу русский язык.', de: 'Jeden Tag lerne ich Russisch.', stufe: 2, benoetigt: ['каждый', 'день', 'я', 'учить', 'русский', 'язык'], formen: { 'учу': ['учить', 'praes1s'] } },
   { ru: 'Она говорит по-русски очень хорошо.', de: 'Sie spricht sehr gut Russisch.', stufe: 2, benoetigt: ['она', 'говорить', 'русский', 'очень', 'хорошо'], formen: { 'говорит': ['говорить', 'praes3s'] } },
   { ru: 'Мне нравится слушать музыку.', de: 'Ich höre gern Musik.', stufe: 2, benoetigt: ['я', 'нравиться', 'слушать', 'музыка'], formen: { 'музыку': ['музыка', 'akk'], 'нравится': ['нравиться', 'praes3s'] } },
   { ru: 'Я не понимаю этот вопрос.', de: 'Ich verstehe diese Frage nicht.', stufe: 2, benoetigt: ['я', 'не', 'понимать', 'этот', 'вопрос'], formen: { 'понимаю': ['понимать', 'praes1s'] } },
   { ru: 'Мой друг работает инженером.', de: 'Mein Freund arbeitet als Ingenieur.', stufe: 2, benoetigt: ['мой', 'друг', 'работать', 'инженер'], formen: { 'работает': ['работать', 'praes3s'] } },
   { ru: 'Сколько стоит этот билет?', de: 'Wie viel kostet dieses Ticket?', stufe: 2, benoetigt: ['сколько', 'стоить', 'этот', 'билет'], formen: { 'стоит': ['стоить', 'praes3s'] } },
-  { ru: 'Моя сестра живёт в Москве.', de: 'Meine Schwester wohnt in Moskau.', stufe: 2, benoetigt: ['моя', 'сестра', 'жить', 'в', 'Москва'], formen: { 'живёт': ['жить', 'praes3s'] } },
-  { ru: 'Зимой в России идёт снег.', de: 'Im Winter schneit es in Russland.', stufe: 2, benoetigt: ['зима', 'в', 'Россия', 'идти', 'снег'], formen: { 'идёт': ['идти', 'praes3s'] } },
+  { ru: 'Моя сестра живёт в Москве.', de: 'Meine Schwester wohnt in Moskau.', stufe: 2, benoetigt: ['моя', 'сестра', 'жить', 'в', 'Москва'], formen: { 'живёт': ['жить', 'praes3s'], 'Москве': ['Москва', 'praep'] } },
+  { ru: 'Зимой в России идёт снег.', de: 'Im Winter schneit es in Russland.', stufe: 2, benoetigt: ['зима', 'в', 'Россия', 'идти', 'снег'], formen: { 'идёт': ['идти', 'praes3s'], 'России': ['Россия', 'praep'] } },
   { ru: 'Летом мы едем на море.', de: 'Im Sommer fahren wir ans Meer.', stufe: 2, benoetigt: ['лето', 'мы', 'ехать', 'на', 'море'], formen: { 'едем': ['ехать', 'praes1p'] } },
   { ru: 'Каждое утро она пьёт кофе и читает новости.', de: 'Jeden Morgen trinkt sie Kaffee und liest die Nachrichten.', stufe: 3, benoetigt: ['каждый', 'утро', 'она', 'пить', 'кофе', 'и', 'читать', 'новости'], formen: { 'пьёт': ['пить', 'praes3s'], 'читает': ['читать', 'praes3s'] } },
-  { ru: 'Я думаю, что зима в этом году будет холодной.', de: 'Ich denke, dass der Winter dieses Jahr kalt wird.', stufe: 3, benoetigt: ['я', 'думать', 'что', 'зима', 'в', 'этот', 'год', 'быть', 'холодный'], formen: { 'думаю': ['думать', 'praes1s'] } },
+  { ru: 'Я думаю, что зима в этом году будет холодной.', de: 'Ich denke, dass der Winter dieses Jahr kalt wird.', stufe: 3, benoetigt: ['я', 'думать', 'что', 'зима', 'в', 'этот', 'год', 'быть', 'холодный'], formen: { 'думаю': ['думать', 'praes1s'], 'году': ['год', 'praep'] } },
   { ru: 'Эту книгу я читал, когда был молодой.', de: 'Dieses Buch las ich, als ich jung war.', stufe: 3, benoetigt: ['этот', 'книга', 'я', 'читать', 'когда', 'быть', 'молодой'], formen: { 'книгу': ['книга', 'akk'] } },
-  { ru: 'Хотя было холодно, дети играли на улице.', de: 'Obwohl es kalt war, spielten die Kinder auf der Straße.', stufe: 3, benoetigt: ['хотя', 'быть', 'холодно', 'ребёнок', 'играть', 'на', 'улица'] },
+  { ru: 'Хотя было холодно, дети играли на улице.', de: 'Obwohl es kalt war, spielten die Kinder auf der Straße.', stufe: 3, benoetigt: ['хотя', 'быть', 'холодно', 'ребёнок', 'играть', 'на', 'улица'], formen: { 'улице': ['улица', 'praep'] } },
   { ru: 'Чтобы хорошо читать, нужно много работать.', de: 'Um gut zu lesen, muss man viel arbeiten.', stufe: 3, benoetigt: ['чтобы', 'хорошо', 'читать', 'нужно', 'много', 'работать'] },
-  { ru: 'Вечером мы встретили друзей в ресторане.', de: 'Am Abend trafen wir Freunde im Restaurant.', stufe: 3, benoetigt: ['вечер', 'мы', 'встретить', 'друг', 'в', 'ресторан'] },
+  { ru: 'Вечером мы встретили друзей в ресторане.', de: 'Am Abend trafen wir Freunde im Restaurant.', stufe: 3, benoetigt: ['вечер', 'мы', 'встретить', 'друг', 'в', 'ресторан'], formen: { 'ресторане': ['ресторан', 'praep'] } },
   { ru: 'Он не только говорит по-русски, но и пишет письма.', de: 'Er spricht nicht nur Russisch, sondern schreibt auch Briefe.', stufe: 3, benoetigt: ['он', 'не', 'только', 'говорить', 'русский', 'но', 'и', 'писать', 'письмо'], formen: { 'говорит': ['говорить', 'praes3s'], 'пишет': ['писать', 'praes3s'] } },
   { ru: 'Я думаю, что русский язык трудный, но очень интересный.', de: 'Ich denke, dass Russisch schwierig, aber sehr interessant ist.', stufe: 3, benoetigt: ['я', 'думать', 'что', 'русский', 'язык', 'трудный', 'но', 'очень', 'интересный'], formen: { 'думаю': ['думать', 'praes1s'] } },
   { ru: 'Учитель говорил медленно, и все поняли.', de: 'Der Lehrer sprach langsam, und alle verstanden.', stufe: 3, benoetigt: ['учитель', 'говорить', 'медленный', 'и', 'все', 'понимать'] },
   { ru: 'Врач сказал, что нужно спать и не работать.', de: 'Der Arzt sagte, dass man schlafen und nicht arbeiten muss.', stufe: 3, benoetigt: ['врач', 'сказать', 'что', 'нужно', 'спать', 'и', 'не', 'работать'] },
   { ru: 'Мой брат сказал, что купит билеты на поезд.', de: 'Mein Bruder sagte, dass er Zugtickets kaufen wird.', stufe: 3, benoetigt: ['мой', 'брат', 'сказать', 'что', 'покупать', 'билет', 'на', 'поезд'] },
   { ru: 'Мы долго искали гостиницу, потому что город был большой.', de: 'Wir suchten lange ein Hotel, weil die Stadt groß war.', stufe: 3, benoetigt: ['мы', 'долго', 'искать', 'гостиница', 'потому что', 'город', 'быть', 'большой'], formen: { 'гостиницу': ['гостиница', 'akk'] } },
-  { ru: 'В этом году я хочу поехать в Россию.', de: 'Dieses Jahr möchte ich nach Russland fahren.', stufe: 3, benoetigt: ['в', 'этот', 'год', 'я', 'хотеть', 'ехать', 'Россия'], formen: { 'Россию': ['Россия', 'akk'], 'хочу': ['хотеть', 'praes1s'] } },
+  { ru: 'В этом году я хочу поехать в Россию.', de: 'Dieses Jahr möchte ich nach Russland fahren.', stufe: 3, benoetigt: ['в', 'этот', 'год', 'я', 'хотеть', 'ехать', 'Россия'], formen: { 'Россию': ['Россия', 'akk'], 'хочу': ['хотеть', 'praes1s'], 'году': ['год', 'praep'] } },
   { ru: 'Когда я был ребёнком, мы часто ездили к бабушке в деревню.', de: 'Als ich ein Kind war, fuhren wir oft zur Oma ins Dorf.', stufe: 3, benoetigt: ['когда', 'я', 'быть', 'ребёнок', 'мы', 'часто', 'ехать', 'к', 'бабушка', 'в', 'деревня'], formen: { 'деревню': ['деревня', 'akk'] } },
   { ru: 'Если завтра будет хорошая погода, мы поедем на море.', de: 'Wenn morgen gutes Wetter ist, fahren wir ans Meer.', stufe: 3, benoetigt: ['если', 'завтра', 'быть', 'хороший', 'погода', 'мы', 'ехать', 'на', 'море'] }
 ];
@@ -1620,6 +1622,16 @@ var GRAMMATIK = [
     merksatz: 'Ein einziger Laut kippt, und nur in der Ich-Form.',
     fussnote: 'Das ist keine Unregelmäßigkeit, sondern Bequemlichkeit: Zwei Laute, die schlecht nebeneinander liegen, weichen einander aus. Wer die Regel hat, muss люблю nicht auswendig lernen.',
     beispiele: ['любить', 'готовить', 'платить', 'видеть', 'встретить', 'спать']
+  },
+  {
+    id: 'praepositiv', name: 'Präpositiv', kurz: 'Wo? — der Ortsfall', aufgabe: 'praep',
+    frage: 'Drei Geschlechter, dieselbe Endung. Was entscheidet hier?',
+    deutungen: ['Nichts — nach в und на endet fast alles auf -е', 'Das Geschlecht, wie im Akkusativ', 'Ob das Wort ein Lebewesen ist'], richtig: 0,
+    regel: 'Der Präpositiv sagt, wo etwas ist. Er steht nach в und на — und nur nach ihnen, weshalb er seinen Namen trägt. Anders als im Akkusativ spielt das Geschlecht keine Rolle: Männlich, weiblich, sächlich, fast alles endet auf -е. Merken muss man sich nicht die Endung, sondern die Präposition.',
+    tabelle: [['männlich', '+ -е', 'город → в городе'], ['weiblich -а / -я', 'wird -е', 'Москва → в Москве'], ['sächlich -о', 'wird -е', 'окно → в окне'], ['-ия · -ий · -ие', 'wird -ии', 'Россия → в России'], ['weiblich -ь', 'wird -и', 'дверь → в двери']],
+    merksatz: 'Im Akkusativ entscheidet das Geschlecht, im Präpositiv die Präposition.',
+    fussnote: 'в und на nehmen beide Fälle: mit dem Akkusativ heißen sie «wohin», mit dem Präpositiv «wo». «Я иду в город» — ich gehe in die Stadt. «Я живу в городе» — ich wohne in der Stadt. Eine Handvoll männlicher Wörter nimmt dabei -у statt -е: в году, в лесу, в аэропорту.',
+    beispiele: ['город', 'стол', 'магазин', 'школа', 'дом', 'квартира', 'комната', 'кухня', 'окно', 'парк', 'университет', 'вокзал', 'банк', 'аптека', 'больница', 'ресторан', 'музей', 'офис', 'сумка', 'гостиница', 'деревня', 'река', 'озеро', 'пляж', 'остров', 'Москва', 'Россия', 'книга', 'письмо', 'улица', 'машина', 'автобус', 'поезд', 'дорога']
   }
 ];
 
@@ -1639,6 +1651,32 @@ var VERBEN = {
   'сказать': { stamm: 'скаж' },
   'брать': { stamm: 'бер', betont: true },
   'ждать': { stamm: 'жд', betont: true }
+};
+
+var NOMEN = {
+  'ребёнок': { praep: 'ребёнке' },
+  'рынок': { praep: 'рынке' },
+  'цветок': { praep: 'цветке' },
+  'палец': { praep: 'пальце' },
+  'заяц': { praep: 'зайце' },
+  'день': { praep: 'дне' },
+  'полдень': { praep: 'полдне' },
+  'ветер': { praep: 'ветре' },
+  'церковь': { praep: 'церкви' },
+  'дочь': { praep: 'дочери' },
+  'время': { praep: 'времени' },
+  'год': { praep: 'году' },
+  'лес': { praep: 'лесу' },
+  'шкаф': { praep: 'шкафу' },
+  'мост': { praep: 'мосту' },
+  'аэропорт': { praep: 'аэропорту' },
+  'нос': { praep: 'носу' },
+  'рот': { praep: 'рту' },
+  'глаз': { praep: 'глазу' },
+  'снег': { praep: 'снегу' },
+  'час': { praep: 'часу' },
+  'метро': { starr: true },
+  'пальто': { starr: true }
 };
 /* == DATEN:ENDE == */
 
@@ -1665,11 +1703,19 @@ function wortartRegel(ru) {
   return '';
 }
 
+// Wortart, Geschlecht und Belebtheit sind drei Dinge. Die Endung verrät das
+// Geschlecht, die Belebtheit verrät sie nie — sie steht immer in den Daten.
+var GESCHLECHT_VON = { m: 'm', mb: 'm', w: 'w', wb: 'w', s: 's', sb: 's' };
+
 // Ist das ein Nomen, dessen Formen die Maschine bilden kann?
-function istNomen(art) { return art === 'm' || art === 'mb' || art === 'w' || art === 's'; }
+function istNomen(art) { return !!GESCHLECHT_VON[art]; }
 
 // Das Geschlecht ohne die Belebtheit — für Anzeige und Abfrage.
-function geschlecht(art) { return art === 'mb' ? 'm' : art; }
+function geschlecht(art) { return GESCHLECHT_VON[art] || art; }
+
+// Lebewesen. Entscheidet im Akkusativ die männliche Form — und hält im
+// Präpositiv die ganze Rubrik sauber: In einer Mutter ist niemand.
+function belebt(art) { return art === 'mb' || art === 'wb' || art === 'sb'; }
 
 var GESCHLECHT_NAME = { m: 'männlich', w: 'weiblich', s: 'sächlich' };
 
@@ -1682,16 +1728,36 @@ function nachZischlaut(stamm) { return /[кгхжчшщ]$/.test(stamm); }
 //   sächlich und unbelebt männlich bleiben, wie sie sind
 //   belebt männlich nimmt -а (eigener Baustein, hier schon richtig gerechnet)
 function akkusativ(ru, art) {
-  if (art === 'w') {
+  var g = geschlecht(art);
+  if (g === 'w') {
     if (/а$/.test(ru)) return ru.slice(0, -1) + 'у';
     if (/я$/.test(ru)) return ru.slice(0, -1) + 'ю';
     return ru;                       // auf -ь: дверь bleibt дверь
   }
-  if (art === 'mb') {
+  if (g === 'm' && belebt(art)) {
     if (/[йь]$/.test(ru)) return ru.slice(0, -1) + 'я';
     return ru + 'а';
   }
   return ru;                         // m unbelebt, s
+}
+
+// Präpositiv Einzahl — der Ortsfall nach в und на, der Themenfall nach о.
+// Fast alles endet auf -е; drei Gruppen tun es nicht.
+//   auf -ия/-ий/-ие → -ии    Россия → России
+//   weiblich auf -ь → -и     дверь → двери
+//   sonst              → -е  город → городе, книга → книге, окно → окне
+// Was die Regel nicht trifft — flüchtige Vokale (день → дне), eigene Stämme
+// (время → времени), der Ortsfall auf -у (год → году) und unveränderliche
+// Lehnwörter (метро) — steht in NOMEN.
+function praepositiv(ru, art) {
+  var eigen = NOMEN[ru] || null;
+  if (eigen && eigen.starr) return ru;
+  if (eigen && eigen.praep) return eigen.praep;
+  if (/(ия|ий|ие)$/.test(ru)) return ru.slice(0, -1) + 'и';
+  if (/ь$/.test(ru)) return ru.slice(0, -1) + (geschlecht(art) === 'w' ? 'и' : 'е');
+  if (/е$/.test(ru)) return ru;
+  if (/[аяой]$/.test(ru)) return ru.slice(0, -1) + 'е';
+  return ru + 'е';
 }
 
 // ── Verben im Präsens ───────────────────────────────────────
@@ -1802,7 +1868,8 @@ function verbIchWandel(ru) {
 
 // Die eine Tür nach draußen. Rollen kommen einzeln dazu, je Baustein.
 function grammForm(ru, art, rolle) {
-  if (rolle === 'akk') return akkusativ(ru, art);
+  if (rolle === 'akk') return istNomen(art) ? akkusativ(ru, art) : null;
+  if (rolle === 'praep') return istNomen(art) ? praepositiv(ru, art) : null;
   if (rolle.indexOf('praes') === 0) {
     if (art !== 'v') return null;
     return praesens(ru, rolle.slice(5));
@@ -2952,7 +3019,10 @@ function wissenZuWort(wort) {
   return { wort: rein, art: 'offen' };
 }
 
-var ROLLE_NAME = { akk: 'Akkusativ — wen? was?' };
+var ROLLE_NAME = {
+  akk: 'Akkusativ — wen? was?',
+  praep: 'Präpositiv — wo?'
+};
 PERSONEN.forEach(function (p) {
   ROLLE_NAME['praes' + p] = 'Präsens · ' + PERSON_NAME[p] + ' — ' + PERSON_DE[p];
 });
@@ -2977,12 +3047,20 @@ function wissenKarteHtml(e) {
   var grund = e.grundform;
   var gleich = e.wort.toLowerCase() === grund.toLowerCase();
   var verb = e.rolle.indexOf('praes') === 0;
-  var warum = verb
-    ? gramVerbWarum(grund, e.rolle.slice(5), e.wort.toLowerCase())
-    : (gleich
-      ? 'Hier ändert sich nichts — die Form ist dieselbe wie die Grundform.'
-      : '<span class="cyr">' + esc(grund.slice(-1)) + '</span> wird zu <span class="cyr">' +
-        esc(e.wort.slice(-1).toLowerCase()) + '</span>.');
+  // Am Satzanfang steht die Form groß. Kleinschreiben darf man sie nur, wenn
+  // auch die Grundform klein ist — «Россия» bleibt sonst «россии».
+  var form = grund.charAt(0) === grund.charAt(0).toLowerCase()
+    ? e.wort.toLowerCase() : e.wort;
+  var warum;
+  if (verb) warum = gramVerbWarum(grund, e.rolle.slice(5), form);
+  else if (e.rolle === 'praep' && e.vokabel) {
+    warum = gramNomenWarum(grund, e.vokabel.art, form);
+  } else if (gleich) {
+    warum = 'Hier ändert sich nichts — die Form ist dieselbe wie die Grundform.';
+  } else {
+    warum = '<span class="cyr">' + esc(grund.slice(-1)) + '</span> wird zu <span class="cyr">' +
+      esc(e.wort.slice(-1).toLowerCase()) + '</span>.';
+  }
   return '<div class="wissen-karte"><p class="wissen-wort cyr">' + esc(e.wort) +
     hoerknopf(e.wort, 'ru') + '</p>' +
     '<p class="wissen-zeile"><span class="cyr">' + esc(grund) + '</span>' +
@@ -4728,14 +4806,28 @@ function gramWortPool(b) {
     });
     return vorrat;
   }
+  // «Wo?» verlangt einen Ort — und ob ein Wort einer sein kann, sagt keine
+  // Endung. «в маме» wäre grammatisch richtig und Unsinn, «в утре» ebenso.
+  // Darum ist der Präpositiv die eine Rubrik mit ausgesuchten Wörtern: Der
+  // Baustein nennt sie, die Regel selbst gilt trotzdem für jedes Nomen — im
+  // Satz führt «Wissen» sie vor.
+  if (b.aufgabe === 'praep') {
+    var orte = b.beispiele.map(function (ru) { return VOKABEL[ru]; })
+      .filter(function (v) { return v && !NOMEN[v.ru] && !belebt(v.art); });
+    var gelernt = orte.filter(function (v) { return (state.boxes[v.id] || 0) > 0; });
+    return gelernt.length >= 4 ? gelernt : orte;
+  }
   var passt = function (v) {
     if (!istNomen(v.art)) return false;
     // Belebte männliche Nomen im Akkusativ bleiben draußen, bis ihr eigener
     // Baustein dran ist — sonst verlangte die Übung eine ungelernte Regel.
     if (b.aufgabe === 'akk' && v.art === 'mb') return false;
+    // Im Präpositiv bleibt draußen, was die Regel nicht trägt: flüchtige
+    // Vokale, eigene Stämme, der Ortsfall auf -у. Im Satz erklärt «Wissen»
+    // solche Formen trotzdem — erklären und abfragen sind zwei Dinge.
     // Erst wenn die Regel sitzt, kommen die Wörter dazu, die sie nicht verrät.
     if (b.aufgabe === 'geschlecht' && stufe < SATZ_STUFE &&
-      v.art !== wortartRegel(v.ru)) return false;
+      geschlecht(v.art) !== wortartRegel(v.ru)) return false;
     return true;
   };
   var begonnen = ALL_VOCAB.filter(function (v) {
@@ -4846,10 +4938,10 @@ function gramFrageBauen() {
     };
     return;
   }
-  // Akkusativ: unter der Endstufe die Form wählen, darüber selbst schreiben.
-  var form = grammForm(wort.ru, wort.art, 'akk');
+  // Fälle: unter der Endstufe die Form wählen, darüber selbst schreiben.
+  var form = grammForm(wort.ru, wort.art, b.aufgabe);
   gramQ = {
-    baustein: b.id, art: 'akk', wort: wort, loesung: form,
+    baustein: b.id, art: b.aufgabe, wort: wort, loesung: form,
     tippen: tippen,
     optionen: shuffle([form].concat(gramAblenker(wort.ru, form)))
   };
@@ -4899,7 +4991,10 @@ function gramEntdeckenWoerter(b) {
       if (aus.length < 4 && wieviele > 0 && aus.indexOf(v) === -1) { aus.push(v); wieviele--; }
     });
   };
-  if (b.aufgabe === 'geschlecht') {
+  // Präpositiv wie Geschlecht: je eines pro Geschlecht. Der Gegensatz ist hier
+  // gerade, dass es *keinen* gibt — dreimal dieselbe Endung, und genau das soll
+  // auffallen, weil der Akkusativ es anders macht.
+  if (b.aufgabe === 'geschlecht' || b.aufgabe === 'praep') {
     nimm(nach('w'), 1); nimm(nach('m'), 1); nimm(nach('s'), 1); nimm(pool, 1);
   } else {
     nimm(nach('w'), 2); nimm(nach('s'), 1); nimm(nach('m'), 1);
@@ -4952,7 +5047,7 @@ function gramPaare(b) {
       links: v.ru,
       rechts: b.aufgabe === 'geschlecht'
         ? GESCHLECHT_NAME[geschlecht(v.art)]
-        : grammForm(v.ru, v.art, 'akk'),
+        : (b.aufgabe === 'praep' ? 'в ' : '') + grammForm(v.ru, v.art, b.aufgabe),
       kyr: b.aufgabe !== 'geschlecht'
     });
   });
@@ -5063,8 +5158,10 @@ function gramUebenHtml(b) {
     });
     html += '</div>';
   } else {
-    if (q.art === 'akk') {
-      html += '<p class="task-label">Wen? Was? — die Form dazu</p>' +
+    if (q.art === 'akk' || q.art === 'praep') {
+      html += '<p class="task-label">' + (q.art === 'praep'
+        ? 'Wo? — die Form nach <span class="cyr">в</span> und <span class="cyr">на</span>'
+        : 'Wen? Was? — die Form dazu') + '</p>' +
         '<p class="word cyr">' + esc(q.wort.ru) + '</p>' +
         '<p class="hint">' + esc(q.wort.de) + ' · ' +
         GESCHLECHT_NAME[geschlecht(q.wort.art)] + '</p>';
@@ -5135,7 +5232,9 @@ function gramWarumHtml(b, q) {
   var v = q.wort;
   var g = geschlecht(v.art);
   if (q.art === 'geschlecht') {
-    var ausRegel = v.art === wortartRegel(v.ru);
+    // Ausnahme heißt: ein anderes Geschlecht als die Endung sagt. Dass ein Wort
+    // zusätzlich belebt ist, macht es nicht zur Ausnahme.
+    var ausRegel = geschlecht(v.art) === wortartRegel(v.ru);
     return '<p class="hint">' + (ausRegel
       ? '«' + esc(v.ru) + '» endet auf <strong class="cyr">' +
         esc(v.ru.slice(-1)) + '</strong> — also ' + GESCHLECHT_NAME[g] + '.'
@@ -5145,12 +5244,54 @@ function gramWarumHtml(b, q) {
   if (q.art === 'praes' || q.art === 'ichform') {
     return '<p class="hint">' + gramVerbWarum(v.ru, q.person, q.loesung) + '</p>';
   }
+  if (q.art === 'praep') {
+    return '<p class="hint">' + gramNomenWarum(v.ru, v.art, q.loesung) + '</p>';
+  }
   var gleich = q.loesung === v.ru;
   void b;
   return '<p class="hint">' + esc(v.ru) + ' ist ' + GESCHLECHT_NAME[g] + ' — ' +
     (gleich ? 'und bleibt im Akkusativ unverändert.'
       : 'darum wird <strong class="cyr">' + esc(v.ru.slice(-1)) + '</strong> zu <strong class="cyr">' +
         esc(q.loesung.slice(-1)) + '</strong>.') + '</p>';
+}
+
+// Warum diese Präpositivform — in Worten. Auch sie braucht «Wissen» im Satz.
+function gramNomenWarum(ru, art, form) {
+  var eigen = NOMEN[ru] || null;
+  if (eigen && eigen.starr) {
+    return '<strong class="cyr">' + esc(ru) + '</strong> ist ein Lehnwort und ' +
+      'ändert sich nie — in keinem Fall.';
+  }
+  if (eigen && eigen.praep) {
+    if (/у$/.test(form)) {
+      return 'Eine Handvoll männlicher Wörter nimmt nach в und на ein ' +
+        '<strong class="cyr">-у</strong> statt <strong class="cyr">-е</strong>: ' +
+        '<strong class="cyr">' + esc(ru) + ' → ' + esc(form) + '</strong>. Das muss man ' +
+        'wissen, herleiten kann man es nicht.';
+    }
+    return '<strong class="cyr">' + esc(ru) + '</strong> verliert vor der Endung einen ' +
+      'Laut: <strong class="cyr">' + esc(form) + '</strong>. Auch das gehört gewusst.';
+  }
+  if (form === ru) {
+    return '<strong class="cyr">' + esc(ru) + '</strong> endet schon auf ' +
+      '<strong class="cyr">-е</strong> — da bleibt nichts zu ändern.';
+  }
+  if (/(ия|ий|ие)$/.test(ru)) {
+    return 'Wörter auf <strong class="cyr">-ия</strong>, <strong class="cyr">-ий</strong> ' +
+      'und <strong class="cyr">-ие</strong> gehen auf <strong class="cyr">-ии</strong> ' +
+      'statt auf -е: <strong class="cyr">' + esc(ru) + ' → ' + esc(form) + '</strong>.';
+  }
+  if (/ь$/.test(ru) && art === 'w') {
+    return 'Weibliche Wörter auf <strong class="cyr">-ь</strong> nehmen ' +
+      '<strong class="cyr">-и</strong>: <strong class="cyr">' + esc(ru) + ' → ' +
+      esc(form) + '</strong>.';
+  }
+  var alt = /[аяоьй]$/.test(ru) ? ru.slice(-1) : '';
+  return '<strong class="cyr">' + esc(ru) + '</strong> ist ' +
+    GESCHLECHT_NAME[geschlecht(art)] + ' und folgt der Hauptregel: ' +
+    (alt ? '<strong class="cyr">' + esc(alt) + '</strong> wird zu '
+      : 'es kommt ein ') + '<strong class="cyr">-е</strong> → ' +
+    '<strong class="cyr">' + esc(form) + '</strong>.';
 }
 
 // Stamm plus Endung, in Worten — und wo der Stamm sich wandelt, auch das.

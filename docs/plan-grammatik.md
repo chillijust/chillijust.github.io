@@ -210,7 +210,7 @@ Die Reihenfolge folgt dem Ertrag in Ihren Sätzen, nicht der Lehrbuchsystematik:
 | --- | --- | --- | --- |
 | **P** | **Geschlecht + Akkusativ** | `книгу`, `газету` | 7 |
 | **2** | **Verben im Präsens, beide Reihen + Ich-Form** | `читаю`, `работает`, `пьёт` | 36 |
-| 3 | Präpositiv nach в/на | `в городе`, `на столе` | ~11 |
+| **3** | **Präpositiv nach в/на** | `в городе`, `на столе` | 13 |
 | 4 | Vergangenheit, nach Geschlecht | `он читал`, `она читала` | ~11 |
 | 5 | Genitiv | `фруктов`, `друзей`, `часов` | ~6 |
 | 6 | Rechtschreibregeln | `книги` statt `книгы` | quer durch |
@@ -324,6 +324,25 @@ bleibt darum winzig.
 hätte: `жить` und `пить` landeten wegen ihres `-ить` in der falschen Reihe («живлю»,
 «пьишь»), und die Ich-Form richtete ihre Endung nach dem ungewandelten Stamm («вижю»
 statt «вижу»). Beides ist gerichtet, beides steht jetzt in der Testreihe.
+
+---
+
+## Etappe 3 ist fertig — der Präpositiv
+
+| geplant | gebaut |
+| --- | --- |
+| ~11 Formen erklärt | 13; zusammen **58 von 110** (53 %) |
+| Regel als Maschine | `praepositiv()`, drei Zeilen Regel plus `nomen.json` mit 23 Ausnahmen |
+| Baustein wie die anderen | entdecken → Regelkarte → anwenden, sechster Baustein |
+| Testreihe erweitern | `grammatik.mjs` von 108 auf 139; zusammen 802 |
+
+**Der erste Entwurf war grammatisch tadellos und trotzdem falsch**: «мама → в маме»,
+«папа → в папе». Der Ortsfall fragt zum ersten Mal etwas über die **Welt** statt über die
+Sprache — kann dieses Ding ein Ort sein? Darauf antwortet keine Endung. Zwei Antworten
+waren nötig (ADR 0032): die Belebtheit auf alle Geschlechter ausdehnen (18 Vokabeln
+bekamen `wb`), und für den Rest — `утро`, `год`, `минута` sind keine Lebewesen und
+trotzdem keine Orte — nennt der Baustein seine 34 Wörter selbst. Die **Regel** gilt
+weiter für jedes Nomen; im Satz führt «Wissen» sie an allen vor.
 
 ---
 

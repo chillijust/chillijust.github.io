@@ -585,8 +585,8 @@ Die Endung der Grundform verrät beides — bei 239 der 380 Wörter. Wo sie schw
 
 | Code | bedeutet |
 | --- | --- |
-| `m` · `mb` | männlich · männlich und belebt |
-| `w` · `s` | weiblich · sächlich |
+| `m` · `w` · `s` | männlich · weiblich · sächlich |
+| `mb` · `wb` · `sb` | dasselbe, dazu **belebt** (Lebewesen) |
 | `pl` | nur in der Mehrzahl gebräuchlich |
 | `v` · `a` | Verb · Adjektiv |
 | `-` | keine Formenlehre (Adverb, Partikel, Zahlwort, Wendung) |
@@ -597,8 +597,9 @@ Sonst würde die Ausnahmeliste still zur zweiten Datenquelle und verdeckte die e
 Ausnahmen — `кровать` (Nomen trotz `-ть`), `кофе` (männlich), `время` (sächlich),
 `папа`/`дедушка`/`дядя` (männlich trotz `-а/-я`).
 
-Die Belebtheit ist nur bei männlichen Nomen vermerkt, weil nur dort eine Form davon
-abhängt. Kommt eine Regel dazu, die mehr braucht, verlangt der Build es dann.
+Die Belebtheit war zunächst nur bei männlichen Nomen vermerkt, weil nur dort eine Form
+davon abhing. Mit dem Präpositiv kam die Regel, die mehr brauchte — seither tragen auch
+weibliche Lebewesen ihr Kürzel (siehe unten).
 
 ### Verben im Präsens
 
@@ -655,6 +656,54 @@ eigenem Stamm mitspielen (`спишь → сплю`). Ihre Ablenker enthalten au
 das es nicht gibt — den ungewandelten Stamm mit der Endung («платю» neben «плачу»). Genau
 das ist der Fehler, um den es geht.
 
+### Der Präpositiv — und warum er ausgesuchte Wörter braucht
+
+Der Ortsfall nach в und на. Die Regel ist die einfachste von allen: **fast alles endet
+auf -е**, das Geschlecht spielt keine Rolle — genau der Gegensatz zum Akkusativ, wo nur
+die weiblichen Wörter sich rühren.
+
+| | | |
+| --- | --- | --- |
+| `-ия` · `-ий` · `-ие` | → `-ии` | Россия → в России |
+| weiblich auf `-ь` | → `-и` | дверь → в двери |
+| auf `-е` | bleibt | море → в море |
+| alles andere | → `-е` | город → в городе, Москва → в Москве, окно → в окне |
+
+`data/nomen.json` trägt, was die Regel nicht erreicht, in vier Gruppen:
+flüchtige Vokale (`день` → `дне`, `палец` → `пальце`), eigene Stämme (`время` →
+`времени`, `дочь` → `дочери`), der **Ortsfall auf -у** nach в/на (`год` → `году`, `лес` →
+`лесу`, `аэропорт` → `аэропорту`) und unveränderliche Lehnwörter (`метро`, `пальто`).
+Wie bei den Verben gilt: **ein Eintrag, der dasselbe liefert wie die Regel, bricht den
+Build ab** — `кофе` flog genau daran heraus, es endet ohnehin auf `-е`.
+
+**Der Präpositiv ist die einzige Rubrik mit ausgesuchten Wörtern.** «Wo?» verlangt einen
+Ort, und ob ein Wort einer sein kann, sagt keine Endung: «в маме» wäre grammatisch
+tadellos und Unsinn, «в утре» ebenso. Der Baustein nennt darum seine Wörter selbst; die
+Übung nimmt daraus, was schon begonnen ist. Die **Regel** gilt trotzdem für jedes Nomen —
+im Satz führt «Wissen» sie an allen vor.
+
+### Belebtheit: eine eigene Eigenschaft, kein Geschlecht
+
+Wortart, Geschlecht und Belebtheit sind drei Dinge. Die Endung verrät das Geschlecht, die
+Belebtheit **nie** — sie steht immer in den Daten. Bis zum Präpositiv war sie nur bei
+männlichen Nomen vermerkt, weil nur dort eine Form davon abhing (`брат` → `брата`). Der
+Ortsfall brauchte mehr: Er muss Lebewesen aussperren, gleich welchen Geschlechts.
+
+Darum tragen jetzt auch weibliche Lebewesen ein `wb` (18 Wörter: `мама`, `сестра`,
+`кошка`, `лошадь` …), und der Code trennt die beiden Begriffe sauber:
+
+```js
+var GESCHLECHT_VON = { m: 'm', mb: 'm', w: 'w', wb: 'w', s: 's', sb: 's' };
+function istNomen(art)    { return !!GESCHLECHT_VON[art]; }
+function geschlecht(art)  { return GESCHLECHT_VON[art] || art; }
+function belebt(art)      { return art === 'mb' || art === 'wb' || art === 'sb'; }
+```
+
+Wer nach dem Geschlecht fragt, fragt `geschlecht()`, nie das rohe Kürzel. Das war
+vorher an zwei Stellen falsch: Der Baustein «Geschlecht» hätte `мама` als **Ausnahme**
+ausgegeben, weil `wb ≠ w` — dabei sagt die Endung das Geschlecht völlig richtig, nur die
+Belebtheit steht obendrauf.
+
 ### Der Ablauf eines Bausteins
 
 1. **Entdecken.** Vier bekannte Wörter mit ihrer Form daneben, darunter drei Deutungen
@@ -667,6 +716,7 @@ das ist der Fehler, um den es geht.
    | --- | --- | --- |
    | Geschlecht | Wort · Geschlecht | je eines pro Geschlecht |
    | Akkusativ | Grundform · Akkusativ | zwei, die sich ändern, eines, das bleibt |
+   | Präpositiv | Grundform · в + Form | je eines pro Geschlecht — und dreimal dieselbe Endung |
    | Präsens (e) | ein Verb · vier Personen | die Endung wechselt, der Stamm nicht |
    | zweite Reihe | dieselbe Person, beide Reihen | drei `-ить/-еть`, eines `-ать` |
    | Ich-Form | ты-Form · я-Form | drei mit Wandel, **eines ohne** |
@@ -695,6 +745,7 @@ Menü und Auswahl; der runde Knopf `#wissenKnopf` zeigt darin den ganzen Satz.
 | Grundform | Bedeutung, Umschrift, Geschlecht, Hörknopf |
 | erklärte Nomenform | `книгу ← книга · weiblich · Akkusativ — wen? was? · а wird zu у` |
 | erklärte Verbform | `пьёт ← пить · Präsens · он/она — er/sie · Stamm пь- + Endung -ёт` |
+| erklärte Ortsform | `в России ← Россия · Präpositiv — wo? · Wörter auf -ия gehen auf -ии` |
 | noch nicht erklärte Form | «Diese Form ist noch nicht erklärt — sie kommt mit einem späteren Baustein.» |
 
 Der dritte Fall ist kein Mangel, sondern die ehrlichste Antwort, die die App geben kann.

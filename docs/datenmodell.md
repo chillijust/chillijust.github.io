@@ -33,9 +33,13 @@ vierten Feld für Wortart und Geschlecht.
 ```
 
 - Das **vierte Feld** steht nur da, wo die Endung die Wortart nicht verrät oder falsch
-  verrät: `m` · `mb` (männlich belebt) · `w` · `s` · `pl` · `v` (Verb) · `a` (Adjektiv) ·
-  `-` (keine Formenlehre). **Eine Angabe, die nur wiederholt, was die Endung ohnehin
-  sagt, lässt den Build scheitern** — sonst verdeckt die Liste die echten Ausnahmen.
+  verrät: `m` · `w` · `s` (Geschlecht), `mb` · `wb` · `sb` (dasselbe, dazu belebt),
+  `pl` · `v` (Verb) · `a` (Adjektiv) · `-` (keine Formenlehre). **Eine Angabe, die nur
+  wiederholt, was die Endung ohnehin sagt, lässt den Build scheitern** — sonst verdeckt
+  die Liste die echten Ausnahmen.
+- **Die Belebtheit sagt keine Endung.** Sie steht bei jedem Lebewesen, gleich welchen
+  Geschlechts: Der Akkusativ braucht sie bei männlichen (`брат` → `брата`), der
+  Präpositiv sperrt mit ihr alle aus — in einer Mutter ist niemand.
 
 - **Die Reihenfolge in dieser Datei ist der Lehrplan.** Sie bestimmt, in welcher Folge
   die Lernsets entstehen und in welcher Reihenfolge Freestyle die Themen anbietet. Wer
@@ -114,6 +118,28 @@ Grundform → das, was die Regel **nicht** trägt. Alles andere rechnet die Masc
   Probe macht der Build selbst: einmal mit, einmal ohne den Eintrag rechnen.
 - `быть` steht nicht darin — das Russische hat für «sein» kein Präsens.
 
+### `data/nomen.json`
+
+Grundform → das, was die Präpositivregel **nicht** trägt.
+
+```json
+{
+  "день": { "praep": "дне" },
+  "год": { "praep": "году" },
+  "метро": { "starr": true }
+}
+```
+
+| Feld | bedeutet |
+| --- | --- |
+| `praep` | die abweichende Präpositivform |
+| `starr` | unveränderliches Lehnwort — in keinem Fall etwas anderes |
+
+Vier Gruppen füllen die Liste: flüchtige Vokale (`палец` → `пальце`), eigene Stämme
+(`время` → `времени`), der Ortsfall auf `-у` nach в/на (`лес` → `лесу`) und
+Unveränderliche. **Ein Eintrag, der dasselbe liefert wie die Regel, bricht den Build
+ab** — `кофе` endet ohnehin auf `-е` und braucht keinen.
+
 ### `data/grammatik.json`
 
 Liste von Bausteinen; jeder ist eine Regel mit allem, was sie zum Lernen braucht.
@@ -121,7 +147,7 @@ Liste von Bausteinen; jeder ist eine Regel mit allem, was sie zum Lernen braucht
 | Feld | bedeutet |
 | --- | --- |
 | `id` · `name` · `kurz` | Kennung (nur Kleinbuchstaben), Überschrift, Untertitel |
-| `aufgabe` | `geschlecht` · `akk` · `praes` · `ichform` |
+| `aufgabe` | `geschlecht` · `akk` · `praes` · `ichform` · `praep` |
 | `klasse` | bei `praes`: `e` oder `i` — welche Reihe geübt wird |
 | `person` | eine feste Person statt einer ausgelosten |
 | `frage` · `deutungen` · `richtig` | der Entdeckenschritt: mindestens drei Deutungen, eine trifft |
@@ -130,7 +156,13 @@ Liste von Bausteinen; jeder ist eine Regel mit allem, was sie zum Lernen braucht
 
 Die Beispiele misst der Build an der Aufgabe: bei `akk` müssen es Nomen sein, bei `praes`
 Verben der richtigen Reihe ohne eigenen Stamm, bei `ichform` Verben, deren Stamm
-tatsächlich kippt. Ein Beispiel, an dem sich die Regel nicht zeigen lässt, bricht ab.
+tatsächlich kippt, bei `praep` Nomen, die ein Ort sein können — also keine Lebewesen und
+keine Ausnahmen aus `nomen.json`. Ein Beispiel, an dem sich die Regel nicht zeigen lässt,
+bricht ab.
+
+**Beim Präpositiv sind die Beispiele zugleich der Wortvorrat der Übung.** Ob ein Wort ein
+Ort sein kann, sagt keine Endung — «в маме» wäre grammatisch richtig und Unsinn. Diese
+eine Rubrik entscheidet der Autor, nicht die Regel.
 
 ### `data/buchstaben.json`
 
@@ -176,7 +208,7 @@ sollten nicht stark auseinanderlaufen, sonst bricht das Raster auf schmalen Ger�
 | doppelter Fakt | Abbruch |
 | Alphabet ≠ 33 Zeichen, Tastaturzeichen fehlt im Alphabet | Abbruch |
 | vermerkte Form, die `grammForm()` anders baut | Abbruch |
-| `verben.json`-Eintrag, der dasselbe liefert wie die Regel | Abbruch |
+| `verben.json`- oder `nomen.json`-Eintrag, der dasselbe liefert wie die Regel | Abbruch |
 | Grammatik-Beispiel, an dem sich die Regel nicht zeigen lässt | Abbruch |
 | doppelte Kennung im Sicherungscode (Wort, Satz, Fakt) | Abbruch |
 

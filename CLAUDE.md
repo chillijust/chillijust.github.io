@@ -63,7 +63,7 @@ zweites Mal einbetten, und nie über Scroll-Rechnung positionieren — sie steht
 index.html                die App — genau diese Datei wird ausgeliefert
 .nojekyll                 schaltet Jekyll ab, niemals löschen
 data/*.json               Lerninhalte, einzige Quelle für Vokabeln/Sätze/Fakten/
-                          Tastatur/Buchstaben/Grammatik
+                          Tastatur/Buchstaben/Grammatik/Verben/Nomen
 tools/build.mjs           /data prüfen und in index.html einbetten (--check = nur prüfen)
 tools/pruefen.mjs         Vor-Push-Prüfung von index.html
 tools/freistellen.py      Maskottchen aus einem Bild freistellen (ohne Bildbibliothek)
@@ -119,7 +119,17 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
 - **Erklären und abfragen sind zwei Dinge.** Was sich nicht herleiten lässt, erklärt
   «Wissen» im Satz, aber die Übung fragt nicht danach — belebte männliche Nomen im
   Akkusativ, Verben mit eigenem Stamm (`писать` → `пиш-`), `быть` im Präsens (das es
-  nicht gibt: `буду` ist Zukunft). Lieber schweigen als danebenliegen.
+  nicht gibt: `буду` ist Zukunft), der Ortsfall auf `-у` (`в году`, `в лесу`). Lieber
+  schweigen als danebenliegen.
+- **Geschlecht und Belebtheit sind zwei Dinge** (ADR 0032). Nie das rohe Kürzel für das
+  Geschlecht halten — immer `geschlecht(art)` fragen, sonst gilt `мама` als Ausnahme und
+  `мышь` wird zu «мыше». `belebt(art)` sagt, ob ein Lebewesen gemeint ist.
+- **Eine richtige Form kann trotzdem Unsinn sein.** «в маме» ist grammatisch tadellos —
+  in einer Mutter ist niemand. Wo eine Regel etwas über die Welt voraussetzt und nicht
+  nur über die Sprache, nennt der Baustein seine Wörter selbst (bisher nur Präpositiv).
+- **Kein Kyrillisch in Versalien-Etiketten** (`.task-label`, `kurz` der Bausteine):
+  «в на» liest sich als «B HA». `.cyr` ist von `text-transform` ausgenommen — im
+  Datenfeld hilft das aber nicht, dort gehört gar kein Kyrillisch hin.
 - **Die Reihenfolge in `data/vokabeln.json` ist der Lehrplan.** Aus ihr und den
   Satzvoraussetzungen bauen sich die Lernsets (`SET_MAX`, `SATZ_STUFE`); Ergänzungen ans
   Ende des passenden Themas.
