@@ -209,7 +209,7 @@ Die Reihenfolge folgt dem Ertrag in Ihren Sätzen, nicht der Lehrbuchsystematik:
 | # | Baustein | erklärt … | Formen in den Sätzen |
 | --- | --- | --- | --- |
 | **P** | **Geschlecht + Akkusativ** | `книгу`, `газету` | 7 |
-| 2 | Verben im Präsens, beide Muster | `читаю`, `работает`, `пишет` | 30 |
+| **2** | **Verben im Präsens, beide Reihen + Ich-Form** | `читаю`, `работает`, `пьёт` | 36 |
 | 3 | Präpositiv nach в/на | `в городе`, `на столе` | ~11 |
 | 4 | Vergangenheit, nach Geschlecht | `он читал`, `она читала` | ~11 |
 | 5 | Genitiv | `фруктов`, `друзей`, `часов` | ~6 |
@@ -298,6 +298,32 @@ bleibt darum winzig.
 - **Die Entdecken-Beispiele müssen kontrastieren.** Der erste Entwurf zeigte vier
   weibliche Wörter — vier Mal dasselbe zeigt kein Muster. Jetzt steht je eines pro
   Geschlecht da.
+
+---
+
+## Etappe 2 ist fertig — Verben im Präsens
+
+| geplant | gebaut |
+| --- | --- |
+| ein Baustein «Verben im Präsens» | **drei**: e-Reihe, i-Reihe, Ich-Form — es sind drei Regeln, und jede will einzeln entdeckt werden |
+| ~30 Formen erklärt | 36; zusammen mit dem Akkusativ **45 von 110** (41 %, vorher 8 %) |
+| Formen in `saetze.json` vermerken | 36 neue Einträge, jede vom Build nachgerechnet |
+| eigenwillige Verben in Daten | `verben.json`, 15 Einträge — nur was die Regel nicht trägt |
+| Testreihe erweitern | `grammatik.mjs` von 65 auf 108; zusammen 771 |
+
+**Drei Entscheidungen, die beim Bauen fielen** (ausführlich in ADR 0031):
+
+- **Die Ich-Form gibt die ты-Form vor**, nicht den Infinitiv. Sonst müsste man zweierlei
+  können: den Stamm finden *und* wissen, was mit ihm geschieht.
+- **`быть` bekommt kein Präsens.** «буду» ist Zukunft. Zwei erklärte Formen mehr wären
+  eine Unwahrheit gewesen.
+- **Verben mit eigenem Stamm werden erklärt, aber nicht abgefragt** — «писать → пиш-» ist
+  zu wissen, nicht zu errechnen.
+
+**Der Beweis hat zwei stille Fehler gefangen**, die niemand mit der Hand nachgerechnet
+hätte: `жить` und `пить` landeten wegen ihres `-ить` in der falschen Reihe («живлю»,
+«пьишь»), und die Ich-Form richtete ihre Endung nach dem ungewandelten Stamm («вижю»
+statt «вижу»). Beides ist gerichtet, beides steht jetzt in der Testreihe.
 
 ---
 

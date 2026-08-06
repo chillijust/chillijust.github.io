@@ -37,5 +37,70 @@
     "merksatz": "Im Deutschen ändert sich der Artikel, im Russischen das Wort selbst.",
     "fussnote": "Darum ist die Wortstellung im Russischen frei: Die Endung sagt, wer wen liest — nicht der Platz im Satz.",
     "beispiele": ["книга", "газета", "каша", "музыка", "кухня", "окно", "стол", "письмо"]
+  },
+  {
+    "id": "praesens",
+    "name": "Präsens",
+    "kurz": "Wer etwas tut",
+    "aufgabe": "praes",
+    "klasse": "e",
+    "frage": "Ein Verb, vier Personen. Woran sieht man, wer gemeint ist?",
+    "deutungen": ["An der Endung des Verbs", "Am Pronomen davor — ohne я, ты, он ginge es nicht", "An der Stellung im Satz"],
+    "richtig": 0,
+    "regel": "Das russische Verb trägt die Person in der Endung. Verben auf -ать und -ять bilden dazu die e-Reihe: Der Stamm ist der Infinitiv ohne -ть, daran hängt die Endung. Weil die Endung schon sagt, wer handelt, darf das Pronomen wegfallen — «читаю» allein heißt bereits «ich lese».",
+    "tabelle": [
+      ["я", "-ю / -у", "читать → читаю"],
+      ["ты", "-ешь", "читать → читаешь"],
+      ["он · она", "-ет", "работать → работает"],
+      ["мы", "-ем", "гулять → гуляем"],
+      ["вы", "-ете", "знать → знаете"],
+      ["они", "-ют / -ут", "играть → играют"]
+    ],
+    "merksatz": "Nicht das Pronomen sagt, wer handelt — die Endung tut es.",
+    "fussnote": "-ю und -ют stehen nach einem Vokal, -у und -ут nach einem Konsonanten. Das ist keine zweite Reihe, nur Rechtschreibung.",
+    "beispiele": ["читать", "работать", "знать", "делать", "слушать", "понимать", "играть", "думать", "гулять"]
+  },
+  {
+    "id": "praesensi",
+    "name": "Die zweite Reihe",
+    "kurz": "Verben auf -ить und -еть",
+    "aufgabe": "praes",
+    "klasse": "i",
+    "frage": "Dieselbe Person, andere Endungen. Woran liegt das?",
+    "deutungen": ["Am Infinitiv: -ить und -еть gehen anders", "Am Geschlecht dessen, der handelt", "Daran, ob die Handlung gerade läuft"],
+    "richtig": 0,
+    "regel": "Verben auf -ить und -еть folgen der zweiten Reihe. Ihr Stamm ist der Infinitiv ohne die letzten drei Zeichen — говор-ить, смотр-еть —, und wo die erste Reihe ein e hat, steht hier ein i. Welcher Reihe ein Verb folgt, sieht man ihm am Infinitiv an; man muss es nicht mitlernen.",
+    "tabelle": [
+      ["я", "-ю / -у", "говорить → говорю"],
+      ["ты", "-ишь", "смотреть → смотришь"],
+      ["он · она", "-ит", "стоить → стоит"],
+      ["мы", "-им", "смотреть → смотрим"],
+      ["вы", "-ите", "любить → любите"],
+      ["они", "-ят / -ат", "учить → учат"]
+    ],
+    "merksatz": "e-Reihe oder i-Reihe: Der Infinitiv entscheidet, nicht die Person.",
+    "fussnote": "Nach к г х ж ч ш щ steht -у und -ат statt -ю und -ят — учу, учат. Auch das ist Rechtschreibung, keine Ausnahme.",
+    "beispiele": ["говорить", "любить", "учить", "смотреть", "видеть", "платить", "готовить", "стоить"]
+  },
+  {
+    "id": "ichform",
+    "name": "Die Ich-Form",
+    "kurz": "Wo der Stamm kippt",
+    "aufgabe": "ichform",
+    "person": "1s",
+    "frage": "Links die ты-Form, rechts dasselbe Verb mit я. Was geschieht mit dem Stamm?",
+    "deutungen": ["Sein letzter Laut ändert sich — aber nur hier", "Der Stamm bleibt gleich, nur die Endung wechselt", "Der Stamm verliert seinen letzten Laut"],
+    "richtig": 0,
+    "regel": "In der i-Reihe ist die Ich-Form der Sonderling: Dort, und nur dort, ändert sich der letzte Laut des Stammes. Nach б п в ф м schiebt sich ein л ein, andere Konsonanten wandeln sich. Die übrigen fünf Formen bleiben unberührt — darum steht «я люблю» neben «ты любишь».",
+    "tabelle": [
+      ["б п в ф м", "+ л", "любить → люблю"],
+      ["т", "wird ч", "платить → плачу"],
+      ["д", "wird ж", "видеть → вижу"],
+      ["с · з · г · х · ст", "wandeln ebenso", "zu ш · ж · ж · ш · щ"],
+      ["ты · он · мы · вы · они", "bleiben", "любишь · любит · любят"]
+    ],
+    "merksatz": "Ein einziger Laut kippt, und nur in der Ich-Form.",
+    "fussnote": "Das ist keine Unregelmäßigkeit, sondern Bequemlichkeit: Zwei Laute, die schlecht nebeneinander liegen, weichen einander aus. Wer die Regel hat, muss люблю nicht auswendig lernen.",
+    "beispiele": ["любить", "готовить", "платить", "видеть", "встретить", "спать"]
   }
 ]

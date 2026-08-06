@@ -20,15 +20,22 @@ git add data index.html && git commit
 
 ### `data/vokabeln.json`
 
-Thema → Liste von Tripeln `[russisch, deutsch, transliteration]`.
+Thema → Liste von Tripeln `[russisch, deutsch, transliteration]`, wahlweise mit einem
+vierten Feld für Wortart und Geschlecht.
 
 ```json
 {
   "Grundlagen": [
-    ["привет", "hallo", "priwjet"]
+    ["привет", "hallo", "priwjet"],
+    ["кровать", "das Bett", "krawat", "w"]
   ]
 }
 ```
+
+- Das **vierte Feld** steht nur da, wo die Endung die Wortart nicht verrät oder falsch
+  verrät: `m` · `mb` (männlich belebt) · `w` · `s` · `pl` · `v` (Verb) · `a` (Adjektiv) ·
+  `-` (keine Formenlehre). **Eine Angabe, die nur wiederholt, was die Endung ohnehin
+  sagt, lässt den Build scheitern** — sonst verdeckt die Liste die echten Ausnahmen.
 
 - **Die Reihenfolge in dieser Datei ist der Lehrplan.** Sie bestimmt, in welcher Folge
   die Lernsets entstehen und in welcher Reihenfolge Freestyle die Themen anbietet. Wer
@@ -53,7 +60,11 @@ Geordnete Liste von Sätzen. Jeder nennt seine **Voraussetzungen**: die Grundfor
   "ru": "Я читаю книгу.",
   "de": "Ich lese ein Buch.",
   "stufe": 1,
-  "benoetigt": ["я", "читать", "книга"]
+  "benoetigt": ["я", "читать", "книга"],
+  "formen": {
+    "читаю": ["читать", "praes1s"],
+    "книгу": ["книга", "akk"]
+  }
 }
 ```
 
@@ -72,6 +83,59 @@ Geordnete Liste von Sätzen. Jeder nennt seine **Voraussetzungen**: die Grundfor
   gelehrten Wortes) — ein Satz steht also dort, wo er erreichbar wird.
 - Der Satzbau zerlegt am Leerzeichen; Satzzeichen bleiben am Wort. Sätze deshalb kurz
   halten.
+- **`formen` ist der Beweis der Grammatikmaschine.** Jeder Eintrag führt eine gebeugte
+  Form auf Grundform und Rolle zurück (`akk`, `praes1s` … `praes3p`). Der Build lässt
+  `grammForm()` jede davon nachbauen und **bricht ab, wenn eine abweicht** — inklusive
+  der Meldung, was die Maschine baut und was im Satz steht. Formen, für die es noch
+  keine Rolle gibt, bleiben einfach weg; «Wissen» sagt dann ehrlich, dass sie noch nicht
+  erklärt sind.
+
+### `data/verben.json`
+
+Grundform → das, was die Regel **nicht** trägt. Alles andere rechnet die Maschine.
+
+```json
+{
+  "писать": { "stamm": "пиш" },
+  "жить": { "stamm": "жив", "betont": true, "konj": "e" },
+  "мочь": { "formen": ["могу", "можешь", "может", "можем", "можете", "могут"] }
+}
+```
+
+| Feld | bedeutet |
+| --- | --- |
+| `stamm` | abweichender Präsensstamm |
+| `betont` | Betonung auf der Endung — aus `e` wird `ё` |
+| `konj` | `e` oder `i`, wenn der Infinitiv in die Irre führt (`жить`, `пить`) |
+| `formen` | alle sechs Formen, wenn das Verb keiner Reihe folgt. Verträgt sich nicht mit `stamm`. |
+
+- Das Verb muss in `vokabeln.json` stehen und dort Wortart `v` haben.
+- **Ein Eintrag, der dasselbe liefert wie die blanke Regel, bricht den Build ab.** Die
+  Probe macht der Build selbst: einmal mit, einmal ohne den Eintrag rechnen.
+- `быть` steht nicht darin — das Russische hat für «sein» kein Präsens.
+
+### `data/grammatik.json`
+
+Liste von Bausteinen; jeder ist eine Regel mit allem, was sie zum Lernen braucht.
+
+| Feld | bedeutet |
+| --- | --- |
+| `id` · `name` · `kurz` | Kennung (nur Kleinbuchstaben), Überschrift, Untertitel |
+| `aufgabe` | `geschlecht` · `akk` · `praes` · `ichform` |
+| `klasse` | bei `praes`: `e` oder `i` — welche Reihe geübt wird |
+| `person` | eine feste Person statt einer ausgelosten |
+| `frage` · `deutungen` · `richtig` | der Entdeckenschritt: mindestens drei Deutungen, eine trifft |
+| `regel` · `tabelle` · `merksatz` · `fussnote` | die Regelkarte; `tabelle` sind Zeilen aus drei Spalten |
+| `beispiele` | mindestens vier Wörter **aus dem Lehrplan** |
+
+Die Beispiele misst der Build an der Aufgabe: bei `akk` müssen es Nomen sein, bei `praes`
+Verben der richtigen Reihe ohne eigenen Stamm, bei `ichform` Verben, deren Stamm
+tatsächlich kippt. Ein Beispiel, an dem sich die Regel nicht zeigen lässt, bricht ab.
+
+### `data/buchstaben.json`
+
+Genau 33 Vierertupel `[Groß, klein, Lautwert, Merksatz]`. Der Build gleicht sie gegen
+`tastatur.json` ab — was auf der Tastatur liegt, muss auch im Alphabet stehen.
 
 ### `data/fakten.json`
 
@@ -99,7 +163,8 @@ sollten nicht stark auseinanderlaufen, sonst bricht das Raster auf schmalen Ger�
 
 | Prüfung | Wirkung |
 | --- | --- |
-| Vokabel-Tupel mit drei Feldern | Abbruch |
+| Vokabel-Tupel mit drei oder vier Feldern | Abbruch |
+| Wortart-Angabe fehlt, wo die Endung schweigt — oder wiederholt sie nur | Abbruch |
 | leere Felder, führende/folgende Leerzeichen | Abbruch |
 | erstes Feld enthält Kyrillisch | Abbruch |
 | Vokabel-Dublette über **alle** Themen | Abbruch |
@@ -109,6 +174,11 @@ sollten nicht stark auseinanderlaufen, sonst bricht das Raster auf schmalen Ger�
 | Satzstufen lückenlos ab 1 | Abbruch |
 | doppelte oder nicht-kyrillische Taste | Abbruch |
 | doppelter Fakt | Abbruch |
+| Alphabet ≠ 33 Zeichen, Tastaturzeichen fehlt im Alphabet | Abbruch |
+| vermerkte Form, die `grammForm()` anders baut | Abbruch |
+| `verben.json`-Eintrag, der dasselbe liefert wie die Regel | Abbruch |
+| Grammatik-Beispiel, an dem sich die Regel nicht zeigen lässt | Abbruch |
+| doppelte Kennung im Sicherungscode (Wort, Satz, Fakt) | Abbruch |
 
 Die Dublettenprüfung greift themenübergreifend: ein Wort gehört an genau eine Stelle.
 Passt es in zwei Themen, ist das ein Hinweis darauf, dass die Themen zu fein geschnitten

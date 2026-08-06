@@ -114,7 +114,12 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   sonst prüft sie Auswendiglernen. Formen rechnet `grammForm()`; sie steht doppelt (App und
   Build) und wird an den vermerkten Formen der Sätze gemessen. **Eine Wortart-Angabe, die
   nur wiederholt, was die Endung sagt, lässt den Build scheitern** — sonst verdeckt die
-  Liste die echten Ausnahmen.
+  Liste die echten Ausnahmen. Dasselbe gilt für `data/verben.json`: **ein Eintrag, der
+  dasselbe liefert wie die blanke Regel, bricht den Build ab** (ADR 0031).
+- **Erklären und abfragen sind zwei Dinge.** Was sich nicht herleiten lässt, erklärt
+  «Wissen» im Satz, aber die Übung fragt nicht danach — belebte männliche Nomen im
+  Akkusativ, Verben mit eigenem Stamm (`писать` → `пиш-`), `быть` im Präsens (das es
+  nicht gibt: `буду` ist Zukunft). Lieber schweigen als danebenliegen.
 - **Die Reihenfolge in `data/vokabeln.json` ist der Lehrplan.** Aus ihr und den
   Satzvoraussetzungen bauen sich die Lernsets (`SET_MAX`, `SATZ_STUFE`); Ergänzungen ans
   Ende des passenden Themas.

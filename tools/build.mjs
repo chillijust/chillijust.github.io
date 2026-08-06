@@ -78,6 +78,7 @@ const fakten = lies('fakten.json').wert;
 const tastatur = lies('tastatur.json').wert;
 const buchstaben = lies('buchstaben.json').wert;
 const grammatik = lies('grammatik.json').wert;
+const verben = lies('verben.json').wert;
 
 // ── Wortart und Geschlecht ───────────────────────────────────
 // Die Endung der Grundform verrät beides — meistens. Was die Regel liefert,
@@ -142,8 +143,58 @@ const akkusativ = (ru, art) => {
   if (art === 'mb') return /[йь]$/.test(ru) ? ru.slice(0, -1) + 'я' : ru + 'а';
   return ru;
 };
-const grammForm = (ru, art, rolle) => (rolle === 'akk' ? akkusativ(ru, art) : null);
+const PERSONEN = ['1s', '2s', '3s', '1p', '2p', '3p'];
+const nachZischlaut = (stamm) => /[кгхжчшщ]$/.test(stamm);
+const weicherStamm = (stamm) => /[аеёиоуыэюяьй]$/.test(stamm);
+const endungenE = (stamm, betont) => {
+  const weich = weicherStamm(stamm);
+  const e = betont ? 'ё' : 'е';
+  return [weich ? 'ю' : 'у', e + 'шь', e + 'т', e + 'м', e + 'те', weich ? 'ют' : 'ут'];
+};
+const endungenI = (stamm) => [
+  nachZischlaut(stammIch(stamm)) ? 'у' : 'ю',
+  'ишь', 'ит', 'им', 'ите',
+  nachZischlaut(stamm) ? 'ат' : 'ят',
+];
+const WANDEL = { 'т': 'ч', 'д': 'ж', 'с': 'ш', 'з': 'ж', 'к': 'ч', 'г': 'ж', 'х': 'ш' };
+const stammIch = (stamm) => {
+  if (/ст$/.test(stamm)) return stamm.slice(0, -2) + 'щ';
+  if (/[бпвфм]$/.test(stamm)) return stamm + 'л';
+  const letzt = stamm.slice(-1);
+  return WANDEL[letzt] ? stamm.slice(0, -1) + WANDEL[letzt] : stamm;
+};
+const verbBauMit = (ru, tab) => {
+  const eigen = tab[ru] || null;
+  if (eigen && eigen.formen) return eigen.formen.slice();
+  if (/ться$/.test(ru)) {
+    const basis = verbBauMit(ru.slice(0, -2), tab);
+    if (!basis) return null;
+    return basis.map((f) => f + (/[аеёиоуыэюя]$/.test(f) ? 'сь' : 'ся'));
+  }
+  let stamm = eigen && eigen.stamm ? eigen.stamm : null;
+  const konj = eigen && eigen.konj ? eigen.konj : (/(ить|еть)$/.test(ru) ? 'i' : 'e');
+  if (!stamm) {
+    if (/(ать|ять)$/.test(ru)) stamm = ru.slice(0, -2);
+    else if (/(ить|еть)$/.test(ru)) stamm = ru.slice(0, -3);
+    else return null;
+  }
+  const enden = konj === 'i' ? endungenI(stamm) : endungenE(stamm, !!(eigen && eigen.betont));
+  return enden.map((e, i) => (i === 0 && konj === 'i' ? stammIch(stamm) : stamm) + e);
+};
+const verbBau = (ru) => verbBauMit(ru, verben);
+const praesens = (ru, person) => {
+  const formen = verbBau(ru);
+  if (!formen) return null;
+  const i = PERSONEN.indexOf(person);
+  return i === -1 ? null : formen[i];
+};
+const grammForm = (ru, art, rolle) => {
+  if (rolle === 'akk') return akkusativ(ru, art);
+  if (rolle.indexOf('praes') === 0) return art === 'v' ? praesens(ru, rolle.slice(5)) : null;
+  return null;
+};
 const ROLLEN = { akk: 'Akkusativ' };
+PERSONEN.forEach((p) => { ROLLEN['praes' + p] = 'Präsens ' + p; });
 
 // Sätze: { ru, de, stufe, benoetigt } — «benoetigt» nennt die Grundformen aus
 // dem Lehrplan, die ein Satz voraussetzt. Erst wenn die sitzen, wird er angeboten.
@@ -316,6 +367,8 @@ const grammatikBlock = (name, liste) => {
     zeilen.push('  {');
     zeilen.push('    id: ' + jsStr(b.id) + ', name: ' + jsStr(b.name) +
       ', kurz: ' + jsStr(b.kurz) + ', aufgabe: ' + jsStr(b.aufgabe) + ',');
+    if (b.klasse) zeilen.push('    klasse: ' + jsStr(b.klasse) + ',');
+    if (b.person) zeilen.push('    person: ' + jsStr(b.person) + ',');
     zeilen.push('    frage: ' + jsStr(b.frage) + ',');
     zeilen.push('    deutungen: [' + b.deutungen.map(jsStr).join(', ') + '], richtig: ' + b.richtig + ',');
     zeilen.push('    regel: ' + jsStr(b.regel) + ',');
@@ -326,6 +379,23 @@ const grammatikBlock = (name, liste) => {
     zeilen.push('  }' + (i < liste.length - 1 ? ',' : ''));
   });
   zeilen.push('];');
+  return zeilen.join('\n');
+};
+
+const verbenBlock = (name, obj) => {
+  const zeilen = ['var ' + name + ' = {'];
+  const schluessel = Object.keys(obj);
+  schluessel.forEach((k, i) => {
+    const a = obj[k];
+    const teile = [];
+    if (a.stamm) teile.push('stamm: ' + jsStr(a.stamm));
+    if (a.betont) teile.push('betont: true');
+    if (a.konj) teile.push('konj: ' + jsStr(a.konj));
+    if (a.formen) teile.push('formen: [' + a.formen.map(jsStr).join(', ') + ']');
+    zeilen.push('  ' + jsStr(k) + ': { ' + teile.join(', ') + ' }' +
+      (i < schluessel.length - 1 ? ',' : ''));
+  });
+  zeilen.push('};');
   return zeilen.join('\n');
 };
 
@@ -358,6 +428,8 @@ const block = [
   listenBlock('ALPHABET', buchstaben, true),
   '',
   grammatikBlock('GRAMMATIK', grammatik),
+  '',
+  verbenBlock('VERBEN', verben),
   ENDE
 ].join('\n');
 
@@ -411,6 +483,24 @@ const jsonSaetze = (liste) => {
   return zeilen.join('\n') + '\n';
 };
 
+// Eigenwillige Verben: ein Verb je Zeile.
+const jsonVerben = (obj) => {
+  const zeilen = ['{'];
+  const schluessel = Object.keys(obj);
+  schluessel.forEach((k, i) => {
+    const a = obj[k];
+    const teile = [];
+    if (a.stamm) teile.push('"stamm": ' + jsonStr(a.stamm));
+    if (a.betont) teile.push('"betont": true');
+    if (a.konj) teile.push('"konj": ' + jsonStr(a.konj));
+    if (a.formen) teile.push('"formen": [' + a.formen.map(jsonStr).join(', ') + ']');
+    zeilen.push('  ' + jsonStr(k) + ': { ' + teile.join(', ') + ' }' +
+      (i < schluessel.length - 1 ? ',' : ''));
+  });
+  zeilen.push('}');
+  return zeilen.join('\n') + '\n';
+};
+
 // Bausteine lesbar halten: Listen bleiben auf einer Zeile, lange Texte stehen
 // für sich. So sieht man beim Durchsehen die Regel und nicht die Klammern.
 const jsonGrammatik = (liste) => {
@@ -423,6 +513,8 @@ const jsonGrammatik = (liste) => {
     feld('name', jsonStr(b.name), true);
     feld('kurz', jsonStr(b.kurz), true);
     feld('aufgabe', jsonStr(b.aufgabe), true);
+    if (b.klasse) feld('klasse', jsonStr(b.klasse), true);
+    if (b.person) feld('person', jsonStr(b.person), true);
     feld('frage', jsonStr(b.frage), true);
     feld('deutungen', '[' + b.deutungen.map(jsonStr).join(', ') + ']', true);
     feld('richtig', String(b.richtig), true);
@@ -447,14 +539,67 @@ const dateien = [
   ['data/fakten.json', jsonListe(fakten, false)],
   ['data/tastatur.json', jsonListe(tastatur, true)],
   ['data/buchstaben.json', jsonListe(buchstaben, true)],
-  ['data/grammatik.json', jsonGrammatik(grammatik)]
+  ['data/grammatik.json', jsonGrammatik(grammatik)],
+  ['data/verben.json', jsonVerben(verben)]
 ];
+
+// ── Eigenwillige Verben ─────────────────────────────────────
+// Hier steht nur, was die Regel nicht trägt — meist ein abweichender Stamm,
+// selten alle sechs Formen. Ein Eintrag, der dasselbe liefert wie die Regel,
+// ist ein Fehler: Er verlängert die Liste und verdeckt die echten Sonderfälle.
+if (!verben || typeof verben !== 'object' || Array.isArray(verben)) {
+  meckern('verben.json: erwartet ein Objekt Grundform → Angaben');
+} else {
+  Object.entries(verben).forEach(([ru, a]) => {
+    const wo = 'verben.json » ' + ru;
+    const eintrag = wortIndex[ru];
+    if (!eintrag) return meckern(wo + ': steht nicht in vokabeln.json');
+    if (wortart(eintrag) !== 'v') meckern(wo + ': ist dort kein Verb');
+    if (!a || typeof a !== 'object' || Array.isArray(a)) return meckern(wo + ': erwartet ein Objekt');
+    const erlaubt = ['stamm', 'betont', 'konj', 'formen'];
+    Object.keys(a).forEach((k) => {
+      if (!erlaubt.includes(k)) meckern(wo + ': unbekannte Angabe «' + k + '»');
+    });
+    if (a.formen !== undefined) {
+      if (!Array.isArray(a.formen) || a.formen.length !== 6) {
+        meckern(wo + ': «formen» braucht genau sechs Formen (я ты он мы вы они)');
+      }
+      if (a.stamm || a.konj || a.betont) meckern(wo + ': «formen» verträgt sich nicht mit «stamm»');
+    }
+    if (a.konj !== undefined && a.konj !== 'i' && a.konj !== 'e') {
+      meckern(wo + ': «konj» ist «i» oder «e»');
+    }
+    // Die Probe aufs Exempel: Was liefert die blanke Regel ohne diesen Eintrag?
+    // Kommt dasselbe heraus, sagt der Eintrag nichts — dann weg damit.
+    const mit = verbBauMit(ru, verben);
+    const ohne = verbBauMit(ru, { ...verben, [ru]: undefined });
+    if (mit && ohne && mit.join(' ') === ohne.join(' ')) {
+      meckern(wo + ': überflüssig — die Regel liefert von allein «' + mit[0] + ' … ' + mit[5] + '»');
+    }
+  });
+}
 
 // ── Grammatik-Bausteine ─────────────────────────────────────
 // Ein Baustein ist eine Regel mit allem, was sie zum Lernen braucht: die Frage
 // zum Entdecken samt Deutungen, die Regel selbst, eine Tabelle und ein
 // Merksatz. Die Aufgabenart verweist auf eine Rolle, die die Maschine kennt.
-const AUFGABEN = ['geschlecht', 'akk'];
+const AUFGABEN = ['geschlecht', 'akk', 'praes', 'ichform'];
+const verbKlasse = (ru) => {
+  if (/ться$/.test(ru)) return verbKlasse(ru.slice(0, -2));
+  const eigen = verben[ru] || null;
+  if (eigen && eigen.formen) return '';
+  if (eigen && eigen.konj) return eigen.konj;
+  return /(ить|еть)$/.test(ru) ? 'i' : 'e';
+};
+const verbStamm = (ru) => {
+  if (/ться$/.test(ru)) return verbStamm(ru.slice(0, -2));
+  const eigen = verben[ru] || null;
+  if (eigen && eigen.formen) return '';
+  if (eigen && eigen.stamm) return eigen.stamm;
+  if (/(ать|ять)$/.test(ru)) return ru.slice(0, -2);
+  if (/(ить|еть)$/.test(ru)) return ru.slice(0, -3);
+  return '';
+};
 if (!Array.isArray(grammatik) || grammatik.length === 0) {
   meckern('grammatik.json: erwartet eine nicht-leere Liste von Bausteinen');
 } else {
@@ -470,6 +615,12 @@ if (!Array.isArray(grammatik) || grammatik.length === 0) {
     ids.add(b.id);
     if (!AUFGABEN.includes(b.aufgabe)) {
       meckern(wo + ': unbekannte Aufgabe «' + b.aufgabe + '» — bekannt: ' + AUFGABEN.join(' '));
+    }
+    if (b.klasse !== undefined && b.klasse !== 'i' && b.klasse !== 'e') {
+      meckern(wo + ': «klasse» ist «i» oder «e»');
+    }
+    if (b.person !== undefined && !PERSONEN.includes(b.person)) {
+      meckern(wo + ': «person» ist eine von ' + PERSONEN.join(' '));
     }
     // Entdecken heißt wählen: eine Deutung trifft, die anderen sind plausibel
     // und falsch. Unter drei Möglichkeiten wäre es kein Erkennen mehr, sondern
@@ -492,9 +643,29 @@ if (!Array.isArray(grammatik) || grammatik.length === 0) {
       meckern(wo + ': «beispiele» braucht mindestens vier Wörter');
     } else {
       b.beispiele.forEach((w) => {
-        if (!wortIndex[w]) meckern(wo + ': Beispiel «' + w + '» steht nicht in vokabeln.json');
-        else if (b.aufgabe === 'akk' && !['m', 'mb', 'w', 's'].includes(wortart(wortIndex[w]))) {
+        if (!wortIndex[w]) return meckern(wo + ': Beispiel «' + w + '» steht nicht in vokabeln.json');
+        if (b.aufgabe === 'akk' && !['m', 'mb', 'w', 's'].includes(wortart(wortIndex[w]))) {
           meckern(wo + ': Beispiel «' + w + '» ist kein Nomen');
+        }
+        if (b.aufgabe !== 'praes' && b.aufgabe !== 'ichform') return;
+        // Ein Verb, an dem sich die Regel nicht zeigen lässt, taugt nicht als
+        // Beispiel: Entweder folgt es keiner Reihe, oder die Übung fände es gar
+        // nicht in ihrem Vorrat und stünde mit leeren Händen da.
+        if (wortart(wortIndex[w]) !== 'v') return meckern(wo + ': Beispiel «' + w + '» ist kein Verb');
+        if (!verbBau(w)) return meckern(wo + ': Beispiel «' + w + '» lässt sich nicht beugen');
+        const klasse = verbKlasse(w);
+        if (!klasse) return meckern(wo + ': Beispiel «' + w + '» folgt keiner Reihe');
+        if (/ться$/.test(w)) return meckern(wo + ': Beispiel «' + w + '» ist rückbezüglich');
+        if (b.aufgabe === 'ichform') {
+          const stamm = verbStamm(w);
+          if (klasse !== 'i' || stammIch(stamm) === stamm) {
+            meckern(wo + ': Beispiel «' + w + '» wandelt seinen Stamm nicht');
+          }
+          return;
+        }
+        if (verben[w]) meckern(wo + ': Beispiel «' + w + '» hat einen eigenen Stamm — nicht herleitbar');
+        if (b.klasse && klasse !== b.klasse) {
+          meckern(wo + ': Beispiel «' + w + '» gehört zur ' + klasse + '-Reihe');
         }
       });
     }

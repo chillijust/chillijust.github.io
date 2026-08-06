@@ -600,14 +600,79 @@ Ausnahmen — `кровать` (Nomen trotz `-ть`), `кофе` (männlich), `�
 Die Belebtheit ist nur bei männlichen Nomen vermerkt, weil nur dort eine Form davon
 abhängt. Kommt eine Regel dazu, die mehr braucht, verlangt der Build es dann.
 
+### Verben im Präsens
+
+Die zweite Ausbaustufe und der größte Sprung: **36 der 110 fremden Formen in den Sätzen
+sind Verbformen.** Zusammen mit dem Akkusativ erklärt die App damit 45 von 110 — statt
+neun.
+
+Zwei Reihen, sechs Personen, ein Sonderling:
+
+| Reihe | Infinitiv | Stamm | я | ты | они |
+| --- | --- | --- | --- | --- | --- |
+| e | `-ать`, `-ять` | ohne `-ть` | `-ю` / `-у` | `-ешь` | `-ют` / `-ут` |
+| i | `-ить`, `-еть` | ohne die letzten drei Zeichen | `-ю` / `-у` | `-ишь` | `-ят` / `-ат` |
+
+`verbBau(ru)` liefert alle sechs Formen, `praesens(ru, person)` eine davon,
+`grammForm(ru, 'v', 'praes3s')` ist die Tür von außen. Dazu `verbKlasse()` (welche
+Reihe), `verbStamm()` (worauf die Endung trifft) und `verbIchWandel()` (kippt der Stamm
+in der Ich-Form?).
+
+Zwei Feinheiten, die der Beweis an den Sätzen aufgedeckt hat:
+
+- **Weich heißt Vokal, `ь` oder `й`** (`weicherStamm()`). Ohne `ь` würde aus dem Stamm
+  `пь-` ein «пьу» statt «пью».
+- **Für die Ich-Form zählt der gewandelte Stamm.** `видеть` hat den Stamm `вид-`, gebildet
+  wird aber auf `виж-` — also `вижу`, nicht «вижю». `endungenI()` fragt darum
+  `nachZischlaut(stammIch(stamm))`, nicht `nachZischlaut(stamm)`.
+
+**`data/verben.json` steht nur für das, was die Regel nicht trägt** — meist ein
+abweichender Stamm (`писать` → `пиш-`), selten alle sechs Formen (`есть`, `хотеть`,
+`мочь`, `бежать`). Ein Eintrag, der dasselbe liefert wie die blanke Regel, **lässt den
+Build scheitern**: Er verlängert die Liste und verdeckt die echten Sonderfälle — dieselbe
+Strenge wie beim vierten Feld der Vokabel.
+
+**`быть` steht nicht darin.** Das Russische hat für «sein» keine Präsensform; `буду`,
+`будет` sind Zukunft. Die Maschine liefert darum `null`, und `будет` bleibt in den Sätzen
+vorerst unerklärt. Eine falsche Auskunft wäre schlimmer als keine.
+
+**Wer einen eigenen Stamm hat, wird nicht abgefragt.** «`писать` → `пиш-`» kann man nicht
+herleiten, nur wissen; die Aufgabe prüfte dann Gedächtnis statt Regel. Im Satz erklärt
+«Wissen» solche Formen trotzdem — dasselbe Prinzip wie bei den belebten männlichen Nomen:
+erklären ja, abfragen nein.
+
+Drei Bausteine tragen das:
+
+| Baustein | Aufgabe | fragt |
+| --- | --- | --- |
+| Präsens | `praes`, `klasse: e` | Infinitiv + Person → Form |
+| Die zweite Reihe | `praes`, `klasse: i` | dasselbe, i-Verben |
+| Die Ich-Form | `ichform` | **ты-Form** + `я` → Form |
+
+Die Ich-Form gibt bewusst die **ты-Form** vor, nicht den Infinitiv: So liegt der Stamm
+offen da, und gefragt ist allein, was mit ihm geschieht. Nur so dürfen auch Verben mit
+eigenem Stamm mitspielen (`спишь → сплю`). Ihre Ablenker enthalten ausnahmsweise ein Wort,
+das es nicht gibt — den ungewandelten Stamm mit der Endung («платю» neben «плачу»). Genau
+das ist der Fehler, um den es geht.
+
 ### Der Ablauf eines Bausteins
 
 1. **Entdecken.** Vier bekannte Wörter mit ihrer Form daneben, darunter drei Deutungen
    zur Wahl. Wer richtig wählt, hat die Regel selbst gefunden. Freie Eingabe wäre nicht
    bewertbar; die Wahl ist die bewertbare Form desselben Gedankens.
-   **Die Beispiele müssen kontrastieren** (`gramEntdeckenWoerter()`): je eines pro
-   Geschlecht, nicht vier weibliche. Vier gleiche Fälle zeigen kein Muster, sondern vier
-   Mal dasselbe.
+   **Die Gegenüberstellung muss kontrastieren** (`gramPaare()`) — worin, hängt an der
+   Regel:
+
+   | Baustein | links · rechts | der Gegensatz |
+   | --- | --- | --- |
+   | Geschlecht | Wort · Geschlecht | je eines pro Geschlecht |
+   | Akkusativ | Grundform · Akkusativ | zwei, die sich ändern, eines, das bleibt |
+   | Präsens (e) | ein Verb · vier Personen | die Endung wechselt, der Stamm nicht |
+   | zweite Reihe | dieselbe Person, beide Reihen | drei `-ить/-еть`, eines `-ать` |
+   | Ich-Form | ты-Form · я-Form | drei mit Wandel, **eines ohne** |
+
+   Vier gleiche Fälle zeigen kein Muster, sondern vier Mal dasselbe. Und ohne das
+   Gegenbeispiel sähe es aus, als wandle sich immer etwas.
 2. **Die Regelkarte.** Ein Satz, eine Tabelle, ein Merksatz, eine Fußnote für die
    Ausnahmen. Später jederzeit über «Warum?» wieder da.
 3. **Anwenden**, gestaffelt wie überall: bis Stufe 1 die Form aus vier wählen, ab
@@ -628,7 +693,8 @@ Menü und Auswahl; der runde Knopf `#wissenKnopf` zeigt darin den ganzen Satz.
 | angetippt | Antwort |
 | --- | --- |
 | Grundform | Bedeutung, Umschrift, Geschlecht, Hörknopf |
-| erklärte Form | `книгу ← книга · weiblich · Akkusativ — wen? was? · а wird zu у` |
+| erklärte Nomenform | `книгу ← книга · weiblich · Akkusativ — wen? was? · а wird zu у` |
+| erklärte Verbform | `пьёт ← пить · Präsens · он/она — er/sie · Stamm пь- + Endung -ёт` |
 | noch nicht erklärte Form | «Diese Form ist noch nicht erklärt — sie kommt mit einem späteren Baustein.» |
 
 Der dritte Fall ist kein Mangel, sondern die ehrlichste Antwort, die die App geben kann.
