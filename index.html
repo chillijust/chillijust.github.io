@@ -520,6 +520,19 @@ button.built-word:active { transform: scale(.95); }
   to { opacity: 1; transform: none; }
 }
 
+/* Gegenstück zur Meisterschaft: derselbe Bau, anderer Ton. Der leichte Patzer
+   bleibt grau, das Zurückstufen trägt die Warnfarbe — man soll es sehen. */
+.patzer {
+  margin-top: 14px; padding: 11px 14px; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--card-2);
+  animation: meisterAuf .42s cubic-bezier(.2, .9, .3, 1);
+}
+.patzer strong { display: block; font-size: 14px; color: var(--text); }
+.patzer.hart { border-color: var(--bad); }
+.patzer.hart strong { color: var(--bad); }
+.patzer-worte { display: block; font-size: 16px; margin-top: 4px; }
+.patzer-note { display: block; font-size: 12px; color: var(--dim); margin-top: 5px; }
+
 .chili { display: block; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .35)); }
 .chili.gross { width: 104px; height: 104px; margin: 0 auto 16px; }
 .chili.klein { width: 76px; height: 76px; flex: none; margin: 0; }
@@ -2228,31 +2241,50 @@ function datumKurz(ms) {
   try { return new Date(ms).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }); }
   catch (e) { return ''; }
 }
+// Ortszeit, nicht UTC: Der Text wird von Menschen gelesen, die zu dieser Zeit
+// vor dem Gerät saßen. Der Versatz steht dabei, damit er eindeutig bleibt.
 function datumLang(ms) {
-  try { return new Date(ms).toISOString().slice(0, 16).replace('T', ' ') + ' UTC'; }
-  catch (e) { return ''; }
+  try {
+    var d = new Date(ms);
+    var zwei = function (n) { return (n < 10 ? '0' : '') + n; };
+    var min = -d.getTimezoneOffset();
+    var vz = min < 0 ? '-' : '+';
+    var abs = Math.abs(min);
+    return d.getFullYear() + '-' + zwei(d.getMonth() + 1) + '-' + zwei(d.getDate()) + ' ' +
+      zwei(d.getHours()) + ':' + zwei(d.getMinutes()) +
+      ' (UTC' + vz + zwei(Math.floor(abs / 60)) + (abs % 60 ? ':' + zwei(abs % 60) : '') + ')';
+  } catch (e) { return ''; }
 }
 
 // Ein Ticket als Textabschnitt. Markdown, weil das gebündelt gut lesbar ist —
 // für mich beim Überfliegen wie für Claude Code beim Abarbeiten.
-function ticketAbschnitt(t, nr) {
+// «Ort», nicht «Übung»: Der Bezug kann auch die Übersicht oder eine
+// Menüansicht sein, und «Übung: Übersicht» wäre schlicht falsch.
+function ticketAbschnitt(t, nr, standZeigen) {
   return '## ' + nr + ' · ' + (t.art === 'bug' ? 'Fehler' : 'Wunsch') + ': ' + t.titel + '\n\n' +
     (t.text ? t.text + '\n\n' : '') +
-    (t.reiter ? '- Übung: ' + t.reiter + '\n' : '') +
-    '- App-Stand: ' + t.stand + '\n' +
+    (t.reiter ? '- Ort: ' + t.reiter + '\n' : '') +
+    (standZeigen ? '- App-Stand: ' + t.stand + '\n' : '') +
     '- Erstellt: ' + datumLang(t.erstellt) + '\n' +
     (t.geaendert ? '- Geändert: ' + datumLang(t.geaendert) + '\n' : '');
 }
 
 // Alles in einem Rutsch: älteste zuerst, damit die Nummern der Reihenfolge
-// folgen, in der die Dinge aufgefallen sind. Das Gerät steht einmal am Ende
-// statt bei jedem Ticket — es ist ohnehin immer dasselbe.
+// folgen, in der die Dinge aufgefallen sind. Gerät und App-Stand stehen einmal
+// am Ende — das Gerät ist ohnehin immer dasselbe, und der Stand meistens auch.
+// Nur wenn sich zwischendurch etwas ausgeliefert hat, gehört er an jedes
+// Ticket: Dann sagt er, gegen welche Fassung sich die Meldung richtet.
 function ticketsAlsText(liste) {
   if (!liste.length) return '';
   var reihe = liste.slice().sort(function (a, b) { return a.erstellt - b.erstellt; });
+  var staende = [];
+  reihe.forEach(function (t) { if (staende.indexOf(t.stand) === -1) staende.push(t.stand); });
+  var jeTicket = staende.length > 1;
   var kopf = '# Chillingo · ' + reihe.length + (reihe.length === 1 ? ' Ticket' : ' Tickets') + '\n\n';
-  var koerper = reihe.map(function (t, i) { return ticketAbschnitt(t, i + 1); }).join('\n');
-  return kopf + koerper + '\n---\nGerät: ' + reihe[reihe.length - 1].geraet + '\n';
+  var koerper = reihe.map(function (t, i) { return ticketAbschnitt(t, i + 1, jeTicket); }).join('\n');
+  return kopf + koerper + '\n---\n' +
+    (jeTicket ? '' : 'App-Stand: ' + staende[0] + '\n') +
+    'Gerät: ' + reihe[reihe.length - 1].geraet + '\n';
 }
 
 function ticketsOffen() {
@@ -2476,6 +2508,10 @@ function defaultState() {
     // ist eine Regel, wenn sie viermal auf verschiedene Wörter gewirkt hat.
     gramBox: {},               // Leitner-Stufe je Baustein
     gramSeen: {},              // Zeitstempel je Baustein; fehlt er, ist er noch unentdeckt
+    // Wie oft ein Wort in «Übersetzen» **hintereinander** falsch geschrieben
+    // wurde. Richtig geschrieben löscht den Eintrag — nur eine Serie zählt.
+    wortFehler: {},
+    zuletzt: null,             // { uebung, zeit } — woran zuletzt gearbeitet wurde
     streak: 0,
     bestStreak: 0,
     answered: 0,
@@ -2497,6 +2533,11 @@ function mergeState(parsed) {
   d.abcSeen = nurBuchstaben(d.abcSeen);
   d.gramBox = nurBausteine(d.gramBox);
   d.gramSeen = nurBausteine(d.gramSeen);
+  d.wortFehler = migriereIds(d.wortFehler);
+  // «Zuletzt» zeigt auf eine Übung, die es noch gibt — sonst führte die
+  // Empfehlung nach einem Umbau ins Leere.
+  if (!d.zuletzt || !UEBUNG_NAME[d.zuletzt.uebung] || d.zuletzt.uebung === 'home' ||
+    typeof d.zuletzt.zeit !== 'number') d.zuletzt = null;
   // Ältere Stände kannten nur «gesehen», keine Stufe. Ein gesehener Satz
   // startet auf Stufe 1 und gilt als sofort fällig — nichts geht verloren,
   // aber als sitzend wird auch nichts verbucht, was nie geprüft wurde.
@@ -3154,8 +3195,9 @@ function setTab(name) {
   menuSetzen(false);
 }
 
-document.getElementById('zurueck').addEventListener('click', function () {
-  // Aus einer Detailansicht der Bilanz führt der Pfeil zunächst dorthin zurück.
+function zurueckGehen() {
+  if (currentTab === 'home') return;
+  // Aus einer Detailansicht der Bilanz führt der Weg zunächst dorthin zurück.
   if (currentTab === 'bilanz' && bilanzDetail) {
     bilanzDetail = null;
     renderBilanz();
@@ -3163,7 +3205,49 @@ document.getElementById('zurueck').addEventListener('click', function () {
     return;
   }
   setTab('home');
-});
+}
+
+document.getElementById('zurueck').addEventListener('click', zurueckGehen);
+
+// ── Vom Rand wischen ────────────────────────────────────────
+// Im Vollbild der Home-Bildschirm-Verknüpfung gibt es die Zurück-Geste des
+// Browsers nicht; der Pfeil oben links ist der einzige Weg. Eine Wischgeste
+// vom linken Rand nimmt ihm die Arbeit ab.
+//
+// Sie startet nur am äußersten Rand — dort liegt kein Bedienelement — und
+// wirkt erst am Ende der Berührung. Ein Tippen bewegt nichts und löst darum
+// nichts aus. Ist ein Blatt offen, schweigt sie: Menü, Auswahl und Meldeblatt
+// haben ihre eigene Art, sich zu schließen.
+var WISCH_RAND = 26;          // px vom linken Rand, in denen die Geste beginnen darf
+var WISCH_WEG = 70;           // px, die der Finger mindestens zurücklegen muss
+var wischVonX = 0, wischVonY = 0, wischBereit = false;
+
+function blattOffen() {
+  return menuOffen || filterOffen || wissenOffen || meldeOffen;
+}
+
+document.addEventListener('touchstart', function (e) {
+  wischBereit = false;
+  if (e.touches.length !== 1 || currentTab === 'home' || blattOffen()) return;
+  var t = e.touches[0];
+  if (t.clientX > WISCH_RAND) return;
+  wischBereit = true;
+  wischVonX = t.clientX;
+  wischVonY = t.clientY;
+}, { passive: true });
+
+document.addEventListener('touchend', function (e) {
+  if (!wischBereit) return;
+  wischBereit = false;
+  if (blattOffen()) return;
+  var t = e.changedTouches[0];
+  var quer = t.clientX - wischVonX;
+  var hoch = Math.abs(t.clientY - wischVonY);
+  // Waagerecht muss deutlich überwiegen, sonst war es ein Scrollen.
+  if (quer >= WISCH_WEG && hoch <= quer * 0.7) zurueckGehen();
+}, { passive: true });
+
+document.addEventListener('touchcancel', function () { wischBereit = false; }, { passive: true });
 
 document.getElementById('meldeKnopf').innerHTML = ICON.melden;
 document.getElementById('meldeKnopf').addEventListener('click', function () {
@@ -3322,7 +3406,30 @@ function uebungsStand(id) {
 }
 
 // Der eine Knopf, der immer richtig ist: was jetzt am meisten bringt.
+// ── Wo war ich stehen geblieben? ────────────────────────────
+// Eine abgegebene Antwort ist der einzige verlässliche Beleg dafür, woran
+// jemand gearbeitet hat — Herumblättern zählt nicht.
+function zuletztGeuebt(id) {
+  state.zuletzt = { uebung: id, zeit: Date.now() };
+}
+
+// Zwei Stunden: lang genug, um eine Unterbrechung zu überstehen, kurz genug,
+// dass die Empfehlung am nächsten Tag wieder aus dem Lernstand kommt und nicht
+// aus dem Gedächtnis.
+var FORTSETZEN_FRIST = 2 * 60 * 60 * 1000;
+
 function empfehlung() {
+  var z = state.zuletzt;
+  if (z && Date.now() - z.zeit < FORTSETZEN_FRIST && UEBUNG_NAME[z.uebung]) {
+    var stand = uebungsStand(z.uebung);
+    if (!stand.gesperrt) {
+      return {
+        ziel: z.uebung,
+        titel: 'Weiter mit «' + UEBUNG_NAME[z.uebung] + '»',
+        note: stand.text + ' · Sie waren gerade dort.'
+      };
+    }
+  }
   var set = LERNSETS[aktuellesSet()];
   var offen = set.woerter.filter(function (v) { return (state.boxes[v.id] || 0) < SATZ_STUFE; }).length;
   var frisch = tippenWiederholung().length;
@@ -3570,6 +3677,7 @@ function ansichtenZuruecksetzen() {
   tkAusgabe = '';
   meldeBearbeitet = null;
   meisterMeldung = null;
+  patzerMeldung = null;
 }
 
 function uebNext(skipFact) {
@@ -3672,6 +3780,7 @@ function uebPruefen() {
   meisterPruefen(vorher, state.boxes[q.word.id], 'Wort', q.word.ru + ' — ' + q.word.de,
     woerterGemeistert() + ' von ' + ALL_VOCAB.length + ' Wörtern');
   meisterTon(uebCorrect);
+  zuletztGeuebt(uebModus);
   // Hat diese Antwort das laufende Set vollgemacht? Dann wartet der Jubel
   // auf das nächste «Weiter» — mitten in der Auflösung wäre er im Weg.
   if (aktuellesSet() !== setVorher && setGeschafft(setVorher)) uebGeschafftesSet = setVorher;
@@ -3904,6 +4013,69 @@ function trVergleichbar(text, deutsch) {
   return worte.join(' ');
 }
 
+// ── Was genau war falsch? ───────────────────────────────────
+// «Falsch» ist eine dürftige Auskunft. Wer einen Buchstaben vertippt hat, hat
+// etwas anderes getan als wer das Wort nicht kennt — und beides verdient eine
+// andere Antwort (ADR 0033).
+
+// Levenshtein: wie viele Buchstaben trennen zwei Wörter? Zwei Zeilen genügen,
+// die Wörter sind kurz.
+function editAbstand(a, b) {
+  if (a === b) return 0;
+  if (!a.length) return b.length;
+  if (!b.length) return a.length;
+  var vor = [];
+  for (var j = 0; j <= b.length; j++) vor[j] = j;
+  for (var i = 1; i <= a.length; i++) {
+    var jetzt = [i];
+    for (var k = 1; k <= b.length; k++) {
+      jetzt[k] = Math.min(
+        vor[k] + 1,                                              // löschen
+        jetzt[k - 1] + 1,                                        // einfügen
+        vor[k - 1] + (a.charAt(i - 1) === b.charAt(k - 1) ? 0 : 1) // ersetzen
+      );
+    }
+    vor = jetzt;
+  }
+  return vor[b.length];
+}
+
+// Ordnet jedem Wort der Lösung das Wort zu, das dafür geschrieben wurde. Die
+// Sätze sind kurz, darum genügt die gierige Wahl: das nächstliegende freie
+// Wort, bei gleichem Abstand das mit der ähnlichsten Position. So zählt ein
+// vertauschtes Wortpaar nicht als zwei unbekannte Wörter.
+function trWortDiff(eingabe, loesung) {
+  var ziel = tokenize(normalize(loesung));
+  var hat = tokenize(normalize(eingabe));
+  var frei = hat.map(function () { return true; });
+  return ziel.map(function (z, i) {
+    var beste = -1, bestRang = Infinity;
+    hat.forEach(function (h, j) {
+      if (!frei[j]) return;
+      var rang = editAbstand(z, h) * 100 + Math.abs(i - j);
+      if (rang < bestRang) { bestRang = rang; beste = j; }
+    });
+    if (beste === -1) return { ziel: z, getippt: '', abstand: z.length };
+    frei[beste] = false;
+    return { ziel: z, getippt: hat[beste], abstand: editAbstand(z, hat[beste]) };
+  });
+}
+
+// Welche Vokabel steckt hinter dieser Wortform? Erst über die vermerkten
+// Formen des Satzes, dann als Grundform. Findet sich keine — «будет» etwa —,
+// bleibt die Form ungewertet: Was der Lehrplan nicht führt, kann er auch nicht
+// zurückstufen.
+function trVokabelZu(satz, form) {
+  var formen = (satz && satz.formen) || {};
+  var klein = String(form).toLowerCase();
+  var grund = null;
+  Object.keys(formen).forEach(function (f) {
+    if (normalize(f) === klein) grund = formen[f][0];
+  });
+  if (grund && VOKABEL[grund]) return VOKABEL[grund];
+  return VOKABEL[klein] || null;
+}
+
 function satzFrei(s) {
   return s.benoetigt.every(function (w) { return (state.boxes[w] || 0) >= SATZ_STUFE; });
 }
@@ -4017,6 +4189,7 @@ function buildTransTask(vorgabe) {
   trCorrect = null;
   trRevealed = false;
   meisterMeldung = null;
+  patzerMeldung = null;
 }
 
 function trWort(key) {
@@ -4056,10 +4229,109 @@ function trFinish(ok) {
   meisterMeldung = null;
   meisterPruefen(vorher, satzBox(trTask.satz), 'Satz', trTask.satz.ru,
     saetzeGemeistert() + ' von ' + SENTENCES.length + ' Sätzen');
+  patzerPruefen(ok);
   meisterTon(ok);
   state.transStats.correct += ok ? 1 : 0;
   state.transStats.wrong += ok ? 0 : 1;
+  zuletztGeuebt('uebersetzen');
   save();
+}
+
+// ── Wer schreibt, der bleibt ────────────────────────────────
+// Dreimal hintereinander dasselbe Wort verschrieben heißt: Es sitzt nicht,
+// gleich was der Leitner-Stand behauptet. Dann geht es zurück unter die
+// Satzschwelle — und der Satz damit wieder zu.
+var WORT_STRAFE = 3;
+var patzerMeldung = null;
+
+function patzerPruefen(ok) {
+  patzerMeldung = null;
+  // Gewertet wird nur die russische Seite und nur Geschriebenes: Aus Kacheln
+  // lässt sich ein Wort nicht verschreiben, und die deutsche Rechtschreibung
+  // ist hier nicht der Lehrstoff.
+  if (!trTask || trTask.art !== 'tippen' || !trTask.loesungRu) return;
+  // Aufgeben ist kein Verschreiben. Wer «Aufdecken» drückt, hat gar nichts
+  // behauptet — dafür ein Wort zurückzustufen wäre eine Strafe für Ehrlichkeit.
+  if (trRevealed) return;
+
+  var diff = trWortDiff(trEingabe, trTask.solution);
+  var zurueck = [], warnung = [], buchstaben = 0, danebenWorte = 0;
+
+  diff.forEach(function (d) {
+    if (d.abstand) { buchstaben += d.abstand; danebenWorte++; }
+    var v = trVokabelZu(trTask.satz, d.ziel);
+    if (!v) return;
+    if (!d.abstand) { delete state.wortFehler[v.id]; return; }
+    var n = (state.wortFehler[v.id] || 0) + 1;
+    if (n < WORT_STRAFE) {
+      state.wortFehler[v.id] = n;
+      if (n === WORT_STRAFE - 1) warnung.push(v);
+      return;
+    }
+    delete state.wortFehler[v.id];
+    // Wer schon unter der Schwelle steht, kann nicht tiefer fallen — und
+    // verdient keine zweite Strafe für dieselbe Lücke.
+    if ((state.boxes[v.id] || 0) < SATZ_STUFE) return;
+    state.boxes[v.id] = SATZ_STUFE - 1;
+    state.lastSeen[v.id] = Date.now();
+    zurueck.push(v);
+  });
+
+  if (zurueck.length) {
+    patzerMeldung = {
+      art: 'zurueck', woerter: zurueck,
+      text: zurueck.length === 1
+        ? 'Dreimal hintereinander verschrieben — das ist kein Vertipper mehr.'
+        : 'Dreimal hintereinander verschrieben. Das ist kein Vertipper mehr.',
+      note: satzFrei(trTask.satz)
+        ? 'Der Satz bleibt offen, in «Lernsets» sehen Sie sich wieder.'
+        : 'Der Satz ist damit wieder zu, bis ' +
+          (zurueck.length === 1 ? 'es sitzt.' : 'sie sitzen.')
+    };
+    return;
+  }
+  if (ok || !danebenWorte) return;
+  patzerMeldung = {
+    art: 'knapp', woerter: warnung,
+    text: patzerSpruch(danebenWorte, buchstaben),
+    note: warnung.length
+      ? 'Noch einmal daneben, dann geht ' + (warnung.length === 1 ? 'es' : 'das') +
+        ' zurück in die Lehre.'
+      : ''
+  };
+}
+
+// Wie knapp war es? Ein Buchstabe ist etwas anderes als ein fehlendes Wort,
+// und die Meldung darf das ruhig sagen.
+function patzerSpruch(worte, buchstaben) {
+  if (worte === 1 && buchstaben === 1) {
+    return 'Ein einziger Buchstabe. Aber wer schreibt, der bleibt.';
+  }
+  if (worte === 1) {
+    return buchstaben + ' Buchstaben daneben — war zwar nur ein Wort, aber knapp ist auch daneben.';
+  }
+  if (buchstaben <= worte + 1) {
+    return worte + ' Wörter, ' + buchstaben + ' Buchstaben. So nah dran und doch vorbei.';
+  }
+  return worte + ' Wörter sind noch nicht da. Noch mal von vorn.';
+}
+
+function patzerHtml() {
+  var p = patzerMeldung;
+  if (!p) return '';
+  var woerter = p.woerter.map(function (v) {
+    return '<span class="cyr">' + esc(v.ru) + '</span>';
+  }).join(' · ');
+  return '<div class="patzer' + (p.art === 'zurueck' ? ' hart' : '') + '">' +
+    '<strong>' + (p.art === 'zurueck'
+      ? 'Uff. ' + (p.woerter.length === 1 ? 'Dieses Wort' : 'Diese Wörter') +
+        ' müssen Sie noch mal lernen.'
+      : esc(p.text)) + '</strong>' +
+    (p.art === 'zurueck' ? '<span class="patzer-worte">' + woerter + '</span>' +
+      '<span class="patzer-note">' + esc(p.text) + ' ' + esc(p.note) + '</span>'
+      : (woerter ? '<span class="patzer-worte">' + woerter + '</span>' : '') +
+        (p.note ? '<span class="patzer-note">' + esc(p.note) + '</span>' : '')) +
+    '</div>';
 }
 
 function saetzeGemeistert() {
@@ -4207,7 +4479,7 @@ function renderUebersetzen() {
     if (trCorrect) html += '<p>' + ICON.haken + 'Правильно — richtig übersetzt!</p>';
     else html += '<p>' + ICON.kreuz + (trRevealed ? 'Lösung: ' : 'Richtig wäre: ') +
       '<strong class="' + (promptIsRu ? '' : 'cyr') + '">' + esc(t.solution) + '</strong></p>';
-    html += '</div>' + hoerzeile(t.ru, t.de) + meisterHtml();
+    html += '</div>' + hoerzeile(t.ru, t.de) + patzerHtml() + meisterHtml();
   }
 
   html += '</div><div class="btn-row">';
@@ -4487,6 +4759,7 @@ function abcPruefen() {
   meisterPruefen(vorher, abcBox(q.b), 'Buchstabe', q.b[0] + ' ' + q.b[1] + ' — ' + q.b[2],
     abcMeisterschaft() + ' von ' + ALPHABET.length + ' Buchstaben');
   meisterTon(abcCorrect);
+  zuletztGeuebt('buchstaben');
   abcPhase = 'feedback';
   renderBuchstaben();
 }
@@ -4965,6 +5238,7 @@ function gramPruefen() {
   meisterPruefen(vorher, gramBox(b), 'Regel', b.name,
     gramMeisterschaft() + ' von ' + GRAMMATIK.length + ' Regeln', false);
   meisterTon(gramCorrect);
+  zuletztGeuebt('grammatik');
   gramPhase = 'feedback';
   renderGrammatik();
 }
@@ -5619,6 +5893,7 @@ function renderTippen() {
     meisterTon(ok);
     state.typingStats.correct += ok ? 1 : 0;
     state.typingStats.wrong += ok ? 0 : 1;
+    zuletztGeuebt('tippen');
     save();
     var v = input.value;
     renderTippen();

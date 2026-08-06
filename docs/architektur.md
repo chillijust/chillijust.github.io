@@ -136,8 +136,23 @@ vier Ansichten, die keine sind: Bilanz, Sicherung, Einstellungen, Tickets. Der B
 **Home** (`renderHome()`, Startansicht) ist kein Verzeichnis, sondern ein Lagebild. Jede
 Kachel nennt über `uebungsStand()`, was dort ansteht — «Set 1 · 11 offen», «21 fällig»,
 «noch gesperrt». Darüber steht `empfehlung()`: der eine Knopf, der immer richtig ist.
-Seine Reihenfolge ist bewusst: erst auffrischen (wenn fünf oder mehr Dinge warten), dann
-das laufende Lernset, dann offene Sätze, dann Tippen, sonst Freestyle als Kür.
+Seine Reihenfolge ist bewusst: **erst fortsetzen**, dann auffrischen (wenn fünf oder mehr
+Dinge warten), dann das laufende Lernset, dann offene Sätze, dann Tippen, sonst Freestyle
+als Kür.
+
+**Fortsetzen geht vor.** Wer vor zwei Stunden noch in «Übersetzen» geantwortet hat, will
+dorthin zurück und nicht in die Lernsets. `zuletztGeuebt(id)` merkt sich die Übung bei
+jeder **abgegebenen Antwort** — Herumblättern zählt nicht —, `FORTSETZEN_FRIST` (zwei
+Stunden) begrenzt das Gedächtnis. Danach kommt die Empfehlung wieder aus dem Lernstand.
+Eine gesperrte Übung wird nie vorgeschlagen, und ein `state.zuletzt`, das auf eine Übung
+zeigt, die es nicht mehr gibt, fällt in `mergeState()` weg.
+
+**Zurück gibt es zweimal**: den Pfeil oben links und eine Wischgeste vom linken
+Bildschirmrand zur Mitte. Beide rufen `zurueckGehen()`. Die Geste ist für das Vollbild
+der Home-Bildschirm-Verknüpfung, wo die Zurück-Geste des Browsers fehlt: Sie beginnt nur
+in den äußeren 26 px, verlangt 70 px waagerechten Weg bei höchstens 70 % davon senkrecht
+(sonst war es Scrollen) und wirkt erst beim Loslassen — ein Tippen löst nichts aus. Ist
+ein Blatt offen (Menü, Auswahl, Wissen, Meldeblatt), schweigt sie.
 
 **Der Kopf wechselt seinen Inhalt**, statt dass es zwei gäbe (`renderKopf()`):
 
@@ -343,6 +358,34 @@ hat keine — «Ich lese ein Buch» gegen «Ich lese das Buch» ist kein Überse
 ein Ratefehler. Im **Kachelmodus** gilt das nicht: Dort steht der richtige Artikel zur
 Auswahl, man muss ihn also nicht erfinden. Im Russischen wird ohnehin jedes Wort
 gewertet.
+
+### Was genau war falsch? — Wortauswertung und Strafe
+
+«Richtig oder falsch» ist eine dürftige Auskunft: Wer einen Buchstaben vertippt hat, hat
+etwas anderes getan als wer das Wort nicht kennt (ADR 0033). Beim **Schreiben ins
+Russische** wertet die App darum Wort für Wort aus.
+
+`editAbstand(a, b)` ist Levenshtein in zwei Zeilen Tabelle. `trWortDiff()` ordnet jedem
+Wort der Lösung das zu, das dafür geschrieben wurde — **gierig, nicht stellungstreu**:
+das nächstliegende freie Wort, bei gleichem Abstand das mit der ähnlichsten Position. So
+gilt ein vertauschtes Paar nicht als zwei unbekannte Wörter. `trVokabelZu()` führt eine
+Form über `satz.formen` auf ihre Vokabel zurück; was der Lehrplan nicht führt, bleibt
+ungewertet.
+
+Daraus folgen zwei Dinge:
+
+| | |
+| --- | --- |
+| **die Strafe** | `state.wortFehler` zählt je Wort die Serie. Richtig geschrieben löscht sie. Bei `WORT_STRAFE` (3) fällt das Wort auf `SATZ_STUFE - 1` — es kommt in «Lernsets» zurück, und der Satz schließt sich, weil ihm eine Voraussetzung fehlt. Wer schon darunter steht, fällt nicht weiter. |
+| **der Ton** | `patzerSpruch()` staffelt nach Wörtern und Buchstaben: «Ein einziger Buchstabe. Aber wer schreibt, der bleibt.» bis «3 Wörter sind noch nicht da.» Beim zweiten Fehler warnt die Meldung vor — eine Strafe, die man kommen sieht, ist eine Ansage. |
+
+**Drei Ausnahmen, alle aus demselben Grund:** Gewertet wird nur, was der Nutzer wirklich
+behauptet hat.
+
+- **Kacheln zählen nicht** — dort prüft die Aufgabe die Wortstellung, nicht die Schreibung.
+- **Die deutsche Seite zählt nicht** — ein Tippfehler in «Buch» darf «книга» nicht treffen.
+- **«Aufdecken» zählt nicht** (`trRevealed`) — aufgeben ist kein Verschreiben. Ohne diese
+  Ausnahme zerlegte dreimal Aufdecken den halben Satz.
 
 Die **eingebaute kyrillische Tastatur** (dieselben `KB_ROWS` wie in «Tippen») erscheint
 nur, wenn die Lösung russisch ist — einen deutschen Satz schreibt man mit der
@@ -802,9 +845,10 @@ verschickt, nichts geladen — die App braucht dafür weder Netz noch einen Zuga
 | Baustein | Aufgabe |
 | --- | --- |
 | `TICKET_KEY` | eigener `localStorage`-Schlüssel (`chillingo_tickets_v1`) |
-| `ticketAnlegen()` | legt an, trimmt, begrenzt, ergänzt Übung, Stand und Gerät |
+| `ticketAnlegen()` | legt an, trimmt, begrenzt, ergänzt Ort, Stand und Gerät |
 | `ticketAbschnitt()` | ein Ticket als Markdown-Abschnitt |
 | `ticketsAlsText()` | bündelt eine Liste, älteste zuerst nummeriert |
+| `datumLang()` | Ortszeit mit Versatz — der Text wird von Menschen gelesen |
 | `inZwischenablage()` | Kopierversuch; scheitert er, bleibt der Text zum Markieren |
 | `renderTickets()` | Liste, Formular, Ausgabe, Aufräumen |
 
@@ -822,6 +866,16 @@ notfalls um eins vor. Damit ist die Nummerierung im gebündelten Text eindeutig.
 nicht verschieben —, `geaendert` kommt dazu und steht im gebündelten Text. **Ein
 geändertes Ticket ist wieder offen:** Was übergeben wurde, stimmt so nicht mehr, und die
 neue Fassung soll beim nächsten Bündeln mitgehen.
+
+**Der Bezug heißt «Ort», nicht «Übung».** Er kann auch die Übersicht oder eine
+Menüansicht sein, und «Übung: Übersicht» wäre schlicht falsch. Aus demselben Grund steht
+die Zeit als **Ortszeit mit Versatz** (`2026-08-06 20:52 (UTC+02)`) statt in UTC — sie
+wird von jemandem gelesen, der zu dieser Stunde vor dem Gerät saß.
+
+**Der App-Stand steht in der Fußzeile, solange er für alle Tickets gleich ist.** Vier
+Tickets desselben Tages nennen ihn sonst viermal. Unterscheiden sie sich, wandert er an
+jedes Ticket zurück — dann sagt er etwas, nämlich gegen welche Fassung sich die Meldung
+richtet.
 
 **Bündeln heißt übergeben.** Wer «offene kopieren» tippt, bekommt den Text *und* setzt
 damit `uebergeben` auf allen betroffenen Tickets — sonst müsste man den Zustand zweimal

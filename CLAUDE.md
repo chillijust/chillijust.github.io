@@ -108,7 +108,13 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   (ADR 0025).
 - **Tickets liegen in `chillingo_tickets_v1`**, nicht im Lernstand — der Sicherungscode
   soll schlank bleiben. Sie verlassen das Gerät nie von selbst: ein Knopf bündelt sie zu
-  einem Text zum Kopieren (ADR 0016).
+  einem Text zum Kopieren (ADR 0016). Der Bezug heißt **Ort**, nicht «Übung» — er kann
+  auch die Übersicht oder eine Menüansicht sein.
+- **Gewertet wird nur, was der Nutzer behauptet hat** (ADR 0033). Die Wortauswertung in
+  «Übersetzen» greift nur beim Schreiben ins Russische; Kacheln, die deutsche Seite und
+  «Aufdecken» bleiben draußen. Wer aufgibt, hat nichts falsch geschrieben.
+- **Der Rückweg steht in `zurueckGehen()`** — Pfeil und Randwischgeste teilen ihn sich.
+  Die Geste schweigt, solange ein Blatt offen ist.
 - **Grammatik ist eine Funktion, kein Fakt** (ADR 0030). Die Karteikarte ist die **Regel**,
   nicht das Wort, und die Aufgabe verlangt ein bekanntes Wort in einer nie gesehenen Form —
   sonst prüft sie Auswendiglernen. Formen rechnet `grammForm()`; sie steht doppelt (App und
@@ -175,6 +181,10 @@ zehn.
   anlegen.
 - **Touch-Ziele und `:hover`.** Auf iOS bleibt ein Hover-Zustand nach dem Tippen hängen;
   Zustände deshalb über Klassen setzen, nicht über `:hover`.
+- **Wörter, die dreimal hintereinander falsch geschrieben werden**, fallen auf
+  `SATZ_STUFE - 1` zurück und schließen damit ihren Satz (ADR 0033). Der Zähler steht in
+  `state.wortFehler`; richtig geschrieben löscht ihn. Beides steht bewusst **nicht** im
+  Sicherungscode.
 - **Neuer Ansichtszustand** (eine Variable, die eine Rubrik zwischen zwei Renderläufen
   hält) gehört in `ansichtenZuruecksetzen()`. Sonst zeigt die Rubrik nach dem
   Wiederherstellen einer Sicherung weiter den alten Stand — genau dieser Fehler war da
