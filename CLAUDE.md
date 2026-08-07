@@ -114,9 +114,12 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   «Übersetzen» greift nur beim Schreiben ins Russische; Kacheln, die deutsche Seite und
   «Aufdecken» bleiben draußen. Wer aufgibt, hat nichts falsch geschrieben.
 - **Aufgaben sitzen auf zwei Dritteln der Höhe**, nicht oben: Der Körper trägt in den
-  Übungen die Klasse `aufgabe`, zwei Streben in `#main` teilen den freien Raum 2:1. Das
-  bringt «Prüfen» und «Weiter» in Daumenreichweite. Beide Streben haben Basis 0 und
-  schrumpfen nicht — bei hohem Inhalt fallen sie weg, statt oben abzuschneiden.
+  Übungen die Klasse `aufgabe`, `aufgabeAusrichten()` setzt `--vorlauf`. Das bringt
+  «Prüfen» und «Weiter» in Daumenreichweite. **Die eingeblendete Tastatur (`.kb`) zählt
+  beim Rechnen nicht mit** — sie darf unten hinausragen, aber die Karte nie hochschieben.
+- **Die iOS-Tastatur hebt nur, wenn sie die Knopfreihe verdeckt** (`sichtPruefen()` über
+  `visualViewport`), und dann per `transform` genau um den Überstand. Wer das auf
+  Layout-Eigenschaften umstellt, schiebt den ganzen Fluss mit.
 - **Der Rückweg steht in `zurueckGehen()`** — Pfeil und Randwischgeste teilen ihn sich.
   Die Geste schweigt, solange ein Blatt offen ist.
 - **Grammatik ist eine Funktion, kein Fakt** (ADR 0030). Die Karteikarte ist die **Regel**,
