@@ -826,7 +826,7 @@ body.melden-offen #meldeKnopf { opacity: 0; pointer-events: none; transform: sca
 #meldeHof[hidden] { display: none; }
 body.melden-offen #meldeHof { opacity: 1; }
 
-#meldeBlatt, #ergebnisBlatt {
+#meldeBlatt {
   position: fixed; z-index: 60; left: 0; right: 0; bottom: 0;
   margin: 0 auto; max-width: 560px;
   padding: 8px var(--pad-rechts) calc(16px + env(safe-area-inset-bottom)) var(--pad-links);
@@ -839,21 +839,48 @@ body.melden-offen #meldeHof { opacity: 1; }
 }
 body.melden-offen #meldeBlatt { transform: translateY(0); }
 
-/* Die Auflösung zieht nicht, sie gehört zum Ablauf. Sie darf hoch werden —
-   Begründung, Regelkarte und Meisterschaft kommen zusammen —, aber **der Weg
-   weiter bleibt immer sichtbar**: Der Inhalt scrollt, der Fuß steht fest. Ein
-   «Weiter», nach dem man erst suchen muss, wäre genau die Hürde, die das Blatt
-   vermeiden soll. */
+/* Die Auflösung steht in der Mitte und ploppt dort auf — sie ist der Kern des
+   Augenblicks, nicht eine Randnotiz von unten. Sie darf hoch werden (Begründung,
+   Regelkarte und Meisterschaft kommen zusammen), aber **der Weg weiter bleibt
+   immer sichtbar**: Der Inhalt scrollt, der Fuß steht fest. Ein «Weiter», nach
+   dem man erst suchen muss, wäre genau die Hürde, die das Fenster vermeiden
+   soll (ADR 0034). */
+#ergebnisHof {
+  position: fixed; inset: 0; z-index: 58; background: rgba(0, 0, 0, .46);
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+/* Der Hof fängt die Tipps ab, solange die Auflösung steht — hinter ihr gibt es
+   nichts zu tun, und «Weiter» ist der einzige Weg nach vorn. Er schließt selbst
+   nichts: Wer danebentippt, stünde sonst ohne Weiter-Knopf da. */
+body.ergebnis-offen #ergebnisHof { opacity: 1; pointer-events: auto; }
+
 #ergebnisBlatt {
-  z-index: 55; touch-action: auto;
+  position: fixed; z-index: 59;
+  left: 50%; top: 50%;
+  width: calc(100% - 32px); max-width: 480px;
+  padding: 18px var(--pad-rechts) 18px var(--pad-links);
+  background: var(--card); border: 1px solid var(--line); border-radius: 20px;
+  box-shadow: 0 22px 60px var(--shade), inset 0 1px 0 var(--lip);
   display: flex; flex-direction: column;
-  max-height: 72vh; overflow: hidden;
+  max-height: 78vh; overflow: hidden;
+  transform: translate(-50%, -50%) scale(.9);
+  opacity: 0; pointer-events: none;
+  transition: opacity .16s ease, transform .16s ease;
+}
+body.ergebnis-offen #ergebnisBlatt {
+  opacity: 1; pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1);
+  animation: ergPlopp .26s cubic-bezier(.2, 1.35, .45, 1);
+}
+/* Aus der Mitte heraus, mit einem Hauch Überschwung — das ist das «Plopp». */
+@keyframes ergPlopp {
+  from { transform: translate(-50%, -50%) scale(.86); opacity: 0; }
+  to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 }
 #ergebnisInhalt { display: flex; flex-direction: column; min-height: 0; }
 .erg-scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; min-height: 0; }
 .erg-fuss { flex: none; }
-body.ergebnis-offen #ergebnisBlatt { transform: translateY(0); }
-/* Der Meldeknopf schwebt sonst mitten auf der Auflösung. */
+/* Der Meldeknopf schwebt sonst über der Auflösung. */
 body.ergebnis-offen #meldeKnopf { opacity: 0; pointer-events: none; }
 #ergebnisBlatt .feedback { margin-top: 0; }
 #ergebnisBlatt .btn-row { margin-top: 16px; }
@@ -904,6 +931,7 @@ body.ergebnis-offen #meldeKnopf { opacity: 0; pointer-events: none; }
 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
+  body.ergebnis-offen #ergebnisBlatt { animation: none; }
 }
 </style>
 </head>
@@ -975,10 +1003,10 @@ body.ergebnis-offen #meldeKnopf { opacity: 0; pointer-events: none; }
   </div>
 </div>
 
-<!-- Die Auflösung. Sie kommt von unten, trägt alles Nützliche zur Antwort und
-     ganz unten den Weg weiter — dort, wo der Daumen ohnehin liegt. -->
-<div id="ergebnisBlatt" role="dialog" aria-modal="false" aria-label="Auflösung" aria-hidden="true">
-  <div class="blatt-griff" aria-hidden="true"></div>
+<!-- Die Auflösung. Sie ploppt in der Mitte auf, trägt alles Nützliche zur
+     Antwort und unten den Weg weiter. -->
+<div id="ergebnisHof" aria-hidden="true"></div>
+<div id="ergebnisBlatt" role="dialog" aria-modal="true" aria-label="Auflösung" aria-hidden="true">
   <div class="blatt-inhalt" id="ergebnisInhalt" aria-live="polite"></div>
 </div>
 
