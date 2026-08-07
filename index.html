@@ -159,6 +159,23 @@ body.unterwegs header {
   border-bottom: 1px solid var(--line);
   padding-bottom: 10px;
 }
+/* Aufgaben sitzen tiefer. Karte und Knöpfe rücken in die Mitte des freien
+   Raums, statt oben zu kleben — so liegen «Prüfen» und «Weiter» dort, wo der
+   Daumen ohnehin ist, und die eingeblendete Tastatur schiebt sie nicht weg.
+   `margin: auto` statt `justify-content: center`: Wird der Inhalt höher als
+   der Platz (Regelkarte, Tastatur), fallen die Automargen auf null und nichts
+   wird oben abgeschnitten. Nur Übungen — Listen wie Bilanz gehören nach oben. */
+body.aufgabe { display: flex; flex-direction: column; min-height: 100vh; }
+@supports (min-height: 100svh) { body.aufgabe { min-height: 100svh; } }
+body.aufgabe #main { flex: 1 0 auto; display: flex; flex-direction: column; }
+/* Zwei Streben teilen den freien Raum 2:1 — der Block sitzt damit auf zwei
+   Dritteln der Höhe, tiefer als die Mitte, aber nicht am Boden geklebt.
+   Basis 0 und kein Schrumpfen: Ist der Inhalt höher als der Platz, fallen
+   beide auf null und nichts wird oben abgeschnitten. */
+body.aufgabe #main::before { content: ''; flex: 2 0 0; }
+body.aufgabe #main::after { content: ''; flex: 1 0 0; }
+body.aufgabe #main > section { flex: 0 0 auto; width: 100%; }
+
 body.unterwegs .titelblock { min-width: 0; }
 body.unterwegs h1 { font-size: 19px; letter-spacing: .01em; }
 body.unterwegs .eyebrow { margin-bottom: 2px; }
@@ -3150,6 +3167,8 @@ function renderKopf() {
   var daheim = currentTab === 'home';
   document.body.classList.toggle('unterwegs', !daheim);
   document.body.classList.toggle('im-menu', imMenu(currentTab));
+  // Nur die Übungen rücken in die Mitte; Listen und Menüansichten nicht.
+  document.body.classList.toggle('aufgabe', !!UEBUNG_NAME[currentTab] && !daheim);
   document.getElementById('zurueck').hidden = daheim;
   document.getElementById('kopfFortschritt').hidden = !daheim;
   // In einer Detailansicht der Bilanz trägt der Kopf deren Namen und nennt

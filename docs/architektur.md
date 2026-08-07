@@ -154,6 +154,19 @@ in den äußeren 26 px, verlangt 70 px waagerechten Weg bei höchstens 70 % davo
 (sonst war es Scrollen) und wirkt erst beim Loslassen — ein Tippen löst nichts aus. Ist
 ein Blatt offen (Menü, Auswahl, Wissen, Meldeblatt), schweigt sie.
 
+**Aufgaben sitzen tiefer als Listen.** In den sechs Übungen trägt der Körper die Klasse
+`aufgabe`; `#main` wird dann zur Flexspalte, und zwei Streben (`::before` mit `flex: 2`,
+`::after` mit `flex: 1`) teilen den freien Raum **2:1**. Der Aufgabenblock steht damit auf
+zwei Dritteln der Höhe — tiefer als die Mitte, aber nicht am Boden geklebt. Der Grund ist
+die Hand: «Prüfen» und «Weiter» liegen so dort, wo der Daumen ohnehin ist, und die
+eingeblendete Tastatur schiebt sie nicht aus dem Bild.
+
+Beide Streben haben **Basis 0 und kein Schrumpfen**. Wird der Inhalt höher als der Platz
+(offene Regelkarte, eingeblendete Tastatur), fallen sie auf null, und die Seite scrollt
+wie zuvor — anders als bei `justify-content: center` wird oben nichts abgeschnitten.
+Listen und Menüansichten bleiben unberührt: Bilanz, Einstellungen und Tickets gehören
+nach oben.
+
 **Der Kopf wechselt seinen Inhalt**, statt dass es zwei gäbe (`renderKopf()`):
 
 | | Home | unterwegs |
