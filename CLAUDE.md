@@ -90,8 +90,13 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   **Darstellung und Ton**. Soll eine geänderte Vorgabe auch bestehende Geräte
   erreichen, den Schlüssel umbenennen — der alte Wert fällt in `mergeState()` weg.
 - **Vorlesen nur über `hoerknopf(text, sprache)`** — der Text hängt als `data-say` am
-  Knopf, ein einziger Zuhörer auf `#main` bedient alle. Nie einen eigenen Zuhörer je
-  Knopf anhängen. Was die Antwort wäre, schweigt bis zur Auflösung.
+  Knopf, ein einziger Zuhörer (`hoerZuhoerer`) bedient alle; er hängt an `#main` und am
+  Ergebnisblatt. Nie einen eigenen Zuhörer je Knopf anhängen. Was die Antwort wäre,
+  schweigt bis zur Auflösung.
+- **Die Auflösung steht im Blatt** (`ergebnisZeigen`), nicht mehr unter der Karte — und
+  **der «Weiter»-Knopf gehört hinein** (ADR 0034). Nur so bleibt die Zahl der Tipps
+  gleich; ein Blatt zum Wegtippen wäre die Hürde aus ADR 0026. Der Inhalt scrollt, der
+  Fuß steht fest.
 - **Klang nur über `ton(richtig)`** beziehungsweise `meisterTon(richtig)`. Erzeugt in der
   Web Audio API, nie als Datei, immer in `try/catch`, abschaltbar über die Einstellung
   `ton`. Kein Ablauf darf Ton voraussetzen. **Ein schlafender Kontext heißt `suspended`

@@ -826,7 +826,7 @@ body.melden-offen #meldeKnopf { opacity: 0; pointer-events: none; transform: sca
 #meldeHof[hidden] { display: none; }
 body.melden-offen #meldeHof { opacity: 1; }
 
-#meldeBlatt {
+#meldeBlatt, #ergebnisBlatt {
   position: fixed; z-index: 60; left: 0; right: 0; bottom: 0;
   margin: 0 auto; max-width: 560px;
   padding: 8px var(--pad-rechts) calc(16px + env(safe-area-inset-bottom)) var(--pad-links);
@@ -838,6 +838,40 @@ body.melden-offen #meldeHof { opacity: 1; }
   touch-action: none;   /* das Blatt zieht selbst, es soll nicht mitscrollen */
 }
 body.melden-offen #meldeBlatt { transform: translateY(0); }
+
+/* Die Auflösung zieht nicht, sie gehört zum Ablauf. Sie darf hoch werden —
+   Begründung, Regelkarte und Meisterschaft kommen zusammen —, aber **der Weg
+   weiter bleibt immer sichtbar**: Der Inhalt scrollt, der Fuß steht fest. Ein
+   «Weiter», nach dem man erst suchen muss, wäre genau die Hürde, die das Blatt
+   vermeiden soll. */
+#ergebnisBlatt {
+  z-index: 55; touch-action: auto;
+  display: flex; flex-direction: column;
+  max-height: 72vh; overflow: hidden;
+}
+#ergebnisInhalt { display: flex; flex-direction: column; min-height: 0; }
+.erg-scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; min-height: 0; }
+.erg-fuss { flex: none; }
+body.ergebnis-offen #ergebnisBlatt { transform: translateY(0); }
+/* Der Meldeknopf schwebt sonst mitten auf der Auflösung. */
+body.ergebnis-offen #meldeKnopf { opacity: 0; pointer-events: none; }
+#ergebnisBlatt .feedback { margin-top: 0; }
+#ergebnisBlatt .btn-row { margin-top: 16px; }
+#ergebnisBlatt .hoerzeile { margin-top: 12px; }
+#ergebnisBlatt .gram-regel { margin-top: 14px; }
+.erg-wort {
+  font-family: Georgia, 'Times New Roman', serif; font-size: 27px; line-height: 1.25;
+  margin: 10px 0 2px; color: var(--text);
+}
+.erg-satz {
+  font-family: Georgia, 'Times New Roman', serif; font-size: 21px; line-height: 1.35;
+  margin: 10px 0 2px; color: var(--text);
+}
+.erg-zeile { font-size: 15px; color: var(--dim); margin: 0; }
+.erg-meta {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; margin-top: 12px;
+}
 /* Während der Finger zieht, folgt das Blatt sofort — erst beim Loslassen
    federt es mit Übergang zurück. */
 #meldeBlatt.zieht { transition: none; }
@@ -939,6 +973,13 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
       <button class="btn primary" id="meldeSichern">Sichern</button>
     </div>
   </div>
+</div>
+
+<!-- Die Auflösung. Sie kommt von unten, trägt alles Nützliche zur Antwort und
+     ganz unten den Weg weiter — dort, wo der Daumen ohnehin liegt. -->
+<div id="ergebnisBlatt" role="dialog" aria-modal="false" aria-label="Auflösung" aria-hidden="true">
+  <div class="blatt-griff" aria-hidden="true"></div>
+  <div class="blatt-inhalt" id="ergebnisInhalt" aria-live="polite"></div>
 </div>
 
 
@@ -1915,7 +1956,7 @@ var SATZ_STUFE = 2;
 var STORAGE_KEY = 'russisch_trainer_v1';
 // Stand der ausgelieferten Datei. Wird von tools/build.mjs gesetzt und geht in
 // jedes Ticket ein, damit ein Bericht sagt, welcher Stand gemeint war.
-var APP_STAND = '2026-08-06'; /* == STAND == */
+var APP_STAND = '2026-08-07'; /* == STAND == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -3193,6 +3234,46 @@ function setTab(name) {
   filterSetzen(false);
   wissenSetzen(false);
   menuSetzen(false);
+  // Die Auflösung gehört zur Aufgabe, die man gerade verlässt.
+  if (!ergebnisGehoertHierher()) ergebnisSetzen(false);
+}
+
+// Bleibt das Blatt beim Zeichnen stehen? Nur dort, wo eine Aufgabe aufgelöst
+// ist — die Renderfunktion der Übung setzt es selbst wieder.
+function ergebnisGehoertHierher() {
+  return currentTab === 'lernsets' || currentTab === 'freestyle' ||
+    currentTab === 'tippen' || currentTab === 'uebersetzen' ||
+    currentTab === 'buchstaben' || currentTab === 'grammatik';
+}
+
+// ── Die Auflösung als Blatt ─────────────────────────────────
+// Was nach einer Antwort zu sagen ist, stand bisher unter der Aufgabe und war
+// je nach Bildschirmlage halb abgeschnitten. Jetzt kommt es von unten — samt
+// Hörknöpfen und allem, was die Antwort erklärt.
+//
+// **Der «Weiter»-Knopf steht im Blatt**, nicht mehr in der Karte. Das ist der
+// ganze Trick: Die Zahl der Tipps bleibt gleich, das Blatt kostet also nichts.
+// Ein Blatt, das man erst wegtippen müsste, wäre genau die Hürde, vor der
+// ADR 0026 gewarnt hat.
+var ergebnisOffen = false;
+
+function ergebnisSetzen(auf) {
+  ergebnisOffen = auf;
+  document.body.classList.toggle('ergebnis-offen', auf);
+  var blatt = document.getElementById('ergebnisBlatt');
+  blatt.setAttribute('aria-hidden', auf ? 'false' : 'true');
+  if (!auf) document.getElementById('ergebnisInhalt').innerHTML = '';
+  blatt.querySelectorAll('button').forEach(function (b) { b.tabIndex = auf ? 0 : -1; });
+}
+
+// `inhalt` ist die Auflösung der jeweiligen Übung, `weiter` der Weg hinaus.
+function ergebnisZeigen(inhalt, weiter) {
+  document.getElementById('ergebnisInhalt').innerHTML =
+    '<div class="erg-scroll">' + inhalt + '</div>' +
+    '<div class="btn-row erg-fuss">' + weiter + '</div>';
+  ergebnisSetzen(true);
+  var lauf = document.querySelector('#ergebnisInhalt .erg-scroll');
+  if (lauf) lauf.scrollTop = 0;
 }
 
 function zurueckGehen() {
@@ -3678,6 +3759,9 @@ function ansichtenZuruecksetzen() {
   meldeBearbeitet = null;
   meisterMeldung = null;
   patzerMeldung = null;
+  abcAufloesung = '';
+  gramAufloesung = '';
+  ergebnisSetzen(false);
 }
 
 function uebNext(skipFact) {
@@ -3900,13 +3984,16 @@ function renderUeben() {
     html += '</div>';
   }
 
+  var aufloesung = '';
   if (uebPhase === 'feedback') {
-    html += '<div class="feedback ' + (uebCorrect ? 'good' : 'bad') + '">';
-    if (uebCorrect) html += '<p>' + ICON.haken + 'Правильно — richtig!</p>';
-    else html += '<p>' + ICON.kreuz + (uebRevealed ? 'Lösung: ' : 'Richtig wäre: ') +
-      '<strong class="cyr">' + esc(q.word.ru) + '</strong> — ' + esc(q.word.de) +
-      ' <span class="translit">[' + esc(q.word.tr) + ']</span></p>';
-    html += '</div>' + hoerzeile(q.word.ru, q.word.de) + meisterHtml();
+    aufloesung = '<div class="feedback ' + (uebCorrect ? 'good' : 'bad') + '">';
+    if (uebCorrect) aufloesung += '<p>' + ICON.haken + 'Правильно — richtig!</p>';
+    else aufloesung += '<p>' + ICON.kreuz + (uebRevealed ? 'Lösung: ' : 'Richtig wäre: ') + '</p>';
+    aufloesung += '</div>' +
+      '<p class="erg-wort cyr">' + esc(q.word.ru) + '</p>' +
+      '<p class="erg-zeile">' + esc(q.word.de) +
+      ' <span class="translit">[' + esc(q.word.tr) + ']</span></p>' +
+      ergThemaHtml(q.word) + hoerzeile(q.word.ru, q.word.de) + meisterHtml();
   }
 
   html += '</div><div class="btn-row">';
@@ -3917,7 +4004,7 @@ function renderUeben() {
         '>Best\u00e4tigen</button>';
     }
   } else {
-    html += '<button class="btn primary" id="uebNext">Weiter \u2192</button>';
+    html += '';
   }
   html += '</div>';
   html += '<p class="session-info">' + state.answered + ' beantwortet · Beste Serie: ' + state.bestStreak + '</p></section>';
@@ -3957,9 +4044,24 @@ function renderUeben() {
       uebBuilt.pop();
       renderUeben();
     });
+    ergebnisSetzen(false);
   } else {
+    ergebnisZeigen(aufloesung,
+      '<button class="btn primary" id="uebNext">Weiter \u2192</button>');
     document.getElementById('uebNext').addEventListener('click', function () { uebNext(false); });
   }
+}
+
+// Woher das Wort stammt und wo es auf der Leiter steht — beim Auflösen die
+// nützlichste Zusatzauskunft, weil sie den Fortschritt sichtbar macht.
+function ergThemaHtml(v) {
+  var stufe = state.boxes[v.id] || 0;
+  var punkte = '';
+  for (var i = 0; i <= BOX_MAX; i++) {
+    punkte += '<span class="' + (i <= stufe && stufe > 0 ? 'on' : '') + '"></span>';
+  }
+  return '<div class="erg-meta"><span class="boxdots">' + punkte + '</span>' +
+    '<span class="card-theme">' + esc(v.theme) + '</span></div>';
 }
 
 // ── ÜBERSETZEN ──────────────────────────────────────────────
@@ -4308,7 +4410,7 @@ function patzerSpruch(worte, buchstaben) {
     return 'Ein einziger Buchstabe. Aber wer schreibt, der bleibt.';
   }
   if (worte === 1) {
-    return buchstaben + ' Buchstaben daneben — war zwar nur ein Wort, aber knapp ist auch daneben.';
+    return buchstaben + ' Buchstaben daneben — war zwar nur ein Wort, aber knapp daneben ist auch vorbei.';
   }
   if (buchstaben <= worte + 1) {
     return worte + ' Wörter, ' + buchstaben + ' Buchstaben. So nah dran und doch vorbei.';
@@ -4474,12 +4576,15 @@ function renderUebersetzen() {
     html += '<button class="wordtile fn" id="trUndo" aria-label="Letztes Wort entfernen">' + ICON.ruecktaste + '</button></div>';
   }
 
+  var aufloesung = '';
   if (trPhase === 'feedback') {
-    html += '<div class="feedback ' + (trCorrect ? 'good' : 'bad') + '">';
-    if (trCorrect) html += '<p>' + ICON.haken + 'Правильно — richtig übersetzt!</p>';
-    else html += '<p>' + ICON.kreuz + (trRevealed ? 'Lösung: ' : 'Richtig wäre: ') +
-      '<strong class="' + (promptIsRu ? '' : 'cyr') + '">' + esc(t.solution) + '</strong></p>';
-    html += '</div>' + hoerzeile(t.ru, t.de) + patzerHtml() + meisterHtml();
+    aufloesung = '<div class="feedback ' + (trCorrect ? 'good' : 'bad') + '">';
+    if (trCorrect) aufloesung += '<p>' + ICON.haken + 'Правильно — richtig übersetzt!</p>';
+    else aufloesung += '<p>' + ICON.kreuz + (trRevealed ? 'Lösung: ' : 'Richtig wäre: ') + '</p>';
+    aufloesung += '</div>' +
+      '<p class="erg-satz cyr">' + esc(t.ru) + '</p>' +
+      '<p class="erg-zeile">' + esc(t.de) + '</p>' +
+      ergSatzMetaHtml(t.satz) + hoerzeile(t.ru, t.de) + patzerHtml() + meisterHtml();
   }
 
   html += '</div><div class="btn-row">';
@@ -4491,8 +4596,6 @@ function renderUebersetzen() {
       html += '<button class="btn primary" id="trConfirm"' + (trAbgabeBereit() ? '' : ' disabled') +
         '>' + (getippt ? 'Pr\u00fcfen' : 'Best\u00e4tigen') + '</button>';
     }
-  } else {
-    html += '<button class="btn primary" id="trNext">Weiter \u2192</button>';
   }
   html += '</div>';
 
@@ -4586,12 +4689,26 @@ function renderUebersetzen() {
       trFinish(false);
       renderUebersetzen();
     });
+    ergebnisSetzen(false);
   } else {
+    ergebnisZeigen(aufloesung,
+      '<button class="btn primary" id="trNext">Weiter \u2192</button>');
     document.getElementById('trNext').addEventListener('click', function () {
       buildTransTask();
       renderUebersetzen();
     });
   }
+}
+
+// Wo der Satz auf der Leiter steht, und welche Stufe als Nächstes kommt.
+function ergSatzMetaHtml(satz) {
+  var stufe = satzBox(satz);
+  var punkte = '';
+  for (var i = 0; i <= BOX_MAX; i++) {
+    punkte += '<span class="' + (i <= stufe && stufe > 0 ? 'on' : '') + '"></span>';
+  }
+  return '<div class="erg-meta"><span class="boxdots">' + punkte + '</span>' +
+    '<span class="card-theme">Stufe ' + satz.stufe + '</span></div>';
 }
 
 // ── BUCHSTABEN ──────────────────────────────────────────────
@@ -4606,6 +4723,9 @@ var ABC_TUECKISCH = 'внрсух';
 // Geübt wird ohne Umweg; die Tafel ist ein Nachschlagewerk und liegt hinter
 // dem Knopf links neben der Auswahl.
 var abcAnsicht = 'ueben';     // 'ueben' · 'tafel'
+// Die Auflösung wandert ins Blatt; abcUebenHtml() legt sie hier ab, weil es
+// selbst nur eine Zeichenkette zurückgibt.
+var abcAufloesung = '';
 var abcRichtung = 'gemischt'; // 'zeichen' · 'laut' · 'gemischt'
 var abcOffen = null;          // Buchstabe, dessen Merkhilfe in der Tafel aufgeklappt ist
 var abcQ = null, abcPhase = 'ask', abcPicked = null, abcCorrect = null;
@@ -4881,16 +5001,17 @@ function abcUebenHtml() {
     html += '</div>';
   }
 
+  abcAufloesung = '';
   if (abcPhase === 'feedback') {
-    html += '<div class="feedback ' + (abcCorrect ? 'good' : 'bad') + '">';
-    html += abcCorrect
-      ? '<p>' + ICON.haken + 'Richtig!</p>'
-      : '<p>' + ICON.kreuz + (abcRevealed ? 'Lösung: ' : 'Richtig wäre: ') +
-        '<strong class="cyr">' + esc(q.b[0] + ' ' + q.b[1]) +
-        '</strong> — klingt wie ' + esc(q.b[2]) + '</p>';
-    // Erst nach der Auflösung — vorher wäre der Laut die Antwort.
-    html += '</div>' + hoerzeile(q.b[1], null) + '<p class="hint">' + esc(q.b[3]) + '</p>' +
-      meisterHtml();
+    abcAufloesung = '<div class="feedback ' + (abcCorrect ? 'good' : 'bad') + '">' +
+      (abcCorrect
+        ? '<p>' + ICON.haken + 'Richtig!</p>'
+        : '<p>' + ICON.kreuz + (abcRevealed ? 'Lösung: ' : 'Richtig wäre: ') + '</p>') +
+      '</div>' +
+      '<p class="erg-wort cyr">' + esc(q.b[0] + ' ' + q.b[1]) + '</p>' +
+      '<p class="erg-zeile">klingt wie ' + esc(q.b[2]) + '</p>' +
+      // Erst nach der Auflösung — vorher wäre der Laut die Antwort.
+      hoerzeile(q.b[1], null) + '<p class="hint">' + esc(q.b[3]) + '</p>' + meisterHtml();
   }
   html += '</div><div class="btn-row">';
   if (abcPhase === 'ask') {
@@ -4899,8 +5020,6 @@ function abcUebenHtml() {
       html += '<button class="btn primary" id="abcConfirm"' + (abcAbgabeBereit() ? '' : ' disabled') +
         '>Best\u00e4tigen</button>';
     }
-  } else {
-    html += '<button class="btn primary" id="abcNext">Weiter \u2192</button>';
   }
   html += '</div><p class="session-info">' + abcPool().length + ' offen · ' +
     abcGelernt() + ' von ' + ALPHABET.length + ' sitzen · ' +
@@ -4909,8 +5028,15 @@ function abcUebenHtml() {
 }
 
 function renderBuchstaben() {
+  abcAufloesung = '';
   main.innerHTML = '<section>' +
     (abcAnsicht === 'tafel' ? abcTafelHtml() : abcUebenHtml()) + '</section>';
+  if (abcAufloesung) {
+    ergebnisZeigen(abcAufloesung,
+      '<button class="btn primary" id="abcNext">Weiter \u2192</button>');
+  } else {
+    ergebnisSetzen(false);
+  }
 
   main.querySelectorAll('[data-abc]').forEach(function (b) {
     b.addEventListener('click', function () {
@@ -4994,6 +5120,9 @@ function tastaturHtml(attr) {
 // Freiwillig wie die Buchstaben: blockiert nichts, zählt nicht in Serie und
 // «beantwortet», eigener Topf.
 var gramBaustein = null;   // Kennung des laufenden Bausteins
+// Wie bei den Buchstaben: gramUebenHtml() gibt nur Text zurück, die Auflösung
+// für das Blatt wird hier abgelegt.
+var gramAufloesung = '';
 var gramQ = null;          // die laufende Aufgabe
 var gramPhase = 'ask';     // 'ask' · 'feedback'
 var gramPicked = null;
@@ -5470,14 +5599,12 @@ function gramUebenHtml(b) {
   }
 
   if (gramPhase === 'feedback') {
-    html += '<div class="feedback ' + (gramCorrect ? 'good' : 'bad') + '"><p>';
-    if (gramCorrect) html += ICON.haken + 'Richtig!';
-    else if (q.art === 'geschlecht') {
-      html += ICON.kreuz + '<strong>' + GESCHLECHT_NAME[q.loesung] + '</strong>';
-    } else {
-      html += ICON.kreuz + 'Richtig wäre <strong class="cyr">' + esc(q.loesung) + '</strong>';
-    }
-    html += '</p></div>' + gramWarumHtml(b, q) + meisterHtml();
+    gramAufloesung = '<div class="feedback ' + (gramCorrect ? 'good' : 'bad') + '"><p>' +
+      (gramCorrect ? ICON.haken + 'Richtig!' : ICON.kreuz + 'Richtig wäre:') +
+      '</p></div>' +
+      '<p class="erg-wort' + (q.art === 'geschlecht' ? '' : ' cyr') + '">' +
+      esc(q.art === 'geschlecht' ? GESCHLECHT_NAME[q.loesung] : q.loesung) + '</p>' +
+      gramWarumHtml(b, q) + gramRegelHtml(b, false) + meisterHtml();
   }
 
   html += '</div><div class="btn-row">';
@@ -5485,8 +5612,6 @@ function gramUebenHtml(b) {
     html += '<button class="btn ghost" id="gramWarum">Warum?</button>' +
       '<button class="btn primary" id="gramConfirm"' + (gramAbgabeBereit() ? '' : ' disabled') +
       '>' + (q.tippen ? 'Prüfen' : 'Bestätigen') + '</button>';
-  } else {
-    html += '<button class="btn primary" id="gramNext">Weiter →</button>';
   }
   html += '</div>';
   if (gramRegelOffen) html += gramRegelHtml(b, false);
@@ -5618,10 +5743,17 @@ function renderGrammatik() {
   }
 
   var html = '<section>';
+  gramAufloesung = '';
   if (!gramEntdeckt(b)) html += gramEntdeckenHtml(b);
   else if (gramRegelNeu) html += gramKopfHtml(b) + gramRegelHtml(b, true);
   else html += gramUebenHtml(b);
   main.innerHTML = html + '</section>';
+  if (gramAufloesung) {
+    ergebnisZeigen(gramAufloesung,
+      '<button class="btn primary" id="gramNext">Weiter →</button>');
+  } else {
+    ergebnisSetzen(false);
+  }
 
   main.querySelectorAll('[data-gramdeutung]').forEach(function (el) {
     el.addEventListener('click', function () {
@@ -5844,16 +5976,22 @@ function renderTippen() {
     ' placeholder="кириллица \u2026" lang="ru" autocapitalize="off" autocorrect="off" spellcheck="false"' +
     (tResult ? ' readonly' : '') + '>';
 
-  if (tResult === 'wrong') html += '<p class="feedback bad">' + ICON.kreuz + 'Richtig: <strong class="cyr">' + esc(w.ru) + '</strong></p>';
-  if (tResult === 'right') html += '<p class="feedback good">' + ICON.haken + 'Правильно — richtig!</p>';
-  // Erst nach der Abgabe zu hören: vorher wäre die Aussprache die halbe Antwort.
-  if (tResult) html += hoerzeile(w.ru, w.de) + meisterHtml();
+  var aufloesung = '';
+  if (tResult) {
+    aufloesung = '<div class="feedback ' + (tResult === 'right' ? 'good' : 'bad') + '"><p>' +
+      (tResult === 'right' ? ICON.haken + 'Правильно — richtig!' : ICON.kreuz + 'Richtig wäre:') +
+      '</p></div>' +
+      '<p class="erg-wort cyr">' + esc(w.ru) + '</p>' +
+      '<p class="erg-zeile">' + esc(w.de) +
+      ' <span class="translit">[' + esc(w.tr) + ']</span></p>' +
+      ergThemaHtml(w) +
+      // Erst nach der Abgabe zu hören: vorher wäre die Aussprache die halbe Antwort.
+      hoerzeile(w.ru, w.de) + meisterHtml();
+  }
   html += '</div><div class="btn-row">';
   if (!tResult) {
     html += '<button class="btn ghost" id="tHintBtn">Hinweis</button>' +
       '<button class="btn primary" id="tCheck">Prüfen</button>';
-  } else {
-    html += '<button class="btn primary" id="tNext">Nächstes Wort \u2192</button>';
   }
   html += '</div>';
   html += '<button class="kb-toggle" id="tKbToggle">' + (tKb ? 'Tastatur ausblenden' : 'Tastatur einblenden') + '</button>';
@@ -5919,8 +6057,13 @@ function renderTippen() {
   });
   var checkBtn = document.getElementById('tCheck');
   if (checkBtn) checkBtn.addEventListener('click', check);
-  var nextBtn = document.getElementById('tNext');
-  if (nextBtn) nextBtn.addEventListener('click', next);
+  if (aufloesung) {
+    ergebnisZeigen(aufloesung,
+      '<button class="btn primary" id="tNext">N\u00e4chstes Wort \u2192</button>');
+    document.getElementById('tNext').addEventListener('click', next);
+  } else {
+    ergebnisSetzen(false);
+  }
   document.getElementById('tKbToggle').addEventListener('click', function () {
     tKb = !tKb;
     var v = document.getElementById('tInput').value;
@@ -6970,10 +7113,13 @@ document.addEventListener('visibilitychange', function () {
 
 // Ein Zuhörer für alle Hörknöpfe. Weil er am gleichbleibenden #main hängt und
 // nicht an den Knöpfen selbst, überlebt er jeden Renderlauf.
-main.addEventListener('click', function (e) {
+function hoerZuhoerer(e) {
   var k = e.target.closest ? e.target.closest('[data-say]') : null;
   if (k) speak(k.dataset.say, k.dataset.lang);
-});
+}
+main.addEventListener('click', hoerZuhoerer);
+// Die Auflösung steht außerhalb von #main und braucht denselben Zuhörer.
+document.getElementById('ergebnisBlatt').addEventListener('click', hoerZuhoerer);
 
 // Jede Ansicht setzt #main neu; der Beobachter merkt das und schickt die Chili
 // zur passenden Station, ohne dass jede Renderfunktion daran denken muss.

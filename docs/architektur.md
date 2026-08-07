@@ -305,6 +305,35 @@ Ausgelöst wird der Klang an genau vier Stellen: `uebPruefen()` (Lernsets/Freest
 (Buchstaben) — jeweils über `meisterTon()`, das zwischen «richtig» und «gemeistert»
 entscheidet. «Aufdecken» bleibt still, weil das keine Antwort ist.
 
+## Die Auflösung als Blatt
+
+Was nach einer Antwort zu sagen ist, steht in **allen fünf Übungen** in einem Blatt, das
+von unten kommt (`#ergebnisBlatt`) — Urteil, Lösung groß, Umschrift, Leitner-Stand, Thema,
+Hörknöpfe, Patzer und Meisterschaft; in «Grammatik» dazu die ganze Regelkarte.
+
+**Der «Weiter»-Knopf steht im Blatt**, nicht mehr in der Karte. Das ist der ganze Trick
+(ADR 0034): Die Zahl der Tipps bleibt gleich — eine Antwort, ein «Weiter» —, das Blatt
+kostet also nichts. Ein Blatt, das man erst wegtippen müsste, wäre genau die Hürde, vor
+der ADR 0026 gewarnt hat.
+
+**Der Inhalt scrollt, der Fuß steht fest** (`.erg-scroll` / `.erg-fuss`). Sonst läge
+«Weiter» in «Grammatik» unter der Kante, sobald die Regelkarte mitkommt.
+
+| Baustein | Aufgabe |
+| --- | --- |
+| `ergebnisZeigen(inhalt, weiter)` | füllt und öffnet |
+| `ergebnisSetzen(auf)` | öffnet/schließt, leert beim Schließen |
+| `ergThemaHtml(v)` · `ergSatzMetaHtml(s)` | Leitner-Punkte plus Thema beziehungsweise Satzstufe |
+| `abcAufloesung` · `gramAufloesung` | Ablage für die zwei Übungen, deren `…UebenHtml()` nur Text zurückgibt |
+
+Jede Renderfunktion entscheidet in ihrem Feedback-Zweig, ob das Blatt auf- oder zugeht —
+es gibt keinen Zustand, den man vergessen könnte. Ein Ansichtswechsel und
+`ansichtenZuruecksetzen()` schließen es ebenfalls.
+
+**Das Blatt hat seinen eigenen Hörzuhörer.** Es steht außerhalb von `#main`, an dem der
+gemeinsame Zuhörer hängt; `hoerZuhoerer` wird darum beiden angehängt. Die Regel bleibt:
+nie einen Zuhörer je Knopf.
+
 ## Gemeistert — die Rückmeldung
 
 Wenn ein Wort, ein Satz oder ein Buchstabe mit dieser Antwort `BOX_MAX` **erreicht**,
