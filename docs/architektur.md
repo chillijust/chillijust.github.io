@@ -740,7 +740,7 @@ Alphabet.
 
 | wo | was |
 | --- | --- |
-| **«Buchstaben», am Fuß** | Der Wink (`.lese-wink`): «368 Wörter können Sie schon lesen» mit einem Knopf, der direkt in den Modus führt — nicht bloß in die Übung, wo man ihn erst suchen müsste. Er erscheint ab `LESE_MINDEST` (3); eine Ankündigung ohne Deckung wäre eine Verlockung ins Leere. |
+| **«Buchstaben», am Fuß** | Der Wink (`.lese-wink`): «368 Wörter können Sie schon lesen» mit einem Knopf, der direkt in den Modus führt — nicht bloß in die Übung, wo man ihn erst suchen müsste. Er erscheint ab `LESE_MINDEST` (3); eine Ankündigung ohne Deckung wäre eine Verlockung ins Leere. **Er lässt sich schließen** (`state.leseWinkAb`) — und kommt wieder, wenn mehr Wörter lesbar sind als beim Zuklappen. Dann ist er neue Nachricht statt Wiederholung. |
 | **«Freestyle», über dem Thema** | Der Schalter (`.lese-schalter`, `uebLesen`), volle Breite, mit der Zahl der lesbaren Wörter. Er steht in der Ansicht, **nicht in der Auswahl**: Wer die Buchstaben gerade gemeistert hat, soll ihn sehen, nicht suchen. Ohne lesbare Wörter steht er gar nicht da. |
 
 Der Modus schneidet **quer durch die Themen**: Er fragt nicht, wovon ein Wort handelt,
@@ -1234,6 +1234,7 @@ Ein einziges Objekt `state` hält den gesamten Lernstand:
 | `wortFehler` | Serie falscher Schreibungen je Wort — bei `WORT_STRAFE` fällt das Wort zurück |
 | `patzer` | zurückgestufte Wörter mit dem Zeitpunkt ihres Falls — der Topf des Power-Trainings |
 | `leseFehler` | Serie fehlender Buchstaben im Lesemodus — bei `LESE_STRAFE` fällt das Zeichen |
+| `leseWinkAb` | bei wie vielen lesbaren Wörtern der Wink zuletzt weggeklickt wurde |
 | `settings` | Einstellungen des Nutzers, siehe unten |
 
 `wortFehler`, `patzer` und `leseFehler` stehen bewusst **nicht** im Sicherungscode: Alle

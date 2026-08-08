@@ -616,9 +616,19 @@ button.built-word:active { transform: scale(.95); }
 /* Der Wink am Fuß von «Buchstaben»: kein Tadel, sondern ein Lohn — darum Gold
    statt der grauen Linie. */
 .lese-wink {
-  margin-top: 16px; padding: 12px 14px; border-radius: 12px;
+  position: relative; margin-top: 16px; padding: 12px 14px; border-radius: 12px;
   border: 1px solid var(--gold); background: var(--card-2); text-align: left;
 }
+/* Der Schließknopf sitzt in der Ecke und greift über den Rand hinaus, damit
+   die Trefferfläche 44 px erreicht, ohne den Text zu verdrängen. */
+.lw-zu {
+  position: absolute; top: 0; right: 0; width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: 0; color: var(--dim); cursor: pointer;
+}
+.lw-zu .icon { width: 15px; height: 15px; }
+.lw-zu:active { color: var(--gold); }
+.lese-wink strong { padding-right: 32px; }
 .lese-wink strong { display: block; font-size: 14px; color: var(--gold); }
 .lw-note { display: block; font-size: 12px; color: var(--dim); margin-top: 5px; }
 .lw-los { margin-top: 12px; width: 100%; }
@@ -2764,6 +2774,10 @@ function defaultState() {
     // wurden. Sie bleiben vermerkt, bis sie wieder sitzen — daraus speist sich
     // das Power-Training (ADR 0034).
     patzer: {},
+    // Bei wie vielen lesbaren Wörtern der Wink zuletzt weggeklickt wurde. Er
+    // kommt wieder, wenn es mehr geworden sind — dann ist er neue Nachricht
+    // und keine Wiederholung.
+    leseWinkAb: 0,
     // Wie oft ein Buchstabe im Lesemodus **hintereinander** gefehlt hat.
     // Richtig gelegt löscht den Eintrag — wie wortFehler eine Momentaufnahme
     // und darum nicht im Sicherungscode (ADR 0035).
@@ -5494,8 +5508,10 @@ function abcUebenHtml() {
 // Verlockung ins Leere.
 function leseWinkHtml() {
   var lesbar = leseWoerter().length;
-  if (lesbar < LESE_MINDEST) return '';
+  if (lesbar < LESE_MINDEST || lesbar <= (state.leseWinkAb || 0)) return '';
   return '<div class="lese-wink">' +
+    '<button class="lw-zu" id="leseWinkZu" aria-label="Hinweis schließen">' +
+    ICON.kreuz + '</button>' +
     '<strong>' + lesbar + ' Wörter können Sie schon lesen.</strong>' +
     '<span class="lw-note">Ihre gemeisterten Buchstaben reichen dafür aus — ' +
     'Buchstabe für Buchstabe, ohne zu raten.</span>' +
@@ -5555,6 +5571,13 @@ function renderBuchstaben() {
   var next = document.getElementById('abcNext');
   if (next) next.addEventListener('click', function () {
     abcFrageBauen();
+    renderBuchstaben();
+  });
+  var winkZu = document.getElementById('leseWinkZu');
+  if (winkZu) winkZu.addEventListener('click', function () {
+    // Weg — bis mehr Wörter lesbar sind als jetzt.
+    state.leseWinkAb = leseWoerter().length;
+    save();
     renderBuchstaben();
   });
   var los = document.getElementById('leseLos');
