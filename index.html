@@ -948,6 +948,15 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
 .blatt-inhalt { display: block; }
 #meldeBlatt .btn-row { margin-top: 14px; }
 
+/* Der Weg in die Liste: eine Zeile, kein dritter Knopf. Neben «Abbrechen» und
+   «Sichern» wäre er gleichgewichtig, und das ist er nicht. */
+.blatt-link {
+  display: block; width: 100%; min-height: 44px; margin-top: 14px;
+  background: none; border: 0; border-top: 1px solid var(--line);
+  color: var(--ice); font: inherit; font-size: 13px; cursor: pointer;
+}
+.blatt-link:active { color: var(--gold); }
+
 .bezug {
   display: flex; align-items: center; gap: 12px;
   margin-top: 14px; min-height: 44px; cursor: pointer;
@@ -1034,6 +1043,7 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
       <span class="bezug-kasten" aria-hidden="true"></span>
       <span class="bezug-text">Betrifft <strong id="meldeBezugName">Home</strong></span>
     </label>
+    <button class="blatt-link" id="meldeAlle">Alle Tickets →</button>
     <div class="btn-row">
       <button class="btn ghost" id="meldeAbbruch">Abbrechen</button>
       <button class="btn primary" id="meldeSichern">Sichern</button>
@@ -3419,6 +3429,13 @@ document.getElementById('meldeAbbruch').addEventListener('click', function () {
 });
 document.getElementById('meldeBezug').addEventListener('change', function (e) {
   meldeBezugAn = e.target.checked;
+});
+// Vom Blatt in die Liste. Nur zuklappen, nicht leeren: Ein Entwurf überlebt
+// das Zuklappen, und ihn beim Nachsehen wegzuwerfen wäre die böseste Falle
+// von allen (ADR 0025).
+document.getElementById('meldeAlle').addEventListener('click', function () {
+  meldeSetzen(false);
+  setTab('tickets');
 });
 // Der Knopf soll sofort zeigen, dass etwas angefangen ist — nicht erst, wenn
 // das Blatt zugeht.
@@ -6899,6 +6916,9 @@ function meldeFuellen() {
   document.getElementById('meldeBezug').checked = meldeBezugAn;
   document.getElementById('meldeSichern').textContent = meldeBearbeitet ? 'Ändern' : 'Sichern';
   document.getElementById('meldeAbbruch').textContent = meldeBearbeitet ? 'Verwerfen' : 'Abbrechen';
+  // In der Liste selbst führt der Weg nirgendwohin — und beim Bearbeiten käme
+  // man aus der Liste, in der man ohnehin schon steht.
+  document.getElementById('meldeAlle').hidden = currentTab === 'tickets';
 }
 
 // Ein vorhandenes Ticket zum Bearbeiten ins Blatt holen.
