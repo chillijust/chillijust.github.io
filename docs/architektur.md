@@ -413,9 +413,45 @@ behauptet hat.
 - **«Aufdecken» zählt nicht** (`trRevealed`) — aufgeben ist kein Verschreiben. Ohne diese
   Ausnahme zerlegte dreimal Aufdecken den halben Satz.
 
+### Buchstabe für Buchstabe — die Prüfzeile
+
+«Falsch» ist eine dürftige Auskunft, wenn ein einziges Zeichen daneben lag. Nach der
+Abgabe tritt darum an die Stelle des Feldes der **eingefärbte Satz** (`.pruefzeile`):
+grün, was stimmt, rot und unterstrichen, was falsch dasteht, ein schmaler roter Balken,
+wo etwas fehlt (ADR 0037).
+
+Ein `textarea` kann seinen Text nicht stellenweise färben — es muss also **weichen**,
+statt bloß gesperrt zu werden. Die Zeile sieht aus wie das Feld (gleiche Größe, gleicher
+Grund), nur ohne Rand: Hier wird nichts mehr geschrieben.
+
+`trZeichenMarken()` ist Levenshtein **mit Rückweg** — `editAbstand()` sagt nur, *wie
+viel* daneben war, nicht *wo*. Auf dem Rückweg wird die Diagonale zuerst geprüft, damit
+zwei Zeichen an derselben Stelle einander zugeordnet bleiben, statt als «zu viel» und
+«fehlt» nebeneinanderzustehen.
+
+**Was `normalize()` übersieht, muss auch die Farbe übersehen.** Satzzeichen, Leerraum,
+Groß- und Kleinschreibung und ё/е kosten nichts. Sonst stünde eine Antwort, die als
+richtig gewertet wurde, rot da — und die Farbe widerspräche dem Haken darüber.
+
+**Die Farbe trägt nichts allein.** Falsche Zeichen sind zusätzlich unterstrichen, und
+eine Zeile darunter zählt in Worten: «1 Zeichen steht falsch · 1 fehlt». Wer aufgibt,
+ohne etwas zu schreiben, bekommt gar keine Zeile — es gibt nichts einzufärben.
+
+### Welche Tastatur
+
 Die **eingebaute kyrillische Tastatur** (dieselben `KB_ROWS` wie in «Tippen») erscheint
 nur, wenn die Lösung russisch ist — einen deutschen Satz schreibt man mit der
-Gerätetastatur, einen kyrillischen oft nicht. Der geschriebene Text steht in `trEingabe`,
+Gerätetastatur, einen kyrillischen oft nicht. Sie klappt **von selbst auf**
+(`tastaturVorgabe()`, Einstellung `tastaturAuto`, Vorgabe an): Wo Kyrillisch verlangt
+ist, ist sie das Werkzeug, und es erst zu holen war ein Handgriff ohne Entscheidung.
+Dasselbe gilt in «Tippen», «Grammatik» und im Power-Training, wo die Antwort immer
+kyrillisch ist.
+
+**Die Sprache der *Gerätetastatur* kann eine Seite nicht wählen.** iOS entscheidet das
+aus den installierten Tastaturen und der zuletzt benutzten; `lang` ist dafür kein Hebel.
+Die eingebaute Tastatur ist die Antwort der App darauf — mehr geht nicht.
+
+Der geschriebene Text steht in `trEingabe`,
 nicht nur im Feld: Zwischen zwei Renderläufen wäre er sonst weg. Beim Tippen wird darum
 auch **nicht neu gezeichnet** — das nähme dem Feld mitten im Schreiben den Fokus; nur der
 Abgabeknopf wird nachgeführt.
@@ -540,6 +576,12 @@ aber jede neue Vokabel würde alle folgenden verschieben und alte Codes still ve
 tragen, und bricht sonst ab — die Wahrscheinlichkeit ist winzig, die Folge wäre lautlos.
 
 **Tagesgenau reicht**, weil alle Fristen in Tagen rechnen (`INTERVALL`, `auffrischen`).
+
+**Die Schalter stehen an festen Stellen** (`BK_SETTINGS`). Eine Einstellung, die es nicht
+mehr gibt, hinterlässt darum ein `null` als Platzhalter — wandern die Stellen, liest ein
+alter Code die falschen Schalter. Und was ein Code **nicht führt**, behält seine Vorgabe:
+Sonst machte ein älterer Code aus jeder später hinzugekommenen Einstellung ein «aus»,
+und `tastaturAuto` wäre nach jedem Wiederherstellen abgeschaltet.
 
 **Die Prüfsumme** über die ersten sechs Felder erkennt abgeschnittenes oder verändertes
 Einfügen. Ohne sie hätte ein halb kopierter Code stillschweigend einen halben Lernstand
@@ -1041,8 +1083,15 @@ Knopf trägt so lange einen goldenen Punkt (`hat-entwurf`). Verworfen wird aussc
 über «Abbrechen»; ein halb geschriebenes Ticket durch eine Handbewegung zu verlieren wäre
 der schlechtere Tausch (ADR 0025).
 
-Erreichbar über **Menü → Tickets**. `letzterTab` hält die Übung, aus der man kam — die
-ist gemeint, wenn ein Fehler gemeldet wird, nicht «Menü».
+**Vom Blatt in die Liste** führt eine Zeile unter dem Haken (`#meldeAlle`): kein dritter
+Knopf, denn neben «Abbrechen» und «Sichern» wäre er gleichgewichtig, und das ist er
+nicht. Sie klappt das Blatt zu und wechselt in die Ticket-Ansicht — **ohne zu leeren**.
+Einen halb geschriebenen Entwurf beim Nachsehen wegzuwerfen wäre die böseste Falle von
+allen (ADR 0025). In der Liste selbst steht die Zeile nicht da; dort führte sie
+nirgendwohin.
+
+Erreichbar auch über **Menü → Tickets**. `letzterTab` hält die Übung, aus der man kam —
+die ist gemeint, wenn ein Fehler gemeldet wird, nicht «Menü».
 
 ## Absicherung
 
@@ -1144,7 +1193,7 @@ auf einen sinnvollen Bereich:
 | `confirmUebersetzen` | an | In „Übersetzen" wird der Satz erst gelegt und dann bestätigt. Aus: Der Satz zählt, sobald das letzte Wort liegt. |
 | `requireComplete` | aus | „Bestätigen" ist erst möglich, wenn die Lösung vollständig ist. Verrät dadurch deren Länge. |
 | `tippenAbStufe` | 4 | Ab welcher Leitner-Stufe ein Wort in „Tippen" erscheint (2, 3 oder 4). |
-| `tastaturAn` | aus | Zeigt die eingebaute Tastatur in „Tippen" gleich beim Öffnen. |
+| `tastaturAuto` | **an** | Verlangt eine Aufgabe Kyrillisch, klappt die eingebaute Tastatur gleich auf. Aus: Sie holen sie bei Bedarf. Wo Deutsch gefragt ist, kommt sie nie. |
 | `darstellung` | `system` | `system`, `dunkel` oder `hell`. Steuert `data-theme` am `<html>`-Element. |
 
 Eine neue Einstellung braucht drei Dinge: einen Vorgabewert in `defaultSettings()`,

@@ -112,7 +112,20 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
 - **Tickets liegen in `chillingo_tickets_v1`**, nicht im Lernstand — der Sicherungscode
   soll schlank bleiben. Sie verlassen das Gerät nie von selbst: ein Knopf bündelt sie zu
   einem Text zum Kopieren (ADR 0016). Der Bezug heißt **Ort**, nicht «Übung» — er kann
-  auch die Übersicht oder eine Menüansicht sein.
+  auch die Übersicht oder eine Menüansicht sein. Vom Blatt führt eine Zeile in die Liste;
+  sie klappt nur zu, sie leert nicht.
+- **Was `normalize()` übersieht, übersieht auch die Farbe** (ADR 0037). Die Prüfzeile in
+  «Übersetzen» färbt den getippten Satz zeichenweise ein; Satzzeichen, Leerraum,
+  Groß-/Kleinschreibung und ё/е kosten nichts — sonst stünde eine als richtig gewertete
+  Antwort rot da. Die Farbe trägt nie allein: Falsches ist zusätzlich unterstrichen, und
+  eine Zeile zählt es in Worten.
+- **Die eingebaute Tastatur kommt von selbst, wo Kyrillisch verlangt ist**
+  (`tastaturVorgabe()`, Einstellung `tastaturAuto`). Die Sprache der *Geräte*tastatur
+  kann eine Seite nicht wählen — iOS entscheidet das, `lang` ist kein Hebel. Nichts
+  vortäuschen, was das Betriebssystem nicht hergibt.
+- **Die Schalter im Sicherungscode stehen an festen Stellen** (`BK_SETTINGS`). Eine
+  Einstellung, die es nicht mehr gibt, hinterlässt ein `null` als Platzhalter; was ein
+  Code nicht führt, behält seine Vorgabe.
 - **Gewertet wird nur, was der Nutzer behauptet hat** (ADR 0033). Die Wortauswertung in
   «Übersetzen» greift nur beim Schreiben ins Russische; Kacheln, die deutsche Seite und
   «Aufdecken» bleiben draußen. Wer aufgibt, hat nichts falsch geschrieben.

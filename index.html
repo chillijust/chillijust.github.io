@@ -731,6 +731,27 @@ input.err, textarea.err { border-color: var(--bad); }
 }
 #trInput:focus { outline: none; border-color: var(--ice); }
 
+/* Die Prüfzeile tritt nach der Abgabe an die Stelle des Feldes. Sie sieht aus
+   wie das Feld — gleiche Größe, gleicher Grund —, damit der Blick nicht
+   springt, nur ihr Rand bleibt weg: Hier wird nichts mehr geschrieben. */
+.pruefzeile {
+  margin: 16px 0 0; padding: 12px 14px; border-radius: 12px;
+  background: var(--bg); font-size: 19px; line-height: 1.5;
+  text-align: left; white-space: pre-wrap; word-break: break-word;
+}
+.z-ok { color: var(--good); }
+/* Nicht nur Farbe: Wer Rot und Grün nicht unterscheidet, sieht den Strich. */
+.z-weg {
+  color: var(--bad); text-decoration: underline;
+  text-decoration-thickness: 2px; text-underline-offset: 3px;
+}
+/* Was fehlt, hat kein Zeichen — also steht dort ein schmaler Balken. */
+.z-fehlt {
+  display: inline-block; width: 3px; height: 0.9em; margin: 0 1px;
+  vertical-align: -0.1em; border-radius: 2px; background: var(--bad);
+}
+.pruef-note { margin: 8px 0 0; font-size: 12px; color: var(--dim); text-align: left; }
+
 .btn-row { display: flex; gap: 10px; margin-top: 14px; }
 .btn {
   flex: 1; padding: 13px; min-height: 48px; border-radius: 12px; font-size: 15px;
@@ -4757,6 +4778,98 @@ function satzMitWissen(text) {
 }
 
 // Stufenwahl mit Angabe, wie viele S\u00e4tze je Stufe schon offen sind.
+// ── Buchstabe für Buchstabe ─────────────────────────────────
+// «Falsch» ist eine dürftige Auskunft, wenn ein einziges Zeichen daneben lag.
+// Nach der Abgabe wird der getippte Satz darum eingefärbt: Was stimmt, steht
+// grün, was falsch dasteht, rot, und wo etwas fehlt, ein schmaler Strich.
+//
+// Der Abstand allein sagt nur, *wie viel* daneben war — nicht *wo*. Es braucht
+// also Levenshtein mit Rückweg, nicht bloß `editAbstand()`.
+//
+// Satzzeichen, Groß- und Kleinschreibung und ё/е kosten nichts. Sonst stünde
+// eine Antwort, die als richtig gewertet wurde, rot da — `normalize()` sieht
+// über genau diese Unterschiede hinweg, und die Farbe muss dasselbe tun.
+function trZeichenNeutral(c) { return /[.,!?;:\s]/.test(c); }
+function trZeichenGleich(a, b) {
+  return a.toLowerCase().replace(/ё/g, 'е') === b.toLowerCase().replace(/ё/g, 'е');
+}
+
+function trZeichenMarken(eingabe, loesung) {
+  var a = String(eingabe), b = String(loesung);
+  var n = a.length, m = b.length;
+  var kosten = [], i, j;
+  for (i = 0; i <= n; i++) {
+    kosten[i] = [];
+    for (j = 0; j <= m; j++) {
+      if (i === 0 && j === 0) { kosten[0][0] = 0; continue; }
+      if (i === 0) {
+        kosten[0][j] = kosten[0][j - 1] + (trZeichenNeutral(b.charAt(j - 1)) ? 0 : 1);
+        continue;
+      }
+      if (j === 0) {
+        kosten[i][0] = kosten[i - 1][0] + (trZeichenNeutral(a.charAt(i - 1)) ? 0 : 1);
+        continue;
+      }
+      var ca = a.charAt(i - 1), cb = b.charAt(j - 1);
+      kosten[i][j] = Math.min(
+        kosten[i - 1][j] + (trZeichenNeutral(ca) ? 0 : 1),   // zu viel getippt
+        kosten[i][j - 1] + (trZeichenNeutral(cb) ? 0 : 1),   // fehlt
+        kosten[i - 1][j - 1] + (trZeichenGleich(ca, cb) ? 0 : 1)
+      );
+    }
+  }
+  // Rückweg. Die Diagonale wird zuerst geprüft: Zwei Zeichen an derselben
+  // Stelle sollen einander zugeordnet bleiben, statt als «zu viel» und
+  // «fehlt» nebeneinanderzustehen.
+  var marken = [];
+  i = n;
+  j = m;
+  while (i > 0 || j > 0) {
+    var za = i > 0 ? a.charAt(i - 1) : '';
+    var zb = j > 0 ? b.charAt(j - 1) : '';
+    if (i > 0 && j > 0 &&
+      kosten[i][j] === kosten[i - 1][j - 1] + (trZeichenGleich(za, zb) ? 0 : 1)) {
+      marken.unshift({ z: za, art: trZeichenGleich(za, zb) ? 'ok' : 'weg' });
+      i--;
+      j--;
+    } else if (i > 0 &&
+      kosten[i][j] === kosten[i - 1][j] + (trZeichenNeutral(za) ? 0 : 1)) {
+      marken.unshift({ z: za, art: trZeichenNeutral(za) ? 'ok' : 'weg' });
+      i--;
+    } else {
+      if (!trZeichenNeutral(zb)) marken.unshift({ z: '', art: 'fehlt' });
+      j--;
+    }
+  }
+  return marken;
+}
+
+function trPruefzeileHtml(eingabe, loesung, kyrillisch) {
+  if (!String(eingabe).replace(/^\s+|\s+$/g, '')) return '';
+  var marken = trZeichenMarken(eingabe, loesung);
+  var fehlt = 0, falsch = 0;
+  var html = '<p class="pruefzeile' + (kyrillisch ? ' cyr' : '') + '">';
+  marken.forEach(function (mk) {
+    if (mk.art === 'fehlt') {
+      fehlt++;
+      html += '<span class="z-fehlt" aria-hidden="true"></span>';
+      return;
+    }
+    if (mk.art === 'weg') falsch++;
+    html += '<span class="z-' + mk.art + '">' + esc(mk.z) + '</span>';
+  });
+  html += '</p>';
+  // Die Farbe allein darf nichts tragen: Wer sie nicht unterscheidet, liest
+  // hier, worum es geht. (Die falschen Zeichen sind zusätzlich unterstrichen.)
+  if (falsch || fehlt) {
+    html += '<p class="pruef-note">' +
+      (falsch ? falsch + (falsch === 1 ? ' Zeichen steht' : ' Zeichen stehen') + ' falsch' : '') +
+      (falsch && fehlt ? ' · ' : '') +
+      (fehlt ? fehlt + (fehlt === 1 ? ' fehlt' : ' fehlen') : '') + '</p>';
+  }
+  return html;
+}
+
 function renderUebersetzen() {
   if (!trTask) buildTransTask();
   if (!trTask) { renderUebersetzenLeer(); return; }
@@ -4776,14 +4889,20 @@ function renderUebersetzen() {
     hoerknopf(t.prompt, promptIsRu ? 'ru' : 'de') + '</p>';
 
   if (getippt) {
-    html += '<textarea id="trInput" rows="2" class="fliess' + (t.loesungRu ? ' cyr' : '') +
-      (trPhase === 'feedback' ? (trCorrect ? ' ok' : ' err') : '') + '"' +
-      ' lang="' + (t.loesungRu ? 'ru' : 'de') + '" autocapitalize="sentences"' +
-      ' autocorrect="off" spellcheck="false"' + (trPhase === 'feedback' ? ' readonly' : '') +
-      ' placeholder="' + (t.loesungRu ? 'Den Satz auf Russisch schreiben …'
-        : 'Den Satz auf Deutsch schreiben …') + '">' + esc(trEingabe) + '</textarea>';
-    if (!t.loesungRu && trPhase === 'ask') {
-      html += '<p class="hint">Artikel zählen nicht mit — das Russische hat keine.</p>';
+    // Nach der Abgabe tritt an die Stelle des Feldes der eingefärbte Satz. Ein
+    // `textarea` kann seinen Text nicht stellenweise färben — es muss also
+    // weichen, statt bloß gesperrt zu werden.
+    if (trPhase === 'feedback') {
+      html += trPruefzeileHtml(trEingabe, t.solution, !!t.loesungRu);
+    } else {
+      html += '<textarea id="trInput" rows="2" class="fliess' + (t.loesungRu ? ' cyr' : '') +
+        '" lang="' + (t.loesungRu ? 'ru' : 'de') + '" autocapitalize="sentences"' +
+        ' autocorrect="off" spellcheck="false"' +
+        ' placeholder="' + (t.loesungRu ? 'Den Satz auf Russisch schreiben …'
+          : 'Den Satz auf Deutsch schreiben …') + '">' + esc(trEingabe) + '</textarea>';
+      if (!t.loesungRu) {
+        html += '<p class="hint">Artikel zählen nicht mit — das Russische hat keine.</p>';
+      }
     }
   } else {
     html += '<div class="built' + (promptIsRu ? '' : ' cyr') + '">';
