@@ -354,6 +354,22 @@ body.wissen-offen #wissenPanel { grid-template-rows: 1fr; opacity: 1; pointer-ev
 /* Der Tafelknopf zeigt nicht «abweichend», sondern «hier stehen Sie». */
 #tafelKnopf.aktiv { border-color: var(--ice); color: var(--ice); }
 #filterKnopf[aria-expanded="true"] { border-color: var(--gold); color: var(--gold); }
+/* Aufgeklappt weicht das Symbol nach unten und die Chili nimmt seinen Platz —
+   dieselbe Bewegung wie beim Menü, nur mit einem Zeichen statt drei Strichen.
+   Trägt die Figur gerade eine Ansicht, bleibt ein ruhender Punkt zurück, damit
+   der Knopf kein leerer Kreis ist. */
+.knopfzeichen {
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .36s cubic-bezier(.3, .8, .3, 1), opacity .24s;
+}
+#filterKnopf[aria-expanded="true"] .knopfzeichen { transform: translateY(26px); opacity: 0; }
+#filterKnopf .punkt {
+  position: absolute; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--gold); opacity: 0; transition: opacity .3s .2s;
+}
+#filterKnopf[aria-expanded="true"] .punkt { opacity: .8; }
+#filterKnopf[aria-expanded="true"].mit-chili .punkt { opacity: 0; transition-delay: 0s; }
+#chiliFilter { position: absolute; inset: 6px; }
 .filterpanel { width: 284px; max-width: 86vw; }
 .filterpanel .menuinhalt { max-height: 62vh; overflow-y: auto; padding: 12px; gap: 0; }
 .filtergruppe + .filtergruppe { margin-top: 14px; }
@@ -1129,7 +1145,11 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
     <div id="wissenPanel" class="menupanel filterpanel" role="group" aria-label="Wissen" aria-hidden="true">
       <div class="menuwrap"><div class="menuinhalt" id="wissenInhalt"></div></div>
     </div>
-    <button id="filterKnopf" class="rundbtn" aria-label="Auswahl" aria-expanded="false" aria-controls="filterPanel" hidden></button>
+    <button id="filterKnopf" class="rundbtn" aria-label="Auswahl" aria-expanded="false" aria-controls="filterPanel" hidden>
+      <span class="knopfzeichen" id="filterZeichen" aria-hidden="true"></span>
+      <span class="punkt" aria-hidden="true"></span>
+      <span id="chiliFilter" class="chili-platz" data-chili-knopf></span>
+    </button>
     <div id="filterPanel" class="menupanel filterpanel" role="group" aria-label="Auswahl">
       <div class="menuwrap"><div class="menuinhalt" id="filterInhalt"></div></div>
     </div>
@@ -2229,15 +2249,17 @@ function chiliFlug(vorher, jetzt) {
   } catch (e) { /* ohne Flug bleibt der Hüpfer */ }
 }
 
-// Wo steht die Figur? Drei Regeln, in dieser Reihenfolge:
-//  1. Ist das Menü aufgeklappt, gehört sie in den Knopf — die Striche stehen
-//     dann unten, er wäre sonst ein leerer Kreis.
-//  2. Stellt die Ansicht einen Platz auf (Karte, Empfehlung, Leerzustand),
+// Wo steht die Figur? Vier Regeln, in dieser Reihenfolge:
+//  1. Ist das Menü aufgeklappt, gehört sie in dessen Knopf — die Striche
+//     stehen dann unten, er wäre sonst ein leerer Kreis.
+//  2. Dasselbe gilt für die Auswahl: auch dort weicht das Zeichen.
+//  3. Stellt die Ansicht einen Platz auf (Karte, Empfehlung, Leerzustand),
 //     gehört sie dorthin.
-//  3. Sonst: im Menübereich in den Knopf, überall sonst in den Kopf.
+//  4. Sonst: im Menübereich in den Menüknopf, überall sonst in den Kopf.
 function chiliPlatzhalter() {
   var knopf = document.getElementById('chiliKnopf');
   if (menuOffen) return knopf;
+  if (filterOffen) return document.getElementById('chiliFilter');
   var inhalt = main.querySelector('[data-chili]');
   if (inhalt) return inhalt;
   return imMenu(currentTab) ? knopf : document.getElementById('chiliPlatz');
@@ -2251,6 +2273,8 @@ function chiliAktualisieren(ohneSprung) {
   // trägt — das gilt auch, wenn sich sonst nichts geändert hat.
   document.getElementById('menuKnopf')
     .classList.toggle('mit-chili', platz.id === 'chiliKnopf');
+  document.getElementById('filterKnopf')
+    .classList.toggle('mit-chili', platz.id === 'chiliFilter');
   if (platz === chiliStation) return;
   var ersterAuftritt = chiliStation === null;
   // Die alte Station lässt sich nur messen, solange sie im Dokument hängt —
@@ -3258,11 +3282,17 @@ function menuSetzen(auf) {
 var filterOffen = false;
 
 function filterSetzen(auf) {
+  var vorher = filterOffen;
   filterOffen = auf && filterHatWahl();
   document.body.classList.toggle('filter-offen', filterOffen);
   var knopf = document.getElementById('filterKnopf');
   knopf.setAttribute('aria-expanded', filterOffen ? 'true' : 'false');
   document.getElementById('filterPanel').setAttribute('aria-hidden', filterOffen ? 'false' : 'true');
+  // Nur beim echten Umschalten. `renderFilter()` ruft diese Funktion bei jedem
+  // Zeichnen mit `false` — beim Aufbau noch, bevor `#main` gefüllt ist. Die
+  // Figur bekäme dann eine Station im Kopf und flöge sichtbar auf ihren Platz,
+  // sobald die Ansicht dasteht.
+  if (filterOffen !== vorher) chiliAktualisieren();
 }
 
 function filterHatWahl() {
