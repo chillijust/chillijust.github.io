@@ -165,17 +165,16 @@ body.unterwegs header {
    `margin: auto` statt `justify-content: center`: Wird der Inhalt höher als
    der Platz (Regelkarte, Tastatur), fallen die Automargen auf null und nichts
    wird oben abgeschnitten. Nur Übungen — Listen wie Bilanz gehören nach oben. */
-/* Den Vorlauf rechnet `aufgabeAusrichten()` aus — zwei Drittel des freien
-   Raums, **ohne die eingeblendete Tastatur mitzuzählen**. Sie darf unten
-   hinausragen, aber die Karte nicht nach oben schieben.
-   Die Hebung kommt von `sichtPruefen()`: Die iOS-Tastatur legt sich über die
-   Seite; erst wenn sie die Knopfreihe verdeckt, hebt sich der Block — und nur
-   so weit wie nötig. Ein Transform, damit sich am Fluss nichts ändert. */
-body.aufgabe #main {
-  padding-top: var(--vorlauf, 0px);
-  transform: translateY(calc(-1 * var(--hebung, 0px)));
-  transition: transform .18s ease;
-}
+body.aufgabe { display: flex; flex-direction: column; min-height: 100vh; }
+@supports (min-height: 100svh) { body.aufgabe { min-height: 100svh; } }
+body.aufgabe #main { flex: 1 0 auto; display: flex; flex-direction: column; }
+/* Zwei Streben teilen den freien Raum 2:1 — der Block sitzt damit auf zwei
+   Dritteln der Höhe, tiefer als die Mitte, aber nicht am Boden geklebt.
+   Basis 0 und kein Schrumpfen: Ist der Inhalt höher als der Platz, fallen
+   beide auf null und nichts wird oben abgeschnitten. */
+body.aufgabe #main::before { content: ''; flex: 2 0 0; }
+body.aufgabe #main::after { content: ''; flex: 1 0 0; }
+body.aufgabe #main > section { flex: 0 0 auto; width: 100%; }
 
 body.unterwegs .titelblock { min-width: 0; }
 body.unterwegs h1 { font-size: 19px; letter-spacing: .01em; }
@@ -4988,9 +4987,7 @@ function renderBuchstaben() {
 // Die eingebaute kyrillische Tastatur. Sie steht in drei Übungen; das
 // Datenattribut sagt, wer die Tasten abholt.
 function tastaturHtml(attr) {
-  // Die Klasse «kb» macht die Tastatur messbar: Sie zählt beim Ausrichten der
-  // Aufgabe nicht mit, damit sie die Karte nicht nach oben schiebt.
-  var html = '<div class="kb">';
+  var html = '<div>';
   KB_ROWS.forEach(function (row, ri) {
     html += '<div class="kb-row">';
     row.forEach(function (ch) {
@@ -5880,7 +5877,7 @@ function renderTippen() {
   html += '</div>';
   html += '<button class="kb-toggle" id="tKbToggle">' + (tKb ? 'Tastatur ausblenden' : 'Tastatur einblenden') + '</button>';
   if (tKb) {
-    html += '<div class="kb">';
+    html += '<div>';
     KB_ROWS.forEach(function (row, ri) {
       html += '<div class="kb-row">';
       row.forEach(function (ch) {
@@ -6997,79 +6994,10 @@ main.addEventListener('click', function (e) {
   if (k) speak(k.dataset.say, k.dataset.lang);
 });
 
-// ── Wo die Aufgabe sitzt ────────────────────────────────────
-// Der Block steht auf zwei Dritteln des freien Raums, damit «Prüfen» und
-// «Weiter» in Daumenreichweite liegen. Gerechnet wird das **ohne die
-// eingeblendete Tastatur**: Sie hängt unten heraus, statt die Karte
-// hochzuschieben. Wer sie einblendet, will schreiben — und will die Aufgabe
-// dort behalten, wo sie stand.
-var AUFGABE_ANTEIL = 2 / 3;
-var aktuelleHebung = 0;
-
-function aufgabeFuss() {
-  var wert = parseFloat(getComputedStyle(document.body).paddingBottom);
-  return isNaN(wert) ? 96 : wert;
-}
-
-function aufgabeAusrichten() {
-  var koerper = document.body;
-  if (!koerper.classList.contains('aufgabe')) {
-    koerper.style.setProperty('--vorlauf', '0px');
-    return;
-  }
-  var sec = main.firstElementChild;
-  if (!sec) return;
-  var hoehe = sec.offsetHeight;
-  var kb = sec.querySelector('.kb');
-  if (kb) hoehe -= kb.offsetHeight;
-  // `offsetTop` statt `getBoundingClientRect()`: Es zählt vom Dokument, nicht
-  // vom Sichtfeld, und bleibt darum von Scrollstand und Hebung unberührt.
-  var frei = window.innerHeight - main.offsetTop - aufgabeFuss() - hoehe;
-  koerper.style.setProperty('--vorlauf',
-    (frei > 0 ? Math.round(frei * AUFGABE_ANTEIL) : 0) + 'px');
-}
-
-// Die iOS-Tastatur legt sich über die Seite, statt Platz wegzunehmen: Das
-// Sicht-Fenster schrumpft, das Layout bleibt. Solange die Knopfreihe sichtbar
-// bleibt, rührt sich nichts. Verdeckt die Tastatur sie, hebt sich der Block —
-// genau um den Überstand, keinen Millimeter mehr.
-var HEBUNG_LUFT = 12;
-
-function sichtPruefen() {
-  var koerper = document.body;
-  var sicht = window.visualViewport;
-  var setzen = function (px) {
-    aktuelleHebung = px;
-    koerper.style.setProperty('--hebung', px + 'px');
-  };
-  if (!sicht || !koerper.classList.contains('aufgabe')) return setzen(0);
-  var reihe = main.querySelector('.btn-row');
-  if (!reihe) return setzen(0);
-  // Der Kasten steht schon verschoben da — die eigene Hebung herausrechnen.
-  var unten = reihe.getBoundingClientRect().bottom + aktuelleHebung;
-  var ueberstand = unten - (sicht.offsetTop + sicht.height) + HEBUNG_LUFT;
-  setzen(ueberstand > 0 ? Math.round(ueberstand) : 0);
-}
-
-function aufgabeNachfuehren() {
-  aufgabeAusrichten();
-  sichtPruefen();
-}
-
-if (window.visualViewport) {
-  window.visualViewport.addEventListener('resize', sichtPruefen);
-  window.visualViewport.addEventListener('scroll', sichtPruefen);
-}
-window.addEventListener('resize', aufgabeNachfuehren);
-
 // Jede Ansicht setzt #main neu; der Beobachter merkt das und schickt die Chili
-// zur passenden Station und richtet die Aufgabe aus, ohne dass jede
-// Renderfunktion daran denken muss.
+// zur passenden Station, ohne dass jede Renderfunktion daran denken muss.
 if (window.MutationObserver) {
-  new MutationObserver(function () {
-    chiliAktualisieren();
-    aufgabeNachfuehren();
-  }).observe(main, { childList: true });
+  new MutationObserver(function () { chiliAktualisieren(); }).observe(main, { childList: true });
 }
 // Erst zeichnen, dann die Chili das erste Mal setzen: sonst stünde sie kurz im
 // Kopf (main ist noch leer) und spränge danach sichtbar auf ihren Platz in der

@@ -155,38 +155,17 @@ in den äußeren 26 px, verlangt 70 px waagerechten Weg bei höchstens 70 % davo
 ein Blatt offen (Menü, Auswahl, Wissen, Meldeblatt), schweigt sie.
 
 **Aufgaben sitzen tiefer als Listen.** In den sechs Übungen trägt der Körper die Klasse
-`aufgabe`; `aufgabeAusrichten()` rechnet dann einen **Vorlauf** aus — zwei Drittel des
-freien Raums (`AUFGABE_ANTEIL`) — und setzt ihn als `--vorlauf` an `#main`. Der
-Aufgabenblock steht damit auf zwei Dritteln der Höhe, tiefer als die Mitte, aber nicht am
-Boden geklebt. Der Grund ist die Hand: «Prüfen» und «Weiter» liegen dort, wo der Daumen
-ohnehin ist.
+`aufgabe`; `#main` wird dann zur Flexspalte, und zwei Streben (`::before` mit `flex: 2`,
+`::after` mit `flex: 1`) teilen den freien Raum **2:1**. Der Aufgabenblock steht damit auf
+zwei Dritteln der Höhe — tiefer als die Mitte, aber nicht am Boden geklebt. Der Grund ist
+die Hand: «Prüfen» und «Weiter» liegen so dort, wo der Daumen ohnehin ist, und die
+eingeblendete Tastatur schiebt sie nicht aus dem Bild.
 
-**Die eingeblendete Tastatur zählt beim Rechnen nicht mit.** Ihre Höhe (`.kb`) wird von
-der Sektionshöhe abgezogen, bevor der Vorlauf bestimmt wird. So bleibt die Karte genau
-dort stehen, wo sie ohne Tastatur stand; die Tastatur hängt unten heraus und die Seite
-scrollt, statt die Aufgabe hochzuschieben. Wer die Tastatur einblendet, will schreiben —
-und will die Aufgabe dort behalten, wo sie war.
-
-Gerechnet wird über `main.offsetTop`, nicht über `getBoundingClientRect()`: Das zählt vom
-Dokument statt vom Sichtfeld und bleibt darum von Scrollstand und Hebung unberührt. Passt
-der Inhalt nicht (offene Regelkarte), wird der Vorlauf null und die Seite scrollt wie
-zuvor. Listen und Menüansichten bleiben unberührt: Bilanz, Einstellungen und Tickets
-gehören nach oben.
-
-### Die iOS-Tastatur hebt nur, wenn sie muss
-
-Die Systemtastatur nimmt keinen Platz weg — sie legt sich darüber. Das **Layout-Sichtfeld**
-bleibt, das **visuelle** schrumpft. Ohne Zutun schiebt Safari die fokussierte Eingabe ins
-Bild und reißt die ganze Aufgabe mit nach oben.
-
-`sichtPruefen()` verhindert das: Es vergleicht die Unterkante der Knopfreihe mit
-`visualViewport.offsetTop + height`. Bleibt sie sichtbar, geschieht **nichts**. Verdeckt
-die Tastatur sie, hebt sich `#main` per `transform: translateY()` — genau um den
-Überstand plus `HEBUNG_LUFT` (12 px), keinen Millimeter mehr. Ein Transform, weil er den
-Fluss nicht anfasst: Nichts anderes rückt mit.
-
-Beide Rechnungen hängen am `MutationObserver` auf `#main` — derselbe, der die Chili
-umhängt. Keine Renderfunktion muss daran denken.
+Beide Streben haben **Basis 0 und kein Schrumpfen**. Wird der Inhalt höher als der Platz
+(offene Regelkarte, eingeblendete Tastatur), fallen sie auf null, und die Seite scrollt
+wie zuvor — anders als bei `justify-content: center` wird oben nichts abgeschnitten.
+Listen und Menüansichten bleiben unberührt: Bilanz, Einstellungen und Tickets gehören
+nach oben.
 
 **Der Kopf wechselt seinen Inhalt**, statt dass es zwei gäbe (`renderKopf()`):
 
