@@ -23,7 +23,9 @@ nicht «Rubrik». In dieser Reihenfolge:
 Stufe — Kacheln vor Tippen, RU→DE vor DE→RU),
 **Buchstaben** (das kyrillische Alphabet — freiwillig, eigener Lernstand, zählt nicht in
 Serie und Fortschritt; Einstieg ist das Üben, die Tafel liegt hinter einem eigenen Knopf),
-**Grammatik** (warum ein Wort so dasteht — freiwillig, entdecken statt belehren).
+**Grammatik** (warum ein Wort so dasteht — freiwillig, entdecken statt belehren),
+**Power-Training** (die zurückgefallenen Wörter zurückholen — drei auf einmal, ab drei
+gefallenen offen).
 Keine Übungen, sondern **im Menü** (runder Knopf, drei Striche): **Bilanz**,
 **Sicherung**, **Einstellungen**, **Tickets**. Dazu **Sprachfakten** aus der Faktenkarte oder der
 Bilanz. Eine Reiterleiste gibt es nicht — der Kopf trägt unterwegs den Rückweg.
@@ -187,8 +189,13 @@ zehn.
   Zustände deshalb über Klassen setzen, nicht über `:hover`.
 - **Wörter, die dreimal hintereinander falsch geschrieben werden**, fallen auf
   `SATZ_STUFE - 1` zurück und schließen damit ihren Satz (ADR 0033). Der Zähler steht in
-  `state.wortFehler`; richtig geschrieben löscht ihn. Beides steht bewusst **nicht** im
-  Sicherungscode.
+  `state.wortFehler`, die Gefallenen in `state.patzer`; richtig geschrieben löscht beides.
+  Beides steht bewusst **nicht** im Sicherungscode — es sind Momentaufnahmen, kein
+  Lernstand.
+- **Das Power-Training zählt regulär mit** (ADR 0034). `ptPruefen()` ruft `updateBox()`
+  und `meisterPruefen()` wie jede andere Übung; ein zweiter, abgekoppelter Lernstand wäre
+  eine Lüge über den eigenen Fortschritt. `ptPool()` räumt beim Nachsehen auf — wer wieder
+  auf `SATZ_STUFE` steht, verlässt den Topf, auch ohne dort geübt zu haben.
 - **Neuer Ansichtszustand** (eine Variable, die eine Rubrik zwischen zwei Renderläufen
   hält) gehört in `ansichtenZuruecksetzen()`. Sonst zeigt die Rubrik nach dem
   Wiederherstellen einer Sicherung weiter den alten Stand — genau dieser Fehler war da

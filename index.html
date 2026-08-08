@@ -394,6 +394,31 @@ select {
 .answer { font-size: 17px; color: var(--ice); margin: 12px 0 0; }
 .translit { font-size: 13px; color: var(--dim); font-style: italic; margin: 4px 0 0; }
 .hint { font-size: 13px; color: var(--dim); margin-top: 12px; }
+/* Die Vorgabe der Grammatikaufgabe: kein Kleingedrucktes, sondern Teil der
+   Frage. «он / она» sagt, welche Form verlangt ist — wer das überliest,
+   beantwortet die falsche Aufgabe. */
+.gram-vorgabe {
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-wrap: wrap; gap: 10px;
+  margin: 14px auto 0; padding: 9px 16px;
+  border: 1px solid var(--line); border-radius: 999px; background: var(--card-2);
+  font-size: 15px; color: var(--dim);
+}
+.gv-trenner { width: 4px; height: 4px; border-radius: 50%; background: var(--line); }
+.gv-verlangt { font-size: 17px; color: var(--gold); font-weight: 600; }
+.gv-verlangt .cyr { font-size: 19px; }
+
+/* Abschluss einer Power-Runde: was aus jedem Wort geworden ist. */
+.pt-liste { display: flex; flex-direction: column; gap: 8px; margin: 18px 0 4px; text-align: left; }
+.pt-zeile {
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 10px 14px; border: 1px solid var(--line); border-radius: 12px;
+  background: var(--card-2);
+}
+.pt-zeile .cyr { font-size: 17px; }
+.pt-de { flex: 1; font-size: 13px; color: var(--dim); }
+.pt-stand { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
+.pt-stand.frei { color: var(--good); }
 
 .speak {
   background: none; border: none; color: var(--ice);
@@ -549,6 +574,7 @@ button.built-word:active { transform: scale(.95); }
 .patzer.hart strong { color: var(--bad); }
 .patzer-worte { display: block; font-size: 16px; margin-top: 4px; }
 .patzer-note { display: block; font-size: 12px; color: var(--dim); margin-top: 5px; }
+.patzer-los { margin-top: 12px; width: 100%; }
 
 .chili { display: block; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .35)); }
 .chili.gross { width: 104px; height: 104px; margin: 0 auto 16px; }
@@ -1932,7 +1958,7 @@ var SATZ_STUFE = 2;
 var STORAGE_KEY = 'russisch_trainer_v1';
 // Stand der ausgelieferten Datei. Wird von tools/build.mjs gesetzt und geht in
 // jedes Ticket ein, damit ein Bericht sagt, welcher Stand gemeint war.
-var APP_STAND = '2026-08-07'; /* == STAND == */
+var APP_STAND = '2026-08-08'; /* == STAND == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -2528,6 +2554,10 @@ function defaultState() {
     // Wie oft ein Wort in «Übersetzen» **hintereinander** falsch geschrieben
     // wurde. Richtig geschrieben löscht den Eintrag — nur eine Serie zählt.
     wortFehler: {},
+    // Wörter, die dreimal hintereinander verschrieben und darum zurückgestuft
+    // wurden. Sie bleiben vermerkt, bis sie wieder sitzen — daraus speist sich
+    // das Power-Training (ADR 0035).
+    patzer: {},
     zuletzt: null,             // { uebung, zeit } — woran zuletzt gearbeitet wurde
     streak: 0,
     bestStreak: 0,
@@ -2551,6 +2581,7 @@ function mergeState(parsed) {
   d.gramBox = nurBausteine(d.gramBox);
   d.gramSeen = nurBausteine(d.gramSeen);
   d.wortFehler = migriereIds(d.wortFehler);
+  d.patzer = migriereIds(d.patzer);
   // «Zuletzt» zeigt auf eine Übung, die es noch gibt — sonst führte die
   // Empfehlung nach einem Umbau ins Leere.
   if (!d.zuletzt || !UEBUNG_NAME[d.zuletzt.uebung] || d.zuletzt.uebung === 'home' ||
@@ -2852,7 +2883,8 @@ var UEBUNGEN = [
   { id: 'tippen', name: 'Tippen', note: 'Selbst schreiben, mit kyrillischer Tastatur.' },
   { id: 'uebersetzen', name: 'Übersetzen', note: 'Ganze Sätze aus Wortkacheln bauen.' },
   { id: 'buchstaben', name: 'Buchstaben', note: 'Das kyrillische Alphabet — freiwillig.' },
-  { id: 'grammatik', name: 'Grammatik', note: 'Warum ein Wort so dasteht — Regeln statt auswendig.' }
+  { id: 'grammatik', name: 'Grammatik', note: 'Warum ein Wort so dasteht — Regeln statt auswendig.' },
+  { id: 'power', name: 'Power-Training', note: 'Die Wörter, die zurückgefallen sind — drei auf einmal.' }
 ];
 var UEBUNG_NAME = { home: 'Übersicht' };
 UEBUNGEN.forEach(function (u) { UEBUNG_NAME[u.id] = u.name; });
@@ -2903,7 +2935,7 @@ function filterSetzen(auf) {
 function filterHatWahl() {
   return currentTab === 'lernsets' || currentTab === 'freestyle' ||
     currentTab === 'tippen' || currentTab === 'uebersetzen' ||
-    currentTab === 'buchstaben';
+    currentTab === 'buchstaben' || currentTab === 'grammatik';
 }
 
 // Weicht etwas vom Regelfall ab? Nur dann ist der Knopf farbig.
@@ -2915,6 +2947,7 @@ function filterAktiv() {
     return trLevel !== 1 || trDir !== 'gemischt' || trModus !== 'lernen';
   }
   if (currentTab === 'buchstaben') return abcRichtung !== 'gemischt';
+  if (currentTab === 'grammatik') return gramWahl !== null;
   return false;
 }
 
@@ -2945,6 +2978,18 @@ function filterInhaltHtml() {
       themen += filterChip('thema', t, t, uebThema === t);
     });
     return filterGruppe('Thema', themen);
+  }
+  if (currentTab === 'grammatik') {
+    // Gemeistertes lässt sich damit jederzeit wiederholen — der Reihe nach
+    // kommt es sonst erst zurück, wenn die Auffrischfrist um ist.
+    var bausteine = filterChip('gramwahl', '', 'Der Reihe nach', gramWahl === null);
+    GRAMMATIK.forEach(function (b) {
+      var stufe = gramBox(b);
+      bausteine += filterChip('gramwahl', b.id,
+        b.name + ' · ' + (gramGemeistert(b) ? 'sitzt' : 'Stufe ' + stufe),
+        gramWahl === b.id);
+    });
+    return filterGruppe('Baustein', bausteine);
   }
   if (currentTab === 'tippen') {
     return filterGruppe('Stapel',
@@ -2997,6 +3042,14 @@ function filterWaehlen(gruppe, wert) {
       tWord = null; tResult = null; tHint = false;
     }
     renderTippen();
+  } else if (gruppe === 'gramwahl') {
+    gramWahl = wert || null;
+    gramBaustein = gramWahl;
+    gramQ = null;
+    gramRegelNeu = false;
+    gramRegelOffen = false;
+    renderGrammatik();
+    renderKopf();
   } else if (gruppe === 'abcrichtung') {
     if (abcRichtung !== wert) {
       abcRichtung = wert;
@@ -3421,6 +3474,16 @@ function uebungsStand(id) {
       warm: sitzen === 0
     };
   }
+  if (id === 'power') {
+    var gefallen = ptPool().length;
+    if (gefallen < PT_MINDEST) {
+      return {
+        text: gefallen ? gefallen + ' von ' + PT_MINDEST + ' Wörtern' : 'nichts gefallen',
+        gesperrt: true
+      };
+    }
+    return { text: gefallen + ' Wörter warten', warm: true };
+  }
   return { text: '' };
 }
 
@@ -3516,6 +3579,7 @@ function render() {
   else if (currentTab === 'tippen') renderTippen();
   else if (currentTab === 'buchstaben') renderBuchstaben();
   else if (currentTab === 'grammatik') renderGrammatik();
+  else if (currentTab === 'power') renderPower();
   else if (currentTab === 'einstellungen') renderEinstellungen();
   else if (currentTab === 'fakten') renderFakten();
   else if (currentTab === 'tickets') renderTickets();
@@ -3676,6 +3740,7 @@ function ansichtenZuruecksetzen() {
   abcRevealed = false;
 
   gramBaustein = null;
+  gramWahl = null;
   gramQ = null;
   gramPhase = 'ask';
   gramPicked = null;
@@ -3683,6 +3748,14 @@ function ansichtenZuruecksetzen() {
   gramEingabe = '';
   gramKb = null;
   gramRegelOffen = false;
+
+  ptSatz = null;
+  ptQ = null;
+  ptPhase = 'ask';
+  ptEingabe = '';
+  ptBuilt = [];
+  ptKb = null;
+  ptCorrect = null;
   gramRegelNeu = false;
   meisterMeldung = null;
 
@@ -4293,6 +4366,7 @@ function patzerPruefen(ok) {
     if ((state.boxes[v.id] || 0) < SATZ_STUFE) return;
     state.boxes[v.id] = SATZ_STUFE - 1;
     state.lastSeen[v.id] = Date.now();
+    state.patzer[v.id] = Date.now();
     zurueck.push(v);
   });
 
@@ -4350,6 +4424,10 @@ function patzerHtml() {
       '<span class="patzer-note">' + esc(p.text) + ' ' + esc(p.note) + '</span>'
       : (woerter ? '<span class="patzer-worte">' + woerter + '</span>' : '') +
         (p.note ? '<span class="patzer-note">' + esc(p.note) + '</span>' : '')) +
+    // Der Augenblick, in dem ein Wort fällt, ist der beste, um es
+    // zurückzuholen — sofern schon genug beisammen ist für eine Runde.
+    (p.art === 'zurueck' && ptOffen()
+      ? '<button class="btn ghost patzer-los" id="ptLos">Power-Training \u2192</button>' : '') +
     '</div>';
 }
 
@@ -4523,6 +4601,10 @@ function renderUebersetzen() {
     if (trKb && trPhase === 'ask') html += tastaturHtml('trkey');
   }
 
+  if (ptOffen()) {
+    html += '<button class="kb-toggle" id="ptLosFuss">Power-Training \u2192 ' +
+      ptPool().length + ' gefallene Wörter</button>';
+  }
   var sitzt = liste.filter(function (x) { return satzBox(x) >= BOX_MAX; }).length;
   html += '<p class="session-info">' + trPool().length +
     (trModus === 'wiederholung' ? ' zum Auffrischen' : ' offen') + ' · ' +
@@ -4611,6 +4693,11 @@ function renderUebersetzen() {
       renderUebersetzen();
     });
   }
+  // Zwei Wege ins Power-Training: gleich nach dem Sturz und dauerhaft unten.
+  ['ptLos', 'ptLosFuss'].forEach(function (id) {
+    var k = document.getElementById(id);
+    if (k) k.addEventListener('click', function () { setTab('power'); });
+  });
 }
 
 // ── BUCHSTABEN ──────────────────────────────────────────────
@@ -5019,7 +5106,10 @@ var gramPicked = null;
 var gramCorrect = null;
 var gramEingabe = '';
 var gramKb = null;
-var gramRegelOffen = false;   // Regelkarte über «Warum?» aufgeklappt
+var gramRegelOffen = false;   // Regelkarte über «Mehr …» aufgeklappt
+// Ausdrücklich gewählter Baustein. Null heißt: der Reihe nach. Damit lässt
+// sich auch Gemeistertes wiederholen, ohne auf die Auffrischfrist zu warten.
+var gramWahl = null;
 var gramRegelNeu = false;     // frisch entdeckt: die Regel steht ganzseitig da
 
 function gramBox(b) { return state.gramBox[b.id] || 0; }
@@ -5052,6 +5142,11 @@ function gramWaehlen() {
 }
 
 function gramAktuell() {
+  if (gramWahl) {
+    var gewaehlt = gramFinde(gramWahl);
+    if (gewaehlt) { gramBaustein = gewaehlt.id; return gewaehlt; }
+    gramWahl = null;
+  }
   var b = gramBaustein ? gramFinde(gramBaustein) : null;
   if (!b) { b = gramWaehlen(); gramBaustein = b ? b.id : null; }
   return b;
@@ -5438,7 +5533,7 @@ function gramUebenHtml(b) {
   if (q.art === 'geschlecht') {
     html += '<p class="task-label">Welches Geschlecht?</p>' +
       '<p class="word cyr">' + esc(q.wort.ru) + hoerknopf(q.wort.ru, 'ru') + '</p>' +
-      '<p class="hint">' + esc(q.wort.de) + '</p><div class="options abc-optionen">';
+      gramVorgabe(q.wort.de, '') + '<div class="options abc-optionen">';
     q.optionen.forEach(function (g) {
       var klasse = 'option';
       if (gramPhase === 'feedback') {
@@ -5456,14 +5551,14 @@ function gramUebenHtml(b) {
         ? 'Wo? — die Form nach <span class="cyr">в</span> und <span class="cyr">на</span>'
         : 'Wen? Was? — die Form dazu') + '</p>' +
         '<p class="word cyr">' + esc(q.wort.ru) + '</p>' +
-        '<p class="hint">' + esc(q.wort.de) + ' · ' +
-        GESCHLECHT_NAME[geschlecht(q.wort.art)] + '</p>';
+        gramVorgabe(q.wort.de, GESCHLECHT_NAME[geschlecht(q.wort.art)]);
     } else {
       html += '<p class="task-label">' +
         (q.art === 'ichform' ? 'Und in der Ich-Form?' : 'Die Form für diese Person') +
         '</p><p class="word cyr">' + esc(q.von) + '</p>' +
-        '<p class="hint">' + esc(q.wort.de) + ' · <strong class="cyr">' +
-        esc(PERSON_NAME[q.person]) + '</strong> — ' + PERSON_DE[q.person] + '</p>';
+        gramVorgabe(q.wort.de,
+          '<span class="cyr">' + esc(PERSON_NAME[q.person]) + '</span> — ' +
+          esc(PERSON_DE[q.person]));
     }
     if (q.tippen) {
       html += '<textarea id="gramInput" rows="1" class="fliess cyr' +
@@ -5501,7 +5596,7 @@ function gramUebenHtml(b) {
 
   html += '</div><div class="btn-row">';
   if (gramPhase === 'ask') {
-    html += '<button class="btn ghost" id="gramWarum">Warum?</button>' +
+    html += '<button class="btn ghost" id="gramWarum">Mehr \u2026</button>' +
       '<button class="btn primary" id="gramConfirm"' + (gramAbgabeBereit() ? '' : ' disabled') +
       '>' + (q.tippen ? 'Prüfen' : 'Bestätigen') + '</button>';
   } else {
@@ -5517,6 +5612,16 @@ function gramUebenHtml(b) {
   html += '<p class="session-info">' + gramPool().length + ' offen · ' +
     gramMeisterschaft() + ' von ' + GRAMMATIK.length + ' Regeln sitzen</p>';
   return html;
+}
+
+// Was die Aufgabe außer dem Wort noch vorgibt — die Bedeutung und, wenn es
+// eine gibt, die verlangte Person oder das Geschlecht. Das stand als graue
+// Nebenbemerkung da und wurde überlesen; jetzt ist es ein eigenes Feld, und
+// der verlangte Teil trägt die Goldfarbe.
+function gramVorgabe(bedeutung, verlangt) {
+  return '<p class="gram-vorgabe"><span class="gv-bedeutung">' + esc(bedeutung) + '</span>' +
+    (verlangt ? '<span class="gv-trenner" aria-hidden="true"></span>' +
+      '<strong class="gv-verlangt">' + verlangt + '</strong>' : '') + '</p>';
 }
 
 // Die Begründung *zu dieser Antwort* — nicht die Regel im Allgemeinen. Sie
@@ -5632,7 +5737,10 @@ function renderGrammatik() {
     main.innerHTML = '<section><div class="leer">' + maskottchen('gross') +
       '<h3>Alle Regeln sitzen</h3><p>Alle ' + GRAMMATIK.length +
       ' Bausteine sind ' + BOX_MAX + '× richtig angewandt. ' + ruhend +
-      ' ruhen bis zur nächsten Auffrischung.</p></div></section>';
+      ' ruhen bis zur nächsten Auffrischung.</p>' +
+      '<p class="naechste">Wiederholen können Sie trotzdem jederzeit: ' +
+      'Über die Auswahl oben lässt sich jeder Baustein einzeln vornehmen.</p>' +
+      '</div></section>';
     return;
   }
 
@@ -5716,6 +5824,324 @@ function renderGrammatik() {
     gramFrageBauen();
     renderGrammatik();
   });
+}
+
+// ── POWER-TRAINING ──────────────────────────────────────────
+// Wer ein Wort dreimal hintereinander verschreibt, verliert es (ADR 0033) —
+// und findet es danach irgendwann im großen Stapel wieder. Das ist richtig,
+// aber langsam. Hier kommen genau diese Wörter noch einmal geballt: **drei
+// Stück, jedes fünfmal**, mit steigender Schwierigkeit.
+//
+// Warum drei und nicht alle: Ein Stapel aus zwölf gefallenen Wörtern ist
+// dasselbe wie der große Stapel, nur kürzer. Drei Wörter fünfmal hintereinander
+// sind eine Einheit, die man zu Ende bringt — und genau darum wirkt sie.
+var PT_MINDEST = 3;      // ab so vielen gefallenen Wörtern öffnet die Übung
+var PT_WOERTER = 3;      // so viele kommen in eine Runde
+var PT_RUNDEN = 5;       // so oft muss jedes richtig sein
+
+// Ansichtszustand — gehört nach ADR 0017 in ansichtenZuruecksetzen().
+var ptSatz = null;       // die laufende Runde: [{ v, treffer }]
+var ptQ = null;          // die laufende Frage
+var ptPhase = 'ask';     // 'ask' · 'feedback' · 'fertig'
+var ptEingabe = '';
+var ptBuilt = [];
+var ptKb = null;
+
+// Der Vorrat: gefallene Wörter, die noch unter der Satzschwelle stehen. Wer
+// wieder oben ist, hat es geschafft und fliegt aus der Liste — das Aufräumen
+// geschieht hier, damit es nicht an einer Schreibstelle vergessen wird.
+function ptPool() {
+  var aus = [];
+  Object.keys(state.patzer).forEach(function (id) {
+    var v = VOKABEL[id];
+    if (!v) { delete state.patzer[id]; return; }
+    if ((state.boxes[id] || 0) >= SATZ_STUFE) { delete state.patzer[id]; return; }
+    aus.push(v);
+  });
+  // Das zuletzt Gefallene zuerst: Es sitzt am wenigsten.
+  aus.sort(function (a, b) { return (state.patzer[b.id] || 0) - (state.patzer[a.id] || 0); });
+  return aus;
+}
+
+function ptOffen() {
+  return ptPool().length >= PT_MINDEST;
+}
+
+// Eine Runde aufsetzen: die drei zuletzt gefallenen Wörter, jedes mit einem
+// eigenen Zähler.
+function ptRundeStarten() {
+  ptSatz = ptPool().slice(0, PT_WOERTER).map(function (v) {
+    return { v: v, treffer: 0 };
+  });
+  ptPhase = 'ask';
+  ptQ = null;
+  ptFrageBauen();
+}
+
+// Welches Wort ist dran? Das mit den wenigsten Treffern, aber nie zweimal
+// hintereinander dasselbe, solange es eine Alternative gibt.
+function ptNaechstes() {
+  var offen = ptSatz.filter(function (e) { return e.treffer < PT_RUNDEN; });
+  if (!offen.length) return null;
+  var wenigste = offen.slice().sort(function (a, b) { return a.treffer - b.treffer; });
+  if (ptQ && wenigste.length > 1 && wenigste[0].v.id === ptQ.wort.id) {
+    return wenigste[1];
+  }
+  return wenigste[0];
+}
+
+// Die Schwierigkeit steigt mit dem Zähler — dieselbe Leiter wie überall, nur
+// im Zeitraffer: erst zusammensetzen, dann schreiben mit Umschrift, dann ohne.
+function ptStufe(treffer) {
+  if (treffer < 2) return 'kacheln';
+  if (treffer < 4) return 'tippen-hilfe';
+  return 'tippen';
+}
+
+function ptFrageBauen() {
+  var eintrag = ptNaechstes();
+  ptPhase = 'ask';
+  ptEingabe = '';
+  ptBuilt = [];
+  meisterMeldung = null;
+  if (!eintrag) { ptQ = null; ptPhase = 'fertig'; return; }
+  var stufe = ptStufe(eintrag.treffer);
+  var q = { wort: eintrag.v, eintrag: eintrag, stufe: stufe };
+  if (stufe === 'kacheln') {
+    // Die Buchstaben des Wortes, gemischt — plus ein paar fremde, damit es
+    // kein Abzählen wird.
+    var zeichen = eintrag.v.ru.split('');
+    var stoerer = ptStoerer(eintrag.v.ru, Math.min(3, Math.max(1, 8 - zeichen.length)));
+    q.tiles = shuffle(zeichen.concat(stoerer)).map(function (ch, i) {
+      return { key: i, ch: ch };
+    });
+    q.laenge = zeichen.length;
+  }
+  ptQ = q;
+}
+
+// Fremde Buchstaben aus dem Alphabet, die im Wort nicht vorkommen.
+function ptStoerer(wort, wieviele) {
+  var drin = {};
+  wort.split('').forEach(function (c) { drin[c] = true; });
+  var frei = ALPHABET.map(function (b) { return b[1]; }).filter(function (c) { return !drin[c]; });
+  return shuffle(frei).slice(0, wieviele);
+}
+
+function ptAbgabeBereit() {
+  if (!ptQ) return false;
+  if (ptQ.stufe === 'kacheln') return ptBuilt.length === ptQ.laenge;
+  return normalize(ptEingabe) !== '';
+}
+
+function ptPruefen() {
+  var q = ptQ;
+  var versuch = q.stufe === 'kacheln'
+    ? ptBuilt.map(function (k) {
+      return q.tiles.filter(function (t) { return t.key === k; })[0].ch;
+    }).join('')
+    : ptEingabe;
+  var richtig = normalize(versuch) === normalize(q.wort.ru);
+  ptCorrect = richtig;
+  // Gewertet wird auch hier im Leitner-System: Wer das Wort hier zurückholt,
+  // holt es wirklich zurück — sonst wäre das Power-Training ein Spielplatz
+  // ohne Folgen.
+  var vorher = state.boxes[q.wort.id] || 0;
+  updateBox(q.wort.id, richtig);
+  meisterMeldung = null;
+  meisterPruefen(vorher, state.boxes[q.wort.id], 'Wort', q.wort.ru + ' — ' + q.wort.de,
+    woerterGemeistert() + ' von ' + ALL_VOCAB.length + ' Wörtern');
+  meisterTon(richtig);
+  if (richtig) q.eintrag.treffer++;
+  else q.eintrag.treffer = Math.max(0, q.eintrag.treffer - 1);
+  zuletztGeuebt('power');
+  save();
+  ptPhase = 'feedback';
+  renderPower();
+}
+
+var ptCorrect = null;
+
+function ptKopfHtml() {
+  var html = '<p class="task-label">Power-Training</p><div class="paket">' +
+    '<div class="paket-punkte" aria-hidden="true">';
+  ptSatz.forEach(function (e) {
+    for (var i = 0; i < PT_RUNDEN; i++) {
+      html += '<span class="pp' + (i < e.treffer ? ' s4' : ' s0') + '"></span>';
+    }
+  });
+  var gesamt = ptSatz.reduce(function (n, e) { return n + e.treffer; }, 0);
+  html += '</div><p class="paket-text">' + gesamt + ' von ' +
+    (ptSatz.length * PT_RUNDEN) + ' · ' + ptSatz.length +
+    (ptSatz.length === 1 ? ' Wort zurückholen' : ' Wörter zurückholen') + '</p></div>';
+  return html;
+}
+
+function renderPower() {
+  if (!ptOffen() && !ptSatz) { renderPowerLeer(); return; }
+  if (!ptSatz) ptRundeStarten();
+  if (ptPhase === 'fertig') { renderPowerFertig(); return; }
+  if (!ptQ) ptFrageBauen();
+  if (!ptQ) { renderPowerFertig(); return; }
+
+  var q = ptQ;
+  var html = '<section>' + ptKopfHtml() + '<div class="card">' +
+    '<div class="card-meta"><span class="card-theme">' + esc(q.wort.theme) + '</span>' +
+    '<span class="card-theme">' + (q.eintrag.treffer + 1) + ' von ' + PT_RUNDEN + '</span></div>' +
+    '<p class="task-label">' + (q.stufe === 'kacheln'
+      ? 'Setzen Sie das Wort zusammen'
+      : 'Schreiben Sie es auf Russisch') + '</p>' +
+    '<p class="word">' + esc(q.wort.de) + hoerknopf(q.wort.de, 'de') + '</p>';
+
+  if (q.stufe === 'tippen-hilfe' && ptPhase === 'ask') {
+    html += '<p class="translit">[' + esc(q.wort.tr) + ']</p>';
+  }
+
+  if (q.stufe === 'kacheln') {
+    html += '<div class="slots">';
+    for (var i = 0; i < q.laenge; i++) {
+      var gefuellt = i < ptBuilt.length;
+      var ch = gefuellt ? q.tiles.filter(function (t) { return t.key === ptBuilt[i]; })[0].ch : '';
+      html += '<span class="slot' + (gefuellt ? ' filled' : '') + '">' + esc(ch) + '</span>';
+    }
+    html += '</div>';
+    if (ptPhase === 'ask') {
+      html += '<div class="tiles">';
+      q.tiles.forEach(function (t) {
+        var benutzt = ptBuilt.indexOf(t.key) !== -1;
+        html += '<button class="tile cyr' + (benutzt ? ' used' : '') + '" data-pttile="' + t.key + '"' +
+          (benutzt ? ' disabled' : '') + '>' + esc(t.ch) + '</button>';
+      });
+      html += '<button class="tile fn" id="ptUndo" aria-label="Letztes Zeichen entfernen">' +
+        ICON.ruecktaste + '</button></div>';
+    }
+  } else {
+    html += '<textarea id="ptInput" rows="1" class="fliess cyr' +
+      (ptPhase === 'feedback' ? (ptCorrect ? ' ok' : ' err') : '') + '"' +
+      ' lang="ru" autocapitalize="off" autocorrect="off" spellcheck="false"' +
+      (ptPhase === 'feedback' ? ' readonly' : '') +
+      ' placeholder="кириллица …">' + esc(ptEingabe) + '</textarea>';
+  }
+
+  if (ptPhase === 'feedback') {
+    html += '<div class="feedback ' + (ptCorrect ? 'good' : 'bad') + '"><p>' +
+      (ptCorrect ? ICON.haken + 'Правильно — richtig!'
+        : ICON.kreuz + 'Richtig wäre <strong class="cyr">' + esc(q.wort.ru) + '</strong>') +
+      '</p></div>' + hoerzeile(q.wort.ru, q.wort.de) + meisterHtml();
+  }
+
+  html += '</div><div class="btn-row">';
+  if (ptPhase === 'ask') {
+    html += '<button class="btn primary" id="ptConfirm"' + (ptAbgabeBereit() ? '' : ' disabled') +
+      '>Prüfen</button>';
+  } else {
+    html += '<button class="btn primary" id="ptNext">Weiter →</button>';
+  }
+  html += '</div>';
+
+  if (q.stufe !== 'kacheln' && ptPhase === 'ask') {
+    if (ptKb === null) ptKb = state.settings.tastaturAn;
+    html += '<button class="kb-toggle" id="ptKbToggle">' +
+      (ptKb ? 'Tastatur ausblenden' : 'Tastatur einblenden') + '</button>';
+    if (ptKb) html += tastaturHtml('ptkey');
+  }
+  html += '<p class="session-info">' + ptPool().length + ' gefallene Wörter insgesamt</p></section>';
+  main.innerHTML = html;
+  ptBinden();
+}
+
+function ptBinden() {
+  main.querySelectorAll('[data-pttile]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      if (ptPhase !== 'ask') return;
+      var key = parseInt(b.dataset.pttile, 10);
+      if (ptBuilt.indexOf(key) !== -1 || ptBuilt.length >= ptQ.laenge) return;
+      ptBuilt.push(key);
+      if (ptBuilt.length === ptQ.laenge) ptPruefen();
+      else renderPower();
+    });
+  });
+  var undo = document.getElementById('ptUndo');
+  if (undo) undo.addEventListener('click', function () { ptBuilt.pop(); renderPower(); });
+
+  var feld = document.getElementById('ptInput');
+  if (feld) {
+    feld.addEventListener('input', function () {
+      ptEingabe = feld.value;
+      var knopf = document.getElementById('ptConfirm');
+      if (knopf) knopf.disabled = !ptAbgabeBereit();
+    });
+  }
+  main.querySelectorAll('[data-ptkey]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var k = b.dataset.ptkey;
+      ptEingabe = k === 'BS' ? ptEingabe.slice(0, -1) : ptEingabe + k;
+      var f = document.getElementById('ptInput');
+      if (f) f.value = ptEingabe;
+      var knopf = document.getElementById('ptConfirm');
+      if (knopf) knopf.disabled = !ptAbgabeBereit();
+    });
+  });
+  var kbToggle = document.getElementById('ptKbToggle');
+  if (kbToggle) kbToggle.addEventListener('click', function () { ptKb = !ptKb; renderPower(); });
+
+  var confirm = document.getElementById('ptConfirm');
+  if (confirm) confirm.addEventListener('click', function () {
+    if (ptAbgabeBereit()) ptPruefen();
+  });
+  var next = document.getElementById('ptNext');
+  if (next) next.addEventListener('click', function () { ptFrageBauen(); renderPower(); });
+  var neu = document.getElementById('ptNeu');
+  if (neu) neu.addEventListener('click', function () { ptSatz = null; renderPower(); });
+  var heim = document.getElementById('ptHeim');
+  if (heim) heim.addEventListener('click', function () { setTab('home'); });
+}
+
+// Zwei Leerzustände, die sich sehr verschieden anfühlen: noch nichts gefallen
+// (schön) und zu wenig für eine Runde (bald).
+function renderPowerLeer() {
+  var da = ptPool().length;
+  main.innerHTML = '<section><div class="leer">' + maskottchen('gross') +
+    (da === 0
+      ? '<h3>Nichts gefallen</h3><p>Hier sammeln sich die Wörter, die Sie in ' +
+        '«Übersetzen» dreimal hintereinander verschrieben haben. Bisher ist ' +
+        'keines dabei — das ist die beste Nachricht, die diese Seite zu bieten hat.</p>'
+      : '<h3>Noch zu wenige</h3><p>' + da + ' von ' + PT_MINDEST +
+        ' Wörtern sind gefallen. Ab ' + PT_MINDEST + ' lohnt sich eine Runde; ' +
+        'für weniger genügt der gewöhnliche Weg über «Lernsets».</p>') +
+    '<div class="btn-row"><button class="btn primary" id="ptHeim">Zur Übersicht</button></div>' +
+    '</div></section>';
+  ptBinden();
+}
+
+function renderPowerFertig() {
+  var geschafft = ptSatz || [];
+  var raus = geschafft.filter(function (e) {
+    return (state.boxes[e.v.id] || 0) >= SATZ_STUFE;
+  });
+  var html = '<section><div class="leer">' + maskottchen('gross') +
+    '<h3>Runde geschafft</h3>' +
+    '<p>' + geschafft.length + (geschafft.length === 1 ? ' Wort' : ' Wörter') +
+    ' je ' + PT_RUNDEN + '× richtig geschrieben.</p>' +
+    '<div class="pt-liste">';
+  geschafft.forEach(function (e) {
+    var frei = (state.boxes[e.v.id] || 0) >= SATZ_STUFE;
+    html += '<div class="pt-zeile"><span class="cyr">' + esc(e.v.ru) + '</span>' +
+      '<span class="pt-de">' + esc(e.v.de) + '</span>' +
+      '<span class="pt-stand' + (frei ? ' frei' : '') + '">' +
+      (frei ? 'wieder frei' : 'Stufe ' + (state.boxes[e.v.id] || 0)) + '</span></div>';
+  });
+  html += '</div>';
+  if (raus.length) {
+    html += '<p class="naechste">' + raus.length +
+      (raus.length === 1 ? ' Wort steht' : ' Wörter stehen') +
+      ' wieder auf Satzstufe — die zugehörigen Sätze sind damit offen.</p>';
+  }
+  html += '<div class="btn-row">';
+  if (ptOffen()) html += '<button class="btn ghost" id="ptNeu">Noch eine Runde</button>';
+  html += '<button class="btn primary" id="ptHeim">Zur Übersicht</button></div></div></section>';
+  main.innerHTML = html;
+  ptBinden();
 }
 
 // ── TIPPEN ──────────────────────────────────────────────────

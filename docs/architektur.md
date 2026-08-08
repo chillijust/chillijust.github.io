@@ -128,8 +128,8 @@ und wächst über `blaseAuf` (0,6 s) herein, statt aufzuploppen. Unter
 
 ## Navigation: Home, Kopf, Menü
 
-Die App hat sechs **Übungen** (Lernsets, Freestyle, Tippen, Übersetzen, Buchstaben,
-Grammatik) und
+Die App hat sieben **Übungen** (Lernsets, Freestyle, Tippen, Übersetzen, Buchstaben,
+Grammatik, Power-Training) und
 vier Ansichten, die keine sind: Bilanz, Sicherung, Einstellungen, Tickets. Der Begriff
 «Rubrik» ist hinfällig; im Nutzertext wie im Code heißt es **Übung**.
 
@@ -410,6 +410,39 @@ Abgabeknopf wird nachgeführt.
 Beim Schreiben gibt es die Abgabe **immer**, unabhängig von der Einstellung
 «Bestätigen»: Anders als bei den Kacheln gibt es keinen Augenblick, an dem die Antwort
 erkennbar fertig ist.
+
+## Power-Training — die Gefallenen zurückholen
+
+Eine Strafe ohne Weg zurück ist bloß eine Strafe (ADR 0034). Wer ein Wort dreimal
+verschrieben hat, sieht es zwar in den Lernsets wieder — aber verstreut zwischen zwanzig
+anderen, in Wochen. Das Power-Training ist der kurze Weg: **nur die gefallenen Wörter,
+drei auf einmal, bis sie sitzen.**
+
+`state.patzer` (Wort → Zeitstempel) merkt sich, wen `patzerPruefen()` zurückgestuft hat.
+Der Topf steht **bewusst nicht im Sicherungscode** — er ist eine Momentaufnahme, kein
+Lernstand, und der Code soll schlank bleiben.
+
+| | |
+| --- | --- |
+| **`ptPool()`** | räumt beim Nachsehen auf: Wer inzwischen wieder auf `SATZ_STUFE` steht, fällt aus dem Topf. Sortiert **zuletzt gefallen zuerst** — das frischeste Ärgernis ist das dringendste. |
+| **`ptOffen()`** | ab `PT_MINDEST` (3) offen. Für zwei Wörter lohnt keine eigene Übung. |
+| **`ptRundeStarten()`** | nimmt `PT_WOERTER` (3) aus dem Topf. Mehr wäre wieder eine Liste, nicht ein Training. |
+| **`ptNaechstes()`** | wählt das Wort mit den **wenigsten Treffern**, nie zweimal dasselbe hintereinander — sonst tippt man es ab, statt es zu wissen. |
+| **`ptStufe(treffer)`** | 0–1 Kacheln · 2–3 Tippen mit Umschrift · ab 4 Tippen blank. Dieselbe Leiter wie überall, nur auf fünf Runden zusammengezogen (`PT_RUNDEN`). |
+| **`ptPruefen()`** | zählt den Treffer hoch, bei Fehler herunter (nie unter 0), und führt dabei `updateBox()` und `meisterPruefen()` regulär mit — **was hier gelernt wird, zählt auch draußen.** |
+
+Wer alle drei Wörter durch `PT_RUNDEN` Treffer bringt, sieht `renderPowerFertig()`: eine
+Zeile je Wort mit seinem neuen Stand, «wieder frei» in Grün für die, die den Topf
+verlassen haben. Das ist der Punkt der Übung — nicht ein Punktestand, sondern ein
+sichtbar geräumter Rückstand.
+
+Zwei Leerzustände, und sie sagen Verschiedenes: **nichts gefallen** ist ein Lob, **zu
+wenige gefallen** ist eine Auskunft («noch 2 fehlen»). Beide dürfen nicht wie ein Fehler
+klingen.
+
+Der Einstieg steht an drei Stellen: die Kachel auf Home, `#ptLos` in der Patzer-Meldung
+(direkt nach der Rückstufung, wo der Ärger frisch ist) und `#ptLosFuss` unter
+«Übersetzen» — dort, wo die Wörter gefallen sind.
 
 ## Fertig heißt raus — und einmal zurück
 
@@ -780,9 +813,24 @@ Belebtheit steht obendrauf.
    Vier gleiche Fälle zeigen kein Muster, sondern vier Mal dasselbe. Und ohne das
    Gegenbeispiel sähe es aus, als wandle sich immer etwas.
 2. **Die Regelkarte.** Ein Satz, eine Tabelle, ein Merksatz, eine Fußnote für die
-   Ausnahmen. Später jederzeit über «Warum?» wieder da.
+   Ausnahmen. Später jederzeit über **«Mehr …»** wieder da — nicht über «Warum?». Der
+   Knopf holt die ganze Karte zurück, nicht bloß eine Begründung; «Warum?» versprach
+   weniger, als er liefert.
 3. **Anwenden**, gestaffelt wie überall: bis Stufe 1 die Form aus vier wählen, ab
    `SATZ_STUFE` selbst tippen (kyrillische Tastatur einblendbar).
+
+**Die Vorgabe steht in eigener Zeile** (`gramVorgabe()`, `.gram-vorgabe`): links die
+Bedeutung, rechts nach einem Trenner in Gold, was verlangt ist — «hören · **я — ich**».
+Vorher lief beides als ein Fließtext unter der Aufgabe mit und wurde überlesen; wer die
+Person übersieht, beugt das richtige Verb in die falsche Form und hält die Regel für
+schuld.
+
+**Ein Baustein lässt sich gezielt wählen.** Die Auswahl (runder Knopf, `filterInhaltHtml()`)
+führt in «Grammatik» die Gruppe **Baustein**: ein Chip je Regel mit ihrem Stand, dazu «Der
+Reihe nach» als Vorgabe (`gramWahl === null`). Das ist der Weg zur **Wiederholung
+gemeisterter Regeln** — ohne ihn schiebt `gramAktuell()` immer die dringendste vor, und
+eine gemeisterte Regel kommt erst wieder, wenn sie fällig ist. Verschwindet die gewählte
+Regel (Sicherung eingespielt), fällt `gramWahl` still auf `null` zurück.
 
 Die Wörter kommen aus dem **begonnenen** Wortschatz — die Regel soll auf ein Wort wirken,
 das man kennt, sonst prüft die Aufgabe zwei Dinge auf einmal. Ist noch nichts begonnen,
@@ -982,7 +1030,12 @@ Ein einziges Objekt `state` hält den gesamten Lernstand:
 | `answered` | Gesamtzahl beantworteter Fragen |
 | `factIdx` | Zähler der gezeigten Fakten |
 | `fakten` | je Sprachfakt `{ n: wie oft gezeigt, f: Favorit }`, unter einer kurzen Kennung |
+| `wortFehler` | Serie falscher Schreibungen je Wort — bei `WORT_STRAFE` fällt das Wort zurück |
+| `patzer` | zurückgestufte Wörter mit dem Zeitpunkt ihres Falls — der Topf des Power-Trainings |
 | `settings` | Einstellungen des Nutzers, siehe unten |
+
+`wortFehler` und `patzer` stehen bewusst **nicht** im Sicherungscode: Beides sind
+Momentaufnahmen, kein Lernstand.
 
 Daneben existieren pro Übung einige Modulvariablen (`uebQ`, `uebPhase`, `trTask`,
 `tWord` …). Sie beschreiben die aktuelle Frage und sind bewusst **nicht** Teil von
