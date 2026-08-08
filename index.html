@@ -36,31 +36,24 @@
   --lip: rgba(255, 255, 255, .035);
   --shade: rgba(0, 0, 0, .28);
 }
-/* Helle Palette: greift automatisch nach der Systemvorgabe — oder ausdrücklich
-   über data-theme, wenn in den Einstellungen gewählt. */
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme]) {
-    --bg: #F4F2ED;
-    --card: #FFFFFF;
-    --card-2: #EDEAE2;
-    --line: #D8D4C9;
-    --text: #23272E;
-    --dim: #6E7683;
-    --ice: #2F5FA8;
-    --gold: #A87B2A;
-    --gold-ink: #FFFFFF;
-    --good: #2E7D5B;
-    --bad: #B4443C;
-    --glow: #FFFFFF;
-    --lip: rgba(255, 255, 255, .6);
-    --shade: rgba(35, 39, 46, .07);
-  }
-}
-:root[data-theme="hell"] {
-  --bg: #F4F2ED;
-  --card: #FFFFFF;
-  --card-2: #EDEAE2;
-  --line: #D8D4C9;
+/* Ein Farbschema ist eine Palette, nicht zwei Achsen. «Dark» ist das :root
+   darüber — es trägt kein Attribut, wie zuvor die Vorgabe keines trug. Die vier
+   hellen Schemata setzen `data-schema`.
+
+   Warum nur eine Achse: «cremig» und «pastellig» sind helle Begriffe. Ein Ton
+   in einer dunklen Fassung wäre keiner mehr, und die Frage «hell oder dunkel?»
+   mit der Frage «welche Farbe?» zu kreuzen ergab acht Paletten, von denen die
+   Hälfte niemand wollte (ADR 0039).
+
+   `prefers-color-scheme` wertet die App darum nicht mehr aus: Es gibt keine
+   Achse mehr, auf der das System etwas beitragen könnte. */
+
+/* Die hellen Schemata teilen sich alles außer den Flächen. Schrift, Gold und
+   die Signalfarben stehen darum einmal — die Regel aus ADR 0038 gilt weiter. */
+:root[data-schema="classic"],
+:root[data-schema="gruen"],
+:root[data-schema="blau"],
+:root[data-schema="rosa"] {
   --text: #23272E;
   --dim: #6E7683;
   --ice: #2F5FA8;
@@ -68,92 +61,42 @@
   --gold-ink: #FFFFFF;
   --good: #2E7D5B;
   --bad: #B4443C;
-  --glow: #FFFFFF;
-  --lip: rgba(255, 255, 255, .6);
-  --shade: rgba(35, 39, 46, .07);
+  --lip: rgba(255, 255, 255, .7);
+  /* Etwas kräftiger als im dunklen Schema: Die Kachel soll sich abheben, und
+     dazu trägt der Schatten bei, nicht nur die Helligkeit. */
+  --shade: rgba(35, 39, 46, .10);
 }
 
-/* Farbtöne: eine zweite Achse neben hell und dunkel. Sie tönen **nur die
-   Flächen** — Text, Gold und die Signalfarben bleiben, sonst zerfiele die
-   Sprache der Oberfläche und «richtig» hieße auf Rosa etwas anderes als auf
-   Grün. Die Helligkeit jeder Fläche ist aus dem neutralen Grundton übernommen,
-   nur Farbton und Sättigung wandern; der Kontrast zum Text bleibt damit überall
-   derselbe (tools/palette.py rechnet sie aus).
-
-   Der Aufbau spiegelt den der Grundpalette: erst der dunkle Ton, dann der
-   helle über die Systemvorgabe, dann der helle über die ausdrückliche Wahl.
-   Die Regel mit beiden Attributen sticht beide Einzelregeln — darauf beruht
-   das Zusammenspiel der zwei Achsen. */
-
-:root[data-farbe="gruen"] {
-  --bg: #101814;
-  --card: #17231D;
-  --card-2: #1C2D25;
-  --line: #253A30;
-  --glow: #1D2E26;
+/* Die Flächen. Gerechnet von tools/palette.py: eine Staffelung der Helligkeit
+   für alle Schemata, nur Farbton und Sättigung wandern. Der Abstand zwischen
+   Grund und Kachel ist bewusst reichlich — die Kachel ist eine eigene Fläche,
+   kein heller Hauch auf dem Grund. */
+:root[data-schema="classic"] {
+  --bg: #EEEAE3;
+  --card: #FCFCFB;
+  --card-2: #E4DFD3;
+  --line: #D3CCBB;
+  --glow: #FCFCFB;
 }
-@media (prefers-color-scheme: light) {
-  :root[data-farbe="gruen"]:not([data-theme]) {
-    --bg: #EDF4F1;
-    --card: #FAFCFB;
-    --card-2: #E1EEE8;
-    --line: #C4DDD1;
-    --glow: #FAFCFB;
-  }
+:root[data-schema="gruen"] {
+  --bg: #E1EFE8;
+  --card: #FBFCFB;
+  --card-2: #D0E7DB;
+  --line: #B7D7C7;
+  --glow: #FBFCFB;
 }
-:root[data-theme="hell"][data-farbe="gruen"] {
-  --bg: #EDF4F1;
-  --card: #FAFCFB;
-  --card-2: #E1EEE8;
-  --line: #C4DDD1;
-  --glow: #FAFCFB;
-}
-
-:root[data-farbe="blau"] {
-  --bg: #0B131D;
-  --card: #101C2A;
-  --card-2: #142335;
-  --line: #1A2E45;
-  --glow: #142437;
-}
-@media (prefers-color-scheme: light) {
-  :root[data-farbe="blau"]:not([data-theme]) {
-    --bg: #ECF0F5;
-    --card: #FAFBFC;
-    --card-2: #E0E7EF;
-    --line: #C1CFE0;
-    --glow: #FAFBFC;
-  }
-}
-:root[data-theme="hell"][data-farbe="blau"] {
-  --bg: #ECF0F5;
+:root[data-schema="blau"] {
+  --bg: #DFE9F1;
   --card: #FAFBFC;
-  --card-2: #E0E7EF;
-  --line: #C1CFE0;
+  --card-2: #CEDCE9;
+  --line: #B4C8DA;
   --glow: #FAFBFC;
 }
-
-:root[data-farbe="rosa"] {
-  --bg: #1A0E12;
-  --card: #26141A;
-  --card-2: #2F1A20;
-  --line: #3E212A;
-  --glow: #311A21;
-}
-@media (prefers-color-scheme: light) {
-  :root[data-farbe="rosa"]:not([data-theme]) {
-    --bg: #F5ECEF;
-    --card: #FCFAFB;
-    --card-2: #EFE0E4;
-    --line: #DFC2CB;
-    --glow: #FCFAFB;
-  }
-}
-:root[data-theme="hell"][data-farbe="rosa"] {
-  --bg: #F5ECEF;
+:root[data-schema="rosa"] {
+  --bg: #F1DFE4;
   --card: #FCFAFB;
-  --card-2: #EFE0E4;
-  --line: #DFC2CB;
+  --card-2: #E9CED5;
+  --line: #DAB4BE;
   --glow: #FCFAFB;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -919,6 +862,12 @@ input.err, textarea.err { border-color: var(--bad); }
 }
 .seg { flex: none; display: flex; gap: 4px; }
 .seg .chip { min-width: 44px; padding: 10px 0; text-align: center; }
+/* Ab vier Knöpfen bliebe für den Hinweis eine Schlucht von wenigen Wörtern
+   Breite. Dann rückt die Wahl unter den Text und nimmt die ganze Zeile. */
+.setting.breit { flex-wrap: wrap; }
+.setting.breit .setting-text { flex: 1 0 100%; }
+.setting.breit .seg { flex: 1 0 100%; gap: 6px; }
+.setting.breit .seg .chip { flex: 1; padding: 10px 4px; }
 
 .session-info { text-align: center; font-size: 12px; color: var(--dim); margin-top: 16px; }
 
@@ -2857,8 +2806,10 @@ function defaultSettings() {
     // selbst — dafür ist sie da. Neuer Schlüssel, weil die alte Vorgabe «aus»
     // war und die neue auch bestehende Geräte erreichen soll.
     tastaturAuto: true,
-    darstellung: 'system',     // 'system' · 'dunkel' · 'hell'
-    farbe: 'nacht',            // Farbton der Flächen — zweite Achse neben hell/dunkel
+    // Ein Schema, nicht zwei Achsen: «Dark» ist die Vorgabe, «Classic» das
+    // helle Cremeweiß, die drei Farben sind Cremetöne (ADR 0039). Neuer
+    // Schlüssel, damit bestehende Geräte die Umstellung mitbekommen.
+    schema: 'dark',
     ton: true                  // kurzer Klang bei richtig und falsch
   };
 }
@@ -2939,8 +2890,12 @@ function mergeState(parsed) {
     var stufe = d.settings.tippenStufe;
     if (!(stufe >= 1 && stufe <= BOX_MAX)) d.settings.tippenStufe = 3;
     if ([7, 14, 21, 30].indexOf(d.settings.auffrischen) === -1) d.settings.auffrischen = 21;
-    if (['system', 'dunkel', 'hell'].indexOf(d.settings.darstellung) === -1) d.settings.darstellung = 'system';
-    if (farbTon(d.settings.farbe).wert !== d.settings.farbe) d.settings.farbe = 'nacht';
+    // Gefragt ist der gespeicherte Wert, nicht der verschmolzene: Ein Stand von
+    // vor ADR 0039 führt gar kein Schema, und die Vorgabe «dark» wäre gültig —
+    // die Übersetzung der beiden alten Achsen käme nie zum Zug.
+    if (schemaVon(parsed.settings.schema).wert !== parsed.settings.schema) {
+      d.settings.schema = schemaAusAchsen(parsed.settings.darstellung, parsed.settings.farbe);
+    }
   }
   return d;
 }
@@ -3041,40 +2996,49 @@ function zeigeStatus(art, text) {
   }
 }
 
-// Die Farbtöne. Die Flächenwerte stehen im Stylesheet; hier steht nur der
-// Grundton je Stimmung, weil die Statusleiste ihn als Zahl braucht — eine
-// Medienabfrage hat das `theme-color`-Meta nicht.
-var FARBTOENE = [
-  { wert: 'nacht', text: 'Nacht', dunkel: '#101418', hell: '#F4F2ED' },
-  { wert: 'gruen', text: 'Grün', dunkel: '#101814', hell: '#EDF4F1' },
-  { wert: 'blau', text: 'Blau', dunkel: '#0B131D', hell: '#ECF0F5' },
-  { wert: 'rosa', text: 'Rosa', dunkel: '#1A0E12', hell: '#F5ECEF' }
+// Die Farbschemata. Eine Liste, keine zwei Achsen: «Dark» ist eines davon, und
+// die drei Farben sind Cremetöne — die gibt es nur hell (ADR 0039). Die
+// Flächenwerte stehen im Stylesheet; hier steht je Schema nur der Grund, weil
+// die Statusleiste ihn als Zahl braucht und keine Medienabfrage kennt.
+var SCHEMATA = [
+  { wert: 'dark', text: 'Dark', grund: '#101418' },
+  { wert: 'classic', text: 'Classic', grund: '#EEEAE3' },
+  { wert: 'gruen', text: 'Grün', grund: '#E1EFE8' },
+  { wert: 'blau', text: 'Blau', grund: '#DFE9F1' },
+  { wert: 'rosa', text: 'Rosa', grund: '#F1DFE4' }
 ];
 
-function farbTon(wert) {
-  for (var i = 0; i < FARBTOENE.length; i++) {
-    if (FARBTOENE[i].wert === wert) return FARBTOENE[i];
+function schemaVon(wert) {
+  for (var i = 0; i < SCHEMATA.length; i++) {
+    if (SCHEMATA[i].wert === wert) return SCHEMATA[i];
   }
-  return FARBTOENE[0];
+  return SCHEMATA[0];
 }
 
-// Dunkel oder hell: «system» folgt der Vorgabe des Geräts, sonst gilt die Wahl.
-// Der Farbton ist davon unabhängig — beide Achsen greifen zugleich.
-function updateDarstellung() {
-  var wahl = state.settings.darstellung;
-  var wurzel = document.documentElement;
-  if (wahl === 'system') wurzel.removeAttribute('data-theme');
-  else wurzel.setAttribute('data-theme', wahl);
-  // «Nacht» ist der Grundton — er trägt kein Attribut, wie «system» keines trägt.
-  var ton = farbTon(state.settings.farbe);
-  if (ton.wert === 'nacht') wurzel.removeAttribute('data-farbe');
-  else wurzel.setAttribute('data-farbe', ton.wert);
-  // Safari färbt die Statusleiste nach diesem Wert.
-  var dunkel = wahl === 'dunkel' ||
-    (wahl === 'system' && !(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches));
-  var meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', dunkel ? ton.dunkel : ton.hell);
+// Bis ADR 0039 standen Darstellung (system/dunkel/hell) und Farbton
+// (nacht/grün/blau/rosa) als zwei Achsen nebeneinander. Ein Gerät oder ein
+// Sicherungscode von damals wird hierüber übersetzt: Der Farbton wiegt
+// schwerer, weil ihn jemand ausdrücklich gewählt hat; ohne Farbton entscheidet
+// hell gegen dunkel.
+var FARBTOENE_ALT = ['nacht', 'gruen', 'blau', 'rosa'];
+var DARSTELLUNG_ALT = ['system', 'dunkel', 'hell'];
+function schemaAusAchsen(darstellung, farbe) {
+  if (['gruen', 'blau', 'rosa'].indexOf(farbe) !== -1) return farbe;
+  return darstellung === 'hell' ? 'classic' : 'dark';
 }
+
+// Ein Schema, ein Attribut. «Dark» ist die Vorgabe und trägt keines — es steht
+// im `:root` selbst, wie zuvor die dunkle Palette.
+function updateDarstellung() {
+  var schema = schemaVon(state.settings.schema);
+  var wurzel = document.documentElement;
+  if (schema.wert === 'dark') wurzel.removeAttribute('data-schema');
+  else wurzel.setAttribute('data-schema', schema.wert);
+  // Safari färbt die Statusleiste nach diesem Wert.
+  var meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', schema.grund);
+}
+
 
 function woerterGemeistert() {
   var n = 0;
@@ -7124,7 +7088,10 @@ function renderEinstellungen() {
   }
 
   function wahlText(key, titel, hinweis, werte) {
-    var html = '<div class="setting"><span class="setting-text">' +
+    // Ab vier Knöpfen bliebe für den Hinweis eine Schlucht von wenigen Wörtern
+    // Breite — dann rückt die Wahl unter den Text.
+    var html = '<div class="setting' + (werte.length > 3 ? ' breit' : '') +
+      '"><span class="setting-text">' +
       '<span class="setting-title">' + esc(titel) + '</span>' +
       '<span class="setting-note">' + esc(hinweis) + '</span></span>' +
       '<span class="seg" role="group" aria-label="' + esc(titel) + '">';
@@ -7160,12 +7127,10 @@ function renderEinstellungen() {
       'Aus: Sie holen sie bei Bedarf. Wo Deutsch gefragt ist, kommt sie nie — dort ' +
       'schreibt die Gerätetastatur.') +
     '<h2>Darstellung und Ton</h2>' +
-    wahlText('darstellung', 'Darstellung',
-      'Dunkel ist die Vorgabe. «System» folgt der Einstellung des iPhones.',
-      [{ wert: 'system', text: 'System' }, { wert: 'dunkel', text: 'Dunkel' }, { wert: 'hell', text: 'Hell' }]) +
-    wahlText('farbe', 'Farbton',
-      'Tönt die Flächen — hell und dunkel bleiben davon unberührt. Schrift und ' +
-      'Signalfarben ändern sich nicht.', FARBTOENE) +
+    wahlText('schema', 'Farbschema',
+      '«Dark» ist die Vorgabe, «Classic» das helle Cremeweiß. Grün, Blau und Rosa ' +
+      'sind helle Cremetöne. Schrift und Signalfarben bleiben in jedem Schema gleich.',
+      SCHEMATA) +
     schalter('ton', 'Ton bei richtig und falsch',
       'Ein kurzer Klang nach jeder Antwort. Auf iOS klingt er auch bei gestelltem ' +
       'Stummschalter, sofern das Gerät die Sitzungssteuerung kennt.') +
@@ -7700,8 +7665,10 @@ function encodeBackup() {
   var s = state.settings;
   var einst = BK_SETTINGS.map(function (k) { return k && s[k] ? '1' : '0'; }).join('') +
     '.' + s.tippenStufe + '.' + s.auffrischen + '.' +
-    ['system', 'dunkel', 'hell'].indexOf(s.darstellung) + '.' +
-    FARBTOENE.map(function (t) { return t.wert; }).indexOf(s.farbe);
+    // Darstellung und Farbton gab es bis ADR 0039; ihre Stellen bleiben leer
+    // stehen, damit das Schema nicht dorthin rutscht, wo ein älterer Code
+    // etwas anderes führt.
+    '-.-.' + SCHEMATA.map(function (t) { return t.wert; }).indexOf(s.schema);
 
   var abc = bkStaendeAus(state.abcBox, state.abcSeen, bkKennung);
   // Neuntes Feld: der Grammatikstand. Er führt Regeln, nicht Wörter — darum
@@ -7774,10 +7741,15 @@ function decodeBackup(code) {
   });
   d.settings.tippenStufe = parseInt(e[1], 10) || 3;
   d.settings.auffrischen = parseInt(e[2], 10) || 21;
-  d.settings.darstellung = ['system', 'dunkel', 'hell'][parseInt(e[3], 10)] || 'system';
-  // Ältere Codes führen den Farbton nicht — dann bleibt es beim Grundton.
-  var ton = FARBTOENE[parseInt(e[4], 10)];
-  d.settings.farbe = ton ? ton.wert : 'nacht';
+  // An Stelle 4 und 5 standen bis ADR 0039 Darstellung und Farbton; heute steht
+  // dort ein «-». Ein Code von damals wird über dieselben Regeln übersetzt wie
+  // ein alter Lernstand, ein Code ohne Angabe bleibt bei der Vorgabe.
+  var schema = SCHEMATA[parseInt(e[5], 10)];
+  if (schema) d.settings.schema = schema.wert;
+  else if (e.length > 4 && e[4] !== '-') {
+    d.settings.schema = schemaAusAchsen(DARSTELLUNG_ALT[parseInt(e[3], 10)],
+      FARBTOENE_ALT[parseInt(e[4], 10)]);
+  }
   return d;
 }
 
@@ -8128,7 +8100,7 @@ function renderSicherung() {
 document.querySelectorAll('[data-symbol]').forEach(function (b) {
   b.insertAdjacentHTML('afterbegin', ICON[b.dataset.symbol] || '');
 });
-document.getElementById('filterKnopf').innerHTML = ICON.filter;
+document.getElementById('filterZeichen').innerHTML = ICON.filter;
 load();
 ticketsLaden();
 updateDarstellung();

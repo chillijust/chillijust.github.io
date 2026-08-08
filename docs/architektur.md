@@ -46,35 +46,43 @@ Favoriten oder allen und zeigt je Fakt, wie oft er dran war.
 
 ## Darstellung
 
-Dunkel ist die Grundeinstellung im `:root`. Die helle Palette hängt an zwei Stellen:
-`@media (prefers-color-scheme: light)` greift nur, solange **kein** `data-theme` gesetzt
-ist (`:root:not([data-theme])`), und `:root[data-theme="hell"]` setzt sie ausdrücklich.
-`updateDarstellung()` schreibt das Attribut und färbt `meta[name=theme-color]` nach, damit
-die Statusleiste auf dem iPhone passt.
+Ein **Farbschema**, keine zwei Achsen (ADR 0039). Die Einstellung `schema` kennt fünf
+Werte: `dark` (Vorgabe), `classic`, `gruen`, `blau`, `rosa`. Vier davon sind hell — die
+Farben gibt es nicht in einer dunklen Fassung.
 
-### Der Farbton — eine zweite Achse
+`updateDarstellung()` schreibt `data-schema` ans `<html>`-Element und färbt
+`meta[name=theme-color]` nach, damit die Statusleiste auf dem iPhone passt. Wie zuvor der
+dunkle Grundton trägt **«dark» kein Attribut**: Seine Palette steht im `:root` selbst.
 
-Neben hell und dunkel steht der **Farbton** (`data-farbe`, Einstellung `farbe`): Nacht,
-Grün, Blau, Rosa. Beide Achsen greifen zugleich; das ergibt acht Paletten.
+`prefers-color-scheme` wertet die App **nicht** aus. Ein Schema ist eine Wahl, keine
+Umgebungsbedingung; wer Rosa gewählt hat, will es auch abends. (Bis ADR 0039 folgte die
+Vorgabe «system» der Einstellung des iPhones.)
 
 **Getönt werden nur die Flächen** — `--bg`, `--card`, `--card-2`, `--line`, `--glow`.
-Schrift, Gold und die Signalfarben bleiben, sonst zerfiele die Sprache der Oberfläche und
-«richtig» hieße auf Rosa etwas anderes als auf Grün. Das hält den Aufwand auch klein:
-fünf Werte je Ton und Modus statt einer ganzen Palette.
+Schrift, Gold und die Signalfarben stehen einmal für alle hellen Schemata, sonst zerfiele
+die Sprache der Oberfläche und «richtig» hieße auf Rosa etwas anderes als auf Grün.
 
-**Die Helligkeit kommt aus dem neutralen Grundton**, nur Farbton und Sättigung wandern
-(`tools/palette.py` rechnet sie aus). Damit bleibt der Kontrast zum Text überall
-derselbe — gemessen liegt der größte anteilige Verlust gegenüber «Nacht» unter 6 %.
+**Alle hellen Schemata teilen dieselbe Staffelung der Helligkeit**, nur Farbton und
+Sättigung wandern (`tools/palette.py` rechnet sie aus). Damit steht die Kachel überall
+gleich weit vom Grund ab und der Kontrast zum Text bleibt vergleichbar — gemessen liegt
+der größte anteilige Verlust gegenüber «classic» unter 7 %, die Lesetexte bei mindestens
+11,7 : 1.
 
-Der Aufbau spiegelt den der Grundpalette: erst der dunkle Ton, dann der helle über die
-Systemvorgabe (`:not([data-theme])`), dann der helle über die ausdrückliche Wahl. **Die
-Regel mit beiden Attributen** (`:root[data-theme="hell"][data-farbe="rosa"]`) sticht beide
-Einzelregeln — darauf beruht das Zusammenspiel. Wie «system» beim Modus trägt «nacht»
-**kein** Attribut; der Grundton ist die Abwesenheit einer Wahl.
+`SCHEMATA` im Skript führt je Schema nur den Grundwert. Das ist die einzige Stelle, an der
+eine Flächenfarbe doppelt steht — `meta[name=theme-color]` nimmt eine Zahl und keine
+Medienabfrage.
 
-`FARBTOENE` im Skript führt je Ton den dunklen und den hellen Grundwert. Das ist die
-einzige Stelle, an der Flächenfarben doppelt stehen — `meta[name=theme-color]` nimmt eine
-Zahl und keine Medienabfrage.
+### Von zwei Achsen auf eine
+
+Bis ADR 0039 standen `darstellung` (`system`/`dunkel`/`hell`) und `farbe`
+(`nacht`/`gruen`/`blau`/`rosa`) nebeneinander. `schemaAusAchsen()` übersetzt beides: Ein
+gewählter Farbton wiegt schwerer als hell/dunkel, sonst entscheidet `hell` → `classic`
+gegen alles übrige → `dark`. Aufgerufen wird sie an zwei Stellen — in `mergeState()` für
+einen gespeicherten Lernstand und in `decodeBackup()` für einen älteren Sicherungscode.
+
+Im Sicherungscode bleiben die beiden alten Stellen (viertes und fünftes Feld der
+Einstellungen) als `-` stehen; das Schema steht dahinter. Sonst rutschte es dorthin, wo
+ein älterer Code etwas anderes führt.
 
 ## Maskottchen
 
@@ -1281,8 +1289,7 @@ auf einen sinnvollen Bereich:
 | `requireComplete` | aus | „Bestätigen" ist erst möglich, wenn die Lösung vollständig ist. Verrät dadurch deren Länge. |
 | `tippenAbStufe` | 4 | Ab welcher Leitner-Stufe ein Wort in „Tippen" erscheint (2, 3 oder 4). |
 | `tastaturAuto` | **an** | Verlangt eine Aufgabe Kyrillisch, klappt die eingebaute Tastatur gleich auf. Aus: Sie holen sie bei Bedarf. Wo Deutsch gefragt ist, kommt sie nie. |
-| `darstellung` | `system` | `system`, `dunkel` oder `hell`. Steuert `data-theme` am `<html>`-Element. |
-| `farbe` | `nacht` | Farbton der Flächen: `nacht`, `gruen`, `blau`, `rosa`. Steuert `data-farbe` — unabhängig von hell und dunkel. |
+| `schema` | `dark` | Farbschema: `dark`, `classic`, `gruen`, `blau`, `rosa`. Steuert `data-schema` am `<html>`-Element; `dark` trägt keines. |
 
 Eine neue Einstellung braucht drei Dinge: einen Vorgabewert in `defaultSettings()`,
 eine Zeile in `renderEinstellungen()` und — falls sie das Verhalten einer Übung
