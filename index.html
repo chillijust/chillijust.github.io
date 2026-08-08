@@ -2889,7 +2889,7 @@ function faelligeAnzahl(liste) {
 var currentTab = 'home';
 var main = document.getElementById('main');
 
-var letzterTab = 'home'; // Rückweg aus Menüansichten
+var letzterTab = 'home'; // die zuletzt offene Übung — Bezug eines Tickets
 
 // Die fünf Übungen. «Bilanz», «Einstellungen» und «Tickets» sind keine
 // Übungen — sie stehen im Menü, nicht auf Home.
@@ -3271,8 +3271,29 @@ function renderTafelKnopf() {
   knopf.setAttribute('aria-label', aufTafel ? 'Zurück zum Üben' : 'Alphabet-Tafel');
 }
 
-function setTab(name) {
+// ── Der Rückweg ─────────────────────────────────────────────
+// Zurück heißt: dorthin, wo man herkam — nicht stur nach Home. Wer aus der
+// Bilanz zu den Fakten abbiegt, will von dort in die Bilanz zurück, nicht an
+// den Anfang. Der Stapel merkt sich die Ansichten davor.
+//
+// Er kann nicht wachsen: Home räumt ihn leer — dort endet jeder Weg —, und wer
+// dorthin zurücksteuert, wo er gerade herkam, nimmt den Schritt zurück, statt
+// einen zweiten daraufzusetzen. Ein Hin und Her zwischen zwei Ansichten
+// hinterlässt also keinen Rest. Die Obergrenze ist nur die Reißleine.
+var STAPEL_MAX = 12;
+var ansichtStapel = [];
+
+function stapelMerken(neu) {
+  if (neu === currentTab) return;
+  if (neu === 'home') { ansichtStapel.length = 0; return; }
+  if (ansichtStapel[ansichtStapel.length - 1] === neu) { ansichtStapel.pop(); return; }
+  ansichtStapel.push(currentTab);
+  if (ansichtStapel.length > STAPEL_MAX) ansichtStapel.shift();
+}
+
+function setTab(name, zurueck) {
   if (UEBUNG_NAME[name] || name === 'home') letzterTab = name;
+  if (!zurueck) stapelMerken(name);
   currentTab = name;
   window.scrollTo(0, 0);
   render();
@@ -3292,7 +3313,7 @@ function zurueckGehen() {
     renderKopf();
     return;
   }
-  setTab('home');
+  setTab(ansichtStapel.pop() || 'home', true);
 }
 
 document.getElementById('zurueck').addEventListener('click', zurueckGehen);
@@ -3754,6 +3775,8 @@ function ansichtenZuruecksetzen() {
   abcCorrect = null;
   abcBuilt = [];
   abcRevealed = false;
+
+  ansichtStapel.length = 0;
 
   gramBaustein = null;
   gramWahl = null;
@@ -6532,7 +6555,7 @@ function renderEinstellungen() {
       if (zeile) zeile.textContent = tonAuskunft();
     }, 150);
   });
-  document.getElementById('setBack').addEventListener('click', function () { setTab(letzterTab); });
+  document.getElementById('setBack').addEventListener('click', zurueckGehen);
 }
 
 // ── SPRACHFAKTEN ────────────────────────────────────────────
@@ -6590,7 +6613,7 @@ function renderFakten() {
       renderFakten();
     });
   });
-  document.getElementById('faktenBack').addEventListener('click', function () { setTab(letzterTab); });
+  document.getElementById('faktenBack').addEventListener('click', zurueckGehen);
 }
 
 // ── Melden ──────────────────────────────────────────────────
@@ -6853,7 +6876,7 @@ function renderTickets() {
     });
   }
 
-  document.getElementById('tkBack').addEventListener('click', function () { setTab(letzterTab); });
+  document.getElementById('tkBack').addEventListener('click', zurueckGehen);
 }
 
 // ── BILANZ ──────────────────────────────────────────────────
