@@ -367,6 +367,27 @@ select {
 .paket-text { font-size: 11px; color: var(--dim); margin: 0; }
 .paket-frei { color: var(--gold); }
 
+/* Der Lesemodus im Freestyle: über dem Thema, volle Breite, damit er auffällt
+   ohne zu drängen. Eingeschaltet trägt er Gold — dieselbe Sprache wie ein
+   gesetzter Chip. */
+.lese-schalter {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  min-height: 46px; padding: 0 14px; margin: 0 0 14px;
+  background: var(--card-2); color: var(--dim);
+  border: 1px solid var(--line); border-radius: 14px;
+  font: inherit; font-size: 13px; text-align: left; cursor: pointer;
+}
+.lese-schalter .icon { width: 18px; height: 18px; flex: none; }
+.ls-text { flex: 1; }
+.ls-zahl {
+  flex: none; min-width: 26px; padding: 3px 8px; border-radius: 999px;
+  background: var(--card); color: var(--dim); font-size: 11px; text-align: center;
+}
+.lese-schalter.an {
+  border-color: var(--gold); color: var(--gold); background: var(--card);
+}
+.lese-schalter.an .ls-zahl { background: var(--gold); color: var(--gold-ink); }
+
 .leer {
   border: 1px dashed var(--line); border-radius: 16px; padding: 28px 20px; text-align: center;
 }
@@ -591,6 +612,26 @@ button.built-word:active { transform: scale(.95); }
 .patzer-worte { display: block; font-size: 16px; margin-top: 4px; }
 .patzer-note { display: block; font-size: 12px; color: var(--dim); margin-top: 5px; }
 .patzer-los { margin-top: 12px; width: 100%; }
+
+/* Der Wink am Fuß von «Buchstaben»: kein Tadel, sondern ein Lohn — darum Gold
+   statt der grauen Linie. */
+.lese-wink {
+  margin-top: 16px; padding: 12px 14px; border-radius: 12px;
+  border: 1px solid var(--gold); background: var(--card-2); text-align: left;
+}
+.lese-wink strong { display: block; font-size: 14px; color: var(--gold); }
+.lw-note { display: block; font-size: 12px; color: var(--dim); margin-top: 5px; }
+.lw-los { margin-top: 12px; width: 100%; }
+
+/* Ein Buchstabe ist zurückgefallen — dieselbe Form wie ein Patzer, dieselbe
+   Bedeutung. */
+.lese-fall { margin-top: 14px; padding: 11px 14px; border-radius: 12px;
+  border: 1px solid var(--bad); background: var(--card-2); text-align: left;
+  animation: meisterAuf .42s cubic-bezier(.2, .9, .3, 1);
+}
+.lese-fall strong { display: block; font-size: 14px; color: var(--bad); }
+.lf-zeichen { display: block; font-size: 20px; margin-top: 4px; }
+.lf-note { display: block; font-size: 12px; color: var(--dim); margin-top: 5px; }
 
 .chili { display: block; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .35)); }
 .chili.gross { width: 104px; height: 104px; margin: 0 auto 16px; }
@@ -2572,8 +2613,12 @@ function defaultState() {
     wortFehler: {},
     // Wörter, die dreimal hintereinander verschrieben und darum zurückgestuft
     // wurden. Sie bleiben vermerkt, bis sie wieder sitzen — daraus speist sich
-    // das Power-Training (ADR 0035).
+    // das Power-Training (ADR 0034).
     patzer: {},
+    // Wie oft ein Buchstabe im Lesemodus **hintereinander** gefehlt hat.
+    // Richtig gelegt löscht den Eintrag — wie wortFehler eine Momentaufnahme
+    // und darum nicht im Sicherungscode (ADR 0035).
+    leseFehler: {},
     zuletzt: null,             // { uebung, zeit } — woran zuletzt gearbeitet wurde
     streak: 0,
     bestStreak: 0,
@@ -2598,6 +2643,7 @@ function mergeState(parsed) {
   d.gramSeen = nurBausteine(d.gramSeen);
   d.wortFehler = migriereIds(d.wortFehler);
   d.patzer = migriereIds(d.patzer);
+  d.leseFehler = nurBuchstaben(d.leseFehler);
   // «Zuletzt» zeigt auf eine Übung, die es noch gibt — sonst führte die
   // Empfehlung nach einem Umbau ins Leere.
   if (!d.zuletzt || !UEBUNG_NAME[d.zuletzt.uebung] || d.zuletzt.uebung === 'home' ||
@@ -3631,6 +3677,7 @@ function render() {
 var uebModus = 'lernsets';   // 'lernsets' · 'freestyle'
 var uebAuswahl = 'aktuell';  // 'aktuell' · 'alle' · Nummer eines freien Sets
 var uebThema = 'Alle';       // nur im Freestyle
+var uebLesen = false;        // nur im Freestyle: nur Wörter aus gemeisterten Buchstaben
 var uebQ = null;
 var uebPhase = 'ask'; // ask | feedback | fact
 var uebBuilt = [];
@@ -3643,8 +3690,15 @@ var uebGeschafftesSet = null; // Nummer eines Sets, das gerade fertig wurde
 // «Lernsets» arbeiten das laufende Set ab, «Freestyle» ein Thema freier Wahl.
 function uebPool() {
   if (uebModus === 'freestyle') {
-    if (uebThema === 'Alle') return ALL_VOCAB;
-    return ALL_VOCAB.filter(function (v) { return v.theme === uebThema; });
+    var frei = uebThema === 'Alle' ? ALL_VOCAB
+      : ALL_VOCAB.filter(function (v) { return v.theme === uebThema; });
+    // Der Lesemodus schneidet quer durch die Themen: Er fragt nicht, wovon ein
+    // Wort handelt, sondern ob man es überhaupt entziffern kann.
+    if (uebLesen) {
+      var meister = gemeisterteBuchstaben();
+      frei = frei.filter(function (v) { return wortLesbar(v, meister); });
+    }
+    return frei;
   }
   if (uebAuswahl === 'alle') return freigeschalteteWoerter();
   var nr = uebAuswahl === 'aktuell' ? aktuellesSet() : uebAuswahl;
@@ -3702,7 +3756,11 @@ function buildQuestion() {
   // wäre eine Farce. Über zwölf Buchstaben passt die Reihe nicht mehr aufs Telefon.
   var canTile = word.ru.indexOf(' ') === -1 && word.ru.length >= 3 && word.ru.length <= 12;
   var mode;
-  if (box <= 1) mode = Math.random() < 0.5 ? 'mc-de' : 'mc-ru';
+  // Im Lesemodus rücken die Kacheln eine Stufe vor: Dort geht es um die
+  // Buchstaben, und zusammensetzen ist die Übung, die danach fragt. Auf Stufe 0
+  // bleibt es bei der Auswahl — ein nie gesehenes Wort zu legen wäre Raten.
+  var kachelAb = uebLesen ? 1 : 2;
+  if (box < kachelAb) mode = Math.random() < 0.5 ? 'mc-de' : 'mc-ru';
   else mode = canTile ? 'tiles' : 'mc-ru';
 
   if (mode === 'tiles') {
@@ -3729,6 +3787,7 @@ function buildQuestion() {
 }
 // Setzt die laufende Frage zurück, ohne zu zeichnen.
 function uebZuruecksetzen() {
+  leseMeldung = null;
   uebGeschafftesSet = null;
   uebQ = null;
   uebPhase = 'ask';
@@ -3747,6 +3806,7 @@ function ansichtenZuruecksetzen() {
   uebModus = 'lernsets';
   uebAuswahl = 'aktuell';
   uebThema = 'Alle';
+  uebLesen = false;
   uebFactText = '';
 
   tWord = null;
@@ -3830,6 +3890,7 @@ function uebNext(skipFact) {
   uebPhase = 'ask';
   uebBuilt = [];
   meisterMeldung = null;
+  leseMeldung = null;
   uebPicked = null;
   uebCorrect = null;
   uebRevealed = false;
@@ -3869,8 +3930,21 @@ function setKopfHtml() {
   return html;
 }
 
+// Der Weg vom Alphabet in den Wortschatz. Er steht über dem Thema, nicht in der
+// Auswahl: Wer die Buchstaben gerade gemeistert hat, soll ihn sehen, nicht
+// suchen. Solange nichts zu lesen ist, steht er auch nicht da.
+function leseSchalterHtml() {
+  var lesbar = leseWoerter().length;
+  if (!uebLesen && lesbar < LESE_MINDEST) return '';
+  return '<button class="lese-schalter' + (uebLesen ? ' an' : '') + '" id="leseSchalter"' +
+    ' aria-pressed="' + (uebLesen ? 'true' : 'false') + '">' + ICON.tafel +
+    '<span class="ls-text">' + (uebLesen ? 'Nur was ich lesen kann' : 'Aus Buchstaben lesen') +
+    '</span><span class="ls-zahl">' + lesbar + '</span></button>';
+}
+
 function themaKopfHtml() {
-  var html = '<p class="task-label">' + esc(uebThema === 'Alle' ? 'Alle Themen' : uebThema) + '</p>';
+  var html = leseSchalterHtml() +
+    '<p class="task-label">' + esc(uebThema === 'Alle' ? 'Alle Themen' : uebThema) + '</p>';
 
   var woerter = uebPool();
   var begonnen = woerter.filter(function (v) { return (state.boxes[v.id] || 0) > 0; }).length;
@@ -3894,17 +3968,88 @@ function uebAbgabeBereit() {
   return uebPicked !== null;
 }
 
+// ── Wenn ein Buchstabe nicht trägt ──────────────────────────
+// Dieselbe Idee wie beim Verschreiben in «Übersetzen» (ADR 0033), nur milder:
+// Wer im Lesemodus ein Wort legt und dabei einen Buchstaben gar nicht
+// unterbringt, kennt ihn nicht — nach LESE_STRAFE Malen fällt er eine Stufe.
+//
+// Gewertet wird nur, was **fehlt**, nicht was falsch steht: Wer alle
+// Buchstaben hat und bloß die Reihenfolge verdreht, kennt sie ja. Und nur
+// beim Legen — Auswahlfragen sagen über Buchstaben nichts aus.
+var leseMeldung = null;
+
+function fehlendeBuchstaben(loesung, versuch) {
+  var uebrig = {};
+  versuch.toLowerCase().split('').forEach(function (c) {
+    uebrig[c] = (uebrig[c] || 0) + 1;
+  });
+  var fehlt = [];
+  loesung.toLowerCase().split('').forEach(function (c) {
+    if (leseZeichenEgal(c)) return;
+    if (uebrig[c]) { uebrig[c]--; return; }
+    if (fehlt.indexOf(c) === -1) fehlt.push(c);
+  });
+  return fehlt;
+}
+
+function leseWerten(wort, versuch, richtig) {
+  if (!uebLesen) return;
+  var buchstaben = wort.toLowerCase().split('').filter(function (c) {
+    return !leseZeichenEgal(c);
+  });
+  if (richtig) {
+    // Eine Serie ist eine Serie: Richtig gelegt löscht sie ganz.
+    buchstaben.forEach(function (c) { delete state.leseFehler[c]; });
+    return;
+  }
+  var gefallen = [];
+  fehlendeBuchstaben(wort, versuch).forEach(function (c) {
+    var n = (state.leseFehler[c] || 0) + 1;
+    if (n < LESE_STRAFE) { state.leseFehler[c] = n; return; }
+    delete state.leseFehler[c];
+    var jetzt = state.abcBox[c] || 0;
+    if (jetzt <= 0) return;
+    state.abcBox[c] = jetzt - 1;
+    state.abcSeen[c] = Date.now();
+    gefallen.push(c);
+  });
+  if (gefallen.length) {
+    leseMeldung = {
+      zeichen: gefallen,
+      // Ein gefallener Buchstabe nimmt Wörter aus dem Lesemodus mit. Das ist
+      // keine Nebenwirkung, sondern der Sinn: Er sitzt eben nicht mehr.
+      note: gefallen.length === 1
+        ? 'Er steht wieder in «Buchstaben» — und die Wörter mit ihm sind hier vorerst weg.'
+        : 'Sie stehen wieder in «Buchstaben» — und die Wörter mit ihnen sind hier vorerst weg.'
+    };
+  }
+}
+
+function leseFallHtml() {
+  if (!leseMeldung) return '';
+  return '<div class="lese-fall"><strong>' +
+    (leseMeldung.zeichen.length === 1
+      ? 'Dieser Buchstabe braucht noch eine Runde.'
+      : 'Diese Buchstaben brauchen noch eine Runde.') + '</strong>' +
+    '<span class="lf-zeichen cyr">' +
+    esc(leseMeldung.zeichen.join(' · ')) + '</span>' +
+    '<span class="lf-note">' + esc(leseMeldung.note) + '</span></div>';
+}
+
 function uebPruefen() {
   var q = uebQ;
   var setVorher = aktuellesSet();
+  var attempt = '';
   if (q.mode === 'tiles') {
-    var attempt = uebBuilt.map(function (k) {
+    attempt = uebBuilt.map(function (k) {
       return q.tiles.filter(function (t) { return t.key === k; })[0].ch;
     }).join('');
     uebCorrect = normalize(attempt) === normalize(q.word.ru);
   } else {
     uebCorrect = uebPicked === q.word.id;
   }
+  leseMeldung = null;
+  if (q.mode === 'tiles' && !uebRevealed) leseWerten(q.word.ru, attempt, uebCorrect);
   var vorher = state.boxes[q.word.id] || 0;
   updateBox(q.word.id, uebCorrect);
   meisterMeldung = null;
@@ -3917,6 +4062,25 @@ function uebPruefen() {
   if (aktuellesSet() !== setVorher && setGeschafft(setVorher)) uebGeschafftesSet = setVorher;
   uebPhase = 'feedback';
   renderUeben();
+}
+
+// Der Lesemodus lässt sich aus zwei Zuständen heraus umlegen — aus der Aufgabe
+// und aus dem Leerzustand. Beide hängen dieselben Zuhörer an.
+function leseBinden() {
+  var schalter = document.getElementById('leseSchalter');
+  if (schalter) schalter.addEventListener('click', function () {
+    uebLesen = !uebLesen;
+    uebZuruecksetzen();
+    renderUeben();
+  });
+  var aus = document.getElementById('leseAus');
+  if (aus) aus.addEventListener('click', function () {
+    uebLesen = false;
+    uebZuruecksetzen();
+    renderUeben();
+  });
+  var zuAbc = document.getElementById('leseZuAbc');
+  if (zuAbc) zuAbc.addEventListener('click', function () { setTab('buchstaben'); });
 }
 
 function renderUeben() {
@@ -3976,7 +4140,24 @@ function renderUeben() {
     return;
   }
   if (!uebQ) uebQ = buildQuestion();
-  if (!uebQ) { main.innerHTML = '<section>' + uebKopfHtml() + '</section>'; return; }
+  if (!uebQ) {
+    // Leer heißt hier zweierlei. Im Lesemodus kann der Vorrat weggeschmolzen
+    // sein, weil ein Buchstabe zurückgefallen ist — dann muss der Weg hinaus
+    // sichtbar sein, sonst steht man vor einer leeren Seite ohne Knopf.
+    main.innerHTML = '<section>' + uebKopfHtml() +
+      (uebLesen
+        ? '<div class="leer">' + maskottchen('gross') +
+          '<h3>Dafür reichen die Buchstaben noch nicht</h3>' +
+          '<p>Zu diesem Thema lässt sich noch kein Wort vollständig entziffern. ' +
+          'Üben Sie ein paar Buchstaben — oder nehmen Sie den Modus heraus.</p>' +
+          '<div class="btn-row">' +
+          '<button class="btn ghost" id="leseAus">Alle Wörter</button>' +
+          '<button class="btn primary" id="leseZuAbc">Zu «Buchstaben»</button>' +
+          '</div></div>'
+        : '') + '</section>';
+    leseBinden();
+    return;
+  }
   var q = uebQ;
   var box = state.boxes[q.word.id] || 0;
   var promptRu = q.mode === 'mc-de';
@@ -4037,7 +4218,7 @@ function renderUeben() {
     else html += '<p>' + ICON.kreuz + (uebRevealed ? 'Lösung: ' : 'Richtig wäre: ') +
       '<strong class="cyr">' + esc(q.word.ru) + '</strong> — ' + esc(q.word.de) +
       ' <span class="translit">[' + esc(q.word.tr) + ']</span></p>';
-    html += '</div>' + hoerzeile(q.word.ru, q.word.de) + meisterHtml();
+    html += '</div>' + hoerzeile(q.word.ru, q.word.de) + meisterHtml() + leseFallHtml();
   }
 
   html += '</div><div class="btn-row">';
@@ -4054,6 +4235,7 @@ function renderUeben() {
   html += '<p class="session-info">' + state.answered + ' beantwortet · Beste Serie: ' + state.bestStreak + '</p></section>';
 
   main.innerHTML = html;
+  leseBinden();
 
   if (uebPhase === 'ask') {
     document.getElementById('uebReveal').addEventListener('click', function () {
@@ -4787,6 +4969,43 @@ function abcPool() {
   return offen.concat(frisch);
 }
 
+// ── Lesen: was die Buchstaben schon hergeben ────────────────
+// «Buchstaben» und «Freestyle» standen nebeneinander, ohne voneinander zu
+// wissen: Wer das Alphabet übte, sah nie, wozu. Ein Wort, dessen Buchstaben
+// alle gemeistert sind, lässt sich lesen — und das ist der erste Lohn des
+// Alphabets. Genau diese Wörter sammelt der Lesemodus (ADR 0035).
+var LESE_MINDEST = 3;   // ab so vielen lesbaren Wörtern lohnt der Hinweis
+var LESE_STRAFE = 4;    // so oft darf ein Buchstabe danebengehen, dann fällt er
+
+function gemeisterteBuchstaben() {
+  var meister = {};
+  ALPHABET.forEach(function (b) {
+    if (abcGemeistert(b)) meister[b[1]] = true;
+  });
+  return meister;
+}
+
+// Was in keinem Alphabet steht, hält kein Wort auf: Leerzeichen und Striche
+// muss man nicht gemeistert haben.
+function leseZeichenEgal(c) {
+  return c === ' ' || c === '-' || c === '‑' || c === '’' || c === '\'';
+}
+
+function wortLesbar(v, meister) {
+  var w = v.ru.toLowerCase();
+  for (var i = 0; i < w.length; i++) {
+    var c = w.charAt(i);
+    if (leseZeichenEgal(c)) continue;
+    if (!meister[c]) return false;
+  }
+  return true;
+}
+
+function leseWoerter() {
+  var meister = gemeisterteBuchstaben();
+  return ALL_VOCAB.filter(function (v) { return wortLesbar(v, meister); });
+}
+
 function abcWaehlen() {
   var pool = abcPool();
   if (!pool.length) return null;
@@ -5047,10 +5266,24 @@ function abcUebenHtml() {
   } else {
     html += '<button class="btn primary" id="abcNext">Weiter \u2192</button>';
   }
-  html += '</div><p class="session-info">' + abcPool().length + ' offen · ' +
+  html += '</div>' + leseWinkHtml() +
+    '<p class="session-info">' + abcPool().length + ' offen · ' +
     abcGelernt() + ' von ' + ALPHABET.length + ' sitzen · ' +
     abcMeisterschaft() + ' gemeistert</p>';
   return html;
+}
+
+// Der Lohn des Alphabets, dort gezeigt, wo er verdient wurde. Er erscheint erst,
+// wenn wirklich etwas zu lesen ist — eine Ankündigung ohne Deckung wäre eine
+// Verlockung ins Leere.
+function leseWinkHtml() {
+  var lesbar = leseWoerter().length;
+  if (lesbar < LESE_MINDEST) return '';
+  return '<div class="lese-wink">' +
+    '<strong>' + lesbar + ' Wörter können Sie schon lesen.</strong>' +
+    '<span class="lw-note">Ihre gemeisterten Buchstaben reichen dafür aus — ' +
+    'Buchstabe für Buchstabe, ohne zu raten.</span>' +
+    '<button class="btn ghost lw-los" id="leseLos">Wörter lesen \u2192</button></div>';
 }
 
 function renderBuchstaben() {
@@ -5107,6 +5340,16 @@ function renderBuchstaben() {
   if (next) next.addEventListener('click', function () {
     abcFrageBauen();
     renderBuchstaben();
+  });
+  var los = document.getElementById('leseLos');
+  if (los) los.addEventListener('click', function () {
+    // Der Wink führt in genau den Modus, den er anpreist — nicht bloß in die
+    // Übung, in der man ihn erst suchen müsste.
+    uebModus = 'freestyle';
+    uebThema = 'Alle';
+    uebLesen = true;
+    uebZuruecksetzen();
+    setTab('freestyle');
   });
 }
 

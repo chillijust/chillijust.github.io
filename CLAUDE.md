@@ -70,6 +70,7 @@ tools/build.mjs           /data prüfen und in index.html einbetten (--check = n
 tools/pruefen.mjs         Vor-Push-Prüfung von index.html
 tools/freistellen.py      Maskottchen aus einem Bild freistellen (ohne Bildbibliothek)
 tools/skaliere.py         PNG auf Icon-Größe bringen (ohne Bildbibliothek)
+tools/appikon.py          App-Symbol bauen: Grund tauschen, Sprechblase umdrehen
 docs/                     Architektur, Datenmodell, Deploy, Entscheidungen (ADRs)
 docs/decisions/           kurze ADRs, fortlaufend nummeriert
 ```
@@ -119,8 +120,11 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   Übungen die Klasse `aufgabe`, zwei Streben in `#main` teilen den freien Raum 2:1. Das
   bringt «Prüfen» und «Weiter» in Daumenreichweite. Beide Streben haben Basis 0 und
   schrumpfen nicht — bei hohem Inhalt fallen sie weg, statt oben abzuschneiden.
-- **Der Rückweg steht in `zurueckGehen()`** — Pfeil und Randwischgeste teilen ihn sich.
-  Die Geste schweigt, solange ein Blatt offen ist.
+- **Der Rückweg steht in `zurueckGehen()`** — Pfeil, Randwischgeste und die
+  «Zurück»-Knöpfe der Menüansichten teilen ihn sich. Die Geste schweigt, solange ein
+  Blatt offen ist. Zurück heißt **dorthin, wo man herkam** (`ansichtStapel`), nicht nach
+  Home; Home räumt den Stapel, und wer umkehrt, nimmt den Schritt zurück, statt einen
+  zweiten daraufzusetzen (ADR 0036).
 - **Grammatik ist eine Funktion, kein Fakt** (ADR 0030). Die Karteikarte ist die **Regel**,
   nicht das Wort, und die Aufgabe verlangt ein bekanntes Wort in einer nie gesehenen Form —
   sonst prüft sie Auswendiglernen. Formen rechnet `grammForm()`; sie steht doppelt (App und
@@ -192,6 +196,15 @@ zehn.
   `state.wortFehler`, die Gefallenen in `state.patzer`; richtig geschrieben löscht beides.
   Beides steht bewusst **nicht** im Sicherungscode — es sind Momentaufnahmen, kein
   Lernstand.
+- **Ein Wort ist lesbar, wenn alle seine Buchstaben *gemeistert* sind** (ADR 0035) —
+  nicht, wenn sie «sitzen». Der Lesemodus in «Freestyle» (`uebLesen`) schneidet quer
+  durch die Themen. Sein Leerzustand braucht **zwei Ausgänge**: Ein gefallener Buchstabe
+  kann den Vorrat wegschmelzen lassen, und ein Modus ohne Ausgang wäre eine Falle.
+- **Das App-Symbol lässt sich zur Laufzeit nicht wechseln.** iOS liest
+  `apple-touch-icon` einmal, beim Anlegen der Verknüpfung — keine Medienabfrage, keine
+  Schnittstelle dafür. Ein Umschalter in den Einstellungen wäre eine Attrappe. Gebaut
+  wird das Symbol mit `tools/appikon.py`; wer die Farben ändert, denkt an die
+  Sprechblase, die sonst im hellen Grund verschwindet.
 - **Das Power-Training zählt regulär mit** (ADR 0034). `ptPruefen()` ruft `updateBox()`
   und `meisterPruefen()` wie jede andere Übung; ein zweiter, abgekoppelter Lernstand wäre
   eine Lüge über den eigenen Fortschritt. `ptPool()` räumt beim Nachsehen auf — wer wieder

@@ -154,7 +154,20 @@ in den äußeren 26 px, verlangt 70 px waagerechten Weg bei höchstens 70 % davo
 (sonst war es Scrollen) und wirkt erst beim Loslassen — ein Tippen löst nichts aus. Ist
 ein Blatt offen (Menü, Auswahl, Wissen, Meldeblatt), schweigt sie.
 
-**Aufgaben sitzen tiefer als Listen.** In den sechs Übungen trägt der Körper die Klasse
+**Zurück heißt: dorthin, wo man herkam** — nicht stur nach Home. Wer aus der Bilanz zu
+den Fakten abbiegt, will von dort in die Bilanz zurück. `ansichtStapel` merkt sich die
+Ansichten davor; `setTab(name, zurueck)` legt ab, `zurueckGehen()` nimmt herunter. Die
+drei „Zurück"-Knöpfe in den Menüansichten (`#setBack`, `#faktenBack`, `#tkBack`) gehen
+denselben Weg wie der Pfeil — sie riefen früher `setTab(letzterTab)` und landeten damit
+in der zuletzt offenen *Übung*, egal woher man kam.
+
+Der Stapel kann nicht wachsen: **Home räumt ihn leer** — dort endet jeder Weg —, und wer
+dorthin zurücksteuert, wo er gerade herkam, **nimmt den Schritt zurück**, statt einen
+zweiten daraufzusetzen. Ein Hin und Her zwischen zwei Ansichten hinterlässt also keinen
+Rest (ADR 0036). `STAPEL_MAX` (12) ist nur die Reißleine. Die Detailansicht der Bilanz behält ihren
+eigenen Zwischenschritt vor dem Stapel: Erst schließt sie, dann geht es weiter zurück.
+
+**Aufgaben sitzen tiefer als Listen.** In den sieben Übungen trägt der Körper die Klasse
 `aufgabe`; `#main` wird dann zur Flexspalte, und zwei Streben (`::before` mit `flex: 2`,
 `::after` mit `flex: 1`) teilen den freien Raum **2:1**. Der Aufgabenblock steht damit auf
 zwei Dritteln der Höhe — tiefer als die Mitte, aber nicht am Boden geklebt. Der Grund ist
@@ -610,6 +623,53 @@ Der Sicherungscode trägt die Buchstaben als achtes Feld. Ältere Codes haben si
 `decodeBackup()` liest die Prüfsumme darum immer aus dem letzten Feld und behandelt das
 achte als optional.
 
+### Der Lesemodus — wozu das Alphabet gut ist
+
+«Buchstaben» und «Freestyle» standen nebeneinander, ohne voneinander zu wissen: Wer das
+Alphabet übte, sah nie, wozu. Ein Wort, dessen Buchstaben **alle gemeistert** sind, lässt
+sich lesen — und das ist der erste Lohn des Alphabets (ADR 0035).
+
+`wortLesbar(v, meister)` prüft genau das; `leseWoerter()` sammelt die Wörter. Maßstab ist
+**gemeistert** (`BOX_MAX`), nicht «sitzt»: Wer ein Zeichen erst zweimal erkannt hat, liest
+damit noch kein Wort. Leerzeichen und Striche zählen nicht mit — sie stehen in keinem
+Alphabet.
+
+| wo | was |
+| --- | --- |
+| **«Buchstaben», am Fuß** | Der Wink (`.lese-wink`): «368 Wörter können Sie schon lesen» mit einem Knopf, der direkt in den Modus führt — nicht bloß in die Übung, wo man ihn erst suchen müsste. Er erscheint ab `LESE_MINDEST` (3); eine Ankündigung ohne Deckung wäre eine Verlockung ins Leere. |
+| **«Freestyle», über dem Thema** | Der Schalter (`.lese-schalter`, `uebLesen`), volle Breite, mit der Zahl der lesbaren Wörter. Er steht in der Ansicht, **nicht in der Auswahl**: Wer die Buchstaben gerade gemeistert hat, soll ihn sehen, nicht suchen. Ohne lesbare Wörter steht er gar nicht da. |
+
+Der Modus schneidet **quer durch die Themen**: Er fragt nicht, wovon ein Wort handelt,
+sondern ob man es entziffern kann. Beides wirkt zusammen — Thema *und* Lesbarkeit.
+Zusätzlich rücken die **Kacheln eine Stufe vor** (ab Stufe 1 statt 2): Dort geht es um
+Buchstaben, und zusammensetzen ist die Übung, die danach fragt. Auf Stufe 0 bleibt es bei
+der Auswahl — ein nie gesehenes Wort zu legen wäre Raten.
+
+**Der Leerzustand hat zwei Ausgänge.** Fällt ein Buchstabe zurück, kann der Vorrat
+wegschmelzen; dann stehen «Alle Wörter» und «Zu ‹Buchstaben›» da. Ein Modus, in den man
+hineinkommt, aber nicht heraus, wäre eine Falle.
+
+### Wenn ein Buchstabe nicht trägt
+
+Dieselbe Idee wie beim Verschreiben in «Übersetzen» (ADR 0033), nur milder. Wer im
+Lesemodus ein Wort **legt** und dabei einen Buchstaben gar nicht unterbringt, kennt ihn
+nicht: `state.leseFehler` zählt die Serie je Zeichen, bei `LESE_STRAFE` (4) fällt der
+Buchstabe **eine** Stufe und steht damit wieder in «Buchstaben».
+
+Drei Einschränkungen, alle aus demselben Grund — gewertet wird nur, was etwas über
+Buchstaben aussagt:
+
+- **Nur beim Legen.** Eine Auswahlfrage sagt über Schreibung nichts.
+- **Nur was fehlt, nicht was falsch steht.** Wer alle Buchstaben hat und bloß die
+  Reihenfolge verdreht, kennt sie ja (`fehlendeBuchstaben()` vergleicht als Menge).
+- **Vier statt drei.** Wer mit dem Alphabet anfängt, ist Anfänger.
+
+Dass ein gefallener Buchstabe Wörter aus dem Lesemodus mitnimmt, ist keine Nebenwirkung,
+sondern der Sinn: Er sitzt eben nicht mehr. Die Meldung sagt es auch so.
+
+`state.leseFehler` steht wie `wortFehler` und `patzer` **nicht** im Sicherungscode — eine
+Momentaufnahme, kein Lernstand.
+
 ## Vorlesen
 
 `speak(text, sprache)` meldet einen Text bei der Sprachausgabe an — `ru-RU`, wenn nichts
@@ -816,6 +876,13 @@ Belebtheit steht obendrauf.
    Ausnahmen. Später jederzeit über **«Mehr …»** wieder da — nicht über «Warum?». Der
    Knopf holt die ganze Karte zurück, nicht bloß eine Begründung; «Warum?» versprach
    weniger, als er liefert.
+
+   **Sie klappt auf wie das Menü** (`.regelklapp`, `grid-template-rows: 0fr → 1fr`) und
+   hält 20 px Abstand zu den Knöpfen — vorher klebte sie unmittelbar darunter und wirkte
+   angeschnitten. Zwei Dinge machen die Bewegung überhaupt möglich: Die Karte steht
+   **immer** im Baum, nur zugeklappt, und der Umschalter **zeichnet nicht neu**, sondern
+   legt eine Klasse um. Ein Neuaufbau setzte sie fertig aufgeklappt ein, und der Browser
+   hätte nichts, wovon aus er laufen könnte.
 3. **Anwenden**, gestaffelt wie überall: bis Stufe 1 die Form aus vier wählen, ab
    `SATZ_STUFE` selbst tippen (kyrillische Tastatur einblendbar).
 
@@ -1007,6 +1074,29 @@ rel="apple-touch-icon">`: das Maskottchen — eine Chili mit «Я»-Sprechblase 
 Browser-Reiter. Damit bleibt die ausgelieferte Datei allein, ohne dass ein Bild
 danebenliegen muss. Das Original bleibt in `docs/` als Quelle für spätere Größen.
 
+**Der Grund ist hell** (`#F4F2ED`, das `--bg` der hellen Palette). `tools/appikon.py`
+baut das Symbol aus dem Original — und tauscht dabei nicht bloß den Hintergrund:
+
+- Die **Sprechblase wird umgedreht**. Ihre Fläche ist cremeweiß und verschwände in
+  einem cremeweißen Grund; sie bekommt darum das Türkis des alten Hintergrunds, das
+  «Я» das Creme. So bleibt sie ein Gegenstand, und das Symbol behält seine Farben.
+- **Nur die Blase, nicht jede cremefarbene Stelle.** Derselbe Ton steht im Augenweiß
+  der Chili. Umgefärbt wird darum nach Fläche, nicht nach Farbe: Der Hintergrund wird
+  vom Rand her geflutet, der Rest in Zusammenhangskomponenten zerlegt, und die
+  zweitgrößte ist die Blase. Wer nach Farbe umfärbt, gibt der Figur türkise Augen —
+  genau das war der erste Versuch.
+- **Die weichen Ränder wandern mit.** Ein Randpixel ist eine Mischung zweier Farben.
+  Es wird in seine Anteile zerlegt (Projektion auf die Strecke zwischen beiden), beide
+  Anteile werden umgefärbt und wieder gemischt — sonst bliebe ein türkiser Saum um
+  Blase und Figur stehen. Die Hintergrundfarbe *an dieser Stelle* liefert eine
+  Ausgleichsebene über den geflutenten Pixeln, denn der Grund ist ein Verlauf.
+
+**Das Symbol lässt sich zur Laufzeit nicht wechseln.** iOS liest `apple-touch-icon`
+einmal — beim Anlegen der Verknüpfung — und kennt für diesen Link weder Medienabfragen
+noch eine Schnittstelle, über die eine Seite ihn nachträglich austauschen könnte. Ein
+Umschalter in den Einstellungen wäre eine Attrappe. Wer ein anderes Symbol will, löscht
+die Verknüpfung und legt sie neu an.
+
 `ICON` (am Anfang des Skripts) hält alle Symbole als Inline-SVG, gezeichnet mit
 `stroke="currentColor"`, also immer in der Farbe des umgebenden Elements. **Keine
 Emoji-Zeichen im Auslieferungspfad:** iOS rendert Zeichen aus dem Emoji-Bereich als
@@ -1032,10 +1122,11 @@ Ein einziges Objekt `state` hält den gesamten Lernstand:
 | `fakten` | je Sprachfakt `{ n: wie oft gezeigt, f: Favorit }`, unter einer kurzen Kennung |
 | `wortFehler` | Serie falscher Schreibungen je Wort — bei `WORT_STRAFE` fällt das Wort zurück |
 | `patzer` | zurückgestufte Wörter mit dem Zeitpunkt ihres Falls — der Topf des Power-Trainings |
+| `leseFehler` | Serie fehlender Buchstaben im Lesemodus — bei `LESE_STRAFE` fällt das Zeichen |
 | `settings` | Einstellungen des Nutzers, siehe unten |
 
-`wortFehler` und `patzer` stehen bewusst **nicht** im Sicherungscode: Beides sind
-Momentaufnahmen, kein Lernstand.
+`wortFehler`, `patzer` und `leseFehler` stehen bewusst **nicht** im Sicherungscode: Alle
+drei sind Momentaufnahmen, kein Lernstand.
 
 Daneben existieren pro Übung einige Modulvariablen (`uebQ`, `uebPhase`, `trTask`,
 `tWord` …). Sie beschreiben die aktuelle Frage und sind bewusst **nicht** Teil von
