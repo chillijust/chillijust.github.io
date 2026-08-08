@@ -114,11 +114,12 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   einem Text zum Kopieren (ADR 0016). Der Bezug heißt **Ort**, nicht «Übung» — er kann
   auch die Übersicht oder eine Menüansicht sein. Vom Blatt führt eine Zeile in die Liste;
   sie klappt nur zu, sie leert nicht.
-- **Was `normalize()` übersieht, übersieht auch die Farbe** (ADR 0037). Die Prüfzeile in
-  «Übersetzen» färbt den getippten Satz zeichenweise ein; Satzzeichen, Leerraum,
-  Groß-/Kleinschreibung und ё/е kosten nichts — sonst stünde eine als richtig gewertete
-  Antwort rot da. Die Farbe trägt nie allein: Falsches ist zusätzlich unterstrichen, und
-  eine Zeile zählt es in Worten.
+- **Was `normalize()` übersieht, übersieht auch die Farbe** (ADR 0037). Die Prüfzeile
+  färbt das Getippte zeichenweise ein; Satzzeichen, Leerraum, Groß-/Kleinschreibung und
+  ё/е kosten nichts — sonst stünde eine als richtig gewertete Antwort rot da. Die Farbe
+  trägt nie allein: Falsches ist zusätzlich unterstrichen, und eine Zeile zählt es in
+  Worten. Sie steht in **allen vier Schreibaufgaben** (`pruefzeileHtml()`, drei Gestalten
+  je nach Feld); die Kachelmodi bleiben draußen — gelegt ist nicht geschrieben.
 - **Die eingebaute Tastatur kommt von selbst, wo Kyrillisch verlangt ist**
   (`tastaturVorgabe()`, Einstellung `tastaturAuto`). Die Sprache der *Geräte*tastatur
   kann eine Seite nicht wählen — iOS entscheidet das, `lang` ist kein Hebel. Nichts

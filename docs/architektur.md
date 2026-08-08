@@ -413,30 +413,6 @@ behauptet hat.
 - **«Aufdecken» zählt nicht** (`trRevealed`) — aufgeben ist kein Verschreiben. Ohne diese
   Ausnahme zerlegte dreimal Aufdecken den halben Satz.
 
-### Buchstabe für Buchstabe — die Prüfzeile
-
-«Falsch» ist eine dürftige Auskunft, wenn ein einziges Zeichen daneben lag. Nach der
-Abgabe tritt darum an die Stelle des Feldes der **eingefärbte Satz** (`.pruefzeile`):
-grün, was stimmt, rot und unterstrichen, was falsch dasteht, ein schmaler roter Balken,
-wo etwas fehlt (ADR 0037).
-
-Ein `textarea` kann seinen Text nicht stellenweise färben — es muss also **weichen**,
-statt bloß gesperrt zu werden. Die Zeile sieht aus wie das Feld (gleiche Größe, gleicher
-Grund), nur ohne Rand: Hier wird nichts mehr geschrieben.
-
-`trZeichenMarken()` ist Levenshtein **mit Rückweg** — `editAbstand()` sagt nur, *wie
-viel* daneben war, nicht *wo*. Auf dem Rückweg wird die Diagonale zuerst geprüft, damit
-zwei Zeichen an derselben Stelle einander zugeordnet bleiben, statt als «zu viel» und
-«fehlt» nebeneinanderzustehen.
-
-**Was `normalize()` übersieht, muss auch die Farbe übersehen.** Satzzeichen, Leerraum,
-Groß- und Kleinschreibung und ё/е kosten nichts. Sonst stünde eine Antwort, die als
-richtig gewertet wurde, rot da — und die Farbe widerspräche dem Haken darüber.
-
-**Die Farbe trägt nichts allein.** Falsche Zeichen sind zusätzlich unterstrichen, und
-eine Zeile darunter zählt in Worten: «1 Zeichen steht falsch · 1 fehlt». Wer aufgibt,
-ohne etwas zu schreiben, bekommt gar keine Zeile — es gibt nichts einzufärben.
-
 ### Welche Tastatur
 
 Die **eingebaute kyrillische Tastatur** (dieselben `KB_ROWS` wie in «Tippen») erscheint
@@ -459,6 +435,50 @@ Abgabeknopf wird nachgeführt.
 Beim Schreiben gibt es die Abgabe **immer**, unabhängig von der Einstellung
 «Bestätigen»: Anders als bei den Kacheln gibt es keinen Augenblick, an dem die Antwort
 erkennbar fertig ist.
+
+## Die Prüfzeile — Buchstabe für Buchstabe
+
+«Falsch» ist eine dürftige Auskunft, wenn ein einziges Zeichen daneben lag. Nach der
+Abgabe tritt darum an die Stelle des Feldes das **eingefärbte Getippte**
+(`.pruefzeile`): grün, was stimmt, rot und unterstrichen, was falsch dasteht, ein
+schmaler roter Balken, wo etwas fehlt (ADR 0037).
+
+**Alle vier Schreibaufgaben teilen sie sich** — «Übersetzen», «Tippen», «Grammatik» und
+das Power-Training. `pruefzeileHtml()` und `zeichenMarken()` stehen darum bei den
+Hilfsfunktionen, nicht in einer Übung.
+
+Ein `textarea` kann seinen Text nicht stellenweise färben — das Feld muss also
+**weichen**, statt bloß gesperrt zu werden. Damit der Blick beim Wechsel nicht springt,
+kennt die Zeile **drei Gestalten**, je nachdem, an wessen Stelle sie tritt:
+
+| Gestalt | wo | sieht aus wie |
+| --- | --- | --- |
+| `satz` | «Übersetzen» | das große linksbündige Feld, 19 px auf `--bg` |
+| `wort` | «Tippen» | die mittige Zeile, 22 px auf `--bg` |
+| `form` | «Grammatik», Power-Training | das kleine Feld, 16 px auf `--card-2` |
+
+`zeichenMarken()` ist Levenshtein **mit Rückweg** — `editAbstand()` sagt nur, *wie viel*
+daneben war, nicht *wo*. Auf dem Rückweg wird die Diagonale zuerst geprüft, damit zwei
+Zeichen an derselben Stelle einander zugeordnet bleiben, statt als «zu viel» und «fehlt»
+nebeneinanderzustehen.
+
+**Was `normalize()` übersieht, muss auch die Farbe übersehen.** Satzzeichen, Leerraum,
+Groß- und Kleinschreibung und ё/е kosten nichts. Sonst stünde eine Antwort, die als
+richtig gewertet wurde, rot da — und die Farbe widerspräche dem Haken darüber.
+
+**Die Farbe trägt nichts allein.** Falsche Zeichen sind zusätzlich unterstrichen, und
+eine Zeile darunter zählt in Worten: «1 Zeichen steht falsch · 1 fehlt». Wer aufgibt,
+ohne etwas zu schreiben, bekommt gar keine Zeile — es gibt nichts einzufärben.
+
+**Gelegt ist nicht geschrieben.** Die Kachelmodi bekommen keine Prüfzeile: Dort prüft die
+Aufgabe die Reihenfolge, nicht die Schreibung, und die Kacheln geben die Zeichen ohnehin
+vor.
+
+**Der getippte Text braucht ein Zuhause außerhalb des Feldes.** In «Übersetzen»,
+«Grammatik» und im Power-Training war das schon so (`trEingabe`, `gramEingabe`,
+`ptEingabe`); «Tippen» hielt ihn allein im Feld und schrieb ihn nach jedem Renderlauf von
+Hand zurück. Mit der Prüfzeile gibt es das Feld in der Auflösung aber nicht mehr — also
+gibt es jetzt auch dort ein `tEingabe`.
 
 ## Power-Training — die Gefallenen zurückholen
 

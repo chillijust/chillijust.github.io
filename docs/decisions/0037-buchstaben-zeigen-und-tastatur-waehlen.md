@@ -61,6 +61,23 @@ gibt es nichts zu tun und nichts vorzutäuschen.
   entscheidet die Hand.
 - Drei Bestandstests prüften die alte Vorgabe («Tastatur startet zugeklappt») und wurden
   umgestellt.
-- Die Prüfzeile bleibt vorerst auf «Übersetzen» beschränkt. In «Tippen» wäre sie
-  dieselbe Sache mit demselben Helfer — aber ein Wort statt eines Satzes, und danach war
-  nicht gefragt.
+- Die Prüfzeile blieb zunächst auf «Übersetzen» beschränkt — danach war gefragt.
+
+## Nachtrag · 2026-08-08
+
+Auf Wunsch ausgeweitet auf **alle vier Schreibaufgaben**: «Tippen», «Grammatik» und das
+Power-Training bekommen dieselbe Zeile. Das ist keine neue Entscheidung, nur ihre
+Fortsetzung — die Begründung oben gilt unverändert. Drei Dinge kamen dabei hinzu:
+
+- `zeichenMarken()` und `pruefzeileHtml()` heißen nicht mehr `tr…` und stehen bei den
+  Hilfsfunktionen. Vier Übungen fragen danach, keine besitzt sie mehr.
+- Die Zeile kennt **drei Gestalten** (`satz`, `wort`, `form`), weil das Feld, an dessen
+  Stelle sie tritt, in jeder Übung anders aussieht. Der Blick soll beim Wechsel nicht
+  springen.
+- «Tippen» hielt den getippten Text allein im Feld und schrieb ihn nach jedem
+  Renderlauf von Hand zurück. Ohne Feld in der Auflösung geht das nicht mehr — daher
+  `tEingabe`, wie in den drei anderen Übungen längst üblich.
+
+**Die Kachelmodi bleiben draußen.** Gelegt ist nicht geschrieben: Dort prüft die Aufgabe
+die Reihenfolge, nicht die Schreibung, und die Kacheln geben die Zeichen ohnehin vor. In
+«Übersetzen» war das von Anfang an so.

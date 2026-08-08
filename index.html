@@ -735,9 +735,21 @@ input.err, textarea.err { border-color: var(--bad); }
    wie das Feld — gleiche Größe, gleicher Grund —, damit der Blick nicht
    springt, nur ihr Rand bleibt weg: Hier wird nichts mehr geschrieben. */
 .pruefzeile {
+  white-space: pre-wrap; word-break: break-word; line-height: 1.5;
+}
+/* Drei Gestalten, weil das Feld, an dessen Stelle sie tritt, in jeder Übung
+   anders aussieht — der Blick soll beim Wechsel nicht springen. */
+.pruefzeile.satz {
   margin: 16px 0 0; padding: 12px 14px; border-radius: 12px;
-  background: var(--bg); font-size: 19px; line-height: 1.5;
-  text-align: left; white-space: pre-wrap; word-break: break-word;
+  background: var(--bg); font-size: 19px; text-align: left;
+}
+.pruefzeile.wort {
+  margin: 16px 0 0; padding: 12px; border-radius: 12px; min-height: 48px;
+  background: var(--bg); font-size: 22px; text-align: center;
+}
+.pruefzeile.form {
+  margin: 10px 0 0; padding: 10px; border-radius: 10px;
+  background: var(--card-2); font-size: 16px; text-align: left;
 }
 .z-ok { color: var(--good); }
 /* Nicht nur Farbe: Wer Rot und Grün nicht unterscheidet, sieht den Strich. */
@@ -2562,6 +2574,106 @@ function naechsterFakt() {
 function normalize(s) {
   return (s || '').toLowerCase().replace(/ё/g, 'е').replace(/[.,!?;:]/g, '').replace(/\s+/g, ' ').trim();
 }
+
+// ── Buchstabe für Buchstabe ─────────────────────────────────
+// «Falsch» ist eine dürftige Auskunft, wenn ein einziges Zeichen daneben lag.
+// Nach der Abgabe wird das Getippte darum eingefärbt: Was stimmt, steht grün,
+// was falsch dasteht, rot, und wo etwas fehlt, ein schmaler Strich.
+//
+// Steht hier bei den Hilfsfunktionen, nicht in einer Übung: Vier fragen danach
+// — «Übersetzen», «Tippen», «Grammatik» und das Power-Training.
+//
+// Der Abstand allein sagt nur, *wie viel* daneben war — nicht *wo*. Es braucht
+// also Levenshtein mit Rückweg, nicht bloß `editAbstand()`.
+//
+// Satzzeichen, Groß- und Kleinschreibung und ё/е kosten nichts. Sonst stünde
+// eine Antwort, die als richtig gewertet wurde, rot da — `normalize()` sieht
+// über genau diese Unterschiede hinweg, und die Farbe muss dasselbe tun.
+function zeichenNeutral(c) { return /[.,!?;:\s]/.test(c); }
+function zeichenGleich(a, b) {
+  return a.toLowerCase().replace(/ё/g, 'е') === b.toLowerCase().replace(/ё/g, 'е');
+}
+
+function zeichenMarken(eingabe, loesung) {
+  var a = String(eingabe), b = String(loesung);
+  var n = a.length, m = b.length;
+  var kosten = [], i, j;
+  for (i = 0; i <= n; i++) {
+    kosten[i] = [];
+    for (j = 0; j <= m; j++) {
+      if (i === 0 && j === 0) { kosten[0][0] = 0; continue; }
+      if (i === 0) {
+        kosten[0][j] = kosten[0][j - 1] + (zeichenNeutral(b.charAt(j - 1)) ? 0 : 1);
+        continue;
+      }
+      if (j === 0) {
+        kosten[i][0] = kosten[i - 1][0] + (zeichenNeutral(a.charAt(i - 1)) ? 0 : 1);
+        continue;
+      }
+      var ca = a.charAt(i - 1), cb = b.charAt(j - 1);
+      kosten[i][j] = Math.min(
+        kosten[i - 1][j] + (zeichenNeutral(ca) ? 0 : 1),   // zu viel getippt
+        kosten[i][j - 1] + (zeichenNeutral(cb) ? 0 : 1),   // fehlt
+        kosten[i - 1][j - 1] + (zeichenGleich(ca, cb) ? 0 : 1)
+      );
+    }
+  }
+  // Rückweg. Die Diagonale wird zuerst geprüft: Zwei Zeichen an derselben
+  // Stelle sollen einander zugeordnet bleiben, statt als «zu viel» und
+  // «fehlt» nebeneinanderzustehen.
+  var marken = [];
+  i = n;
+  j = m;
+  while (i > 0 || j > 0) {
+    var za = i > 0 ? a.charAt(i - 1) : '';
+    var zb = j > 0 ? b.charAt(j - 1) : '';
+    if (i > 0 && j > 0 &&
+      kosten[i][j] === kosten[i - 1][j - 1] + (zeichenGleich(za, zb) ? 0 : 1)) {
+      marken.unshift({ z: za, art: zeichenGleich(za, zb) ? 'ok' : 'weg' });
+      i--;
+      j--;
+    } else if (i > 0 &&
+      kosten[i][j] === kosten[i - 1][j] + (zeichenNeutral(za) ? 0 : 1)) {
+      marken.unshift({ z: za, art: zeichenNeutral(za) ? 'ok' : 'weg' });
+      i--;
+    } else {
+      if (!zeichenNeutral(zb)) marken.unshift({ z: '', art: 'fehlt' });
+      j--;
+    }
+  }
+  return marken;
+}
+
+// `gestalt` sagt, an wessen Stelle die Zeile tritt: 'satz' für das große Feld
+// in «Übersetzen», 'wort' für die mittige Zeile in «Tippen», 'form' für die
+// kleinen Felder in «Grammatik» und im Power-Training. Der Blick soll beim
+// Wechsel nicht springen.
+function pruefzeileHtml(eingabe, loesung, kyrillisch, gestalt) {
+  if (!String(eingabe).replace(/^\s+|\s+$/g, '')) return '';
+  var marken = zeichenMarken(eingabe, loesung);
+  var fehlt = 0, falsch = 0;
+  var html = '<p class="pruefzeile ' + (gestalt || 'satz') +
+    (kyrillisch ? ' cyr' : '') + '">';
+  marken.forEach(function (mk) {
+    if (mk.art === 'fehlt') {
+      fehlt++;
+      html += '<span class="z-fehlt" aria-hidden="true"></span>';
+      return;
+    }
+    if (mk.art === 'weg') falsch++;
+    html += '<span class="z-' + mk.art + '">' + esc(mk.z) + '</span>';
+  });
+  html += '</p>';
+  // Die Farbe allein darf nichts tragen: Wer sie nicht unterscheidet, liest
+  // hier, worum es geht. (Die falschen Zeichen sind zusätzlich unterstrichen.)
+  if (falsch || fehlt) {
+    html += '<p class="pruef-note">' +
+      (falsch ? falsch + (falsch === 1 ? ' Zeichen steht' : ' Zeichen stehen') + ' falsch' : '') +
+      (falsch && fehlt ? ' · ' : '') +
+      (fehlt ? fehlt + (fehlt === 1 ? ' fehlt' : ' fehlen') : '') + '</p>';
+  }
+  return html;
+}
 function shuffle(arr) {
   var a = arr.slice();
   for (var i = a.length - 1; i > 0; i--) {
@@ -3853,6 +3965,7 @@ function ansichtenZuruecksetzen() {
   tWord = null;
   tResult = null;
   tHint = false;
+  tEingabe = '';
   tKb = null;
   tippenModus = 'lernen';
 
@@ -4778,98 +4891,6 @@ function satzMitWissen(text) {
 }
 
 // Stufenwahl mit Angabe, wie viele S\u00e4tze je Stufe schon offen sind.
-// ── Buchstabe für Buchstabe ─────────────────────────────────
-// «Falsch» ist eine dürftige Auskunft, wenn ein einziges Zeichen daneben lag.
-// Nach der Abgabe wird der getippte Satz darum eingefärbt: Was stimmt, steht
-// grün, was falsch dasteht, rot, und wo etwas fehlt, ein schmaler Strich.
-//
-// Der Abstand allein sagt nur, *wie viel* daneben war — nicht *wo*. Es braucht
-// also Levenshtein mit Rückweg, nicht bloß `editAbstand()`.
-//
-// Satzzeichen, Groß- und Kleinschreibung und ё/е kosten nichts. Sonst stünde
-// eine Antwort, die als richtig gewertet wurde, rot da — `normalize()` sieht
-// über genau diese Unterschiede hinweg, und die Farbe muss dasselbe tun.
-function trZeichenNeutral(c) { return /[.,!?;:\s]/.test(c); }
-function trZeichenGleich(a, b) {
-  return a.toLowerCase().replace(/ё/g, 'е') === b.toLowerCase().replace(/ё/g, 'е');
-}
-
-function trZeichenMarken(eingabe, loesung) {
-  var a = String(eingabe), b = String(loesung);
-  var n = a.length, m = b.length;
-  var kosten = [], i, j;
-  for (i = 0; i <= n; i++) {
-    kosten[i] = [];
-    for (j = 0; j <= m; j++) {
-      if (i === 0 && j === 0) { kosten[0][0] = 0; continue; }
-      if (i === 0) {
-        kosten[0][j] = kosten[0][j - 1] + (trZeichenNeutral(b.charAt(j - 1)) ? 0 : 1);
-        continue;
-      }
-      if (j === 0) {
-        kosten[i][0] = kosten[i - 1][0] + (trZeichenNeutral(a.charAt(i - 1)) ? 0 : 1);
-        continue;
-      }
-      var ca = a.charAt(i - 1), cb = b.charAt(j - 1);
-      kosten[i][j] = Math.min(
-        kosten[i - 1][j] + (trZeichenNeutral(ca) ? 0 : 1),   // zu viel getippt
-        kosten[i][j - 1] + (trZeichenNeutral(cb) ? 0 : 1),   // fehlt
-        kosten[i - 1][j - 1] + (trZeichenGleich(ca, cb) ? 0 : 1)
-      );
-    }
-  }
-  // Rückweg. Die Diagonale wird zuerst geprüft: Zwei Zeichen an derselben
-  // Stelle sollen einander zugeordnet bleiben, statt als «zu viel» und
-  // «fehlt» nebeneinanderzustehen.
-  var marken = [];
-  i = n;
-  j = m;
-  while (i > 0 || j > 0) {
-    var za = i > 0 ? a.charAt(i - 1) : '';
-    var zb = j > 0 ? b.charAt(j - 1) : '';
-    if (i > 0 && j > 0 &&
-      kosten[i][j] === kosten[i - 1][j - 1] + (trZeichenGleich(za, zb) ? 0 : 1)) {
-      marken.unshift({ z: za, art: trZeichenGleich(za, zb) ? 'ok' : 'weg' });
-      i--;
-      j--;
-    } else if (i > 0 &&
-      kosten[i][j] === kosten[i - 1][j] + (trZeichenNeutral(za) ? 0 : 1)) {
-      marken.unshift({ z: za, art: trZeichenNeutral(za) ? 'ok' : 'weg' });
-      i--;
-    } else {
-      if (!trZeichenNeutral(zb)) marken.unshift({ z: '', art: 'fehlt' });
-      j--;
-    }
-  }
-  return marken;
-}
-
-function trPruefzeileHtml(eingabe, loesung, kyrillisch) {
-  if (!String(eingabe).replace(/^\s+|\s+$/g, '')) return '';
-  var marken = trZeichenMarken(eingabe, loesung);
-  var fehlt = 0, falsch = 0;
-  var html = '<p class="pruefzeile' + (kyrillisch ? ' cyr' : '') + '">';
-  marken.forEach(function (mk) {
-    if (mk.art === 'fehlt') {
-      fehlt++;
-      html += '<span class="z-fehlt" aria-hidden="true"></span>';
-      return;
-    }
-    if (mk.art === 'weg') falsch++;
-    html += '<span class="z-' + mk.art + '">' + esc(mk.z) + '</span>';
-  });
-  html += '</p>';
-  // Die Farbe allein darf nichts tragen: Wer sie nicht unterscheidet, liest
-  // hier, worum es geht. (Die falschen Zeichen sind zusätzlich unterstrichen.)
-  if (falsch || fehlt) {
-    html += '<p class="pruef-note">' +
-      (falsch ? falsch + (falsch === 1 ? ' Zeichen steht' : ' Zeichen stehen') + ' falsch' : '') +
-      (falsch && fehlt ? ' · ' : '') +
-      (fehlt ? fehlt + (fehlt === 1 ? ' fehlt' : ' fehlen') : '') + '</p>';
-  }
-  return html;
-}
-
 function renderUebersetzen() {
   if (!trTask) buildTransTask();
   if (!trTask) { renderUebersetzenLeer(); return; }
@@ -4893,7 +4914,7 @@ function renderUebersetzen() {
     // `textarea` kann seinen Text nicht stellenweise färben — es muss also
     // weichen, statt bloß gesperrt zu werden.
     if (trPhase === 'feedback') {
-      html += trPruefzeileHtml(trEingabe, t.solution, !!t.loesungRu);
+      html += pruefzeileHtml(trEingabe, t.solution, !!t.loesungRu, 'satz');
     } else {
       html += '<textarea id="trInput" rows="2" class="fliess' + (t.loesungRu ? ' cyr' : '') +
         '" lang="' + (t.loesungRu ? 'ru' : 'de') + '" autocapitalize="sentences"' +
@@ -5991,11 +6012,11 @@ function gramUebenHtml(b) {
           esc(PERSON_DE[q.person]));
     }
     if (q.tippen) {
-      html += '<textarea id="gramInput" rows="1" class="fliess cyr' +
-        (gramPhase === 'feedback' ? (gramCorrect ? ' ok' : ' err') : '') + '"' +
-        ' lang="ru" autocapitalize="off" autocorrect="off" spellcheck="false"' +
-        (gramPhase === 'feedback' ? ' readonly' : '') +
-        ' placeholder="Die Form schreiben …">' + esc(gramEingabe) + '</textarea>';
+      html += gramPhase === 'feedback'
+        ? pruefzeileHtml(gramEingabe, q.loesung, true, 'form')
+        : '<textarea id="gramInput" rows="1" class="fliess cyr"' +
+          ' lang="ru" autocapitalize="off" autocorrect="off" spellcheck="false"' +
+          ' placeholder="Die Form schreiben …">' + esc(gramEingabe) + '</textarea>';
     } else {
       html += '<div class="options abc-optionen">';
       q.optionen.forEach(function (f, i) {
@@ -6468,11 +6489,11 @@ function renderPower() {
         ICON.ruecktaste + '</button></div>';
     }
   } else {
-    html += '<textarea id="ptInput" rows="1" class="fliess cyr' +
-      (ptPhase === 'feedback' ? (ptCorrect ? ' ok' : ' err') : '') + '"' +
-      ' lang="ru" autocapitalize="off" autocorrect="off" spellcheck="false"' +
-      (ptPhase === 'feedback' ? ' readonly' : '') +
-      ' placeholder="кириллица …">' + esc(ptEingabe) + '</textarea>';
+    html += ptPhase === 'feedback'
+      ? pruefzeileHtml(ptEingabe, q.wort.ru, true, 'form')
+      : '<textarea id="ptInput" rows="1" class="fliess cyr"' +
+        ' lang="ru" autocapitalize="off" autocorrect="off" spellcheck="false"' +
+        ' placeholder="кириллица …">' + esc(ptEingabe) + '</textarea>';
   }
 
   if (ptPhase === 'feedback') {
@@ -6602,6 +6623,10 @@ function renderPowerFertig() {
 // Stufe voll; danach ist es **aus dem Pool**. Nach der Auffrischfrist kommt es
 // einmal zur Sicherheit wieder — richtig getippt, und es ist wieder draußen.
 var tWord = null, tResult = null, tHint = false, tKb = null;
+// Der getippte Text. Er stand bisher nur im Feld und wurde nach jedem
+// Renderlauf von Hand zurückgeschrieben — mit der Prüfzeile gibt es das Feld
+// in der Auflösung aber nicht mehr.
+var tEingabe = '';
 var tippenModus = 'lernen';   // 'lernen' · 'wiederholung'
 
 // Offen: begonnen, aber noch nicht fertig. Ohne Fälligkeitsfilter — wer üben
@@ -6737,9 +6762,11 @@ function renderTippen() {
       ? 'Zur Sicherheit noch einmal' : 'Schreiben Sie auf Russisch') + '</p>' +
     '<p class="word">' + esc(w.de) + hoerknopf(w.de, 'de') + '</p>' +
     (tHint ? '<p class="translit">[' + esc(w.tr) + ']</p>' : '') +
-    '<input type="text" id="tInput" class="cyr' + (tResult === 'right' ? ' ok' : tResult === 'wrong' ? ' err' : '') + '"' +
-    ' placeholder="кириллица \u2026" lang="ru" autocapitalize="off" autocorrect="off" spellcheck="false"' +
-    (tResult ? ' readonly' : '') + '>';
+    (tResult
+      ? pruefzeileHtml(tEingabe, w.ru, true, 'wort')
+      : '<input type="text" id="tInput" class="cyr" value="' + esc(tEingabe) + '"' +
+        ' placeholder="кириллица \u2026" lang="ru" autocapitalize="off"' +
+        ' autocorrect="off" spellcheck="false">');
 
   if (tResult === 'wrong') html += '<p class="feedback bad">' + ICON.kreuz + 'Richtig: <strong class="cyr">' + esc(w.ru) + '</strong></p>';
   if (tResult === 'right') html += '<p class="feedback good">' + ICON.haken + 'Правильно — richtig!</p>';
@@ -6776,11 +6803,12 @@ function renderTippen() {
 
   main.innerHTML = html;
 
+  // In der Auflösung steht hier kein Feld mehr, sondern die Prüfzeile.
   var input = document.getElementById('tInput');
 
   function check() {
     if (tResult) return;
-    var ok = normalize(input.value) === normalize(w.ru);
+    var ok = normalize(tEingabe) === normalize(w.ru);
     tResult = ok ? 'right' : 'wrong';
     var vorher = state.boxes[w.id] || 0;
     updateBox(w.id, ok);
@@ -6792,27 +6820,27 @@ function renderTippen() {
     state.typingStats.wrong += ok ? 0 : 1;
     zuletztGeuebt('tippen');
     save();
-    var v = input.value;
     renderTippen();
-    document.getElementById('tInput').value = v;
   }
   function next() {
     tResult = null;
     tHint = false;
+    tEingabe = '';
     meisterMeldung = null;
     tWord = waehleWort(tippenPool());
     renderTippen();
   }
 
-  input.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') { if (tResult) next(); else check(); }
-  });
+  if (input) {
+    input.addEventListener('input', function () { tEingabe = input.value; });
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { tEingabe = input.value; check(); }
+    });
+  }
   var hintBtn = document.getElementById('tHintBtn');
   if (hintBtn) hintBtn.addEventListener('click', function () {
     tHint = true;
-    var v = input.value;
     renderTippen();
-    document.getElementById('tInput').value = v;
   });
   var checkBtn = document.getElementById('tCheck');
   if (checkBtn) checkBtn.addEventListener('click', check);
@@ -6820,17 +6848,15 @@ function renderTippen() {
   if (nextBtn) nextBtn.addEventListener('click', next);
   document.getElementById('tKbToggle').addEventListener('click', function () {
     tKb = !tKb;
-    var v = document.getElementById('tInput').value;
     renderTippen();
-    document.getElementById('tInput').value = v;
   });
   main.querySelectorAll('[data-key]').forEach(function (b) {
     b.addEventListener('click', function () {
       if (tResult) return;
-      var inp = document.getElementById('tInput');
       var k = b.dataset.key;
-      if (k === 'BS') inp.value = inp.value.slice(0, -1);
-      else inp.value += k;
+      tEingabe = k === 'BS' ? tEingabe.slice(0, -1) : tEingabe + k;
+      var inp = document.getElementById('tInput');
+      if (inp) inp.value = tEingabe;
     });
   });
 }
