@@ -3222,7 +3222,9 @@ function filterInhaltHtml() {
       filterGruppe('Stapel',
         filterChip('trmodus', 'lernen', 'Lernen \u00b7 ' + trLernen(trLevel).length, trModus === 'lernen') +
         filterChip('trmodus', 'wiederholung', 'Wiederholung \u00b7 ' + trWiederholung(trLevel).length,
-          trModus === 'wiederholung'));
+          trModus === 'wiederholung') +
+        filterChip('trmodus', 'alle', 'Alle \u00b7 ' + freieSaetze(trLevel).length,
+          trModus === 'alle'));
   }
   if (currentTab === 'buchstaben') {
     // Die Tafel steckt im eigenen Knopf daneben, nicht mehr hier — sie ist
@@ -4440,7 +4442,7 @@ function renderUeben() {
 // aus dem Lehrplan) mindestens SATZ_STUFE erreicht hat.
 var SATZ_STUFE = 2;
 var trLevel = 1, trDir = 'gemischt';   // 'gemischt' · 'ru-de' · 'de-ru'
-var trModus = 'lernen';   // 'lernen' · 'wiederholung' — wie in «Tippen»
+var trModus = 'lernen';   // 'lernen' · 'wiederholung' · 'alle'
 // 'gemischt' ist der Regelfall: die Richtung wechselt dann mit der Stufe.
 var trTask = null, trBuilt = [], trPhase = 'ask', trCorrect = null, trRevealed = false;
 // Der getippte Satz und die eingeblendete Tastatur. Beides gehört an die
@@ -4642,7 +4644,7 @@ function waehleSatz(pool, ausser) {
 // Ohne Argument wird der nächste Satz gewählt; mit Argument ein bestimmter.
 function buildTransTask(vorgabe) {
   // Ist der gewählte Stapel leer und der andere nicht, dorthin wechseln.
-  if (!vorgabe && !trPool().length) {
+  if (!vorgabe && trModus !== 'alle' && !trPool().length) {
     var anderer = trModus === 'lernen' ? 'wiederholung' : 'lernen';
     trModus = anderer;
     if (!trPool().length) trModus = 'lernen';
@@ -5041,7 +5043,8 @@ function renderUebersetzen() {
   }
   var sitzt = liste.filter(function (x) { return satzBox(x) >= BOX_MAX; }).length;
   html += '<p class="session-info">' + trPool().length +
-    (trModus === 'wiederholung' ? ' zum Auffrischen' : ' offen') + ' · ' +
+    (trModus === 'wiederholung' ? ' zum Auffrischen'
+      : trModus === 'alle' ? ' im Stapel' : ' offen') + ' · ' +
     sitzt + ' von ' + liste.length + ' sitzt';
   if (state.transStats.correct + state.transStats.wrong > 0) {
     html += ' · ' + state.transStats.correct + ' richtig, ' + state.transStats.wrong + ' falsch';

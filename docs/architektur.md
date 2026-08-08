@@ -553,6 +553,7 @@ Kacheln mit ihren Beständen:
 | **Lernen** | `tippenStufe <= box < BOX_MAX` | `satzBox < BOX_MAX` |
 | **Wiederholung** | `box === BOX_MAX` **und** fällig | `satzBox === BOX_MAX` **und** fällig |
 | *(ruhend, nicht sichtbar)* | `box === BOX_MAX`, noch nicht fällig | `satzBox === BOX_MAX`, noch nicht fällig |
+| **Alle** *(nur Sätze)* | — | alle freigeschalteten, ohne Rücksicht auf Stufe und Frist |
 
 Wer etwas fertig lernt, sieht es also **nicht mehr** — bis die Auffrischfrist um ist.
 Dann kommt es einmal zur Sicherheit; richtig beantwortet ruht es wieder, falsch fällt es
@@ -568,7 +569,18 @@ Sache.
 **Umschalten geschieht von selbst:** Ist der gewählte Stapel leer und der andere nicht,
 wechseln `renderTippen()` beziehungsweise `buildTransTask()` hinüber. Sind beide leer,
 nennt der Leerzustand, wann das Nächste fällig wird (`naechsteAuffrischung()`,
-`trNaechsteAuffrischung()`).
+`trNaechsteAuffrischung()`). **Der Stapel «Alle» ist davon ausgenommen** — wer ihn
+gewählt hat, soll darin bleiben.
+
+**«Alle» hebt die Teilung auf**, und es musste ihn geben: Wer alle Sätze gemeistert hat,
+stand vor zwei Stapeln mit null und konnte nichts wiederholen, bis die Frist um war. Für
+Wörter gab es diesen Ausweg längst (`uebAuswahl === 'alle'` in «Lernsets», und «Freestyle»
+kennt den ganzen Wortschatz ohnehin); für Sätze fehlte er. Die Vorgabe bleibt «Lernen» —
+ADR 0015 gilt für den Regelfall, nicht für den ausdrücklichen Wunsch.
+
+Eine Antwort im Stapel «Alle» zählt ganz normal: Sie hält den Satz auf `BOX_MAX` und
+schiebt seine nächste Auffrischung nach hinten. Gemeldet wird nichts — `meisterPruefen()`
+kennt nur den **Übergang** auf die Endstufe (ADR 0026).
 
 ### Sätze führen dieselbe Leiter
 
