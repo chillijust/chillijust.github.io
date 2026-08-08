@@ -54,15 +54,10 @@ Farben gibt es nicht in einer dunklen Fassung.
 `meta[name=theme-color]` nach, damit die Statusleiste auf dem iPhone passt. Wie zuvor der
 dunkle Grundton trägt **«dark» kein Attribut**: Seine Palette steht im `:root` selbst.
 
-**In «Dark» liegt die Kachel unter dem Grund** (ADR 0040): Kacheln, Kopfzeile und der
-Schein hinter dem Kopf tragen den tieferen Ton (`#15171B`), die Fläche dazwischen den
-helleren (`#212429`). In den hellen Schemata ist es umgekehrt. Die Kopfzeile hat dafür
-eine eigene Variable `--kopf` — in «dark» der Kachelton, in den hellen `var(--bg)`.
-`--card-2` bleibt in jedem Schema die hellste der vier Flächen: Es trägt Chips, Schalter
-und Tasten, und die sollen aufliegen.
-
-Die Statusleiste nennt darum den **Kopfton**, nicht den Grund — sie sitzt unmittelbar
-über der Kopfzeile. `SCHEMATA[].grund` führt diesen Wert.
+**Die Kachel liegt in jedem Schema über dem Grund** — in «Dark» seit ADR 0041 mit einem
+deutlichen Schritt (Grund `#1A1A18`, Kachel `#2A2926`, warmneutral statt blau). Die
+Kopfzeile nimmt überall den Grund. `--card-2` ist die Bedienfläche für Chips, Schalter und
+Tasten; in «Dark» rückt sie von der Kachel nach oben, in den hellen nach unten.
 
 `prefers-color-scheme` wertet die App **nicht** aus. Ein Schema ist eine Wahl, keine
 Umgebungsbedingung; wer Rosa gewählt hat, will es auch abends. (Bis ADR 0039 folgte die
@@ -78,7 +73,7 @@ gleich weit vom Grund ab und der Kontrast zum Text bleibt vergleichbar — gemes
 der größte anteilige Verlust gegenüber «classic» unter 7 %, die Lesetexte bei mindestens
 11,7 : 1.
 
-`SCHEMATA` im Skript führt je Schema nur den Kopfton. Das ist die einzige Stelle, an der
+`SCHEMATA` im Skript führt je Schema nur den Grundwert. Das ist die einzige Stelle, an der
 eine Flächenfarbe doppelt steht — `meta[name=theme-color]` nimmt eine Zahl und keine
 Medienabfrage. Bei der dunklen Palette steht sie sogar dreifach: Das `theme-color`-Meta im
 `<head>` gilt, bevor das Skript zum ersten Mal läuft.

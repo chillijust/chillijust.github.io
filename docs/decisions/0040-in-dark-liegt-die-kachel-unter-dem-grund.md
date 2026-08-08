@@ -1,6 +1,10 @@
 # 0040 · In «Dark» liegt die Kachel unter dem Grund
 
-**Stand:** angenommen · 2026-08-08 · ergänzt [ADR 0039](0039-ein-farbschema-statt-zweier-achsen.md)
+**Stand:** **abgelöst** durch [ADR 0041](0041-die-dunkle-palette-neu.md) · 2026-08-08
+
+> Die hier beschriebene Umkehrung stand nur wenige Minuten und gefiel am Gerät nicht.
+> Die Kachel liegt wieder über dem Grund; `--kopf` gibt es nicht mehr. Der Eintrag bleibt
+> stehen, weil er festhält, was probiert wurde und warum es nicht trug.
 
 ## Ausgangslage
 
