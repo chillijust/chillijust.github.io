@@ -147,6 +147,12 @@ Stunden) begrenzt das Gedächtnis. Danach kommt die Empfehlung wieder aus dem Le
 Eine gesperrte Übung wird nie vorgeschlagen, und ein `state.zuletzt`, das auf eine Übung
 zeigt, die es nicht mehr gibt, fällt in `mergeState()` weg.
 
+**Eine leere ebenso wenig.** `uebungsStand()` gibt neben dem Text zwei Kennzeichen
+zurück: `gesperrt` heißt «hier geht noch nichts», **`leer` heißt «hier ist gerade nichts
+zu tun»**. Die Empfehlung überspringt beide. Ohne das schickte «Weiter mit …» einen
+zurück in die Übung, die man gerade fertig gemacht hatte — in einen Leerzustand, dessen
+einziger Knopf nach Home führt. Eine Schleife, und zwar genau im Augenblick des Erfolgs.
+
 **Zurück gibt es zweimal**: den Pfeil oben links und eine Wischgeste vom linken
 Bildschirmrand zur Mitte. Beide rufen `zurueckGehen()`. Die Geste ist für das Vollbild
 der Home-Bildschirm-Verknüpfung, wo die Zurück-Geste des Browsers fehlt: Sie beginnt nur

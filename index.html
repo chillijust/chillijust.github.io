@@ -3652,6 +3652,9 @@ document.addEventListener('keydown', function (e) {
 
 // ── Home ────────────────────────────────────────────────────
 // Nicht bloß ein Verzeichnis: jede Kachel sagt, was dort gerade ansteht.
+// Was auf der Kachel steht — und zwei Kennzeichen für die Empfehlung:
+// `gesperrt` heißt «hier geht noch nichts», `leer` heißt «hier ist gerade
+// nichts zu tun». Beides darf sie nicht vorschlagen.
 function uebungsStand(id) {
   var jetzt = Date.now();
   if (id === 'lernsets') {
@@ -3672,7 +3675,7 @@ function uebungsStand(id) {
     var lernen = tippenLernen().length, frisch = tippenWiederholung().length;
     if (!lernen && !frisch) {
       return tippenRuhend().length
-        ? { text: 'alles getippt' }
+        ? { text: 'alles getippt', leer: true }
         : { text: 'noch gesperrt', gesperrt: true };
     }
     return { text: lernen + ' offen' + (frisch ? ' · ' + frisch + ' fällig' : ''), warm: !!frisch };
@@ -3685,13 +3688,13 @@ function uebungsStand(id) {
       faellig2 += trWiederholung(n).length;
     });
     if (!frei) return { text: 'noch gesperrt', gesperrt: true };
-    if (!offen2 && !faellig2) return { text: 'alles übersetzt' };
+    if (!offen2 && !faellig2) return { text: 'alles übersetzt', leer: true };
     return { text: offen2 + ' offen' + (faellig2 ? ' · ' + faellig2 + ' fällig' : ''), warm: !!faellig2 };
   }
   if (id === 'buchstaben') {
     var sitzt = abcGelernt();
     var offen2 = abcPool().length;
-    if (!offen2) return { text: 'alles gemeistert' };
+    if (!offen2) return { text: 'alles gemeistert', leer: true };
     var faelligAbc = ALPHABET.filter(function (b) {
       return abcGemeistert(b) && abcFaellig(b, jetzt);
     }).length;
@@ -3704,7 +3707,7 @@ function uebungsStand(id) {
   if (id === 'grammatik') {
     var sitzen = gramMeisterschaft();
     var offenG = gramPool().length;
-    if (!offenG) return { text: 'alle Regeln sitzen' };
+    if (!offenG) return { text: 'alle Regeln sitzen', leer: true };
     var naechster = gramWaehlen();
     return {
       text: naechster && !gramEntdeckt(naechster)
@@ -3743,7 +3746,10 @@ function empfehlung() {
   var z = state.zuletzt;
   if (z && Date.now() - z.zeit < FORTSETZEN_FRIST && UEBUNG_NAME[z.uebung]) {
     var stand = uebungsStand(z.uebung);
-    if (!stand.gesperrt) {
+    // «Weiter mit …» nur, wenn dort auch etwas wartet. Wer die Buchstaben
+    // gerade fertig gemeistert hat, wurde sonst dorthin zurückgeschickt — in
+    // einen Leerzustand, der ihn wieder nach Home schickt.
+    if (!stand.gesperrt && !stand.leer) {
       return {
         ziel: z.uebung,
         titel: 'Weiter mit «' + UEBUNG_NAME[z.uebung] + '»',

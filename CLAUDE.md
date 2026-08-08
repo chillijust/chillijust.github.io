@@ -245,11 +245,18 @@ zehn.
   Richtung steht in `trTask.dir`, nie beim Zeichnen aus `trDir` gelesen.
 - **Gemeistert meldet nur der Übergang** auf `BOX_MAX` (ADR 0026). Wer `meisterPruefen()`
   auch beim Auffrischen auslösen lässt, macht aus der Meldung Rauschen.
+- **Eine Übung ohne Arbeit wird nie empfohlen.** `uebungsStand()` gibt `gesperrt` («geht
+  noch nicht») und `leer` («gerade nichts zu tun») zurück; `empfehlung()` überspringt
+  beide. Sonst schickt «Weiter mit …» genau im Augenblick des Erfolgs in eine Schleife.
+- **Home zählt über alle Satzstufen, «Übersetzen» zeigt eine.** Wer seine Stufe fertig
+  hat, muss von dort zur nächsten finden (`trStufeMitArbeit()`) — sonst widersprechen
+  sich Kachel und Übung. Angeboten, nicht genommen: Die Stufe ist eine Wahl des Nutzers.
 - **«Tippen» und «Übersetzen» sind zweigeteilt** (ADR 0015): Lernen und Wiederholung.
   Fertig Gelerntes verlässt beide Stapel, bis die Frist `auffrischen` um ist. Wer dort
   etwas ändert, muss beide Stapel und die drei Leerzustände mitdenken — «noch nichts
   freigeschaltet», «alles gelernt», «gerade nichts fällig» fühlen sich verschieden an
-  und sagen Verschiedenes.
+  und sagen Verschiedenes. **«Übersetzen» hat einen dritten Stapel «Alle»** — ohne ihn
+  lässt sich Gemeistertes vor Ablauf der Frist nicht wiederholen.
 
 ## Offen
 
