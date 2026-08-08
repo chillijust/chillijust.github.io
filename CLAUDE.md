@@ -118,6 +118,11 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   einem Text zum Kopieren (ADR 0016). Der Bezug heißt **Ort**, nicht «Übung» — er kann
   auch die Übersicht oder eine Menüansicht sein. Vom Blatt führt eine Zeile in die Liste;
   sie klappt nur zu, sie leert nicht.
+- **In «Dark» liegt die Kachel unter dem Grund** (ADR 0040): Kacheln, Kopfzeile
+  (`--kopf`) und der Schein hinter dem Kopf tragen den tieferen Ton, die Fläche dazwischen
+  den helleren; in den hellen Schemata ist es umgekehrt. `--card-2` bleibt überall die
+  hellste Fläche — es trägt Bedienelemente. Die Statusleiste nennt den **Kopfton**, und
+  die dunkle Palette steht dreifach: `:root`, `SCHEMATA`, `theme-color` im `<head>`.
 - **Ein Schema tönt nur die Flächen** (ADR 0039) — `--bg`, `--card`, `--card-2`,
   `--line`, `--glow`. Schrift, Gold und die Signalfarben stehen einmal für alle hellen
   Schemata, sonst hieße «richtig» auf Rosa etwas anderes als auf Grün. Neue Werte rechnet
