@@ -56,7 +56,8 @@ zweites Mal einbetten, und nie über Scroll-Rechnung positionieren — sie steht
   `-webkit-tap-highlight-color: transparent`, `env(safe-area-inset-*)` für Notch und
   Home-Indicator.
 - Dark Mode als Standard, hell über `prefers-color-scheme` — oder ausdrücklich über die
-  Einstellung `darstellung` (`data-theme` am `<html>`-Element).
+  Einstellung `darstellung` (`data-theme` am `<html>`-Element). Quer dazu steht der
+  **Farbton** (`data-farbe`): Nacht, Grün, Blau, Rosa. Beide Achsen greifen zugleich.
 - Die App muss offline funktionieren, nachdem sie einmal geladen wurde.
 
 ## Verzeichnisse
@@ -71,6 +72,7 @@ tools/pruefen.mjs         Vor-Push-Prüfung von index.html
 tools/freistellen.py      Maskottchen aus einem Bild freistellen (ohne Bildbibliothek)
 tools/skaliere.py         PNG auf Icon-Größe bringen (ohne Bildbibliothek)
 tools/appikon.py          App-Symbol bauen: Grund tauschen, Sprechblase umdrehen
+tools/palette.py          getönte Paletten aus dem neutralen Grundton rechnen
 docs/                     Architektur, Datenmodell, Deploy, Entscheidungen (ADRs)
 docs/decisions/           kurze ADRs, fortlaufend nummeriert
 ```
@@ -114,6 +116,11 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   einem Text zum Kopieren (ADR 0016). Der Bezug heißt **Ort**, nicht «Übung» — er kann
   auch die Übersicht oder eine Menüansicht sein. Vom Blatt führt eine Zeile in die Liste;
   sie klappt nur zu, sie leert nicht.
+- **Ein Farbton tönt nur die Flächen** (ADR 0038) — `--bg`, `--card`, `--card-2`,
+  `--line`, `--glow`. Schrift, Gold und die Signalfarben bleiben in jedem Ton gleich,
+  sonst hieße «richtig» auf Rosa etwas anderes als auf Grün. Neue Werte rechnet
+  `tools/palette.py` aus dem neutralen Grundton — die Helligkeit bleibt, nur Farbton und
+  Sättigung wandern.
 - **Was `normalize()` übersieht, übersieht auch die Farbe** (ADR 0037). Die Prüfzeile
   färbt das Getippte zeichenweise ein; Satzzeichen, Leerraum, Groß-/Kleinschreibung und
   ё/е kosten nichts — sonst stünde eine als richtig gewertete Antwort rot da. Die Farbe

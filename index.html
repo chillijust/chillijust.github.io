@@ -72,6 +72,90 @@
   --lip: rgba(255, 255, 255, .6);
   --shade: rgba(35, 39, 46, .07);
 }
+
+/* Farbtöne: eine zweite Achse neben hell und dunkel. Sie tönen **nur die
+   Flächen** — Text, Gold und die Signalfarben bleiben, sonst zerfiele die
+   Sprache der Oberfläche und «richtig» hieße auf Rosa etwas anderes als auf
+   Grün. Die Helligkeit jeder Fläche ist aus dem neutralen Grundton übernommen,
+   nur Farbton und Sättigung wandern; der Kontrast zum Text bleibt damit überall
+   derselbe (tools/palette.py rechnet sie aus).
+
+   Der Aufbau spiegelt den der Grundpalette: erst der dunkle Ton, dann der
+   helle über die Systemvorgabe, dann der helle über die ausdrückliche Wahl.
+   Die Regel mit beiden Attributen sticht beide Einzelregeln — darauf beruht
+   das Zusammenspiel der zwei Achsen. */
+
+:root[data-farbe="gruen"] {
+  --bg: #101814;
+  --card: #17231D;
+  --card-2: #1C2D25;
+  --line: #253A30;
+  --glow: #1D2E26;
+}
+@media (prefers-color-scheme: light) {
+  :root[data-farbe="gruen"]:not([data-theme]) {
+    --bg: #EDF4F1;
+    --card: #FAFCFB;
+    --card-2: #E1EEE8;
+    --line: #C4DDD1;
+    --glow: #FAFCFB;
+  }
+}
+:root[data-theme="hell"][data-farbe="gruen"] {
+  --bg: #EDF4F1;
+  --card: #FAFCFB;
+  --card-2: #E1EEE8;
+  --line: #C4DDD1;
+  --glow: #FAFCFB;
+}
+
+:root[data-farbe="blau"] {
+  --bg: #0B131D;
+  --card: #101C2A;
+  --card-2: #142335;
+  --line: #1A2E45;
+  --glow: #142437;
+}
+@media (prefers-color-scheme: light) {
+  :root[data-farbe="blau"]:not([data-theme]) {
+    --bg: #ECF0F5;
+    --card: #FAFBFC;
+    --card-2: #E0E7EF;
+    --line: #C1CFE0;
+    --glow: #FAFBFC;
+  }
+}
+:root[data-theme="hell"][data-farbe="blau"] {
+  --bg: #ECF0F5;
+  --card: #FAFBFC;
+  --card-2: #E0E7EF;
+  --line: #C1CFE0;
+  --glow: #FAFBFC;
+}
+
+:root[data-farbe="rosa"] {
+  --bg: #1A0E12;
+  --card: #26141A;
+  --card-2: #2F1A20;
+  --line: #3E212A;
+  --glow: #311A21;
+}
+@media (prefers-color-scheme: light) {
+  :root[data-farbe="rosa"]:not([data-theme]) {
+    --bg: #F5ECEF;
+    --card: #FCFAFB;
+    --card-2: #EFE0E4;
+    --line: #DFC2CB;
+    --glow: #FCFAFB;
+  }
+}
+:root[data-theme="hell"][data-farbe="rosa"] {
+  --bg: #F5ECEF;
+  --card: #FCFAFB;
+  --card-2: #EFE0E4;
+  --line: #DFC2CB;
+  --glow: #FCFAFB;
+}
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 /* Doppeltipp vergrößert nicht mehr; Aufziehen mit zwei Fingern bleibt möglich. */
 html { touch-action: manipulation; }
@@ -2750,6 +2834,7 @@ function defaultSettings() {
     // war und die neue auch bestehende Geräte erreichen soll.
     tastaturAuto: true,
     darstellung: 'system',     // 'system' · 'dunkel' · 'hell'
+    farbe: 'nacht',            // Farbton der Flächen — zweite Achse neben hell/dunkel
     ton: true                  // kurzer Klang bei richtig und falsch
   };
 }
@@ -2831,6 +2916,7 @@ function mergeState(parsed) {
     if (!(stufe >= 1 && stufe <= BOX_MAX)) d.settings.tippenStufe = 3;
     if ([7, 14, 21, 30].indexOf(d.settings.auffrischen) === -1) d.settings.auffrischen = 21;
     if (['system', 'dunkel', 'hell'].indexOf(d.settings.darstellung) === -1) d.settings.darstellung = 'system';
+    if (farbTon(d.settings.farbe).wert !== d.settings.farbe) d.settings.farbe = 'nacht';
   }
   return d;
 }
@@ -2931,17 +3017,39 @@ function zeigeStatus(art, text) {
   }
 }
 
+// Die Farbtöne. Die Flächenwerte stehen im Stylesheet; hier steht nur der
+// Grundton je Stimmung, weil die Statusleiste ihn als Zahl braucht — eine
+// Medienabfrage hat das `theme-color`-Meta nicht.
+var FARBTOENE = [
+  { wert: 'nacht', text: 'Nacht', dunkel: '#101418', hell: '#F4F2ED' },
+  { wert: 'gruen', text: 'Grün', dunkel: '#101814', hell: '#EDF4F1' },
+  { wert: 'blau', text: 'Blau', dunkel: '#0B131D', hell: '#ECF0F5' },
+  { wert: 'rosa', text: 'Rosa', dunkel: '#1A0E12', hell: '#F5ECEF' }
+];
+
+function farbTon(wert) {
+  for (var i = 0; i < FARBTOENE.length; i++) {
+    if (FARBTOENE[i].wert === wert) return FARBTOENE[i];
+  }
+  return FARBTOENE[0];
+}
+
 // Dunkel oder hell: «system» folgt der Vorgabe des Geräts, sonst gilt die Wahl.
+// Der Farbton ist davon unabhängig — beide Achsen greifen zugleich.
 function updateDarstellung() {
   var wahl = state.settings.darstellung;
   var wurzel = document.documentElement;
   if (wahl === 'system') wurzel.removeAttribute('data-theme');
   else wurzel.setAttribute('data-theme', wahl);
+  // «Nacht» ist der Grundton — er trägt kein Attribut, wie «system» keines trägt.
+  var ton = farbTon(state.settings.farbe);
+  if (ton.wert === 'nacht') wurzel.removeAttribute('data-farbe');
+  else wurzel.setAttribute('data-farbe', ton.wert);
   // Safari färbt die Statusleiste nach diesem Wert.
   var dunkel = wahl === 'dunkel' ||
     (wahl === 'system' && !(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches));
   var meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', dunkel ? '#101418' : '#F4F2ED');
+  if (meta) meta.setAttribute('content', dunkel ? ton.dunkel : ton.hell);
 }
 
 function woerterGemeistert() {
@@ -6999,6 +7107,9 @@ function renderEinstellungen() {
     wahlText('darstellung', 'Darstellung',
       'Dunkel ist die Vorgabe. «System» folgt der Einstellung des iPhones.',
       [{ wert: 'system', text: 'System' }, { wert: 'dunkel', text: 'Dunkel' }, { wert: 'hell', text: 'Hell' }]) +
+    wahlText('farbe', 'Farbton',
+      'Tönt die Flächen — hell und dunkel bleiben davon unberührt. Schrift und ' +
+      'Signalfarben ändern sich nicht.', FARBTOENE) +
     schalter('ton', 'Ton bei richtig und falsch',
       'Ein kurzer Klang nach jeder Antwort. Auf iOS klingt er auch bei gestelltem ' +
       'Stummschalter, sofern das Gerät die Sitzungssteuerung kennt.') +
@@ -7533,7 +7644,8 @@ function encodeBackup() {
   var s = state.settings;
   var einst = BK_SETTINGS.map(function (k) { return k && s[k] ? '1' : '0'; }).join('') +
     '.' + s.tippenStufe + '.' + s.auffrischen + '.' +
-    ['system', 'dunkel', 'hell'].indexOf(s.darstellung);
+    ['system', 'dunkel', 'hell'].indexOf(s.darstellung) + '.' +
+    FARBTOENE.map(function (t) { return t.wert; }).indexOf(s.farbe);
 
   var abc = bkStaendeAus(state.abcBox, state.abcSeen, bkKennung);
   // Neuntes Feld: der Grammatikstand. Er führt Regeln, nicht Wörter — darum
@@ -7607,6 +7719,9 @@ function decodeBackup(code) {
   d.settings.tippenStufe = parseInt(e[1], 10) || 3;
   d.settings.auffrischen = parseInt(e[2], 10) || 21;
   d.settings.darstellung = ['system', 'dunkel', 'hell'][parseInt(e[3], 10)] || 'system';
+  // Ältere Codes führen den Farbton nicht — dann bleibt es beim Grundton.
+  var ton = FARBTOENE[parseInt(e[4], 10)];
+  d.settings.farbe = ton ? ton.wert : 'nacht';
   return d;
 }
 

@@ -52,6 +52,30 @@ ist (`:root:not([data-theme])`), und `:root[data-theme="hell"]` setzt sie ausdr�
 `updateDarstellung()` schreibt das Attribut und färbt `meta[name=theme-color]` nach, damit
 die Statusleiste auf dem iPhone passt.
 
+### Der Farbton — eine zweite Achse
+
+Neben hell und dunkel steht der **Farbton** (`data-farbe`, Einstellung `farbe`): Nacht,
+Grün, Blau, Rosa. Beide Achsen greifen zugleich; das ergibt acht Paletten.
+
+**Getönt werden nur die Flächen** — `--bg`, `--card`, `--card-2`, `--line`, `--glow`.
+Schrift, Gold und die Signalfarben bleiben, sonst zerfiele die Sprache der Oberfläche und
+«richtig» hieße auf Rosa etwas anderes als auf Grün. Das hält den Aufwand auch klein:
+fünf Werte je Ton und Modus statt einer ganzen Palette.
+
+**Die Helligkeit kommt aus dem neutralen Grundton**, nur Farbton und Sättigung wandern
+(`tools/palette.py` rechnet sie aus). Damit bleibt der Kontrast zum Text überall
+derselbe — gemessen liegt der größte anteilige Verlust gegenüber «Nacht» unter 6 %.
+
+Der Aufbau spiegelt den der Grundpalette: erst der dunkle Ton, dann der helle über die
+Systemvorgabe (`:not([data-theme])`), dann der helle über die ausdrückliche Wahl. **Die
+Regel mit beiden Attributen** (`:root[data-theme="hell"][data-farbe="rosa"]`) sticht beide
+Einzelregeln — darauf beruht das Zusammenspiel. Wie «system» beim Modus trägt «nacht»
+**kein** Attribut; der Grundton ist die Abwesenheit einer Wahl.
+
+`FARBTOENE` im Skript führt je Ton den dunklen und den hellen Grundwert. Das ist die
+einzige Stelle, an der Flächenfarben doppelt stehen — `meta[name=theme-color]` nimmt eine
+Zahl und keine Medienabfrage.
+
 ## Maskottchen
 
 Die Chili ist aus dem Icon freigestellt (`tools/freistellen.py`) und existiert **genau
@@ -1258,6 +1282,7 @@ auf einen sinnvollen Bereich:
 | `tippenAbStufe` | 4 | Ab welcher Leitner-Stufe ein Wort in „Tippen" erscheint (2, 3 oder 4). |
 | `tastaturAuto` | **an** | Verlangt eine Aufgabe Kyrillisch, klappt die eingebaute Tastatur gleich auf. Aus: Sie holen sie bei Bedarf. Wo Deutsch gefragt ist, kommt sie nie. |
 | `darstellung` | `system` | `system`, `dunkel` oder `hell`. Steuert `data-theme` am `<html>`-Element. |
+| `farbe` | `nacht` | Farbton der Flächen: `nacht`, `gruen`, `blau`, `rosa`. Steuert `data-farbe` — unabhängig von hell und dunkel. |
 
 Eine neue Einstellung braucht drei Dinge: einen Vorgabewert in `defaultSettings()`,
 eine Zeile in `renderEinstellungen()` und — falls sie das Verhalten einer Übung
