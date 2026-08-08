@@ -5094,7 +5094,7 @@ function renderUebersetzen() {
     } else {
       html += '<textarea id="trInput" rows="2" class="fliess' + (t.loesungRu ? ' cyr' : '') +
         '" lang="' + (t.loesungRu ? 'ru' : 'de') + '" autocapitalize="sentences"' +
-        ' autocorrect="off" spellcheck="false"' +
+        ' autocorrect="off" spellcheck="false" enterkeyhint="go"' +
         ' placeholder="' + (t.loesungRu ? 'Den Satz auf Russisch schreiben …'
           : 'Den Satz auf Deutsch schreiben …') + '">' + esc(trEingabe) + '</textarea>';
       if (!t.loesungRu) {
@@ -5188,6 +5188,7 @@ function renderUebersetzen() {
   });
 
   var eingabe = document.getElementById('trInput');
+  enterGibtAb(eingabe, 'trConfirm');
   if (eingabe) {
     eingabe.addEventListener('input', function () {
       trEingabe = eingabe.value;
@@ -5702,6 +5703,31 @@ function renderBuchstaben() {
 
 // Die eingebaute kyrillische Tastatur. Sie steht in drei Übungen; das
 // Datenattribut sagt, wer die Tasten abholt.
+// Die Eingabetaste der **Gerätetastatur** gibt ab — dieselbe Wirkung wie
+// «Prüfen». Sie klickt den Abgabeknopf, statt die Prüfung selbst zu rufen: So
+// gibt es nur einen Weg, und die beiden können nicht auseinanderlaufen. Ist der
+// Knopf gesperrt, weil noch nichts dasteht, tut sie nichts.
+//
+// `preventDefault()` verhindert den Zeilenumbruch, den ein `textarea` sonst
+// einfügt. Mit Umschalt bleibt der Umbruch möglich — gebraucht wird er hier
+// zwar nie, aber ihn zu verbieten wäre eine Anmaßung.
+//
+// Nur in den Übungen: Im Meldeblatt schreibt man Absätze, dort wäre die Taste
+// eine Falle.
+function enterGibtAb(feld, knopfId) {
+  if (!feld) return;
+  feld.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' || e.shiftKey) return;
+    e.preventDefault();
+    // Ein leeres Feld gibt nichts ab. In drei Übungen sperrt schon der Knopf;
+    // in «Tippen» tut er es nicht — dort zählt eine leere Abgabe als Fehler,
+    // und die Taste liegt beim Schreiben zu nah, um das zu riskieren.
+    if (!feld.value.replace(/^\s+|\s+$/g, '')) return;
+    var knopf = document.getElementById(knopfId);
+    if (knopf && !knopf.disabled) knopf.click();
+  });
+}
+
 // Kommt die eingebaute Tastatur von selbst? Nur da, wo sie überhaupt hilft:
 // Ein deutscher Satz lässt sich mit der Gerätetastatur schreiben, ein
 // kyrillischer auf einem deutschen iPhone nicht. Die Sprache der
@@ -6207,7 +6233,7 @@ function gramUebenHtml(b) {
         ? pruefzeileHtml(gramEingabe, q.loesung, true, 'form')
         : '<textarea id="gramInput" rows="1" class="fliess cyr"' +
           ' lang="ru" autocapitalize="off" autocorrect="off" spellcheck="false"' +
-          ' placeholder="Die Form schreiben …">' + esc(gramEingabe) + '</textarea>';
+          ' enterkeyhint="go" placeholder="Die Form schreiben …">' + esc(gramEingabe) + '</textarea>';
     } else {
       html += '<div class="options abc-optionen">';
       q.optionen.forEach(function (f, i) {
@@ -6439,6 +6465,7 @@ function renderGrammatik() {
     });
   });
   var feld = document.getElementById('gramInput');
+  enterGibtAb(feld, 'gramConfirm');
   if (feld) feld.addEventListener('input', function () {
     gramEingabe = feld.value;
     var k = document.getElementById('gramConfirm');
@@ -6684,7 +6711,7 @@ function renderPower() {
       ? pruefzeileHtml(ptEingabe, q.wort.ru, true, 'form')
       : '<textarea id="ptInput" rows="1" class="fliess cyr"' +
         ' lang="ru" autocapitalize="off" autocorrect="off" spellcheck="false"' +
-        ' placeholder="кириллица …">' + esc(ptEingabe) + '</textarea>';
+        ' enterkeyhint="go" placeholder="кириллица …">' + esc(ptEingabe) + '</textarea>';
   }
 
   if (ptPhase === 'feedback') {
@@ -6729,6 +6756,7 @@ function ptBinden() {
   if (undo) undo.addEventListener('click', function () { ptBuilt.pop(); renderPower(); });
 
   var feld = document.getElementById('ptInput');
+  enterGibtAb(feld, 'ptConfirm');
   if (feld) {
     feld.addEventListener('input', function () {
       ptEingabe = feld.value;
@@ -6957,7 +6985,7 @@ function renderTippen() {
       ? pruefzeileHtml(tEingabe, w.ru, true, 'wort')
       : '<input type="text" id="tInput" class="cyr" value="' + esc(tEingabe) + '"' +
         ' placeholder="кириллица \u2026" lang="ru" autocapitalize="off"' +
-        ' autocorrect="off" spellcheck="false">');
+        ' autocorrect="off" spellcheck="false" enterkeyhint="go">');
 
   if (tResult === 'wrong') html += '<p class="feedback bad">' + ICON.kreuz + 'Richtig: <strong class="cyr">' + esc(w.ru) + '</strong></p>';
   if (tResult === 'right') html += '<p class="feedback good">' + ICON.haken + 'Правильно — richtig!</p>';
@@ -7010,11 +7038,9 @@ function renderTippen() {
     renderTippen();
   }
 
+  enterGibtAb(input, 'tCheck');
   if (input) {
     input.addEventListener('input', function () { tEingabe = input.value; });
-    input.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') { tEingabe = input.value; check(); }
-    });
   }
   var hintBtn = document.getElementById('tHintBtn');
   if (hintBtn) hintBtn.addEventListener('click', function () {
