@@ -368,6 +368,16 @@ sich dabei zugleich: die **Form** (`trArt()`) von der Vorlage zur freien Eingabe
 | 3 | DE → RU | getippt | das Schwerste |
 | 4 (Auffrischung) | DE → RU | getippt | die stärkste Behauptung |
 
+**Die Übung zeigt eine Stufe, Home zählt alle.** `uebungsStand('uebersetzen')` summiert
+über `satzStufen()`; die Übung arbeitet immer nur auf `trLevel`. Wer seine Stufe fertig
+hatte, stand darum vor «Stufe 1 sitzt», während die Kachel weiter «1 offen» meldete —
+zwei wahre Sätze, die einander widersprachen. `trStufeMitArbeit()` sucht die nächste
+Stufe mit offenen oder fälligen Sätzen; der Leerzustand nennt sie und führt mit einem
+Tipp hin (Stufenchip in der Auswahl wandert mit).
+
+Der Weg wird **angeboten, nicht genommen**: Die Stufe ist eine Wahl des Nutzers, anders
+als der Stapel, der von selbst umschaltet.
+
 **«Gemischt» ist der Regelfall und heißt nicht Zufall.** Würfelte die Richtung, hinge die
 Stufe am Losglück: Ein Satz, den man nur versteht, käme über eine glückliche RU→DE-Runde
 auf die Endstufe, ohne je auf Russisch geschrieben worden zu sein. Die feste Ordnung

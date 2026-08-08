@@ -3209,11 +3209,8 @@ function filterInhaltHtml() {
         tippenModus === 'wiederholung'));
   }
   if (currentTab === 'uebersetzen') {
-    var stufen = [];
-    SENTENCES.forEach(function (x) { if (stufen.indexOf(x.stufe) === -1) stufen.push(x.stufe); });
-    stufen.sort(function (a, b) { return a - b; });
     var st = '';
-    stufen.forEach(function (n) {
+    satzStufen().forEach(function (n) {
       st += filterChip('stufe', n, 'Stufe ' + n + ' · ' + freieSaetze(n).length + '/' +
         stufenSaetze(n).length, trLevel === n);
     });
@@ -4561,6 +4558,12 @@ function satzFehlt(s) {
 function stufenSaetze(stufe) {
   return SENTENCES.filter(function (s) { return s.stufe === stufe; });
 }
+// Welche Stufen es überhaupt gibt — aus den Daten, nicht geraten.
+function satzStufen() {
+  var stufen = [];
+  SENTENCES.forEach(function (s) { if (stufen.indexOf(s.stufe) === -1) stufen.push(s.stufe); });
+  return stufen.sort(function (a, b) { return a - b; });
+}
 function freieSaetze(stufe) {
   return stufenSaetze(stufe).filter(satzFrei);
 }
@@ -4583,7 +4586,27 @@ function trRuhend(stufe) {
     return satzBox(s) >= BOX_MAX && !satzFaellig(s, jetzt);
   });
 }
+// Home zählt über alle Stufen, die Übung zeigt nur eine. Wer seine Stufe
+// fertig hat, stand darum vor «Stufe 1 sitzt», während die Kachel weiter
+// «1 offen» meldete. Diese Stufe nennt den Weg dorthin.
+function trStufeMitArbeit() {
+  var beste = null;
+  satzStufen().forEach(function (n) {
+    if (n === trLevel || beste) return;
+    var offen = trLernen(n).length;
+    var faellig = trWiederholung(n).length;
+    if (offen || faellig) beste = { stufe: n, offen: offen, faellig: faellig };
+  });
+  return beste;
+}
+
+// Drei Stapel. «Lernen» und «Wiederholung» teilen den Bestand nach ADR 0015;
+// «Alle» hebt die Teilung auf. Es musste einen Weg geben, Fertiges vor Ablauf
+// der Frist noch einmal anzusehen — «Lernsets» hat ihn längst («alle»),
+// «Übersetzen» hatte ihn nicht, und wer alles gemeistert hatte, stand vor
+// zwei Stapeln mit null.
 function trPool() {
+  if (trModus === 'alle') return freieSaetze(trLevel);
   return trModus === 'wiederholung' ? trWiederholung(trLevel) : trLernen(trLevel);
 }
 function trNaechsteAuffrischung() {
@@ -4827,6 +4850,12 @@ function renderUebersetzenLeer() {
   var frisch = trWiederholung(trLevel).length;
   var ruhend = trRuhend(trLevel).length;
 
+  var andere = trStufeMitArbeit();
+  var andereKnopf = andere
+    ? '<button class="btn primary" id="trZuStufe">Zu Stufe ' + andere.stufe + ' \u00b7 ' +
+      (andere.offen ? andere.offen + ' offen' : andere.faellig + ' f\u00e4llig') + '</button>'
+    : '';
+
   var html = '<section><div class="leer">' + maskottchen('gross');
 
   if (!frei.length) {
@@ -4843,7 +4872,9 @@ function renderUebersetzenLeer() {
         return '<span class="cyr">' + esc(w) + '</span>';
       }).join(' \u00b7 ') + (fehlt.length > 6 ? ' \u2026' : '') + '</p>';
     }
-    html += '<div class="btn-row"><button class="btn primary" id="trZuUeben">Zu \u00abLernsets\u00bb</button></div>';
+    html += '<div class="btn-row">' + andereKnopf +
+      '<button class="btn ' + (andereKnopf ? 'ghost' : 'primary') +
+      '" id="trZuUeben">Zu \u00abLernsets\u00bb</button></div>';
   } else if (trModus === 'wiederholung') {
     html += '<h3>' + (ruhend ? 'Gerade nichts f\u00e4llig' : 'Noch nichts zum Auffrischen') + '</h3>' +
       '<p>' + (ruhend
@@ -4851,9 +4882,11 @@ function renderUebersetzenLeer() {
           ' Der n\u00e4chste kommt ' + esc(trNaechsteAuffrischung()) + ' zur Sicherheit noch einmal.'
         : 'Hier erscheinen S\u00e4tze, die Sie ' + BOX_MAX + '\u00d7 richtig \u00fcbersetzt haben \u2014 nach ' +
           (state.settings.auffrischen || 21) + ' Tagen einmal zur Sicherheit.') + '</p>';
-    if (offen) {
-      html += '<div class="btn-row"><button class="btn primary" id="trZuLernen">' +
-        offen + (offen === 1 ? ' Satz offen' : ' S\u00e4tze offen') + '</button></div>';
+    if (offen || andereKnopf) {
+      html += '<div class="btn-row">' +
+        (offen ? '<button class="btn primary" id="trZuLernen">' +
+          offen + (offen === 1 ? ' Satz offen' : ' S\u00e4tze offen') + '</button>' : '') +
+        andereKnopf + '</div>';
     }
   } else {
     html += '<h3>Stufe ' + trLevel + ' sitzt</h3>' +
@@ -4864,6 +4897,7 @@ function renderUebersetzenLeer() {
         : 'Die n\u00e4chste Auffrischung kommt ' + esc(trNaechsteAuffrischung()) + '.') + '</p>' +
       '<div class="btn-row">' +
       (frisch ? '<button class="btn primary" id="trZuFrisch">Wiederholen</button>' : '') +
+      andereKnopf +
       '<button class="btn ghost" id="trZuUeben">Neue W\u00f6rter lernen</button></div>';
   }
 
@@ -4885,6 +4919,15 @@ function renderUebersetzenLeer() {
     trTask = null;
     buildTransTask();
     renderUebersetzen();
+  });
+  var stufeBtn = document.getElementById('trZuStufe');
+  if (stufeBtn && andere) stufeBtn.addEventListener('click', function () {
+    trLevel = andere.stufe;
+    trModus = andere.offen ? 'lernen' : 'wiederholung';
+    trTask = null;
+    buildTransTask();
+    renderUebersetzen();
+    renderFilter();   // die Stufe steht auch als Chip in der Auswahl
   });
 }
 
