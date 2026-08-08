@@ -523,6 +523,22 @@ button.built-word:active { transform: scale(.95); }
 
 /* Die Regelkarte: erst der Satz, dann die Tabelle, dann der Merksatz. */
 .gram-regel { text-align: left; }
+
+/* «Mehr …» klappt die Karte auf — dieselbe Art wie beim Menü: über die
+   Zeilenhöhe eines Rasters, damit keine feste Höhe geraten werden muss. Die
+   Karte klebte vorher unmittelbar an den Knöpfen; der Abstand wächst darum
+   mit, statt fest dazustehen. */
+.regelklapp {
+  display: grid; grid-template-rows: 0fr; overflow: hidden;
+  opacity: 0; margin-top: 0;
+  transition: grid-template-rows .36s cubic-bezier(.3, .8, .3, 1),
+              margin-top .36s cubic-bezier(.3, .8, .3, 1), opacity .2s;
+}
+/* Die Rasterzeile ist der Behälter, nicht die Karte: Ränder und Innenabstände
+   der Karte zählten sonst zur Zeilenhöhe, und zugeklappt bliebe ein Streifen. */
+.regelklapp > .klappwrap { min-height: 0; overflow: hidden; }
+.regelklapp.auf { grid-template-rows: 1fr; opacity: 1; margin-top: 20px; }
+.regelklapp .gram-regel { box-shadow: inset 0 1px 0 var(--lip), 0 12px 26px var(--shade); }
 .gram-tabelle {
   display: flex; flex-direction: column; gap: 1px; margin: 16px 0 14px;
   border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
@@ -5596,14 +5612,19 @@ function gramUebenHtml(b) {
 
   html += '</div><div class="btn-row">';
   if (gramPhase === 'ask') {
-    html += '<button class="btn ghost" id="gramWarum">Mehr \u2026</button>' +
+    html += '<button class="btn ghost" id="gramWarum" aria-expanded="' +
+      (gramRegelOffen ? 'true' : 'false') + '" aria-controls="gramRegelKlapp">Mehr \u2026</button>' +
       '<button class="btn primary" id="gramConfirm"' + (gramAbgabeBereit() ? '' : ' disabled') +
       '>' + (q.tippen ? 'Prüfen' : 'Bestätigen') + '</button>';
   } else {
     html += '<button class="btn primary" id="gramNext">Weiter →</button>';
   }
   html += '</div>';
-  if (gramRegelOffen) html += gramRegelHtml(b, false);
+  // Die Karte steht immer im Baum, nur zugeklappt — sonst gäbe es nichts, was
+  // sich aufklappen könnte, und der Wechsel wäre ein Sprung statt einer Bewegung.
+  html += '<div class="regelklapp' + (gramRegelOffen ? ' auf' : '') + '" id="gramRegelKlapp"' +
+    ' aria-hidden="' + (gramRegelOffen ? 'false' : 'true') + '"><div class="klappwrap">' +
+    gramRegelHtml(b, false) + '</div></div>';
   if (q.tippen && gramPhase === 'ask') {
     html += '<button class="kb-toggle" id="gramKbToggle">' +
       (gramKb ? 'Tastatur ausblenden' : 'Tastatur einblenden') + '</button>';
@@ -5811,8 +5832,24 @@ function renderGrammatik() {
   });
   var warum = document.getElementById('gramWarum');
   if (warum) warum.addEventListener('click', function () {
+    // Nicht neu zeichnen: Die Karte liegt schon da, nur zugeklappt. Ein
+    // Neuaufbau setzte sie fertig aufgeklappt ein — dann gibt es keinen
+    // Übergang, den der Browser noch laufen lassen könnte.
     gramRegelOffen = !gramRegelOffen;
-    renderGrammatik();
+    var klapp = document.getElementById('gramRegelKlapp');
+    if (klapp) {
+      klapp.classList.toggle('auf', gramRegelOffen);
+      klapp.setAttribute('aria-hidden', gramRegelOffen ? 'false' : 'true');
+    }
+    warum.setAttribute('aria-expanded', gramRegelOffen ? 'true' : 'false');
+    // Die Karte steht unterhalb der Knöpfe und wäre sonst halb im Nichts.
+    // Erst nach dem Aufklappen steht ihre Höhe fest, darum verzögert.
+    if (gramRegelOffen && klapp) {
+      setTimeout(function () {
+        try { klapp.scrollIntoView({ behavior: 'smooth', block: 'end' }); }
+        catch (e) { klapp.scrollIntoView(false); }
+      }, 380);
+    }
   });
   var conf = document.getElementById('gramConfirm');
   if (conf) conf.addEventListener('click', function () {
