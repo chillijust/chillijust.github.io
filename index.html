@@ -307,8 +307,15 @@ body.wissen-offen #wissenPanel { grid-template-rows: 1fr; opacity: 1; pointer-ev
 /* Aufgeklappt weicht das Symbol nach unten und die Chili nimmt seinen Platz —
    dieselbe Bewegung wie beim Menü, nur mit einem Zeichen statt drei Strichen.
    Trägt die Figur gerade eine Ansicht, bleibt ein ruhender Punkt zurück, damit
-   der Knopf kein leerer Kreis ist. */
+   der Knopf kein leerer Kreis ist.
+
+   Wie beim Menüknopf wird **in einer eigenen Hülle** geblendet, nicht am Knopf:
+   Der Knopf muss überstehen lassen, sonst wäre die einfliegende Chili bis zur
+   Landung abgeschnitten und der Flug sähe aus wie ein Aufploppen. Und er muss
+   über dem Panel liegen, sonst verschwindet sie dahinter. */
+#filterKnopf { overflow: visible; z-index: 40; }
 .knopfzeichen {
+  position: absolute; inset: 0; border-radius: 50%; overflow: hidden;
   display: flex; align-items: center; justify-content: center;
   transition: transform .36s cubic-bezier(.3, .8, .3, 1), opacity .24s;
 }
@@ -2221,8 +2228,20 @@ function chiliPlatzhalter() {
   return imMenu(currentTab) ? knopf : document.getElementById('chiliPlatz');
 }
 
+// Ein Klick, eine Bewegung. Wer von der Auswahl ins Menü wechselt, schließt
+// erst das eine Blatt und öffnet dann das andere — zwei Aufrufe, und dazwischen
+// stünde die Figur kurz auf ihrem Platz in der Ansicht. Sichtbar wird davon nur
+// ein Sprung von dort, denn der zweite Flug bricht den ersten ab. Also die
+// Zwischenschritte anhalten und am Ende **einmal** nachziehen.
+var chiliHalt = 0;
+function chiliZusammen(fn) {
+  chiliHalt++;
+  try { fn(); } finally { chiliHalt--; }
+  chiliAktualisieren();
+}
+
 function chiliAktualisieren(ohneSprung) {
-  if (!chiliBuehne) return;
+  if (chiliHalt || !chiliBuehne) return;
   var platz = chiliPlatzhalter();
   if (!platz) return;
   // Der Knopf zeigt seinen ruhenden Punkt nur, solange er die Figur nicht
@@ -3616,9 +3635,11 @@ function setTab(name, zurueck) {
   render();
   // Erst zeichnen, dann schließen: die Platzwahl der Chili liefe sonst noch
   // über den Inhalt der alten Ansicht.
-  filterSetzen(false);
-  wissenSetzen(false);
-  menuSetzen(false);
+  chiliZusammen(function () {
+    filterSetzen(false);
+    wissenSetzen(false);
+    menuSetzen(false);
+  });
 }
 
 function zurueckGehen() {
@@ -3677,8 +3698,10 @@ document.addEventListener('touchcancel', function () { wischBereit = false; }, {
 
 document.getElementById('meldeKnopf').innerHTML = ICON.melden;
 document.getElementById('meldeKnopf').addEventListener('click', function () {
-  menuSetzen(false);
-  filterSetzen(false);
+  chiliZusammen(function () {
+    menuSetzen(false);
+    filterSetzen(false);
+  });
   meldeSetzen(true);
 });
 // Der einzige Weg, einen Entwurf loszuwerden. Zuklappen allein reicht nicht —
@@ -3722,27 +3745,35 @@ meldeZiehenBinden();
 
 document.getElementById('menuKnopf').addEventListener('click', function (e) {
   e.stopPropagation();
-  filterSetzen(false);
-  menuSetzen(!menuOffen);
+  chiliZusammen(function () {
+    filterSetzen(false);
+    menuSetzen(!menuOffen);
+  });
 });
 document.getElementById('filterKnopf').addEventListener('click', function (e) {
   e.stopPropagation();
-  menuSetzen(false);
-  filterSetzen(!filterOffen);
-  renderFilter();   // die Einträge sind nur im offenen Panel erreichbar
+  chiliZusammen(function () {
+    menuSetzen(false);
+    filterSetzen(!filterOffen);
+    renderFilter();   // die Einträge sind nur im offenen Panel erreichbar
+  });
 });
 document.getElementById('wissenKnopf').addEventListener('click', function (e) {
   e.stopPropagation();
-  menuSetzen(false);
-  filterSetzen(false);
+  chiliZusammen(function () {
+    menuSetzen(false);
+    filterSetzen(false);
+  });
   wissenWort = null;
   wissenSetzen(!wissenOffen);
   renderWissen();
 });
 document.getElementById('tafelKnopf').addEventListener('click', function (e) {
   e.stopPropagation();
-  menuSetzen(false);
-  filterSetzen(false);
+  chiliZusammen(function () {
+    menuSetzen(false);
+    filterSetzen(false);
+  });
   abcAnsicht = abcAnsicht === 'tafel' ? 'ueben' : 'tafel';
   abcOffen = null;
   renderBuchstaben();
@@ -3754,21 +3785,26 @@ document.querySelectorAll('.menueintrag').forEach(function (b) {
 // Daneben tippen schließt — aber nur, wenn offen; sonst kostet jeder Tipp auf
 // der Seite unnötig Arbeit.
 document.addEventListener('click', function (e) {
-  if (menuOffen &&
-      !document.getElementById('menuPanel').contains(e.target) &&
-      !document.getElementById('menuKnopf').contains(e.target)) {
-    menuSetzen(false);
-  }
-  if (filterOffen &&
-      !document.getElementById('filterPanel').contains(e.target) &&
-      !document.getElementById('filterKnopf').contains(e.target)) {
-    filterSetzen(false);
-  }
+  if (!menuOffen && !filterOffen) return;
+  chiliZusammen(function () {
+    if (menuOffen &&
+        !document.getElementById('menuPanel').contains(e.target) &&
+        !document.getElementById('menuKnopf').contains(e.target)) {
+      menuSetzen(false);
+    }
+    if (filterOffen &&
+        !document.getElementById('filterPanel').contains(e.target) &&
+        !document.getElementById('filterKnopf').contains(e.target)) {
+      filterSetzen(false);
+    }
+  });
 });
 document.addEventListener('keydown', function (e) {
   if (e.key !== 'Escape') return;
-  if (menuOffen) menuSetzen(false);
-  if (filterOffen) filterSetzen(false);
+  chiliZusammen(function () {
+    if (menuOffen) menuSetzen(false);
+    if (filterOffen) filterSetzen(false);
+  });
   if (wissenOffen) wissenSetzen(false);
 });
 
@@ -5180,8 +5216,10 @@ function renderUebersetzen() {
   main.querySelectorAll('[data-wissenwort]').forEach(function (b) {
     b.addEventListener('click', function (e) {
       e.stopPropagation();
-      menuSetzen(false);
-      filterSetzen(false);
+      chiliZusammen(function () {
+        menuSetzen(false);
+        filterSetzen(false);
+      });
       wissenWort = b.dataset.wissenwort;
       wissenSetzen(true);
       renderWissen();

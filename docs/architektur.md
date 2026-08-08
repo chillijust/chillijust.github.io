@@ -116,12 +116,13 @@ Der Platz im Kopf steht im Fluss, zwischen Titel und Menüknopf. Mittig über de
 wäre er nur auf Home sichtbar — dort hat aber die Empfehlung immer Vorrang —, und
 unterwegs liefe ein langer Name wie «Einstellungen» darunter hindurch.
 
-`chiliPlatzhalter()` entscheidet in drei Stufen:
+`chiliPlatzhalter()` entscheidet in vier Stufen:
 
-1. **Menü aufgeklappt** → der Knopf. Die Striche stehen dann unten, er wäre sonst ein
+1. **Menü aufgeklappt** → der Menüknopf. Die Striche stehen dann unten, er wäre sonst ein
    leerer Kreis — auch auf Home, wo sonst die Empfehlung Vorrang hätte.
-2. **Die Ansicht stellt einen Platz auf** (Karte, Empfehlung, Leerzustand) → dorthin.
-3. Sonst: im Menübereich der Knopf, überall sonst der Kopf.
+2. **Auswahl aufgeklappt** → der Auswahlknopf; dort weicht das Zeichen genauso.
+3. **Die Ansicht stellt einen Platz auf** (Karte, Empfehlung, Leerzustand) → dorthin.
+4. Sonst: im Menübereich der Menüknopf, überall sonst der Kopf.
 
 **Kein Nachrechnen.** Es gibt keine Positionsrechnung je Bild. Weil die Figur ein Kind
 ihres Platzhalters ist, scrollt sie starr mit dem Inhalt (ADR 0012).
@@ -149,6 +150,15 @@ zwei Teilen auf zwei Elementen, die sich nicht ins Gehege kommen:
 
 Ein noch laufender Flug wird zu Beginn **abgebrochen**: zwei Animationen mit
 `fill: 'backwards'` überlagerten sich sonst und stellten die Figur irgendwo dazwischen ab.
+
+**Ein Klick, eine Bewegung.** Wer von der Auswahl ins Menü wechselt, schließt im Code erst
+das eine Blatt und öffnet dann das andere — zwei Aufrufe, und dazwischen stünde die Figur
+kurz auf ihrem Platz in der Ansicht. Zu sehen wäre davon nur ein Sprung von dort, denn der
+zweite Flug bricht den ersten ab. `chiliZusammen(fn)` hält die Zwischenschritte an
+(Zähler `chiliHalt`, den `chiliAktualisieren()` abfragt) und zieht am Ende **einmal** nach.
+Jede Stelle, die mehr als ein Blatt auf einmal schließt — beide Kopfknöpfe, «Wissen»,
+die Tafel, der Meldeknopf, `setTab()`, Escape, der Tipp daneben —, geht durch sie
+hindurch.
 
 Die alte Lage kommt aus `chiliLage()` in **Dokumentkoordinaten** — die Figur steht im
 Fluss und scrollt mit, ihre Lage im Dokument bleibt also gültig. Gemessen wird der
@@ -275,7 +285,15 @@ Stationswechsel — sonst bliebe sie stehen, wenn sich bloß der Inhalt der Ansi
 (etwa wenn das erste Ticket den Leerzustand ablöst).
 
 `menuSetzen()` ruft `chiliAktualisieren()` mit auf; `setTab()` schließt das Menü darum
-**nach** `render()`, sonst liefe die Platzwahl noch über den Inhalt der alten Ansicht.
+**nach** `render()`, sonst liefe die Platzwahl noch über den Inhalt der alten Ansicht —
+und über `chiliZusammen()`, damit Menü, Auswahl und «Wissen» zusammen einen Schritt
+ergeben.
+
+**Der Auswahlknopf trägt dieselben zwei Regeln.** Er ist kein `.burger` und erbte sie
+darum nicht: `overflow: visible` und `z-index: 40` am Knopf, geblendet wird in der Hülle
+`.knopfzeichen`. Ohne das erste wäre die einfliegende Figur den ganzen Flug über
+abgeschnitten und der Sprung sähe aus wie ein Aufploppen; ohne das zweite verschwände sie
+hinter dem Panel.
 
 Geschlossen wird bei Auswahl, bei einem Tipp daneben, mit `Escape` oder erneutem Druck.
 Zugeklappt bekommen die Einträge `tabindex="-1"`, damit der Fokus nicht in ein

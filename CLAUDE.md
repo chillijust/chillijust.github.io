@@ -35,7 +35,10 @@ Maskottchen ist die Chili — freigestellt aus `docs/IMG_2942.png` mit
 genau einmal als `#chiliFigur` in der Hülle `#chiliBuehne`; Ansichten stellen mit
 `maskottchen(klasse)` nur einen Platzhalter auf, in den sie umgehängt wird. Nie ein
 zweites Mal einbetten, und nie über Scroll-Rechnung positionieren — sie steht im Fluss
-(ADR 0012).
+(ADR 0012). **Ein Klick ist eine Bewegung:** Wer mehr als ein Blatt auf einmal schließt,
+wickelt das in `chiliZusammen()` — sonst fliegt sie über einen Zwischenhalt, und der
+zweite Flug bricht den ersten ab. Ein runder Knopf, in den sie springt, braucht
+`overflow: visible` und `z-index: 40`; geblendet wird in einer Hülle darin.
 
 ## Harte Rahmenbedingungen — nicht verhandelbar
 
