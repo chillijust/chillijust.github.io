@@ -2599,7 +2599,10 @@ function defaultSettings() {
     requireComplete: false,    // Bestätigen erst bei vollständiger Lösung
     tippenStufe: 3,            // ab welcher Leitner-Stufe ein Wort im Tippen erscheint
     auffrischen: 21,           // Tage, bis Fertiges zur Sicherheit noch einmal drankommt
-    tastaturAn: false,         // eingebaute Tastatur in «Tippen» beim Start zeigen
+    // Verlangt eine Aufgabe Kyrillisch, kommt die eingebaute Tastatur von
+    // selbst — dafür ist sie da. Neuer Schlüssel, weil die alte Vorgabe «aus»
+    // war und die neue auch bestehende Geräte erreichen soll.
+    tastaturAuto: true,
     darstellung: 'system',     // 'system' · 'dunkel' · 'hell'
     ton: true                  // kurzer Klang bei richtig und falsch
   };
@@ -4834,6 +4837,7 @@ function renderUebersetzen() {
   // Die eingebaute Tastatur nur, wo sie hilft: Ein deutscher Satz l\u00e4sst sich
   // mit der Ger\u00e4tetastatur schreiben, ein kyrillischer oft nicht.
   if (getippt && t.loesungRu) {
+    if (trKb === null) trKb = tastaturVorgabe(t.loesungRu);
     html += '<button class="kb-toggle" id="trKbToggle">' +
       (trKb ? 'Tastatur ausblenden' : 'Tastatur einblenden') + '</button>';
     if (trKb && trPhase === 'ask') html += tastaturHtml('trkey');
@@ -5372,6 +5376,14 @@ function renderBuchstaben() {
 
 // Die eingebaute kyrillische Tastatur. Sie steht in drei Übungen; das
 // Datenattribut sagt, wer die Tasten abholt.
+// Kommt die eingebaute Tastatur von selbst? Nur da, wo sie überhaupt hilft:
+// Ein deutscher Satz lässt sich mit der Gerätetastatur schreiben, ein
+// kyrillischer auf einem deutschen iPhone nicht. Die Sprache der
+// *Gerätetastatur* kann eine Seite nicht wählen — das ist Sache von iOS.
+function tastaturVorgabe(kyrillisch) {
+  return !!kyrillisch && state.settings.tastaturAuto;
+}
+
 function tastaturHtml(attr) {
   var html = '<div>';
   KB_ROWS.forEach(function (row, ri) {
@@ -5909,6 +5921,7 @@ function gramUebenHtml(b) {
     ' aria-hidden="' + (gramRegelOffen ? 'false' : 'true') + '"><div class="klappwrap">' +
     gramRegelHtml(b, false) + '</div></div>';
   if (q.tippen && gramPhase === 'ask') {
+    if (gramKb === null) gramKb = tastaturVorgabe(true);
     html += '<button class="kb-toggle" id="gramKbToggle">' +
       (gramKb ? 'Tastatur ausblenden' : 'Tastatur einblenden') + '</button>';
     if (gramKb) html += tastaturHtml('gramkey');
@@ -6360,7 +6373,7 @@ function renderPower() {
   html += '</div>';
 
   if (q.stufe !== 'kacheln' && ptPhase === 'ask') {
-    if (ptKb === null) ptKb = state.settings.tastaturAn;
+    if (ptKb === null) ptKb = tastaturVorgabe(true);
     html += '<button class="kb-toggle" id="ptKbToggle">' +
       (ptKb ? 'Tastatur ausblenden' : 'Tastatur einblenden') + '</button>';
     if (ptKb) html += tastaturHtml('ptkey');
@@ -6583,7 +6596,7 @@ function renderTippenLeer() {
 }
 
 function renderTippen() {
-  if (tKb === null) tKb = state.settings.tastaturAn;
+  if (tKb === null) tKb = tastaturVorgabe(true);
   // Ist der gewählte Stapel leer und der andere nicht, dorthin wechseln —
   // sonst stünde man vor einem Leerzustand, obwohl es etwas zu tun gibt.
   if (!tResult && !tippenPool().length) {
@@ -6762,8 +6775,10 @@ function renderEinstellungen() {
       'Bestätigen ist erst möglich, wenn alle Buchstaben beziehungsweise Wörter liegen. Verrät dadurch die Länge der Lösung.',
       ohneBestaetigung) +
     '<h2>Eingabe</h2>' +
-    schalter('tastaturAn', 'Tastatur gleich einblenden',
-      'Zeigt die eingebaute kyrillische Tastatur in «Tippen» sofort. Aus: Sie klappen sie bei Bedarf auf.') +
+    schalter('tastaturAuto', 'Kyrillische Tastatur von selbst',
+      'Verlangt eine Aufgabe Kyrillisch, klappt die eingebaute Tastatur gleich auf. ' +
+      'Aus: Sie holen sie bei Bedarf. Wo Deutsch gefragt ist, kommt sie nie — dort ' +
+      'schreibt die Gerätetastatur.') +
     '<h2>Darstellung und Ton</h2>' +
     wahlText('darstellung', 'Darstellung',
       'Dunkel ist die Vorgabe. «System» folgt der Einstellung des iPhones.',
@@ -7274,8 +7289,11 @@ function bkStaendeNach(text, tabelle, boxen, zeiten) {
   }
 }
 
-// Die Einstellungen in fester Reihenfolge — Namen wären hier reine Länge.
-var BK_SETTINGS = ['confirmUeben', 'confirmUebersetzen', 'requireComplete', 'ton', 'tastaturAn'];
+// Die Einstellungen in fester Reihenfolge — Namen wären hier reine Länge. Ein
+// `null` hält den Platz einer Einstellung, die es nicht mehr gibt: Die Stellen
+// dürfen nicht wandern, sonst liest ein alter Code die falschen Schalter.
+var BK_SETTINGS = ['confirmUeben', 'confirmUebersetzen', 'requireComplete', 'ton',
+  null, 'tastaturAuto'];
 
 function encodeBackup() {
   var woerter = bkStaendeAus(state.boxes, state.lastSeen, bkKennung);
@@ -7297,7 +7315,7 @@ function encodeBackup() {
     .map(function (n) { return Math.max(0, n | 0).toString(36); }).join('.');
 
   var s = state.settings;
-  var einst = BK_SETTINGS.map(function (k) { return s[k] ? '1' : '0'; }).join('') +
+  var einst = BK_SETTINGS.map(function (k) { return k && s[k] ? '1' : '0'; }).join('') +
     '.' + s.tippenStufe + '.' + s.auffrischen + '.' +
     ['system', 'dunkel', 'hell'].indexOf(s.darstellung);
 
@@ -7365,7 +7383,11 @@ function decodeBackup(code) {
 
   var e = teile[5].split('.');
   var schalter = e[0] || '';
-  BK_SETTINGS.forEach(function (k, n) { d.settings[k] = schalter.charAt(n) === '1'; });
+  // Was der Code nicht führt, behält seine Vorgabe. Sonst machte ein älterer
+  // Code aus jeder später hinzugekommenen Einstellung ein «aus».
+  BK_SETTINGS.forEach(function (k, n) {
+    if (k && n < schalter.length) d.settings[k] = schalter.charAt(n) === '1';
+  });
   d.settings.tippenStufe = parseInt(e[1], 10) || 3;
   d.settings.auffrischen = parseInt(e[2], 10) || 21;
   d.settings.darstellung = ['system', 'dunkel', 'hell'][parseInt(e[3], 10)] || 'system';
