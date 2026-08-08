@@ -415,7 +415,7 @@ behauptet hat.
 
 ### Welche Tastatur
 
-Die **eingebaute kyrillische Tastatur** (dieselben `KB_ROWS` wie in «Tippen») erscheint
+Die **eingebaute kyrillische Tastatur** erscheint
 nur, wenn die Lösung russisch ist — einen deutschen Satz schreibt man mit der
 Gerätetastatur, einen kyrillischen oft nicht. Sie klappt **von selbst auf**
 (`tastaturVorgabe()`, Einstellung `tastaturAuto`, Vorgabe an): Wo Kyrillisch verlangt
@@ -426,6 +426,20 @@ kyrillisch ist.
 **Die Sprache der *Gerätetastatur* kann eine Seite nicht wählen.** iOS entscheidet das
 aus den installierten Tastaturen und der zuletzt benutzten; `lang` ist dafür kein Hebel.
 Die eingebaute Tastatur ist die Antwort der App darauf — mehr geht nicht.
+
+**Sie steht genau einmal im Code.** `tastaturHtml(attr)` baut sie für alle vier
+Schreibaufgaben; das Datenattribut sagt, wer die Tasten abholt (`trkey`, `key`,
+`gramkey`, `ptkey`). «Tippen» hatte lange eine eigene, gleichlautende Fassung — ein
+Layout an zwei Stellen ist eines zu viel.
+
+**Der Aufbau folgt der gewohnten Tastatur:** drei Buchstabenreihen aus `KB_ROWS`, die
+**Rücktaste rechts am Ende der dritten**, und das **Leerzeichen allein in einer vierten**
+— breit (62 %, mindestens 150 px) und mittig, wie man es von jedem Telefon kennt. Der
+Daumen trifft es, ohne hinzusehen.
+
+Vorher hingen Leerzeichen und Rücktaste beide hinten an der dritten Reihe. Die brach
+dadurch um, und die Rücktaste landete allein und mittig auf einer eigenen Zeile — an
+genau der Stelle, an der das Auge die Leertaste sucht.
 
 Der geschriebene Text steht in `trEingabe`,
 nicht nur im Feld: Zwischen zwei Renderläufen wäre er sonst weg. Beim Tippen wird darum

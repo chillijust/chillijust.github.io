@@ -124,6 +124,9 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   (`tastaturVorgabe()`, Einstellung `tastaturAuto`). Die Sprache der *Geräte*tastatur
   kann eine Seite nicht wählen — iOS entscheidet das, `lang` ist kein Hebel. Nichts
   vortäuschen, was das Betriebssystem nicht hergibt.
+- **Die Tastatur steht genau einmal im Code** (`tastaturHtml(attr)`, alle vier
+  Schreibaufgaben). Ihr Aufbau folgt der gewohnten: drei Buchstabenreihen, Rücktaste
+  rechts am Ende der dritten, Leerzeichen breit und mittig in einer vierten.
 - **Die Schalter im Sicherungscode stehen an festen Stellen** (`BK_SETTINGS`). Eine
   Einstellung, die es nicht mehr gibt, hinterlässt ein `null` als Platzhalter; was ein
   Code nicht führt, behält seine Vorgabe.

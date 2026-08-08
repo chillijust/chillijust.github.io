@@ -823,6 +823,9 @@ input.err, textarea.err { border-color: var(--bad); }
 }
 .key:active { background: var(--gold); color: var(--gold-ink); }
 .key.wide { min-width: 46px; font-size: 14px; }
+/* Die Leertaste steht allein in der letzten Reihe — breit und mittig, wie man
+   es von jeder Tastatur kennt. Der Daumen trifft sie, ohne hinzusehen. */
+.key.space { flex: 0 1 62%; min-width: 150px; font-size: 14px; color: var(--dim); }
 
 .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 22px; }
 .stat {
@@ -5524,6 +5527,10 @@ function tastaturVorgabe(kyrillisch) {
   return !!kyrillisch && state.settings.tastaturAuto;
 }
 
+// Der Aufbau folgt der gewohnten Tastatur: die Rücktaste rechts am Ende der
+// dritten Reihe, das Leerzeichen allein in einer vierten — breit und mittig.
+// Vorher hingen beide hinten an der dritten Reihe; die brach dadurch um, und
+// die Rücktaste landete allein und mittig auf einer eigenen Zeile.
 function tastaturHtml(attr) {
   var html = '<div>';
   KB_ROWS.forEach(function (row, ri) {
@@ -5531,13 +5538,14 @@ function tastaturHtml(attr) {
     row.forEach(function (ch) {
       html += '<button class="key cyr" data-' + attr + '="' + esc(ch) + '">' + esc(ch) + '</button>';
     });
-    if (ri === 2) {
-      html += '<button class="key wide" data-' + attr + '=" ">\u2423</button>' +
-        '<button class="key wide" data-' + attr + '="BS" aria-label="Zeichen löschen">' +
+    if (ri === KB_ROWS.length - 1) {
+      html += '<button class="key wide" data-' + attr + '="BS" aria-label="Zeichen löschen">' +
         ICON.ruecktaste + '</button>';
     }
     html += '</div>';
   });
+  html += '<div class="kb-row"><button class="key space" data-' + attr + '=" "' +
+    ' aria-label="Leerzeichen">\u2423</button></div>';
   return html + '</div>';
 }
 
@@ -6781,21 +6789,9 @@ function renderTippen() {
   }
   html += '</div>';
   html += '<button class="kb-toggle" id="tKbToggle">' + (tKb ? 'Tastatur ausblenden' : 'Tastatur einblenden') + '</button>';
-  if (tKb) {
-    html += '<div>';
-    KB_ROWS.forEach(function (row, ri) {
-      html += '<div class="kb-row">';
-      row.forEach(function (ch) {
-        html += '<button class="key cyr" data-key="' + esc(ch) + '">' + esc(ch) + '</button>';
-      });
-      if (ri === 2) {
-        html += '<button class="key wide" data-key=" ">\u2423</button>' +
-          '<button class="key wide" data-key="BS" aria-label="Zeichen löschen">' + ICON.ruecktaste + '</button>';
-      }
-      html += '</div>';
-    });
-    html += '</div>';
-  }
+  // Dieselbe Tastatur wie in den anderen drei Übungen — sie stand hier
+  // gleichlautend ein zweites Mal, und ein Layout an zwei Stellen ist eines zu viel.
+  if (tKb) html += tastaturHtml('key');
   html += '<p class="session-info">' + pool.length +
     (tippenModus === 'wiederholung' ? ' zum Auffrischen' : ' offen') + ' · ' +
     stats.correct + ' richtig · ' + stats.wrong + ' falsch' +
