@@ -1513,9 +1513,18 @@ Erreichte fiele nicht mehr auf — die Bewegung ist die Auszeichnung, nicht die 
 Die vier Takte über `nth-child` sorgen dafür, dass eine Reihe goldener Flammen lebt statt
 im Gleichschritt zu pulsen; die negative Verzögerung lässt sie von Anfang an brennen.
 
-**Die Reihe richtet sich unten aus** (`align-items: flex-end`). Eine Flamme wächst nach
-oben, also ist der Boden die gemeinsame Kante — sonst hinge der Strich der ungeübten
-Wörter in der Luft. Aus demselben Grund liegt der Drehpunkt des Flackerns bei `50% 88%`.
+**Die Reihe richtet sich unten aus** (`align-items: end`). Eine Flamme wächst nach oben,
+also ist der Boden die gemeinsame Kante — sonst hinge der Strich der ungeübten Wörter in
+der Luft. Aus demselben Grund liegt der Drehpunkt des Flackerns bei `50% 88%`.
+
+**Die Reihe ist ein Raster, keine umbrechende Flexbox**
+(`grid-template-columns: repeat(auto-fill, minmax(15px, 1fr))`). In einer Flexbox verteilt
+die *letzte* Zeile den ganzen Restplatz unter ihre wenigen Zeichen: Die 33 Buchstaben
+brechen auf zwei Zeilen um, und in der zweiten stünden die Flammen weiter auseinander als
+in der ersten. Solange ein Strich sein Fach ausfüllte, fiel das nicht auf — eine mittig
+stehende Flamme lässt die Lücke sehen. Das Raster legt die Spalten einmal für alle Zeilen
+fest. **`auto-fill`, nicht `auto-fit`:** `auto-fit` lässt leere Spalten zusammenfallen,
+dann zöge eine kurze Reihe (zehn Regeln) sich über die volle Breite auseinander.
 
 Die Pfade stehen einmal in `FLAMME_PFADE`; `ICON.flamme` (weiter Ausschnitt, für den
 Knopf neben anderen Symbolen) und `ICON.flammeEng` (eng beschnitten, damit die Flamme

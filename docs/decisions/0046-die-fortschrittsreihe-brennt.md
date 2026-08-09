@@ -43,6 +43,14 @@ Widerspruch; ein Strich ist ein Docht, der noch nicht brennt.
 gemeinsame Kante, sonst hinge der Strich der ungeübten Wörter in der Luft. Aus demselben
 Grund liegt der Drehpunkt des Flackerns bei `50% 88%` und nicht in der Mitte.
 
+**Die Reihe ist ein Raster.** Als umbrechende Flexbox verteilte die letzte Zeile den
+ganzen Restplatz unter ihre wenigen Zeichen — bei 33 gemeisterten Buchstaben standen die
+zehn Flammen der zweiten Zeile sichtbar weiter auseinander als die 23 darüber. Mit
+Strichen fiel das nie auf: Ein Strich füllte sein Fach aus, eine mittig stehende Flamme
+lässt die Lücke sehen. `repeat(auto-fill, minmax(15px, 1fr))` legt die Spalten einmal für
+alle Zeilen fest. `auto-fit` wäre falsch — es lässt leere Spalten zusammenfallen, und
+eine kurze Reihe (zehn Regeln) zöge sich über die volle Breite auseinander.
+
 ## Begründung
 
 Die Größe trägt die Aussage, die Farbe bestätigt sie. Eine Reihe, in der die Zeichen
