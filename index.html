@@ -144,11 +144,16 @@ button { font-family: inherit; }
 /* Zwei Gruppen, jede für sich dicht. Der Menüknopf steht am rechten Rand — er
    ist die Grundposition, alles andere rückt an ihn heran. Die Figur schließt
    die Gruppe nach links ab, direkt neben dem äußersten Knopf. */
+/* Die Reihenfolge steht in der Anordnung, nicht im Markup: Auf Home liegt der
+   Titel zwischen den Gruppen, unterwegs rückt er darunter. Ohne diese Angabe
+   stünde «Chillingo» rechts vom Menüknopf — er kommt im Dokument vor ihm. */
 .kopf-links, .kopf-rechts { display: flex; align-items: center; gap: 6px; }
+.kopf-links { order: 1; }
+.kopf-rechts { order: 3; }
 /* Der Bezug für die Blätter: Sie hängen unter den **Knöpfen**, nicht unter dem
    ganzen Kopf — der ist seit der zweiten Zeile viel höher. */
 .kopf-rechts { position: relative; }
-.titelblock { flex: 1; min-width: 0; }
+.titelblock { order: 2; flex: 1; min-width: 0; }
 /* Der Platz im Kopf steht im Fluss, zwischen Titel und Menüknopf. Mittig über
    der Zeile wäre er nur auf Home sichtbar — dort hat aber die Empfehlung immer
    Vorrang —, und unterwegs liefe ein langer Name wie «Einstellungen» darunter
@@ -233,7 +238,7 @@ body.unterwegs .titelblock { min-width: 0; }
    «Power-Training» keinen Platz — und ein Name, der abgeschnitten wird, sagt
    weniger als einer, der eine Zeile kostet. */
 body.unterwegs .titelblock {
-  order: 3; flex: 1 0 100%; min-width: 100%;
+  order: 4; flex: 1 0 100%; min-width: 100%;
   margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line);
   /* Nebeneinander statt untereinander: «MENÜ · Tickets» ist eine Angabe, keine
      zwei. Auf der Grundlinie ausgerichtet, damit die kleine Schrift unter der

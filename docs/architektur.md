@@ -146,6 +146,10 @@ Titelblock rückt darum unterwegs in eine **eigene Zeile** unter einer Haarlinie
 **nebeneinander** auf einer Grundlinie: «ÜBUNG Buchstaben» ist eine Angabe, keine zwei.
 Ein Name, der abgeschnitten wird, sagt weniger als einer, der eine Zeile kostet.
 
+**Die Reihenfolge steht in der Anordnung, nicht im Markup.** Auf Home liegt der Titel
+zwischen den Gruppen (`order: 2`), unterwegs rückt er unter beide (`order: 4`). Ohne diese
+Angabe stünde «Chillingo» rechts vom Menüknopf — im Dokument kommt er vor ihm.
+
 Der Kopf hat dafür **zwei Gruppen** statt sieben Einzelteilen: `.kopf-links` (Zurück,
 Home) und `.kopf-rechts` (Figur, Tafel, Wissen, Auswahl, Menü), jede für sich dicht
 gepackt. Der Menüknopf schließt rechts ab — er ist die Grundposition, alles andere rückt
