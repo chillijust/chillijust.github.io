@@ -1453,7 +1453,7 @@ Daneben existieren pro Übung einige Modulvariablen (`uebQ`, `uebPhase`, `trTask
 ## Einstellungen
 
 `state.settings` liegt im selben `localStorage`-Eintrag wie der Fortschritt. `mergeState()`
-übernimmt nur Werte, deren Typ zur Vorgabe passt — und prüft `tippenAbStufe` zusätzlich
+übernimmt nur Werte, deren Typ zur Vorgabe passt — und prüft `tippenStufe` zusätzlich
 auf einen sinnvollen Bereich:
 
 | Schalter | Vorgabe | Wirkung |
@@ -1461,7 +1461,7 @@ auf einen sinnvollen Bereich:
 | `confirmUeben` | an | Beim Vokabeltraining wird eine Antwort erst gewählt und dann über „Bestätigen" abgegeben. Aus: Der erste Tipp zählt sofort. |
 | `confirmUebersetzen` | an | In „Übersetzen" wird der Satz erst gelegt und dann bestätigt. Aus: Der Satz zählt, sobald das letzte Wort liegt. |
 | `requireComplete` | aus | „Bestätigen" ist erst möglich, wenn die Lösung vollständig ist. Verrät dadurch deren Länge. |
-| `tippenAbStufe` | 4 | Ab welcher Leitner-Stufe ein Wort in „Tippen" erscheint (2, 3 oder 4). |
+| `tippenStufe` | 3 | Ab welcher Leitner-Stufe ein Wort in „Tippen" erscheint (1 bis 4). Ein **gewähltes Lernset sticht diese Schwelle** und beginnt bei 1 (ADR 0048). |
 | `tastaturAuto` | **an** | Verlangt eine Aufgabe Kyrillisch, klappt die eingebaute Tastatur gleich auf. Aus: Sie holen sie bei Bedarf. Wo Deutsch gefragt ist, kommt sie nie. |
 | `schema` | `dark` | Farbschema: `dark`, `classic`, `gruen`, `blau`, `rosa`. Steuert `data-schema` am `<html>`-Element; `dark` trägt keines. |
 
@@ -1487,7 +1487,7 @@ Leitner-Stand (`state.boxes`). Unterschiedlich ist nur, *welchen Ausschnitt* sie
 | --- | --- |
 | Lernsets | das laufende Set, wahlweise ein früheres oder alle freigeschalteten |
 | Freestyle | ein Thema freier Wahl oder der ganze Bestand, ohne Sperre |
-| Tippen | nur Wörter ab `settings.tippenAbStufe` (Vorgabe 4, also gemeistert) |
+| Tippen | der ganze Wortschatz ab `settings.tippenStufe` (Vorgabe 3) — oder ein einzelnes Lernset, dann ab Stufe 1 |
 | Übersetzen | nur Sätze, deren Voraussetzungen alle mindestens `SATZ_STUFE` (2) haben |
 
 - **Lernsets** entstehen beim Start aus den Sätzen (`LERNSETS`): Die Sätze werden nach
@@ -1509,6 +1509,12 @@ Leitner-Stand (`state.boxes`). Unterschiedlich ist nur, *welchen Ausschnitt* sie
 - **Tippen** ist gesperrt, bis Wörter die Schwelle erreichen; der Leerzustand nennt die
   drei Wörter, die am nächsten dran sind. Während der Rückmeldung bleibt das Wort stehen,
   auch wenn ein Fehler es unter die Schwelle geworfen hat.
+- **Tippen hat zwei Achsen** (ADR 0048): den **Stapel** (`tippenModus`: Lernen ·
+  Wiederholung · Alle) und den **Vorrat** (`tippenSet`: der ganze Wortschatz oder ein
+  einzelnes Lernset). Beide zusammen liefert `tippenWoerter(setNr, modus)` — dieselbe
+  Funktion, die auch die Zahlen in der Auswahl rechnet, damit ein Chip nie etwas anderes
+  verspricht, als sein Antippen liefert. Ein Set, das es nach einer Lehrplanänderung nicht
+  mehr gibt, fällt auf den ganzen Wortschatz zurück statt leer zu bleiben.
 - **Übersetzen** prüft `benoetigt` gegen `state.boxes`; die Stufenleiste zeigt je Stufe,
   wie viele Sätze offen sind. Geübte Sätze merkt sich `state.readSeen` unter ihrem
   russischen Text.

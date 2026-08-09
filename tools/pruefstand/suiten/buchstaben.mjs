@@ -138,8 +138,9 @@ try {
   abcAnsicht = 'ueben'; abcRichtung = 'gemischt'; renderKopf();
   pruefe('G4 Regelfall färbt den Filter nicht', !q('#filterKnopf').classList.contains('aktiv'));
   q('#filterKnopf').click();
-  pruefe('G5 nur noch die Richtung im Filter',
-    alle('.filtergruppe').length === 1 && !q('[data-fw="abcansicht"]'),
+  pruefe('G5 Stapel und Richtung im Filter, die Tafel nicht mehr',
+    alle('.filtergruppe').length === 2 && !q('[data-fw="abcansicht"]') &&
+    !!q('[data-fw="abcstapel"]') && !!q('[data-fw="abcrichtung"]'),
     String(alle('.filtergruppe').length));
   q('[data-fw="abcrichtung"][data-fv="zeichen"]').click();
   pruefe('G6 Richtung gewechselt und Frage neu', abcRichtung === 'zeichen' && !!abcQ);

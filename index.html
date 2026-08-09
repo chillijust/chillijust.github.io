@@ -2606,7 +2606,7 @@ var APP_STAND = '2026-08-09'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '1.0.3'; /* == VERSION == */
+var APP_VERSION = '1.1.0'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -3989,11 +3989,11 @@ function filterHatWahl() {
 function filterAktiv() {
   if (currentTab === 'lernsets') return uebAuswahl !== 'aktuell';
   if (currentTab === 'freestyle') return uebThema !== 'Alle';
-  if (currentTab === 'tippen') return tippenModus !== 'lernen';
+  if (currentTab === 'tippen') return tippenModus !== 'lernen' || tippenSet !== null;
   if (currentTab === 'uebersetzen') {
     return trLevel !== 1 || trDir !== 'gemischt' || trModus !== 'lernen';
   }
-  if (currentTab === 'buchstaben') return abcRichtung !== 'gemischt';
+  if (currentTab === 'buchstaben') return abcRichtung !== 'gemischt' || abcStapel !== 'reihe';
   if (currentTab === 'grammatik') return gramWahl !== null;
   return false;
 }
@@ -4039,10 +4039,23 @@ function filterInhaltHtml() {
     return filterGruppe('Baustein', bausteine);
   }
   if (currentTab === 'tippen') {
-    return filterGruppe('Stapel',
-      filterChip('tmodus', 'lernen', 'Lernen · ' + tippenLernen().length, tippenModus === 'lernen') +
+    var stapel = filterChip('tmodus', 'lernen', 'Lernen · ' + tippenLernen().length,
+      tippenModus === 'lernen') +
       filterChip('tmodus', 'wiederholung', 'Wiederholung · ' + tippenWiederholung().length,
-        tippenModus === 'wiederholung'));
+        tippenModus === 'wiederholung') +
+      filterChip('tmodus', 'alle', 'Alle · ' + tippenAlle().length, tippenModus === 'alle');
+    // Die Set-Reihe zählt im **gewählten Stapel** — sonst verspräche eine Zahl
+    // etwas anderes, als das Antippen liefert. Gesperrte Sets stehen da, aber
+    // grau: Sie sagen, wohin der Weg führt.
+    var woher = filterChip('tset', '', 'Der Reihe nach', tippenSet === null);
+    LERNSETS.forEach(function (set, i) {
+      // Ein gesperrtes Set bekommt keine Zahl. «Set 7 · 0» behauptete, dort sei
+      // nichts — dabei ist dort nur noch nichts *erlaubt*.
+      var frei = setFrei(i);
+      woher += filterChip('tset', i, 'Set ' + (i + 1) +
+        (frei ? ' · ' + tippenWoerter(i, tippenModus).length : ''), tippenSet === i, !frei);
+    });
+    return filterGruppe('Stapel', stapel) + filterGruppe('Woher', woher);
   }
   if (currentTab === 'uebersetzen') {
     var st = '';
@@ -4065,10 +4078,14 @@ function filterInhaltHtml() {
   if (currentTab === 'buchstaben') {
     // Die Tafel steckt im eigenen Knopf daneben, nicht mehr hier — sie ist
     // keine Einstellung, sondern ein zweiter Ort.
-    return filterGruppe('Gefragt wird',
-      filterChip('abcrichtung', 'gemischt', 'Gemischt', abcRichtung === 'gemischt') +
-      filterChip('abcrichtung', 'zeichen', 'Zeichen \u2192 Laut', abcRichtung === 'zeichen') +
-      filterChip('abcrichtung', 'laut', 'Laut \u2192 Zeichen', abcRichtung === 'laut'));
+    return filterGruppe('Stapel',
+      filterChip('abcstapel', 'reihe', 'Der Reihe nach \u00b7 ' + abcPoolVon('reihe').length,
+        abcStapel === 'reihe') +
+      filterChip('abcstapel', 'alle', 'Alle \u00b7 ' + ALPHABET.length, abcStapel === 'alle')) +
+      filterGruppe('Gefragt wird',
+        filterChip('abcrichtung', 'gemischt', 'Gemischt', abcRichtung === 'gemischt') +
+        filterChip('abcrichtung', 'zeichen', 'Zeichen \u2192 Laut', abcRichtung === 'zeichen') +
+        filterChip('abcrichtung', 'laut', 'Laut \u2192 Zeichen', abcRichtung === 'laut'));
   }
   return '';
 }
@@ -4088,6 +4105,15 @@ function filterWaehlen(gruppe, wert) {
       tWord = null; tResult = null; tHint = false;
     }
     renderTippen();
+  } else if (gruppe === 'tset') {
+    var neuesSet = wert === '' ? null : parseInt(wert, 10);
+    if (tippenSet !== neuesSet) {
+      tippenSet = neuesSet;
+      // Das laufende Wort gehört zum alten Vorrat — mit ihm auch die
+      // angefangene Eingabe und eine offene Auflösung.
+      tWord = null; tResult = null; tHint = false; tEingabe = '';
+    }
+    renderTippen();
   } else if (gruppe === 'gramwahl') {
     gramWahl = wert || null;
     gramBaustein = gramWahl;
@@ -4095,6 +4121,14 @@ function filterWaehlen(gruppe, wert) {
     gramRegelNeu = false;
     gramRegelOffen = false;
     renderGrammatik();
+    renderKopf();
+  } else if (gruppe === 'abcstapel') {
+    if (abcStapel !== wert) {
+      abcStapel = wert;
+      abcQ = null;   // die laufende Frage kommt aus dem alten Stapel
+    }
+    abcOffen = null;
+    renderBuchstaben();
     renderKopf();
   } else if (gruppe === 'abcrichtung') {
     if (abcRichtung !== wert) {
@@ -4868,6 +4902,7 @@ function ansichtenZuruecksetzen() {
   tEingabe = '';
   tKb = null;
   tippenModus = 'lernen';
+  tippenSet = null;
 
   trTask = null;
   trBuilt = [];
@@ -4882,6 +4917,7 @@ function ansichtenZuruecksetzen() {
 
   abcAnsicht = 'ueben';
   abcRichtung = 'gemischt';
+  abcStapel = 'reihe';
   abcOffen = null;
   abcQ = null;
   abcPhase = 'ask';
@@ -6057,6 +6093,7 @@ var ABC_TUECKISCH = 'внрсух';
 // dem Knopf links neben der Auswahl.
 var abcAnsicht = 'ueben';     // 'ueben' · 'tafel'
 var abcRichtung = 'gemischt'; // 'zeichen' · 'laut' · 'gemischt'
+var abcStapel = 'reihe';      // 'reihe' = offen und fällig · 'alle' = alle 33
 var abcOffen = null;          // Buchstabe, dessen Merkhilfe in der Tafel aufgeklappt ist
 var abcQ = null, abcPhase = 'ask', abcPicked = null, abcCorrect = null;
 var abcBuilt = [], abcRevealed = false;
@@ -6085,12 +6122,19 @@ function abcUpdate(b, richtig) {
 // Offen ist, was noch nicht gemeistert ist; dazu kommt Fertiges, dessen Frist
 // um ist. Ein Buchstabe, der erst «sitzt», bleibt also im Stapel — genau dort
 // wartet die Kachelaufgabe auf ihn.
-function abcPool() {
+//
+// **«Alle» ist der zweite Stapel** (ADR 0048): Wer das Alphabet gemeistert hat,
+// stand bis dahin vor einer verschlossenen Tür — die Übung war leer, und der
+// einzige Weg zurück führte über das Warten auf die Auffrischfrist. Üben können
+// darf nie an einem Datum hängen.
+function abcPoolVon(stapel) {
+  if (stapel === 'alle') return ALPHABET.slice();
   var jetzt = Date.now();
   var offen = ALPHABET.filter(function (b) { return !abcGemeistert(b); });
   var frisch = ALPHABET.filter(function (b) { return abcGemeistert(b) && abcFaellig(b, jetzt); });
   return offen.concat(frisch);
 }
+function abcPool() { return abcPoolVon(abcStapel); }
 
 // ── Lesen: was die Buchstaben schon hergeben ────────────────
 // «Buchstaben» und «Freestyle» standen nebeneinander, ohne voneinander zu
@@ -6313,7 +6357,9 @@ function abcUebenHtml() {
     return abcKopfHtml() + '<div class="leer">' + maskottchen('gross') +
       '<h3>Das Alphabet sitzt</h3><p>Alle ' + ALPHABET.length + ' Buchstaben sind ' +
       BOX_MAX + '× richtig erkannt. ' + ruhend + ' ruhen bis zur nächsten Auffrischung.</p>' +
-      '<div class="btn-row"><button class="btn ghost" id="abcZurTafel">Tafel ansehen</button></div></div>';
+      '<div class="btn-row">' +
+      '<button class="btn primary" id="abcAlle">Trotzdem üben</button>' +
+      '<button class="btn ghost" id="abcZurTafel">Tafel ansehen</button></div></div>';
   }
   var q = abcQ;
   var zeichenFrage = q.modus !== 'laut';
@@ -6433,6 +6479,13 @@ function renderBuchstaben() {
     abcAnsicht = 'tafel';
     renderBuchstaben();
     renderKopf();
+  });
+  var abcAlleBtn = document.getElementById('abcAlle');
+  if (abcAlleBtn) abcAlleBtn.addEventListener('click', function () {
+    abcStapel = 'alle';
+    abcQ = null;
+    renderBuchstaben();
+    renderFilter();
   });
   main.querySelectorAll('[data-abcopt]').forEach(function (b) {
     b.addEventListener('click', function () {
@@ -7835,31 +7888,49 @@ var tWord = null, tResult = null, tHint = false, tKb = null;
 // Renderlauf von Hand zurückgeschrieben — mit der Prüfzeile gibt es das Feld
 // in der Auflösung aber nicht mehr.
 var tEingabe = '';
-var tippenModus = 'lernen';   // 'lernen' · 'wiederholung'
+var tippenModus = 'lernen';   // 'lernen' · 'wiederholung' · 'alle'
+// Woher die Wörter kommen: der ganze Wortschatz oder ein einzelnes Lernset.
+var tippenSet = null;         // null = der Reihe nach, sonst die Set-Nummer
 
-// Offen: begonnen, aber noch nicht fertig. Ohne Fälligkeitsfilter — wer üben
-// will, soll üben dürfen, nicht auf den nächsten Tag warten.
-function tippenLernen() {
-  var schwelle = state.settings.tippenStufe;
-  return ALL_VOCAB.filter(function (v) {
+// Der Vorrat einer Wahl. Ein Set, das es nach einer Lehrplanänderung nicht mehr
+// gibt, fällt auf den ganzen Wortschatz zurück statt leer zu bleiben.
+function tippenVorrat(setNr) {
+  return (setNr === null || !LERNSETS[setNr]) ? ALL_VOCAB : LERNSETS[setNr].woerter;
+}
+// **Ein gewähltes Set sticht die Stufenschwelle** (ADR 0048). Ein Set gilt auf
+// SATZ_STUFE als geschafft, «Tippen» beginnt aber erst bei settings.tippenStufe
+// — wer sein frisch gelerntes Set nachschreiben will, fände sonst nichts vor.
+function tippenSchwelle(setNr) {
+  return setNr === null ? state.settings.tippenStufe : 1;
+}
+
+// Die drei Stapel an einer Stelle, damit die Auswahl dieselben Zahlen nennt,
+// die sie liefert — und damit eine Zählung für ein *anderes* Set möglich ist,
+// ohne die laufende Wahl anzufassen.
+function tippenWoerter(setNr, modus) {
+  var schwelle = tippenSchwelle(setNr);
+  var jetzt = Date.now();
+  return tippenVorrat(setNr).filter(function (v) {
     var b = state.boxes[v.id] || 0;
+    // Fertig und die Frist ist um: einmal zur Sicherheit.
+    if (modus === 'wiederholung') return b >= BOX_MAX && faellig(v, jetzt);
+    // Alles Begonnene, ohne Rücksicht auf Stufe und Frist — der Stapel zum
+    // Festigen. Nie Gesehenes bleibt draußen: «Tippen» ist keine erste
+    // Begegnung, sondern eine Behauptung.
+    if (modus === 'alle') return b >= 1;
+    // Offen: begonnen, aber noch nicht fertig. Ohne Fälligkeitsfilter — wer
+    // üben will, soll üben dürfen, nicht auf den nächsten Tag warten.
     return b >= schwelle && b < BOX_MAX;
   });
 }
-// Fertig und die Frist ist um: einmal zur Sicherheit.
-function tippenWiederholung() {
-  var jetzt = Date.now();
-  return ALL_VOCAB.filter(function (v) {
-    return (state.boxes[v.id] || 0) >= BOX_MAX && faellig(v, jetzt);
-  });
-}
-function tippenPool() {
-  return tippenModus === 'wiederholung' ? tippenWiederholung() : tippenLernen();
-}
+function tippenLernen() { return tippenWoerter(tippenSet, 'lernen'); }
+function tippenWiederholung() { return tippenWoerter(tippenSet, 'wiederholung'); }
+function tippenAlle() { return tippenWoerter(tippenSet, 'alle'); }
+function tippenPool() { return tippenWoerter(tippenSet, tippenModus); }
 // Fertig, aber noch nicht fällig — das sind die, die gerade ruhen.
 function tippenRuhend() {
   var jetzt = Date.now();
-  return ALL_VOCAB.filter(function (v) {
+  return tippenVorrat(tippenSet).filter(function (v) {
     return (state.boxes[v.id] || 0) >= BOX_MAX && !faellig(v, jetzt);
   });
 }
@@ -7880,28 +7951,46 @@ function naechsteAuffrischung() {
 // Leerzustand: drei Fälle, die sich sehr verschieden anfühlen — noch nichts
 // freigeschaltet, alles getippt, oder gerade nichts fällig.
 function renderTippenLeer() {
-  var schwelle = state.settings.tippenStufe;
+  var schwelle = tippenSchwelle(tippenSet);
   var ruhend = tippenRuhend().length;
   var offen = tippenLernen().length;
   var frisch = tippenWiederholung().length;
-  var fast = ALL_VOCAB.filter(function (v) {
+  var fast = tippenVorrat(tippenSet).filter(function (v) {
     var b = state.boxes[v.id] || 0;
     return b > 0 && b < schwelle;
   }).sort(function (a, b) { return (state.boxes[b.id] || 0) - (state.boxes[a.id] || 0); });
 
   var html = '<section><div class="leer">' + maskottchen('gross');
 
-  if (tippenModus === 'wiederholung') {
+  // Ein gewähltes Set hat seinen eigenen Leerzustand. «Noch kein Wort
+  // freigeschaltet» wäre hier gelogen — freigeschaltet ist das Set, angefangen
+  // ist es nur nicht.
+  if (tippenSet !== null && LERNSETS[tippenSet] && !tippenAlle().length) {
+    html += '<h3>Set ' + (tippenSet + 1) + ' ist noch unberührt</h3>' +
+      '<p>Getippt wird, was in «Lernsets» schon einmal drankam. Von diesem Set ' +
+      'hat noch kein Wort angefangen zu sitzen.</p>' +
+      '<div class="btn-row"><button class="btn primary" id="tZuUeben">Zu «Lernsets»</button>' +
+      '<button class="btn ghost" id="tAlleSets">Der Reihe nach</button></div>';
+  } else if (tippenModus === 'alle') {
+    html += '<h3>Nichts zum Festigen</h3>' +
+      '<p>Hier steht alles, was schon einmal drankam — ' +
+      (tippenSet !== null ? 'aus Set ' + (tippenSet + 1) + ' ' : '') +
+      'unabhängig von Stufe und Frist. Noch ist nichts dabei.</p>' +
+      '<div class="btn-row"><button class="btn primary" id="tZuUeben">Zu «Lernsets»</button>' +
+      (tippenSet !== null ? '<button class="btn ghost" id="tAlleSets">Der Reihe nach</button>' : '') +
+      '</div>';
+  } else if (tippenModus === 'wiederholung') {
     html += '<h3>' + (ruhend ? 'Gerade nichts fällig' : 'Noch nichts zum Auffrischen') + '</h3>' +
       '<p>' + (ruhend
         ? ruhend + (ruhend === 1 ? ' Wort sitzt' : ' Wörter sitzen') + ' und ruhen. Das nächste kommt ' +
           esc(naechsteAuffrischung()) + ' zur Sicherheit noch einmal.'
         : 'Hier erscheinen Wörter, die Sie fertig gelernt haben — nach ' +
           (state.settings.auffrischen || 21) + ' Tagen einmal zur Sicherheit.') + '</p>';
-    if (offen) {
-      html += '<div class="btn-row"><button class="btn primary" id="tZuLernen">' +
-        offen + (offen === 1 ? ' Wort offen' : ' Wörter offen') + '</button></div>';
-    }
+    html += '<div class="btn-row">' +
+      (offen ? '<button class="btn primary" id="tZuLernen">' +
+        offen + (offen === 1 ? ' Wort offen' : ' Wörter offen') + '</button>' : '') +
+      (tippenAlle().length ? '<button class="btn' + (offen ? ' ghost' : ' primary') +
+        '" id="tZuAlle">Trotzdem festigen</button>' : '') + '</div>';
   } else if (ruhend || frisch) {
     html += '<h3>Alles getippt</h3>' +
       '<p>Auf der Lernstufe wartet kein Wort mehr. ' +
@@ -7910,8 +7999,11 @@ function renderTippenLeer() {
         ? frisch + (frisch === 1 ? ' ist' : ' sind') + ' zum Auffrischen bereit.'
         : 'Die nächste Auffrischung kommt ' + esc(naechsteAuffrischung()) + '.') +
       '</p>';
+    // Der Ausweg, den es lange nicht gab: Gelerntes noch einmal schreiben,
+    // ohne auf die Frist zu warten.
     html += '<div class="btn-row">' +
       (frisch ? '<button class="btn primary" id="tZuFrisch">Wiederholen</button>' : '') +
+      '<button class="btn' + (frisch ? ' ghost' : ' primary') + '" id="tZuAlle">Trotzdem festigen</button>' +
       '<button class="btn ghost" id="tZuUeben">Neue Wörter lernen</button></div>';
   } else {
     html += '<h3>Noch kein Wort freigeschaltet</h3>' +
@@ -7938,12 +8030,28 @@ function renderTippenLeer() {
     tippenModus = 'wiederholung';
     tWord = null;
     renderTippen();
+    renderFilter();
+  });
+  var alleBtn = document.getElementById('tZuAlle');
+  if (alleBtn) alleBtn.addEventListener('click', function () {
+    tippenModus = 'alle';
+    tWord = null;
+    renderTippen();
+    renderFilter();
+  });
+  var setBtn = document.getElementById('tAlleSets');
+  if (setBtn) setBtn.addEventListener('click', function () {
+    tippenSet = null;
+    tWord = null;
+    renderTippen();
+    renderFilter();
   });
   var lernBtn = document.getElementById('tZuLernen');
   if (lernBtn) lernBtn.addEventListener('click', function () {
     tippenModus = 'lernen';
     tWord = null;
     renderTippen();
+    renderFilter();
   });
 }
 
@@ -7951,7 +8059,9 @@ function renderTippen() {
   if (tKb === null) tKb = tastaturVorgabe(true);
   // Ist der gewählte Stapel leer und der andere nicht, dorthin wechseln —
   // sonst stünde man vor einem Leerzustand, obwohl es etwas zu tun gibt.
-  if (!tResult && !tippenPool().length) {
+  // «Alle» bleibt davon unberührt: Wer festigen will, hat das ausdrücklich
+  // gewählt und soll nicht stillschweigend woandershin geschoben werden.
+  if (!tResult && tippenModus !== 'alle' && !tippenPool().length) {
     var anderer = tippenModus === 'lernen' ? 'wiederholung' : 'lernen';
     tippenModus = anderer;
     if (!tippenPool().length) tippenModus = 'lernen';
@@ -7967,7 +8077,10 @@ function renderTippen() {
 
   var html = '<section><div class="card">' +
     '<p class="task-label">' + (tippenModus === 'wiederholung'
-      ? 'Zur Sicherheit noch einmal' : 'Schreiben Sie auf Russisch') + '</p>' +
+      ? 'Zur Sicherheit noch einmal'
+      : tippenModus === 'alle' ? 'Noch einmal, zum Festigen'
+        : 'Schreiben Sie auf Russisch') +
+    (tippenSet !== null && LERNSETS[tippenSet] ? ' · Set ' + (tippenSet + 1) : '') + '</p>' +
     '<p class="word">' + esc(w.de) + hoerknopf(w.de, 'de') + '</p>' +
     (tHint ? '<p class="translit">[' + esc(w.tr) + ']</p>' : '') +
     (tResult

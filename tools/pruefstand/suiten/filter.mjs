@@ -105,8 +105,10 @@ try {
   setTab('tippen');
   q('#filterKnopf').click();
   var st = alle('[data-fw="tmodus"]');
-  pruefe('F1 beide Stapel mit Zahlen', st.length === 2 &&
-    st[0].textContent.indexOf('Lernen · 4') === 0 && st[1].textContent.indexOf('Wiederholung · 2') === 0,
+  pruefe('F1 drei Stapel mit Zahlen', st.length === 3 &&
+    st[0].textContent.indexOf('Lernen · 4') === 0 &&
+    st[1].textContent.indexOf('Wiederholung · 2') === 0 &&
+    st[2].textContent.indexOf('Alle · 6') === 0,
     st.map(function (x) { return x.textContent; }).join(' | '));
   st[1].click();
   pruefe('F2 Wechsel wirkt', tippenModus === 'wiederholung' && !filterOffen &&

@@ -75,9 +75,10 @@ try {
   setTab('tippen');
   filterSetzen(true); renderFilter();
   var kacheln = alle('[data-fw="tmodus"]');
-  pruefe('E1 zwei Stapel mit Beständen', kacheln.length === 2 &&
+  pruefe('E1 drei Stapel mit Beständen', kacheln.length === 3 &&
     kacheln[0].textContent.indexOf('Lernen · 4') === 0 &&
-    kacheln[1].textContent.indexOf('Wiederholung · 2') === 0,
+    kacheln[1].textContent.indexOf('Wiederholung · 2') === 0 &&
+    kacheln[2].textContent.indexOf('Alle · 6') === 0,
     kacheln.map(function (k) { return k.textContent; }).join(' | '));
   kacheln[1].click();
   pruefe('E2 Klick wechselt den Stapel', tippenModus === 'wiederholung' &&

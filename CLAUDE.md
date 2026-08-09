@@ -323,6 +323,14 @@ gibt es den Skill `ticket`.
 - **Home zählt über alle Satzstufen, «Übersetzen» zeigt eine.** Wer seine Stufe fertig
   hat, muss von dort zur nächsten finden (`trStufeMitArbeit()`) — sonst widersprechen
   sich Kachel und Übung. Angeboten, nicht genommen: Die Stufe ist eine Wahl des Nutzers.
+- **Üben können hängt nie an einem Datum** (ADR 0048). «Tippen» und «Buchstaben» haben
+  den Stapel **«Alle»** — alles Begonnene beziehungsweise alle 33 Zeichen, ohne Rücksicht
+  auf Stufe und Auffrischfrist; die Leerzustände tragen ihn als Knopf mit. «Tippen» hat
+  dazu einen **Vorrat** (`tippenSet`): der ganze Wortschatz oder ein einzelnes Lernset,
+  und **ein gewähltes Set sticht die Stufenschwelle**. Beide Achsen liefert
+  `tippenWoerter(setNr, modus)` — dieselbe Funktion rechnet die Zahlen in der Auswahl,
+  sonst verspräche ein Chip etwas anderes, als sein Antippen liefert. «Übersetzen» bleibt
+  bewusst bei drei Achsen.
 - **«Tippen» und «Übersetzen» sind zweigeteilt** (ADR 0015): Lernen und Wiederholung.
   Fertig Gelerntes verlässt beide Stapel, bis die Frist `auffrischen` um ist. Wer dort
   etwas ändert, muss beide Stapel und die drei Leerzustände mitdenken — «noch nichts
