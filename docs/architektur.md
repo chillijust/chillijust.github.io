@@ -817,8 +817,9 @@ Ein Buchstabe kennt **zwei Schwellen**, genau wie eine Vokabel:
 `abcPool()` fragt nach **gemeistert**, nicht nach «sitzt» — sonst fiele ein Buchstabe
 schon auf Stufe 2 aus der Übung heraus, und zwischen Erkennen und Können läge nichts mehr.
 
-Der Kopf über der Frage ist dasselbe **Paket** wie in «Lernsets» (`abcKopfHtml()`): ein
-Punkt je Buchstabe, gefärbt nach seiner Stufe, darunter «x von 33 auf Stufe 2 · y
+Der Kopf über der Frage ist dasselbe **Paket** wie in «Lernsets» (`abcKopfHtml()`): eine
+Flamme je Buchstabe, gefärbt und bemessen nach seiner Stufe (siehe «Die
+Fortschrittsreihe»), darunter «x von 33 auf Stufe 2 · y
 gemeistert · z fällig». Auf der Karte selbst stehen die **Fortschrittspunkte** des
 gefragten Buchstabens (`.boxdots`) und rechts, ob es einer der falschen Freunde ist.
 
@@ -1491,6 +1492,34 @@ Leitner-Stand (`state.boxes`). Unterschiedlich ist nur, *welchen Ausschnitt* sie
 Die Wort-Kennung ist das russische Wort selbst, nicht `Thema::wort`. Damit überlebt der
 Lernstand jede Umbenennung und Umsortierung der Themen; `migriereIds()` schreibt alte
 Stände beim Laden um.
+
+### Die Fortschrittsreihe
+
+Über der Aufgabe steht in vier Übungen dieselbe Reihe — ein Zeichen je Wort, Buchstabe,
+Regel oder Runde: **Lernsets** (`setKopfHtml()`), **Buchstaben**
+(`abcKopfHtml()`), **Grammatik** (`gramKopfHtml()`) und **Power-Training**
+(`ptKopfHtml()`). Das Zeichen baut `ppHtml(stufe)` und steht damit genau einmal im Code.
+
+| Stufe | Zeichen | Farbe |
+| --- | --- | --- |
+| 0 — nicht angefangen | Strich | `--line` |
+| 1 | kleine Flamme | `--dim` |
+| 2 | etwas größer | `--ice`, blass |
+| 3 | größer | `--ice` |
+| 4 — gemeistert | größte Flamme, **flackert** | `--gold` |
+
+**Nur Gold bewegt sich.** Flackerten alle Stufen, zappelte eine ganze Reihe, und das
+Erreichte fiele nicht mehr auf — die Bewegung ist die Auszeichnung, nicht die Grundform.
+Die vier Takte über `nth-child` sorgen dafür, dass eine Reihe goldener Flammen lebt statt
+im Gleichschritt zu pulsen; die negative Verzögerung lässt sie von Anfang an brennen.
+
+**Die Reihe richtet sich unten aus** (`align-items: flex-end`). Eine Flamme wächst nach
+oben, also ist der Boden die gemeinsame Kante — sonst hinge der Strich der ungeübten
+Wörter in der Luft. Aus demselben Grund liegt der Drehpunkt des Flackerns bei `50% 88%`.
+
+Die Pfade stehen einmal in `FLAMME_PFADE`; `ICON.flamme` (weiter Ausschnitt, für den
+Knopf neben anderen Symbolen) und `ICON.flammeEng` (eng beschnitten, damit die Flamme
+ihren Platz in der Reihe füllt) unterscheiden sich allein im `viewBox`.
 
 ## Persistenz
 

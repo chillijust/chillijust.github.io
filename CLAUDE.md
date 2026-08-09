@@ -64,6 +64,11 @@ zweite Flug bricht den ersten ab. Ein runder Knopf, in den sie springt, braucht
 - **Der Jubel ist ein Fenster für das Seltene** (ADR 0044) — fünf Anlässe, ausgelöst nur
   am Übergang, Ton ausgelost. Ein einzelnes gemeistertes Wort bekommt weiter nur eine
   Zeile: Was oft passiert, darf keine Hürde werden.
+- **Die Fortschrittsreihe brennt** (ADR 0046) — ein Zeichen je Wort, gebaut von
+  `ppHtml(stufe)` und sonst nirgends: Stufe 0 bleibt ein Strich, ab Stufe 1 wächst eine
+  Flamme mit. **Nur Gold flackert**; die Animation hängt an `.punkt` und `.pp.s4`, nicht
+  an `.flamme-aussen` allein. Die Farben der Stufen sind unverändert — die Gestalt trägt
+  die Aussage, die Farbe bestätigt sie.
 - **Die Übersicht ordnet in drei Gruppen** (ADR 0045): Wörter · Sätze · Freiwillig. Eine
   neue Übung braucht einen Eintrag in `UEBUNG_GRUPPEN` **und** in `UEBUNGEN`.
 - **Die Einstellungen haben Reiter** (ADR 0045). Was nur auf einem Reiter steht, ist beim
