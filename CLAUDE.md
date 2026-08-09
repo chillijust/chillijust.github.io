@@ -64,6 +64,11 @@ zweite Flug bricht den ersten ab. Ein runder Knopf, in den sie springt, braucht
 - **Der Jubel ist ein Fenster für das Seltene** (ADR 0044) — fünf Anlässe, ausgelöst nur
   am Übergang, Ton ausgelost. Ein einzelnes gemeistertes Wort bekommt weiter nur eine
   Zeile: Was oft passiert, darf keine Hürde werden.
+- **Die Übersicht ordnet in drei Gruppen** (ADR 0045): Wörter · Sätze · Freiwillig. Eine
+  neue Übung braucht einen Eintrag in `UEBUNG_GRUPPEN` **und** in `UEBUNGEN`.
+- **Die Einstellungen haben Reiter** (ADR 0045). Was nur auf einem Reiter steht, ist beim
+  Binden nicht immer da — vor `addEventListener` prüfen. `einstReiter` gehört in
+  `ansichtenZuruecksetzen()`.
 - **Ein Farbschema, keine zwei Achsen** (ADR 0039): die Einstellung `schema` mit den
   Werten Dark (Vorgabe), Classic, Grün, Blau, Rosa — `data-schema` am `<html>`-Element,
   «dark» trägt keines. Vier davon sind hell; die Farben gibt es nicht in einer dunklen

@@ -357,7 +357,12 @@ body.wissen-offen #wissenPanel { grid-template-rows: 1fr; opacity: 1; pointer-ev
 .card { position: relative; }
 .kachel-knopf {
   position: absolute; top: 10px; right: 10px; z-index: 40;
+  transition: opacity .18s;
 }
+/* Ist ein anderes Blatt offen, hat der Knopf in der Kachel dort nichts zu
+   suchen: Er liegt über dem Blatt (z-index 40 gegen 30) und stach hindurch. */
+body.menu-offen .kachel-knopf,
+body.filter-offen .kachel-knopf { opacity: 0; pointer-events: none; }
 .filterpanel { width: 284px; max-width: 86vw; }
 .filterpanel .menuinhalt { max-height: 62vh; overflow-y: auto; padding: 12px; gap: 0; }
 .filtergruppe + .filtergruppe { margin-top: 14px; }
@@ -419,7 +424,20 @@ body.wissen-offen #wissenPanel { grid-template-rows: 1fr; opacity: 1; pointer-ev
 .empf-titel { display: block; font-family: Georgia, serif; font-size: 19px; line-height: 1.25; }
 .empf-note { display: block; font-size: 13px; color: var(--dim); margin-top: 5px; line-height: 1.4; }
 
+/* Zwei Spalten, außer wo eine Gruppe nur eine Übung hat — «Übersetzen» steht
+   allein und darf die ganze Breite nehmen: Es ist das Ziel des ganzen Wegs. */
 .kachelfeld { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.kachelfeld.breit { grid-template-columns: 1fr; }
+/* Eine ungerade letzte Kachel nimmt beide Spalten, statt eine Lücke zu lassen —
+   die Lücke war genau das «Wilde» am alten Feld. */
+.kachelfeld .kachel:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.kachelfeld.breit .kachel,
+.kachelfeld .kachel:last-child:nth-child(odd) { min-height: 96px; }
+.kachelfeld + .gruppe-titel { margin-top: 22px; }
+.gruppe-titel {
+  font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--dim); margin: 0 0 8px 2px;
+}
 .kachel {
   display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
   min-height: 116px; padding: 15px; text-align: left; cursor: pointer;
@@ -805,6 +823,16 @@ body.chili-steht #chiliBuehne { visibility: visible; }
 }
 .sprechblase .fact-label { text-align: left; margin: 0 0 8px; }
 .sprechblase .fact-text { font-size: 16px; }
+/* Der Streifen unter der Auflösung: dieselbe Blase, aber ohne Zipfel und ohne
+   Auftritt — die Chili steht hier nicht daneben, sie ist mitten in der Übung. */
+.fakt-streifen {
+  display: flex; align-items: flex-start; gap: 12px; margin-top: 16px;
+  animation: none; padding: 14px 14px 12px;
+}
+.fakt-streifen::after { display: none; }
+.fakt-streifen .fact-text { font-size: 15px; flex: 1; }
+.fakt-streifen > span:first-child { display: none; }
+.fakt-streifen .sternbtn { flex: none; }
 .fakt-fuss { display: flex; align-items: center; gap: 12px; margin: 12px 0 0 16px; }
 .fakt-fuss .sternbtn { margin-left: auto; }
 
@@ -922,6 +950,26 @@ input.err, textarea.err { border-color: var(--bad); }
 .switch:disabled { opacity: .35; cursor: default; }
 .switch.on { border-color: var(--gold); background: rgba(210, 162, 78, .18); }
 .switch.on .knob { transform: translateX(20px); background: var(--gold); }
+/* Die Reiterleiste klebt oben unter dem Kopf: Sie sagt, wo man ist, und das
+   soll sie auch nach dem Scrollen noch tun. Vier Reiter passen nebeneinander;
+   wird es enger, darf sie schieben statt umzubrechen. */
+.reiter {
+  position: sticky; top: 0; z-index: 5;
+  display: flex; gap: 4px; margin: 0 0 4px;
+  padding: 6px 0 10px; background: var(--bg);
+  overflow-x: auto; scrollbar-width: none;
+}
+.reiter::-webkit-scrollbar { display: none; }
+body.unterwegs .reiter { top: 62px; }
+.reiter-knopf {
+  flex: 1 0 auto; min-height: 44px; padding: 0 12px;
+  border: 1px solid var(--line); border-radius: 999px;
+  background: var(--card-2); color: var(--dim);
+  font-size: 13px; cursor: pointer; white-space: nowrap;
+}
+.reiter-knopf.active { border-color: var(--gold); color: var(--gold); background: var(--card); }
+.reiter-blatt { min-height: 40vh; }
+.reiter-blatt .setting:first-child { padding-top: 4px; }
 .settings-note { font-size: 12px; color: var(--dim); line-height: 1.5; margin: 16px 0 0; }
 .mehr {
   display: block; margin: 12px auto 0; background: none; border: none; color: var(--ice);
@@ -1881,7 +1929,32 @@ var FACTS = [
   '«Москва» ist weiblich: «Москва красивая».',
   'Das Wort «спутник» heißt einfach „Weggefährte" — der Satellit kam erst 1957 dazu.',
   '«Ёлка» ist der Tannenbaum — in Russland zu Neujahr, nicht zu Weihnachten.',
-  '«Дача» ist mehr als ein Wochenendhaus: ein Garten, ein Ritual, ein halbes Sommerleben.'
+  '«Дача» ist mehr als ein Wochenendhaus: ein Garten, ein Ritual, ein halbes Sommerleben.',
+  '«Ни пуха ни пера» heißt wörtlich «weder Flaum noch Feder» — es ist das russische «Hals- und Beinbruch». Geantwortet wird «К чёрту!» — «zum Teufel!».',
+  '«Вешать лапшу на уши» heißt wörtlich «Nudeln auf die Ohren hängen» und bedeutet: jemandem einen Bären aufbinden.',
+  '«Держать язык за зубами» — «die Zunge hinter den Zähnen halten». Auf Deutsch: den Mund halten.',
+  '«Не в своей тарелке» heißt wörtlich «nicht im eigenen Teller» und bedeutet: sich unwohl fühlen, fehl am Platz sein.',
+  '«Когда рак на горе свистнет» — «wenn der Krebs auf dem Berg pfeift». Das ist das russische «am Sankt-Nimmerleins-Tag».',
+  '«Делать из мухи слона» — «aus einer Fliege einen Elefanten machen». Wir machen aus einer Mücke einen Elefanten; das Tier stimmt, das Insekt nicht.',
+  '«Как две капли воды» — «wie zwei Wassertropfen». Gemeint ist: zum Verwechseln ähnlich.',
+  '«Заморить червячка» heißt wörtlich «das Würmchen töten» und bedeutet schlicht: eine Kleinigkeit essen.',
+  '«Ежу понятно» — «dem Igel ist es klar», also: das versteht sich von selbst.',
+  '«Хоть глаз выколи» — «auch wenn du dir das Auge ausstichst». Es beschreibt völlige Dunkelheit.',
+  '«Руки не доходят» heißt wörtlich «die Hände kommen nicht hin» und bedeutet: Ich komme nicht dazu.',
+  '«Смотреть сквозь пальцы» — «durch die Finger schauen»: etwas absichtlich übersehen. Diese Wendung gibt es im Deutschen fast wörtlich.',
+  '«Бабушка надвое сказала» — «die Großmutter hat zweierlei gesagt». Gemeint ist: Das ist noch längst nicht sicher.',
+  '«Тише едешь — дальше будешь» — «je leiser du fährst, desto weiter kommst du». Eile mit Weile.',
+  '«Волка ноги кормят» — «den Wolf ernähren seine Beine»: Wer nichts tut, bekommt nichts.',
+  '«Медведь на ухо наступил» — «ein Bär ist ihm aufs Ohr getreten»: Er hat kein Gehör für Musik.',
+  '«Гол как сокол» — «nackt wie ein Falke», also: völlig mittellos. Der «сокол» war ursprünglich kein Vogel, sondern ein glatter Rammbock.',
+  '«Дело в шляпе» — «die Sache ist im Hut»: alles geregelt. Unser «unter Dach und Fach» meint dasselbe.',
+  '«Голод не тётка» — «der Hunger ist keine Tante». Eine Tante würde einem etwas zustecken; der Hunger tut das nicht.',
+  '«У чёрта на куличках» — «beim Teufel auf den Osterkuchen»: am Ende der Welt.',
+  'Wörtlich übersetzen führt oft in die Irre: «Я тебя люблю» heißt Wort für Wort «ich dich liebe» — die Reihenfolge ist frei, weil die Endungen sagen, wer wen liebt.',
+  '«Ничего» heißt wörtlich «nichts», wird aber als Antwort auf «Wie geht\'s?» benutzt und meint dann: «Geht schon.»',
+  'Der russische Mat ist eine eigene, sehr alte Schimpfsprache aus wenigen Wurzeln. Wörtlich übersetzt ergeben ihre Wendungen im Deutschen selten Sinn — sie tragen ihre Wucht aus der Sprache selbst, nicht aus dem Bild.',
+  '«Ремонт» heißt Renovierung, nicht Reparatur — und «евроремонт» ist eine Renovierung im westlichen Stil.',
+  '«Собака» ist der Hund und zugleich das Zeichen @ in einer E-Mail-Adresse: «собака» wegen des eingerollten Schwanzes.'
 ];
 
 var KB_ROWS = [
@@ -3407,6 +3480,48 @@ function meisterHtml() {
     '</span></div>';
 }
 
+// ── Fakten überall ──────────────────────────────────────────
+// Ein Sprachfakt gehört zu jeder Übung, nicht nur zu den Lernsets. Dort hat er
+// einen eigenen Schritt, weil die Runde kurz ist und der Fakt die Pause
+// **ist**; überall sonst steht er als Streifen unter der Auflösung. Ein eigener
+// Bildschirm wäre dort im Weg — man ist mitten in einer Aufgabe.
+// «Buchstaben» und «Grammatik» bleiben draußen: Sie zählen nicht in
+// `state.answered`, und ein Fakt zwischen zwei Regeln wäre ein zweiter Gedanke
+// zu viel.
+var faktStreifen = '';
+
+function faktStreifenPruefen() {
+  faktStreifen = '';
+  if (state.answered <= 0 || state.answered % 5 !== 0) return;
+  faktStreifen = naechsterFakt();
+  faktGezeigt(faktStreifen);
+  state.factIdx++;
+  save();
+}
+
+function faktStreifenHtml() {
+  if (!faktStreifen) return '';
+  var st = faktStand(faktStreifen);
+  return '<div class="sprechblase fakt-streifen">' +
+    '<span class="fact-label">Wussten Sie?</span>' +
+    '<p class="fact-text">' + esc(faktStreifen) + '</p>' +
+    '<button class="sternbtn' + (st.f ? ' an' : '') + '" id="streifenFav"' +
+    ' aria-pressed="' + (st.f ? 'true' : 'false') + '" aria-label="Als Favorit merken">' +
+    (st.f ? ICON.sternVoll : ICON.stern) + '</button></div>';
+}
+
+// Der Stern wirkt sofort, ohne die Aufgabe darunter neu zu zeichnen.
+function faktStreifenBinden() {
+  var b = document.getElementById('streifenFav');
+  if (!b) return;
+  b.addEventListener('click', function () {
+    var an = faktFavorit(faktStreifen);
+    b.classList.toggle('an', an);
+    b.setAttribute('aria-pressed', an ? 'true' : 'false');
+    b.innerHTML = an ? ICON.sternVoll : ICON.stern;
+  });
+}
+
 // ── Jubel ───────────────────────────────────────────────────
 // Für die seltenen großen Augenblicke ein Fenster. Der Ton wechselt: mal
 // trocken, mal überdreht, mal irgendwo dazwischen — dreimal dasselbe
@@ -3608,6 +3723,15 @@ var letzterTab = 'home'; // die zuletzt offene Übung — Bezug eines Tickets
 
 // Die fünf Übungen. «Bilanz», «Einstellungen» und «Tickets» sind keine
 // Übungen — sie stehen im Menü, nicht auf Home.
+// Drei Gruppen statt sieben Kacheln in einer Reihe. Die Reihenfolge ist der
+// Lernweg: erst die Wörter, dann der Satz, dann das Freiwillige. Sieben
+// gleichrangige Kacheln sahen aus wie eine Schublade — mit Überschriften sieht
+// man, wozu jede gehört, und die Zahl der Kacheln erschreckt nicht mehr.
+var UEBUNG_GRUPPEN = [
+  { titel: 'Wörter', ids: ['lernsets', 'freestyle', 'tippen'] },
+  { titel: 'Sätze', ids: ['uebersetzen'] },
+  { titel: 'Freiwillig', ids: ['buchstaben', 'grammatik', 'power'] }
+];
 var UEBUNGEN = [
   { id: 'lernsets', name: 'Lernsets', note: 'Die Wörter der nächsten Sätze, Päckchen für Päckchen.' },
   { id: 'freestyle', name: 'Freestyle', note: 'Freies Vokabeltraining nach Thema, ohne Sperren.' },
@@ -3617,6 +3741,10 @@ var UEBUNGEN = [
   { id: 'grammatik', name: 'Grammatik', note: 'Warum ein Wort so dasteht — Regeln statt auswendig.' },
   { id: 'power', name: 'Power-Training', note: 'Die Wörter, die zurückgefallen sind — drei auf einmal.' }
 ];
+function uebungVon(id) {
+  for (var i = 0; i < UEBUNGEN.length; i++) if (UEBUNGEN[i].id === id) return UEBUNGEN[i];
+  return null;
+}
 var UEBUNG_NAME = { home: 'Übersicht' };
 UEBUNGEN.forEach(function (u) { UEBUNG_NAME[u.id] = u.name; });
 var ANSICHT_NAME = {
@@ -4356,15 +4484,21 @@ function renderHome() {
     '<span class="empf-titel">' + esc(e.titel) + '</span>' +
     '<span class="empf-note">' + esc(e.note) + '</span></span></button>';
 
-  html += '<div class="kachelfeld">';
-  UEBUNGEN.forEach(function (u) {
-    var st = uebungsStand(u.id);
-    html += '<button class="kachel' + (st.gesperrt ? ' gesperrt' : '') + '" data-uebung="' + u.id + '">' +
-      '<span class="kachel-name">' + esc(u.name) + '</span>' +
-      '<span class="kachel-note">' + esc(u.note) + '</span>' +
-      '<span class="kachel-stand' + (st.warm ? ' faellig' : '') + '">' + esc(st.text) + '</span></button>';
+  UEBUNG_GRUPPEN.forEach(function (g) {
+    html += '<p class="gruppe-titel">' + esc(g.titel) + '</p>' +
+      '<div class="kachelfeld' + (g.ids.length === 1 ? ' breit' : '') + '">';
+    g.ids.forEach(function (id) {
+      var u = uebungVon(id);
+      if (!u) return;
+      var st = uebungsStand(id);
+      html += '<button class="kachel' + (st.gesperrt ? ' gesperrt' : '') + '" data-uebung="' + id + '">' +
+        '<span class="kachel-name">' + esc(u.name) + '</span>' +
+        '<span class="kachel-note">' + esc(u.note) + '</span>' +
+        '<span class="kachel-stand' + (st.warm ? ' faellig' : '') + '">' + esc(st.text) + '</span></button>';
+    });
+    html += '</div>';
   });
-  html += '</div></section>';
+  html += '</section>';
   main.innerHTML = html;
 
   document.getElementById('homeEmpf').addEventListener('click', function () { setTab(e.ziel); });
@@ -4598,6 +4732,8 @@ function ansichtenZuruecksetzen() {
   meldeBearbeitet = null;
   meisterMeldung = null;
   patzerMeldung = null;
+  einstReiter = 'lernweg';
+  faktStreifen = '';
 }
 
 function uebNext(skipFact) {
@@ -5298,6 +5434,7 @@ function trFinish(ok) {
   state.transStats.correct += ok ? 1 : 0;
   state.transStats.wrong += ok ? 0 : 1;
   zuletztGeuebt('uebersetzen');
+  faktStreifenPruefen();
   save();
 }
 
@@ -5580,7 +5717,7 @@ function renderUebersetzen() {
     if (trCorrect) html += '<p>' + ICON.haken + 'Правильно — richtig übersetzt!</p>';
     else html += '<p>' + ICON.kreuz + (trRevealed ? 'Lösung: ' : 'Richtig wäre: ') +
       '<strong class="' + (promptIsRu ? '' : 'cyr') + '">' + esc(t.solution) + '</strong></p>';
-    html += '</div>' + hoerzeile(t.ru, t.de) + patzerHtml() + meisterHtml();
+    html += '</div>' + hoerzeile(t.ru, t.de) + patzerHtml() + meisterHtml() + faktStreifenHtml();
   }
 
   html += '</div><div class="btn-row">';
@@ -5707,6 +5844,7 @@ function renderUebersetzen() {
     var k = document.getElementById(id);
     if (k) k.addEventListener('click', function () { setTab('power'); });
   });
+  faktStreifenBinden();
   // Jetzt steht die Kachel — erst jetzt darf die Wissenshülle einziehen.
   renderWissen();
   wissenUmhaengen();
@@ -7296,6 +7434,7 @@ function ptPruefen() {
   if (richtig) q.eintrag.treffer++;
   else q.eintrag.treffer = Math.max(0, q.eintrag.treffer - 1);
   zuletztGeuebt('power');
+  faktStreifenPruefen();
   // Der Topf war eben noch voll und ist es nicht mehr — nur dann.
   if (vorher < SATZ_STUFE && state.boxes[q.wort.id] >= SATZ_STUFE &&
     ptPool().length === 0) jubelZeigen('power');
@@ -7373,7 +7512,7 @@ function renderPower() {
     html += '<div class="feedback ' + (ptCorrect ? 'good' : 'bad') + '"><p>' +
       (ptCorrect ? ICON.haken + 'Правильно — richtig!'
         : ICON.kreuz + 'Richtig wäre <strong class="cyr">' + esc(q.wort.ru) + '</strong>') +
-      '</p></div>' + hoerzeile(q.wort.ru, q.wort.de) + meisterHtml();
+      '</p></div>' + hoerzeile(q.wort.ru, q.wort.de) + meisterHtml() + faktStreifenHtml();
   }
 
   html += '</div><div class="btn-row">';
@@ -7442,6 +7581,7 @@ function ptBinden() {
   if (neu) neu.addEventListener('click', function () { ptSatz = null; renderPower(); });
   var heim = document.getElementById('ptHeim');
   if (heim) heim.addEventListener('click', function () { setTab('home'); });
+  faktStreifenBinden();
 }
 
 // Zwei Leerzustände, die sich sehr verschieden anfühlen: noch nichts gefallen
@@ -7645,7 +7785,7 @@ function renderTippen() {
   if (tResult === 'wrong') html += '<p class="feedback bad">' + ICON.kreuz + 'Richtig: <strong class="cyr">' + esc(w.ru) + '</strong></p>';
   if (tResult === 'right') html += '<p class="feedback good">' + ICON.haken + 'Правильно — richtig!</p>';
   // Erst nach der Abgabe zu hören: vorher wäre die Aussprache die halbe Antwort.
-  if (tResult) html += hoerzeile(w.ru, w.de) + meisterHtml();
+  if (tResult) html += hoerzeile(w.ru, w.de) + meisterHtml() + faktStreifenHtml();
   html += '</div><div class="btn-row">';
   if (!tResult) {
     html += '<button class="btn ghost" id="tHintBtn">Hinweis</button>' +
@@ -7681,6 +7821,7 @@ function renderTippen() {
     state.typingStats.correct += ok ? 1 : 0;
     state.typingStats.wrong += ok ? 0 : 1;
     zuletztGeuebt('tippen');
+    faktStreifenPruefen();
     save();
     renderTippen();
   }
@@ -7719,9 +7860,52 @@ function renderTippen() {
       if (inp) inp.value = tEingabe;
     });
   });
+  faktStreifenBinden();
 }
 
 // ── EINSTELLUNGEN ───────────────────────────────────────────
+// Die Reiter der Einstellungen. Die Reihenfolge ist dieselbe wie zuvor die der
+// Überschriften — was zuerst gefragt wird, steht zuerst.
+var EINST_REITER = [
+  { id: 'lernweg', name: 'Lernweg' },
+  { id: 'abgabe', name: 'Abgabe' },
+  { id: 'eingabe', name: 'Eingabe' },
+  { id: 'darstellung', name: 'Darstellung' }
+];
+var einstReiter = 'lernweg';
+
+// Wischen wechselt den Reiter — dieselbe Geste wie im Kopf, nur waagerecht
+// begrenzt aufs Blatt. Der Randwisch für «zurück» hat Vorrang: Er beginnt am
+// linken Rand, dieser hier nicht.
+function einstWischenBinden() {
+  var blatt = document.getElementById('einstBlatt');
+  if (!blatt) return;
+  var x0 = 0, y0 = 0, bereit = false;
+  blatt.addEventListener('touchstart', function (e) {
+    if (e.touches.length !== 1) { bereit = false; return; }
+    x0 = e.touches[0].clientX;
+    y0 = e.touches[0].clientY;
+    bereit = x0 > 28;
+  }, { passive: true });
+  blatt.addEventListener('touchend', function (e) {
+    if (!bereit || !e.changedTouches.length) return;
+    bereit = false;
+    var quer = e.changedTouches[0].clientX - x0;
+    var hoch = Math.abs(e.changedTouches[0].clientY - y0);
+    if (Math.abs(quer) < WISCH_WEG || hoch > Math.abs(quer) * 0.7) return;
+    einstReiterWechseln(quer < 0 ? 1 : -1);
+  }, { passive: true });
+}
+
+function einstReiterWechseln(richtung) {
+  var i = 0;
+  EINST_REITER.forEach(function (r, k) { if (r.id === einstReiter) i = k; });
+  var neu = i + richtung;
+  if (neu < 0 || neu >= EINST_REITER.length) return;
+  einstReiter = EINST_REITER[neu].id;
+  renderEinstellungen();
+}
+
 function renderEinstellungen() {
   var s = state.settings;
 
@@ -7767,27 +7951,32 @@ function renderEinstellungen() {
 
   // Gegliedert nach der Frage, die die Einstellung beantwortet: *was* wird
   // wann geübt, *wie* gebe ich ab, *womit* tippe ich, *wie* wirkt die App.
-  main.innerHTML = '<section><h2>Lernweg</h2>' +
+  // Vier Fragen, vier Reiter. Zu allen zugleich gehört Scrollen, und wer
+  // scrollt, verliert die Übersicht darüber, was es überhaupt gibt. Die Leiste
+  // bleibt oben stehen — man soll jederzeit sehen, wo man ist.
+  var teile = {};
+  teile.lernweg =
     wahl('tippenStufe', 'Tippen ab Stufe',
       'Ab welcher Leitner-Stufe ein Wort in «Tippen» erscheint. Stufe 3 heißt: drei Mal nacheinander richtig — richtig getippt macht es dann Stufe 4 voll.',
       [{ wert: 2, text: '2' }, { wert: 3, text: '3' }, { wert: 4, text: '4' }]) +
     wahl('auffrischen', 'Auffrischen nach',
       'Fertig Gelerntes verschwindet aus «Tippen» und «Übersetzen». Nach dieser Frist kommt es einmal zur Sicherheit zurück — richtig beantwortet, und es ist wieder draußen.',
       [{ wert: 7, text: '7 T' }, { wert: 14, text: '14 T' }, { wert: 21, text: '21 T' }, { wert: 30, text: '30 T' }]) +
-    '<h2>Abgabe</h2>' +
+    '';
+  teile.abgabe =
     schalter('confirmUeben', 'Bestätigen beim Vokabeltraining',
       'Antwort erst auswählen, dann mit «Bestätigen» abgeben. Aus: Der erste Tipp zählt sofort.') +
     schalter('confirmUebersetzen', 'Bestätigen in «Übersetzen»',
       'Satz erst zusammenstellen, dann mit «Bestätigen» abgeben. Aus: Der Satz zählt, sobald das letzte Wort liegt.') +
     schalter('requireComplete', 'Erst bei vollständiger Lösung',
       'Bestätigen ist erst möglich, wenn alle Buchstaben beziehungsweise Wörter liegen. Verrät dadurch die Länge der Lösung.',
-      ohneBestaetigung) +
-    '<h2>Eingabe</h2>' +
+      ohneBestaetigung) + '';
+  teile.eingabe =
     schalter('tastaturAuto', 'Kyrillische Tastatur von selbst',
       'Verlangt eine Aufgabe Kyrillisch, klappt die eingebaute Tastatur gleich auf. ' +
       'Aus: Sie holen sie bei Bedarf. Wo Deutsch gefragt ist, kommt sie nie — dort ' +
-      'schreibt die Gerätetastatur.') +
-    '<h2>Darstellung und Ton</h2>' +
+      'schreibt die Gerätetastatur.') + '';
+  teile.darstellung =
     wahlText('schema', 'Farbschema',
       '«Dark» ist die Vorgabe, «Classic» das helle Cremeweiß. Grün, Blau und Rosa ' +
       'sind helle Cremetöne. Schrift und Signalfarben bleiben in jedem Schema gleich.',
@@ -7800,10 +7989,31 @@ function renderEinstellungen() {
     '<span class="setting-note">Spielt den Klang für «richtig» und sagt darunter, was ' +
     'gerade eingerichtet ist. Hören Sie nichts, steht dort, woran es liegt.</span></span>' +
     '<button class="chip" id="tonTest">Abspielen</button></div>' +
-    '<p class="settings-note" id="tonStand">' + esc(tonAuskunft()) + '</p>' +
+    '<p class="settings-note" id="tonStand">' + esc(tonAuskunft()) + '</p>';
+
+  var reiter = '<div class="reiter" role="tablist">';
+  EINST_REITER.forEach(function (r) {
+    reiter += '<button class="reiter-knopf' + (r.id === einstReiter ? ' active' : '') +
+      '" role="tab" aria-selected="' + (r.id === einstReiter ? 'true' : 'false') +
+      '" data-reiter="' + r.id + '">' + esc(r.name) + '</button>';
+  });
+  reiter += '</div>';
+
+  var jetzt = EINST_REITER.filter(function (r) { return r.id === einstReiter; })[0] || EINST_REITER[0];
+  main.innerHTML = '<section>' + reiter +
+    '<div class="reiter-blatt" id="einstBlatt" role="tabpanel" aria-label="' + esc(jetzt.name) + '">' +
+    teile[jetzt.id] + '</div>' +
     '<p class="settings-note">Die Einstellungen gelten nur auf diesem Gerät und werden zusammen mit dem ' +
     'Lernstand gespeichert. «Fortschritt zurücksetzen» in der Sicherung lässt sie unberührt.</p>' +
     '<div class="btn-row"><button class="btn ghost" id="setBack">Zurück</button></div></section>';
+
+  main.querySelectorAll('[data-reiter]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      einstReiter = b.dataset.reiter;
+      renderEinstellungen();
+    });
+  });
+  einstWischenBinden();
 
   main.querySelectorAll('[data-set]').forEach(function (b) {
     b.addEventListener('click', function () {
@@ -7828,7 +8038,9 @@ function renderEinstellungen() {
       renderEinstellungen();
     });
   });
-  document.getElementById('tonTest').addEventListener('click', function () {
+  // Den Tonknopf gibt es nur auf seinem Reiter.
+  var tonKnopf = document.getElementById('tonTest');
+  if (tonKnopf) tonKnopf.addEventListener('click', function () {
     // Der Tipp selbst ist die Geste, die iOS verlangt — erst entsperren, dann
     // spielen, dann berichten. Die Auskunft kommt kurz verzögert, weil
     // `resume()` asynchron ist und der Zustand sonst noch der alte wäre.
