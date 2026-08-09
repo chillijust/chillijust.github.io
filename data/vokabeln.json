@@ -227,7 +227,11 @@
     ["играть", "spielen", "igrat"],
     ["ехать", "fahren", "jechat"],
     ["бежать", "rennen", "beschat"],
-    ["думать", "denken", "dumat"]
+    ["думать", "denken", "dumat"],
+    ["отвечать", "antworten", "atwetschat"],
+    ["спрашивать", "fragen", "sprashiwat"],
+    ["открывать", "öffnen", "atkrywat"],
+    ["закрывать", "schließen", "sakrywat"]
   ],
   "Adjektive": [
     ["большой", "groß", "balschoj"],
@@ -320,7 +324,18 @@
     ["нравиться", "gefallen", "nrawitsja"],
     ["стоить", "kosten", "stoit"],
     ["искать", "suchen", "iskat"],
-    ["встретить", "treffen", "wstretit"]
+    ["встретить", "treffen", "wstretit"],
+    ["начинать", "anfangen", "natschinat"],
+    ["отдыхать", "sich ausruhen", "addychat"],
+    ["повторять", "wiederholen", "pawtarjat"],
+    ["считать", "zählen", "sschitat"],
+    ["звонить", "anrufen", "swanit"],
+    ["ходить", "gehen (regelmäßig)", "chadit"],
+    ["носить", "tragen", "nassit"],
+    ["просить", "bitten", "prassit"],
+    ["сидеть", "sitzen", "sidet"],
+    ["строить", "bauen", "stroit"],
+    ["помнить", "sich erinnern", "pomnit"]
   ],
   "Körper": [
     ["голова", "Kopf", "galawa"],

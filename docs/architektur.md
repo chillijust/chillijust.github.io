@@ -992,11 +992,67 @@ flüchtige Vokale (`день` → `дне`, `палец` → `пальце`), ei
 Wie bei den Verben gilt: **ein Eintrag, der dasselbe liefert wie die Regel, bricht den
 Build ab** — `кофе` flog genau daran heraus, es endet ohnehin auf `-е`.
 
-**Der Präpositiv ist die einzige Rubrik mit ausgesuchten Wörtern.** «Wo?» verlangt einen
+**Der Präpositiv war die erste Rubrik mit ausgesuchten Wörtern.** «Wo?» verlangt einen
 Ort, und ob ein Wort einer sein kann, sagt keine Endung: «в маме» wäre grammatisch
 tadellos und Unsinn, «в утре» ebenso. Der Baustein nennt darum seine Wörter selbst; die
 Übung nimmt daraus, was schon begonnen ist. Die **Regel** gilt trotzdem für jedes Nomen —
-im Satz führt «Wissen» sie an allen vor.
+im Satz führt «Wissen» sie an allen vor. Mehrzahl, Genitiv und Übereinstimmung folgen
+demselben Muster (siehe unten).
+
+### Zehn Bausteine
+
+| Baustein | Aufgabe | fragt | Vorrat |
+| --- | --- | --- | --- |
+| Geschlecht | `geschlecht` | Wort → männlich/weiblich/sächlich | begonnener Wortschatz |
+| Mehrzahl | `plural` | Grundform → Mehrzahl | eigene Liste |
+| Akkusativ | `akk` | Grundform → «wen? was?» | begonnener Wortschatz |
+| Genitiv | `gen` | Grundform → Form nach «нет» | eigene Liste |
+| Präpositiv | `praep` | Grundform → Form nach в/на | eigene Liste |
+| Übereinstimmung | `adj` | Adjektiv + Nomen → passende Form | eigene Liste + Partner |
+| Präsens | `praes`, `klasse: e` | Infinitiv + Person → Form | begonnene Verben |
+| Die zweite Reihe | `praes`, `klasse: i` | dasselbe, i-Verben | begonnene Verben |
+| Die Ich-Form | `ichform` | ты-Form + `я` → Form | begonnene Verben |
+| Vergangenheit | `praet` | Infinitiv + wer → Form | begonnene Verben |
+
+**Die Mehrzahl und der Genitiv nennen ihre Wörter selbst**, aus demselben Grund wie der
+Präpositiv: «zwei Wasser» ist keine Mehrzahl, sondern eine Sonderbedeutung, und «нет
+музыки» sagt niemand. Und **die Übereinstimmung braucht dazu ein Gegenüber** — das Feld
+`partner` nennt die Nomen, nach denen sich das Adjektiv richten darf. «тёмный папа» wäre
+tadellos gebeugt und trotzdem Unsinn. Der Build erzwingt, dass die Partnerliste alle drei
+Geschlechter abdeckt und dass ihre Mehrzahl die Regel trifft — sie steht in der Aufgabe.
+
+### Die Vergangenheit: die Regel, die nach dem Geschlecht fragt
+
+Infinitiv ohne `-ть`, dann `-л` · `-ла` · `-ло` · `-ли` — die einfachste Form der Sprache.
+Sie richtet sich aber nicht nach der Person, sondern nach dem, der handelt: «я читал» sagt
+ein Mann, «я читала» eine Frau. Das ist der Gegensatz zum Präsens, und die Übung stellt
+genau ihn: Ausgelost wird nicht die Person, sondern das Geschlecht.
+
+Anders als das Präsens greift sie auch bei Verben mit **eigenem Präsensstamm**: `писать` →
+`пиш-`, aber `писал` folgt der Regel. Darum steht die Vergangenheit in `verben.json` als
+eigenes Feld `praet` (vier Formen) und nur dort, wo sie wirklich abweicht — `идти` → `шёл`,
+`есть` → `ел`, `мочь` → `мог`. Ein `praet`, das dasselbe liefert wie die Regel, bricht den
+Build ab; ein Eintrag, der **nur** `praet` trägt, entkommt dagegen der Präsensprobe.
+
+### Übereinstimmung: wenn ein Wort über ein anderes entscheidet
+
+Die erste Regel, in der nicht jedes Wort für sich entscheidet. `adjektiv(ru, genus)` baut
+aus der männlichen Grundform die drei übrigen; drei Dinge am Stamm entscheiden über die
+Schreibung:
+
+| Stamm | weiblich | sächlich | Mehrzahl |
+| --- | --- | --- | --- |
+| hart (`новый`) | `-ая` | `-ое` | `-ые` |
+| auf к г х (`маленький`) | `-ая` | `-ое` | `-ие` |
+| auf ж ч ш щ (`хороший`) | `-ая` | `-ее` | `-ие` |
+| weich, `-ий` (`синий`) | `-яя` | `-ее` | `-ие` |
+| betont, `-ой` (`большой`) | `-ая` | `-ое` | `-ие` / `-ые` |
+
+`-ой` ist immer betont — darum steht dort `-ое`, auch nach Zischlaut (`большое`).
+
+`data/nomen.json` trägt neben `praep` jetzt auch `gen` und `plural`. Jede Angabe wird
+**für sich** gegen die blanke Regel geprüft: `рынок` braucht `praep` und `gen` (flüchtiges
+о), aber kein `plural` — `рынки` fällt von allein heraus.
 
 ### Belebtheit: eine eigene Eigenschaft, kein Geschlecht
 

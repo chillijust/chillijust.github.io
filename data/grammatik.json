@@ -16,7 +16,28 @@
     ],
     "merksatz": "Die Endung entscheidet, nicht die Bedeutung. Nur bei -ь muss man nachsehen.",
     "fussnote": "Drei Wörter meinen Männer und enden trotzdem weiblich: папа, дедушка, дядя. Sie sind männlich — die Bedeutung schlägt hier die Endung.",
-    "beispiele": ["дом", "книга", "окно", "стол", "кухня", "море", "город", "вода", "письмо"]
+    "beispiele": ["дом", "книга", "окно", "стол", "кухня", "море", "город", "вода", "письмо", "машина", "магазин", "дверь", "ночь", "музей", "яблоко", "улица", "телефон", "неделя", "площадь", "билет", "сумка", "озеро"]
+  },
+  {
+    "id": "mehrzahl",
+    "name": "Mehrzahl",
+    "kurz": "Aus eins wird viele",
+    "aufgabe": "plural",
+    "frage": "Vier Wörter, vier Mehrzahlen. Was entscheidet die Endung?",
+    "deutungen": ["Die Endung der Grundform", "Ob man die Dinge zählen kann", "Die Zahl davor — ab fünf sieht es anders aus"],
+    "richtig": 0,
+    "regel": "Wie beim Geschlecht sagt die Endung der Grundform, was zu tun ist. Männliche Wörter auf einen Konsonanten und weibliche auf -а nehmen -ы; alles Weiche — -й, -ь, -я — nimmt -и. Sächliche Wörter tauschen: -о wird -а, -е wird -я. Dazu kommt die eine Rechtschreibregel, die überall im Russischen gilt: nach к г х ж ч ш щ steht nie ы.",
+    "tabelle": [
+      ["männlich Konsonant", "+ -ы", "стол → столы"],
+      ["männlich -й / -ь", "+ -и", "музей → музеи"],
+      ["weiblich -а", "wird -ы", "газета → газеты"],
+      ["weiblich -я / -ь", "wird -и", "кухня → кухни"],
+      ["sächlich -о / -е", "wird -а / -я", "окно → окна"],
+      ["nach к г х ж ч ш щ", "immer -и", "книга → книги"]
+    ],
+    "merksatz": "Hart nimmt -ы, weich nimmt -и, sächlich tauscht.",
+    "fussnote": "Eine Handvoll männlicher Wörter nimmt statt -ы ein betontes -а: дом → дома, город → города, поезд → поезда. Und ein paar bilden die Mehrzahl ganz neu: брат → братья, друг → друзья, ребёнок → дети. Das muss man wissen; die Übung fragt nicht danach.",
+    "beispiele": ["стол", "магазин", "билет", "телефон", "зуб", "парк", "ключ", "музей", "книга", "газета", "школа", "машина", "улица", "сумка", "кухня", "дверь", "окно", "письмо", "море"]
   },
   {
     "id": "akkusativ",
@@ -36,7 +57,70 @@
     ],
     "merksatz": "Im Deutschen ändert sich der Artikel, im Russischen das Wort selbst.",
     "fussnote": "Darum ist die Wortstellung im Russischen frei: Die Endung sagt, wer wen liest — nicht der Platz im Satz.",
-    "beispiele": ["книга", "газета", "каша", "музыка", "кухня", "окно", "стол", "письмо"]
+    "beispiele": ["книга", "газета", "каша", "музыка", "кухня", "окно", "стол", "письмо", "машина", "работа", "школа", "улица", "квартира", "комната", "сумка", "рыба", "вода", "молоко", "мясо", "телефон", "билет", "магазин", "дверь"]
+  },
+  {
+    "id": "genitiv",
+    "name": "Genitiv",
+    "kurz": "Was fehlt, wem etwas gehört",
+    "aufgabe": "gen",
+    "frage": "Vier Wörter nach «нет». Was passiert mit ihnen?",
+    "deutungen": ["Männlich und sächlich nehmen -а, weiblich -ы oder -и", "Alle nehmen -а", "Nichts — nach нет steht die Grundform"],
+    "richtig": 0,
+    "regel": "Der Genitiv ist der Fall des Fehlens und des Besitzes. Er steht nach «нет» («нет хлеба» — es gibt kein Brot), nach «у» («у брата» — beim Bruder) und nach Mengen («много воды»). Männlich und sächlich nehmen -а, weiblich -ы beziehungsweise -и — dieselbe Rechtschreibregel wie überall: nach к г х ж ч ш щ nie ы.",
+    "tabelle": [
+      ["männlich Konsonant", "+ -а", "хлеб → нет хлеба"],
+      ["männlich -й / -ь", "+ -я", "музей → нет музея"],
+      ["sächlich -о / -е", "wird -а / -я", "окно → нет окна"],
+      ["weiblich -а", "wird -ы", "газета → нет газеты"],
+      ["weiblich -я / -ь", "wird -и", "кухня → нет кухни"],
+      ["nach к г х ж ч ш щ", "immer -и", "книга → нет книги"]
+    ],
+    "merksatz": "«Es gibt kein …» heißt im Russischen: «нет» und dann der Genitiv.",
+    "fussnote": "«У меня есть книга» heißt wörtlich «bei mir ist ein Buch» — darum steht das Buch dort im ersten Fall und «меня» im Genitiv. Verneint kippt beides: «У меня нет книги».",
+    "beispiele": ["хлеб", "сыр", "суп", "сахар", "стол", "ключ", "музей", "телефон", "книга", "газета", "машина", "работа", "вода", "рыба", "кухня", "соль", "окно", "письмо", "молоко", "мясо", "море"]
+  },
+  {
+    "id": "praepositiv",
+    "name": "Präpositiv",
+    "kurz": "Wo? — der Ortsfall",
+    "aufgabe": "praep",
+    "frage": "Drei Geschlechter, dieselbe Endung. Was entscheidet hier?",
+    "deutungen": ["Nichts — nach в und на endet fast alles auf -е", "Das Geschlecht, wie im Akkusativ", "Ob das Wort ein Lebewesen ist"],
+    "richtig": 0,
+    "regel": "Der Präpositiv sagt, wo etwas ist. Er steht nach в und на — und nur nach ihnen, weshalb er seinen Namen trägt. Anders als im Akkusativ spielt das Geschlecht keine Rolle: Männlich, weiblich, sächlich, fast alles endet auf -е. Merken muss man sich nicht die Endung, sondern die Präposition.",
+    "tabelle": [
+      ["männlich", "+ -е", "город → в городе"],
+      ["weiblich -а / -я", "wird -е", "Москва → в Москве"],
+      ["sächlich -о", "wird -е", "окно → в окне"],
+      ["-ия · -ий · -ие", "wird -ии", "Россия → в России"],
+      ["weiblich -ь", "wird -и", "дверь → в двери"]
+    ],
+    "merksatz": "Im Akkusativ entscheidet das Geschlecht, im Präpositiv die Präposition.",
+    "fussnote": "в und на nehmen beide Fälle: mit dem Akkusativ heißen sie «wohin», mit dem Präpositiv «wo». «Я иду в город» — ich gehe in die Stadt. «Я живу в городе» — ich wohne in der Stadt. Eine Handvoll männlicher Wörter nimmt dabei -у statt -е: в году, в лесу, в аэропорту.",
+    "beispiele": ["город", "стол", "магазин", "школа", "дом", "квартира", "комната", "кухня", "окно", "парк", "университет", "вокзал", "банк", "аптека", "больница", "ресторан", "музей", "офис", "сумка", "гостиница", "деревня", "река", "озеро", "пляж", "остров", "Москва", "Россия", "книга", "письмо", "улица", "машина", "автобус", "поезд", "дорога"]
+  },
+  {
+    "id": "adjektiv",
+    "name": "Übereinstimmung",
+    "kurz": "Wenn ein Wort sich nach einem anderen richtet",
+    "aufgabe": "adj",
+    "frage": "Dasselbe Adjektiv, vier Nomen. Woran richtet es sich?",
+    "deutungen": ["Am Nomen — Geschlecht und Zahl", "An seiner eigenen Bedeutung", "Daran, ob es vor oder hinter dem Nomen steht"],
+    "richtig": 0,
+    "regel": "Ein Adjektiv steht nie für sich: Es übernimmt Geschlecht und Zahl seines Nomens. Die Grundform im Wörterbuch ist die männliche; daraus baut man die übrigen drei. Das ist eine neue Art von Regel — bisher entschied jedes Wort für sich, hier entscheidet ein Wort über ein anderes.",
+    "tabelle": [
+      ["männlich", "-ый / -ий / -ой", "новый дом"],
+      ["weiblich", "-ая", "новая книга"],
+      ["sächlich", "-ое", "новое окно"],
+      ["Mehrzahl", "-ые", "новые дома"],
+      ["Stamm auf к г х ж ч ш щ", "Mehrzahl -ие", "маленькие, хорошие"],
+      ["weicher Stamm auf -ий", "-яя · -ее · -ие", "синий → синяя"]
+    ],
+    "merksatz": "Nicht das Adjektiv entscheidet, sondern das Nomen daneben.",
+    "fussnote": "Dieselbe Übereinstimmung gilt für мой, твой, наш und этот: мой дом, моя книга, моё окно, мои книги. Wer sie beim Adjektiv verstanden hat, muss sie dort nicht neu lernen.",
+    "partner": ["стол", "парк", "магазин", "книга", "машина", "улица", "комната", "окно", "письмо", "море"],
+    "beispiele": ["новый", "старый", "большой", "маленький", "хороший", "красивый", "молодой", "холодный", "быстрый", "интересный", "умный", "важный", "дорогой", "сильный", "синий", "зелёный", "чёрный", "белый", "тёмный", "светлый"]
   },
   {
     "id": "praesens",
@@ -58,7 +142,7 @@
     ],
     "merksatz": "Nicht das Pronomen sagt, wer handelt — die Endung tut es.",
     "fussnote": "-ю und -ют stehen nach einem Vokal, -у und -ут nach einem Konsonanten. Das ist keine zweite Reihe, nur Rechtschreibung.",
-    "beispiele": ["читать", "работать", "знать", "делать", "слушать", "понимать", "играть", "думать", "гулять"]
+    "beispiele": ["читать", "работать", "знать", "делать", "слушать", "понимать", "играть", "думать", "покупать", "помогать", "гулять", "отвечать", "спрашивать", "открывать", "закрывать", "начинать", "отдыхать", "повторять", "считать"]
   },
   {
     "id": "praesensi",
@@ -80,7 +164,7 @@
     ],
     "merksatz": "e-Reihe oder i-Reihe: Der Infinitiv entscheidet, nicht die Person.",
     "fussnote": "Nach к г х ж ч ш щ steht -у und -ат statt -ю und -ят — учу, учат. Auch das ist Rechtschreibung, keine Ausnahme.",
-    "beispiele": ["говорить", "любить", "учить", "смотреть", "видеть", "платить", "готовить", "стоить"]
+    "beispiele": ["говорить", "любить", "учить", "смотреть", "видеть", "платить", "готовить", "стоить", "встретить", "звонить", "ходить", "носить", "просить", "сидеть", "строить", "помнить"]
   },
   {
     "id": "ichform",
@@ -101,26 +185,26 @@
     ],
     "merksatz": "Ein einziger Laut kippt, und nur in der Ich-Form.",
     "fussnote": "Das ist keine Unregelmäßigkeit, sondern Bequemlichkeit: Zwei Laute, die schlecht nebeneinander liegen, weichen einander aus. Wer die Regel hat, muss люблю nicht auswendig lernen.",
-    "beispiele": ["любить", "готовить", "платить", "видеть", "встретить", "спать"]
+    "beispiele": ["любить", "готовить", "платить", "видеть", "встретить", "спать", "ходить", "носить", "просить", "сидеть"]
   },
   {
-    "id": "praepositiv",
-    "name": "Präpositiv",
-    "kurz": "Wo? — der Ortsfall",
-    "aufgabe": "praep",
-    "frage": "Drei Geschlechter, dieselbe Endung. Was entscheidet hier?",
-    "deutungen": ["Nichts — nach в und на endet fast alles auf -е", "Das Geschlecht, wie im Akkusativ", "Ob das Wort ein Lebewesen ist"],
+    "id": "praeteritum",
+    "name": "Vergangenheit",
+    "kurz": "Was gestern war",
+    "aufgabe": "praet",
+    "frage": "Ein Verb, vier Mal Vergangenheit. Woran hängt die Endung?",
+    "deutungen": ["Daran, wer gehandelt hat — männlich, weiblich, sächlich, mehrere", "An der Person, wie im Präsens", "Daran, wie lange es her ist"],
     "richtig": 0,
-    "regel": "Der Präpositiv sagt, wo etwas ist. Er steht nach в und на — und nur nach ihnen, weshalb er seinen Namen trägt. Anders als im Akkusativ spielt das Geschlecht keine Rolle: Männlich, weiblich, sächlich, fast alles endet auf -е. Merken muss man sich nicht die Endung, sondern die Präposition.",
+    "regel": "Die Vergangenheit ist die einfachste Form der Sprache: Infinitiv ohne -ть, dann -л. Nur richtet sie sich nicht nach der Person, sondern nach dem, der handelt. «Я читал» sagt ein Mann, «я читала» eine Frau — dasselbe я, zwei Formen. Vier Endungen für alle sechs Personen, und das Pronomen darf hier gerade nicht wegfallen: Ohne es wüsste man nicht, wer gemeint ist.",
     "tabelle": [
-      ["männlich", "+ -е", "город → в городе"],
-      ["weiblich -а / -я", "wird -е", "Москва → в Москве"],
-      ["sächlich -о", "wird -е", "окно → в окне"],
-      ["-ия · -ий · -ие", "wird -ии", "Россия → в России"],
-      ["weiblich -ь", "wird -и", "дверь → в двери"]
+      ["er · männlich", "-л", "читать → читал"],
+      ["sie · weiblich", "-ла", "читать → читала"],
+      ["es · sächlich", "-ло", "быть → было"],
+      ["sie · mehrere", "-ли", "работать → работали"],
+      ["я · ты · мы · вы", "richten sich danach", "ты писал oder ты писала"]
     ],
-    "merksatz": "Im Akkusativ entscheidet das Geschlecht, im Präpositiv die Präposition.",
-    "fussnote": "в und на nehmen beide Fälle: mit dem Akkusativ heißen sie «wohin», mit dem Präpositiv «wo». «Я иду в город» — ich gehe in die Stadt. «Я живу в городе» — ich wohne in der Stadt. Eine Handvoll männlicher Wörter nimmt dabei -у statt -е: в году, в лесу, в аэропорту.",
-    "beispiele": ["город", "стол", "магазин", "школа", "дом", "квартира", "комната", "кухня", "окно", "парк", "университет", "вокзал", "банк", "аптека", "больница", "ресторан", "музей", "офис", "сумка", "гостиница", "деревня", "река", "озеро", "пляж", "остров", "Москва", "Россия", "книга", "письмо", "улица", "машина", "автобус", "поезд", "дорога"]
+    "merksatz": "Im Präsens zählt die Person, in der Vergangenheit das Geschlecht.",
+    "fussnote": "Drei Verben gehen eigene Wege, weil sie nicht auf -ть enden: идти → шёл, шла; есть → ел, ела; мочь → мог, могла. Wer die Regel hat, sieht ihnen sofort an, dass sie Ausnahmen sind.",
+    "beispiele": ["читать", "работать", "знать", "делать", "думать", "гулять", "играть", "слушать", "понимать", "говорить", "смотреть", "любить", "учить", "жить", "писать", "спать", "пить", "хотеть", "ехать", "готовить", "отвечать", "спрашивать", "открывать", "начинать", "звонить", "ходить", "просить", "сидеть", "покупать", "помогать"]
   }
 ]

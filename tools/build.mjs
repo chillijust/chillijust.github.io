@@ -162,6 +162,68 @@ const praepositivMit = (ru, art, tab) => {
   return ru + 'е';
 };
 const praepositiv = (ru, art) => praepositivMit(ru, art, nomen);
+const genitivMit = (ru, art, tab) => {
+  const eigen = tab[ru] || null;
+  if (eigen && eigen.starr) return ru;
+  if (eigen && eigen.gen) return eigen.gen;
+  if (/ия$/.test(ru)) return ru.slice(0, -1) + 'и';
+  if (/(ий|ие)$/.test(ru)) return ru.slice(0, -2) + 'ия';
+  if (/а$/.test(ru)) return ru.slice(0, -1) + (nachZischlaut(ru.slice(0, -1)) ? 'и' : 'ы');
+  if (/я$/.test(ru)) return ru.slice(0, -1) + 'и';
+  if (/ь$/.test(ru)) return ru.slice(0, -1) + (geschlecht(art) === 'w' ? 'и' : 'я');
+  if (/о$/.test(ru)) return ru.slice(0, -1) + 'а';
+  // Nach ж ч ш щ ц steht unbetont ein а, kein я: сердце → сердца.
+  if (/е$/.test(ru)) return ru.slice(0, -1) + (/[жчшщц]$/.test(ru.slice(0, -1)) ? 'а' : 'я');
+  if (/й$/.test(ru)) return ru.slice(0, -1) + 'я';
+  return ru + 'а';
+};
+const genitiv = (ru, art) => genitivMit(ru, art, nomen);
+const pluralMit = (ru, tab) => {
+  const eigen = tab[ru] || null;
+  if (eigen && eigen.starr) return ru;
+  if (eigen && eigen.plural) return eigen.plural;
+  if (/ия$/.test(ru)) return ru.slice(0, -1) + 'и';
+  if (/ие$/.test(ru)) return ru.slice(0, -1) + 'я';
+  if (/[ьй]$/.test(ru)) return ru.slice(0, -1) + 'и';
+  if (/а$/.test(ru)) return ru.slice(0, -1) + (nachZischlaut(ru.slice(0, -1)) ? 'и' : 'ы');
+  if (/я$/.test(ru)) return ru.slice(0, -1) + 'и';
+  if (/о$/.test(ru)) return ru.slice(0, -1) + 'а';
+  if (/е$/.test(ru)) return ru.slice(0, -1) + (/[жчшщц]$/.test(ru.slice(0, -1)) ? 'а' : 'я');
+  return ru + (nachZischlaut(ru) ? 'и' : 'ы');
+};
+const plural = (ru) => pluralMit(ru, nomen);
+const GENERA = ['m', 'w', 's', 'p'];
+const adjTeile = (ru) => {
+  if (!/(ый|ий|ой)$/.test(ru)) return null;
+  const stamm = ru.slice(0, -2);
+  const zisch = /[жчшщ]$/.test(stamm);
+  const velar = /[кгх]$/.test(stamm);
+  return { stamm, end: ru.slice(-2), zisch, velar, weich: ru.slice(-2) === 'ий' && !zisch && !velar };
+};
+const adjektiv = (ru, genus) => {
+  const t = adjTeile(ru);
+  if (!t) return null;
+  if (genus === 'm') return ru;
+  if (genus === 'w') return t.stamm + (t.weich ? 'яя' : 'ая');
+  if (genus === 's') return t.stamm + (t.weich || (t.zisch && t.end !== 'ой') ? 'ее' : 'ое');
+  if (genus === 'p') return t.stamm + (t.weich || t.zisch || t.velar ? 'ие' : 'ые');
+  return null;
+};
+const PRAET_ENDE = { m: 'л', w: 'ла', s: 'ло', p: 'ли' };
+const praeteritumMit = (ru, genus, tab) => {
+  const i = GENERA.indexOf(genus);
+  if (i === -1) return null;
+  const eigen = tab[ru] || null;
+  if (eigen && eigen.praet) return eigen.praet[i];
+  if (/ться$/.test(ru)) {
+    const basis = praeteritumMit(ru.slice(0, -2), genus, tab);
+    if (!basis) return null;
+    return basis + (/[аеёиоуыэюя]$/.test(basis) ? 'сь' : 'ся');
+  }
+  if (!/ть$/.test(ru)) return null;
+  return ru.slice(0, -2) + PRAET_ENDE[genus];
+};
+const praeteritum = (ru, genus) => praeteritumMit(ru, genus, verben);
 const PERSONEN = ['1s', '2s', '3s', '1p', '2p', '3p'];
 const nachZischlaut = (stamm) => /[кгхжчшщ]$/.test(stamm);
 const weicherStamm = (stamm) => /[аеёиоуыэюяьй]$/.test(stamm);
@@ -211,11 +273,21 @@ const istNomen = (art) => !!GESCHLECHT_VON[art];
 const grammForm = (ru, art, rolle) => {
   if (rolle === 'akk') return istNomen(art) ? akkusativ(ru, art) : null;
   if (rolle === 'praep') return istNomen(art) ? praepositiv(ru, art) : null;
+  if (rolle === 'gen') return istNomen(art) ? genitiv(ru, art) : null;
+  if (rolle === 'plural') return istNomen(art) ? plural(ru, art) : null;
+  if (rolle.indexOf('praet') === 0) return art === 'v' ? praeteritum(ru, rolle.slice(5)) : null;
   if (rolle.indexOf('praes') === 0) return art === 'v' ? praesens(ru, rolle.slice(5)) : null;
+  if (rolle.indexOf('adj') === 0) return art === 'a' ? adjektiv(ru, rolle.slice(3)) : null;
   return null;
 };
-const ROLLEN = { akk: 'Akkusativ', praep: 'Präpositiv' };
+const GENUS_NAME = { m: 'männlich', w: 'weiblich', s: 'sächlich', p: 'Mehrzahl' };
+const GESCHLECHT_NAME = { m: 'männlich', w: 'weiblich', s: 'sächlich' };
+const ROLLEN = { akk: 'Akkusativ', praep: 'Präpositiv', gen: 'Genitiv', plural: 'Mehrzahl' };
 PERSONEN.forEach((p) => { ROLLEN['praes' + p] = 'Präsens ' + p; });
+GENERA.forEach((g) => {
+  ROLLEN['praet' + g] = 'Vergangenheit ' + GENUS_NAME[g];
+  ROLLEN['adj' + g] = 'Adjektiv ' + GENUS_NAME[g];
+});
 
 // Sätze: { ru, de, stufe, benoetigt } — «benoetigt» nennt die Grundformen aus
 // dem Lehrplan, die ein Satz voraussetzt. Erst wenn die sitzen, wird er angeboten.
@@ -390,6 +462,7 @@ const grammatikBlock = (name, liste) => {
       ', kurz: ' + jsStr(b.kurz) + ', aufgabe: ' + jsStr(b.aufgabe) + ',');
     if (b.klasse) zeilen.push('    klasse: ' + jsStr(b.klasse) + ',');
     if (b.person) zeilen.push('    person: ' + jsStr(b.person) + ',');
+    if (b.partner) zeilen.push('    partner: [' + b.partner.map(jsStr).join(', ') + '],');
     zeilen.push('    frage: ' + jsStr(b.frage) + ',');
     zeilen.push('    deutungen: [' + b.deutungen.map(jsStr).join(', ') + '], richtig: ' + b.richtig + ',');
     zeilen.push('    regel: ' + jsStr(b.regel) + ',');
@@ -413,6 +486,7 @@ const verbenBlock = (name, obj) => {
     if (a.betont) teile.push('betont: true');
     if (a.konj) teile.push('konj: ' + jsStr(a.konj));
     if (a.formen) teile.push('formen: [' + a.formen.map(jsStr).join(', ') + ']');
+    if (a.praet) teile.push('praet: [' + a.praet.map(jsStr).join(', ') + ']');
     zeilen.push('  ' + jsStr(k) + ': { ' + teile.join(', ') + ' }' +
       (i < schluessel.length - 1 ? ',' : ''));
   });
@@ -429,6 +503,8 @@ const nomenBlock = (name, obj) => {
     const teile = [];
     if (a.starr) teile.push('starr: true');
     if (a.praep) teile.push('praep: ' + jsStr(a.praep));
+    if (a.gen) teile.push('gen: ' + jsStr(a.gen));
+    if (a.plural) teile.push('plural: ' + jsStr(a.plural));
     zeilen.push('  ' + jsStr(k) + ': { ' + teile.join(', ') + ' }' +
       (i < schluessel.length - 1 ? ',' : ''));
   });
@@ -533,6 +609,7 @@ const jsonVerben = (obj) => {
     if (a.betont) teile.push('"betont": true');
     if (a.konj) teile.push('"konj": ' + jsonStr(a.konj));
     if (a.formen) teile.push('"formen": [' + a.formen.map(jsonStr).join(', ') + ']');
+    if (a.praet) teile.push('"praet": [' + a.praet.map(jsonStr).join(', ') + ']');
     zeilen.push('  ' + jsonStr(k) + ': { ' + teile.join(', ') + ' }' +
       (i < schluessel.length - 1 ? ',' : ''));
   });
@@ -565,6 +642,7 @@ const jsonGrammatik = (liste) => {
     zeilen.push('    ],');
     feld('merksatz', jsonStr(b.merksatz), true);
     feld('fussnote', jsonStr(b.fussnote || ''), true);
+    if (b.partner) feld('partner', '[' + b.partner.map(jsonStr).join(', ') + ']', true);
     feld('beispiele', '[' + b.beispiele.map(jsonStr).join(', ') + ']', false);
     zeilen.push('  }' + (i < liste.length - 1 ? ',' : ''));
   });
@@ -581,6 +659,8 @@ const jsonNomen = (obj) => {
     const teile = [];
     if (a.starr) teile.push('"starr": true');
     if (a.praep) teile.push('"praep": ' + jsonStr(a.praep));
+    if (a.gen) teile.push('"gen": ' + jsonStr(a.gen));
+    if (a.plural) teile.push('"plural": ' + jsonStr(a.plural));
     zeilen.push('  ' + jsonStr(k) + ': { ' + teile.join(', ') + ' }' +
       (i < schluessel.length - 1 ? ',' : ''));
   });
@@ -612,7 +692,7 @@ if (!verben || typeof verben !== 'object' || Array.isArray(verben)) {
     if (!eintrag) return meckern(wo + ': steht nicht in vokabeln.json');
     if (wortart(eintrag) !== 'v') meckern(wo + ': ist dort kein Verb');
     if (!a || typeof a !== 'object' || Array.isArray(a)) return meckern(wo + ': erwartet ein Objekt');
-    const erlaubt = ['stamm', 'betont', 'konj', 'formen'];
+    const erlaubt = ['stamm', 'betont', 'konj', 'formen', 'praet'];
     Object.keys(a).forEach((k) => {
       if (!erlaubt.includes(k)) meckern(wo + ': unbekannte Angabe «' + k + '»');
     });
@@ -625,11 +705,26 @@ if (!verben || typeof verben !== 'object' || Array.isArray(verben)) {
     if (a.konj !== undefined && a.konj !== 'i' && a.konj !== 'e') {
       meckern(wo + ': «konj» ist «i» oder «e»');
     }
+    // Die Vergangenheit steht getrennt: Sie folgt einer eigenen Regel und
+    // stimmt bei den meisten Verben, auch wenn das Präsens abweicht.
+    if (a.praet !== undefined) {
+      if (!Array.isArray(a.praet) || a.praet.length !== 4 ||
+        !a.praet.every((f) => typeof f === 'string' && istKyrillisch(f))) {
+        meckern(wo + ': «praet» braucht vier kyrillische Formen (er sie es sie·Mz)');
+      } else {
+        const ohne = praeteritumMit(ru, 'm', { ...verben, [ru]: undefined });
+        if (ohne && a.praet.join(' ') === GENERA.map(
+          (g) => praeteritumMit(ru, g, { ...verben, [ru]: undefined })).join(' ')) {
+          meckern(wo + ': «praet» überflüssig — die Regel liefert von allein «' + ohne + '»');
+        }
+      }
+    }
     // Die Probe aufs Exempel: Was liefert die blanke Regel ohne diesen Eintrag?
     // Kommt dasselbe heraus, sagt der Eintrag nichts — dann weg damit.
+    const nurPraet = Object.keys(a).length === 1 && a.praet !== undefined;
     const mit = verbBauMit(ru, verben);
     const ohne = verbBauMit(ru, { ...verben, [ru]: undefined });
-    if (mit && ohne && mit.join(' ') === ohne.join(' ')) {
+    if (!nurPraet && mit && ohne && mit.join(' ') === ohne.join(' ')) {
       meckern(wo + ': überflüssig — die Regel liefert von allein «' + mit[0] + ' … ' + mit[5] + '»');
     }
   });
@@ -649,20 +744,37 @@ if (!nomen || typeof nomen !== 'object' || Array.isArray(nomen)) {
     const art = wortart(eintrag);
     if (!istNomen(art)) meckern(wo + ': ist dort kein Nomen');
     if (!a || typeof a !== 'object' || Array.isArray(a)) return meckern(wo + ': erwartet ein Objekt');
+    const FAELLE = ['praep', 'gen', 'plural'];
     Object.keys(a).forEach((k) => {
-      if (k !== 'praep' && k !== 'starr') meckern(wo + ': unbekannte Angabe «' + k + '»');
+      if (k !== 'starr' && !FAELLE.includes(k)) meckern(wo + ': unbekannte Angabe «' + k + '»');
     });
-    if (a.starr && a.praep) meckern(wo + ': «starr» verträgt sich nicht mit «praep»');
-    if (!a.starr && !a.praep) return meckern(wo + ': sagt nichts aus');
-    if (a.praep !== undefined && (typeof a.praep !== 'string' || !istKyrillisch(a.praep))) {
-      meckern(wo + ': «praep» erwartet eine kyrillische Form');
+    if (a.starr && FAELLE.some((k) => a[k])) {
+      meckern(wo + ': «starr» verträgt sich nicht mit einer Form');
     }
-    // Die Probe: Was liefert die blanke Regel ohne diesen Eintrag?
-    const ohne = praepositivMit(ru, geschlecht(art), {});
-    const mit = a.starr ? ru : a.praep;
-    if (mit === ohne) {
-      meckern(wo + ': überflüssig — die Regel liefert von allein «' + ohne + '»');
+    if (!a.starr && !FAELLE.some((k) => a[k])) return meckern(wo + ': sagt nichts aus');
+    FAELLE.forEach((k) => {
+      if (a[k] !== undefined && (typeof a[k] !== 'string' || !istKyrillisch(a[k]))) {
+        meckern(wo + ': «' + k + '» erwartet eine kyrillische Form');
+      }
+    });
+    // Die Probe je Form: Was liefert die blanke Regel ohne diesen Eintrag?
+    // Jede Angabe muss für sich etwas sagen, sonst verdeckt die Liste die
+    // echten Ausnahmen.
+    const blank = {
+      praep: praepositivMit(ru, geschlecht(art), {}),
+      gen: genitivMit(ru, geschlecht(art), {}),
+      plural: pluralMit(ru, {}),
+    };
+    if (a.starr) {
+      if (FAELLE.every((k) => blank[k] === ru)) {
+        meckern(wo + ': überflüssig — die Regel lässt das Wort von allein stehen');
+      }
     }
+    FAELLE.forEach((k) => {
+      if (a[k] !== undefined && a[k] === blank[k]) {
+        meckern(wo + ': «' + k + '» überflüssig — die Regel liefert von allein «' + blank[k] + '»');
+      }
+    });
   });
 }
 
@@ -670,7 +782,8 @@ if (!nomen || typeof nomen !== 'object' || Array.isArray(nomen)) {
 // Ein Baustein ist eine Regel mit allem, was sie zum Lernen braucht: die Frage
 // zum Entdecken samt Deutungen, die Regel selbst, eine Tabelle und ein
 // Merksatz. Die Aufgabenart verweist auf eine Rolle, die die Maschine kennt.
-const AUFGABEN = ['geschlecht', 'akk', 'praes', 'ichform', 'praep'];
+const AUFGABEN = ['geschlecht', 'akk', 'praes', 'ichform', 'praep',
+  'gen', 'plural', 'praet', 'adj'];
 const verbKlasse = (ru) => {
   if (/ться$/.test(ru)) return verbKlasse(ru.slice(0, -2));
   const eigen = verben[ru] || null;
@@ -709,6 +822,31 @@ if (!Array.isArray(grammatik) || grammatik.length === 0) {
     if (b.person !== undefined && !PERSONEN.includes(b.person)) {
       meckern(wo + ': «person» ist eine von ' + PERSONEN.join(' '));
     }
+    // Die Übereinstimmung braucht ein Gegenüber: Nomen, nach denen sich das
+    // Adjektiv richtet. Sie müssen alle drei Geschlechter abdecken — sonst
+    // zeigt die Gegenüberstellung nicht, worum es geht — und ihre Mehrzahl
+    // muss die Regel treffen, denn sie steht in der Aufgabe.
+    if (b.aufgabe === 'adj') {
+      if (!Array.isArray(b.partner) || b.partner.length < 4) {
+        meckern(wo + ': «partner» braucht mindestens vier Nomen');
+      } else {
+        const gefunden = new Set();
+        b.partner.forEach((w) => {
+          if (!wortIndex[w]) return meckern(wo + ': Partner «' + w + '» steht nicht in vokabeln.json');
+          const art = wortart(wortIndex[w]);
+          if (!istNomen(art)) return meckern(wo + ': Partner «' + w + '» ist kein Nomen');
+          if (nomen[w] && (nomen[w].starr || nomen[w].plural)) {
+            meckern(wo + ': Partner «' + w + '» hat eine eigenwillige Mehrzahl');
+          }
+          gefunden.add(geschlecht(art));
+        });
+        ['m', 'w', 's'].forEach((gg) => {
+          if (!gefunden.has(gg)) meckern(wo + ': «partner» nennt kein ' + GESCHLECHT_NAME[gg] + 'es Nomen');
+        });
+      }
+    } else if (b.partner !== undefined) {
+      meckern(wo + ': «partner» gibt es nur bei der Übereinstimmung');
+    }
     // Entdecken heißt wählen: eine Deutung trifft, die anderen sind plausibel
     // und falsch. Unter drei Möglichkeiten wäre es kein Erkennen mehr, sondern
     // Raten mit halber Chance.
@@ -731,12 +869,39 @@ if (!Array.isArray(grammatik) || grammatik.length === 0) {
     } else {
       b.beispiele.forEach((w) => {
         if (!wortIndex[w]) return meckern(wo + ': Beispiel «' + w + '» steht nicht in vokabeln.json');
-        if ((b.aufgabe === 'akk' || b.aufgabe === 'praep') && !istNomen(wortart(wortIndex[w]))) {
+        const NOMENFACH = ['akk', 'praep', 'gen', 'plural'];
+        if (NOMENFACH.includes(b.aufgabe) && !istNomen(wortart(wortIndex[w]))) {
           meckern(wo + ': Beispiel «' + w + '» ist kein Nomen');
+        }
+        if (b.aufgabe === 'adj' && wortart(wortIndex[w]) !== 'a') {
+          meckern(wo + ': Beispiel «' + w + '» ist kein Adjektiv');
+        }
+        // Die Mehrzahl zeigt sich nur an Zählbarem — «zwei Wasser» ist kein
+        // Beispiel, sondern eine Sonderbedeutung. Darum nennt der Baustein
+        // seine Wörter selbst, und was die Regel nicht trifft, bleibt draußen.
+        if (b.aufgabe === 'gen' || b.aufgabe === 'plural') {
+          const art = wortart(wortIndex[w]);
+          const eintrag = nomen[w];
+          if (eintrag && (eintrag.starr || eintrag[b.aufgabe === 'gen' ? 'gen' : 'plural'])) {
+            meckern(wo + ': Beispiel «' + w + '» ist eine Ausnahme — nicht herleitbar');
+          } else if (grammForm(w, art, b.aufgabe) === w) {
+            meckern(wo + ': Beispiel «' + w + '» ändert sich nicht');
+          }
+        }
+        if (b.aufgabe === 'praet') {
+          if (wortart(wortIndex[w]) !== 'v') return meckern(wo + ': Beispiel «' + w + '» ist kein Verb');
+          if (verben[w] && verben[w].praet) {
+            meckern(wo + ': Beispiel «' + w + '» ist eine Ausnahme — nicht herleitbar');
+          } else if (!praeteritum(w, 'm')) {
+            meckern(wo + ': Beispiel «' + w + '» bildet keine Vergangenheit nach der Regel');
+          }
+          return;
         }
         if (b.aufgabe === 'praep') {
           const art = wortart(wortIndex[w]);
-          if (nomen[w]) meckern(wo + ': Beispiel «' + w + '» ist eine Ausnahme — nicht herleitbar');
+          if (nomen[w] && (nomen[w].starr || nomen[w].praep)) {
+            meckern(wo + ': Beispiel «' + w + '» ist eine Ausnahme — nicht herleitbar');
+          }
           else if (belebt(art)) {
             meckern(wo + ': Beispiel «' + w + '» ist ein Lebewesen — kein Ort');
           } else if (praepositiv(w, geschlecht(art)) === w) {

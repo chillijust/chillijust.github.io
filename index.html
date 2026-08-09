@@ -409,6 +409,9 @@ body.wissen-offen #wissenPanel { grid-template-rows: 1fr; opacity: 1; pointer-ev
 .kachel.gesperrt { opacity: .55; }
 .kachel-name { font-family: Georgia, serif; font-size: 17px; }
 .kachel-note { font-size: 12px; color: var(--dim); line-height: 1.4; }
+/* Das Nomen neben dem Adjektiv: kleiner und gedämpft, aber groß genug, um
+   gelesen zu werden — nach ihm richtet sich die Antwort. */
+.wort-partner { color: var(--dim); font-size: .72em; }
 .kachel-stand { margin-top: auto; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
 .kachel-stand.faellig { color: var(--gold); }
 .kachel .icon { width: 22px; height: 22px; color: var(--ice); }
@@ -1409,7 +1412,11 @@ var VOCAB_THEMES = {
     ['играть', 'spielen', 'igrat'],
     ['ехать', 'fahren', 'jechat'],
     ['бежать', 'rennen', 'beschat'],
-    ['думать', 'denken', 'dumat']
+    ['думать', 'denken', 'dumat'],
+    ['отвечать', 'antworten', 'atwetschat'],
+    ['спрашивать', 'fragen', 'sprashiwat'],
+    ['открывать', 'öffnen', 'atkrywat'],
+    ['закрывать', 'schließen', 'sakrywat']
   ],
   'Adjektive': [
     ['большой', 'groß', 'balschoj'],
@@ -1502,7 +1509,18 @@ var VOCAB_THEMES = {
     ['нравиться', 'gefallen', 'nrawitsja'],
     ['стоить', 'kosten', 'stoit'],
     ['искать', 'suchen', 'iskat'],
-    ['встретить', 'treffen', 'wstretit']
+    ['встретить', 'treffen', 'wstretit'],
+    ['начинать', 'anfangen', 'natschinat'],
+    ['отдыхать', 'sich ausruhen', 'addychat'],
+    ['повторять', 'wiederholen', 'pawtarjat'],
+    ['считать', 'zählen', 'sschitat'],
+    ['звонить', 'anrufen', 'swanit'],
+    ['ходить', 'gehen (regelmäßig)', 'chadit'],
+    ['носить', 'tragen', 'nassit'],
+    ['просить', 'bitten', 'prassit'],
+    ['сидеть', 'sitzen', 'sidet'],
+    ['строить', 'bauen', 'stroit'],
+    ['помнить', 'sich erinnern', 'pomnit']
   ],
   'Körper': [
     ['голова', 'Kopf', 'galawa'],
@@ -1824,7 +1842,17 @@ var GRAMMATIK = [
     tabelle: [['Konsonant', 'männlich', 'дом · стол · город'], ['-а / -я', 'weiblich', 'книга · кухня · вода'], ['-о / -е', 'sächlich', 'окно · море · письмо'], ['-ь', 'beides möglich', 'день männlich · ночь weiblich']],
     merksatz: 'Die Endung entscheidet, nicht die Bedeutung. Nur bei -ь muss man nachsehen.',
     fussnote: 'Drei Wörter meinen Männer und enden trotzdem weiblich: папа, дедушка, дядя. Sie sind männlich — die Bedeutung schlägt hier die Endung.',
-    beispiele: ['дом', 'книга', 'окно', 'стол', 'кухня', 'море', 'город', 'вода', 'письмо']
+    beispiele: ['дом', 'книга', 'окно', 'стол', 'кухня', 'море', 'город', 'вода', 'письмо', 'машина', 'магазин', 'дверь', 'ночь', 'музей', 'яблоко', 'улица', 'телефон', 'неделя', 'площадь', 'билет', 'сумка', 'озеро']
+  },
+  {
+    id: 'mehrzahl', name: 'Mehrzahl', kurz: 'Aus eins wird viele', aufgabe: 'plural',
+    frage: 'Vier Wörter, vier Mehrzahlen. Was entscheidet die Endung?',
+    deutungen: ['Die Endung der Grundform', 'Ob man die Dinge zählen kann', 'Die Zahl davor — ab fünf sieht es anders aus'], richtig: 0,
+    regel: 'Wie beim Geschlecht sagt die Endung der Grundform, was zu tun ist. Männliche Wörter auf einen Konsonanten und weibliche auf -а nehmen -ы; alles Weiche — -й, -ь, -я — nimmt -и. Sächliche Wörter tauschen: -о wird -а, -е wird -я. Dazu kommt die eine Rechtschreibregel, die überall im Russischen gilt: nach к г х ж ч ш щ steht nie ы.',
+    tabelle: [['männlich Konsonant', '+ -ы', 'стол → столы'], ['männlich -й / -ь', '+ -и', 'музей → музеи'], ['weiblich -а', 'wird -ы', 'газета → газеты'], ['weiblich -я / -ь', 'wird -и', 'кухня → кухни'], ['sächlich -о / -е', 'wird -а / -я', 'окно → окна'], ['nach к г х ж ч ш щ', 'immer -и', 'книга → книги']],
+    merksatz: 'Hart nimmt -ы, weich nimmt -и, sächlich tauscht.',
+    fussnote: 'Eine Handvoll männlicher Wörter nimmt statt -ы ein betontes -а: дом → дома, город → города, поезд → поезда. Und ein paar bilden die Mehrzahl ganz neu: брат → братья, друг → друзья, ребёнок → дети. Das muss man wissen; die Übung fragt nicht danach.',
+    beispiele: ['стол', 'магазин', 'билет', 'телефон', 'зуб', 'парк', 'ключ', 'музей', 'книга', 'газета', 'школа', 'машина', 'улица', 'сумка', 'кухня', 'дверь', 'окно', 'письмо', 'море']
   },
   {
     id: 'akkusativ', name: 'Akkusativ', kurz: 'Wen? Was?', aufgabe: 'akk',
@@ -1834,40 +1862,17 @@ var GRAMMATIK = [
     tabelle: [['weiblich -а', 'wird -у', 'книга → книгу'], ['weiblich -я', 'wird -ю', 'кухня → кухню'], ['sächlich', 'bleibt', 'окно → окно'], ['männlich, Sache', 'bleibt', 'стол → стол'], ['männlich, Lebewesen', 'nimmt (-а)', 'брат → брат(а) — eigener Baustein']],
     merksatz: 'Im Deutschen ändert sich der Artikel, im Russischen das Wort selbst.',
     fussnote: 'Darum ist die Wortstellung im Russischen frei: Die Endung sagt, wer wen liest — nicht der Platz im Satz.',
-    beispiele: ['книга', 'газета', 'каша', 'музыка', 'кухня', 'окно', 'стол', 'письмо']
+    beispiele: ['книга', 'газета', 'каша', 'музыка', 'кухня', 'окно', 'стол', 'письмо', 'машина', 'работа', 'школа', 'улица', 'квартира', 'комната', 'сумка', 'рыба', 'вода', 'молоко', 'мясо', 'телефон', 'билет', 'магазин', 'дверь']
   },
   {
-    id: 'praesens', name: 'Präsens', kurz: 'Wer etwas tut', aufgabe: 'praes',
-    klasse: 'e',
-    frage: 'Ein Verb, vier Personen. Woran sieht man, wer gemeint ist?',
-    deutungen: ['An der Endung des Verbs', 'Am Pronomen davor — ohne я, ты, он ginge es nicht', 'An der Stellung im Satz'], richtig: 0,
-    regel: 'Das russische Verb trägt die Person in der Endung. Verben auf -ать und -ять bilden dazu die e-Reihe: Der Stamm ist der Infinitiv ohne -ть, daran hängt die Endung. Weil die Endung schon sagt, wer handelt, darf das Pronomen wegfallen — «читаю» allein heißt bereits «ich lese».',
-    tabelle: [['я', '-ю / -у', 'читать → читаю'], ['ты', '-ешь', 'читать → читаешь'], ['он · она', '-ет', 'работать → работает'], ['мы', '-ем', 'гулять → гуляем'], ['вы', '-ете', 'знать → знаете'], ['они', '-ют / -ут', 'играть → играют']],
-    merksatz: 'Nicht das Pronomen sagt, wer handelt — die Endung tut es.',
-    fussnote: '-ю und -ют stehen nach einem Vokal, -у und -ут nach einem Konsonanten. Das ist keine zweite Reihe, nur Rechtschreibung.',
-    beispiele: ['читать', 'работать', 'знать', 'делать', 'слушать', 'понимать', 'играть', 'думать', 'гулять']
-  },
-  {
-    id: 'praesensi', name: 'Die zweite Reihe', kurz: 'Verben auf -ить und -еть', aufgabe: 'praes',
-    klasse: 'i',
-    frage: 'Dieselbe Person, andere Endungen. Woran liegt das?',
-    deutungen: ['Am Infinitiv: -ить und -еть gehen anders', 'Am Geschlecht dessen, der handelt', 'Daran, ob die Handlung gerade läuft'], richtig: 0,
-    regel: 'Verben auf -ить und -еть folgen der zweiten Reihe. Ihr Stamm ist der Infinitiv ohne die letzten drei Zeichen — говор-ить, смотр-еть —, und wo die erste Reihe ein e hat, steht hier ein i. Welcher Reihe ein Verb folgt, sieht man ihm am Infinitiv an; man muss es nicht mitlernen.',
-    tabelle: [['я', '-ю / -у', 'говорить → говорю'], ['ты', '-ишь', 'смотреть → смотришь'], ['он · она', '-ит', 'стоить → стоит'], ['мы', '-им', 'смотреть → смотрим'], ['вы', '-ите', 'любить → любите'], ['они', '-ят / -ат', 'учить → учат']],
-    merksatz: 'e-Reihe oder i-Reihe: Der Infinitiv entscheidet, nicht die Person.',
-    fussnote: 'Nach к г х ж ч ш щ steht -у und -ат statt -ю und -ят — учу, учат. Auch das ist Rechtschreibung, keine Ausnahme.',
-    beispiele: ['говорить', 'любить', 'учить', 'смотреть', 'видеть', 'платить', 'готовить', 'стоить']
-  },
-  {
-    id: 'ichform', name: 'Die Ich-Form', kurz: 'Wo der Stamm kippt', aufgabe: 'ichform',
-    person: '1s',
-    frage: 'Links die ты-Form, rechts dasselbe Verb mit я. Was geschieht mit dem Stamm?',
-    deutungen: ['Sein letzter Laut ändert sich — aber nur hier', 'Der Stamm bleibt gleich, nur die Endung wechselt', 'Der Stamm verliert seinen letzten Laut'], richtig: 0,
-    regel: 'In der i-Reihe ist die Ich-Form der Sonderling: Dort, und nur dort, ändert sich der letzte Laut des Stammes. Nach б п в ф м schiebt sich ein л ein, andere Konsonanten wandeln sich. Die übrigen fünf Formen bleiben unberührt — darum steht «я люблю» neben «ты любишь».',
-    tabelle: [['б п в ф м', '+ л', 'любить → люблю'], ['т', 'wird ч', 'платить → плачу'], ['д', 'wird ж', 'видеть → вижу'], ['с · з · г · х · ст', 'wandeln ebenso', 'zu ш · ж · ж · ш · щ'], ['ты · он · мы · вы · они', 'bleiben', 'любишь · любит · любят']],
-    merksatz: 'Ein einziger Laut kippt, und nur in der Ich-Form.',
-    fussnote: 'Das ist keine Unregelmäßigkeit, sondern Bequemlichkeit: Zwei Laute, die schlecht nebeneinander liegen, weichen einander aus. Wer die Regel hat, muss люблю nicht auswendig lernen.',
-    beispiele: ['любить', 'готовить', 'платить', 'видеть', 'встретить', 'спать']
+    id: 'genitiv', name: 'Genitiv', kurz: 'Was fehlt, wem etwas gehört', aufgabe: 'gen',
+    frage: 'Vier Wörter nach «нет». Was passiert mit ihnen?',
+    deutungen: ['Männlich und sächlich nehmen -а, weiblich -ы oder -и', 'Alle nehmen -а', 'Nichts — nach нет steht die Grundform'], richtig: 0,
+    regel: 'Der Genitiv ist der Fall des Fehlens und des Besitzes. Er steht nach «нет» («нет хлеба» — es gibt kein Brot), nach «у» («у брата» — beim Bruder) und nach Mengen («много воды»). Männlich und sächlich nehmen -а, weiblich -ы beziehungsweise -и — dieselbe Rechtschreibregel wie überall: nach к г х ж ч ш щ nie ы.',
+    tabelle: [['männlich Konsonant', '+ -а', 'хлеб → нет хлеба'], ['männlich -й / -ь', '+ -я', 'музей → нет музея'], ['sächlich -о / -е', 'wird -а / -я', 'окно → нет окна'], ['weiblich -а', 'wird -ы', 'газета → нет газеты'], ['weiblich -я / -ь', 'wird -и', 'кухня → нет кухни'], ['nach к г х ж ч ш щ', 'immer -и', 'книга → нет книги']],
+    merksatz: '«Es gibt kein …» heißt im Russischen: «нет» und dann der Genitiv.',
+    fussnote: '«У меня есть книга» heißt wörtlich «bei mir ist ein Buch» — darum steht das Buch dort im ersten Fall und «меня» im Genitiv. Verneint kippt beides: «У меня нет книги».',
+    beispiele: ['хлеб', 'сыр', 'суп', 'сахар', 'стол', 'ключ', 'музей', 'телефон', 'книга', 'газета', 'машина', 'работа', 'вода', 'рыба', 'кухня', 'соль', 'окно', 'письмо', 'молоко', 'мясо', 'море']
   },
   {
     id: 'praepositiv', name: 'Präpositiv', kurz: 'Wo? — der Ortsfall', aufgabe: 'praep',
@@ -1878,17 +1883,71 @@ var GRAMMATIK = [
     merksatz: 'Im Akkusativ entscheidet das Geschlecht, im Präpositiv die Präposition.',
     fussnote: 'в und на nehmen beide Fälle: mit dem Akkusativ heißen sie «wohin», mit dem Präpositiv «wo». «Я иду в город» — ich gehe in die Stadt. «Я живу в городе» — ich wohne in der Stadt. Eine Handvoll männlicher Wörter nimmt dabei -у statt -е: в году, в лесу, в аэропорту.',
     beispiele: ['город', 'стол', 'магазин', 'школа', 'дом', 'квартира', 'комната', 'кухня', 'окно', 'парк', 'университет', 'вокзал', 'банк', 'аптека', 'больница', 'ресторан', 'музей', 'офис', 'сумка', 'гостиница', 'деревня', 'река', 'озеро', 'пляж', 'остров', 'Москва', 'Россия', 'книга', 'письмо', 'улица', 'машина', 'автобус', 'поезд', 'дорога']
+  },
+  {
+    id: 'adjektiv', name: 'Übereinstimmung', kurz: 'Wenn ein Wort sich nach einem anderen richtet', aufgabe: 'adj',
+    partner: ['стол', 'парк', 'магазин', 'книга', 'машина', 'улица', 'комната', 'окно', 'письмо', 'море'],
+    frage: 'Dasselbe Adjektiv, vier Nomen. Woran richtet es sich?',
+    deutungen: ['Am Nomen — Geschlecht und Zahl', 'An seiner eigenen Bedeutung', 'Daran, ob es vor oder hinter dem Nomen steht'], richtig: 0,
+    regel: 'Ein Adjektiv steht nie für sich: Es übernimmt Geschlecht und Zahl seines Nomens. Die Grundform im Wörterbuch ist die männliche; daraus baut man die übrigen drei. Das ist eine neue Art von Regel — bisher entschied jedes Wort für sich, hier entscheidet ein Wort über ein anderes.',
+    tabelle: [['männlich', '-ый / -ий / -ой', 'новый дом'], ['weiblich', '-ая', 'новая книга'], ['sächlich', '-ое', 'новое окно'], ['Mehrzahl', '-ые', 'новые дома'], ['Stamm auf к г х ж ч ш щ', 'Mehrzahl -ие', 'маленькие, хорошие'], ['weicher Stamm auf -ий', '-яя · -ее · -ие', 'синий → синяя']],
+    merksatz: 'Nicht das Adjektiv entscheidet, sondern das Nomen daneben.',
+    fussnote: 'Dieselbe Übereinstimmung gilt für мой, твой, наш und этот: мой дом, моя книга, моё окно, мои книги. Wer sie beim Adjektiv verstanden hat, muss sie dort nicht neu lernen.',
+    beispiele: ['новый', 'старый', 'большой', 'маленький', 'хороший', 'красивый', 'молодой', 'холодный', 'быстрый', 'интересный', 'умный', 'важный', 'дорогой', 'сильный', 'синий', 'зелёный', 'чёрный', 'белый', 'тёмный', 'светлый']
+  },
+  {
+    id: 'praesens', name: 'Präsens', kurz: 'Wer etwas tut', aufgabe: 'praes',
+    klasse: 'e',
+    frage: 'Ein Verb, vier Personen. Woran sieht man, wer gemeint ist?',
+    deutungen: ['An der Endung des Verbs', 'Am Pronomen davor — ohne я, ты, он ginge es nicht', 'An der Stellung im Satz'], richtig: 0,
+    regel: 'Das russische Verb trägt die Person in der Endung. Verben auf -ать und -ять bilden dazu die e-Reihe: Der Stamm ist der Infinitiv ohne -ть, daran hängt die Endung. Weil die Endung schon sagt, wer handelt, darf das Pronomen wegfallen — «читаю» allein heißt bereits «ich lese».',
+    tabelle: [['я', '-ю / -у', 'читать → читаю'], ['ты', '-ешь', 'читать → читаешь'], ['он · она', '-ет', 'работать → работает'], ['мы', '-ем', 'гулять → гуляем'], ['вы', '-ете', 'знать → знаете'], ['они', '-ют / -ут', 'играть → играют']],
+    merksatz: 'Nicht das Pronomen sagt, wer handelt — die Endung tut es.',
+    fussnote: '-ю und -ют stehen nach einem Vokal, -у und -ут nach einem Konsonanten. Das ist keine zweite Reihe, nur Rechtschreibung.',
+    beispiele: ['читать', 'работать', 'знать', 'делать', 'слушать', 'понимать', 'играть', 'думать', 'покупать', 'помогать', 'гулять', 'отвечать', 'спрашивать', 'открывать', 'закрывать', 'начинать', 'отдыхать', 'повторять', 'считать']
+  },
+  {
+    id: 'praesensi', name: 'Die zweite Reihe', kurz: 'Verben auf -ить und -еть', aufgabe: 'praes',
+    klasse: 'i',
+    frage: 'Dieselbe Person, andere Endungen. Woran liegt das?',
+    deutungen: ['Am Infinitiv: -ить und -еть gehen anders', 'Am Geschlecht dessen, der handelt', 'Daran, ob die Handlung gerade läuft'], richtig: 0,
+    regel: 'Verben auf -ить und -еть folgen der zweiten Reihe. Ihr Stamm ist der Infinitiv ohne die letzten drei Zeichen — говор-ить, смотр-еть —, und wo die erste Reihe ein e hat, steht hier ein i. Welcher Reihe ein Verb folgt, sieht man ihm am Infinitiv an; man muss es nicht mitlernen.',
+    tabelle: [['я', '-ю / -у', 'говорить → говорю'], ['ты', '-ишь', 'смотреть → смотришь'], ['он · она', '-ит', 'стоить → стоит'], ['мы', '-им', 'смотреть → смотрим'], ['вы', '-ите', 'любить → любите'], ['они', '-ят / -ат', 'учить → учат']],
+    merksatz: 'e-Reihe oder i-Reihe: Der Infinitiv entscheidet, nicht die Person.',
+    fussnote: 'Nach к г х ж ч ш щ steht -у und -ат statt -ю und -ят — учу, учат. Auch das ist Rechtschreibung, keine Ausnahme.',
+    beispiele: ['говорить', 'любить', 'учить', 'смотреть', 'видеть', 'платить', 'готовить', 'стоить', 'встретить', 'звонить', 'ходить', 'носить', 'просить', 'сидеть', 'строить', 'помнить']
+  },
+  {
+    id: 'ichform', name: 'Die Ich-Form', kurz: 'Wo der Stamm kippt', aufgabe: 'ichform',
+    person: '1s',
+    frage: 'Links die ты-Form, rechts dasselbe Verb mit я. Was geschieht mit dem Stamm?',
+    deutungen: ['Sein letzter Laut ändert sich — aber nur hier', 'Der Stamm bleibt gleich, nur die Endung wechselt', 'Der Stamm verliert seinen letzten Laut'], richtig: 0,
+    regel: 'In der i-Reihe ist die Ich-Form der Sonderling: Dort, und nur dort, ändert sich der letzte Laut des Stammes. Nach б п в ф м schiebt sich ein л ein, andere Konsonanten wandeln sich. Die übrigen fünf Formen bleiben unberührt — darum steht «я люблю» neben «ты любишь».',
+    tabelle: [['б п в ф м', '+ л', 'любить → люблю'], ['т', 'wird ч', 'платить → плачу'], ['д', 'wird ж', 'видеть → вижу'], ['с · з · г · х · ст', 'wandeln ebenso', 'zu ш · ж · ж · ш · щ'], ['ты · он · мы · вы · они', 'bleiben', 'любишь · любит · любят']],
+    merksatz: 'Ein einziger Laut kippt, und nur in der Ich-Form.',
+    fussnote: 'Das ist keine Unregelmäßigkeit, sondern Bequemlichkeit: Zwei Laute, die schlecht nebeneinander liegen, weichen einander aus. Wer die Regel hat, muss люблю nicht auswendig lernen.',
+    beispiele: ['любить', 'готовить', 'платить', 'видеть', 'встретить', 'спать', 'ходить', 'носить', 'просить', 'сидеть']
+  },
+  {
+    id: 'praeteritum', name: 'Vergangenheit', kurz: 'Was gestern war', aufgabe: 'praet',
+    frage: 'Ein Verb, vier Mal Vergangenheit. Woran hängt die Endung?',
+    deutungen: ['Daran, wer gehandelt hat — männlich, weiblich, sächlich, mehrere', 'An der Person, wie im Präsens', 'Daran, wie lange es her ist'], richtig: 0,
+    regel: 'Die Vergangenheit ist die einfachste Form der Sprache: Infinitiv ohne -ть, dann -л. Nur richtet sie sich nicht nach der Person, sondern nach dem, der handelt. «Я читал» sagt ein Mann, «я читала» eine Frau — dasselbe я, zwei Formen. Vier Endungen für alle sechs Personen, und das Pronomen darf hier gerade nicht wegfallen: Ohne es wüsste man nicht, wer gemeint ist.',
+    tabelle: [['er · männlich', '-л', 'читать → читал'], ['sie · weiblich', '-ла', 'читать → читала'], ['es · sächlich', '-ло', 'быть → было'], ['sie · mehrere', '-ли', 'работать → работали'], ['я · ты · мы · вы', 'richten sich danach', 'ты писал oder ты писала']],
+    merksatz: 'Im Präsens zählt die Person, in der Vergangenheit das Geschlecht.',
+    fussnote: 'Drei Verben gehen eigene Wege, weil sie nicht auf -ть enden: идти → шёл, шла; есть → ел, ела; мочь → мог, могла. Wer die Regel hat, sieht ihnen sofort an, dass sie Ausnahmen sind.',
+    beispiele: ['читать', 'работать', 'знать', 'делать', 'думать', 'гулять', 'играть', 'слушать', 'понимать', 'говорить', 'смотреть', 'любить', 'учить', 'жить', 'писать', 'спать', 'пить', 'хотеть', 'ехать', 'готовить', 'отвечать', 'спрашивать', 'открывать', 'начинать', 'звонить', 'ходить', 'просить', 'сидеть', 'покупать', 'помогать']
   }
 ];
 
 var VERBEN = {
-  'есть': { formen: ['ем', 'ешь', 'ест', 'едим', 'едите', 'едят'] },
+  'есть': { formen: ['ем', 'ешь', 'ест', 'едим', 'едите', 'едят'], praet: ['ел', 'ела', 'ело', 'ели'] },
   'хотеть': { formen: ['хочу', 'хочешь', 'хочет', 'хотим', 'хотите', 'хотят'] },
-  'мочь': { formen: ['могу', 'можешь', 'может', 'можем', 'можете', 'могут'] },
+  'мочь': { formen: ['могу', 'можешь', 'может', 'можем', 'можете', 'могут'], praet: ['мог', 'могла', 'могло', 'могли'] },
   'бежать': { formen: ['бегу', 'бежишь', 'бежит', 'бежим', 'бежите', 'бегут'] },
   'жить': { stamm: 'жив', betont: true, konj: 'e' },
   'пить': { stamm: 'пь', betont: true, konj: 'e' },
-  'идти': { stamm: 'ид', betont: true },
+  'идти': { stamm: 'ид', betont: true, praet: ['шёл', 'шла', 'шло', 'шли'] },
   'ехать': { stamm: 'ед' },
   'давать': { stamm: 'да', betont: true },
   'спать': { stamm: 'сп', konj: 'i' },
@@ -1900,29 +1959,51 @@ var VERBEN = {
 };
 
 var NOMEN = {
-  'ребёнок': { praep: 'ребёнке' },
-  'рынок': { praep: 'рынке' },
-  'цветок': { praep: 'цветке' },
-  'палец': { praep: 'пальце' },
-  'заяц': { praep: 'зайце' },
-  'день': { praep: 'дне' },
-  'полдень': { praep: 'полдне' },
-  'ветер': { praep: 'ветре' },
-  'церковь': { praep: 'церкви' },
-  'дочь': { praep: 'дочери' },
-  'время': { praep: 'времени' },
+  'ребёнок': { praep: 'ребёнке', gen: 'ребёнка', plural: 'дети' },
+  'рынок': { praep: 'рынке', gen: 'рынка', plural: 'рынки' },
+  'цветок': { praep: 'цветке', gen: 'цветка', plural: 'цветы' },
+  'палец': { praep: 'пальце', gen: 'пальца', plural: 'пальцы' },
+  'заяц': { praep: 'зайце', gen: 'зайца', plural: 'зайцы' },
+  'день': { praep: 'дне', gen: 'дня', plural: 'дни' },
+  'полдень': { praep: 'полдне', gen: 'полдня' },
+  'ветер': { praep: 'ветре', gen: 'ветра', plural: 'ветры' },
+  'церковь': { praep: 'церкви', gen: 'церкви', plural: 'церкви' },
+  'дочь': { praep: 'дочери', gen: 'дочери', plural: 'дочери' },
+  'время': { praep: 'времени', gen: 'времени', plural: 'времена' },
   'год': { praep: 'году' },
-  'лес': { praep: 'лесу' },
+  'лес': { praep: 'лесу', plural: 'леса' },
   'шкаф': { praep: 'шкафу' },
   'мост': { praep: 'мосту' },
   'аэропорт': { praep: 'аэропорту' },
   'нос': { praep: 'носу' },
-  'рот': { praep: 'рту' },
-  'глаз': { praep: 'глазу' },
-  'снег': { praep: 'снегу' },
+  'рот': { praep: 'рту', gen: 'рта', plural: 'рты' },
+  'глаз': { praep: 'глазу', plural: 'глаза' },
+  'снег': { praep: 'снегу', plural: 'снега' },
   'час': { praep: 'часу' },
   'метро': { starr: true },
-  'пальто': { starr: true }
+  'пальто': { starr: true },
+  'дом': { plural: 'дома' },
+  'город': { plural: 'города' },
+  'брат': { plural: 'братья' },
+  'друг': { plural: 'друзья' },
+  'сын': { plural: 'сыновья' },
+  'стул': { plural: 'стулья' },
+  'дерево': { plural: 'деревья' },
+  'учитель': { plural: 'учителя' },
+  'поезд': { plural: 'поезда' },
+  'паспорт': { plural: 'паспорта' },
+  'остров': { plural: 'острова' },
+  'вечер': { plural: 'вечера' },
+  'свитер': { plural: 'свитера' },
+  'ухо': { plural: 'уши' },
+  'плечо': { plural: 'плечи' },
+  'колено': { plural: 'колени' },
+  'яблоко': { plural: 'яблоки' },
+  'сестра': { plural: 'сёстры' },
+  'жена': { plural: 'жёны' },
+  'муж': { plural: 'мужья' },
+  'озеро': { plural: 'озёра' },
+  'небо': { plural: 'небеса' }
 };
 /* == DATEN:ENDE == */
 
@@ -1964,6 +2045,14 @@ function geschlecht(art) { return GESCHLECHT_VON[art] || art; }
 function belebt(art) { return art === 'mb' || art === 'wb' || art === 'sb'; }
 
 var GESCHLECHT_NAME = { m: 'männlich', w: 'weiblich', s: 'sächlich' };
+// Wer gehandelt hat — die Vergangenheit fragt danach, nicht nach der Person.
+var GENUS_NAME = { m: 'männlich', w: 'weiblich', s: 'sächlich', p: 'Mehrzahl' };
+var GENUS_SUBJEKT = {
+  m: '<span class="cyr">он</span> — er',
+  w: '<span class="cyr">она</span> — sie',
+  s: '<span class="cyr">оно</span> — es',
+  p: '<span class="cyr">они</span> — sie (Mehrzahl)'
+};
 
 // Nach к г х ж ч ш щ steht nie ы — dort schreibt man и. Die Regel greift in
 // mehreren Fällen; sie steht hier einmal und wird von dort benutzt.
@@ -2004,6 +2093,82 @@ function praepositiv(ru, art) {
   if (/е$/.test(ru)) return ru;
   if (/[аяой]$/.test(ru)) return ru.slice(0, -1) + 'е';
   return ru + 'е';
+}
+
+// Genitiv Einzahl — der Fall des Fehlens und des Besitzes: «нет книги»,
+// «у брата». Männlich und sächlich nehmen -а, weiblich -ы beziehungsweise -и.
+//   männlich Konsonant → -а     дом → дома
+//   männlich -й / -ь    → -я    музей → музея, день → дня (Eintrag)
+//   sächlich -о / -е    → -а/-я окно → окна, море → моря
+//   weiblich -а         → -ы    книга → книги (и nach к г х ж ч ш щ)
+//   weiblich -я / -ь    → -и    кухня → кухни, дверь → двери
+//   auf -ия             → -ии   Россия → России
+function genitiv(ru, art) {
+  var eigen = NOMEN[ru] || null;
+  if (eigen && eigen.starr) return ru;
+  if (eigen && eigen.gen) return eigen.gen;
+  if (/ия$/.test(ru)) return ru.slice(0, -1) + 'и';
+  if (/(ий|ие)$/.test(ru)) return ru.slice(0, -2) + 'ия';
+  if (/а$/.test(ru)) return ru.slice(0, -1) + (nachZischlaut(ru.slice(0, -1)) ? 'и' : 'ы');
+  if (/я$/.test(ru)) return ru.slice(0, -1) + 'и';
+  if (/ь$/.test(ru)) return ru.slice(0, -1) + (geschlecht(art) === 'w' ? 'и' : 'я');
+  if (/о$/.test(ru)) return ru.slice(0, -1) + 'а';
+  // Nach ж ч ш щ ц steht unbetont ein а, kein я: сердце → сердца.
+  if (/е$/.test(ru)) return ru.slice(0, -1) + (/[жчшщц]$/.test(ru.slice(0, -1)) ? 'а' : 'я');
+  if (/й$/.test(ru)) return ru.slice(0, -1) + 'я';
+  return ru + 'а';
+}
+
+// Mehrzahl im ersten Fall. Die Endung der Grundform entscheidet, nicht das
+// Geschlecht — und die eine Rechtschreibregel: nach к г х ж ч ш щ nie ы.
+//   männlich Konsonant → -ы     стол → столы
+//   männlich -й / -ь    → -и    музей → музеи, день → дни (Eintrag)
+//   weiblich -а         → -ы    книга → книги (и nach Zischlaut)
+//   weiblich -я / -ь    → -и    кухня → кухни, дверь → двери
+//   sächlich -о / -е    → -а/-я окно → окна, море → моря
+// Was die Regel nicht trifft — дом → дома, брат → братья, ребёнок → дети —
+// steht in NOMEN.
+function plural(ru, art) {
+  void art;
+  var eigen = NOMEN[ru] || null;
+  if (eigen && eigen.starr) return ru;
+  if (eigen && eigen.plural) return eigen.plural;
+  if (/ия$/.test(ru)) return ru.slice(0, -1) + 'и';
+  if (/ие$/.test(ru)) return ru.slice(0, -1) + 'я';
+  if (/[ьй]$/.test(ru)) return ru.slice(0, -1) + 'и';
+  if (/а$/.test(ru)) return ru.slice(0, -1) + (nachZischlaut(ru.slice(0, -1)) ? 'и' : 'ы');
+  if (/я$/.test(ru)) return ru.slice(0, -1) + 'и';
+  if (/о$/.test(ru)) return ru.slice(0, -1) + 'а';
+  if (/е$/.test(ru)) return ru.slice(0, -1) + (/[жчшщц]$/.test(ru.slice(0, -1)) ? 'а' : 'я');
+  return ru + (nachZischlaut(ru) ? 'и' : 'ы');
+}
+
+// ── Adjektive: Übereinstimmung ──────────────────────────────
+// Ein Adjektiv richtet sich nach seinem Nomen. Die Grundform ist die männliche;
+// drei Dinge am Stamm entscheiden über die Schreibung der übrigen:
+//   к г х  — «velar»: nimmt -ие statt -ые, sonst hart
+//   ж ч ш щ — «Zischlaut»: nimmt -ие, und unbetont -ее statt -ое
+//   sonst -ий — weicher Stamm: -яя, -ее, -ие (синий → синяя)
+// -ой ist immer betont; darum steht dort -ое, auch nach Zischlaut (большое).
+function adjTeile(ru) {
+  if (!/(ый|ий|ой)$/.test(ru)) return null;
+  var stamm = ru.slice(0, -2);
+  var zisch = /[жчшщ]$/.test(stamm);
+  var velar = /[кгх]$/.test(stamm);
+  return {
+    stamm: stamm, end: ru.slice(-2), zisch: zisch, velar: velar,
+    weich: ru.slice(-2) === 'ий' && !zisch && !velar
+  };
+}
+var GENERA = ['m', 'w', 's', 'p'];
+function adjektiv(ru, genus) {
+  var t = adjTeile(ru);
+  if (!t) return null;
+  if (genus === 'm') return ru;
+  if (genus === 'w') return t.stamm + (t.weich ? 'яя' : 'ая');
+  if (genus === 's') return t.stamm + (t.weich || (t.zisch && t.end !== 'ой') ? 'ее' : 'ое');
+  if (genus === 'p') return t.stamm + (t.weich || t.zisch || t.velar ? 'ие' : 'ые');
+  return null;
 }
 
 // ── Verben im Präsens ───────────────────────────────────────
@@ -2078,6 +2243,26 @@ function verbBau(ru) {
   });
 }
 
+// ── Verben in der Vergangenheit ─────────────────────────────
+// Die einfachste Regel der Sprache: Infinitiv ohne -ть, dann -л, -ла, -ло, -ли.
+// Sie richtet sich nicht nach der Person, sondern nach dem, der handelt — «я
+// читал» sagt ein Mann, «я читала» eine Frau. Was nicht auf -ть endet (идти,
+// мочь, есть), steht mit vier Formen in VERBEN.
+var PRAET_ENDE = { m: 'л', w: 'ла', s: 'ло', p: 'ли' };
+function praeteritum(ru, genus) {
+  var i = GENERA.indexOf(genus);
+  if (i === -1) return null;
+  var eigen = VERBEN[ru] || null;
+  if (eigen && eigen.praet) return eigen.praet[i];
+  if (/ться$/.test(ru)) {
+    var basis = praeteritum(ru.slice(0, -2), genus);
+    if (!basis) return null;
+    return basis + (/[аеёиоуыэюя]$/.test(basis) ? 'сь' : 'ся');
+  }
+  if (!/ть$/.test(ru)) return null;
+  return ru.slice(0, -2) + PRAET_ENDE[genus];
+}
+
 function praesens(ru, person) {
   var formen = verbBau(ru);
   if (!formen) return null;
@@ -2116,10 +2301,16 @@ function verbIchWandel(ru) {
 function grammForm(ru, art, rolle) {
   if (rolle === 'akk') return istNomen(art) ? akkusativ(ru, art) : null;
   if (rolle === 'praep') return istNomen(art) ? praepositiv(ru, art) : null;
+  if (rolle === 'gen') return istNomen(art) ? genitiv(ru, art) : null;
+  if (rolle === 'plural') return istNomen(art) ? plural(ru, art) : null;
+  if (rolle.indexOf('praet') === 0) {
+    return art === 'v' ? praeteritum(ru, rolle.slice(5)) : null;
+  }
   if (rolle.indexOf('praes') === 0) {
     if (art !== 'v') return null;
     return praesens(ru, rolle.slice(5));
   }
+  if (rolle.indexOf('adj') === 0) return art === 'a' ? adjektiv(ru, rolle.slice(3)) : null;
   return null;
 }
 
@@ -2148,7 +2339,7 @@ var SATZ_STUFE = 2;
 var STORAGE_KEY = 'russisch_trainer_v1';
 // Stand der ausgelieferten Datei. Wird von tools/build.mjs gesetzt und geht in
 // jedes Ticket ein, damit ein Bericht sagt, welcher Stand gemeint war.
-var APP_STAND = '2026-08-08'; /* == STAND == */
+var APP_STAND = '2026-08-09'; /* == STAND == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -5888,6 +6079,12 @@ function gramUpdate(b, richtig) {
 function gramVerbPasst(b, v) {
   if (v.art !== 'v') return false;
   if (/ться$/.test(v.ru)) return false;      // rückbezüglich — eigener Baustein
+  // Die Vergangenheit hat ihre eigene Regel: Sie greift auch bei Verben mit
+  // eigenem Präsensstamm (писать → писал), aber nicht bei denen mit eigener
+  // Vergangenheit (идти → шёл) und nicht bei denen ohne -ть.
+  if (b.aufgabe === 'praet') {
+    return !(VERBEN[v.ru] && VERBEN[v.ru].praet) && !!praeteritum(v.ru, 'm');
+  }
   if (!verbBau(v.ru)) return false;
   var klasse = verbKlasse(v.ru);
   if (!klasse) return false;                 // folgt keiner Reihe
@@ -5896,9 +6093,27 @@ function gramVerbPasst(b, v) {
   return !b.klasse || klasse === b.klasse;
 }
 
+// Adjektive, an denen sich die Übereinstimmung zeigen lässt: alle, deren
+// Grundform die Maschine beugen kann. «холодно» und «жарко» sind keine —
+// sie stehen in den Daten als unveränderlich.
+function gramAdjektive() {
+  return ALL_VOCAB.filter(function (v) { return v.art === 'a' && adjTeile(v.ru); });
+}
+
 function gramWortPool(b) {
   var stufe = gramBox(b);
-  if (b.aufgabe === 'praes' || b.aufgabe === 'ichform') {
+  // Die Übereinstimmung zeigt sich am Adjektiv, nicht am Nomen — geübt wird
+  // also an Adjektiven, das Nomen kommt als Partner dazu.
+  if (b.aufgabe === 'adj') {
+    var adj = gramAdjektive();
+    var begonnenA = adj.filter(function (v) { return (state.boxes[v.id] || 0) > 0; });
+    if (begonnenA.length >= 4) return begonnenA;
+    var vorratA = b.beispiele.map(function (ru) { return VOKABEL[ru]; })
+      .filter(function (v) { return v && v.art === 'a' && adjTeile(v.ru); });
+    begonnenA.forEach(function (v) { if (vorratA.indexOf(v) === -1) vorratA.push(v); });
+    return vorratA.length ? vorratA : adj.slice(0, 12);
+  }
+  if (b.aufgabe === 'praes' || b.aufgabe === 'ichform' || b.aufgabe === 'praet') {
     var verben = ALL_VOCAB.filter(function (v) {
       return (state.boxes[v.id] || 0) > 0 && gramVerbPasst(b, v);
     });
@@ -5915,9 +6130,15 @@ function gramWortPool(b) {
   // Darum ist der Präpositiv die eine Rubrik mit ausgesuchten Wörtern: Der
   // Baustein nennt sie, die Regel selbst gilt trotzdem für jedes Nomen — im
   // Satz führt «Wissen» sie vor.
-  if (b.aufgabe === 'praep') {
-    var orte = b.beispiele.map(function (ru) { return VOKABEL[ru]; })
-      .filter(function (v) { return v && !NOMEN[v.ru] && !belebt(v.art); });
+  // Dieselbe Vorsicht bei Mehrzahl und Genitiv: «zwei Wasser» ist keine
+  // Mehrzahl, sondern eine Sonderbedeutung, und «нет музыки» sagt niemand.
+  // Auch hier nennt der Baustein seine Wörter selbst.
+  if (b.aufgabe === 'praep' || b.aufgabe === 'plural' || b.aufgabe === 'gen') {
+    var taugt = function (v) {
+      if (!v || NOMEN[v.ru] || !istNomen(v.art)) return false;
+      return b.aufgabe !== 'praep' || !belebt(v.art);
+    };
+    var orte = b.beispiele.map(function (ru) { return VOKABEL[ru]; }).filter(taugt);
     var gelernt = orte.filter(function (v) { return (state.boxes[v.id] || 0) > 0; });
     return gelernt.length >= 4 ? gelernt : orte;
   }
@@ -5990,6 +6211,18 @@ function gramAblenkerIch(ru, richtig) {
   return aus.slice(0, 3);
 }
 
+// Ablenker für die Vergangenheit und für die Übereinstimmung: dieselbe Form in
+// den anderen drei Geschlechtern. Wer sie wählt, hat nicht falsch gebaut,
+// sondern sich nach dem falschen Wort gerichtet.
+function gramAblenkerGenus(bauen, richtig) {
+  var aus = [];
+  shuffle(GENERA.slice()).forEach(function (g) {
+    var f = bauen(g);
+    if (f && f !== richtig && aus.indexOf(f) === -1) aus.push(f);
+  });
+  return aus.slice(0, 3);
+}
+
 function gramFrageBauen() {
   var b = gramAktuell();
   gramPhase = 'ask';
@@ -6042,12 +6275,67 @@ function gramFrageBauen() {
     };
     return;
   }
+  // Vergangenheit: ausgelost wird, wer gehandelt hat — davon hängt die Endung
+  // ab, nicht von der Person.
+  if (b.aufgabe === 'praet') {
+    var genus = GENERA[Math.floor(Math.random() * GENERA.length)];
+    if (gramQ && gramQ.genus === genus) {
+      genus = GENERA[(GENERA.indexOf(genus) + 1 + Math.floor(Math.random() * 3)) % 4];
+    }
+    var vform = praeteritum(wort.ru, genus);
+    gramQ = {
+      baustein: b.id, art: 'praet', wort: wort, genus: genus,
+      von: wort.ru, loesung: vform, tippen: tippen,
+      optionen: shuffle([vform].concat(gramAblenkerGenus(function (g) {
+        return praeteritum(wort.ru, g);
+      }, vform)))
+    };
+    return;
+  }
+  // Übereinstimmung: das Nomen bestimmt, wie das Adjektiv aussieht. Es wird
+  // mitgelost — die Mehrzahl steht dabei für sich, sie hat kein Geschlecht.
+  if (b.aufgabe === 'adj') {
+    var partner = gramNomenPartner(b);
+    var agenus = partner ? partner.genus : 'w';
+    var aform = adjektiv(wort.ru, agenus);
+    gramQ = {
+      baustein: b.id, art: 'adj', wort: wort, genus: agenus,
+      partner: partner, von: wort.ru, loesung: aform, tippen: tippen,
+      optionen: shuffle([aform].concat(gramAblenkerGenus(function (g) {
+        return adjektiv(wort.ru, g);
+      }, aform)))
+    };
+    return;
+  }
   // Fälle: unter der Endstufe die Form wählen, darüber selbst schreiben.
   var form = grammForm(wort.ru, wort.art, b.aufgabe);
   gramQ = {
     baustein: b.id, art: b.aufgabe, wort: wort, loesung: form,
     tippen: tippen,
     optionen: shuffle([form].concat(gramAblenker(wort.ru, form)))
+  };
+}
+
+// Das Nomen, nach dem sich das Adjektiv richtet — aus der Liste des Bausteins,
+// nicht aus dem ganzen Wortschatz. Grammatisch ginge jedes: «тёмный папа» ist
+// tadellos gebeugt und trotzdem Unsinn. Wo eine Aufgabe etwas über die Welt
+// voraussetzt und nicht nur über die Sprache, nennt der Baustein seine Wörter
+// selbst — dieselbe Regel wie beim Präpositiv.
+// Bekanntes zuerst: Ein Nomen, das man schon kennt, macht die Aufgabe zu einer
+// über die Endung statt zu zweien auf einmal.
+function gramNomenPartner(b) {
+  var alleP = b.partner.map(function (ru) { return VOKABEL[ru]; })
+    .filter(function (v) { return v && istNomen(v.art); });
+  var pool = alleP.filter(function (v) { return (state.boxes[v.id] || 0) > 0; });
+  if (pool.length < 3) pool = alleP;
+  if (!pool.length) return null;
+  var v = pool[Math.floor(Math.random() * pool.length)];
+  var mehrzahl = Math.random() < 0.25;
+  return {
+    wort: v,
+    genus: mehrzahl ? 'p' : geschlecht(v.art),
+    text: mehrzahl ? plural(v.ru, v.art) : v.ru,
+    mehrzahl: mehrzahl
   };
 }
 
@@ -6086,7 +6374,8 @@ function gramEntdeckenWoerter(b) {
   var pool = gramWortPool(b);
   // Bei Verben gibt es kein Geschlecht zu mischen — den Gegensatz stellt
   // gramPaare() über Personen und Reihen her.
-  if (b.aufgabe === 'praes' || b.aufgabe === 'ichform') return pool.slice(0, 4);
+  if (b.aufgabe === 'praes' || b.aufgabe === 'ichform' ||
+    b.aufgabe === 'praet' || b.aufgabe === 'adj') return pool.slice(0, 4);
   var nach = function (g) {
     return pool.filter(function (v) { return geschlecht(v.art) === g; });
   };
@@ -6099,7 +6388,8 @@ function gramEntdeckenWoerter(b) {
   // Präpositiv wie Geschlecht: je eines pro Geschlecht. Der Gegensatz ist hier
   // gerade, dass es *keinen* gibt — dreimal dieselbe Endung, und genau das soll
   // auffallen, weil der Akkusativ es anders macht.
-  if (b.aufgabe === 'geschlecht' || b.aufgabe === 'praep') {
+  if (b.aufgabe === 'geschlecht' || b.aufgabe === 'praep' ||
+    b.aufgabe === 'plural' || b.aufgabe === 'gen') {
     nimm(nach('w'), 1); nimm(nach('m'), 1); nimm(nach('s'), 1); nimm(pool, 1);
   } else {
     nimm(nach('w'), 2); nimm(nach('s'), 1); nimm(nach('m'), 1);
@@ -6122,6 +6412,39 @@ function gramPaare(b) {
     var glatt = gramGlattesVerb(b);
     if (glatt) {
       aus.push({ links: praesens(glatt.ru, '2s'), rechts: praesens(glatt.ru, '1s'), kyr: true });
+    }
+    return aus;
+  }
+  // Vergangenheit: ein Verb, vier Handelnde — nicht die Person entscheidet,
+  // sondern wer handelt. Das ist der Gegensatz zum Präsens, und genau er soll
+  // auffallen.
+  if (b.aufgabe === 'praet') {
+    var eines = gramEntdeckenWoerter(b)[0];
+    if (!eines) return aus;
+    GENERA.forEach(function (g) {
+      aus.push({
+        links: eines.ru + ' · ' + (g === 'p' ? 'они' : { m: 'он', w: 'она', s: 'оно' }[g]),
+        rechts: praeteritum(eines.ru, g), kyr: true
+      });
+    });
+    return aus;
+  }
+  // Übereinstimmung: dasselbe Adjektiv neben Nomen dreier Geschlechter.
+  if (b.aufgabe === 'adj') {
+    var adjektive = gramEntdeckenWoerter(b);
+    var eins2 = adjektive[0];
+    if (!eins2) return aus;
+    var muster = b.partner.map(function (ru) { return VOKABEL[ru]; })
+      .filter(function (v) { return v && istNomen(v.art) && !NOMEN[v.ru]; });
+    ['m', 'w', 's'].forEach(function (g) {
+      var n = muster.filter(function (v) { return geschlecht(v.art) === g; })[0];
+      if (n) aus.push({ links: eins2.ru + ' · ' + n.ru, rechts: adjektiv(eins2.ru, g), kyr: true });
+    });
+    var mz = muster[0];
+    if (mz) {
+      aus.push({
+        links: eins2.ru + ' · ' + plural(mz.ru, mz.art), rechts: adjektiv(eins2.ru, 'p'), kyr: true
+      });
     }
     return aus;
   }
@@ -6152,7 +6475,8 @@ function gramPaare(b) {
       links: v.ru,
       rechts: b.aufgabe === 'geschlecht'
         ? GESCHLECHT_NAME[geschlecht(v.art)]
-        : (b.aufgabe === 'praep' ? 'в ' : '') + grammForm(v.ru, v.art, b.aufgabe),
+        : (b.aufgabe === 'praep' ? 'в ' : b.aufgabe === 'gen' ? 'нет ' : '') +
+          grammForm(v.ru, v.art, b.aufgabe),
       kyr: b.aufgabe !== 'geschlecht'
     });
   });
@@ -6263,12 +6587,30 @@ function gramUebenHtml(b) {
     });
     html += '</div>';
   } else {
-    if (q.art === 'akk' || q.art === 'praep') {
-      html += '<p class="task-label">' + (q.art === 'praep'
-        ? 'Wo? — die Form nach <span class="cyr">в</span> und <span class="cyr">на</span>'
-        : 'Wen? Was? — die Form dazu') + '</p>' +
+    if (q.art === 'akk' || q.art === 'praep' || q.art === 'gen' || q.art === 'plural') {
+      var FALLFRAGE = {
+        praep: 'Wo? — die Form nach <span class="cyr">в</span> und <span class="cyr">на</span>',
+        akk: 'Wen? Was? — die Form dazu',
+        gen: 'Was fehlt? — die Form nach <span class="cyr">нет</span>',
+        plural: 'Und in der Mehrzahl?'
+      };
+      html += '<p class="task-label">' + FALLFRAGE[q.art] + '</p>' +
         '<p class="word cyr">' + esc(q.wort.ru) + '</p>' +
         gramVorgabe(q.wort.de, GESCHLECHT_NAME[geschlecht(q.wort.art)]);
+    } else if (q.art === 'praet') {
+      html += '<p class="task-label">Gestern — wer hat gehandelt?</p>' +
+        '<p class="word cyr">' + esc(q.von) + '</p>' +
+        gramVorgabe(q.wort.de, GENUS_SUBJEKT[q.genus]);
+    } else if (q.art === 'adj') {
+      // Das Nomen steht groß daneben: Nach ihm richtet sich die Antwort, es ist
+      // also nicht Beiwerk, sondern die halbe Aufgabe.
+      html += '<p class="task-label">Welche Form passt zum Wort daneben?</p>' +
+        '<p class="word cyr">' + esc(q.von) + ' <span class="wort-partner">' +
+        esc(q.partner ? q.partner.text : '') + '</span></p>' +
+        gramVorgabe(q.wort.de, q.partner
+          ? esc(q.partner.wort.de) + (q.partner.mehrzahl ? ' — Mehrzahl' : ' — ' +
+            GESCHLECHT_NAME[geschlecht(q.partner.wort.art)])
+          : '');
     } else {
       html += '<p class="task-label">' +
         (q.art === 'ichform' ? 'Und in der Ich-Form?' : 'Die Form für diese Person') +
@@ -6367,6 +6709,41 @@ function gramWarumHtml(b, q) {
   }
   if (q.art === 'praep') {
     return '<p class="hint">' + gramNomenWarum(v.ru, v.art, q.loesung) + '</p>';
+  }
+  if (q.art === 'praet') {
+    return '<p class="hint"><strong class="cyr">' + esc(v.ru) + '</strong> ohne ' +
+      '<span class="cyr">-ть</span> ist <strong class="cyr">' + esc(v.ru.slice(0, -2)) +
+      '</strong>; ' + (q.genus === 'p' ? 'in der Mehrzahl' : 'für ' + GENUS_NAME[q.genus]) +
+      ' kommt <strong class="cyr">-' + esc(PRAET_ENDE[q.genus]) +
+      '</strong> daran. Die Person spielt keine Rolle.</p>';
+  }
+  if (q.art === 'adj') {
+    var t = adjTeile(v.ru) || { stamm: v.ru, zisch: false, velar: false, weich: false };
+    var warum = t.weich
+      ? 'Der Stamm ist weich (<span class="cyr">' + esc(t.stamm) + '</span> + ' +
+        '<span class="cyr">-ий</span>), darum die weiche Reihe.'
+      : (t.zisch || t.velar
+        ? 'Nach <span class="cyr">' + esc(t.stamm.slice(-1)) + '</span> steht nie ' +
+          '<span class="cyr">-ы</span> — in der Mehrzahl also <span class="cyr">-ие</span>.'
+        : 'Harter Stamm, harte Endungen.');
+    return '<p class="hint">' + (q.partner
+      ? '<strong class="cyr">' + esc(q.partner.text) + '</strong> ist ' +
+        (q.genus === 'p' ? 'Mehrzahl' : GENUS_NAME[q.genus]) + ' — darum ' +
+        '<strong class="cyr">' + esc(q.loesung) + '</strong>. '
+      : '') + warum + '</p>';
+  }
+  if (q.art === 'gen' || q.art === 'plural') {
+    var letzt = v.ru.slice(-1);
+    var neuLetzt = q.loesung.slice(v.ru.length - 1);
+    return '<p class="hint">' + esc(v.ru) + ' ist ' + GESCHLECHT_NAME[g] + ' und endet auf ' +
+      '<strong class="cyr">' + esc(letzt) + '</strong>' +
+      (q.art === 'plural' && nachZischlaut(v.ru.replace(/[аяоеьйы]$/, ''))
+        ? ' — und nach <span class="cyr">' + esc(v.ru.replace(/[аяоеьйы]$/, '').slice(-1)) +
+          '</span> steht nie <span class="cyr">-ы</span>'
+        : '') +
+      ', darum <strong class="cyr">' + esc(q.loesung) + '</strong>' +
+      (neuLetzt ? ' auf <strong class="cyr">' + esc(q.loesung.slice(-1)) + '</strong>' : '') +
+      '.</p>';
   }
   var gleich = q.loesung === v.ru;
   void b;

@@ -163,10 +163,17 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   Blatt offen ist. Zurück heißt **dorthin, wo man herkam** (`ansichtStapel`), nicht nach
   Home; Home räumt den Stapel, und wer umkehrt, nimmt den Schritt zurück, statt einen
   zweiten daraufzusetzen (ADR 0036).
+- **Ein Baustein, der etwas über die Welt voraussetzt, nennt seine Wörter selbst** —
+  Präpositiv, Mehrzahl, Genitiv und Übereinstimmung (ADR 0043). «в маме», «zwei Wasser»,
+  «нет музыки», «тёмный папа» sind alle tadellos gebeugt und trotzdem Unsinn. Die
+  Übereinstimmung nennt dafür in `partner` die Nomen, nach denen sich ein Adjektiv
+  richten darf.
 - **Grammatik ist eine Funktion, kein Fakt** (ADR 0030). Die Karteikarte ist die **Regel**,
   nicht das Wort, und die Aufgabe verlangt ein bekanntes Wort in einer nie gesehenen Form —
   sonst prüft sie Auswendiglernen. Formen rechnet `grammForm()`; sie steht doppelt (App und
-  Build) und wird an den vermerkten Formen der Sätze gemessen. **Eine Wortart-Angabe, die
+  Build) und wird an den vermerkten Formen der Sätze gemessen. Zehn Bausteine, vier Formen
+  je Nomen (`akk`, `praep`, `gen`, `plural`); in `data/nomen.json` wird **jede Angabe für
+  sich** gegen die blanke Regel geprüft, nicht der Eintrag als Ganzes. **Eine Wortart-Angabe, die
   nur wiederholt, was die Endung sagt, lässt den Build scheitern** — sonst verdeckt die
   Liste die echten Ausnahmen. Dasselbe gilt für `data/verben.json`: **ein Eintrag, der
   dasselbe liefert wie die blanke Regel, bricht den Build ab** (ADR 0031).
