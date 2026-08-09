@@ -97,6 +97,9 @@ data/*.json               Lerninhalte, einzige Quelle für Vokabeln/Sätze/Fakte
                           Tastatur/Buchstaben/Grammatik/Verben/Nomen
 tools/build.mjs           /data prüfen und in index.html einbetten (--check = nur prüfen)
 tools/pruefen.mjs         Vor-Push-Prüfung von index.html
+tools/pruefstand/         Prüfstand: lauf.mjs, suiten/*.mjs, bild.mjs (siehe README dort)
+.claude/skills/           Abläufe für Claude: pruefstand, ticket
+.claude/hooks/            vor-dem-push.mjs — hält den Push an, wenn etwas rot ist
 tools/freistellen.py      Maskottchen aus einem Bild freistellen (ohne Bildbibliothek)
 tools/skaliere.py         PNG auf Icon-Größe bringen (ohne Bildbibliothek)
 tools/appikon.py          App-Symbol bauen: Grund tauschen, Sprechblase umdrehen
@@ -228,17 +231,32 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
 - **Branches:** neue Branches nur auf meine ausdrückliche Ansage. Direkte Arbeit auf
   `main` nur, wenn ich es für den jeweiligen Vorgang freigegeben habe.
 
-## Vor jedem Push
+## Prüfstand und Push
+
+Die App wird am **echten DOM** geprüft: Die ausgelieferte Datei bekommt ein Skript
+angehängt, ein kopfloser Browser lädt sie, das Skript prüft und schreibt sein Urteil in
+den Seitentitel.
 
 ```sh
-node tools/build.mjs --check     # /data und index.html synchron
-node tools/pruefen.mjs           # DOCTYPE, Front-Matter, externe Ressourcen, JS-Syntax
-python3 -m http.server 8000      # lokal in Handybreite ansehen
+node tools/pruefstand/lauf.mjs   # alle Suiten, ~16 s
+node tools/pruefstand/lauf.mjs -q jubel flammen
 ```
 
-Danach kurz sagen, was sich ändert. Nach dem Push: bestätigen, dass die Live-Seite
-tatsächlich aktualisiert wurde — Pages braucht ein bis drei Minuten, der Cache bis zu
-zehn.
+**Der Push ist abgesichert.** `.claude/hooks/vor-dem-push.mjs` fährt vor jedem
+`git push` `build.mjs --check`, `pruefen.mjs` und den Prüfstand und hält an, wenn etwas
+rot ist. Notausgang, wenn es wirklich raus muss: `PRUEFSTAND=aus` vor den Befehl. Ein
+GitHub-Lauf (`.github/workflows/pruefstand.yml`) prüft dasselbe noch einmal unabhängig
+von jeder Sitzung.
+
+**Wer index.html anfasst, sichert die Änderung mit einer Prüfung ab** — der Prüfstand
+ist das Gedächtnis für jeden Fehler, der schon einmal da war. Wie eine Suite entsteht:
+Skill `pruefstand` und `tools/pruefstand/README.md`.
+
+Nach dem Push: bestätigen, dass die Live-Seite tatsächlich aktualisiert wurde — Pages
+braucht ein bis drei Minuten, der Cache bis zu zehn.
+
+**Für einen ganzen Vorgang** — vom gemeldeten Befund bis zur bestätigten Auslieferung —
+gibt es den Skill `ticket`.
 
 ## Bekannte Fallstricke
 

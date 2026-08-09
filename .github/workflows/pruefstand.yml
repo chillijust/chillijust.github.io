@@ -1,0 +1,31 @@
+# Das Auffangnetz. Der Hook vor dem Push greift nur in einer Arbeitssitzung —
+# dieser Lauf greift immer, auch wenn jemand von Hand etwas ändert oder der Hook
+# umgangen wird.
+#
+# Chrome bringt der Läufer von GitHub mit; installiert wird nichts.
+name: Prüfstand
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  pruefen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Daten und index.html synchron
+        run: node tools/build.mjs --check
+
+      - name: DOCTYPE, Fremdadressen, Syntax
+        run: node tools/pruefen.mjs
+
+      - name: Prüfstand
+        run: node tools/pruefstand/lauf.mjs
