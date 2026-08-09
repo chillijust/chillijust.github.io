@@ -126,6 +126,9 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   abgesetzt (ADR 0041). `--card-2` ist die Bedienfläche für Chips, Schalter und Tasten —
   in «Dark» über der Kachel, in den hellen darunter. Die dunkle Palette steht dreifach:
   `:root`, `SCHEMATA`, `theme-color` im `<head>`.
+- **Ein aufklappendes Blatt trägt `--blatt`** (ADR 0042) — in «Dark» den Grund, in den
+  hellen Schemata die Kachel. Wer die helle Leiter verschiebt, prüft `--dim`, `--gold`
+  und `--good` mit: Sie hängen daran, und unter der Leiter liegt keine Grenze mehr.
 - **Ein Schema tönt nur die Flächen** (ADR 0039) — `--bg`, `--card`, `--card-2`,
   `--line`, `--glow`. Schrift, Gold und die Signalfarben stehen einmal für alle hellen
   Schemata, sonst hieße «richtig» auf Rosa etwas anderes als auf Grün. Neue Werte rechnet

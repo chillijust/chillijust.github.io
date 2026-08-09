@@ -63,12 +63,19 @@ Tasten; in «Dark» rückt sie von der Kachel nach oben, in den hellen nach unte
 Umgebungsbedingung; wer Rosa gewählt hat, will es auch abends. (Bis ADR 0039 folgte die
 Vorgabe «system» der Einstellung des iPhones.)
 
+**Ein aufklappendes Blatt trägt `--blatt`** (ADR 0042): in «Dark» den Grund, in den hellen
+Schemata die Kachel — also immer die *andere* der beiden großen Flächen als das, was
+darunter liegt. Sonst stünde in «Dark» Fläche auf Fläche und in den hellen ein grauer
+Kasten über weißen Kacheln.
+
 **Getönt werden nur die Flächen** — `--bg`, `--card`, `--card-2`, `--line`, `--glow`.
 Schrift, Gold und die Signalfarben stehen einmal für alle hellen Schemata, sonst zerfiele
 die Sprache der Oberfläche und «richtig» hieße auf Rosa etwas anderes als auf Grün.
 
-**Alle hellen Schemata teilen dieselbe Staffelung der Helligkeit**, nur Farbton und
-Sättigung wandern (`tools/palette.py` rechnet sie aus). Damit steht die Kachel überall
+**Alle hellen Schemata teilen dieselbe Staffelung der Helligkeit** (Grund 87,5, Kachel
+95,2, Bedienfläche 82,5, Linie 74,5), nur Farbton und Sättigung wandern
+(`tools/palette.py` rechnet sie aus). Schrift, Gold und `--good` hängen an dieser Leiter:
+Sinkt sie, müssen sie mit, sonst fällt der Kontrast unter die Grenze (ADR 0042). Damit steht die Kachel überall
 gleich weit vom Grund ab und der Kontrast zum Text bleibt vergleichbar — gemessen liegt
 der größte anteilige Verlust gegenüber «classic» unter 7 %, die Lesetexte bei mindestens
 11,7 : 1.

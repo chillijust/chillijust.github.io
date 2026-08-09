@@ -6,9 +6,14 @@ Staffelung ist für alle Schemata dieselbe — nur Farbton und Sättigung wander
 Dadurch steht die Kachel überall gleich weit vom Grund ab, und der Kontrast zur
 Schrift bleibt vergleichbar.
 
-Der Abstand zwischen Grund (91) und Kachel (99,5) ist bewusst doppelt so groß
-wie in der ersten Fassung: Die Kachel soll eine eigene Fläche sein, nicht ein
-heller Hauch auf dem Grund.
+Der Abstand zwischen Grund und Kachel ist bewusst doppelt so groß wie in der
+ersten Fassung: Die Kachel soll eine eigene Fläche sein, nicht ein heller Hauch
+auf dem Grund.
+
+Die ganze Leiter steht dabei um dreieinhalb Punkte tiefer als zuerst gerechnet
+(Grund 91 → 87,5, Kachel 98,6 → 95,2). Auf dem Gerät waren die Farben sonst
+grell — und das Weiß der Kachel zieht die Gesamthelligkeit mit hoch, es musste
+also mit.
 """
 import colorsys
 
@@ -20,11 +25,11 @@ def hsl2hex(h, s, l):
 # Sättigung des Schemas: Die hellen Flächen tragen nur einen Hauch davon,
 # sonst wirkten sie schmutzig statt cremig.
 FLAECHEN = [
-    ('bg',     91.0, 1.00),
-    ('card',   98.6, 0.70),
-    ('card-2', 86.0, 1.00),
-    ('line',   78.0, 0.90),
-    ('glow',   98.6, 0.70),
+    ('bg',     87.5, 1.00),
+    ('card',   95.2, 0.70),
+    ('card-2', 82.5, 1.00),
+    ('line',   74.5, 0.90),
+    ('glow',   95.2, 0.70),
 ]
 
 # Farbton und Sättigung je Schema. «classic» ist der warme Cremeton, den die

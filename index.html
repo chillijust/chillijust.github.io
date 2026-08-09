@@ -89,32 +89,32 @@
    Grund und Kachel ist bewusst reichlich — die Kachel ist eine eigene Fläche,
    kein heller Hauch auf dem Grund. */
 :root[data-schema="classic"] {
-  --bg: #EEEAE3;
-  --card: #FCFCFB;
-  --card-2: #E4DFD3;
-  --line: #D3CCBB;
-  --glow: #FCFCFB;
+  --bg: #E7E2D7;
+  --card: #F5F4F1;
+  --card-2: #DDD7C8;
+  --line: #CCC4B0;
+  --glow: #F5F4F1;
 }
 :root[data-schema="gruen"] {
-  --bg: #E1EFE8;
-  --card: #FBFCFB;
-  --card-2: #D0E7DB;
-  --line: #B7D7C7;
-  --glow: #FBFCFB;
+  --bg: #D5E9DF;
+  --card: #F0F6F3;
+  --card-2: #C4E1D2;
+  --line: #ABD1BE;
+  --glow: #F0F6F3;
 }
 :root[data-schema="blau"] {
-  --bg: #DFE9F1;
-  --card: #FAFBFC;
-  --card-2: #CEDCE9;
-  --line: #B4C8DA;
-  --glow: #FAFBFC;
+  --bg: #D3E0EB;
+  --card: #F0F3F6;
+  --card-2: #C1D4E3;
+  --line: #A8BFD4;
+  --glow: #F0F3F6;
 }
 :root[data-schema="rosa"] {
-  --bg: #F1DFE4;
-  --card: #FCFAFB;
-  --card-2: #E9CED5;
-  --line: #DAB4BE;
-  --glow: #FCFAFB;
+  --bg: #EBD3D9;
+  --card: #F6F0F1;
+  --card-2: #E3C1CA;
+  --line: #D4A8B4;
+  --glow: #F6F0F1;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 /* Doppeltipp vergrößert nicht mehr; Aufziehen mit zwei Fingern bleibt möglich. */
@@ -3038,10 +3038,10 @@ function zeigeStatus(art, text) {
 // die Statusleiste ihn als Zahl braucht und keine Medienabfrage kennt.
 var SCHEMATA = [
   { wert: 'dark', text: 'Dark', grund: '#1A1A18' },
-  { wert: 'classic', text: 'Classic', grund: '#EEEAE3' },
-  { wert: 'gruen', text: 'Grün', grund: '#E1EFE8' },
-  { wert: 'blau', text: 'Blau', grund: '#DFE9F1' },
-  { wert: 'rosa', text: 'Rosa', grund: '#F1DFE4' }
+  { wert: 'classic', text: 'Classic', grund: '#E7E2D7' },
+  { wert: 'gruen', text: 'Grün', grund: '#D5E9DF' },
+  { wert: 'blau', text: 'Blau', grund: '#D3E0EB' },
+  { wert: 'rosa', text: 'Rosa', grund: '#EBD3D9' }
 ];
 
 function schemaVon(wert) {
