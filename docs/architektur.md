@@ -306,6 +306,34 @@ Geschlossen wird bei Auswahl, bei einem Tipp daneben, mit `Escape` oder erneutem
 Zugeklappt bekommen die Einträge `tabindex="-1"`, damit der Fokus nicht in ein
 unsichtbares Panel springt.
 
+### Die Einstellungen: Reiter auf einer Bahn
+
+Vier Fragen, vier Reiter — Lernweg, Abgabe, Eingabe, Darstellung. **Alle vier Blätter
+stehen gleichzeitig im Dokument**, nebeneinander auf einer Bahn (`#einstBahn`) hinter
+einem Fenster (`#einstRahmen`, `overflow: hidden`). Gezeigt wird über `translateX`.
+
+Nur so kann der Finger sie **mitnehmen**: `touchmove` schiebt die Bahn ohne Übergang mit,
+`touchend` rastet sie weich ein. Ein Wechsel erst beim Loslassen wäre ein Sprung, kein
+Blättern — und ein Neuaufbau je Wechsel brächte den Übergang zum Stocken. Beim Wechsel
+wird darum nur geschoben und die Leiste nachgezogen (`einstReiterKopf()`).
+
+Drei Regeln halten die Geste sauber:
+
+- **Waagerecht oder senkrecht entscheidet sich einmal** und bleibt dann für die ganze
+  Geste stehen. Wer das je Bild neu entscheidet, bekommt ein Blatt, das beim Scrollen
+  zittert.
+- **Der linke Rand gehört dem Zurückwischen** (ab 28 px). Dort fasst die Bahn nicht an.
+- **Am ersten und letzten Blatt zieht es zäh** (Faktor 0,32). Der Widerstand sagt, dass
+  dahinter nichts mehr kommt, ohne dass es dazu einen Satz braucht.
+
+Ein Blatt, das nicht dran ist, liegt außerhalb des Fensters — der Fokus soll trotzdem
+nicht hineinspringen. Seine Knöpfe bekommen `tabindex="-1"`, dieselbe Regel wie beim
+zugeklappten Menü. Und was nur auf einem Reiter steht, ist beim Binden **nicht immer da**:
+Der Tonknopf wird geprüft, bevor ein Zuhörer daran hängt.
+
+Die Zeilen sitzen auf einem `.blattkarte` in `--blatt` mit Goldrand — dieselbe Fläche wie
+das Menü- und Auswahlblatt; die Reiter tragen die Gestalt der runden Kopfknöpfe.
+
 ## Auswahl in den Übungen
 
 Neben dem Menüknopf steht ein zweiter runder Knopf mit Trichter — die **Auswahl**. Er
