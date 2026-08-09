@@ -134,6 +134,17 @@ unterwegs liefe ein langer Name wie «Einstellungen» darunter hindurch.
 **Kein Nachrechnen.** Es gibt keine Positionsrechnung je Bild. Weil die Figur ein Kind
 ihres Platzhalters ist, scrollt sie starr mit dem Inhalt (ADR 0012).
 
+### Zwei Wege hinaus, ein zweizeiliger Kopf
+
+Unterwegs trägt der Kopf links **zwei** runde Knöpfe: «Zurück» geht einen Schritt
+(`zurueckGehen()`, ADR 0036), «Home» räumt den ganzen Stapel. Das sind zwei verschiedene
+Dinge, darum zwei Knöpfe — und auf Home selbst steht keiner von beiden.
+
+Für einen Namen wie «Power-Training» bleibt neben fünf runden Knöpfen kein Platz. Der
+Titelblock rückt darum unterwegs in eine **eigene Zeile** unter einer Haarlinie
+(`body.unterwegs .titelblock { flex: 1 0 100% }`). Ein Name, der abgeschnitten wird, sagt
+weniger als einer, der eine Zeile kostet.
+
 ### Der Sprung
 
 `chiliAktualisieren()` läuft über einen `MutationObserver` auf `#main`, merkt also jeden
@@ -286,7 +297,9 @@ seine Größe schrumpft — die Platzwahl steht im Abschnitt «Maskottchen». Sc
 **Aufklappen** genügt dafür: ab da sind die Striche unten, der Knopf wäre sonst leer.
 
 Braucht die Ansicht die Figur selbst (Leerzustand in Tickets oder Sprachfakten), tritt im
-Knopf ein ruhender goldener Punkt an ihre Stelle. Die Klasse `mit-chili` schaltet zwischen
+Knopf eine **Flamme** an ihre Stelle — zwei Zungen mit verschobenem Takt, damit es lebt
+statt zu pulsen, und mit dem Ursprung unten: Eine Flamme wächst nach oben, sie dehnt sich
+nicht um ihre Mitte. Bei `prefers-reduced-motion` steht sie still, statt zu verschwinden. Die Klasse `mit-chili` schaltet zwischen
 beiden um und wird bei **jedem** `chiliAktualisieren()` gesetzt, nicht nur beim
 Stationswechsel — sonst bliebe sie stehen, wenn sich bloß der Inhalt der Ansicht ändert
 (etwa wenn das erste Ticket den Leerzustand ablöst).
