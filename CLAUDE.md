@@ -58,6 +58,12 @@ zweite Flug bricht den ersten ab. Ein runder Knopf, in den sie springt, braucht
 - Mobile-first: Touch-Ziele ≥ 44 × 44 px, keine Hover-abhängige Bedienung,
   `-webkit-tap-highlight-color: transparent`, `env(safe-area-inset-*)` für Notch und
   Home-Indicator.
+- **Ein runder Knopf, in dem die Chili landen soll**, steht genau einmal im Dokument und
+  wird umgehängt, nicht neu gebaut (ADR 0044). Wer ihn in eine Kachel setzt: erst nach
+  Hause schicken, dann zeichnen, dann umhängen — `renderKopf()` läuft vor der Ansicht.
+- **Der Jubel ist ein Fenster für das Seltene** (ADR 0044) — fünf Anlässe, ausgelöst nur
+  am Übergang, Ton ausgelost. Ein einzelnes gemeistertes Wort bekommt weiter nur eine
+  Zeile: Was oft passiert, darf keine Hürde werden.
 - **Ein Farbschema, keine zwei Achsen** (ADR 0039): die Einstellung `schema` mit den
   Werten Dark (Vorgabe), Classic, Grün, Blau, Rosa — `data-schema` am `<html>`-Element,
   «dark» trägt keines. Vier davon sind hell; die Farben gibt es nicht in einer dunklen
