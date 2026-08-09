@@ -973,15 +973,27 @@ if (von === -1 || bis === -1 || bis < von) {
   console.error('index.html: Datenmarker nicht gefunden. Erwartet werden die Zeilen\n  ' + START + '\n  ' + ENDE);
   process.exit(1);
 }
-// Der Stand landet in jedem Ticket, das aus der App kommt. Er wird hier
-// mitgeschrieben, damit ihn niemand von Hand pflegen muss.
+// Stand und Version landen in jedem Ticket, das aus der App kommt. Beide werden
+// hier mitgeschrieben, damit sie niemand von Hand pflegen muss — der Stand aus
+// dem Kalender, die Version aus der Datei VERSION. Sie ist die einzige Stelle,
+// an der die Zahl von Hand steht.
 const heute = new Date().toISOString().slice(0, 10);
-const stempeln = (t) => t.replace(/var APP_STAND = '[^']*';/, "var APP_STAND = '" + heute + "';");
+const version = readFileSync(join(ROOT, 'VERSION'), 'utf8').trim();
+if (!/^\d+\.\d+\.\d+$/.test(version)) {
+  meckern('VERSION: erwartet drei Zahlen, etwa «1.0.0» — steht dort «' + version + '»');
+}
+const stempeln = (t) => t
+  .replace(/var APP_STAND = '[^']*';/, "var APP_STAND = '" + heute + "';")
+  .replace(/var APP_VERSION = '[^']*';/, "var APP_VERSION = '" + version + "';");
 
 const neu = stempeln(html.slice(0, von) + block + html.slice(bis + ENDE.length));
 
 if (!/var APP_STAND = '\d{4}-\d{2}-\d{2}';/.test(neu)) {
   console.error('index.html: APP_STAND nicht gefunden — der Stand kann nicht gestempelt werden.');
+  process.exit(1);
+}
+if (!/var APP_VERSION = '\d+\.\d+\.\d+';/.test(neu)) {
+  console.error('index.html: APP_VERSION nicht gefunden — die Version kann nicht gestempelt werden.');
   process.exit(1);
 }
 

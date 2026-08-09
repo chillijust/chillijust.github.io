@@ -2574,6 +2574,10 @@ var STORAGE_KEY = 'russisch_trainer_v1';
 // Stand der ausgelieferten Datei. Wird von tools/build.mjs gesetzt und geht in
 // jedes Ticket ein, damit ein Bericht sagt, welcher Stand gemeint war.
 var APP_STAND = '2026-08-09'; /* == STAND == */
+// Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
+// Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
+// `tools/build.mjs` hierher gestempelt — nicht von Hand.
+var APP_VERSION = '1.0.0'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -2939,11 +2943,18 @@ function datumLang(ms) {
 // für mich beim Überfliegen wie für Claude Code beim Abarbeiten.
 // «Ort», nicht «Übung»: Der Bezug kann auch die Übersicht oder eine
 // Menüansicht sein, und «Übung: Übersicht» wäre schlicht falsch.
+// Version und Stand gehören zusammen: die eine sagt, welche Fassung gemeint
+// ist, die andere, von wann sie war. Tickets von vor der Zählung führen nur den
+// Stand — dann steht auch nur er da.
+function ticketStand(t) {
+  return (t.version ? t.version + ' · ' : '') + t.stand;
+}
+
 function ticketAbschnitt(t, nr, standZeigen) {
   return '## ' + nr + ' · ' + (t.art === 'bug' ? 'Fehler' : 'Wunsch') + ': ' + t.titel + '\n\n' +
     (t.text ? t.text + '\n\n' : '') +
     (t.reiter ? '- Ort: ' + t.reiter + '\n' : '') +
-    (standZeigen ? '- App-Stand: ' + t.stand + '\n' : '') +
+    (standZeigen ? '- App-Stand: ' + ticketStand(t) + '\n' : '') +
     '- Erstellt: ' + datumLang(t.erstellt) + '\n' +
     (t.geaendert ? '- Geändert: ' + datumLang(t.geaendert) + '\n' : '');
 }
@@ -2957,7 +2968,10 @@ function ticketsAlsText(liste) {
   if (!liste.length) return '';
   var reihe = liste.slice().sort(function (a, b) { return a.erstellt - b.erstellt; });
   var staende = [];
-  reihe.forEach(function (t) { if (staende.indexOf(t.stand) === -1) staende.push(t.stand); });
+  reihe.forEach(function (t) {
+    var st = ticketStand(t);
+    if (staende.indexOf(st) === -1) staende.push(st);
+  });
   var jeTicket = staende.length > 1;
   var kopf = '# Chillingo · ' + reihe.length + (reihe.length === 1 ? ' Ticket' : ' Tickets') + '\n\n';
   var koerper = reihe.map(function (t, i) { return ticketAbschnitt(t, i + 1, jeTicket); }).join('\n');
@@ -3006,6 +3020,7 @@ function ticketAnlegen(art, titel, text, reiter) {
     // dann weg, statt «null» zu behaupten.
     reiter: reiter ? ansichtName(reiter) : '',
     stand: APP_STAND,
+    version: APP_VERSION,
     geraet: geraet,
     erstellt: jetzt,
     uebergeben: null
@@ -8177,6 +8192,7 @@ function renderEinstellungen() {
   main.innerHTML = '<section>' + reiter + bahn +
     '<p class="settings-note">Die Einstellungen gelten nur auf diesem Gerät und werden zusammen mit dem ' +
     'Lernstand gespeichert. «Fortschritt zurücksetzen» in der Sicherung lässt sie unberührt.</p>' +
+    '<p class="settings-note">Chillingo ' + esc(APP_VERSION) + ' · Stand ' + esc(APP_STAND) + '</p>' +
     '<div class="btn-row"><button class="btn ghost" id="setBack">Zurück</button></div></section>';
 
   main.querySelectorAll('[data-reiter]').forEach(function (b) {

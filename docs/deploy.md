@@ -89,3 +89,27 @@ Repository-Einstellungen, nicht in einer Datei. Wenn die Seite unerwartet wieder
 gerenderte Markdown-Seite aussieht, dort zuerst nachsehen:
 **Settings → Pages → Build and deployment**. Erwartet: Source „Deploy from a branch",
 Branch `main`, Ordner `/ (root)`.
+
+## Version
+
+Drei Zahlen in der Datei `VERSION` im Wurzelverzeichnis — die **einzige** Stelle, an der
+sie von Hand steht. `tools/build.mjs` stempelt sie als `APP_VERSION` nach `index.html`,
+wie es den Stand als `APP_STAND` stempelt. Von dort geht sie in jedes Ticket und steht
+unten in den Einstellungen.
+
+| Ziffer | wird größer, wenn … | Beispiel |
+| --- | --- | --- |
+| **erste** | sich etwas Grundlegendes ändert: der Lernstand, das Format des Sicherungscodes, der Aufbau des Lernwegs. Kurz: wenn ein Stand von vorher **anders gelesen** wird. | 1.x.x → 2.0.0 |
+| **zweite** | etwas **dazukommt**: eine Übung, ein Grammatikbaustein, neue Vokabeln, ein neues Farbschema. | 1.2.0 → 1.3.0 |
+| **dritte** | alles Übrige: Oberfläche, Texte, Fehlerbehebungen. | 1.3.0 → 1.3.1 |
+
+Die dritte Ziffer ist bewusst weiter gefasst als «Oberfläche»: Sonst hätte eine reine
+Fehlerbehebung keinen Platz, und die kommt häufiger vor als eine neue Übung.
+
+**Version und Stand sind zwei Dinge.** Die Version sagt, welche Fassung gemeint ist, der
+Stand, von wann sie war. Im Ticket stehen beide: `App-Stand: 1.0.0 · 2026-08-09`. Tickets
+von vor der Zählung führen nur den Stand.
+
+**Der Sicherungscode hat seine eigene Zählung** (`CHG2`) und hat mit der Version nichts zu
+tun. Sie darf sich zehnmal ändern, ohne dass ein Code veraltet — und wenn sich das Format
+doch ändert, ist das genau der Fall, in dem die erste Ziffer steigt.

@@ -122,6 +122,9 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   freigegeben, wenn er **in einer Geste** einmal etwas ausgegeben hat (ADR 0027).
 - **Der Datenblock zwischen `DATEN:START` und `DATEN:ENDE` ist generiert.** Inhalte
   ausschließlich in `/data` ändern, danach `node tools/build.mjs`.
+- **Die Version steht in `VERSION`**, sonst nirgends von Hand (siehe `docs/deploy.md`):
+  erste Ziffer = der Lernstand wird anders gelesen, zweite = etwas kommt dazu, dritte =
+  alles Übrige (Oberfläche und Fehler). `tools/build.mjs` stempelt sie als `APP_VERSION`.
 - **`APP_STAND` setzt `tools/build.mjs`**, nicht die Hand. Der Wert geht in jedes Ticket
   ein. `--check` vergleicht ohne ihn, sonst wäre die Datei jeden Tag «nicht auf Stand».
 - **Ein Entwurf im Meldeblatt überlebt das Zuklappen.** Nur «Abbrechen» wirft ihn weg;
