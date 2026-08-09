@@ -476,6 +476,33 @@ geleert, wo eine neue gebaut wird (`uebNext()`, `buildTransTask()`, `abcFrageBau
 müssen machte aus der Belohnung eine Hürde. Für ein ganzes Lernset gibt es weiter die
 Jubelkarte — das ist der seltenere, größere Anlass (ADR 0026).
 
+### Der Jubel gehört dem ersten Mal
+
+Vier der fünf Anlässe sind **Auszeichnungen**: ein Lernset geschafft, ein Thema
+gemeistert, das ganze Alphabet, alle Regeln. Sie hängen nicht am Übergang eines
+einzelnen Wortes, sondern daran, dass eine **ganze Sammlung** vollständig ist — und
+genau daran wären sie beliebig oft auslösbar: Fällt ein Wort zurück (drei Schreibfehler,
+ADR 0033) und wird wieder hochgeholt, ist die Sammlung erneut vollständig, und das
+Fenster ginge ein zweites Mal auf. Am Gerät sah das so aus, als würde ein Set von einem
+einzigen Wort gemeistert.
+
+`state.gefeiert` ist darum eine Merkliste über Marken — `set:3`, `thema:Essen`, `abc`,
+`regel`. `jubelEinmal(marke, anlass, …)` prüft, hakt ab und zeigt; `jubelSchon(marke)`
+fragt nur. Das Lernset entscheidet zweimal: `uebPruefen()` merkt sich das fertige Set nur,
+wenn es noch offen ist, und `uebNext()` feiert es dann — dazwischen liegt eine Auflösung,
+und mitten in ihr wäre das Fenster im Weg.
+
+**`jubelNachtragen()` versöhnt alte Stände.** Nach `load()` und nach dem Einspielen einer
+Sicherung gilt alles, was **jetzt schon** geschafft ist, als gefeiert. Ohne das bekäme
+jeder bestehende Stand sein Fenster ein zweites Mal, sobald das erste Wort aufgefrischt
+wird. Der Sicherungscode führt die Marken nicht mit — er soll schlank bleiben, und sie
+lassen sich aus dem Lernstand herleiten.
+
+**Der leere Topf im Power-Training feiert weiter jedes Mal.** Er ist keine Auszeichnung,
+sondern eine erledigte Aufgabe: Der Topf füllt sich wieder, und dann ist das Aufräumen
+eine neue Leistung. Doppelt auslösen kann er nicht — dafür müsste zwischendurch ein Wort
+gefallen sein.
+
 ## Übersetzen: die Leiter aus Form und Richtung
 
 Ein Satz durchläuft **vier verschiedene Aufgaben**, bevor er sitzt. Zwei Achsen steigern

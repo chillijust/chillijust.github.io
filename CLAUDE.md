@@ -64,6 +64,13 @@ zweite Flug bricht den ersten ab. Ein runder Knopf, in den sie springt, braucht
 - **Der Jubel ist ein Fenster für das Seltene** (ADR 0044) — fünf Anlässe, ausgelöst nur
   am Übergang, Ton ausgelost. Ein einzelnes gemeistertes Wort bekommt weiter nur eine
   Zeile: Was oft passiert, darf keine Hürde werden.
+- **Eine Auszeichnung wird genau einmal gefeiert** (ADR 0047). Set, Thema, Alphabet und
+  Grammatik hängen an einer *Sammlung* und wären sonst beliebig oft auslösbar — ein
+  zurückgefallenes Wort zurückzuholen macht das Set ein zweites Mal voll. Die Marken
+  stehen in `state.gefeiert`, gesetzt über `jubelEinmal()`, nachgetragen von
+  `jubelNachtragen()` nach `load()` **und** nach dem Einspielen einer Sicherung. Der
+  leere Topf im Power-Training bleibt wiederholbar — er ist eine Aufgabe, keine
+  Auszeichnung.
 - **Die Fortschrittsreihe brennt** (ADR 0046) — ein Zeichen je Wort, gebaut von
   `ppHtml(stufe)` und sonst nirgends: Stufe 0 bleibt ein Strich, ab Stufe 1 wächst eine
   Flamme mit. **Nur Gold flackert**; die Animation hängt an `.punkt` und `.pp.s4`, nicht

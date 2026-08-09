@@ -2606,7 +2606,7 @@ var APP_STAND = '2026-08-09'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '1.0.2'; /* == VERSION == */
+var APP_VERSION = '1.0.3'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -3385,6 +3385,10 @@ function defaultState() {
     answered: 0,
     factIdx: 0,
     fakten: {},                // je Fakt: { n: wie oft gezeigt, f: Favorit }
+    // Welche großen Augenblicke schon gefeiert wurden — «set:3», «thema:Essen»,
+    // «abc», «regel». Ohne diese Liste feiert ein Set erneut, sobald ein
+    // einzelnes zurückgefallenes Wort wieder oben ist (ADR 0047).
+    gefeiert: {},
     settings: defaultSettings()
   };
 }
@@ -3404,6 +3408,7 @@ function mergeState(parsed) {
   d.wortFehler = migriereIds(d.wortFehler);
   d.patzer = migriereIds(d.patzer);
   d.leseFehler = nurBuchstaben(d.leseFehler);
+  d.gefeiert = nurJubelmarken(d.gefeiert);
   // «Zuletzt» zeigt auf eine Übung, die es noch gibt — sonst führte die
   // Empfehlung nach einem Umbau ins Leere.
   if (!d.zuletzt || !UEBUNG_NAME[d.zuletzt.uebung] || d.zuletzt.uebung === 'home' ||
@@ -3462,6 +3467,20 @@ function nurBuchstaben(obj) {
   return neu;
 }
 
+// Marken zu Sets oder Themen, die es nicht mehr gibt, fallen weg. Die
+// Set-Nummern hängen am Lehrplan: Kommen Vokabeln dazu, werden die Sets neu
+// geschnitten, und eine Marke auf ein Set, das es nicht mehr gibt, hielte einen
+// Jubel zurück, der jemandem zusteht.
+function nurJubelmarken(obj) {
+  if (!obj || typeof obj !== 'object') return {};
+  var bekannt = { abc: true, regel: true };
+  for (var i = 0; i < LERNSETS.length; i++) bekannt['set:' + i] = true;
+  Object.keys(VOCAB_THEMES).forEach(function (t) { bekannt['thema:' + t] = true; });
+  var neu = {};
+  Object.keys(obj).forEach(function (k) { if (bekannt[k]) neu[k] = 1; });
+  return neu;
+}
+
 // Einträge zu Bausteinen, die es nicht mehr gibt, fallen weg — sonst trüge der
 // Sicherungscode Stände zu Regeln mit, die niemand mehr lernen kann.
 function nurBausteine(obj) {
@@ -3501,7 +3520,7 @@ var saveTimer = null;
 function load() {
   try {
     var raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) state = mergeState(JSON.parse(raw));
+    if (raw) { state = mergeState(JSON.parse(raw)); jubelNachtragen(); }
   } catch (e) {
     zeigeStatus('err', 'Speicher nicht verfügbar — der Fortschritt geht beim Schließen verloren.');
   }
@@ -3741,6 +3760,30 @@ function jubelSetzen(auf) {
 }
 
 function jubelSchliessen() { jubelSetzen(false); }
+
+// Ein Jubel gehört dem ersten Mal (ADR 0047). Wer ein zurückgefallenes Wort
+// wieder hochholt, hat sein Set nicht noch einmal geschafft — er hat es
+// repariert, und dafür gibt es kein Fenster.
+function jubelSchon(marke) { return !!state.gefeiert[marke]; }
+function jubelEinmal(marke, anlass, werte, wege) {
+  if (jubelSchon(marke)) return;
+  state.gefeiert[marke] = 1;
+  save();
+  jubelZeigen(anlass, werte, wege);
+}
+
+// Was beim Laden schon geschafft ist, gilt als gefeiert: Ein Stand von vor
+// dieser Liste — oder eine eingespielte Sicherung, die sie nicht mitführt —
+// bekäme sonst beim nächsten Auffrischen ein Fenster für etwas, das längst
+// vorbei ist.
+function jubelNachtragen() {
+  for (var i = 0; i < LERNSETS.length; i++) if (setGeschafft(i)) state.gefeiert['set:' + i] = 1;
+  Object.keys(VOCAB_THEMES).forEach(function (t) {
+    if (themaGemeistert(t)) state.gefeiert['thema:' + t] = 1;
+  });
+  if (abcMeisterschaft() === ALPHABET.length) state.gefeiert.abc = 1;
+  if (gramMeisterschaft() === GRAMMATIK.length) state.gefeiert.regel = 1;
+}
 
 var JUBEL_ANLASS = {
   set: 'Lernset', thema: 'Thema', abc: 'Alphabet', regel: 'Grammatik', power: 'Power-Training'
@@ -4891,7 +4934,7 @@ function uebNext(skipFact) {
     var nr = uebGeschafftesSet;
     uebGeschafftesSet = null;
     var offen = LERNSETS[nr].saetze.filter(satzFrei).length;
-    jubelZeigen('set',
+    jubelEinmal('set:' + nr, 'set',
       { n: nr + 1, m: offen, s: offen === 1 ? 'Satz' : 'Sätze' },
       [{ text: 'Weiter lernen', tun: null },
        { text: 'Zu «Übersetzen»', tun: function () {
@@ -5093,12 +5136,15 @@ function uebPruefen() {
   meisterTon(uebCorrect);
   zuletztGeuebt(uebModus);
   // Hat diese Antwort das laufende Set vollgemacht? Dann wartet der Jubel
-  // auf das nächste «Weiter» — mitten in der Auflösung wäre er im Weg.
-  if (aktuellesSet() !== setVorher && setGeschafft(setVorher)) uebGeschafftesSet = setVorher;
+  // auf das nächste «Weiter» — mitten in der Auflösung wäre er im Weg. Nur
+  // beim ersten Mal: Ein Set, dem ein zurückgefallenes Wort fehlte, wird
+  // repariert, nicht noch einmal geschafft.
+  if (aktuellesSet() !== setVorher && setGeschafft(setVorher) &&
+    !jubelSchon('set:' + setVorher)) uebGeschafftesSet = setVorher;
   // War das der letzte Fehlende eines ganzen Themas? Nur der Übergang zählt.
   if (uebCorrect && vorher < BOX_MAX && state.boxes[q.word.id] >= BOX_MAX &&
     themaGemeistert(q.word.theme)) {
-    jubelZeigen('thema', { n: q.word.theme });
+    jubelEinmal('thema:' + q.word.theme, 'thema', { n: q.word.theme });
   }
   uebPhase = 'feedback';
   renderUeben();
@@ -6201,9 +6247,9 @@ function abcPruefen() {
     abcMeisterschaft() + ' von ' + ALPHABET.length + ' Buchstaben');
   meisterTon(abcCorrect);
   zuletztGeuebt('buchstaben');
-  // Nur der Übergang: War das der dreiunddreißigste?
+  // Nur der Übergang, und nur beim ersten Mal: War das der dreiunddreißigste?
   if (vorher < BOX_MAX && abcBox(q.b) >= BOX_MAX &&
-    abcMeisterschaft() === ALPHABET.length) jubelZeigen('abc');
+    abcMeisterschaft() === ALPHABET.length) jubelEinmal('abc', 'abc');
   abcPhase = 'feedback';
   renderBuchstaben();
 }
@@ -6862,7 +6908,7 @@ function gramPruefen() {
     gramMeisterschaft() + ' von ' + GRAMMATIK.length + ' Regeln', false);
   if (vorher < BOX_MAX && gramBox(b) >= BOX_MAX &&
     gramMeisterschaft() === GRAMMATIK.length) {
-    jubelZeigen('regel', { m: GRAMMATIK.length });
+    jubelEinmal('regel', 'regel', { m: GRAMMATIK.length });
   }
   meisterTon(gramCorrect);
   zuletztGeuebt('grammatik');
@@ -9168,6 +9214,10 @@ function renderSicherung() {
       var data = decodeBackup(code);
       if (!data || typeof data !== 'object' || !data.boxes) throw new Error('unlesbar');
       state = mergeState(data);
+      // Der Sicherungscode führt die Jubelmarken nicht mit — er soll schlank
+      // bleiben. Was der eingespielte Stand schon geschafft hat, gilt darum als
+      // gefeiert; sonst käme das Fenster nach jeder Wiederherstellung erneut.
+      jubelNachtragen();
       // Der Lernstand ist ein anderer — jede Übung muss neu aufbauen. Sonst
       // stünde in «Tippen» noch das alte Wort und in «Übersetzen» der alte Satz.
       ansichtenZuruecksetzen();
