@@ -142,8 +142,22 @@ Dinge, darum zwei Knöpfe — und auf Home selbst steht keiner von beiden.
 
 Für einen Namen wie «Power-Training» bleibt neben fünf runden Knöpfen kein Platz. Der
 Titelblock rückt darum unterwegs in eine **eigene Zeile** unter einer Haarlinie
-(`body.unterwegs .titelblock { flex: 1 0 100% }`). Ein Name, der abgeschnitten wird, sagt
-weniger als einer, der eine Zeile kostet.
+(`body.unterwegs .titelblock { flex: 1 0 100% }`), und dort stehen Augenbraue und Name
+**nebeneinander** auf einer Grundlinie: «ÜBUNG Buchstaben» ist eine Angabe, keine zwei.
+Ein Name, der abgeschnitten wird, sagt weniger als einer, der eine Zeile kostet.
+
+Der Kopf hat dafür **zwei Gruppen** statt sieben Einzelteilen: `.kopf-links` (Zurück,
+Home) und `.kopf-rechts` (Figur, Tafel, Wissen, Auswahl, Menü), jede für sich dicht
+gepackt. Der Menüknopf schließt rechts ab — er ist die Grundposition, alles andere rückt
+an ihn heran; die Figur schließt die Gruppe nach links ab, direkt neben dem äußersten
+Knopf.
+
+**Die Gruppe ist zugleich der Bezug für die Blätter.** `.menupanel` hängt mit
+`top: calc(100% + 8px)` unter seinem Container — läge der bei `.masthead`, begänne das
+Blatt seit der zweiten Zeile erst unter dem Titel. `.kopf-rechts` trägt darum
+`position: relative`. Und die Wissenshülle im Kopf wird mitversteckt, wenn ihr Knopf
+nichts zu sagen hat: Ein leerer Platzhalter zählt als Element und rückt die Knöpfe
+daneben auseinander.
 
 ### Der Sprung
 
