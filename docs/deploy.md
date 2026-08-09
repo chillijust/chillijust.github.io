@@ -113,3 +113,26 @@ von vor der Zählung führen nur den Stand.
 **Der Sicherungscode hat seine eigene Zählung** (`CHG2`) und hat mit der Version nichts zu
 tun. Sie darf sich zehnmal ändern, ohne dass ein Code veraltet — und wenn sich das Format
 doch ändert, ist das genau der Fall, in dem die erste Ziffer steigt.
+
+### Eine Version festhalten
+
+Jede gezählte Fassung bekommt einen **Zweig** `version/X.Y.Z`, der auf den Commit zeigt,
+mit dem `VERSION` auf diese Zahl gesetzt wurde:
+
+```sh
+git branch version/1.0.0 <commit>
+git push -u origin version/1.0.0
+```
+
+**Warum ein Zweig und kein Tag.** Ein Tag wäre das richtige Werkzeug — die
+Arbeitsumgebung darf aber nur `refs/heads/*` schreiben; ein `git push origin v1.0.0`
+endet dort mit `HTTP 403`. Der Zweig leistet dasselbe: Er hält den Commit fest, taucht
+in der Zweigliste auf und lässt sich jederzeit auschecken. Dieselbe Bauart tragen die
+Momentaufnahmen unter `backup/`.
+
+Von Hand — auf einem Rechner mit vollen Rechten — geht der Tag natürlich weiterhin:
+
+```sh
+git tag -a v1.0.0 <commit> -m "Chillingo 1.0.0"
+git push origin v1.0.0
+```
