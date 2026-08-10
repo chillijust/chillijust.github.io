@@ -1,6 +1,6 @@
 // Prüft die Meister-Rückmeldung, den Tippmodus in «Übersetzen» und den Klang.
 import { readFileSync, writeFileSync } from 'node:fs';
-import { WURZEL, BAU } from '../helfer.mjs';
+import { WURZEL, BAU, testseite } from '../helfer.mjs';
 const html = readFileSync(WURZEL + '/index.html', 'utf8');
 
 const test = String.raw`
@@ -331,6 +331,5 @@ warte(function () {}).then(function () {
 });
 `;
 
-const skript = '\n<script>\nwindow.addEventListener("error", function (e) { document.title = "SEITENFEHLER: " + e.message; });\nsetTimeout(function () {' + test + '}, 150);\n</scr' + 'ipt>\n';
-writeFileSync(BAU + '/t-meister.html', html.replace('</body>', skript + '</body>'));
+writeFileSync(BAU + '/t-meister.html', testseite(html, test));
 console.log('Meister-Testseite geschrieben');

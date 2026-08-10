@@ -80,6 +80,7 @@ const buchstaben = lies('buchstaben.json').wert;
 const grammatik = lies('grammatik.json').wert;
 const verben = lies('verben.json').wert;
 const nomen = lies('nomen.json').wert;
+const kommentare = lies('kommentare.json').wert;
 
 // ── Wortart und Geschlecht ───────────────────────────────────
 // Die Endung der Grundform verrät beides — meistens. Was die Regel liefert,
@@ -421,6 +422,48 @@ if (!Array.isArray(buchstaben) || buchstaben.length !== 33) {
   if (zuviel.length) meckern('tastatur.json: «' + zuviel.join(' ') + '» steht nicht im Alphabet');
 }
 
+// Kommentare: [Topf, Text] — die Zeile, die nach jeder Auflösung etwas sagt.
+// Jeder Topf muss voll genug sein, dass sich nichts sofort wiederholt; darum
+// hier eine Mindestzahl je Topf und keine Dublette im ganzen Vorrat.
+const KOMMENTAR_TOEPFE = {
+  richtig: 12, trocken: 8, serie: 5, jo: 3, weich: 3, lang: 3,
+  eins: 5, knapp: 6, daneben: 8, auf: 4
+};
+if (!Array.isArray(kommentare) || kommentare.length === 0) {
+  meckern('kommentare.json: erwartet eine nicht-leere Liste');
+} else {
+  const gezaehlt = {};
+  const texte = new Set();
+  kommentare.forEach((k, i) => {
+    const wo = 'kommentare.json #' + (i + 1);
+    if (!Array.isArray(k) || k.length !== 2) return meckern(wo + ': erwartet [Topf, Text]');
+    const [topf, text] = k;
+    if (typeof topf !== 'string' || !(topf in KOMMENTAR_TOEPFE)) {
+      return meckern(wo + ': unbekannter Topf «' + topf + '» — erlaubt: ' +
+        Object.keys(KOMMENTAR_TOEPFE).join(' '));
+    }
+    if (typeof text !== 'string' || text.trim() !== text || text.length < 4) {
+      return meckern(wo + ': leerer, zu kurzer oder ungetrimmter Text');
+    }
+    // Nur die drei Platzhalter, die die App füllt. Ein unbekannter bliebe im
+    // Satz stehen und läse sich wie ein Fehler — weil er einer wäre.
+    const unbekannt = (text.match(/\{\w+\}/g) || [])
+      .filter((ph) => ['{n}', '{f}', '{s}'].indexOf(ph) === -1);
+    if (unbekannt.length) meckern(wo + ': unbekannter Platzhalter ' + unbekannt.join(' '));
+    if (texte.has(text)) meckern(wo + ': dieser Text steht schon einmal in der Liste');
+    else texte.add(text);
+    gezaehlt[topf] = (gezaehlt[topf] || 0) + 1;
+  });
+  Object.keys(KOMMENTAR_TOEPFE).forEach((topf) => {
+    const da = gezaehlt[topf] || 0;
+    if (da < KOMMENTAR_TOEPFE[topf]) {
+      meckern('kommentare.json: Topf «' + topf + '» hat nur ' + da +
+        ' Einträge, nötig sind ' + KOMMENTAR_TOEPFE[topf] +
+        ' — sonst wiederholt er sich zu schnell');
+    }
+  });
+}
+
 if (fehler.length) {
   console.error('Prüfung fehlgeschlagen:\n' + fehler.map((f) => '  · ' + f).join('\n'));
   process.exit(1);
@@ -545,6 +588,8 @@ const block = [
   verbenBlock('VERBEN', verben),
   '',
   nomenBlock('NOMEN', nomen),
+  '',
+  listenBlock('KOMMENTARE', kommentare, true),
   ENDE
 ].join('\n');
 
@@ -676,7 +721,8 @@ const dateien = [
   ['data/buchstaben.json', jsonListe(buchstaben, true)],
   ['data/grammatik.json', jsonGrammatik(grammatik)],
   ['data/verben.json', jsonVerben(verben)],
-  ['data/nomen.json', jsonNomen(nomen)]
+  ['data/nomen.json', jsonNomen(nomen)],
+  ['data/kommentare.json', jsonListe(kommentare, true)]
 ];
 
 // ── Eigenwillige Verben ─────────────────────────────────────

@@ -44,6 +44,45 @@ Die Sammlung (`renderFakten()`) ist eine eigene Ansicht ohne Reiter — erreichb
 Faktenkarte und über die Bilanz, zurück über `letzterTab`. Sie filtert nach Gesehenem,
 Favoriten oder allen und zeigt je Fakt, wie oft er dran war.
 
+**Der Fakt hat überall dieselbe Gestalt** (ADR 0049): `faktFaellig()` fragt beim
+**Weitergehen**, ob eine fällig ist, `faktKarteHtml()` und `faktKarteBinden(weiter, neu)`
+bauen sie. Vier Übungen zeigen dieselbe Karte — «Lernsets», «Tippen», «Übersetzen»,
+«Power-Training»; den früheren Streifen unter der Auflösung gibt es nicht mehr.
+«Buchstaben» und «Grammatik» bleiben draußen, weil sie nicht in `state.answered` zählen.
+
+## Kommentare
+
+Nach **jeder** Auflösung sagt die Chili einen Satz (ADR 0049) — in der Zeile, in der
+früher der Faktstreifen stand. Fünf Übungen tragen sie; «Buchstaben» nicht.
+
+`kommentarSetzen(erg)` bekommt das Ergebnis (`ok`, `daneben`, `aufgedeckt`, `loesung`,
+`eingabe`, `getippt`), `kommentarTopf()` wählt daraus einen der zehn Töpfe aus
+`data/kommentare.json`, `kommentarWaehlen()` zieht einen Satz, der zuletzt nicht dran war
+(`kommentarZuletzt`, sechs lang).
+
+| Topf | greift bei |
+| --- | --- |
+| `richtig` · `trocken` | richtig — etwa jeder dritte Treffer wird trocken |
+| `serie` | ab fünf richtigen in Folge |
+| `jo` · `weich` · `lang` | ё, Weichzeichen, langes Wort — **nur beim Schreiben** |
+| `eins` | genau ein Zeichen daneben |
+| `knapp` | zwei bis drei |
+| `daneben` | mehr |
+| `auf` | aufgedeckt |
+
+Drei Regeln halten das ehrlich:
+
+- **Ein fester Satz behauptet keine Zahl**, die er nicht kennt. Wer eine nennt, führt
+  einen Platzhalter (`{n}` Zeichen der Lösung, `{f}` daneben, `{s}` Serie); der Build
+  prüft, dass kein unbekannter darin steht.
+- **Eine Besonderheit sticht, aber nicht jedes Mal** — sonst wüsste man nach drei Wörtern,
+  was kommt.
+- **Gelegt ist nicht geschrieben**: `jo`, `weich` und `lang` greifen nur, wo der Nutzer
+  selbst getippt hat.
+
+Der Patzer-Kasten in «Übersetzen» behält nur noch, was Folgen ankündigt; wie knapp es war,
+sagt die Kommentarzeile darüber. Abschaltbar über die Einstellung `kommentare`.
+
 ## Darstellung
 
 Ein **Farbschema**, keine zwei Achsen (ADR 0039). Die Einstellung `schema` kennt fünf

@@ -1,6 +1,6 @@
 // Prüft die Auftritte des Maskottchens und den Jubel nach einem Lernset.
 import { readFileSync, writeFileSync } from 'node:fs';
-import { WURZEL, BAU } from '../helfer.mjs';
+import { WURZEL, BAU, testseite } from '../helfer.mjs';
 const html = readFileSync(WURZEL + '/index.html', 'utf8');
 
 // Datei-Prüfung: das Bild darf nur als Symbol im Kopf stehen, nicht dupliziert
@@ -637,6 +637,5 @@ var f = log.filter(function (l) { return l.indexOf('FAIL') === 0 || l.indexOf('A
 document.title = f.length === 0 ? 'ALLE ' + log.length + ' TESTS BESTANDEN' : 'FEHLGESCHLAGEN: ' + f.length;
 `;
 
-const skript = '\n<script>\nwindow.addEventListener("error", function (e) { document.title = "SEITENFEHLER: " + e.message; });\nsetTimeout(function () {' + test + '}, 150);\n</scr' + 'ipt>\n';
-writeFileSync(BAU + '/t-maskottchen.html', html.replace('</body>', skript + '</body>'));
+writeFileSync(BAU + '/t-maskottchen.html', testseite(html, test));
 console.log('Maskottchen-Testseite geschrieben');

@@ -1,6 +1,6 @@
 // Prüft die vier Tickets: Fortsetzen, Wortauswertung mit Strafe, Zurückwischen.
 import { readFileSync, writeFileSync } from 'node:fs';
-import { WURZEL, BAU } from '../helfer.mjs';
+import { WURZEL, BAU, testseite } from '../helfer.mjs';
 const html = readFileSync(WURZEL + '/index.html', 'utf8');
 
 const test = String.raw`
@@ -61,14 +61,18 @@ try {
   pruefe('D1 erster Fehler zählt', state.wortFehler['книга'] === 1,
     JSON.stringify(state.wortFehler));
   pruefe('D2 noch keine Strafe', state.boxes['книга'] === BOX_MAX);
-  pruefe('D3 aber eine Rückmeldung zur Knappheit',
-    !!patzerMeldung && patzerMeldung.art === 'knapp', patzerMeldung && patzerMeldung.text);
-  pruefe('D4 sie nennt den einen Buchstaben',
-    patzerMeldung.text.indexOf('Ein einziger Buchstabe') === 0, patzerMeldung.text);
+  // Wie knapp es war, sagt seit ADR 0049 die Kommentarzeile — der Kasten
+  // bleibt dem vorbehalten, was Folgen ankündigt.
+  pruefe('D3 noch kein Kasten, nur ein Kommentar',
+    patzerMeldung === null && !!kommentar, kommentar);
+  pruefe('D4 und der spricht vom einen Buchstaben',
+    KOMMENTAR_TOPF.eins.indexOf(kommentar) !== -1, kommentar);
   schreibe('я читаю книга');
   pruefe('D5 zweiter Fehler', state.wortFehler['книга'] === 2);
-  pruefe('D6 jetzt warnt sie vor', patzerMeldung.note.indexOf('Noch einmal') === 0,
-    patzerMeldung.note);
+  pruefe('D6 jetzt warnt der Kasten vor',
+    !!patzerMeldung && patzerMeldung.art === 'knapp' &&
+    patzerMeldung.note.indexOf('Noch einmal') === 0,
+    patzerMeldung && patzerMeldung.note);
   schreibe('я читаю книга');
   pruefe('D7 dritter Fehler stuft zurück', state.boxes['книга'] === SATZ_STUFE - 1,
     String(state.boxes['книга']));
@@ -228,6 +232,5 @@ var f = log.filter(function (l) { return l.indexOf('FAIL') === 0 || l.indexOf('A
 document.title = f.length === 0 ? 'ALLE ' + log.length + ' TESTS BESTANDEN' : 'FEHLGESCHLAGEN: ' + f.length;
 `;
 
-const skript = '\n<script>\nwindow.addEventListener("error", function (e) { document.title = "SEITENFEHLER: " + e.message; });\nsetTimeout(function () {' + test + '}, 150);\n</scr' + 'ipt>\n';
-writeFileSync(BAU + '/t-patzer.html', html.replace('</body>', skript + '</body>'));
+writeFileSync(BAU + '/t-patzer.html', testseite(html, test));
 console.log('Patzer-Testseite geschrieben');

@@ -34,7 +34,7 @@ meldet der Läufer das als Fehler statt sie zu übergehen.
 
 ```js
 import { readFileSync, writeFileSync } from 'node:fs';
-import { WURZEL, BAU } from '../helfer.mjs';
+import { WURZEL, BAU, testseite } from '../helfer.mjs';
 const html = readFileSync(WURZEL + '/index.html', 'utf8');
 
 const test = String.raw`
@@ -60,8 +60,7 @@ var f = log.filter(function (l) { return l.indexOf('FAIL') === 0 || l.indexOf('A
 document.title = f.length === 0 ? 'ALLE ' + log.length + ' TESTS BESTANDEN' : 'FEHLGESCHLAGEN: ' + f.length;
 `;
 
-const skript = '\n<script>\nwindow.addEventListener("error", function (e) { document.title = "SEITENFEHLER: " + e.message; });\nsetTimeout(function () {' + test + '}, 150);\n</scr' + 'ipt>\n';
-writeFileSync(BAU + '/t-meins.html', html.replace('</body>', skript + '</body>'));
+writeFileSync(BAU + '/t-meins.html', testseite(html, test));
 ```
 
 Das Prüfskript läuft **im Gültigkeitsbereich der App**: `state`, `LERNSETS`,
@@ -84,6 +83,16 @@ Fluchtzeichen frisst, bevor der Browser sie sieht.
   eine dunkle Palette von Hand nach, aus der Zeit vor ADR 0039. Nach ADR 0041
   zeigte er still die alten Farben. `bild.mjs` rendert die Datei, wie sie
   ausgeliefert wird.
+- **Kein Backtick im Prüfskript.** Es steckt in einem `String.raw`-Template;
+  ein Backtick beendet es mitten im Satz. Auch nicht in Kommentaren — dort
+  liest es sich harmlos und bricht trotzdem die Datei.
+- **Kein `$&` im Prüfskript** — und kein `` $` ``, `$'` oder `$1`. Die Seite
+  entsteht über `String.replace`, und dort sind das Steuerzeichen: Ein
+  `'\$&'`, wie man es zum Maskieren eines regulären Ausdrucks schreibt, wurde
+  stillschweigend zu `</body>`, und das Skript war danach kein gültiges
+  JavaScript mehr. `testseite()` in `helfer.mjs` setzt darum eine Funktion als
+  Ersatz ein und ist immun; wer die Seite von Hand zusammenbaut, tritt wieder
+  hinein. **Also immer `testseite(html, test)` benutzen.**
 
 ## Bildschirmfotos
 

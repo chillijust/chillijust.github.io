@@ -1,6 +1,6 @@
 // Prüft Päckchen-Freischaltung, Tippen-Sperre, Fälligkeit und ID-Migration.
 import { readFileSync, writeFileSync } from 'node:fs';
-import { WURZEL, BAU } from '../helfer.mjs';
+import { WURZEL, BAU, testseite } from '../helfer.mjs';
 const html = readFileSync(WURZEL + '/index.html', 'utf8');
 
 const test = `
@@ -128,6 +128,5 @@ var fehler = log.filter(function (l) { return l.indexOf('FAIL') === 0 || l.index
 document.title = fehler.length === 0 ? 'ALLE ' + log.length + ' TESTS BESTANDEN' : 'FEHLGESCHLAGEN: ' + fehler.length;
 `;
 
-const skript = '\n<script>\nwindow.addEventListener("error", function (e) { document.title = "SEITENFEHLER: " + e.message; });\nsetTimeout(function () {' + test + '}, 120);\n</scr' + 'ipt>\n';
-writeFileSync(BAU + '/t-lernweg.html', html.replace('</body>', skript + '</body>'));
+writeFileSync(BAU + '/t-lernweg.html', testseite(html, test));
 console.log('Lernweg-Testseite geschrieben');

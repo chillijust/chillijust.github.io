@@ -1,6 +1,6 @@
 // Baut eine Testkopie von index.html mit injiziertem Klickpfad.
 import { readFileSync, writeFileSync } from 'node:fs';
-import { WURZEL, BAU } from '../helfer.mjs';
+import { WURZEL, BAU, testseite } from '../helfer.mjs';
 const html = readFileSync(WURZEL + '/index.html', 'utf8');
 
 const test = `
@@ -186,6 +186,5 @@ try {
 }
 `;
 
-const skript = '\n<script>\nwindow.addEventListener("error", function (e) { document.title = "SEITENFEHLER: " + e.message; });\nsetTimeout(function () {' + test + '}, 100);\n</scr' + 'ipt>\n';
-writeFileSync(BAU + '/t-funktionstest.html', html.replace('</body>', skript + '</body>'));
+writeFileSync(BAU + '/t-funktionstest.html', testseite(html, test));
 console.log('Testseite geschrieben');

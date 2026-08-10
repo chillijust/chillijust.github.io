@@ -2,7 +2,7 @@
 // «Alle» dort und in «Buchstaben». Kurz: Kann man üben, was man üben will —
 // auch wenn die Leiter es gerade nicht vorsieht?
 import { readFileSync, writeFileSync } from 'node:fs';
-import { WURZEL, BAU } from '../helfer.mjs';
+import { WURZEL, BAU, testseite } from '../helfer.mjs';
 const html = readFileSync(WURZEL + '/index.html', 'utf8');
 
 const test = String.raw`
@@ -209,6 +209,5 @@ var f = log.filter(function (l) { return l.indexOf('FAIL') === 0 || l.indexOf('A
 document.title = f.length === 0 ? 'ALLE ' + log.length + ' TESTS BESTANDEN' : 'FEHLGESCHLAGEN: ' + f.length;
 `;
 
-const skript = '\n<script>\nwindow.addEventListener("error", function (e) { document.title = "SEITENFEHLER: " + e.message; });\nsetTimeout(function () {' + test + '}, 150);\n</scr' + 'ipt>\n';
-writeFileSync(BAU + '/t-grinden.html', html.replace('</body>', skript + '</body>'));
+writeFileSync(BAU + '/t-grinden.html', testseite(html, test));
 console.log('Grind-Testseite geschrieben');

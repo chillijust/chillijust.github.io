@@ -1,6 +1,6 @@
 // Prüft die Übung «Buchstaben»: Inhalte, Tafel, Quiz, Trennung vom Wortschatz.
 import { readFileSync, writeFileSync } from 'node:fs';
-import { WURZEL, BAU } from '../helfer.mjs';
+import { WURZEL, BAU, testseite } from '../helfer.mjs';
 const html = readFileSync(WURZEL + '/index.html', 'utf8');
 const daten = JSON.parse(readFileSync(WURZEL + '/data/buchstaben.json', 'utf8'));
 
@@ -284,6 +284,5 @@ var f = log.filter(function (l) { return l.indexOf('FAIL') === 0 || l.indexOf('A
 document.title = f.length === 0 ? 'ALLE ' + log.length + ' TESTS BESTANDEN' : 'FEHLGESCHLAGEN: ' + f.length;
 `;
 
-const skript = '\n<script>\nwindow.addEventListener("error", function (e) { document.title = "SEITENFEHLER: " + e.message; });\nsetTimeout(function () {' + test + '}, 150);\n</scr' + 'ipt>\n';
-writeFileSync(BAU + '/t-buchstaben.html', html.replace('</body>', skript + '</body>'));
+writeFileSync(BAU + '/t-buchstaben.html', testseite(html, test));
 console.log('Buchstaben-Testseite geschrieben');

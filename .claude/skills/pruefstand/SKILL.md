@@ -61,6 +61,12 @@ Geprüft gehört, was sich still ändern kann und teuer auffällt:
   falscher Name lässt die Prüfung stumm in den falschen Zweig laufen.
 - **`renderKopf()` läuft vor der Ansicht.** Wer etwas in eine Kachel hängt: erst
   nach Hause schicken, dann zeichnen, dann umhängen.
+- **Die Seite immer mit `testseite(html, test)` bauen**, nie von Hand über
+  `html.replace('</body>', …)`. In einem Ersatz*text* sind `$&`, `` $` ``, `$'`
+  und `$1` Steuerzeichen — ein `'\$&'` im Prüfskript wurde stillschweigend zu
+  `</body>` und machte die Seite unlesbar.
+- **Kein Backtick im Prüfskript**, auch nicht in einem Kommentar: Es steckt in
+  einem `String.raw`-Template und endet dort.
 
 ## Bildschirmfotos
 

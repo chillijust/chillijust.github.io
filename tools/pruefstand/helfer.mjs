@@ -49,10 +49,17 @@ export function chromiumFinden() {
 // Eine Testseite ist die ausgelieferte App mit einem angehängten Skript. Es
 // läuft nach einer kurzen Frist, damit der Startlauf der App durch ist, und
 // schreibt sein Ergebnis in den Seitentitel — den liest der Läufer aus.
+//
+// **Der Ersatz ist eine Funktion, keine Zeichenkette.** In einem
+// Ersatz-*Text* sind `$&`, `` $` ``, `$'` und `$1` Steuerzeichen: `String
+// .replace` setzt dort das Gefundene ein. Ein Prüfskript, das irgendwo `$&`
+// enthält — etwa in `'\$&'` beim Maskieren eines regulären Ausdrucks —, bekam
+// an dieser Stelle stillschweigend `</body>` untergeschoben und war danach
+// kein gültiges JavaScript mehr. Eine Funktion kennt diese Zeichen nicht.
 export function testseite(html, test) {
   const skript = '\n<script>\n' +
     'window.addEventListener("error", function (e) { document.title = "SEITENFEHLER: " + e.message; });\n' +
     'setTimeout(function () {' + test + '}, 150);\n' +
     '</scr' + 'ipt>\n';
-  return html.replace('</body>', skript + '</body>');
+  return html.replace('</body>', function () { return skript + '</body>'; });
 }

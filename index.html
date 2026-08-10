@@ -891,14 +891,19 @@ body.chili-steht #chiliBuehne { visibility: visible; }
 .sprechblase .fact-text { font-size: 16px; }
 /* Der Streifen unter der Auflösung: dieselbe Blase, aber ohne Zipfel und ohne
    Auftritt — die Chili steht hier nicht daneben, sie ist mitten in der Übung. */
-.fakt-streifen {
-  display: flex; align-items: flex-start; gap: 12px; margin-top: 16px;
-  animation: none; padding: 14px 14px 12px;
+/* Die Zeile, in der die Chili nach jeder Auflösung etwas sagt. Sie trägt kein
+   Kästchen: Ein Kommentar ist ein Nebensatz, keine Meldung — was gerahmt ist,
+   verlangt Aufmerksamkeit, und die gehört der Auflösung darüber. */
+.kommentar {
+  margin: 12px 2px 0; font-size: 14px; line-height: 1.45; color: var(--dim);
+  font-style: italic;
+  animation: kommentarAuf .34s .06s both ease-out;
 }
-.fakt-streifen::after { display: none; }
-.fakt-streifen .fact-text { font-size: 15px; flex: 1; }
-.fakt-streifen > span:first-child { display: none; }
-.fakt-streifen .sternbtn { flex: none; }
+@keyframes kommentarAuf {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) { .kommentar { animation: none; } }
 .fakt-fuss { display: flex; align-items: center; gap: 12px; margin: 12px 0 0 16px; }
 .fakt-fuss .sternbtn { margin-left: auto; }
 
@@ -2268,6 +2273,102 @@ var NOMEN = {
   'озеро': { plural: 'озёра' },
   'небо': { plural: 'небеса' }
 };
+
+var KOMMENTARE = [
+  ['richtig', 'Sitzt.'],
+  ['richtig', 'Richtig. Weiter.'],
+  ['richtig', '{n} Zeichen, {n} Treffer.'],
+  ['richtig', 'Sauber geschrieben.'],
+  ['richtig', 'Genau so.'],
+  ['richtig', 'Kein Zeichen daneben.'],
+  ['richtig', 'Das war fehlerfrei.'],
+  ['richtig', 'Stimmt, Zeichen für Zeichen.'],
+  ['richtig', 'Ordentlich.'],
+  ['richtig', 'Passt.'],
+  ['richtig', 'Das ging schnell.'],
+  ['richtig', 'Richtig — und ohne Zögern.'],
+  ['richtig', 'So sieht Können aus.'],
+  ['richtig', 'Alles an seinem Platz.'],
+  ['richtig', 'Ja. Nichts hinzuzufügen.'],
+  ['richtig', 'Das hat gesessen.'],
+  ['richtig', 'Fehlerfrei.'],
+  ['richtig', 'Gut gemacht.'],
+  ['richtig', 'Richtig. Das nächste wartet.'],
+  ['richtig', 'Ohne Umweg ins Ziel.'],
+  ['trocken', 'Richtig. Ich hatte kurz Zweifel.'],
+  ['trocken', 'Korrekt. Nicht, dass ich gezweifelt hätte. Doch, hatte ich.'],
+  ['trocken', 'Stimmt. Ich notiere das für die Nachwelt.'],
+  ['trocken', 'Fehlerfrei. Ich suche noch.'],
+  ['trocken', 'Richtig. Manchmal überraschen Sie mich.'],
+  ['trocken', 'Kein einziger Fehler. Das macht mich nervös.'],
+  ['trocken', 'Ja. Sie dürfen kurz stolz sein, dann geht es weiter.'],
+  ['trocken', 'Richtig geschrieben. Ich hatte schon die Ausrede vorbereitet.'],
+  ['trocken', 'Sitzt. Ich hätte Geld darauf gesetzt — auf das Gegenteil.'],
+  ['trocken', 'Perfekt. Jetzt bloß nicht darüber nachdenken.'],
+  ['trocken', 'Richtig. Das gebe ich nur ungern zu.'],
+  ['trocken', 'Alles korrekt. Ich habe zweimal nachgezählt.'],
+  ['trocken', 'Ja doch. Sie müssen nicht so schauen.'],
+  ['trocken', 'Bestanden. Die Messlatte lag da, wo sie immer liegt.'],
+  ['serie', 'Und weiter. Sie sind gerade nicht zu stoppen.'],
+  ['serie', '{s} in Folge. Ich zähle mit.'],
+  ['serie', '{s} richtig hintereinander. Das ist keine Glückssträhne mehr.'],
+  ['serie', 'Noch eins. Ich fange an, das ernst zu nehmen.'],
+  ['serie', '{s} am Stück. Irgendwann muss doch mal ein Fehler kommen.'],
+  ['serie', 'Die Serie hält. Ich halte den Atem an.'],
+  ['serie', '{s} in Folge — langsam wird es unheimlich.'],
+  ['serie', 'Schon wieder richtig. Machen Sie ruhig weiter.'],
+  ['jo', 'ё mit beiden Punkten. Sie gehören zu den Guten.'],
+  ['jo', 'Die zwei Punkte auf dem ё sind da. Respekt.'],
+  ['jo', 'ё vollständig geschrieben — das lassen sogar Zeitungen weg.'],
+  ['jo', 'Das ё hat seine Punkte behalten. Selten genug.'],
+  ['jo', 'Mit ё statt е. Genau richtig.'],
+  ['weich', 'Sogar das Weichzeichen sitzt.'],
+  ['weich', 'Das ь an der richtigen Stelle. Daran scheitern viele.'],
+  ['weich', 'Weichzeichen gesetzt, und zwar dort, wo es hingehört.'],
+  ['weich', 'Ein Zeichen, das man nicht hört, und Sie haben es trotzdem.'],
+  ['weich', 'Das stumme Zeichen sitzt. Aufmerksam.'],
+  ['lang', '{n} Zeichen am Stück. Das war kein kurzes Wort.'],
+  ['lang', 'Ein langes Wort, kein einziger Fehler.'],
+  ['lang', '{n} Zeichen ohne Stolpern. Ordentlich.'],
+  ['lang', 'So ein Wort schreibt man nicht nebenbei.'],
+  ['lang', 'Lang, kyrillisch, fehlerfrei. Drei auf einmal.'],
+  ['eins', 'Ein Buchstabe. Einer. Wir reden nicht mehr darüber.'],
+  ['knapp', 'Knapp daneben. Kyrillisch verzeiht das nicht, ich schon.'],
+  ['knapp', 'Etwas zu viel Selbstvertrauen.'],
+  ['knapp', 'So nah dran und doch vorbei.'],
+  ['knapp', 'Fast. Und «fast» zählt hier leider nicht.'],
+  ['knapp', '{f} Zeichen daneben. Das lässt sich reparieren.'],
+  ['knapp', 'Beinahe. Sehen Sie noch einmal hin.'],
+  ['knapp', 'Um Haaresbreite. Ärgerlich.'],
+  ['eins', 'Ein Zeichen zu viel oder zu wenig — der Rest stand.'],
+  ['knapp', 'Das war fast das Wort. Fast.'],
+  ['knapp', 'Sie hatten es. Es ist Ihnen nur entwischt.'],
+  ['knapp', 'Nicht ganz. Aber wirklich nicht viel.'],
+  ['daneben', 'Das war ein anderes Wort. Ein schönes, aber ein anderes.'],
+  ['daneben', 'Interessanter Vorschlag. Nicht russisch, aber interessant.'],
+  ['daneben', 'Nein. Aber die Handschrift war entschlossen.'],
+  ['daneben', 'Noch nicht. Das Wort steht oben, es läuft nicht weg.'],
+  ['daneben', 'Das kommt wieder. Ob Sie wollen oder nicht.'],
+  ['daneben', 'Daneben. Sehen Sie es sich an, dann noch einmal.'],
+  ['daneben', 'Nicht dieses Mal.'],
+  ['daneben', 'Da war mehr Fantasie als Kyrillisch im Spiel.'],
+  ['daneben', 'Nein. Aber Sie haben sich getraut, und das zählt auch.'],
+  ['daneben', 'Das Wort hat sich gewehrt.'],
+  ['daneben', 'Noch ein Stück Weg. Kein Drama.'],
+  ['daneben', 'Falsch — und jetzt wissen Sie, wie es richtig geht.'],
+  ['auf', 'Aufgedeckt. Auch das ist Lernen, nur schneller.'],
+  ['auf', 'Nachgesehen statt geraten. Kann man machen.'],
+  ['auf', 'Die Lösung steht da. Merken Sie sie sich gut.'],
+  ['auf', 'Aufgegeben. Beim nächsten Mal lasse ich nicht so leicht locker.'],
+  ['auf', 'Ansehen ist erlaubt. Zweimal ansehen auch.'],
+  ['auf', 'Gut, ich verrate es. Aber nur, weil Sie es sind.'],
+  ['eins', 'Ein einziger Buchstabe. Aber wer schreibt, der bleibt.'],
+  ['eins', 'Einer. Ein einziger. Ich sage nichts mehr.'],
+  ['eins', 'Ein Zeichen zwischen Ihnen und dem Wort.'],
+  ['eins', 'Ein Buchstabe daneben — das tut fast mehr weh als zehn.'],
+  ['eins', 'So knapp war es lange nicht.'],
+  ['eins', 'Ein Zeichen. Sehen Sie noch einmal hin, dann haben Sie es.']
+];
 /* == DATEN:ENDE == */
 
 // ── FORMENMASCHINE ──────────────────────────────────────────
@@ -2602,11 +2703,11 @@ var SATZ_STUFE = 2;
 var STORAGE_KEY = 'russisch_trainer_v1';
 // Stand der ausgelieferten Datei. Wird von tools/build.mjs gesetzt und geht in
 // jedes Ticket ein, damit ein Bericht sagt, welcher Stand gemeint war.
-var APP_STAND = '2026-08-09'; /* == STAND == */
+var APP_STAND = '2026-08-10'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '1.1.0'; /* == VERSION == */
+var APP_VERSION = '1.2.0'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -3347,7 +3448,8 @@ function defaultSettings() {
     // helle Cremeweiß, die drei Farben sind Cremetöne (ADR 0039). Neuer
     // Schlüssel, damit bestehende Geräte die Umstellung mitbekommen.
     schema: 'dark',
-    ton: true                  // kurzer Klang bei richtig und falsch
+    ton: true,                 // kurzer Klang bei richtig und falsch
+    kommentare: true           // die Chili sagt nach jeder Auflösung einen Satz
   };
 }
 function defaultState() {
@@ -3646,37 +3748,145 @@ function meisterHtml() {
 // «Buchstaben» und «Grammatik» bleiben draußen: Sie zählen nicht in
 // `state.answered`, und ein Fakt zwischen zwei Regeln wäre ein zweiter Gedanke
 // zu viel.
-var faktStreifen = '';
+// ── Kommentare ──────────────────────────────────────────────
+// Nach jeder Auflösung sagt die Chili einen Satz (ADR 0049). Sie steht in der
+// Zeile, in der früher der Faktstreifen stand — und sie nimmt die Sprüche auf,
+// die vorher verstreut in den Übungen hingen («Ein einziger Buchstabe. Aber wer
+// schreibt, der bleibt.»).
+//
+// Die Töpfe stehen in `data/kommentare.json`, das Mischungsverhältnis ist
+// damit eine Eigenschaft der Inhalte und keine Zahl im Code: Wer mehr Trockenes
+// will, schreibt mehr Trockenes.
+var KOMMENTAR_TOPF = (function () {
+  var t = {};
+  KOMMENTARE.forEach(function (k) { (t[k[0]] = t[k[0]] || []).push(k[1]); });
+  return t;
+})();
 
-function faktStreifenPruefen() {
-  faktStreifen = '';
-  if (state.answered <= 0 || state.answered % 5 !== 0) return;
-  faktStreifen = naechsterFakt();
-  faktGezeigt(faktStreifen);
+var kommentar = '';          // was gerade in der Zeile steht
+var kommentarZuletzt = [];   // die letzten Sätze, damit sich nichts sofort wiederholt
+
+// Welcher Topf passt? Eine Besonderheit sticht, aber nicht jedes Mal — sonst
+// hörte man bei jedem ё denselben Satz und wüsste nach drei Wörtern, was kommt.
+function kommentarTopf(e) {
+  if (e.aufgedeckt) return 'auf';
+  // Ein fester Satz darf keine Zahl behaupten, die er nicht kennt: «Zwei
+  // Zeichen» unter einer Prüfzeile, die «1 Zeichen steht falsch» sagt, ist ein
+  // Widerspruch. Darum hat der eine Buchstabe seinen eigenen Topf.
+  if (!e.ok) {
+    if (e.daneben === 1) return 'eins';
+    return (e.daneben > 0 && e.daneben <= 3) ? 'knapp' : 'daneben';
+  }
+  var wuerfel = Math.random();
+  if (e.serie >= 5 && wuerfel < 0.45) return 'serie';
+  if (e.jo && wuerfel < 0.6) return 'jo';
+  if (e.weich && wuerfel < 0.5) return 'weich';
+  if (e.lang && wuerfel < 0.45) return 'lang';
+  // Trocken ist Würze, nicht Grundton: etwa jeder dritte Treffer.
+  return wuerfel < 0.33 ? 'trocken' : 'richtig';
+}
+
+// Ein Satz aus dem Topf, der zuletzt nicht dran war. Der Vorrat ist groß genug,
+// dass ein Blick zurück über sechs Sätze niemanden in die Enge treibt.
+function kommentarWaehlen(topf, werte) {
+  var liste = KOMMENTAR_TOPF[topf] || [];
+  if (!liste.length) return '';
+  var frisch = liste.filter(function (t) { return kommentarZuletzt.indexOf(t) === -1; });
+  if (!frisch.length) frisch = liste;
+  var text = frisch[Math.floor(Math.random() * frisch.length)];
+  kommentarZuletzt.push(text);
+  if (kommentarZuletzt.length > 6) kommentarZuletzt.shift();
+  return jubelFuellen(text, werte || {});
+}
+
+// `erg` beschreibt die Antwort: ok, daneben (Zeichen), aufgedeckt, loesung,
+// eingabe. Alles Weitere leitet sich daraus ab.
+function kommentarSetzen(erg) {
+  kommentar = '';
+  if (!state.settings.kommentare) return;
+  var loesung = erg.loesung || '';
+  var eingabe = erg.eingabe || '';
+  var zeichen = loesung.replace(/[^\wа-яёА-ЯЁ]/gi, '').length;
+  var e = {
+    ok: !!erg.ok,
+    aufgedeckt: !!erg.aufgedeckt,
+    daneben: erg.daneben || 0,
+    serie: state.streak,
+    // Besonderheiten zählen nur, wenn der Nutzer sie selbst geschrieben hat —
+    // eine gelegte Kachel ist keine Behauptung über die Schreibweise.
+    jo: !!erg.getippt && loesung.indexOf('ё') !== -1 && eingabe.indexOf('ё') !== -1,
+    weich: !!erg.getippt && /[ьъ]/.test(loesung) && /[ьъ]/.test(eingabe),
+    lang: zeichen >= 9
+  };
+  kommentar = kommentarWaehlen(kommentarTopf(e),
+    { n: zeichen, f: e.daneben, s: state.streak });
+}
+
+function kommentarHtml() {
+  if (!kommentar) return '';
+  return '<p class="kommentar">' + esc(kommentar) + '</p>';
+}
+
+// Wie viele Zeichen standen daneben? Dieselbe Rechnung wie in der Prüfzeile —
+// was `normalize()` übersieht, übersieht auch der Kommentar (ADR 0037).
+function danebenZeichen(eingabe, loesung) {
+  var n = 0;
+  zeichenMarken(eingabe || '', loesung || '').forEach(function (mk) {
+    if (mk.art === 'fehlt' || mk.art === 'weg') n++;
+  });
+  return n;
+}
+
+// Ein Fakt bekommt **überall denselben Auftritt** (ADR 0049): Sprechblase,
+// Chili darunter, ein Stern zum Merken, zwei Wege hinaus. Vorher stand er in
+// «Lernsets» als eigener Bildschirm und in den drei anderen Übungen als
+// Streifen unter der Auflösung — zwei Gestalten für dieselbe Sache, und der
+// Streifen belegte die Zeile, die jetzt den Kommentar trägt.
+var faktKarte = '';   // Text des Fakts, solange er die Ansicht belegt
+
+// Ist ein Fakt fällig? Jede fünfte beantwortete Aufgabe. Gefragt wird beim
+// **Weitergehen**, nicht in der Auflösung — mitten in einer Antwort wäre er im
+// Weg. «Buchstaben» und «Grammatik» bleiben draußen: Sie zählen nicht in
+// `state.answered`.
+function faktFaellig() {
+  if (state.answered <= 0 || state.answered % 5 !== 0) return false;
+  faktKarte = naechsterFakt();
+  if (!faktKarte) return false;
+  faktGezeigt(faktKarte);
   state.factIdx++;
   save();
+  return true;
 }
 
-function faktStreifenHtml() {
-  if (!faktStreifen) return '';
-  var st = faktStand(faktStreifen);
-  return '<div class="sprechblase fakt-streifen">' +
+function faktKarteHtml() {
+  var st = faktStand(faktKarte);
+  return '<section>' +
+    '<div class="sprechblase">' +
     '<span class="fact-label">Wussten Sie?</span>' +
-    '<p class="fact-text">' + esc(faktStreifen) + '</p>' +
-    '<button class="sternbtn' + (st.f ? ' an' : '') + '" id="streifenFav"' +
-    ' aria-pressed="' + (st.f ? 'true' : 'false') + '" aria-label="Als Favorit merken">' +
-    (st.f ? ICON.sternVoll : ICON.stern) + '</button></div>';
+    '<p class="fact-text">' + esc(faktKarte) + '</p></div>' +
+    '<div class="fakt-fuss">' + maskottchen('klein') +
+    '<button class="sternbtn' + (st.f ? ' an' : '') + '" id="factFav" ' +
+    'aria-pressed="' + (st.f ? 'true' : 'false') + '" aria-label="Als Favorit merken">' +
+    (st.f ? ICON.sternVoll : ICON.stern) + '</button></div>' +
+    '<div class="btn-row"><button class="btn ghost" id="factAlle">Alle Fakten</button>' +
+    '<button class="btn primary" id="factNext">Weiter üben</button></div>' +
+    '</section>';
 }
 
-// Der Stern wirkt sofort, ohne die Aufgabe darunter neu zu zeichnen.
-function faktStreifenBinden() {
-  var b = document.getElementById('streifenFav');
-  if (!b) return;
-  b.addEventListener('click', function () {
-    var an = faktFavorit(faktStreifen);
-    b.classList.toggle('an', an);
-    b.setAttribute('aria-pressed', an ? 'true' : 'false');
-    b.innerHTML = an ? ICON.sternVoll : ICON.stern;
+// `weiter` räumt die Karte weg und setzt die Übung fort, `neu` zeichnet die
+// Karte selbst noch einmal (der Stern soll sofort umschlagen).
+function faktKarteBinden(weiter, neu) {
+  document.getElementById('factNext').addEventListener('click', function () {
+    faktKarte = '';
+    weiter();
+  });
+  document.getElementById('factAlle').addEventListener('click', function () {
+    faktKarte = '';
+    setTab('fakten');
+  });
+  document.getElementById('factFav').addEventListener('click', function () {
+    faktFavorit(faktKarte);
+    neu();
   });
 }
 
@@ -4771,7 +4981,6 @@ var uebBuilt = [];
 var uebPicked = null;
 var uebCorrect = null;
 var uebRevealed = false;
-var uebFactText = '';
 var uebGeschafftesSet = null; // Nummer eines Sets, das gerade fertig wurde
 
 // «Lernsets» arbeiten das laufende Set ab, «Freestyle» ein Thema freier Wahl.
@@ -4894,7 +5103,6 @@ function ansichtenZuruecksetzen() {
   uebAuswahl = 'aktuell';
   uebThema = 'Alle';
   uebLesen = false;
-  uebFactText = '';
 
   tWord = null;
   tResult = null;
@@ -4960,7 +5168,8 @@ function ansichtenZuruecksetzen() {
   meisterMeldung = null;
   patzerMeldung = null;
   einstReiter = 'lernweg';
-  faktStreifen = '';
+  faktKarte = '';
+  kommentar = '';
 }
 
 function uebNext(skipFact) {
@@ -4980,11 +5189,7 @@ function uebNext(skipFact) {
          setTab('uebersetzen');
        } }]);
   }
-  if (!skipFact && state.answered > 0 && state.answered % 5 === 0) {
-    uebFactText = naechsterFakt();
-    faktGezeigt(uebFactText);
-    state.factIdx++;
-    save();
+  if (!skipFact && faktFaellig()) {
     uebPhase = 'fact';
     renderUeben();
     return;
@@ -5163,6 +5368,11 @@ function uebPruefen() {
     uebCorrect = uebPicked === q.word.id;
   }
   leseMeldung = null;
+  kommentarSetzen({
+    ok: uebCorrect, aufgedeckt: uebRevealed, loesung: q.word.ru,
+    eingabe: attempt, getippt: false,
+    daneben: q.mode === 'tiles' ? danebenZeichen(attempt, q.word.ru) : (uebCorrect ? 0 : 99)
+  });
   if (q.mode === 'tiles' && !uebRevealed) leseWerten(q.word.ru, attempt, uebCorrect);
   var vorher = state.boxes[q.word.id] || 0;
   updateBox(q.word.id, uebCorrect);
@@ -5206,25 +5416,9 @@ function leseBinden() {
 }
 
 function renderUeben() {
-  if (uebPhase === 'fact') {
-    main.innerHTML =
-      '<section>' +
-      '<div class="sprechblase">' +
-      '<span class="fact-label">Wussten Sie?</span>' +
-      '<p class="fact-text">' + esc(uebFactText) + '</p></div>' +
-      '<div class="fakt-fuss">' + maskottchen('klein') +
-      '<button class="sternbtn' + (faktStand(uebFactText).f ? ' an' : '') + '" id="factFav" ' +
-      'aria-pressed="' + (faktStand(uebFactText).f ? 'true' : 'false') + '" aria-label="Als Favorit merken">' +
-      (faktStand(uebFactText).f ? ICON.sternVoll : ICON.stern) + '</button></div>' +
-      '<div class="btn-row"><button class="btn ghost" id="factAlle">Alle Fakten</button>' +
-      '<button class="btn primary" id="factNext">Weiter üben</button></div>' +
-      '</section>';
-    document.getElementById('factNext').addEventListener('click', function () { uebNext(true); });
-    document.getElementById('factAlle').addEventListener('click', function () { setTab('fakten'); });
-    document.getElementById('factFav').addEventListener('click', function () {
-      faktFavorit(uebFactText);
-      renderUeben();
-    });
+  if (uebPhase === 'fact' && faktKarte) {
+    main.innerHTML = faktKarteHtml();
+    faktKarteBinden(function () { uebNext(true); }, renderUeben);
     return;
   }
   if (!uebQ) uebQ = buildQuestion();
@@ -5309,7 +5503,8 @@ function renderUeben() {
     else html += '<p>' + ICON.kreuz + (uebRevealed ? 'Lösung: ' : 'Richtig wäre: ') +
       '<strong class="cyr">' + esc(q.word.ru) + '</strong> — ' + esc(q.word.de) +
       ' <span class="translit">[' + esc(q.word.tr) + ']</span></p>';
-    html += '</div>' + hoerzeile(q.word.ru, q.word.de) + meisterHtml() + leseFallHtml();
+    html += '</div>' + hoerzeile(q.word.ru, q.word.de) + kommentarHtml() +
+      meisterHtml() + leseFallHtml();
   }
 
   html += '</div><div class="btn-row">';
@@ -5659,12 +5854,16 @@ function trFinish(ok) {
   meisterMeldung = null;
   meisterPruefen(vorher, satzBox(trTask.satz), 'Satz', trTask.satz.ru,
     saetzeGemeistert() + ' von ' + SENTENCES.length + ' Sätzen');
+  kommentarSetzen({
+    ok: ok, aufgedeckt: trRevealed, loesung: trTask.satz.ru, eingabe: trEingabe,
+    getippt: trTask.art === 'tippen',
+    daneben: trTask.art === 'tippen' ? danebenZeichen(trEingabe, trTask.satz.ru) : (ok ? 0 : 99)
+  });
   patzerPruefen(ok);
   meisterTon(ok);
   state.transStats.correct += ok ? 1 : 0;
   state.transStats.wrong += ok ? 0 : 1;
   zuletztGeuebt('uebersetzen');
-  faktStreifenPruefen();
   save();
 }
 
@@ -5723,29 +5922,16 @@ function patzerPruefen(ok) {
     return;
   }
   if (ok || !danebenWorte) return;
+  // Wie knapp es war, sagt jetzt die Kommentarzeile darüber (ADR 0049) — hier
+  // bleibt nur stehen, was Folgen ankündigt. Ohne eine Warnung gäbe es nichts
+  // zu melden, was der Kommentar nicht schon gesagt hätte.
+  if (!warnung.length) return;
   patzerMeldung = {
     art: 'knapp', woerter: warnung,
-    text: patzerSpruch(danebenWorte, buchstaben),
-    note: warnung.length
-      ? 'Noch einmal daneben, dann geht ' + (warnung.length === 1 ? 'es' : 'das') +
-        ' zurück in die Lehre.'
-      : ''
+    text: warnung.length === 1 ? 'Vorsicht bei diesem Wort.' : 'Vorsicht bei diesen Wörtern.',
+    note: 'Noch einmal daneben, dann geht ' + (warnung.length === 1 ? 'es' : 'das') +
+      ' zurück in die Lehre.'
   };
-}
-
-// Wie knapp war es? Ein Buchstabe ist etwas anderes als ein fehlendes Wort,
-// und die Meldung darf das ruhig sagen.
-function patzerSpruch(worte, buchstaben) {
-  if (worte === 1 && buchstaben === 1) {
-    return 'Ein einziger Buchstabe. Aber wer schreibt, der bleibt.';
-  }
-  if (worte === 1) {
-    return buchstaben + ' Buchstaben daneben — war zwar nur ein Wort, aber knapp daneben ist auch vorbei.';
-  }
-  if (buchstaben <= worte + 1) {
-    return worte + ' Wörter, ' + buchstaben + ' Buchstaben. So nah dran und doch vorbei.';
-  }
-  return worte + ' Wörter sind noch nicht da. Noch mal von vorn.';
 }
 
 function patzerHtml() {
@@ -5878,6 +6064,12 @@ function satzMitWissen(text) {
 function renderUebersetzen() {
   // Auch hier: Die Übung zeichnet sich oft ohne den Umweg über `render()`.
   wissenHeimschicken();
+  if (faktKarte) {
+    main.innerHTML = faktKarteHtml();
+    faktKarteBinden(function () { buildTransTask(); renderUebersetzen(); }, renderUebersetzen);
+    chiliAktualisieren();
+    return;
+  }
   if (!trTask) buildTransTask();
   if (!trTask) { renderUebersetzenLeer(); return; }
   var t = trTask;
@@ -5947,7 +6139,7 @@ function renderUebersetzen() {
     if (trCorrect) html += '<p>' + ICON.haken + 'Правильно — richtig übersetzt!</p>';
     else html += '<p>' + ICON.kreuz + (trRevealed ? 'Lösung: ' : 'Richtig wäre: ') +
       '<strong class="' + (promptIsRu ? '' : 'cyr') + '">' + esc(t.solution) + '</strong></p>';
-    html += '</div>' + hoerzeile(t.ru, t.de) + patzerHtml() + meisterHtml() + faktStreifenHtml();
+    html += '</div>' + hoerzeile(t.ru, t.de) + kommentarHtml() + patzerHtml() + meisterHtml();
   }
 
   html += '</div><div class="btn-row">';
@@ -6065,6 +6257,8 @@ function renderUebersetzen() {
     });
   } else {
     document.getElementById('trNext').addEventListener('click', function () {
+      // Der Fakt kommt beim Weitergehen, nicht in der Auflösung.
+      if (faktFaellig()) { renderUebersetzen(); return; }
       buildTransTask();
       renderUebersetzen();
     });
@@ -6074,7 +6268,6 @@ function renderUebersetzen() {
     var k = document.getElementById(id);
     if (k) k.addEventListener('click', function () { setTab('power'); });
   });
-  faktStreifenBinden();
   // Jetzt steht die Kachel — erst jetzt darf die Wissenshülle einziehen.
   renderWissen();
   wissenUmhaengen();
@@ -6954,6 +7147,11 @@ function gramPruefen() {
   gramCorrect = q.tippen
     ? normalize(gramEingabe) === normalize(q.loesung)
     : gramPicked === q.loesung;
+  kommentarSetzen({
+    ok: gramCorrect, loesung: q.loesung, eingabe: q.tippen ? gramEingabe : '',
+    getippt: !!q.tippen,
+    daneben: q.tippen ? danebenZeichen(gramEingabe, q.loesung) : (gramCorrect ? 0 : 99)
+  });
   var vorher = gramBox(b);
   gramUpdate(b, gramCorrect);
   meisterMeldung = null;
@@ -7259,7 +7457,7 @@ function gramUebenHtml(b) {
     } else {
       html += ICON.kreuz + 'Richtig wäre <strong class="cyr">' + esc(q.loesung) + '</strong>';
     }
-    html += '</p></div>' + gramWarumHtml(b, q) + meisterHtml();
+    html += '</p></div>' + kommentarHtml() + gramWarumHtml(b, q) + meisterHtml();
   }
 
   html += '</div><div class="btn-row">';
@@ -7669,6 +7867,10 @@ function ptPruefen() {
     : ptEingabe;
   var richtig = normalize(versuch) === normalize(q.wort.ru);
   ptCorrect = richtig;
+  kommentarSetzen({
+    ok: richtig, loesung: q.wort.ru, eingabe: versuch,
+    getippt: q.stufe !== 'kacheln', daneben: danebenZeichen(versuch, q.wort.ru)
+  });
   // Gewertet wird auch hier im Leitner-System: Wer das Wort hier zurückholt,
   // holt es wirklich zurück — sonst wäre das Power-Training ein Spielplatz
   // ohne Folgen.
@@ -7681,7 +7883,6 @@ function ptPruefen() {
   if (richtig) q.eintrag.treffer++;
   else q.eintrag.treffer = Math.max(0, q.eintrag.treffer - 1);
   zuletztGeuebt('power');
-  faktStreifenPruefen();
   // Der Topf war eben noch voll und ist es nicht mehr — nur dann.
   if (vorher < SATZ_STUFE && state.boxes[q.wort.id] >= SATZ_STUFE &&
     ptPool().length === 0) jubelZeigen('power');
@@ -7708,6 +7909,12 @@ function ptKopfHtml() {
 }
 
 function renderPower() {
+  if (faktKarte) {
+    main.innerHTML = faktKarteHtml();
+    faktKarteBinden(function () { ptFrageBauen(); renderPower(); }, renderPower);
+    chiliAktualisieren();
+    return;
+  }
   if (!ptOffen() && !ptSatz) { renderPowerLeer(); return; }
   if (!ptSatz) ptRundeStarten();
   if (ptPhase === 'fertig') { renderPowerFertig(); return; }
@@ -7759,7 +7966,7 @@ function renderPower() {
     html += '<div class="feedback ' + (ptCorrect ? 'good' : 'bad') + '"><p>' +
       (ptCorrect ? ICON.haken + 'Правильно — richtig!'
         : ICON.kreuz + 'Richtig wäre <strong class="cyr">' + esc(q.wort.ru) + '</strong>') +
-      '</p></div>' + hoerzeile(q.wort.ru, q.wort.de) + meisterHtml() + faktStreifenHtml();
+      '</p></div>' + hoerzeile(q.wort.ru, q.wort.de) + kommentarHtml() + meisterHtml();
   }
 
   html += '</div><div class="btn-row">';
@@ -7823,12 +8030,14 @@ function ptBinden() {
     if (ptAbgabeBereit()) ptPruefen();
   });
   var next = document.getElementById('ptNext');
-  if (next) next.addEventListener('click', function () { ptFrageBauen(); renderPower(); });
+  if (next) next.addEventListener('click', function () {
+    if (faktFaellig()) { renderPower(); return; }
+    ptFrageBauen(); renderPower();
+  });
   var neu = document.getElementById('ptNeu');
   if (neu) neu.addEventListener('click', function () { ptSatz = null; renderPower(); });
   var heim = document.getElementById('ptHeim');
   if (heim) heim.addEventListener('click', function () { setTab('home'); });
-  faktStreifenBinden();
 }
 
 // Zwei Leerzustände, die sich sehr verschieden anfühlen: noch nichts gefallen
@@ -8055,7 +8264,24 @@ function renderTippenLeer() {
   });
 }
 
+// Das nächste Wort. Steht hier und nicht in `renderTippen()`, weil auch die
+// Faktkarte den Weg zurück in die Übung braucht.
+function tippenWeiter() {
+  tResult = null;
+  tHint = false;
+  tEingabe = '';
+  meisterMeldung = null;
+  tWord = waehleWort(tippenPool());
+  renderTippen();
+}
+
 function renderTippen() {
+  if (faktKarte) {
+    main.innerHTML = faktKarteHtml();
+    faktKarteBinden(function () { tippenWeiter(); }, renderTippen);
+    chiliAktualisieren();
+    return;
+  }
   if (tKb === null) tKb = tastaturVorgabe(true);
   // Ist der gewählte Stapel leer und der andere nicht, dorthin wechseln —
   // sonst stünde man vor einem Leerzustand, obwohl es etwas zu tun gibt.
@@ -8092,7 +8318,7 @@ function renderTippen() {
   if (tResult === 'wrong') html += '<p class="feedback bad">' + ICON.kreuz + 'Richtig: <strong class="cyr">' + esc(w.ru) + '</strong></p>';
   if (tResult === 'right') html += '<p class="feedback good">' + ICON.haken + 'Правильно — richtig!</p>';
   // Erst nach der Abgabe zu hören: vorher wäre die Aussprache die halbe Antwort.
-  if (tResult) html += hoerzeile(w.ru, w.de) + meisterHtml() + faktStreifenHtml();
+  if (tResult) html += hoerzeile(w.ru, w.de) + kommentarHtml() + meisterHtml();
   html += '</div><div class="btn-row">';
   if (!tResult) {
     html += '<button class="btn ghost" id="tHintBtn">Hinweis</button>' +
@@ -8119,6 +8345,10 @@ function renderTippen() {
     if (tResult) return;
     var ok = normalize(tEingabe) === normalize(w.ru);
     tResult = ok ? 'right' : 'wrong';
+    kommentarSetzen({
+      ok: ok, loesung: w.ru, eingabe: tEingabe, getippt: true,
+      daneben: danebenZeichen(tEingabe, w.ru)
+    });
     var vorher = state.boxes[w.id] || 0;
     updateBox(w.id, ok);
     meisterMeldung = null;
@@ -8128,19 +8358,9 @@ function renderTippen() {
     state.typingStats.correct += ok ? 1 : 0;
     state.typingStats.wrong += ok ? 0 : 1;
     zuletztGeuebt('tippen');
-    faktStreifenPruefen();
     save();
     renderTippen();
   }
-  function next() {
-    tResult = null;
-    tHint = false;
-    tEingabe = '';
-    meisterMeldung = null;
-    tWord = waehleWort(tippenPool());
-    renderTippen();
-  }
-
   enterGibtAb(input, 'tCheck');
   if (input) {
     input.addEventListener('input', function () { tEingabe = input.value; });
@@ -8153,7 +8373,11 @@ function renderTippen() {
   var checkBtn = document.getElementById('tCheck');
   if (checkBtn) checkBtn.addEventListener('click', check);
   var nextBtn = document.getElementById('tNext');
-  if (nextBtn) nextBtn.addEventListener('click', next);
+  if (nextBtn) nextBtn.addEventListener('click', function () {
+    // Der Fakt kommt beim Weitergehen, nicht in der Auflösung.
+    if (faktFaellig()) { renderTippen(); return; }
+    tippenWeiter();
+  });
   document.getElementById('tKbToggle').addEventListener('click', function () {
     tKb = !tKb;
     renderTippen();
@@ -8167,7 +8391,6 @@ function renderTippen() {
       if (inp) inp.value = tEingabe;
     });
   });
-  faktStreifenBinden();
 }
 
 // ── EINSTELLUNGEN ───────────────────────────────────────────
@@ -8364,6 +8587,9 @@ function renderEinstellungen() {
       '«Dark» ist die Vorgabe, «Classic» das helle Cremeweiß. Grün, Blau und Rosa ' +
       'sind helle Cremetöne. Schrift und Signalfarben bleiben in jedem Schema gleich.',
       SCHEMATA) +
+    schalter('kommentare', 'Kommentare der Chili',
+      'Nach jeder Auflösung ein Satz — mal Lob, mal eine trockene Bemerkung. ' +
+      'Aus: Die Zeile bleibt leer, alles Übrige bleibt, wie es ist.') +
     schalter('ton', 'Ton bei richtig und falsch',
       'Ein kurzer Klang nach jeder Antwort. Auf iOS klingt er auch bei gestelltem ' +
       'Stummschalter, sofern das Gerät die Sitzungssteuerung kennt.') +
@@ -8909,7 +9135,7 @@ function bkStaendeNach(text, tabelle, boxen, zeiten) {
 // `null` hält den Platz einer Einstellung, die es nicht mehr gibt: Die Stellen
 // dürfen nicht wandern, sonst liest ein alter Code die falschen Schalter.
 var BK_SETTINGS = ['confirmUeben', 'confirmUebersetzen', 'requireComplete', 'ton',
-  null, 'tastaturAuto'];
+  null, 'tastaturAuto', 'kommentare'];
 
 function encodeBackup() {
   var woerter = bkStaendeAus(state.boxes, state.lastSeen, bkKennung);

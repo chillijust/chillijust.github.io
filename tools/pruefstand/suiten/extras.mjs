@@ -1,7 +1,7 @@
 // Prüft Fakten-Sammlung, Darstellungswahl, App-Symbol, klebende Leiste
 // und den gemeinsamen Lernstand von Lernsets und Freestyle.
 import { readFileSync, writeFileSync } from 'node:fs';
-import { WURZEL, BAU } from '../helfer.mjs';
+import { WURZEL, BAU, testseite } from '../helfer.mjs';
 const html = readFileSync(WURZEL + '/index.html', 'utf8');
 
 const test = `
@@ -58,9 +58,9 @@ try {
   setTab('lernsets');
   uebNext(false);
   pruefe('D1 Fakt erscheint nach fünf Antworten', uebPhase === 'fact' && !!q('.sprechblase'), uebPhase);
-  pruefe('D2 Fakt ist als gezeigt vermerkt', faktStand(uebFactText).n === 1);
+  pruefe('D2 Fakt ist als gezeigt vermerkt', faktStand(faktKarte).n === 1);
   q('#factFav').click();
-  pruefe('D3 Stern auf der Karte merkt vor', faktStand(uebFactText).f === true);
+  pruefe('D3 Stern auf der Karte merkt vor', faktStand(faktKarte).f === true);
   q('#factAlle').click();
   pruefe('D4 «Alle Fakten» führt in die Sammlung', currentTab === 'fakten');
   setTab('lernsets');
@@ -154,6 +154,5 @@ var f = log.filter(function (l) { return l.indexOf('FAIL') === 0 || l.indexOf('A
 document.title = f.length === 0 ? 'ALLE ' + log.length + ' TESTS BESTANDEN' : 'FEHLGESCHLAGEN: ' + f.length;
 `;
 
-const skript = '\n<script>\nwindow.addEventListener("error", function (e) { document.title = "SEITENFEHLER: " + e.message; });\nsetTimeout(function () {' + test + '}, 120);\n</scr' + 'ipt>\n';
-writeFileSync(BAU + '/t-extras.html', html.replace('</body>', skript + '</body>'));
+writeFileSync(BAU + '/t-extras.html', testseite(html, test));
 console.log('Extras-Testseite geschrieben');

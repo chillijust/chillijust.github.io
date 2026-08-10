@@ -61,6 +61,16 @@ zweite Flug bricht den ersten ab. Ein runder Knopf, in den sie springt, braucht
 - **Ein runder Knopf, in dem die Chili landen soll**, steht genau einmal im Dokument und
   wird umgehängt, nicht neu gebaut (ADR 0044). Wer ihn in eine Kachel setzt: erst nach
   Hause schicken, dann zeichnen, dann umhängen — `renderKopf()` läuft vor der Ansicht.
+- **Der Fakt hat überall dieselbe Gestalt, der Kommentar auch** (ADR 0049). Ein Fakt ist
+  immer die Karte mit Sprechblase und Chili (`faktKarteHtml()`), gefragt beim
+  **Weitergehen** über `faktFaellig()` — der Streifen unter der Auflösung ist weg. In
+  seiner Zeile steht jetzt nach **jeder** Auflösung ein Kommentar (`kommentarSetzen()`,
+  `kommentarHtml()`), in allen Übungen außer «Buchstaben». Die Sätze sind **Inhalt** und
+  stehen in `data/kommentare.json`; das Mischungsverhältnis von trocken zu freundlich ist
+  eine Eigenschaft der Liste, keine Zahl im Code. **Ein fester Satz behauptet keine Zahl,
+  die er nicht kennt** — wer eine nennt, nimmt `{n}`, `{f}` oder `{s}`. Und **gelegt ist
+  nicht geschrieben**: Lob für ё, Weichzeichen oder Wortlänge gibt es nur bei getippten
+  Aufgaben.
 - **Der Jubel ist ein Fenster für das Seltene** (ADR 0044) — fünf Anlässe, ausgelöst nur
   am Übergang, Ton ausgelost. Ein einzelnes gemeistertes Wort bekommt weiter nur eine
   Zeile: Was oft passiert, darf keine Hürde werden.
@@ -94,7 +104,7 @@ zweite Flug bricht den ersten ab. Ein runder Knopf, in den sie springt, braucht
 index.html                die App — genau diese Datei wird ausgeliefert
 .nojekyll                 schaltet Jekyll ab, niemals löschen
 data/*.json               Lerninhalte, einzige Quelle für Vokabeln/Sätze/Fakten/
-                          Tastatur/Buchstaben/Grammatik/Verben/Nomen
+                          Tastatur/Buchstaben/Grammatik/Verben/Nomen/Kommentare
 tools/build.mjs           /data prüfen und in index.html einbetten (--check = nur prüfen)
 tools/pruefen.mjs         Vor-Push-Prüfung von index.html
 tools/pruefstand/         Prüfstand: lauf.mjs, suiten/*.mjs, bild.mjs (siehe README dort)
