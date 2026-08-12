@@ -891,6 +891,62 @@ body.chili-steht #chiliBuehne { visibility: visible; }
 .sprechblase .fact-text { font-size: 16px; }
 /* Der Streifen unter der Auflösung: dieselbe Blase, aber ohne Zipfel und ohne
    Auftritt — die Chili steht hier nicht daneben, sie ist mitten in der Übung. */
+/* Das Tutorial. Der Schatten des Lochs verdunkelt alles ringsum — 9999px
+   Streuung reichen für jeden Bildschirm, und das Loch selbst bleibt frei.
+   Zeiger fängt der Hof ab: Während der Erklärung ist nur «Verstanden»
+   bedienbar, sonst tippt man aus Versehen in die App hinein. */
+#tutHof {
+  position: fixed; inset: 0; z-index: 80;
+  background: transparent;
+}
+#tutLoch {
+  position: absolute; border-radius: 14px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, .82);
+  transition: top .28s ease, left .28s ease, width .28s ease, height .28s ease;
+  outline: 2px solid var(--gold); outline-offset: 2px;
+}
+/* Beim **ersten** Erscheinen darf nichts gleiten: Das Loch stünde sonst noch
+   außerhalb des Bildes und flöge sichtbar aus der Ecke heran. Von Schritt zu
+   Schritt wandert es dagegen — dort ist die Bewegung die Erklärung. */
+#tutLoch.springt { transition: none; }
+/* Ohne Ziel — die Eingangsfrage — deckt der Hof selbst ab, und das Loch geht
+   weg. Es außerhalb des Bildes zu parken reicht **nicht**: Der Schatten wächst
+   nur 9999 px weit, und genau so weit draußen stünde das Loch — der Rand des
+   Schattens fiele auf den Rand des Bildschirms, und die Seite bliebe hell. */
+#tutHof.ohne-ziel { background: rgba(0, 0, 0, .82); }
+#tutHof.ohne-ziel #tutLoch { display: none; }
+
+#tutKarte {
+  position: fixed; z-index: 85; left: 16px; right: 16px;
+  background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+  padding: 16px 16px 14px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .45);
+  transition: top .28s ease;
+}
+#tutKarte[aria-hidden="true"] { display: none; }
+#tutKarte h3 { margin: 2px 0 8px; font-size: 20px; }
+#tutKarte .tut-text { margin: 0; font-size: 15px; line-height: 1.5; color: var(--text); }
+#tutKarte .tut-beispiel {
+  margin: 10px 0 0; padding: 9px 11px; border-radius: 10px;
+  background: var(--card-2); border: 1px solid var(--line);
+  font-size: 14px; line-height: 1.45; color: var(--dim);
+}
+#tutKarte .tut-beispiel:empty { display: none; }
+#tutKarte .btn-row { margin-top: 14px; }
+body.tut-offen { overflow: hidden; }
+@media (prefers-reduced-motion: reduce) {
+  #tutLoch, #tutKarte { transition: none; }
+}
+
+/* Der Knopf am Ende der Übersicht. Ruhig: Wer die App kennt, soll ihn
+   übersehen dürfen. */
+.tut-knopf {
+  display: block; width: 100%; margin: 22px 0 4px; padding: 13px 16px;
+  background: none; border: 1px dashed var(--line); border-radius: 14px;
+  color: var(--dim); font: inherit; font-size: 14px; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* Die Zeile, in der die Chili nach jeder Auflösung etwas sagt. Sie trägt kein
    Kästchen: Ein Kommentar ist ein Nebensatz, keine Meldung — was gerahmt ist,
    verlangt Aufmerksamkeit, und die gehört der Auflösung darüber. */
@@ -1382,6 +1438,18 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
 </header>
 
 <main id="main"></main>
+
+<!-- Das Tutorial: ein Scheinwerfer statt einer Maske. «tutLoch» ist ein
+     durchsichtiges Rechteck über dem erklärten Feld; seinen riesigen Schatten
+     legt es über alles Übrige. Kein clip-path, kein SVG — ein Element. -->
+<div id="tutHof" hidden aria-hidden="true"><div id="tutLoch"></div></div>
+<div id="tutKarte" role="dialog" aria-modal="true" aria-labelledby="tutTitel" aria-hidden="true">
+  <p class="task-label" id="tutZaehler"></p>
+  <h3 id="tutTitel"></h3>
+  <p class="tut-text" id="tutText"></p>
+  <p class="tut-beispiel" id="tutBeispiel"></p>
+  <div class="btn-row" id="tutKnoepfe"></div>
+</div>
 
 <!-- Der Jubel: ein Fenster über allem, für die seltenen großen Augenblicke.
      Einzelne gemeisterte Wörter bekommen weiter nur eine Zeile — was oft
@@ -2369,6 +2437,21 @@ var KOMMENTARE = [
   ['eins', 'So knapp war es lange nicht.'],
   ['eins', 'Ein Zeichen. Sieh noch einmal hin, dann hast du es.']
 ];
+
+var TUTORIAL = [
+  ['home', '[data-uebung="buchstaben"]', 'Zuerst die Buchstaben', 'Russisch schreibt mit anderen Zeichen. Solange du sie nicht lesen kannst, ist jedes Wort nur ein Bild. Fang hier an — es sind 33, und viele kennst du fast schon.', 'Р ist ein R, С ist ein S. Damit liest sich ресторан als «restoran» — Restaurant.'],
+  ['home', '[data-uebung="lernsets"]', 'Dann die Wörter', 'Lernsets geben dir zwölf Wörter auf einmal — keine wahllosen, sondern genau die, die du für die nächsten Sätze brauchst. Sitzen alle zwölf, gehen die Sätze auf.', 'Kennst du книга, читать und я, kannst du «Я читаю книгу» bauen.'],
+  ['home', '[data-uebung="uebersetzen"]', 'Dann ganze Sätze', 'Hier kommen die Sätze an, die deine Lernsets geöffnet haben. Erst legst du sie aus Kacheln, später schreibst du sie selbst — und erst russisch verstehen, dann russisch bauen.', '«Я читаю книгу» heißt «Ich lese ein Buch».'],
+  ['home', '[data-uebung="tippen"]', 'Selbst schreiben', 'Tippen ist die ehrlichste Übung: Hier hilft keine Auswahl. Die kyrillische Tastatur kommt von selbst, wenn sie gebraucht wird.', 'Du siehst «Buch» und schreibst книга. Ein Buchstabe daneben zählt nicht.'],
+  ['home', '[data-uebung="grammatik"]', 'Warum ein Wort so dasteht', 'Russisch verändert die Wortenden, je nachdem wozu ein Wort im Satz da ist. Hier siehst du die Regel dahinter — zum Selberfinden, nicht zum Auswendiglernen.', 'книга wird zu книгу, sobald man sie liest. Das ist der Akkusativ.'],
+  ['home', '[data-uebung="freestyle"]', 'Üben ohne Plan', 'Freestyle ist der ganze Wortschatz, ohne Sperren und ohne Reihenfolge. Wähl ein Thema und leg los.', 'Nur Essen, nur Familie, oder alles durcheinander — du entscheidest.'],
+  ['home', '[data-uebung="power"]', 'Was zurückgefallen ist', 'Schreibst du ein Wort dreimal hintereinander falsch, rutscht es zurück und schließt seinen Satz wieder. Hier holst du es heraus — drei Wörter auf einmal.', 'Aus dem Topf kommt nichts, bevor es wirklich wieder sitzt.'],
+  ['home', '#homeEmpf', 'Wenn du nicht weißt, was jetzt', 'Ganz oben steht immer ein Vorschlag. Er kennt deinen Stand und schickt dich dorthin, wo gerade wirklich etwas zu tun ist.', 'Antippen genügt — du landest sofort in der richtigen Übung.'],
+  ['home', '.kopf-rail', 'Dein Fortschritt', 'Der Balken zeigt, wie viele Wörter endgültig sitzen. Ein Wort braucht dafür vier richtige Antworten an verschiedenen Tagen.', 'Darunter läuft deine Serie mit: wie viele Antworten am Stück richtig waren.'],
+  ['lernsets', '#filterKnopf', 'Die Auswahl', 'In jeder Übung sitzt oben dieser Trichter. Dahinter wählst du, woraus geübt wird — der Reihe nach, nur Wiederholungen, oder alles auf einmal.', 'In «Tippen» kannst du damit ein einzelnes Lernset nachschreiben, bis es sitzt.'],
+  ['home', '#menuKnopf', 'Das Menü', 'Hinter den drei Strichen liegen Bilanz, Sicherung, Einstellungen und Tickets. Die Tickets sind für dich: Was hakt oder fehlt, schreibst du dort auf.', 'Die Sicherung ist wichtig — dein Fortschritt liegt nur auf diesem Gerät.'],
+  ['home', '#tutKnopf', 'Das war es', 'Diesen Knopf findest du immer hier unten. Er zeigt dir alles noch einmal, sooft du willst.', 'Jetzt aber los: Die Buchstaben warten.']
+];
 /* == DATEN:ENDE == */
 
 // ── FORMENMASCHINE ──────────────────────────────────────────
@@ -2707,7 +2790,7 @@ var APP_STAND = '2026-08-12'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '1.2.1'; /* == VERSION == */
+var APP_VERSION = '1.3.0'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -3491,6 +3574,9 @@ function defaultState() {
     // «abc», «regel». Ohne diese Liste feiert ein Set erneut, sobald ein
     // einzelnes zurückgefallenes Wort wieder oben ist (ADR 0047).
     gefeiert: {},
+    // Einmal gefragt ist gefragt: Auch wer beim ersten Start abbricht,
+    // bekommt die Frage nicht wieder.
+    tutorialGesehen: false,
     settings: defaultSettings()
   };
 }
@@ -3889,6 +3975,158 @@ function faktKarteBinden(weiter, neu) {
     neu();
   });
 }
+
+// ── Tutorial ────────────────────────────────────────────────
+// Ein Scheinwerfer über der Oberfläche: Alles ist dunkel, nur das erklärte
+// Feld bleibt hell. Das Loch ist ein durchsichtiges Rechteck, dessen riesiger
+// Schatten den Rest deckt — ein Element statt einer Maske (ADR 0051).
+//
+// Schritt -1 ist die Frage «Tutorial abspielen?». Sie gehört zum selben
+// Overlay: ein Mechanismus statt zweier, und der Weg hinein ist derselbe wie
+// der Weg weiter.
+var tutSchritt = -1;      // -1 = die Frage · 0..n = die Schritte
+var tutOffen = false;
+var tutHeimTab = 'home';  // wohin nach dem Ende zurück
+var tutLochStand = false; // lag zuletzt ein Ziel unter dem Loch?
+
+function tutStarten() {
+  tutHeimTab = 'home';
+  tutSchritt = -1;
+  tutOffen = true;
+  tutLochStand = false;
+  document.body.classList.add('tut-offen');
+  tutZeichnen();
+}
+
+function tutEnde() {
+  tutOffen = false;
+  document.body.classList.remove('tut-offen');
+  document.getElementById('tutHof').hidden = true;
+  document.getElementById('tutKarte').setAttribute('aria-hidden', 'true');
+  // Einmal gefragt ist gefragt — auch wer abbricht, wird nicht wieder gefragt.
+  state.tutorialGesehen = true;
+  save();
+  if (currentTab !== tutHeimTab) setTab(tutHeimTab);
+}
+
+function tutWeiter() {
+  tutSchritt++;
+  if (tutSchritt >= TUTORIAL.length) { tutEnde(); return; }
+  tutZeichnen();
+}
+
+// Der Ort eines Schritts. Führt er woandershin, wird dort hingewechselt —
+// das Overlay liegt fest über allem und übersteht den Renderlauf.
+function tutOrtSetzen(ort) {
+  if (!ort || currentTab === ort) return;
+  setTab(ort);
+}
+
+// Das Loch über das Ziel legen. Ohne Ziel bleibt es außerhalb des Bildes:
+// Der Schatten deckt dann alles, und nichts leuchtet grundlos.
+function tutLochSetzen(ziel) {
+  var hof = document.getElementById('tutHof');
+  var loch = document.getElementById('tutLoch');
+  var el = ziel ? document.querySelector(ziel) : null;
+  // Kam das Loch gerade von nirgendwo, wird gesprungen statt geglitten.
+  loch.classList.toggle('springt', !tutLochStand || !el);
+  tutLochStand = !!el;
+  if (!el) {
+    hof.classList.add('ohne-ziel');
+    loch.style.top = '-9999px';
+    loch.style.left = '-9999px';
+    loch.style.width = '0px';
+    loch.style.height = '0px';
+    return null;
+  }
+  hof.classList.remove('ohne-ziel');
+  var r = el.getBoundingClientRect();
+  var luft = 6;
+  loch.style.top = (r.top - luft) + 'px';
+  loch.style.left = (r.left - luft) + 'px';
+  loch.style.width = (r.width + luft * 2) + 'px';
+  loch.style.height = (r.height + luft * 2) + 'px';
+  return r;
+}
+
+// Die Karte dorthin, wo Platz ist: unter das Ziel, wenn es oben steht, sonst
+// darüber. Ohne Ziel in die Mitte.
+function tutKarteSetzen(r) {
+  var karte = document.getElementById('tutKarte');
+  karte.setAttribute('aria-hidden', 'false');
+  var hoehe = karte.getBoundingClientRect().height || 200;
+  var schirm = window.innerHeight;
+  var oben;
+  if (!r) {
+    oben = Math.max(16, (schirm - hoehe) / 2);
+  } else if (r.top + r.height / 2 < schirm / 2) {
+    oben = Math.min(schirm - hoehe - 16, r.bottom + 18);
+  } else {
+    oben = Math.max(16, r.top - hoehe - 18);
+  }
+  karte.style.top = oben + 'px';
+}
+
+function tutZeichnen() {
+  var hof = document.getElementById('tutHof');
+  hof.hidden = false;
+
+  if (tutSchritt < 0) {
+    tutLochSetzen('');
+    document.getElementById('tutZaehler').textContent = 'Tutorial';
+    document.getElementById('tutTitel').textContent = 'Tutorial abspielen?';
+    document.getElementById('tutText').textContent =
+      'Ich zeige dir in einer Minute, wie diese App funktioniert — wo du anfängst, ' +
+      'was die Übungen voneinander wollen und wo was zu finden ist.';
+    document.getElementById('tutBeispiel').textContent = '';
+    tutKnoepfe([['Abbrechen', 'ghost', tutEnde], ['Loslegen', 'primary', tutWeiter]]);
+    tutKarteSetzen(null);
+    return;
+  }
+
+  var sch = TUTORIAL[tutSchritt];
+  tutOrtSetzen(sch[0]);
+  document.getElementById('tutZaehler').textContent =
+    'Schritt ' + (tutSchritt + 1) + ' von ' + TUTORIAL.length;
+  document.getElementById('tutTitel').textContent = sch[2];
+  document.getElementById('tutText').textContent = sch[3];
+  document.getElementById('tutBeispiel').textContent = sch[4] || '';
+  // Am Ende steht nur noch «Fertig»: «Abbrechen» täte dort dasselbe, und zwei
+  // Knöpfe für einen Ausgang sind eine Frage, die keine ist.
+  var letzter = tutSchritt === TUTORIAL.length - 1;
+  tutKnoepfe(letzter
+    ? [['Fertig', 'primary', tutWeiter]]
+    : [['Abbrechen', 'ghost', tutEnde], ['Verstanden', 'primary', tutWeiter]]);
+
+  // Erst ins Bild holen, dann messen: Ein Ziel, das unter dem Rand liegt,
+  // bekäme sonst ein Loch, das niemand sieht.
+  var el = document.querySelector(sch[1]);
+  if (el && el.scrollIntoView) {
+    try { el.scrollIntoView({ block: 'center', inline: 'nearest' }); } catch (e) {
+      el.scrollIntoView();
+    }
+  }
+  tutKarteSetzen(tutLochSetzen(sch[1]));
+}
+
+function tutKnoepfe(liste) {
+  var wo = document.getElementById('tutKnoepfe');
+  wo.innerHTML = liste.map(function (b, i) {
+    return '<button class="btn ' + b[1] + '" data-tut="' + i + '">' + esc(b[0]) + '</button>';
+  }).join('');
+  wo.querySelectorAll('[data-tut]').forEach(function (b) {
+    b.addEventListener('click', liste[parseInt(b.dataset.tut, 10)][2]);
+  });
+}
+
+// Dreht jemand das Gerät oder scrollt die Seite nach, stimmt das Rechteck
+// nicht mehr. Neu messen, nicht neu zeichnen.
+function tutNachmessen() {
+  if (!tutOffen || tutSchritt < 0) return;
+  tutKarteSetzen(tutLochSetzen(TUTORIAL[tutSchritt][1]));
+}
+window.addEventListener('resize', tutNachmessen);
+window.addEventListener('orientationchange', tutNachmessen);
 
 // ── Jubel ───────────────────────────────────────────────────
 // Für die seltenen großen Augenblicke ein Fenster. Der Ton wechselt: mal
@@ -4933,10 +5171,14 @@ function renderHome() {
     });
     html += '</div>';
   });
+  // Ruhig und ganz unten: Wer die App kennt, soll ihn übersehen dürfen — wer
+  // sich verirrt, scrollt ohnehin bis hierher.
+  html += '<button class="tut-knopf" id="tutKnopf">Wie funktioniert das hier?</button>';
   html += '</section>';
   main.innerHTML = html;
 
   document.getElementById('homeEmpf').addEventListener('click', function () { setTab(e.ziel); });
+  document.getElementById('tutKnopf').addEventListener('click', tutStarten);
   main.querySelectorAll('[data-uebung]').forEach(function (b) {
     b.addEventListener('click', function () { setTab(b.dataset.uebung); });
   });
@@ -9639,6 +9881,13 @@ render();
 menuSetzen(false);
 chiliAktualisieren();
 meldeKnopfZeigen();
+
+// Beim allerersten Start das Tutorial anbieten — genau einmal. Wer nie eine
+// Antwort gegeben hat, hat die App noch nicht gesehen; wer abbricht, bekommt
+// die Frage nicht wieder.
+if (!state.tutorialGesehen && state.answered === 0 && currentTab === 'home') {
+  tutStarten();
+}
 </script>
 </body>
 </html>

@@ -83,6 +83,38 @@ Drei Regeln halten das ehrlich:
 Der Patzer-Kasten in «Übersetzen» behält nur noch, was Folgen ankündigt; wie knapp es war,
 sagt die Kommentarzeile darüber. Abschaltbar über die Einstellung `kommentare`.
 
+## Tutorial
+
+Zwölf Schritte über die echte Oberfläche (ADR 0051). Sie stehen in `data/tutorial.json`,
+je Zeile `[Ort, Ziel, Titel, Text, Beispiel]`, und kommen als `TUTORIAL` in die Datei.
+
+Der Scheinwerfer ist **ein** Element: `#tutLoch` ist durchsichtig und trägt
+`box-shadow: 0 0 0 9999px rgba(0,0,0,.82)` — der Schatten deckt den Rest ab, das Rechteck
+bleibt frei. Kein `clip-path`, kein SVG, keine vier Balken.
+
+| Baustein | Aufgabe |
+| --- | --- |
+| `tutStarten()` | öffnet mit Schritt `-1`, der Frage «Tutorial abspielen?» |
+| `tutWeiter()` | zählt hoch, am Ende `tutEnde()` |
+| `tutOrtSetzen(ort)` | wechselt die Ansicht, wenn ein Schritt woandershin zeigt |
+| `tutLochSetzen(ziel)` | scrollt das Ziel in die Mitte, misst es, setzt das Loch |
+| `tutKarteSetzen(r)` | legt die Karte unter das Ziel, wenn es oben liegt, sonst darüber |
+| `tutNachmessen()` | misst neu bei `resize` und `orientationchange` |
+
+Drei Fallen stecken darin:
+
+- **Ohne Ziel deckt der Hof selbst ab** (`#tutHof.ohne-ziel`), nicht das Loch. Es
+  außerhalb des Bildes zu parken reicht nicht — die Streuung endet nach 9999 px, genau am
+  Bildrand.
+- **Beim Aufgehen darf nichts gleiten** (`#tutLoch.springt`). Von Schritt zu Schritt ist
+  die Bewegung die Erklärung; beim ersten Erscheinen wäre sie ein Flug aus der Ecke.
+- **Erst ins Bild holen, dann messen.** Ein Ziel unter dem Rand bekäme sonst ein Loch,
+  das niemand sieht.
+
+Der Einstieg ist der Knopf `#tutKnopf` ganz unten auf Home. Beim allerersten Start
+(`!state.tutorialGesehen && state.answered === 0`) bietet die App ihn einmalig von selbst
+an; jeder Ausgang setzt den Merker.
+
 ## Darstellung
 
 Ein **Farbschema**, keine zwei Achsen (ADR 0039). Die Einstellung `schema` kennt fünf

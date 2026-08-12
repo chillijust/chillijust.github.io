@@ -93,6 +93,12 @@ zweite Flug bricht den ersten ab. Ein runder Knopf, in den sie springt, braucht
   die Aussage, die Farbe bestätigt sie.
 - **Die Übersicht ordnet in drei Gruppen** (ADR 0045): Wörter · Sätze · Freiwillig. Eine
   neue Übung braucht einen Eintrag in `UEBUNG_GRUPPEN` **und** in `UEBUNGEN`.
+- **Das Tutorial ist ein Scheinwerfer** (ADR 0051) — ein durchsichtiges `#tutLoch` mit
+  `box-shadow: 0 0 0 9999px`, das die echte Oberfläche anleuchtet. Die zwölf Schritte
+  sind **Inhalt** und stehen in `data/tutorial.json` (`[Ort, Ziel, Titel, Text,
+  Beispiel]`). **Ein Wähler, der ins Leere zeigt, ist ein stiller Fehler** — wer ein Ziel
+  umbenennt, prüft die Suite `tutorial`. Ohne Ziel deckt der **Hof** ab, nicht das Loch;
+  außerhalb des Bildes endet die Streuung genau am Bildrand.
 - **Die Einstellungen haben Reiter** (ADR 0045). Was nur auf einem Reiter steht, ist beim
   Binden nicht immer da — vor `addEventListener` prüfen. `einstReiter` gehört in
   `ansichtenZuruecksetzen()`.

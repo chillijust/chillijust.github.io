@@ -81,6 +81,7 @@ const grammatik = lies('grammatik.json').wert;
 const verben = lies('verben.json').wert;
 const nomen = lies('nomen.json').wert;
 const kommentare = lies('kommentare.json').wert;
+const tutorial = lies('tutorial.json').wert;
 
 // ── Wortart und Geschlecht ───────────────────────────────────
 // Die Endung der Grundform verrät beides — meistens. Was die Regel liefert,
@@ -464,6 +465,43 @@ if (!Array.isArray(kommentare) || kommentare.length === 0) {
   });
 }
 
+// Tutorial: [Ort, Ziel, Titel, Text, Beispiel] — der Scheinwerfer braucht ein
+// Ziel, das es auch gibt. Ob der Wähler auf dem Schirm etwas trifft, kann hier
+// niemand wissen; das prüft die Suite «tutorial» am echten DOM. Hier steht nur,
+// was sich ohne Browser feststellen lässt.
+const TUT_ORTE = ['home', 'lernsets', 'freestyle', 'tippen', 'uebersetzen',
+  'buchstaben', 'grammatik', 'power'];
+if (!Array.isArray(tutorial) || tutorial.length < 5) {
+  meckern('tutorial.json: erwartet eine Liste mit mindestens fünf Schritten');
+} else {
+  const ziele = new Set();
+  tutorial.forEach((schritt, i) => {
+    const wo = 'tutorial.json Schritt ' + (i + 1);
+    if (!Array.isArray(schritt) || schritt.length !== 5) {
+      return meckern(wo + ': erwartet [Ort, Ziel, Titel, Text, Beispiel]');
+    }
+    const [ort, ziel, titel, text, beispiel] = schritt;
+    if (TUT_ORTE.indexOf(ort) === -1) {
+      meckern(wo + ': unbekannter Ort «' + ort + '» — erlaubt: ' + TUT_ORTE.join(' '));
+    }
+    [['Ziel', ziel], ['Titel', titel], ['Text', text], ['Beispiel', beispiel]]
+      .forEach(([name, wert]) => {
+        if (typeof wert !== 'string' || wert.trim() !== wert) {
+          meckern(wo + ': ' + name + ' ist kein sauberer Text');
+        }
+      });
+    if (!ziel) meckern(wo + ': ohne Ziel gäbe es nichts zu beleuchten');
+    if (ziele.has(ziel)) meckern(wo + ': das Ziel «' + ziel + '» kommt schon vor');
+    else ziele.add(ziel);
+    if (titel.length < 3) meckern(wo + ': der Titel ist zu knapp');
+    if (text.length < 40) meckern(wo + ': der Text erklärt zu wenig');
+    // Einfache Worte hei\u00dfen kurze S\u00e4tze. \u00dcber 240 Zeichen liest
+    // auf einem Handy niemand mehr, w\u00e4hrend der Rest des Bildschirms dunkel ist.
+    if (text.length > 240) meckern(wo + ': der Text ist zu lang für ein Overlay');
+    if (beispiel && beispiel.length > 140) meckern(wo + ': das Beispiel ist zu lang');
+  });
+}
+
 if (fehler.length) {
   console.error('Prüfung fehlgeschlagen:\n' + fehler.map((f) => '  · ' + f).join('\n'));
   process.exit(1);
@@ -590,6 +628,8 @@ const block = [
   nomenBlock('NOMEN', nomen),
   '',
   listenBlock('KOMMENTARE', kommentare, true),
+  '',
+  listenBlock('TUTORIAL', tutorial, true),
   ENDE
 ].join('\n');
 
@@ -722,7 +762,8 @@ const dateien = [
   ['data/grammatik.json', jsonGrammatik(grammatik)],
   ['data/verben.json', jsonVerben(verben)],
   ['data/nomen.json', jsonNomen(nomen)],
-  ['data/kommentare.json', jsonListe(kommentare, true)]
+  ['data/kommentare.json', jsonListe(kommentare, true)],
+  ['data/tutorial.json', jsonListe(tutorial, true)]
 ];
 
 // ── Eigenwillige Verben ─────────────────────────────────────
