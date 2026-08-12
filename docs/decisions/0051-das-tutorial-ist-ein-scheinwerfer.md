@@ -23,6 +23,11 @@ Rechteck bleibt frei. Kein `clip-path`, kein SVG, keine vier Balken.
 `[Ort, Ziel, Titel, Text, Beispiel]`. `tools/build.mjs` prüft Ort und Länge und bettet
 sie als `TUTORIAL` ein.
 
+**Die Erklärung ist eine Sprechblase, kein Kasten.** Sie trägt einen Zipfel, der auf das
+Angeleuchtete zeigt, im Fuß eine Punktreihe statt der Zeile «Schritt 3 von 12» und rechts
+einen runden Pfeil statt eines beschrifteten Knopfes. Der Ausgang ist ein stilles × in
+ihrer Ecke.
+
 **Der Einstieg ist ein Knopf ganz unten auf Home** («Wie funktioniert das hier?»), ruhig
 gestaltet — wer die App kennt, soll ihn übersehen dürfen. Beim allerersten Start bietet
 die App ihn einmalig von selbst an (`state.tutorialGesehen`).
@@ -52,8 +57,21 @@ das niemand sieht. `scrollIntoView({ block: 'center' })` läuft vor
 Übersicht; ihn zu erklären, ohne ihn zu zeigen, wäre Text über einen Knopf. Das Tutorial
 wechselt für diesen Schritt nach «Lernsets» und kehrt am Ende nach Home zurück.
 
-**Am Ende steht nur «Fertig».** «Abbrechen» täte dort dasselbe, und zwei Knöpfe für einen
-Ausgang sind eine Frage, die keine ist.
+**Der Zipfel darf nie ins Nichts zeigen.** Wo oben kein Platz war und die Blase neben dem
+Ziel landet statt darüber, fällt er weg — ein Zeiger, der auf nichts zeigt, ist schlimmer
+als keiner. `tutZipfelSetzen()` rechnet das nach und setzt sonst `ohne-zipfel`.
+
+**Die Blase ist in jedem Schema dunkel**, auch in den vier hellen. Das ist keine
+Nachlässigkeit gegenüber ADR 0039: Sie liegt auf einem abgedunkelten Bild, und eine helle
+Karte wäre dort der zweite Scheinwerfer — sie nähme dem ersten die Aussage. Die vier Werte
+stehen darum als lokale Eigenschaften auf `#tutKarte` selbst.
+
+**Der Ausgang sitzt in der Blase, nicht am Bildrand.** Oben rechts am Rand läge er über
+dem Menüknopf und sähe aus wie ein zweiter davon; die Kopfzeile ist besetzt.
+
+**Nur die Eingangsfrage trägt beschriftete Knöpfe.** «Abbrechen» und «Loslegen» ist eine
+echte Wahl. Ab da gibt es nur noch «weiter» — dafür genügt ein Pfeil, und am letzten
+Schritt wird daraus ein Haken.
 
 ## Folgen
 
@@ -63,5 +81,7 @@ Ausgang sind eine Frage, die keine ist.
   fällt in der Suite auf; ein unbekannter Ort schon im Build.
 - Jedes Ziel kommt genau einmal vor — sonst erklärte das Tutorial zweimal dasselbe.
 - Die Texte duzen wie der Rest der App (ADR 0050); die Suite prüft es mit.
-- **Für die Messung schaltet die Suite den Übergang ab.** Im kopflosen Browser läuft
-  keine Zeit; ohne das stünde bei jeder Messung noch der vorige Ort da.
+- **Für die Messung schaltet die Suite den Übergang ab** — bei `#tutLoch` **und**
+  `#tutKarte`. Im kopflosen Browser läuft keine Zeit; ohne das stünde bei jeder Messung
+  noch der vorige Ort da. Wer nur eines der beiden abschaltet, misst die Vergangenheit
+  des anderen — genau daran ist die Zipfelprüfung zuerst hängen geblieben.

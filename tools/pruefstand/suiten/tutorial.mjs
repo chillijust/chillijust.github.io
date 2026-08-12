@@ -12,13 +12,13 @@ const test = String.raw`
 var log = [];
 function pruefe(n, c, e) { log.push((c ? 'PASS ' : 'FAIL ') + n + (e ? ' [' + e + ']' : '')); }
 function q(s) { return document.querySelector(s); }
-// Das Loch gleitet von Ziel zu Ziel. Im kopflosen Browser läuft keine Zeit,
-// also stünde bei jeder Messung noch der **alte** Ort da. Für die Messung
-// wird das Gleiten abgeschaltet — geprüft wird die Geometrie, nicht die
-// Animation.
+// Loch **und** Blase gleiten von Ziel zu Ziel. Im kopflosen Browser läuft
+// keine Zeit, also stünde bei jeder Messung noch der **alte** Ort da. Für die
+// Messung wird das Gleiten abgeschaltet — geprüft wird die Geometrie, nicht
+// die Animation. Wer hier eines der beiden vergisst, misst Vergangenheit.
 (function () {
   var s = document.createElement('style');
-  s.textContent = '#tutLoch { transition: none !important; }';
+  s.textContent = '#tutLoch, #tutKarte { transition: none !important; }';
   document.head.appendChild(s);
 })();
 function alle(s) { return Array.prototype.slice.call(document.querySelectorAll(s)); }
@@ -103,6 +103,7 @@ try {
   knopf('Loslegen').click();
   var fehlt = [];
   var ohneLoch = [];
+  var ohneZipfel = [];
   for (var i = 0; i < TUTORIAL.length; i++) {
     var sch = TUTORIAL[i];
     pruefe('D' + (i + 1) + ' Schritt ' + (i + 1) + ' · ' + sch[2],
@@ -122,20 +123,50 @@ try {
           Math.round(z.left) + ',' + Math.round(z.top) + ' ' +
           Math.round(z.width) + 'x' + Math.round(z.height) + ']');
       }
+      // Der Zipfel zeigt zum Ziel — und darf nie ins Nichts zeigen. Er sitzt
+      // entweder oben (Blase unter dem Ziel) oder unten (Blase darüber).
+      var kl = q('#tutKarte').classList;
+      var zi = q('#tutZipfel').getBoundingClientRect();
+      var k = q('#tutKarte').getBoundingClientRect();
+      if (!kl.contains('ohne-zipfel')) {
+        var richtung = kl.contains('zipfel-oben') ? (k.top >= z.bottom - 20)
+          : kl.contains('zipfel-unten') ? (k.bottom <= z.top + 20) : false;
+        var waagerecht = zi.left >= k.left - 1 && zi.right <= k.right + 1;
+        if (!richtung || !waagerecht) {
+          ohneZipfel.push(sch[2] + ' [' + (kl.contains('zipfel-oben') ? 'oben' : 'unten') +
+            ' Karte ' + Math.round(k.top) + '–' + Math.round(k.bottom) +
+            ' Ziel ' + Math.round(z.top) + '–' + Math.round(z.bottom) + ']');
+        }
+      }
     }
-    if (i < TUTORIAL.length - 1) knopf('Verstanden').click();
+    if (i < TUTORIAL.length - 1) q('#tutVor').click();
   }
   pruefe('E1 jedes Ziel gibt es wirklich', fehlt.length === 0, fehlt.join(' | '));
   pruefe('E2 und das Loch liegt darüber', ohneLoch.length === 0, ohneLoch.join(' | '));
-  pruefe('E3 der letzte Schritt heißt «Fertig»', !!knopf('Fertig'));
-  pruefe('E3b und bietet keinen zweiten Ausgang an',
-    alle('#tutKnoepfe [data-tut]').length === 1 && !knopf('Abbrechen'),
-    String(alle('#tutKnoepfe [data-tut]').length));
-  pruefe('E4 der Zähler stimmt',
+  pruefe('E2b der Zipfel zeigt zum Ziel', ohneZipfel.length === 0, ohneZipfel.join(' | '));
+  pruefe('E3 der letzte Schritt schließt ab',
+    q('#tutVor').getAttribute('aria-label') === 'Fertig',
+    q('#tutVor').getAttribute('aria-label'));
+  pruefe('E3b während der Schritte gibt es keine beschrifteten Knöpfe',
+    q('#tutKnoepfe').hidden && alle('#tutKnoepfe [data-tut]').length === 0);
+  pruefe('E4 der Zähler stimmt — für das Ohr',
     q('#tutZaehler').textContent === 'Schritt 12 von 12', q('#tutZaehler').textContent);
 
+  // ── E5 · Die Punktreihe ───────────────────────────────────
+  // Sie ersetzt die Zeile «Schritt 3 von 12». Ein Zeichen je Schritt, genau
+  // eines markiert, alles davor abgehakt — sonst zeigt sie nicht, wo man ist.
+  var p = alle('#tutPunkte i');
+  pruefe('E5 ein Punkt je Schritt', p.length === TUTORIAL.length, String(p.length));
+  pruefe('E6 genau einer ist der jetzige',
+    alle('#tutPunkte i.hier').length === 1 &&
+    p[p.length - 1].classList.contains('hier'));
+  pruefe('E7 alle davor sind abgehakt',
+    alle('#tutPunkte i.war').length === TUTORIAL.length - 1,
+    String(alle('#tutPunkte i.war').length));
+  pruefe('E8 der Ausgang steht am Rand bereit', !q('#tutZu').hidden);
+
   // ── F · Der Ausgang führt zurück nach Home ────────────────
-  knopf('Fertig').click();
+  q('#tutVor').click();
   pruefe('F1 fertig schließt', !tutOffen && q('#tutHof').hidden);
   pruefe('F2 und steht wieder auf Home', currentTab === 'home', currentTab);
   pruefe('F3 die Übersicht ist da', !!q('#tutKnopf'));

@@ -916,26 +916,86 @@ body.chili-steht #chiliBuehne { visibility: visible; }
 #tutHof.ohne-ziel { background: rgba(0, 0, 0, .82); }
 #tutHof.ohne-ziel #tutLoch { display: none; }
 
+/* Die Sprechblase. Sie ist in **jedem** Schema dunkel, auch in den hellen —
+   und das ist keine Nachlässigkeit gegenüber ADR 0039: Sie liegt auf einem
+   abgedunkelten Bild. Eine helle Karte wäre dort der zweite Scheinwerfer und
+   nähme dem ersten die Aussage. Die vier Werte stehen darum fest. */
 #tutKarte {
-  position: fixed; z-index: 85; left: 16px; right: 16px;
-  background: var(--card); border: 1px solid var(--line); border-radius: 16px;
-  padding: 16px 16px 14px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, .45);
+  --tut-grund: #17161C;
+  --tut-linie: rgba(255, 255, 255, .13);
+  --tut-schrift: #F2F0EC;
+  --tut-leise: rgba(242, 240, 236, .62);
+  position: fixed; z-index: 85; left: 14px; right: 14px;
+  background: var(--tut-grund); border: 1px solid var(--tut-linie); border-radius: 18px;
+  padding: 15px 16px 13px; color: var(--tut-schrift);
+  box-shadow: 0 14px 38px rgba(0, 0, 0, .5);
   transition: top .28s ease;
 }
 #tutKarte[aria-hidden="true"] { display: none; }
-#tutKarte h3 { margin: 2px 0 8px; font-size: 20px; }
-#tutKarte .tut-text { margin: 0; font-size: 15px; line-height: 1.5; color: var(--text); }
+#tutKarte h3 { margin: 0 0 7px; font-size: 18px; color: var(--tut-schrift); }
+#tutKarte .tut-text { margin: 0; font-size: 15px; line-height: 1.5; color: var(--tut-schrift); }
 #tutKarte .tut-beispiel {
-  margin: 10px 0 0; padding: 9px 11px; border-radius: 10px;
-  background: var(--card-2); border: 1px solid var(--line);
-  font-size: 14px; line-height: 1.45; color: var(--dim);
+  margin: 10px 0 0; padding: 9px 11px; border-radius: 12px;
+  background: rgba(255, 255, 255, .06); border: 1px solid var(--tut-linie);
+  font-size: 14px; line-height: 1.45; color: var(--tut-leise);
 }
 #tutKarte .tut-beispiel:empty { display: none; }
 #tutKarte .btn-row { margin-top: 14px; }
+#tutKarte .btn-row[hidden] { display: none; }
+/* Der Zipfel zeigt auf das, wovon die Rede ist. Ein gedrehtes Quadrat mit
+   demselben Grund; nur die zwei Kanten, die nach außen weisen, tragen die
+   Linie — die anderen beiden verschwinden unter der Karte. */
+#tutZipfel {
+  position: absolute; width: 14px; height: 14px;
+  background: var(--tut-grund); transform: rotate(45deg); border-radius: 2px;
+}
+#tutKarte.zipfel-oben #tutZipfel {
+  top: -8px; border-top: 1px solid var(--tut-linie); border-left: 1px solid var(--tut-linie);
+}
+#tutKarte.zipfel-unten #tutZipfel {
+  bottom: -8px; border-bottom: 1px solid var(--tut-linie); border-right: 1px solid var(--tut-linie);
+}
+#tutKarte.ohne-zipfel #tutZipfel { display: none; }
+/* Der Fuß: links die Punktreihe, rechts der Pfeil. Kein Wort — was er tut,
+   sagt die Reihe daneben. */
+.tut-fuss { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+.tut-fuss[hidden] { display: none; }
+.tut-punkte { display: flex; align-items: center; gap: 5px; flex: 1; flex-wrap: wrap; }
+.tut-punkte i {
+  display: block; width: 5px; height: 5px; border-radius: 999px;
+  background: rgba(255, 255, 255, .26);
+  transition: width .26s ease, background-color .26s ease;
+}
+.tut-punkte i.hier { width: 16px; background: var(--tut-schrift); }
+.tut-punkte i.war { background: rgba(255, 255, 255, .48); }
+/* Nur für Vorleser: Die Punktreihe sagt einem Auge alles, einem Ohr nichts. */
+.tut-zaehler {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
+}
+.tut-vor {
+  flex: none; width: 44px; height: 44px; border-radius: 50%; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  border: none; background: var(--tut-schrift); color: var(--tut-grund);
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.tut-vor svg { width: 20px; height: 20px; }
+/* Der Ausgang sitzt in der Blase, nicht am Bildrand. Am Rand läge er über dem
+   Menüknopf und sähe aus wie ein zweiter davon — die Kopfzeile ist besetzt. */
+#tutZu {
+  position: absolute; top: 3px; right: 3px;
+  width: 44px; height: 44px; border-radius: 50%; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  border: none; background: none; color: var(--tut-leise); cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+#tutZu[hidden] { display: none; }
+#tutZu svg { width: 17px; height: 17px; }
+/* Nur wo er wirklich steht, macht ihm die Überschrift Platz. */
+#tutZu:not([hidden]) + h3 { padding-right: 38px; }
 body.tut-offen { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
-  #tutLoch, #tutKarte { transition: none; }
+  #tutLoch, #tutKarte, .tut-punkte i { transition: none; }
 }
 
 /* Der Knopf am Ende der Übersicht. Ruhig: Wer die App kennt, soll ihn
@@ -1444,11 +1504,17 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
      legt es über alles Übrige. Kein clip-path, kein SVG — ein Element. -->
 <div id="tutHof" hidden aria-hidden="true"><div id="tutLoch"></div></div>
 <div id="tutKarte" role="dialog" aria-modal="true" aria-labelledby="tutTitel" aria-hidden="true">
-  <p class="task-label" id="tutZaehler"></p>
+  <span id="tutZipfel" aria-hidden="true"></span>
+  <button id="tutZu" type="button" hidden></button>
   <h3 id="tutTitel"></h3>
   <p class="tut-text" id="tutText"></p>
   <p class="tut-beispiel" id="tutBeispiel"></p>
   <div class="btn-row" id="tutKnoepfe"></div>
+  <div class="tut-fuss" id="tutFuss" hidden>
+    <div class="tut-punkte" id="tutPunkte" aria-hidden="true"></div>
+    <span class="tut-zaehler" id="tutZaehler"></span>
+    <button class="tut-vor" id="tutVor" type="button"></button>
+  </div>
 </div>
 
 <!-- Der Jubel: ein Fenster über allem, für die seltenen großen Augenblicke.
@@ -2790,7 +2856,7 @@ var APP_STAND = '2026-08-12'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '1.3.0'; /* == VERSION == */
+var APP_VERSION = '1.3.1'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -3313,7 +3379,10 @@ var ICON = {
     FLAMME_PFADE + '</svg>',
   flammeEng: '<svg viewBox="5.2 1.8 13.6 19.4" aria-hidden="true" focusable="false">' +
     FLAMME_PFADE + '</svg>',
-  schluessel: svg('<circle cx="8" cy="8" r="3.6"/><path d="M10.6 10.6l8.4 8.4M16.4 16.4l2-2M14 14l2-2"/>')
+  schluessel: svg('<circle cx="8" cy="8" r="3.6"/><path d="M10.6 10.6l8.4 8.4M16.4 16.4l2-2M14 14l2-2"/>'),
+  // Weiter im Tutorial. Ein Pfeil, kein Wort: Die Sprechblase soll klein
+  // bleiben, und was er tut, sagt schon die Punktreihe daneben.
+  pfeilRechts: svg('<path d="M4.5 12h14M13 6.5l5.5 5.5-5.5 5.5"/>')
 };
 
 // ── Sprachfakten ────────────────────────────────────────────
@@ -4050,21 +4119,43 @@ function tutLochSetzen(ziel) {
 }
 
 // Die Karte dorthin, wo Platz ist: unter das Ziel, wenn es oben steht, sonst
-// darüber. Ohne Ziel in die Mitte.
+// darüber. Ohne Ziel in die Mitte. Der Zipfel folgt und zeigt zurück.
 function tutKarteSetzen(r) {
   var karte = document.getElementById('tutKarte');
   karte.setAttribute('aria-hidden', 'false');
   var hoehe = karte.getBoundingClientRect().height || 200;
   var schirm = window.innerHeight;
-  var oben;
+  var oben, unten;
+  karte.classList.remove('zipfel-oben', 'zipfel-unten', 'ohne-zipfel');
   if (!r) {
     oben = Math.max(16, (schirm - hoehe) / 2);
+    karte.classList.add('ohne-zipfel');
   } else if (r.top + r.height / 2 < schirm / 2) {
-    oben = Math.min(schirm - hoehe - 16, r.bottom + 18);
+    unten = false;
+    oben = Math.min(schirm - hoehe - 16, r.bottom + 16);
+    karte.classList.add('zipfel-oben');
   } else {
-    oben = Math.max(16, r.top - hoehe - 18);
+    unten = true;
+    oben = Math.max(16, r.top - hoehe - 16);
+    karte.classList.add('zipfel-unten');
   }
   karte.style.top = oben + 'px';
+  if (r) tutZipfelSetzen(r, oben, hoehe, unten);
+}
+
+// Der Zipfel steht über der Mitte des Ziels — aber nie so weit außen, dass er
+// die abgerundete Ecke der Blase anschneidet.
+function tutZipfelSetzen(r, oben, hoehe, unten) {
+  var karte = document.getElementById('tutKarte');
+  var zipfel = document.getElementById('tutZipfel');
+  var k = karte.getBoundingClientRect();
+  var mitte = r.left + r.width / 2 - k.left;
+  var rand = 22;
+  zipfel.style.left = Math.max(rand, Math.min(k.width - rand, mitte)) - 7 + 'px';
+  // Steht die Blase gar nicht neben dem Ziel — etwa weil oben kein Platz war —,
+  // zeigt ein Zipfel ins Nichts. Dann lieber keiner.
+  var zeigt = unten ? (oben + hoehe <= r.top + 2) : (oben >= r.bottom - 2);
+  if (!zeigt) karte.classList.add('ohne-zipfel');
 }
 
 function tutZeichnen() {
@@ -4073,30 +4164,24 @@ function tutZeichnen() {
 
   if (tutSchritt < 0) {
     tutLochSetzen('');
-    document.getElementById('tutZaehler').textContent = 'Tutorial';
     document.getElementById('tutTitel').textContent = 'Tutorial abspielen?';
     document.getElementById('tutText').textContent =
       'Ich zeige dir in einer Minute, wie diese App funktioniert — wo du anfängst, ' +
       'was die Übungen voneinander wollen und wo was zu finden ist.';
     document.getElementById('tutBeispiel').textContent = '';
     tutKnoepfe([['Abbrechen', 'ghost', tutEnde], ['Loslegen', 'primary', tutWeiter]]);
+    tutFussSetzen(false);
     tutKarteSetzen(null);
     return;
   }
 
   var sch = TUTORIAL[tutSchritt];
   tutOrtSetzen(sch[0]);
-  document.getElementById('tutZaehler').textContent =
-    'Schritt ' + (tutSchritt + 1) + ' von ' + TUTORIAL.length;
   document.getElementById('tutTitel').textContent = sch[2];
   document.getElementById('tutText').textContent = sch[3];
   document.getElementById('tutBeispiel').textContent = sch[4] || '';
-  // Am Ende steht nur noch «Fertig»: «Abbrechen» täte dort dasselbe, und zwei
-  // Knöpfe für einen Ausgang sind eine Frage, die keine ist.
-  var letzter = tutSchritt === TUTORIAL.length - 1;
-  tutKnoepfe(letzter
-    ? [['Fertig', 'primary', tutWeiter]]
-    : [['Abbrechen', 'ghost', tutEnde], ['Verstanden', 'primary', tutWeiter]]);
+  tutKnoepfe(null);
+  tutFussSetzen(true);
 
   // Erst ins Bild holen, dann messen: Ein Ziel, das unter dem Rand liegt,
   // bekäme sonst ein Loch, das niemand sieht.
@@ -4109,8 +4194,32 @@ function tutZeichnen() {
   tutKarteSetzen(tutLochSetzen(sch[1]));
 }
 
+// Der Fuß der Blase: die Punktreihe und der Pfeil. Er löst die zwei
+// beschrifteten Knöpfe ab, sobald es losgeht — ab hier gibt es nur noch
+// «weiter», und der Ausgang sitzt oben rechts am Rand.
+function tutFussSetzen(an) {
+  var fuss = document.getElementById('tutFuss');
+  var zu = document.getElementById('tutZu');
+  fuss.hidden = !an;
+  zu.hidden = !an;
+  if (!an) return;
+  var punkte = '';
+  for (var i = 0; i < TUTORIAL.length; i++) {
+    punkte += '<i class="' + (i === tutSchritt ? 'hier' : (i < tutSchritt ? 'war' : '')) + '"></i>';
+  }
+  document.getElementById('tutPunkte').innerHTML = punkte;
+  document.getElementById('tutZaehler').textContent =
+    'Schritt ' + (tutSchritt + 1) + ' von ' + TUTORIAL.length;
+  var vor = document.getElementById('tutVor');
+  var letzter = tutSchritt === TUTORIAL.length - 1;
+  vor.innerHTML = letzter ? ICON.haken : ICON.pfeilRechts;
+  vor.setAttribute('aria-label', letzter ? 'Fertig' : 'Weiter');
+}
+
 function tutKnoepfe(liste) {
   var wo = document.getElementById('tutKnoepfe');
+  wo.hidden = !liste;
+  if (!liste) { wo.innerHTML = ''; return; }
   wo.innerHTML = liste.map(function (b, i) {
     return '<button class="btn ' + b[1] + '" data-tut="' + i + '">' + esc(b[0]) + '</button>';
   }).join('');
@@ -4118,6 +4227,10 @@ function tutKnoepfe(liste) {
     b.addEventListener('click', liste[parseInt(b.dataset.tut, 10)][2]);
   });
 }
+document.getElementById('tutVor').addEventListener('click', tutWeiter);
+document.getElementById('tutZu').addEventListener('click', tutEnde);
+document.getElementById('tutZu').innerHTML = ICON.kreuz;
+document.getElementById('tutZu').setAttribute('aria-label', 'Tutorial beenden');
 
 // Dreht jemand das Gerät oder scrollt die Seite nach, stimmt das Rechteck
 // nicht mehr. Neu messen, nicht neu zeichnen.

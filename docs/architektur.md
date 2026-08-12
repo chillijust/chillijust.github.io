@@ -98,8 +98,20 @@ bleibt frei. Kein `clip-path`, kein SVG, keine vier Balken.
 | `tutWeiter()` | zählt hoch, am Ende `tutEnde()` |
 | `tutOrtSetzen(ort)` | wechselt die Ansicht, wenn ein Schritt woandershin zeigt |
 | `tutLochSetzen(ziel)` | scrollt das Ziel in die Mitte, misst es, setzt das Loch |
-| `tutKarteSetzen(r)` | legt die Karte unter das Ziel, wenn es oben liegt, sonst darüber |
+| `tutKarteSetzen(r)` | legt die Blase unter das Ziel, wenn es oben liegt, sonst darüber |
+| `tutZipfelSetzen(…)` | schiebt den Zipfel über die Mitte des Ziels — oder nimmt ihn weg |
+| `tutFussSetzen(an)` | Punktreihe, Pfeil und × statt der beschrifteten Knöpfe |
 | `tutNachmessen()` | misst neu bei `resize` und `orientationchange` |
+
+Die Erklärung ist eine **Sprechblase**: Zipfel zum Ziel, im Fuß links eine Punktreihe
+(ein Zeichen je Schritt, das jetzige als Strich), rechts ein runder Pfeil — am letzten
+Schritt ein Haken. Die Zeile «Schritt 3 von 12» steht weiter im `#tutZaehler`, aber nur
+noch für Vorleser: Eine Punktreihe sagt einem Auge alles und einem Ohr nichts. Der Ausgang
+ist ein stilles × in der Ecke der Blase; nur die Eingangsfrage trägt zwei beschriftete
+Knöpfe, weil dort eine echte Wahl steht.
+
+Die Blase ist in **jedem** Schema dunkel — sie liegt auf einem abgedunkelten Bild, und
+eine helle Karte wäre dort der zweite Scheinwerfer.
 
 Drei Fallen stecken darin:
 
