@@ -1406,7 +1406,7 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
     <div class="controls" id="meldeArt"></div>
     <input type="text" class="zeile" id="meldeTitel" maxlength="120"
       placeholder="Worum geht es? Kurz und knapp." autocapitalize="sentences" spellcheck="false">
-    <textarea class="fliess" id="meldeText" rows="4" placeholder="Was ist passiert, was hatten Sie erwartet?"></textarea>
+    <textarea class="fliess" id="meldeText" rows="4" placeholder="Was ist passiert, was hattest du erwartet?"></textarea>
     <label class="bezug" for="meldeBezug">
       <input type="checkbox" id="meldeBezug" checked>
       <span class="bezug-kasten" aria-hidden="true"></span>
@@ -2299,25 +2299,25 @@ var KOMMENTARE = [
   ['trocken', 'Korrekt. Nicht, dass ich gezweifelt hätte. Doch, hatte ich.'],
   ['trocken', 'Stimmt. Ich notiere das für die Nachwelt.'],
   ['trocken', 'Fehlerfrei. Ich suche noch.'],
-  ['trocken', 'Richtig. Manchmal überraschen Sie mich.'],
+  ['trocken', 'Richtig. Manchmal überraschst du mich.'],
   ['trocken', 'Kein einziger Fehler. Das macht mich nervös.'],
-  ['trocken', 'Ja. Sie dürfen kurz stolz sein, dann geht es weiter.'],
+  ['trocken', 'Ja. Du darfst kurz stolz sein, dann geht es weiter.'],
   ['trocken', 'Richtig geschrieben. Ich hatte schon die Ausrede vorbereitet.'],
   ['trocken', 'Sitzt. Ich hätte Geld darauf gesetzt — auf das Gegenteil.'],
   ['trocken', 'Perfekt. Jetzt bloß nicht darüber nachdenken.'],
   ['trocken', 'Richtig. Das gebe ich nur ungern zu.'],
   ['trocken', 'Alles korrekt. Ich habe zweimal nachgezählt.'],
-  ['trocken', 'Ja doch. Sie müssen nicht so schauen.'],
+  ['trocken', 'Ja doch. Du musst nicht so schauen.'],
   ['trocken', 'Bestanden. Die Messlatte lag da, wo sie immer liegt.'],
-  ['serie', 'Und weiter. Sie sind gerade nicht zu stoppen.'],
+  ['serie', 'Und weiter. Du bist gerade nicht zu stoppen.'],
   ['serie', '{s} in Folge. Ich zähle mit.'],
   ['serie', '{s} richtig hintereinander. Das ist keine Glückssträhne mehr.'],
   ['serie', 'Noch eins. Ich fange an, das ernst zu nehmen.'],
   ['serie', '{s} am Stück. Irgendwann muss doch mal ein Fehler kommen.'],
   ['serie', 'Die Serie hält. Ich halte den Atem an.'],
   ['serie', '{s} in Folge — langsam wird es unheimlich.'],
-  ['serie', 'Schon wieder richtig. Machen Sie ruhig weiter.'],
-  ['jo', 'ё mit beiden Punkten. Sie gehören zu den Guten.'],
+  ['serie', 'Schon wieder richtig. Mach ruhig weiter.'],
+  ['jo', 'ё mit beiden Punkten. Du gehörst zu den Guten.'],
   ['jo', 'Die zwei Punkte auf dem ё sind da. Respekt.'],
   ['jo', 'ё vollständig geschrieben — das lassen sogar Zeitungen weg.'],
   ['jo', 'Das ё hat seine Punkte behalten. Selten genug.'],
@@ -2325,7 +2325,7 @@ var KOMMENTARE = [
   ['weich', 'Sogar das Weichzeichen sitzt.'],
   ['weich', 'Das ь an der richtigen Stelle. Daran scheitern viele.'],
   ['weich', 'Weichzeichen gesetzt, und zwar dort, wo es hingehört.'],
-  ['weich', 'Ein Zeichen, das man nicht hört, und Sie haben es trotzdem.'],
+  ['weich', 'Ein Zeichen, das man nicht hört, und du hast es trotzdem.'],
   ['weich', 'Das stumme Zeichen sitzt. Aufmerksam.'],
   ['lang', '{n} Zeichen am Stück. Das war kein kurzes Wort.'],
   ['lang', 'Ein langes Wort, kein einziger Fehler.'],
@@ -2338,36 +2338,36 @@ var KOMMENTARE = [
   ['knapp', 'So nah dran und doch vorbei.'],
   ['knapp', 'Fast. Und «fast» zählt hier leider nicht.'],
   ['knapp', '{f} Zeichen daneben. Das lässt sich reparieren.'],
-  ['knapp', 'Beinahe. Sehen Sie noch einmal hin.'],
+  ['knapp', 'Beinahe. Sieh noch einmal hin.'],
   ['knapp', 'Um Haaresbreite. Ärgerlich.'],
   ['eins', 'Ein Zeichen zu viel oder zu wenig — der Rest stand.'],
   ['knapp', 'Das war fast das Wort. Fast.'],
-  ['knapp', 'Sie hatten es. Es ist Ihnen nur entwischt.'],
+  ['knapp', 'Du hattest es. Es ist dir nur entwischt.'],
   ['knapp', 'Nicht ganz. Aber wirklich nicht viel.'],
   ['daneben', 'Das war ein anderes Wort. Ein schönes, aber ein anderes.'],
   ['daneben', 'Interessanter Vorschlag. Nicht russisch, aber interessant.'],
   ['daneben', 'Nein. Aber die Handschrift war entschlossen.'],
   ['daneben', 'Noch nicht. Das Wort steht oben, es läuft nicht weg.'],
-  ['daneben', 'Das kommt wieder. Ob Sie wollen oder nicht.'],
-  ['daneben', 'Daneben. Sehen Sie es sich an, dann noch einmal.'],
+  ['daneben', 'Das kommt wieder. Ob du willst oder nicht.'],
+  ['daneben', 'Daneben. Sieh es dir an, dann noch einmal.'],
   ['daneben', 'Nicht dieses Mal.'],
   ['daneben', 'Da war mehr Fantasie als Kyrillisch im Spiel.'],
-  ['daneben', 'Nein. Aber Sie haben sich getraut, und das zählt auch.'],
+  ['daneben', 'Nein. Aber du hast dich getraut, und das zählt auch.'],
   ['daneben', 'Das Wort hat sich gewehrt.'],
   ['daneben', 'Noch ein Stück Weg. Kein Drama.'],
-  ['daneben', 'Falsch — und jetzt wissen Sie, wie es richtig geht.'],
+  ['daneben', 'Falsch — und jetzt weißt du, wie es richtig geht.'],
   ['auf', 'Aufgedeckt. Auch das ist Lernen, nur schneller.'],
   ['auf', 'Nachgesehen statt geraten. Kann man machen.'],
-  ['auf', 'Die Lösung steht da. Merken Sie sie sich gut.'],
+  ['auf', 'Die Lösung steht da. Merk sie dir gut.'],
   ['auf', 'Aufgegeben. Beim nächsten Mal lasse ich nicht so leicht locker.'],
   ['auf', 'Ansehen ist erlaubt. Zweimal ansehen auch.'],
-  ['auf', 'Gut, ich verrate es. Aber nur, weil Sie es sind.'],
+  ['auf', 'Gut, ich verrate es. Aber nur, weil du es bist.'],
   ['eins', 'Ein einziger Buchstabe. Aber wer schreibt, der bleibt.'],
   ['eins', 'Einer. Ein einziger. Ich sage nichts mehr.'],
-  ['eins', 'Ein Zeichen zwischen Ihnen und dem Wort.'],
+  ['eins', 'Ein Zeichen zwischen dir und dem Wort.'],
   ['eins', 'Ein Buchstabe daneben — das tut fast mehr weh als zehn.'],
   ['eins', 'So knapp war es lange nicht.'],
-  ['eins', 'Ein Zeichen. Sehen Sie noch einmal hin, dann haben Sie es.']
+  ['eins', 'Ein Zeichen. Sieh noch einmal hin, dann hast du es.']
 ];
 /* == DATEN:ENDE == */
 
@@ -2703,11 +2703,11 @@ var SATZ_STUFE = 2;
 var STORAGE_KEY = 'russisch_trainer_v1';
 // Stand der ausgelieferten Datei. Wird von tools/build.mjs gesetzt und geht in
 // jedes Ticket ein, damit ein Bericht sagt, welcher Stand gemeint war.
-var APP_STAND = '2026-08-10'; /* == STAND == */
+var APP_STAND = '2026-08-12'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '1.2.0'; /* == VERSION == */
+var APP_VERSION = '1.2.1'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -3862,7 +3862,7 @@ function faktKarteHtml() {
   var st = faktStand(faktKarte);
   return '<section>' +
     '<div class="sprechblase">' +
-    '<span class="fact-label">Wussten Sie?</span>' +
+    '<span class="fact-label">Wusstest du?</span>' +
     '<p class="fact-text">' + esc(faktKarte) + '</p></div>' +
     '<div class="fakt-fuss">' + maskottchen('klein') +
     '<button class="sternbtn' + (st.f ? ' an' : '') + '" id="factFav" ' +
@@ -3905,16 +3905,16 @@ var JUBEL = {
   thema: [
     ['«{n}». Durch.', 'Jedes Wort auf der letzten Stufe. Das war nicht wenig.'],
     ['«{n}» IST GEFALLEN!', 'Alle Wörter gemeistert. Ich lege mich kurz hin.'],
-    ['«{n}» sitzt komplett.', 'Alle Wörter auf der Endstufe — dieses Thema kann Ihnen nichts mehr.']
+    ['«{n}» sitzt komplett.', 'Alle Wörter auf der Endstufe — dieses Thema kann dir nichts mehr.']
   ],
   abc: [
-    ['33 von 33.', 'Das Alphabet ist durch. Sie lesen jetzt Kyrillisch, ohne zu stocken.'],
+    ['33 von 33.', 'Das Alphabet ist durch. Du liest jetzt Kyrillisch, ohne zu stocken.'],
     ['DAS GANZE ALPHABET!', 'Alle 33. Ich habe mitgezählt, mehrmals, ich konnte nicht anders.'],
     ['Das Alphabet steht.', 'Alle 33 Buchstaben gemeistert. Der Anfang ist damit vorbei.']
   ],
   regel: [
-    ['Alle {m} Regeln.', 'Keine Endung überrascht Sie mehr. Das ist selten.'],
-    ['ZEHN VON ZEHN REGELN!', 'Sie beugen besser als mein Onkel, und der ist Russe.'],
+    ['Alle {m} Regeln.', 'Keine Endung überrascht dich mehr. Das ist selten.'],
+    ['ZEHN VON ZEHN REGELN!', 'Du beugst besser als mein Onkel, und der ist Russe.'],
     ['{m} von {m} Regeln.', 'Die ganze Grammatik dieser App sitzt. Ordentlich.']
   ],
   power: [
@@ -4877,7 +4877,7 @@ function empfehlung() {
       return {
         ziel: z.uebung,
         titel: 'Weiter mit «' + UEBUNG_NAME[z.uebung] + '»',
-        note: stand.text + ' · Sie waren gerade dort.'
+        note: stand.text + ' · Du warst gerade dort.'
       };
     }
   }
@@ -4903,7 +4903,7 @@ function empfehlung() {
   }
   var offeneSaetze = trLernen(1).length + trLernen(2).length + trLernen(3).length;
   if (offeneSaetze) {
-    return { ziel: 'uebersetzen', titel: 'Sätze bauen', note: offeneSaetze + ' Sätze warten auf Sie.' };
+    return { ziel: 'uebersetzen', titel: 'Sätze bauen', note: offeneSaetze + ' Sätze warten auf dich.' };
   }
   if (tippenLernen().length) {
     return { ziel: 'tippen', titel: 'Schreiben üben', note: tippenLernen().length + ' Wörter sitzen fast.' };
@@ -5431,7 +5431,7 @@ function renderUeben() {
         ? '<div class="leer">' + maskottchen('gross') +
           '<h3>Dafür reichen die Buchstaben noch nicht</h3>' +
           '<p>Zu diesem Thema lässt sich noch kein Wort vollständig entziffern. ' +
-          'Üben Sie ein paar Buchstaben — oder nehmen Sie den Modus heraus.</p>' +
+          'Üb ein paar Buchstaben — oder nimm den Modus heraus.</p>' +
           '<div class="btn-row">' +
           '<button class="btn ghost" id="leseAus">Alle Wörter</button>' +
           '<button class="btn primary" id="leseZuAbc">Zu «Buchstaben»</button>' +
@@ -5444,7 +5444,7 @@ function renderUeben() {
   var box = state.boxes[q.word.id] || 0;
   var promptRu = q.mode === 'mc-de';
   var prompt = (q.mode === 'tiles' || q.mode === 'mc-ru') ? q.word.de : q.word.ru;
-  var taskLabel = q.mode === 'mc-de' ? 'Was bedeutet …' : q.mode === 'mc-ru' ? 'Welches Wort passt?' : 'Setzen Sie das Wort zusammen';
+  var taskLabel = q.mode === 'mc-de' ? 'Was bedeutet …' : q.mode === 'mc-ru' ? 'Welches Wort passt?' : 'Setz das Wort zusammen';
 
   var dots = '';
   for (var i = 0; i <= BOX_MAX; i++) dots += '<span class="' + (i <= box && box > 0 ? 'on' : '') + '"></span>';
@@ -5915,7 +5915,7 @@ function patzerPruefen(ok) {
         ? 'Dreimal hintereinander verschrieben — das ist kein Vertipper mehr.'
         : 'Dreimal hintereinander verschrieben. Das ist kein Vertipper mehr.',
       note: satzFrei(trTask.satz)
-        ? 'Der Satz bleibt offen, in «Lernsets» sehen Sie sich wieder.'
+        ? 'Der Satz bleibt offen, in «Lernsets» begegnet er dir wieder.'
         : 'Der Satz ist damit wieder zu, bis ' +
           (zurueck.length === 1 ? 'es sitzt.' : 'sie sitzen.')
     };
@@ -5943,7 +5943,7 @@ function patzerHtml() {
   return '<div class="patzer' + (p.art === 'zurueck' ? ' hart' : '') + '">' +
     '<strong>' + (p.art === 'zurueck'
       ? 'Uff. ' + (p.woerter.length === 1 ? 'Dieses Wort' : 'Diese Wörter') +
-        ' müssen Sie noch mal lernen.'
+        ' musst du noch mal lernen.'
       : esc(p.text)) + '</strong>' +
     (p.art === 'zurueck' ? '<span class="patzer-worte">' + woerter + '</span>' +
       '<span class="patzer-note">' + esc(p.text) + ' ' + esc(p.note) + '</span>'
@@ -5998,7 +5998,7 @@ function renderUebersetzenLeer() {
       '<p>' + (ruhend
         ? ruhend + (ruhend === 1 ? ' Satz sitzt und ruht.' : ' S\u00e4tze sitzen und ruhen.') +
           ' Der n\u00e4chste kommt ' + esc(trNaechsteAuffrischung()) + ' zur Sicherheit noch einmal.'
-        : 'Hier erscheinen S\u00e4tze, die Sie ' + BOX_MAX + '\u00d7 richtig \u00fcbersetzt haben \u2014 nach ' +
+        : 'Hier erscheinen S\u00e4tze, die du ' + BOX_MAX + '\u00d7 richtig \u00fcbersetzt haben \u2014 nach ' +
           (state.settings.auffrischen || 21) + ' Tagen einmal zur Sicherheit.') + '</p>';
     if (offen || andereKnopf) {
       html += '<div class="btn-row">' +
@@ -6008,7 +6008,7 @@ function renderUebersetzenLeer() {
     }
   } else {
     html += '<h3>Stufe ' + trLevel + ' sitzt</h3>' +
-      '<p>Alle ' + frei.length + ' freigeschalteten S\u00e4tze dieser Stufe haben Sie ' + BOX_MAX +
+      '<p>Alle ' + frei.length + ' freigeschalteten S\u00e4tze dieser Stufe hast du ' + BOX_MAX +
       '\u00d7 richtig \u00fcbersetzt. ' +
       (frisch
         ? frisch + (frisch === 1 ? ' wartet' : ' warten') + ' zum Auffrischen.'
@@ -6557,7 +6557,7 @@ function abcUebenHtml() {
   var q = abcQ;
   var zeichenFrage = q.modus !== 'laut';
   var box = abcBox(q.b);
-  var taskLabel = q.modus === 'kacheln' ? 'Setzen Sie den Laut zusammen'
+  var taskLabel = q.modus === 'kacheln' ? 'Setz den Laut zusammen'
     : q.modus === 'zeichen' ? 'Wie klingt dieser Buchstabe?' : 'Welcher Buchstabe klingt so?';
 
   // Dieselben Fortschrittspunkte wie über einer Vokabel — dieselbe Leiter,
@@ -6650,8 +6650,8 @@ function leseWinkHtml() {
   return '<div class="lese-wink">' +
     '<button class="lw-zu" id="leseWinkZu" aria-label="Hinweis schließen">' +
     ICON.kreuz + '</button>' +
-    '<strong>' + lesbar + ' Wörter können Sie schon lesen.</strong>' +
-    '<span class="lw-note">Ihre gemeisterten Buchstaben reichen dafür aus — ' +
+    '<strong>' + lesbar + ' Wörter kannst du schon lesen.</strong>' +
+    '<span class="lw-note">Deine gemeisterten Buchstaben reichen dafür aus — ' +
     'Buchstabe für Buchstabe, ohne zu raten.</span>' +
     '<button class="btn ghost lw-los" id="leseLos">Wörter lesen \u2192</button></div>';
 }
@@ -7364,7 +7364,7 @@ function gramUebenHtml(b) {
   if (!gramQ) {
     return '<div class="leer">' + maskottchen('gross') +
       '<h3>Nichts zu üben</h3><p>Für diese Regel fehlen noch passende Wörter. ' +
-      'Lernen Sie ein paar Vokabeln — dann kommt sie von selbst zurück.</p></div>';
+      'Lern ein paar Vokabeln — dann kommt er von selbst zurück.</p></div>';
   }
   var q = gramQ;
   var stufe = gramBox(b);
@@ -7645,7 +7645,7 @@ function renderGrammatik() {
       '<h3>Alle Regeln sitzen</h3><p>Alle ' + GRAMMATIK.length +
       ' Bausteine sind ' + BOX_MAX + '× richtig angewandt. ' + ruhend +
       ' ruhen bis zur nächsten Auffrischung.</p>' +
-      '<p class="naechste">Wiederholen können Sie trotzdem jederzeit: ' +
+      '<p class="naechste">Wiederholen kannst du trotzdem jederzeit: ' +
       'Über die Auswahl oben lässt sich jeder Baustein einzeln vornehmen.</p>' +
       '</div></section>';
     return;
@@ -7928,8 +7928,8 @@ function renderPower() {
     '<span class="mitte">' + (q.stufe === 'kacheln' ? 'legen' : 'selbst schreiben') + '</span>' +
     '<span></span></div>' +
     '<p class="task-label">' + (q.stufe === 'kacheln'
-      ? 'Setzen Sie das Wort zusammen'
-      : 'Schreiben Sie es auf Russisch') + '</p>' +
+      ? 'Setz das Wort zusammen'
+      : 'Schreib es auf Russisch') + '</p>' +
     '<p class="word">' + esc(q.wort.de) + hoerknopf(q.wort.de, 'de') + '</p>';
 
   if (q.stufe === 'tippen-hilfe' && ptPhase === 'ask') {
@@ -8046,7 +8046,7 @@ function renderPowerLeer() {
   var da = ptPool().length;
   main.innerHTML = '<section><div class="leer">' + maskottchen('gross') +
     (da === 0
-      ? '<h3>Nichts gefallen</h3><p>Hier sammeln sich die Wörter, die Sie in ' +
+      ? '<h3>Nichts gefallen</h3><p>Hier sammeln sich die Wörter, die du in ' +
         '«Übersetzen» dreimal hintereinander verschrieben haben. Bisher ist ' +
         'keines dabei — das ist die beste Nachricht, die diese Seite zu bieten hat.</p>'
       : '<h3>Noch zu wenige</h3><p>' + da + ' von ' + PT_MINDEST +
@@ -8193,7 +8193,7 @@ function renderTippenLeer() {
       '<p>' + (ruhend
         ? ruhend + (ruhend === 1 ? ' Wort sitzt' : ' Wörter sitzen') + ' und ruhen. Das nächste kommt ' +
           esc(naechsteAuffrischung()) + ' zur Sicherheit noch einmal.'
-        : 'Hier erscheinen Wörter, die Sie fertig gelernt haben — nach ' +
+        : 'Hier erscheinen Wörter, die du fertig gelernt hast — nach ' +
           (state.settings.auffrischen || 21) + ' Tagen einmal zur Sicherheit.') + '</p>';
     html += '<div class="btn-row">' +
       (offen ? '<button class="btn primary" id="tZuLernen">' +
@@ -8216,7 +8216,7 @@ function renderTippenLeer() {
       '<button class="btn ghost" id="tZuUeben">Neue Wörter lernen</button></div>';
   } else {
     html += '<h3>Noch kein Wort freigeschaltet</h3>' +
-      '<p>Hier tippen Sie nur Wörter, die in «Lernsets» oder «Freestyle» angefangen haben zu sitzen — ' +
+      '<p>Hier tippst du nur Wörter, die in «Lernsets» oder «Freestyle» angefangen haben zu sitzen — ' +
       'ab Stufe ' + schwelle + ' von ' + BOX_MAX + ', also ' + schwelle +
       '× nacheinander richtig beantwortet.</p>';
     if (fast.length) {
@@ -8224,7 +8224,7 @@ function renderTippenLeer() {
         return '<span class="cyr">' + esc(v.ru) + '</span> (Stufe ' + (state.boxes[v.id] || 0) + ')';
       }).join(' · ') + '</p>';
     } else {
-      html += '<p class="naechste">Noch kein Wort begonnen — fangen Sie mit dem ersten Lernset an.</p>';
+      html += '<p class="naechste">Noch kein Wort begonnen — fang mit dem ersten Lernset an.</p>';
     }
     html += '<div class="btn-row"><button class="btn primary" id="tZuUeben">Zu «Lernsets»</button></div>';
   }
@@ -8305,7 +8305,7 @@ function renderTippen() {
     '<p class="task-label">' + (tippenModus === 'wiederholung'
       ? 'Zur Sicherheit noch einmal'
       : tippenModus === 'alle' ? 'Noch einmal, zum Festigen'
-        : 'Schreiben Sie auf Russisch') +
+        : 'Schreib auf Russisch') +
     (tippenSet !== null && LERNSETS[tippenSet] ? ' · Set ' + (tippenSet + 1) : '') + '</p>' +
     '<p class="word">' + esc(w.de) + hoerknopf(w.de, 'de') + '</p>' +
     (tHint ? '<p class="translit">[' + esc(w.tr) + ']</p>' : '') +
@@ -8580,7 +8580,7 @@ function renderEinstellungen() {
   teile.eingabe =
     schalter('tastaturAuto', 'Kyrillische Tastatur von selbst',
       'Verlangt eine Aufgabe Kyrillisch, klappt die eingebaute Tastatur gleich auf. ' +
-      'Aus: Sie holen sie bei Bedarf. Wo Deutsch gefragt ist, kommt sie nie — dort ' +
+      'Aus: Du holst sie bei Bedarf. Wo Deutsch gefragt ist, kommt sie nie — dort ' +
       'schreibt die Gerätetastatur.') + '';
   teile.darstellung =
     wahlText('schema', 'Farbschema',
@@ -8596,7 +8596,7 @@ function renderEinstellungen() {
     '<div class="setting"><span class="setting-text">' +
     '<span class="setting-title">Ton prüfen</span>' +
     '<span class="setting-note">Spielt den Klang für «richtig» und sagt darunter, was ' +
-    'gerade eingerichtet ist. Hören Sie nichts, steht dort, woran es liegt.</span></span>' +
+    'gerade eingerichtet ist. Hörst du nichts, steht dort, woran es liegt.</span></span>' +
     '<button class="chip" id="tonTest">Abspielen</button></div>' +
     '<p class="settings-note" id="tonStand">' + esc(tonAuskunft()) + '</p>';
 
@@ -8700,7 +8700,7 @@ function renderFakten() {
     html += '<div class="leer">' + maskottchen('gross') + '<h3>' +
       (faktenFilter === 'favoriten' ? 'Noch keine Favoriten' : 'Noch keinen Fakt gesehen') + '</h3>' +
       '<p>' + (faktenFilter === 'favoriten'
-        ? 'Tippen Sie auf den Stern, wenn Ihnen einer gefällt — hier finden Sie ihn wieder.'
+        ? 'Tipp auf den Stern, wenn dir einer gefällt — hier findest du ihn wieder.'
         : 'Nach je fünf Antworten erscheint ein Sprachfakt. Sie sammeln sich hier an.') +
       '</p></div>';
   } else {
@@ -8762,7 +8762,7 @@ function meldeFuellen() {
     b.addEventListener('click', function () {
       meldeArt = b.dataset.meldeArt;
       document.getElementById('meldeText').placeholder = meldeArt === 'bug'
-        ? 'Was ist passiert, was hatten Sie erwartet?'
+        ? 'Was ist passiert, was hattest du erwartet?'
         : 'Was soll die App können?';
       meldeFuellen();
     });
@@ -8897,7 +8897,7 @@ function renderTickets() {
     html += '<div class="card">' +
       '<p class="task-label">Kopierfertig</p>' +
       '<p class="backup-note">Alles markiert und in der Zwischenablage. Klappt das Kopieren ' +
-      'nicht, markieren Sie den Text hier von Hand.</p>' +
+      'nicht, markier den Text hier von Hand.</p>' +
       '<textarea class="fliess" id="tkAusgabe" rows="10" readonly></textarea>' +
       '</div><div class="btn-row">' +
       '<button class="btn ghost" id="tkNochmal">Nochmal kopieren</button>' +
@@ -8906,8 +8906,8 @@ function renderTickets() {
     if (!tickets.length) {
       html += '<div class="leer">' + maskottchen('gross') +
         '<h3>Noch kein Ticket</h3>' +
-        '<p>Der Knopf unten rechts ist von überall erreichbar — halten Sie fest, was hakt ' +
-        'oder fehlt, gleich dort, wo es Ihnen auffällt. Später bündelt ein Knopf alles zu ' +
+        '<p>Der Knopf unten rechts ist von überall erreichbar — halt fest, was hakt ' +
+        'oder fehlt, gleich dort, wo es dir auffällt. Später bündelt ein Knopf alles zu ' +
         'einem Text zum Weitergeben.</p></div>';
     } else {
       html += '<div class="tkliste">';
@@ -8938,7 +8938,7 @@ function renderTickets() {
       }
     }
 
-    html += '<p class="settings-note">Neue Tickets schreiben Sie über den Knopf unten rechts — ' +
+    html += '<p class="settings-note">Neue Tickets schreibst du über den Knopf unten rechts — ' +
       'von jeder Ansicht aus. Ein Tipp auf eine Zeile holt das Ticket zum Ändern zurück; ' +
       'geändert gilt es wieder als offen. Sie liegen nur auf diesem Gerät und verlassen es nie ' +
       'von selbst. «Kopieren» legt alles als einen Text in die Zwischenablage; was kopiert ' +
@@ -9284,7 +9284,7 @@ function renderBilanzDetail() {
     var angefangen = themen.filter(function (t) { return t.begonnen > 0; });
     html += '<h2>Nach Themen</h2>';
     if (!angefangen.length) {
-      html += '<p class="detail-fuss">Hier erscheint jedes Thema, sobald Sie das erste Wort ' +
+      html += '<p class="detail-fuss">Hier erscheint jedes Thema, sobald du das erste Wort ' +
         'daraus angefangen haben.</p>';
     } else {
       html += '<div class="theme-list">';
@@ -9354,8 +9354,8 @@ function renderBilanzDetail() {
     ], jetzt, best ? 'von ' + best + ' in Folge' : 'in Folge');
     html += '<p class="detail-fuss">Die Serie zählt richtige Antworten hintereinander und ' +
       'fällt bei jedem Fehler auf null. Ab drei erscheint sie oben auf Home.' +
-      (best > jetzt ? ' Ihre beste Reihe waren ' + best + '.' : '') +
-      (best && jetzt === best ? ' Das ist zugleich Ihre beste Reihe.' : '') + '</p>';
+      (best > jetzt ? ' Deine beste Reihe waren ' + best + '.' : '') +
+      (best && jetzt === best ? ' Das ist zugleich deine beste Reihe.' : '') + '</p>';
   }
 
   html += '<div class="btn-row"><button class="btn ghost" id="detailBack">Zurück zur Bilanz</button>' +
@@ -9475,7 +9475,7 @@ function renderBilanz() {
     '<div class="btn-row"><button class="btn ghost" id="zuFakten">Fakten durchgehen</button></div>';
 
   html += '<h2>Sicherung</h2>' +
-    '<p class="backup-note">Ihr Fortschritt als kopierbarer Code steht im Men\u00fc unter \u00abSicherung\u00bb \u2014 dort wird er erzeugt und dort auch wieder eingespielt.</p>' +
+    '<p class="backup-note">Dein Fortschritt als kopierbarer Code steht im Men\u00fc unter \u00abSicherung\u00bb \u2014 dort wird er erzeugt und dort auch wieder eingespielt.</p>' +
     '<div class="btn-row"><button class="btn ghost" id="zuSicherung">Zur Sicherung</button></div>';
 
   html += '</section>';
@@ -9503,7 +9503,7 @@ function renderBilanz() {
 // Kehrseite derselben Sache und gehört neben den Code, der es auffangen kann.
 function renderSicherung() {
   var html = '<section>';
-  html += '<p class="backup-note">Ihr Fortschritt als kopierbarer Code \u2014 unabh\u00e4ngig vom automatischen ' +
+  html += '<p class="backup-note">Dein Fortschritt als kopierbarer Code \u2014 unabh\u00e4ngig vom automatischen ' +
     'Speichern. Er tr\u00e4gt eine Pr\u00fcfsumme: unvollst\u00e4ndig eingef\u00fcgt wird er abgewiesen statt ' +
     'halb \u00fcbernommen.</p>' +
     '<div class="btn-row"><button class="btn ghost" id="bkMake">Sicherungscode erzeugen</button></div>';

@@ -165,7 +165,7 @@ try {
   pruefe('I2 danach führt sie dorthin zurück', e.ziel === 'uebersetzen', e.ziel);
   pruefe('I3 und sagt das auch', e.titel.indexOf('Weiter mit') === 0 &&
     e.titel.indexOf('Übersetzen') !== -1, e.titel);
-  pruefe('I4 mit dem Stand der Übung', e.note.indexOf('Sie waren gerade dort') !== -1, e.note);
+  pruefe('I4 mit dem Stand der Übung', e.note.indexOf('Du warst gerade dort') !== -1, e.note);
   state.zuletzt.zeit = Date.now() - FORTSETZEN_FRIST - 1000;
   pruefe('I5 nach der Frist wieder der Lernstand', empfehlung().ziel !== 'uebersetzen',
     empfehlung().ziel);

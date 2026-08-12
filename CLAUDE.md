@@ -61,6 +61,11 @@ zweite Flug bricht den ersten ab. Ein runder Knopf, in den sie springt, braucht
 - **Ein runder Knopf, in dem die Chili landen soll**, steht genau einmal im Dokument und
   wird umgehängt, nicht neu gebaut (ADR 0044). Wer ihn in eine Kachel setzt: erst nach
   Hause schicken, dann zeichnen, dann umhängen — `renderKopf()` läuft vor der Ansicht.
+- **Die App duzt** (ADR 0050). Jeder Text, der den Nutzer anspricht, sagt «du» — auch
+  Kommentare und Jubel. **Der Lehrstoff bleibt davon unberührt:** «вы» heißt weiterhin
+  «ihr / Sie», «Sie schreibt einen Brief» ist она пишет, und eine Grammatikerklärung darf
+  «sie» über Wörter sagen. Die Suite `anrede` liest den gerenderten Text jeder Ansicht und
+  führt die Ausnahmen namentlich — wer eine hinzufügt, begründet sie dort.
 - **Der Fakt hat überall dieselbe Gestalt, der Kommentar auch** (ADR 0049). Ein Fakt ist
   immer die Karte mit Sprechblase und Chili (`faktKarteHtml()`), gefragt beim
   **Weitergehen** über `faktFaellig()` — der Streifen unter der Auflösung ist weg. In
