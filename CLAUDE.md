@@ -95,12 +95,16 @@ zweite Flug bricht den ersten ab. Ein runder Knopf, in den sie springt, braucht
   neue Übung braucht einen Eintrag in `UEBUNG_GRUPPEN` **und** in `UEBUNGEN`.
 - **Das Tutorial ist ein Scheinwerfer** (ADR 0051) — ein durchsichtiges `#tutLoch` mit
   `box-shadow: 0 0 0 9999px`, das die echte Oberfläche anleuchtet. Die zwölf Schritte
-  sind **Inhalt** und stehen in `data/tutorial.json` (`[Ort, Ziel, Titel, Text,
-  Beispiel]`). **Ein Wähler, der ins Leere zeigt, ist ein stiller Fehler** — wer ein Ziel
-  umbenennt, prüft die Suite `tutorial`. Ohne Ziel deckt der **Hof** ab, nicht das Loch;
-  außerhalb des Bildes endet die Streuung genau am Bildrand. Die Erklärung ist eine
-  **Sprechblase** mit Zipfel, Punktreihe und rundem Pfeil — in jedem Schema dunkel, weil
-  sie auf einem abgedunkelten Bild liegt.
+  sind **Inhalt** und stehen in `data/tutorial.json` (`[Ort, Ziel, Text]`); ein Schritt
+  ist ein Absatz, und zusammen sagen sie, **in welcher Reihenfolge** man übt. **Ein
+  Wähler, der ins Leere zeigt, ist ein stiller Fehler** — wer ein Ziel umbenennt, prüft
+  die Suite `tutorial`. Ohne Ziel deckt der **Hof** ab, nicht das Loch; außerhalb des
+  Bildes endet die Streuung genau am Bildrand. Die Erklärung ist eine **Sprechblase mit
+  der Chili darin** — Zipfel, Punktreihe, runder Pfeil, in jedem Schema dunkel. Ihr
+  Platzhalter `#tutChili` steht in `chiliPlatzhalter()` **vor** allem anderen, und der
+  Hüpfer je Schritt kommt aus `chiliHuepfen()`, nicht aus einem Umzug. **Der weiche Rand
+  des Lochs braucht dieselbe Deckung wie der äußere Schatten** — sonst bleibt die Linie
+  blass stehen.
 - **Die Einstellungen haben Reiter** (ADR 0045). Was nur auf einem Reiter steht, ist beim
   Binden nicht immer da — vor `addEventListener` prüfen. `einstReiter` gehört in
   `ansichtenZuruecksetzen()`.

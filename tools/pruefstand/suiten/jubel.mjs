@@ -28,6 +28,17 @@ function setVoll(nr, stufe) {
   LERNSETS[nr].woerter.forEach(function (v) { state.boxes[v.id] = stufe; });
 }
 
+// Die Frage auf einen bestimmten Buchstaben umbiegen. Der Modus wird **nicht**
+// von Hand gesetzt: «kacheln» und die Auswahlmodi tragen verschiedene Felder,
+// und ein erfundener Modus wie «wahl» lässt die Ansicht auf q.options greifen,
+// die es dort nicht gibt. Also so lange neu bauen, bis eine Auswahlfrage
+// dasteht, und nur den Buchstaben austauschen.
+function abcAufFrage(b) {
+  for (var i = 0; i < 40 && (!abcQ || !abcQ.options); i++) { abcQ = null; abcFrageBauen(); }
+  if (!abcQ || !abcQ.options) { log.push('FAIL Aufbau: keine Auswahlfrage zu bekommen'); return; }
+  abcQ.b = b;
+}
+
 try {
   // ── A · Die Merkliste selbst ──────────────────────────────
   state = defaultState(); ansichtenZuruecksetzen();
@@ -110,14 +121,16 @@ try {
   state.abcBox[bu[1]] = BOX_MAX - 1;
   abcAnsicht = 'ueben'; abcQ = null; setTab('buchstaben');
   zaehlen();
-  abcQ.b = bu; abcQ.modus = 'wahl'; abcPicked = bu[1]; abcPruefen();
+  abcAufFrage(bu);
+  abcPicked = bu[1]; abcPruefen();
   pruefe('D1 das volle Alphabet feiert', gezaehlt.join() === 'abc', gezaehlt.join());
   zurueck();
   var bu2 = ALPHABET[9];
   state.abcBox[bu2[1]] = BOX_MAX - 1;
   abcQ = null; renderBuchstaben();
   zaehlen();
-  abcQ.b = bu2; abcQ.modus = 'wahl'; abcPicked = bu2[1]; abcPruefen();
+  abcAufFrage(bu2);
+  abcPicked = bu2[1]; abcPruefen();
   pruefe('D2 ein aufgefrischter Buchstabe nicht noch einmal',
     gezaehlt.length === 0, gezaehlt.join());
   zurueck();

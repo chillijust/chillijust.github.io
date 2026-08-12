@@ -12,21 +12,25 @@ wo die Sicherung liegt. Ein Hilfetext hätte das erklärt und wäre nicht gelese
 ## Entscheidung
 
 **Ein Overlay, das jeweils genau eine Stelle der echten Oberfläche anleuchtet** und
-daneben in zwei Sätzen sagt, wozu sie da ist. Zwölf Schritte, jeder mit einem **Beispiel**
-— erklärt wird nicht die Bedienung, sondern der Sinn.
+daneben in zwei, drei Sätzen sagt, wozu sie da ist. Zwölf Schritte — erklärt wird nicht
+die Bedienung, sondern der Sinn und die Reihenfolge.
 
 Der Scheinwerfer ist **ein einziges Element**: `#tutLoch`, ein durchsichtiges Rechteck
 mit `box-shadow: 0 0 0 9999px rgba(0,0,0,.82)`. Der Schatten deckt den Rest ab, das
 Rechteck bleibt frei. Kein `clip-path`, kein SVG, keine vier Balken.
 
 **Die Schritte sind Inhalt**, nicht Code: `data/tutorial.json`, je Zeile
-`[Ort, Ziel, Titel, Text, Beispiel]`. `tools/build.mjs` prüft Ort und Länge und bettet
-sie als `TUTORIAL` ein.
+`[Ort, Ziel, Text]`. `tools/build.mjs` prüft Ort und Länge und bettet sie als `TUTORIAL`
+ein.
 
-**Die Erklärung ist eine Sprechblase, kein Kasten.** Sie trägt einen Zipfel, der auf das
-Angeleuchtete zeigt, im Fuß eine Punktreihe statt der Zeile «Schritt 3 von 12» und rechts
-einen runden Pfeil statt eines beschrifteten Knopfes. Der Ausgang ist ein stilles × in
-ihrer Ecke.
+**Ein Schritt ist ein Absatz**, keine Überschrift mit Erklärung und Beispiel darunter.
+Drei Bausteine in einer Blase auf verdunkeltem Grund waren mehr Gliederung als Inhalt;
+jetzt steht dort ein Text, und das Beispiel ist sein letzter Satz.
+
+**Die Erklärung ist eine Sprechblase, und die Chili erzählt sie.** Sie steht darin, der
+Text neben ihr; die Blase trägt einen Zipfel zum Angeleuchteten, im Fuß eine Punktreihe
+statt der Zeile «Schritt 3 von 12» und rechts einen runden Pfeil. Der Ausgang ist ein
+stilles × in ihrer Ecke.
 
 **Der Einstieg ist ein Knopf ganz unten auf Home** («Wie funktioniert das hier?»), ruhig
 gestaltet — wer die App kennt, soll ihn übersehen dürfen. Beim allerersten Start bietet
@@ -69,6 +73,20 @@ stehen darum als lokale Eigenschaften auf `#tutKarte` selbst.
 **Der Ausgang sitzt in der Blase, nicht am Bildrand.** Oben rechts am Rand läge er über
 dem Menüknopf und sähe aus wie ein zweiter davon; die Kopfzeile ist besetzt.
 
+**Der weiche Rand ist ein zweiter, innen liegender Schatten** — mit **derselben** Deckung
+wie der äußere. Eine goldene Umrandung sah ausgeschnitten aus; eine schwächere Innenkante
+hätte den Rechteckrand nur blass stehen lassen. Erst wenn beide Schatten am Rand gleich
+dunkel sind, gibt es keine Linie mehr, sondern einen Übergang. Dafür braucht das Loch
+reichlich Luft (22 px): Der Auslauf reicht nach innen und läge sonst auf dem, was er
+zeigen soll.
+
+**Die Chili bleibt eine.** Im Tutorial ist ihr Platzhalter `#tutChili`, und
+`chiliPlatzhalter()` fragt danach **vor** allem anderen — sonst zöge jeder Renderlauf
+unter dem Overlay sie kurz in die Ansicht und wieder zurück. Zwischen den Schritten
+wechselt ihr Platz nicht; sie hüpft trotzdem, weil `chiliHuepfen()` den Hüpfer vom Umzug
+trennt. Beim **allerersten** Start fliegt sie nicht: Da liegt das Tutorial schon über dem
+ersten Bild, und ein Flug im Augenblick des Ladens sähe nach Fehler aus.
+
 **Nur die Eingangsfrage trägt beschriftete Knöpfe.** «Abbrechen» und «Loslegen» ist eine
 echte Wahl. Ab da gibt es nur noch «weiter» — dafür genügt ein Pfeil, und am letzten
 Schritt wird daraus ein Haken.
@@ -77,6 +95,13 @@ Schritt wird daraus ein Haken.
 
 - Neuer Zustand: `state.tutorialGesehen` (Vorgabe `false`), im Sicherungscode nicht
   geführt — er gehört zum Gerät, nicht zum Lernstand.
+- Die zwölf Texte sagen zusammen, **in welcher Reihenfolge man übt**: Buchstaben, dann
+  Lernsets, dann Tippen und Übersetzen, Grammatik ab dem zweiten Set, Freestyle und
+  Power-Training nebenher. Schritt 8 fasst es in einem Satz.
+- **Zwei Suiten mussten das Tutorial wegräumen**, bevor sie prüfen: `maskottchen` und
+  `enter`. Beide laden mit leerem Speicher, also bietet die App es von selbst an — und
+  die Figur steht dann in der Blase statt in einem Knopf. Das ist kein Störgeräusch,
+  sondern die Funktion; `maskottchen` prüft sie darum ausdrücklich, bevor sie schließt.
 - `data/tutorial.json` ist die einzige Quelle der Texte. Ein Ziel, das es nicht gibt,
   fällt in der Suite auf; ein unbekannter Ort schon im Build.
 - Jedes Ziel kommt genau einmal vor — sonst erklärte das Tutorial zweimal dasselbe.

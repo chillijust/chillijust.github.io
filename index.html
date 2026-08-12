@@ -899,11 +899,15 @@ body.chili-steht #chiliBuehne { visibility: visible; }
   position: fixed; inset: 0; z-index: 80;
   background: transparent;
 }
+/* Der Rand des Lochs ist weich, nicht gezogen: Ein zweiter, **innen**
+   liegender Schatten läuft von der Kante nach innen aus und trifft dort auf
+   die Dunkelheit ringsum. So gibt es keine Linie mehr, nur einen Übergang —
+   eine harte goldene Umrandung sah ausgeschnitten aus. */
 #tutLoch {
-  position: absolute; border-radius: 14px;
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, .82);
+  position: absolute; border-radius: 20px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, .82),
+              inset 0 0 20px 10px rgba(0, 0, 0, .82);
   transition: top .28s ease, left .28s ease, width .28s ease, height .28s ease;
-  outline: 2px solid var(--gold); outline-offset: 2px;
 }
 /* Beim **ersten** Erscheinen darf nichts gleiten: Das Loch stünde sonst noch
    außerhalb des Bildes und flöge sichtbar aus der Ecke heran. Von Schritt zu
@@ -929,18 +933,25 @@ body.chili-steht #chiliBuehne { visibility: visible; }
   background: var(--tut-grund); border: 1px solid var(--tut-linie); border-radius: 18px;
   padding: 15px 16px 13px; color: var(--tut-schrift);
   box-shadow: 0 14px 38px rgba(0, 0, 0, .5);
-  transition: top .28s ease;
 }
 #tutKarte[aria-hidden="true"] { display: none; }
-#tutKarte h3 { margin: 0 0 7px; font-size: 18px; color: var(--tut-schrift); }
-#tutKarte .tut-text { margin: 0; font-size: 15px; line-height: 1.5; color: var(--tut-schrift); }
-#tutKarte .tut-beispiel {
-  margin: 10px 0 0; padding: 9px 11px; border-radius: 12px;
-  background: rgba(255, 255, 255, .06); border: 1px solid var(--tut-linie);
-  font-size: 14px; line-height: 1.45; color: var(--tut-leise);
+/* Die Chili erzählt: Sie steht in der Blase, der Text neben ihr. Wie überall
+   ist sie nur umgehängt, nie ein zweites Mal eingebettet (ADR 0012). */
+.tut-kopf { display: flex; align-items: flex-start; gap: 13px; }
+#tutChili { flex: none; width: 62px; height: 62px; margin-top: -2px; }
+#tutChili:empty { display: none; }
+#tutKarte .tut-text {
+  margin: 0; flex: 1; min-width: 0;
+  font-size: 15px; line-height: 1.5; color: var(--tut-schrift);
 }
-#tutKarte .tut-beispiel:empty { display: none; }
 #tutKarte .btn-row { margin-top: 14px; }
+/* Jeder Schritt klappt die Blase neu auf — sonst wäre der Wechsel bloß ein
+   ausgetauschter Text, und der Sprung der Chili käme aus dem Nichts. */
+@keyframes tutAuf {
+  from { opacity: 0; transform: scale(.94); }
+  to { opacity: 1; transform: scale(1); }
+}
+#tutKarte.klappt { animation: tutAuf .22s cubic-bezier(.3, .85, .4, 1); }
 #tutKarte .btn-row[hidden] { display: none; }
 /* Der Zipfel zeigt auf das, wovon die Rede ist. Ein gedrehtes Quadrat mit
    demselben Grund; nur die zwei Kanten, die nach außen weisen, tragen die
@@ -991,8 +1002,8 @@ body.chili-steht #chiliBuehne { visibility: visible; }
 }
 #tutZu[hidden] { display: none; }
 #tutZu svg { width: 17px; height: 17px; }
-/* Nur wo er wirklich steht, macht ihm die Überschrift Platz. */
-#tutZu:not([hidden]) + h3 { padding-right: 38px; }
+/* Nur wo er wirklich steht, macht ihm die erste Zeile Platz. */
+#tutZu:not([hidden]) ~ .tut-kopf .tut-text { padding-right: 26px; }
 body.tut-offen { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   #tutLoch, #tutKarte, .tut-punkte i { transition: none; }
@@ -1503,12 +1514,13 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
      durchsichtiges Rechteck über dem erklärten Feld; seinen riesigen Schatten
      legt es über alles Übrige. Kein clip-path, kein SVG — ein Element. -->
 <div id="tutHof" hidden aria-hidden="true"><div id="tutLoch"></div></div>
-<div id="tutKarte" role="dialog" aria-modal="true" aria-labelledby="tutTitel" aria-hidden="true">
+<div id="tutKarte" role="dialog" aria-modal="true" aria-labelledby="tutText" aria-hidden="true">
   <span id="tutZipfel" aria-hidden="true"></span>
   <button id="tutZu" type="button" hidden></button>
-  <h3 id="tutTitel"></h3>
-  <p class="tut-text" id="tutText"></p>
-  <p class="tut-beispiel" id="tutBeispiel"></p>
+  <div class="tut-kopf">
+    <span id="tutChili" class="chili-platz"></span>
+    <p class="tut-text" id="tutText"></p>
+  </div>
   <div class="btn-row" id="tutKnoepfe"></div>
   <div class="tut-fuss" id="tutFuss" hidden>
     <div class="tut-punkte" id="tutPunkte" aria-hidden="true"></div>
@@ -2505,18 +2517,18 @@ var KOMMENTARE = [
 ];
 
 var TUTORIAL = [
-  ['home', '[data-uebung="buchstaben"]', 'Zuerst die Buchstaben', 'Russisch schreibt mit anderen Zeichen. Solange du sie nicht lesen kannst, ist jedes Wort nur ein Bild. Fang hier an — es sind 33, und viele kennst du fast schon.', 'Р ist ein R, С ist ein S. Damit liest sich ресторан als «restoran» — Restaurant.'],
-  ['home', '[data-uebung="lernsets"]', 'Dann die Wörter', 'Lernsets geben dir zwölf Wörter auf einmal — keine wahllosen, sondern genau die, die du für die nächsten Sätze brauchst. Sitzen alle zwölf, gehen die Sätze auf.', 'Kennst du книга, читать und я, kannst du «Я читаю книгу» bauen.'],
-  ['home', '[data-uebung="uebersetzen"]', 'Dann ganze Sätze', 'Hier kommen die Sätze an, die deine Lernsets geöffnet haben. Erst legst du sie aus Kacheln, später schreibst du sie selbst — und erst russisch verstehen, dann russisch bauen.', '«Я читаю книгу» heißt «Ich lese ein Buch».'],
-  ['home', '[data-uebung="tippen"]', 'Selbst schreiben', 'Tippen ist die ehrlichste Übung: Hier hilft keine Auswahl. Die kyrillische Tastatur kommt von selbst, wenn sie gebraucht wird.', 'Du siehst «Buch» und schreibst книга. Ein Buchstabe daneben zählt nicht.'],
-  ['home', '[data-uebung="grammatik"]', 'Warum ein Wort so dasteht', 'Russisch verändert die Wortenden, je nachdem wozu ein Wort im Satz da ist. Hier siehst du die Regel dahinter — zum Selberfinden, nicht zum Auswendiglernen.', 'книга wird zu книгу, sobald man sie liest. Das ist der Akkusativ.'],
-  ['home', '[data-uebung="freestyle"]', 'Üben ohne Plan', 'Freestyle ist der ganze Wortschatz, ohne Sperren und ohne Reihenfolge. Wähl ein Thema und leg los.', 'Nur Essen, nur Familie, oder alles durcheinander — du entscheidest.'],
-  ['home', '[data-uebung="power"]', 'Was zurückgefallen ist', 'Schreibst du ein Wort dreimal hintereinander falsch, rutscht es zurück und schließt seinen Satz wieder. Hier holst du es heraus — drei Wörter auf einmal.', 'Aus dem Topf kommt nichts, bevor es wirklich wieder sitzt.'],
-  ['home', '#homeEmpf', 'Wenn du nicht weißt, was jetzt', 'Ganz oben steht immer ein Vorschlag. Er kennt deinen Stand und schickt dich dorthin, wo gerade wirklich etwas zu tun ist.', 'Antippen genügt — du landest sofort in der richtigen Übung.'],
-  ['home', '.kopf-rail', 'Dein Fortschritt', 'Der Balken zeigt, wie viele Wörter endgültig sitzen. Ein Wort braucht dafür vier richtige Antworten an verschiedenen Tagen.', 'Darunter läuft deine Serie mit: wie viele Antworten am Stück richtig waren.'],
-  ['lernsets', '#filterKnopf', 'Die Auswahl', 'In jeder Übung sitzt oben dieser Trichter. Dahinter wählst du, woraus geübt wird — der Reihe nach, nur Wiederholungen, oder alles auf einmal.', 'In «Tippen» kannst du damit ein einzelnes Lernset nachschreiben, bis es sitzt.'],
-  ['home', '#menuKnopf', 'Das Menü', 'Hinter den drei Strichen liegen Bilanz, Sicherung, Einstellungen und Tickets. Die Tickets sind für dich: Was hakt oder fehlt, schreibst du dort auf.', 'Die Sicherung ist wichtig — dein Fortschritt liegt nur auf diesem Gerät.'],
-  ['home', '#tutKnopf', 'Das war es', 'Diesen Knopf findest du immer hier unten. Er zeigt dir alles noch einmal, sooft du willst.', 'Jetzt aber los: Die Buchstaben warten.']
+  ['home', '[data-uebung="buchstaben"]', 'Fang hier an. Russisch schreibt mit anderen Zeichen — solange du sie nicht lesen kannst, ist jedes Wort nur ein Bild. Es sind 33, und viele kennst du fast schon: Р ist ein R, С ein S.'],
+  ['home', '[data-uebung="lernsets"]', 'Dann hierher. Lernsets geben dir zwölf Wörter auf einmal — nicht wahllose, sondern genau die, die du für die nächsten Sätze brauchst. Das ist dein Hauptweg durch die App.'],
+  ['home', '[data-uebung="tippen"]', 'Sobald ein Wort halbwegs sitzt, taucht es hier auf. Tippen ist die ehrlichste Übung: keine Auswahl, du schreibst selbst. Die kyrillische Tastatur kommt von allein.'],
+  ['home', '[data-uebung="uebersetzen"]', 'Sitzen alle Wörter eines Satzes, geht er hier auf. Erst legst du ihn aus Kacheln, später schreibst du ihn — und erst Russisch verstehen, dann Russisch bauen.'],
+  ['home', '[data-uebung="grammatik"]', 'Wenn dir auffällt, dass sich Wörter verändern: книга wird zu книгу, sobald man sie liest. Hier steht, warum. Freiwillig — aber ab dem zweiten Lernset lohnt es sich.'],
+  ['home', '[data-uebung="freestyle"]', 'Zwischendurch, wenn du einfach üben willst: der ganze Wortschatz nach Thema, ohne Sperren und ohne Reihenfolge.'],
+  ['home', '[data-uebung="power"]', 'Schreibst du ein Wort dreimal hintereinander falsch, rutscht es zurück und schließt seinen Satz wieder. Hier holst du es heraus — drei auf einmal.'],
+  ['home', '#homeEmpf', 'Kurz gesagt: Buchstaben, dann Lernsets, dann Tippen und Übersetzen. Merken musst du dir das nicht — hier oben steht immer, was als Nächstes dran ist.'],
+  ['home', '.kopf-rail', 'Der Balken zeigt, wie viele Wörter endgültig sitzen. Ein Wort braucht dafür vier richtige Antworten an verschiedenen Tagen. Darunter läuft deine Serie mit.'],
+  ['lernsets', '#filterKnopf', 'In jeder Übung sitzt oben dieser Trichter. Dahinter wählst du, woraus geübt wird: der Reihe nach, nur Wiederholungen, oder alles auf einmal.'],
+  ['home', '#menuKnopf', 'Hinter den drei Strichen liegen Bilanz, Sicherung, Einstellungen und Tickets. Die Sicherung ist wichtig — dein Fortschritt liegt nur auf diesem Gerät.'],
+  ['home', '#tutKnopf', 'Diesen Knopf findest du immer hier unten. Er zeigt dir alles noch einmal, sooft du willst. Jetzt aber los: Die Buchstaben warten.']
 ];
 /* == DATEN:ENDE == */
 
@@ -2856,7 +2868,7 @@ var APP_STAND = '2026-08-12'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '1.3.1'; /* == VERSION == */
+var APP_VERSION = '1.4.0'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -2941,6 +2953,10 @@ function chiliFlug(vorher, jetzt) {
 function chiliPlatzhalter() {
   var knopf = document.getElementById('chiliKnopf');
   if (jubelOffen) return document.getElementById('jubelChili');
+  // Im Tutorial erzählt sie — und bleibt dabei in der Blase stehen, auch wenn
+  // die Ansicht darunter wechselt. Genau deshalb steht das vor allem anderen:
+  // Sonst zöge jeder Renderlauf sie kurz in die Ansicht und wieder zurück.
+  if (tutOffen) return document.getElementById('tutChili');
   if (menuOffen) return knopf;
   if (filterOffen) return document.getElementById('chiliFilter');
   if (wissenOffen) return document.getElementById('chiliWissen');
@@ -2987,7 +3003,14 @@ function chiliAktualisieren(ohneSprung) {
   if (ersterAuftritt || ohneSprung) return;
 
   chiliFlug(vorher, jetzt);
+  chiliHuepfen();
+}
 
+// Nur der Hüpfer, ohne Umzug. Das Tutorial braucht ihn: Dort bleibt die Figur
+// zwölf Schritte lang im selben Platzhalter stehen — die Blase wandert unter
+// ihr. Ohne den Hüpfer stünde sie bei jedem Schritt reglos da.
+function chiliHuepfen() {
+  if (!chiliFigur) return;
   chiliFigur.classList.remove('springt');
   void chiliFigur.offsetWidth; // Neustart der Sprunganimation erzwingen
   chiliFigur.classList.add('springt');
@@ -4058,24 +4081,33 @@ var tutOffen = false;
 var tutHeimTab = 'home';  // wohin nach dem Ende zurück
 var tutLochStand = false; // lag zuletzt ein Ziel unter dem Loch?
 
-function tutStarten() {
+// «ruhig» heißt: ohne Flug der Chili. Beim allerersten Start liegt das Tutorial
+// schon über dem ersten Bild — sie flöge dann im Augenblick des Ladens quer
+// über den Schirm, und das sähe nach Fehler aus, nicht nach Auftritt.
+function tutStarten(ruhig) {
   tutHeimTab = 'home';
   tutSchritt = -1;
   tutOffen = true;
   tutLochStand = false;
   document.body.classList.add('tut-offen');
   tutZeichnen();
+  chiliAktualisieren(ruhig);
 }
 
 function tutEnde() {
   tutOffen = false;
   document.body.classList.remove('tut-offen');
+  // Die Blase bleibt noch stehen: Die Figur zieht **aus ihr heraus** zurück in
+  // die Ansicht, und ihre alte Lage lässt sich nur messen, solange sie da ist.
+  // Ein Klick ist eine Bewegung — der Ansichtswechsel und der Umzug sind einer.
+  chiliZusammen(function () {
+    if (currentTab !== tutHeimTab) setTab(tutHeimTab);
+  });
   document.getElementById('tutHof').hidden = true;
   document.getElementById('tutKarte').setAttribute('aria-hidden', 'true');
   // Einmal gefragt ist gefragt — auch wer abbricht, wird nicht wieder gefragt.
   state.tutorialGesehen = true;
   save();
-  if (currentTab !== tutHeimTab) setTab(tutHeimTab);
 }
 
 function tutWeiter() {
@@ -4110,7 +4142,9 @@ function tutLochSetzen(ziel) {
   }
   hof.classList.remove('ohne-ziel');
   var r = el.getBoundingClientRect();
-  var luft = 6;
+  // Reichlich Luft: Der weiche Rand läuft nach innen aus, und ohne Abstand
+  // legte er sich auf das, was er zeigen soll.
+  var luft = 22;
   loch.style.top = (r.top - luft) + 'px';
   loch.style.left = (r.left - luft) + 'px';
   loch.style.width = (r.width + luft * 2) + 'px';
@@ -4164,11 +4198,9 @@ function tutZeichnen() {
 
   if (tutSchritt < 0) {
     tutLochSetzen('');
-    document.getElementById('tutTitel').textContent = 'Tutorial abspielen?';
     document.getElementById('tutText').textContent =
       'Ich zeige dir in einer Minute, wie diese App funktioniert — wo du anfängst, ' +
       'was die Übungen voneinander wollen und wo was zu finden ist.';
-    document.getElementById('tutBeispiel').textContent = '';
     tutKnoepfe([['Abbrechen', 'ghost', tutEnde], ['Loslegen', 'primary', tutWeiter]]);
     tutFussSetzen(false);
     tutKarteSetzen(null);
@@ -4177,9 +4209,7 @@ function tutZeichnen() {
 
   var sch = TUTORIAL[tutSchritt];
   tutOrtSetzen(sch[0]);
-  document.getElementById('tutTitel').textContent = sch[2];
-  document.getElementById('tutText').textContent = sch[3];
-  document.getElementById('tutBeispiel').textContent = sch[4] || '';
+  document.getElementById('tutText').textContent = sch[2];
   tutKnoepfe(null);
   tutFussSetzen(true);
 
@@ -4192,6 +4222,20 @@ function tutZeichnen() {
     }
   }
   tutKarteSetzen(tutLochSetzen(sch[1]));
+  // Zuletzt die Bewegung: Die Chili hüpft an ihrem neuen Platz auf, und die
+  // Blase klappt darum auf. Erst rechnen, dann bewegen — sonst spielte die
+  // Animation, während die Blase noch am alten Ort steht.
+  chiliHuepfen();
+  tutKlappen();
+}
+
+// Der Auftritt der Blase. Die Klasse muss weg und neu gesetzt werden, sonst
+// startet die Animation beim zweiten Schritt nicht wieder.
+function tutKlappen() {
+  var karte = document.getElementById('tutKarte');
+  karte.classList.remove('klappt');
+  void karte.offsetWidth;
+  karte.classList.add('klappt');
 }
 
 // Der Fuß der Blase: die Punktreihe und der Pfeil. Er löst die zwei
@@ -9999,7 +10043,7 @@ meldeKnopfZeigen();
 // Antwort gegeben hat, hat die App noch nicht gesehen; wer abbricht, bekommt
 // die Frage nicht wieder.
 if (!state.tutorialGesehen && state.answered === 0 && currentTab === 'home') {
-  tutStarten();
+  tutStarten(true);
 }
 </script>
 </body>

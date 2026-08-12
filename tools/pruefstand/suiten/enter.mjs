@@ -23,6 +23,11 @@ function enter(el, umschalt) {
 }
 
 try {
+  // Die Testseite lädt mit leerem Speicher — dann bietet die App das Tutorial
+  // von selbst an, und die Chili erzählt aus dessen Blase statt in Knöpfen zu
+  // sitzen. Erst wegräumen, dann prüfen.
+  tutEnde();
+
   // ── A · «Tippen» ──────────────────────────────────────────
   state = defaultState();
   ansichtenZuruecksetzen();

@@ -86,7 +86,9 @@ sagt die Kommentarzeile darüber. Abschaltbar über die Einstellung `kommentare`
 ## Tutorial
 
 Zwölf Schritte über die echte Oberfläche (ADR 0051). Sie stehen in `data/tutorial.json`,
-je Zeile `[Ort, Ziel, Titel, Text, Beispiel]`, und kommen als `TUTORIAL` in die Datei.
+je Zeile `[Ort, Ziel, Text]`, und kommen als `TUTORIAL` in die Datei. Ein Schritt ist ein
+Absatz — keine Überschrift, kein abgesetztes Beispiel; zusammen sagen die zwölf, **in
+welcher Reihenfolge** man übt.
 
 Der Scheinwerfer ist **ein** Element: `#tutLoch` ist durchsichtig und trägt
 `box-shadow: 0 0 0 9999px rgba(0,0,0,.82)` — der Schatten deckt den Rest ab, das Rechteck
@@ -103,15 +105,26 @@ bleibt frei. Kein `clip-path`, kein SVG, keine vier Balken.
 | `tutFussSetzen(an)` | Punktreihe, Pfeil und × statt der beschrifteten Knöpfe |
 | `tutNachmessen()` | misst neu bei `resize` und `orientationchange` |
 
-Die Erklärung ist eine **Sprechblase**: Zipfel zum Ziel, im Fuß links eine Punktreihe
-(ein Zeichen je Schritt, das jetzige als Strich), rechts ein runder Pfeil — am letzten
-Schritt ein Haken. Die Zeile «Schritt 3 von 12» steht weiter im `#tutZaehler`, aber nur
-noch für Vorleser: Eine Punktreihe sagt einem Auge alles und einem Ohr nichts. Der Ausgang
-ist ein stilles × in der Ecke der Blase; nur die Eingangsfrage trägt zwei beschriftete
-Knöpfe, weil dort eine echte Wahl steht.
+Die Erklärung ist eine **Sprechblase, und die Chili erzählt sie**: Sie steht links darin,
+der Text neben ihr, der Zipfel zeigt zum Ziel. Im Fuß links eine Punktreihe (ein Zeichen
+je Schritt, das jetzige als Strich), rechts ein runder Pfeil — am letzten Schritt ein
+Haken. Die Zeile «Schritt 3 von 12» steht weiter im `#tutZaehler`, aber nur noch für
+Vorleser: Eine Punktreihe sagt einem Auge alles und einem Ohr nichts. Der Ausgang ist ein
+stilles × in der Ecke der Blase; nur die Eingangsfrage trägt zwei beschriftete Knöpfe,
+weil dort eine echte Wahl steht.
 
 Die Blase ist in **jedem** Schema dunkel — sie liegt auf einem abgedunkelten Bild, und
 eine helle Karte wäre dort der zweite Scheinwerfer.
+
+**Die Figur bleibt eine.** Ihr Platzhalter im Tutorial ist `#tutChili`, und
+`chiliPlatzhalter()` fragt danach vor allem anderen — sonst zöge jeder Renderlauf unter
+dem Overlay sie kurz in die Ansicht. Zwischen den Schritten wechselt ihr Platz nicht; den
+Hüpfer trägt `chiliHuepfen()`, das den Sprung vom Umzug trennt. Beim allerersten Start
+(`tutStarten(true)`) fliegt sie nicht.
+
+**Der Rand des Lochs ist weich**: ein zweiter, innen liegender Schatten mit *derselben*
+Deckung wie der äußere. Nur bei gleicher Deckung gibt es am Rand keine Linie, sondern
+einen Übergang — deshalb auch 22 px Luft um das Ziel, sonst läge der Auslauf darauf.
 
 Drei Fallen stecken darin:
 

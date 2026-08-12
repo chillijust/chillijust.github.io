@@ -29,12 +29,19 @@ try {
   // A0 · Beim Laden steht sie sofort richtig — kein Sprung von der Kopfzeile
   // auf die Empfehlung (das sah beim Neuladen wie ein Fehler aus).
   pruefe('A0 Startansicht ist Home', currentTab === 'home', currentTab);
-  pruefe('A0b sie steht gleich auf der Empfehlung',
-    chiliStation === q('.empfehlung [data-chili]'),
+  // Die Testseite lädt mit leerem Speicher — dann liegt das Tutorial schon
+  // über dem ersten Bild, und die Figur erzählt aus seiner Blase. Auch das
+  // darf beim Laden **kein** Flug sein.
+  pruefe('A0b beim allerersten Start steht sie in der Tutorial-Blase',
+    tutOffen && chiliStation === q('#tutChili'),
     chiliStation && (chiliStation.id || chiliStation.className));
   pruefe('A0c und ist dabei nicht geflogen', chiliBuehne.getAnimations().length === 0 &&
     chiliFigur.className.indexOf('springt') === -1,
     String(chiliBuehne.getAnimations().length));
+  tutEnde();
+  pruefe('A0d danach steht sie auf der Empfehlung',
+    chiliStation === q('.empfehlung [data-chili]'),
+    chiliStation && (chiliStation.id || chiliStation.className));
 
   // A · Quelle
   pruefe('A1 Figur trägt das freigestellte Bild',

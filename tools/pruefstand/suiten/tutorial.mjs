@@ -47,27 +47,28 @@ try {
   // ausgeht.
   pruefe('00 beim allerersten Start fragt die App von selbst',
     tutOffen === true && q('#tutHof').hidden === false, String(tutOffen));
-  pruefe('01 und zwar mit der Frage', q('#tutTitel').textContent.indexOf('Tutorial') !== -1,
-    q('#tutTitel').textContent);
+  pruefe('01 und zwar mit der Frage', q('#tutText').textContent.indexOf('Ich zeige dir') === 0,
+    q('#tutText').textContent.slice(0, 40));
   tutEnde();
 
   // ── A · Die Schritte selbst ───────────────────────────────
   reicherStand();
   pruefe('A1 zwölf Schritte', TUTORIAL.length === 12, String(TUTORIAL.length));
-  pruefe('A2 jeder hat Ort, Ziel, Titel, Text und Beispiel',
-    TUTORIAL.every(function (s) { return s.length === 5; }));
+  pruefe('A2 jeder hat Ort, Ziel und Text',
+    TUTORIAL.every(function (s) { return s.length === 3; }));
   pruefe('A3 jeder Text ist kurz genug fürs Overlay',
-    TUTORIAL.every(function (s) { return s[3].length <= 240; }),
-    String(Math.max.apply(null, TUTORIAL.map(function (s) { return s[3].length; }))));
-  pruefe('A4 elf von zwölf tragen ein Beispiel',
-    TUTORIAL.filter(function (s) { return s[4]; }).length >= 11);
+    TUTORIAL.every(function (s) { return s[2].length <= 230; }),
+    String(Math.max.apply(null, TUTORIAL.map(function (s) { return s[2].length; }))));
+  pruefe('A4 und keiner ist eine Überschrift',
+    TUTORIAL.every(function (s) { return s[2].length >= 40; }),
+    String(Math.min.apply(null, TUTORIAL.map(function (s) { return s[2].length; }))));
   pruefe('A5 kein Ziel kommt zweimal vor', (function () {
     var z = {};
     TUTORIAL.forEach(function (s) { z[s[1]] = 1; });
     return Object.keys(z).length === TUTORIAL.length;
   })());
   pruefe('A6 die App duzt auch hier', TUTORIAL.every(function (s) {
-    return !/\bSie\b|\bIhnen\b|\bIhre\b/.test(s[2] + ' ' + s[3] + ' ' + s[4]);
+    return !/\bSie\b|\bIhnen\b|\bIhre\b/.test(s[2]);
   }));
 
   // ── B · Der Knopf auf Home ────────────────────────────────
@@ -84,8 +85,8 @@ try {
   // ── C · Erst die Frage, dann der Scheinwerfer ─────────────
   q('#tutKnopf').click();
   pruefe('C1 das Overlay ist offen', tutOffen && !q('#tutHof').hidden);
-  pruefe('C2 und fragt zuerst', q('#tutTitel').textContent.indexOf('Tutorial abspielen') === 0,
-    q('#tutTitel').textContent);
+  pruefe('C2 und fragt zuerst', q('#tutText').textContent.indexOf('Ich zeige dir') === 0,
+    q('#tutText').textContent.slice(0, 40));
   pruefe('C3 mit «Abbrechen» und «Loslegen»', !!knopf('Abbrechen') && !!knopf('Loslegen'));
   pruefe('C4 noch leuchtet nichts', q('#tutHof').classList.contains('ohne-ziel'));
 
@@ -106,9 +107,9 @@ try {
   var ohneZipfel = [];
   for (var i = 0; i < TUTORIAL.length; i++) {
     var sch = TUTORIAL[i];
-    pruefe('D' + (i + 1) + ' Schritt ' + (i + 1) + ' · ' + sch[2],
-      tutSchritt === i && q('#tutTitel').textContent === sch[2],
-      tutSchritt + '/' + q('#tutTitel').textContent);
+    pruefe('D' + (i + 1) + ' Schritt ' + (i + 1) + ' · ' + sch[2].slice(0, 28),
+      tutSchritt === i && q('#tutText').textContent === sch[2],
+      tutSchritt + '/' + q('#tutText').textContent.slice(0, 28));
     if (currentTab !== sch[0]) fehlt.push(sch[2] + ': Ort ' + currentTab + ' statt ' + sch[0]);
     var ziel = q(sch[1]);
     if (!ziel) fehlt.push(sch[2] + ': «' + sch[1] + '» gibt es nicht');
@@ -163,13 +164,26 @@ try {
   pruefe('E7 alle davor sind abgehakt',
     alle('#tutPunkte i.war').length === TUTORIAL.length - 1,
     String(alle('#tutPunkte i.war').length));
-  pruefe('E8 der Ausgang steht am Rand bereit', !q('#tutZu').hidden);
+  pruefe('E8 der Ausgang steht bereit', !q('#tutZu').hidden);
+
+  // ── E9 · Die Chili erzählt ────────────────────────────────
+  // Sie gibt es **einmal**. Im Tutorial steht sie in der Blase — und bleibt
+  // dort, auch wenn der Filter-Schritt die Ansicht darunter wechselt.
+  pruefe('E9 es gibt weiterhin genau eine Figur',
+    alle('#chiliFigur').length === 1 && alle('#chiliBuehne').length === 1);
+  pruefe('E10 und sie steht in der Blase',
+    q('#tutChili').contains(q('#chiliFigur')));
 
   // ── F · Der Ausgang führt zurück nach Home ────────────────
   q('#tutVor').click();
   pruefe('F1 fertig schließt', !tutOffen && q('#tutHof').hidden);
   pruefe('F2 und steht wieder auf Home', currentTab === 'home', currentTab);
   pruefe('F3 die Übersicht ist da', !!q('#tutKnopf'));
+  // Bleibt sie in der zugeklappten Blase stehen, ist sie weg — die Ansicht
+  // hätte dann gar keine Figur mehr.
+  pruefe('F4 die Chili ist zurück in der Ansicht',
+    !q('#tutChili').contains(q('#chiliFigur')) &&
+    document.body.contains(q('#chiliFigur')));
 
   // ── G · Der Schritt in einer Übung ────────────────────────
   // Einer der zwölf führt woandershin. Danach muss der Weg zurückführen.
@@ -187,7 +201,7 @@ try {
   pruefe('H2 die Bedingung greift',
     !state.tutorialGesehen && state.answered === 0 && currentTab === 'home');
   tutStarten();
-  pruefe('H3 die Frage steht da', tutOffen && q('#tutTitel').textContent.indexOf('Tutorial') !== -1);
+  pruefe('H3 die Frage steht da', tutOffen && q('#tutText').textContent.indexOf('Ich zeige dir') === 0);
   knopf('Abbrechen').click();
   pruefe('H4 danach greift die Bedingung nicht mehr', state.tutorialGesehen === true);
 
