@@ -105,9 +105,11 @@ zweite Flug bricht den ersten ab. Ein runder Knopf, in den sie springt, braucht
   `chiliPlatzhalter()` **vor** allem anderen; ihr Sprung wird in **Bildkoordinaten**
   gemessen (`tutChiliLage()`) — die eine benannte Ausnahme zu ADR 0012. **Der weiche Rand
   des Lochs braucht dieselbe Deckung wie der äußere Schatten** — sonst bleibt die Linie
-  blass stehen. **Der Einstiegsknopf wandert**: ungesehen goldenes Angebot ganz oben,
-  danach ruhig ganz unten — aber immer nur **einmal** im Dokument. Den Merker setzt
-  `tutStarten()`, beim Öffnen, nicht beim Schließen.
+  blass stehen. **Der Einstiegsknopf wandert**: goldenes Angebot ganz oben,
+  bis das Tutorial **einmal ganz** lief, danach ruhig ganz unten — aber immer nur
+  **einmal** im Dokument. Zwei Merker: `tutorialGesehen` (fällt beim Öffnen, steuert das
+  automatische Angebot) und `tutorialFertig` (fällt nach dem letzten Schritt, steuert den
+  Platz). Ein Abbruch setzt nur den ersten.
 - **Die Einstellungen haben Reiter** (ADR 0045). Was nur auf einem Reiter steht, ist beim
   Binden nicht immer da — vor `addEventListener` prüfen. `einstReiter` gehört in
   `ansichtenZuruecksetzen()`.

@@ -141,13 +141,21 @@ Drei Fallen stecken darin:
   das niemand sieht.
 
 Der Einstieg ist der Knopf `#tutKnopf` auf Home — **oben oder unten, je nach
-`state.tutorialGesehen`**: ungesehen als goldenes Angebot über der Empfehlung, danach
-ruhig am Ende. Er steht immer nur **einmal** im Dokument; zweimal gezeichnet hieße zweimal
-dieselbe Kennung, und der letzte Tutorialschritt leuchtete den falschen an. Beim
-allerersten Start (`!state.tutorialGesehen && state.answered === 0`) bietet die App ihn
-zusätzlich von selbst an. Den Merker setzt `tutStarten()` — beim **Öffnen**, nicht beim
-Schließen, damit der Knopf schon während des Durchlaufs dort steht, wo Schritt 12 ihn
-behauptet. `tutEnde()` zeichnet die Übersicht in jedem Fall neu.
+`state.tutorialFertig`**: solange das Tutorial nicht einmal ganz gelaufen ist, steht er
+als goldenes Angebot über der Empfehlung, danach ruhig am Ende. Er steht immer nur
+**einmal** im Dokument; zweimal gezeichnet hieße zweimal dieselbe Kennung, und der letzte
+Tutorialschritt leuchtete den falschen an. `tutEnde()` zeichnet die Übersicht in jedem
+Fall neu.
+
+Zwei Merker, zwei Fragen:
+
+| Merker | fällt | steuert |
+| --- | --- | --- |
+| `tutorialGesehen` | in `tutStarten()`, also beim Öffnen | ob die App beim allerersten Start (`state.answered === 0`) noch von selbst fragt |
+| `tutorialFertig` | in `tutWeiter()` nach dem letzten Schritt | wo der Knopf steht |
+
+Ein Abbruch — an der Eingangsfrage oder mitten drin — setzt nur den ersten. Wer abbricht,
+hat das Tutorial nicht gesehen, und ein Angebot, das eine Absage beendet, wäre keins.
 
 ## Darstellung
 

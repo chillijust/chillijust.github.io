@@ -2566,7 +2566,7 @@ var TUTORIAL = [
   ['home', '.kopf-rail', 'Der Balken zeigt, wie viele Wörter endgültig sitzen. Ein Wort braucht dafür vier richtige Antworten an verschiedenen Tagen. Darunter läuft deine Serie mit.'],
   ['lernsets', '#filterKnopf', 'In jeder Übung sitzt oben dieser Trichter. Dahinter wählst du, woraus geübt wird: der Reihe nach, nur Wiederholungen, oder alles auf einmal.'],
   ['home', '#menuKnopf', 'Hinter den drei Strichen liegen Bilanz, Sicherung, Einstellungen und Tickets. Die Sicherung ist wichtig — dein Fortschritt liegt nur auf diesem Gerät.'],
-  ['home', '#tutKnopf', 'Diesen Knopf findest du immer hier unten. Er zeigt dir alles noch einmal, sooft du willst. Jetzt aber los: Die Buchstaben warten.']
+  ['home', '#tutKnopf', 'Diesen Knopf findest du immer auf der Übersicht — ab jetzt ganz unten. Er zeigt dir alles noch einmal, sooft du willst. Los geht es: Die Buchstaben warten.']
 ];
 /* == DATEN:ENDE == */
 
@@ -2916,7 +2916,7 @@ var APP_STAND = '2026-08-13'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '1.5.0'; /* == VERSION == */
+var APP_VERSION = '1.5.1'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -3716,9 +3716,13 @@ function defaultState() {
     // «abc», «regel». Ohne diese Liste feiert ein Set erneut, sobald ein
     // einzelnes zurückgefallenes Wort wieder oben ist (ADR 0047).
     gefeiert: {},
-    // Einmal gefragt ist gefragt: Auch wer beim ersten Start abbricht,
-    // bekommt die Frage nicht wieder.
+    // **Zwei Merker, zwei Fragen.** «gesehen» heißt: Die App hat von selbst
+    // gefragt — auch wer da abbricht, bekommt die Frage nicht wieder.
+    // «fertig» heißt: einmal ganz durch. Nur das schickt den Knopf auf Home
+    // nach unten; wer abbricht, hat das Tutorial nicht gesehen, und ein
+    // Angebot, das nach einem Abbruch verschwindet, wäre keins.
     tutorialGesehen: false,
+    tutorialFertig: false,
     settings: defaultSettings()
   };
 }
@@ -4140,10 +4144,9 @@ function tutStarten(ruhig) {
   tutOffen = true;
   tutLochStand = false;
   document.body.classList.add('tut-offen');
-  // **Hier**, nicht am Ende: Der Knopf auf Home steht oben, solange das
-  // Tutorial nie lief. Würde der Merker erst beim Schließen fallen, zeigte der
-  // vorletzte Schritt auf einen Knopf, der gleich darauf woandershin wandert —
-  // und sein eigener Text («immer hier unten») wäre in dem Moment falsch.
+  // Gefragt ist gefragt: Das automatische Angebot beim allerersten Start kommt
+  // nicht wieder. Über den **Platz** des Knopfes sagt das nichts — dafür ist
+  // «fertig» zuständig, und das fällt erst am Ende.
   state.tutorialGesehen = true;
   save();
   tutZeichnen();
@@ -4168,7 +4171,14 @@ function tutEnde() {
 
 function tutWeiter() {
   tutSchritt++;
-  if (tutSchritt >= TUTORIAL.length) { tutEnde(); return; }
+  if (tutSchritt >= TUTORIAL.length) {
+    // **Erst hier.** Wer abbricht — an der Frage oder mitten drin —, hat das
+    // Tutorial nicht gesehen; sein Knopf bleibt oben stehen und bietet es
+    // weiter an. Ein Angebot, das schon eine Absage beendet, wäre keins.
+    state.tutorialFertig = true;
+    tutEnde();
+    return;
+  }
   tutZeichnen();
 }
 
@@ -5412,10 +5422,11 @@ function empfehlung() {
 function renderHome() {
   var e = empfehlung();
   // **Wer die App noch nicht kennt, findet den Knopf zuerst.** Solange das
-  // Tutorial nie lief, steht er ganz oben — über der Empfehlung, als Erstes im
-  // Bild. Danach wandert er ans Ende: Wer ihn einmal hatte, soll ihn übersehen
-  // dürfen, und der Platz oben gehört dann dem, was zu tun ist.
-  var neu = !state.tutorialGesehen;
+  // Tutorial nicht **einmal ganz** gelaufen ist, steht er ganz oben — über der
+  // Empfehlung, als Erstes im Bild. Danach wandert er ans Ende: Wer ihn einmal
+  // hatte, soll ihn übersehen dürfen, und der Platz oben gehört dann dem, was
+  // zu tun ist.
+  var neu = !state.tutorialFertig;
   var tutHtml = '<button class="tut-knopf' + (neu ? ' oben' : '') +
     '" id="tutKnopf">Wie funktioniert das hier?</button>';
   var html = '<section>' + (neu ? tutHtml : '') +

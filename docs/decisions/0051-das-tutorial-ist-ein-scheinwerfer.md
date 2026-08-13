@@ -37,11 +37,11 @@ der Zeile «Schritt 3 von 12», rechts ein runder Pfeil, in der Ecke ein stilles
 **Sie springt von Schritt zu Schritt** — derselbe Wurfbogen wie überall in der App.
 
 **Der Einstieg ist ein Knopf auf Home** («Wie funktioniert das hier?»), und **er
-wandert**: Solange das Tutorial nie lief, steht er ganz oben — über der Empfehlung, als
-Erstes im Bild, in Gold statt in Grau. Danach rutscht er ans Ende und wird ruhig. Wer die
-App noch nicht kennt, findet ihn zuerst; wer sie kennt, soll ihn übersehen dürfen, und der
-Platz oben gehört dann dem, was zu tun ist. Beim allerersten Start bietet die App ihn
-zusätzlich einmalig von selbst an (`state.tutorialGesehen`).
+wandert**: Solange das Tutorial nicht **einmal ganz** gelaufen ist, steht er oben — über
+der Empfehlung, als Erstes im Bild, in Gold statt in Grau. Danach rutscht er ans Ende und
+wird ruhig. Wer die App noch nicht kennt, findet ihn zuerst; wer sie kennt, soll ihn
+übersehen dürfen, und der Platz oben gehört dann dem, was zu tun ist. Beim allerersten
+Start bietet die App ihn zusätzlich einmalig von selbst an.
 
 ## Begründung
 
@@ -108,12 +108,15 @@ dunklen Bild, die nichts miteinander zu tun zu haben scheinen.
 Mitte kann oben weniger Platz haben als darunter, und ein Gespann, das nicht passt, legt
 sich auf das, wovon es spricht.
 
-**Der Merker fällt beim Öffnen, nicht beim Schließen.** Er steuert seit 1.5.0 auch, wo der
-Knopf steht. Fiele er erst am Ende, zeigte der letzte Schritt auf einen Knopf, der gleich
-darauf woandershin wandert — und sein eigener Text («immer hier unten») wäre in genau dem
-Moment falsch, in dem er gelesen wird. Dass auch ein Abbruch an der Eingangsfrage zählt,
-ist gewollt: Die App hat gefragt, und ein Angebot, das nach jeder Absage wiederkommt, ist
-kein Angebot.
+**Zwei Merker, zwei Fragen.** `tutorialGesehen` heißt «die App hat von selbst gefragt» und
+fällt beim Öffnen — das automatische Angebot beim allerersten Start kommt nicht wieder,
+auch nach einer Absage nicht. `tutorialFertig` heißt «einmal ganz durch» und fällt erst,
+wenn der letzte Schritt abgehakt ist; nur das schickt den Knopf nach unten.
+
+Der erste Entwurf (1.5.0) hatte nur einen. Damit sprang der Knopf schon dann nach unten,
+wenn man die Eingangsfrage abbrach — **wer abgebrochen hat, hat das Tutorial aber nicht
+gesehen**, und ein Angebot, das eine Absage beendet, ist keins. Ein Abbruch mitten drin
+zählt aus demselben Grund nicht.
 
 **Nur die Eingangsfrage trägt beschriftete Knöpfe.** «Abbrechen» und «Loslegen» ist eine
 echte Wahl. Ab da gibt es nur noch «weiter» — dafür genügt ein Pfeil, und am letzten
@@ -121,8 +124,11 @@ Schritt wird daraus ein Haken.
 
 ## Folgen
 
-- Neuer Zustand: `state.tutorialGesehen` (Vorgabe `false`), im Sicherungscode nicht
-  geführt — er gehört zum Gerät, nicht zum Lernstand.
+- Neuer Zustand: `state.tutorialGesehen` und `state.tutorialFertig` (beide Vorgabe
+  `false`), im Sicherungscode nicht geführt — sie gehören zum Gerät, nicht zum Lernstand.
+- **Der letzte Schritt darf keine Lage behaupten.** Während des Durchlaufs steht der Knopf
+  noch oben und wandert erst mit «Fertig» — sein Text sagt darum «ab jetzt ganz unten»,
+  nicht «hier unten».
 - Die zwölf Texte sagen zusammen, **in welcher Reihenfolge man übt**: Buchstaben, dann
   Lernsets, dann Tippen und Übersetzen, Grammatik ab dem zweiten Set, Freestyle und
   Power-Training nebenher. Schritt 8 fasst es in einem Satz.

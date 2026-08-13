@@ -10,5 +10,5 @@
   ["home", ".kopf-rail", "Der Balken zeigt, wie viele Wörter endgültig sitzen. Ein Wort braucht dafür vier richtige Antworten an verschiedenen Tagen. Darunter läuft deine Serie mit."],
   ["lernsets", "#filterKnopf", "In jeder Übung sitzt oben dieser Trichter. Dahinter wählst du, woraus geübt wird: der Reihe nach, nur Wiederholungen, oder alles auf einmal."],
   ["home", "#menuKnopf", "Hinter den drei Strichen liegen Bilanz, Sicherung, Einstellungen und Tickets. Die Sicherung ist wichtig — dein Fortschritt liegt nur auf diesem Gerät."],
-  ["home", "#tutKnopf", "Diesen Knopf findest du immer hier unten. Er zeigt dir alles noch einmal, sooft du willst. Jetzt aber los: Die Buchstaben warten."]
+  ["home", "#tutKnopf", "Diesen Knopf findest du immer auf der Übersicht — ab jetzt ganz unten. Er zeigt dir alles noch einmal, sooft du willst. Los geht es: Die Buchstaben warten."]
 ]

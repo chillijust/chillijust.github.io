@@ -83,17 +83,24 @@ try {
   }
   pruefe('B1 es gibt ihn genau einmal', alle('#tutKnopf').length === 1,
     String(alle('#tutKnopf').length));
-  pruefe('B2 ungesehen steht er ganz oben',
+  pruefe('B2 ungespielt steht er ganz oben',
     q('#main section').firstElementChild === q('#tutKnopf') && !nachDenKacheln(),
     q('#main section').firstElementChild.className);
   pruefe('B2b und ist als Angebot ausgezeichnet', q('#tutKnopf').classList.contains('oben'));
+  // Nur **fertig** schickt ihn nach unten. Dass die App einmal gefragt hat,
+  // reicht nicht: Wer abbricht, hat das Tutorial nicht gesehen.
   state.tutorialGesehen = true;
   renderHome();
-  pruefe('B2c gesehen wandert er ans Ende', nachDenKacheln() &&
+  pruefe('B2c gefragt allein bewegt ihn nicht',
+    q('#main section').firstElementChild === q('#tutKnopf'));
+  state.tutorialFertig = true;
+  renderHome();
+  pruefe('B2d durchgespielt wandert er ans Ende', nachDenKacheln() &&
     !q('#tutKnopf').classList.contains('oben'));
-  pruefe('B2d und auch dann gibt es ihn nur einmal', alle('#tutKnopf').length === 1,
+  pruefe('B2e und auch dann gibt es ihn nur einmal', alle('#tutKnopf').length === 1,
     String(alle('#tutKnopf').length));
   state.tutorialGesehen = false;
+  state.tutorialFertig = false;
   renderHome();
   pruefe('B3 vor dem Start ist nichts offen',
     q('#tutHof').hidden && q('#tutGespann').getAttribute('aria-hidden') === 'true');
@@ -110,8 +117,26 @@ try {
   knopf('Abbrechen').click();
   pruefe('C5 Abbrechen schließt', !tutOffen && q('#tutHof').hidden &&
     q('#tutGespann').getAttribute('aria-hidden') === 'true');
-  pruefe('C6 und merkt sich das', state.tutorialGesehen === true);
+  pruefe('C6 und merkt sich, dass gefragt wurde', state.tutorialGesehen === true);
+  pruefe('C6b aber nicht, dass es gelaufen wäre', state.tutorialFertig === false);
+  pruefe('C6c der Knopf bleibt oben stehen',
+    q('#main section').firstElementChild === q('#tutKnopf') &&
+    q('#tutKnopf').classList.contains('oben'),
+    q('#main section').firstElementChild.className);
   pruefe('C7 der Körper ist wieder frei', !document.body.classList.contains('tut-offen'));
+
+  // Und mitten drin abgebrochen genauso: Drei Schritte weit gekommen ist nicht
+  // durchgespielt.
+  q('#tutKnopf').click();
+  knopf('Loslegen').click();
+  q('#tutVor').click();
+  q('#tutVor').click();
+  pruefe('C8 mitten im Tutorial', tutSchritt === 2, String(tutSchritt));
+  q('#tutZu').click();
+  pruefe('C8b ein Abbruch mitten drin zählt nicht', state.tutorialFertig === false);
+  pruefe('C8c der Knopf steht weiter oben',
+    q('#main section').firstElementChild === q('#tutKnopf'),
+    q('#main section').firstElementChild.className);
 
   // ── D · Jeder Schritt findet sein Ziel ────────────────────
   // Der eigentliche Zweck dieser Suite.
@@ -243,14 +268,19 @@ try {
   pruefe('H3 die Frage steht da', tutOffen && q('#tutText').textContent.indexOf('Ich zeige dir') === 0);
   knopf('Abbrechen').click();
   pruefe('H4 danach greift die Bedingung nicht mehr', state.tutorialGesehen === true);
+  pruefe('H5 und der Knopf steht trotzdem noch oben', state.tutorialFertig === false);
 
   // ── I · Der Merker überlebt Speichern und Laden ───────────
   var kopie = mergeState(JSON.parse(JSON.stringify(state)));
   pruefe('I1 der Merker übersteht das Verschmelzen', kopie.tutorialGesehen === true);
   pruefe('I2 ein alter Stand ohne Merker fängt bei false an',
-    mergeState({ boxes: {} }).tutorialGesehen === false);
+    mergeState({ boxes: {} }).tutorialGesehen === false &&
+    mergeState({ boxes: {} }).tutorialFertig === false);
   pruefe('I3 Fortschritt zurücksetzen fragt wieder',
-    defaultState().tutorialGesehen === false);
+    defaultState().tutorialGesehen === false && defaultState().tutorialFertig === false);
+  pruefe('I4 beide Merker überstehen das Verschmelzen einzeln',
+    mergeState({ tutorialGesehen: true }).tutorialFertig === false &&
+    mergeState({ tutorialFertig: true }).tutorialFertig === true);
 
   // ── J · Ohne Ziel bleibt der Schirm dunkel ────────────────
   // Die Eingangsfrage leuchtet nichts an. Dann muss der **Hof** decken: Ein
