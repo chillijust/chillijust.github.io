@@ -73,14 +73,28 @@ try {
     return !/\bSie\b|\bIhnen\b|\bIhre\b/.test(s[2]);
   }));
 
-  // ── B · Der Knopf auf Home ────────────────────────────────
-  pruefe('B1 der Knopf steht ganz unten', !!q('#tutKnopf'));
-  pruefe('B2 und zwar nach den Kacheln', (function () {
+  // ── B · Der Knopf auf Home wandert ────────────────────────
+  // Wer die App noch nicht kennt, findet ihn zuerst; wer sie kennt, zuletzt.
+  function nachDenKacheln() {
     var kacheln = alle('#main .kachel');
     var letzte = kacheln[kacheln.length - 1];
     return !!letzte &&
       (letzte.compareDocumentPosition(q('#tutKnopf')) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
-  })());
+  }
+  pruefe('B1 es gibt ihn genau einmal', alle('#tutKnopf').length === 1,
+    String(alle('#tutKnopf').length));
+  pruefe('B2 ungesehen steht er ganz oben',
+    q('#main section').firstElementChild === q('#tutKnopf') && !nachDenKacheln(),
+    q('#main section').firstElementChild.className);
+  pruefe('B2b und ist als Angebot ausgezeichnet', q('#tutKnopf').classList.contains('oben'));
+  state.tutorialGesehen = true;
+  renderHome();
+  pruefe('B2c gesehen wandert er ans Ende', nachDenKacheln() &&
+    !q('#tutKnopf').classList.contains('oben'));
+  pruefe('B2d und auch dann gibt es ihn nur einmal', alle('#tutKnopf').length === 1,
+    String(alle('#tutKnopf').length));
+  state.tutorialGesehen = false;
+  renderHome();
   pruefe('B3 vor dem Start ist nichts offen',
     q('#tutHof').hidden && q('#tutGespann').getAttribute('aria-hidden') === 'true');
 

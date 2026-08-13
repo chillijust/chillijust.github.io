@@ -105,7 +105,9 @@ zweite Flug bricht den ersten ab. Ein runder Knopf, in den sie springt, braucht
   `chiliPlatzhalter()` **vor** allem anderen; ihr Sprung wird in **Bildkoordinaten**
   gemessen (`tutChiliLage()`) — die eine benannte Ausnahme zu ADR 0012. **Der weiche Rand
   des Lochs braucht dieselbe Deckung wie der äußere Schatten** — sonst bleibt die Linie
-  blass stehen.
+  blass stehen. **Der Einstiegsknopf wandert**: ungesehen goldenes Angebot ganz oben,
+  danach ruhig ganz unten — aber immer nur **einmal** im Dokument. Den Merker setzt
+  `tutStarten()`, beim Öffnen, nicht beim Schließen.
 - **Die Einstellungen haben Reiter** (ADR 0045). Was nur auf einem Reiter steht, ist beim
   Binden nicht immer da — vor `addEventListener` prüfen. `einstReiter` gehört in
   `ansichtenZuruecksetzen()`.
@@ -151,7 +153,9 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   Abfrage an der wirksamen Stelle. Gespeicherte Stände werden über `mergeState()`
   aufgefüllt — `state.settings` nie als Ganzes aus dem Speicher übernehmen. Die
   Einstellungen sind nach Fragen gegliedert: **Lernweg**, **Abgabe**, **Eingabe**,
-  **Darstellung und Ton**. Soll eine geänderte Vorgabe auch bestehende Geräte
+  **Darstellung und Ton**. Eine **Frist ist ein Zähler**, keine Chip-Reihe (ADR 0015):
+  Grenzen in `auffrischGrenzen()`, Gedrückthalten zählt weiter, und er zeichnet **an Ort
+  und Stelle** nach — ein Renderlauf würde die gehaltene Taste wegwerfen. Soll eine geänderte Vorgabe auch bestehende Geräte
   erreichen, den Schlüssel umbenennen — der alte Wert fällt in `mergeState()` weg.
 - **Vorlesen nur über `hoerknopf(text, sprache)`** — der Text hängt als `data-say` am
   Knopf, ein einziger Zuhörer auf `#main` bedient alle. Nie einen eigenen Zuhörer je

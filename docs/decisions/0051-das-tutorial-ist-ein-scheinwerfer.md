@@ -36,9 +36,12 @@ der Zeile «Schritt 3 von 12», rechts ein runder Pfeil, in der Ecke ein stilles
 
 **Sie springt von Schritt zu Schritt** — derselbe Wurfbogen wie überall in der App.
 
-**Der Einstieg ist ein Knopf ganz unten auf Home** («Wie funktioniert das hier?»), ruhig
-gestaltet — wer die App kennt, soll ihn übersehen dürfen. Beim allerersten Start bietet
-die App ihn einmalig von selbst an (`state.tutorialGesehen`).
+**Der Einstieg ist ein Knopf auf Home** («Wie funktioniert das hier?»), und **er
+wandert**: Solange das Tutorial nie lief, steht er ganz oben — über der Empfehlung, als
+Erstes im Bild, in Gold statt in Grau. Danach rutscht er ans Ende und wird ruhig. Wer die
+App noch nicht kennt, findet ihn zuerst; wer sie kennt, soll ihn übersehen dürfen, und der
+Platz oben gehört dann dem, was zu tun ist. Beim allerersten Start bietet die App ihn
+zusätzlich einmalig von selbst an (`state.tutorialGesehen`).
 
 ## Begründung
 
@@ -105,6 +108,13 @@ dunklen Bild, die nichts miteinander zu tun zu haben scheinen.
 Mitte kann oben weniger Platz haben als darunter, und ein Gespann, das nicht passt, legt
 sich auf das, wovon es spricht.
 
+**Der Merker fällt beim Öffnen, nicht beim Schließen.** Er steuert seit 1.5.0 auch, wo der
+Knopf steht. Fiele er erst am Ende, zeigte der letzte Schritt auf einen Knopf, der gleich
+darauf woandershin wandert — und sein eigener Text («immer hier unten») wäre in genau dem
+Moment falsch, in dem er gelesen wird. Dass auch ein Abbruch an der Eingangsfrage zählt,
+ist gewollt: Die App hat gefragt, und ein Angebot, das nach jeder Absage wiederkommt, ist
+kein Angebot.
+
 **Nur die Eingangsfrage trägt beschriftete Knöpfe.** «Abbrechen» und «Loslegen» ist eine
 echte Wahl. Ab da gibt es nur noch «weiter» — dafür genügt ein Pfeil, und am letzten
 Schritt wird daraus ein Haken.
@@ -129,6 +139,11 @@ Schritt wird daraus ein Haken.
 - `data/tutorial.json` ist die einzige Quelle der Texte. Ein Ziel, das es nicht gibt,
   fällt in der Suite auf; ein unbekannter Ort schon im Build.
 - Jedes Ziel kommt genau einmal vor — sonst erklärte das Tutorial zweimal dasselbe.
+- **Den Knopf gibt es genau einmal im Dokument**, oben *oder* unten. Zweimal gezeichnet
+  hieße zweimal dieselbe Kennung, und der letzte Schritt leuchtete den falschen an. Die
+  Suite prüft beide Lagen und die Anzahl.
+- Ein Ausgang zeichnet die Übersicht in **jedem** Fall neu, auch wenn die Ansicht dieselbe
+  bleibt — sonst zeigte sie den Knopf noch oben, obwohl er dorthin nicht mehr gehört.
 - Die Texte duzen wie der Rest der App (ADR 0050); die Suite prüft es mit.
 - **Für die Messung schaltet die Suite den Übergang ab** — bei `#tutLoch` **und**
   `#tutGespann`. Im kopflosen Browser läuft keine Zeit; ohne das stünde bei jeder Messung

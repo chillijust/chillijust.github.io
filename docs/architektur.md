@@ -140,9 +140,14 @@ Drei Fallen stecken darin:
 - **Erst ins Bild holen, dann messen.** Ein Ziel unter dem Rand bekäme sonst ein Loch,
   das niemand sieht.
 
-Der Einstieg ist der Knopf `#tutKnopf` ganz unten auf Home. Beim allerersten Start
-(`!state.tutorialGesehen && state.answered === 0`) bietet die App ihn einmalig von selbst
-an; jeder Ausgang setzt den Merker.
+Der Einstieg ist der Knopf `#tutKnopf` auf Home — **oben oder unten, je nach
+`state.tutorialGesehen`**: ungesehen als goldenes Angebot über der Empfehlung, danach
+ruhig am Ende. Er steht immer nur **einmal** im Dokument; zweimal gezeichnet hieße zweimal
+dieselbe Kennung, und der letzte Tutorialschritt leuchtete den falschen an. Beim
+allerersten Start (`!state.tutorialGesehen && state.answered === 0`) bietet die App ihn
+zusätzlich von selbst an. Den Merker setzt `tutStarten()` — beim **Öffnen**, nicht beim
+Schließen, damit der Knopf schon während des Durchlaufs dort steht, wo Schritt 12 ihn
+behauptet. `tutEnde()` zeichnet die Übersicht in jedem Fall neu.
 
 ## Darstellung
 
@@ -1563,7 +1568,16 @@ auf einen sinnvollen Bereich:
 | `requireComplete` | aus | „Bestätigen" ist erst möglich, wenn die Lösung vollständig ist. Verrät dadurch deren Länge. |
 | `tippenStufe` | 3 | Ab welcher Leitner-Stufe ein Wort in „Tippen" erscheint (1 bis 4). Ein **gewähltes Lernset sticht diese Schwelle** und beginnt bei 1 (ADR 0048). |
 | `tastaturAuto` | **an** | Verlangt eine Aufgabe Kyrillisch, klappt die eingebaute Tastatur gleich auf. Aus: Sie holen sie bei Bedarf. Wo Deutsch gefragt ist, kommt sie nie. |
+| `auffrischen` | 21 | Tage, bis Fertiges einmal zur Sicherheit zurückkommt. **Frei wählbar von 1 bis 365** über einen Zähler mit − und + (ADR 0015). |
 | `schema` | `dark` | Farbschema: `dark`, `classic`, `gruen`, `blau`, `rosa`. Steuert `data-schema` am `<html>`-Element; `dark` trägt keines. |
+
+Die meisten Einstellungen sind Schalter oder eine Chip-Reihe; `auffrischen` ist ein
+**Zähler**. Er hat drei Eigenheiten, die zusammengehören: `auffrischGrenzen()` kappt in
+`mergeState()` **und** beim Zählen auf 1…365, **Gedrückthalten zählt weiter** (420 ms
+Anlauf, dann alle 90 ms), und er zeichnet **an Ort und Stelle** nach statt über
+`renderEinstellungen()` — wer die Taste hält, hielte sonst einen Knopf, den der Renderlauf
+gerade weggeworfen hat. Der Klick, der nach einem Halten noch kommt, wird über
+`zaehlerLief` verworfen, sonst legte das Loslassen einen Tag drauf.
 
 Eine neue Einstellung braucht drei Dinge: einen Vorgabewert in `defaultSettings()`,
 eine Zeile in `renderEinstellungen()` und — falls sie das Verhalten einer Übung

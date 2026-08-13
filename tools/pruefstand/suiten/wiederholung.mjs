@@ -169,15 +169,67 @@ try {
     !q('.built') && !q('#trInput') && main.textContent.indexOf('sitzt') !== -1,
     main.textContent.slice(0, 120));
 
-  // I · Einstellung
+  // I · Einstellung — die Frist zählt man hoch und runter, sie ist keine Liste
+  // von vier Meinungen mehr.
+  state.settings.auffrischen = 21;
   setTab('einstellungen');
-  pruefe('I1 Auffrischfrist wählbar', alle('[data-wahl="auffrischen"]').length === 4);
-  alle('[data-wahl="auffrischen"]')[0].click();
-  pruefe('I2 Klick stellt um', state.settings.auffrischen === 7);
+  function taste(schritt) {
+    return alle('[data-zaehler="auffrischen"]').filter(function (b) {
+      return b.dataset.schritt === String(schritt);
+    })[0];
+  }
+  pruefe('I1 die Frist hat zwei Tasten', !!taste(-1) && !!taste(1));
+  pruefe('I1b und zeigt ihren Wert', q('.zaehler-wert').textContent.indexOf('21') === 0,
+    q('.zaehler-wert').textContent);
+  taste(1).click();
+  pruefe('I2 plus zählt hoch', state.settings.auffrischen === 22,
+    String(state.settings.auffrischen));
+  taste(-1).click(); taste(-1).click();
+  pruefe('I2b minus zählt runter', state.settings.auffrischen === 20,
+    String(state.settings.auffrischen));
+  pruefe('I2c und die Ansicht zieht mit',
+    q('.zaehler-wert').textContent.indexOf('20') === 0, q('.zaehler-wert').textContent);
+  // Ein Tipp zählt **einmal**. Gedrückt halten zählt weiter, und der Klick, der
+  // beim Loslassen noch kommt, darf keinen Tag draufsetzen — darum zählt schon
+  // das Drücken allein nicht.
+  state.settings.auffrischen = 21;
+  renderEinstellungen();
+  taste(1).dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+  pruefe('I2d Drücken allein zählt noch nicht', state.settings.auffrischen === 21,
+    String(state.settings.auffrischen));
+  document.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
+  taste(1).click();
+  pruefe('I2e ein Tipp zählt genau einen Tag', state.settings.auffrischen === 22,
+    String(state.settings.auffrischen));
+
+  state.settings.auffrischen = 7;
   pruefe('I3 wirkt auf das Intervall', intervallFuer(BOX_MAX) === 7 * TAG);
   pruefe('I4 untere Stufen bleiben unberührt', intervallFuer(1) === INTERVALL[1]);
-  var m = mergeState({ settings: { auffrischen: 999 } });
-  pruefe('I5 unsinnige Frist wird verworfen', m.settings.auffrischen === 21);
+
+  // Die Grenzen: unter einem Tag wäre «fertig» kein Zustand mehr, über einem
+  // Jahr keine Frist. **Am Anschlag sperrt die Taste**, sonst tippt man ins
+  // Leere und hält die Zahl für kaputt.
+  state.settings.auffrischen = AUFFRISCH_MIN;
+  renderEinstellungen();
+  pruefe('I5 am unteren Anschlag sperrt Minus', taste(-1).disabled && !taste(1).disabled);
+  taste(-1).click();
+  pruefe('I5b und ändert nichts', state.settings.auffrischen === AUFFRISCH_MIN,
+    String(state.settings.auffrischen));
+  state.settings.auffrischen = AUFFRISCH_MAX;
+  renderEinstellungen();
+  pruefe('I6 am oberen Anschlag sperrt Plus', taste(1).disabled && !taste(-1).disabled);
+
+  // Ein Stand aus dem Speicher wird auf die Grenzen gezogen, nicht verworfen:
+  // Bis 1.4.1 gab es nur 7/14/21/30 — jeder andere Wert fiel auf 21 zurück.
+  pruefe('I7 zu große Frist wird gekappt',
+    mergeState({ settings: { auffrischen: 9999 } }).settings.auffrischen === AUFFRISCH_MAX);
+  pruefe('I7b Unsinn fällt auf die Vorgabe',
+    mergeState({ settings: { auffrischen: 0 } }).settings.auffrischen === 21 &&
+    mergeState({ settings: { auffrischen: -3 } }).settings.auffrischen === 21);
+  pruefe('I7c ein alter Wert überlebt',
+    mergeState({ settings: { auffrischen: 14 } }).settings.auffrischen === 14);
+  pruefe('I7d ein krummer auch',
+    mergeState({ settings: { auffrischen: 18 } }).settings.auffrischen === 18);
   state.settings.auffrischen = 21;
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);

@@ -1032,6 +1032,11 @@ body.tut-offen { overflow: hidden; }
   color: var(--dim); font: inherit; font-size: 14px; cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
+/* Oben ist er ein Angebot, unten eine Auskunft. Dieselbe Form, aber in Gold:
+   Wer die App zum ersten Mal öffnet, soll ihn nicht überlesen. */
+.tut-knopf.oben {
+  margin: 0 0 16px; border-color: var(--gold); color: var(--gold);
+}
 
 /* Die Zeile, in der die Chili nach jeder Auflösung etwas sagt. Sie trägt kein
    Kästchen: Ein Kommentar ist ein Nebensatz, keine Meldung — was gerahmt ist,
@@ -1213,6 +1218,24 @@ body.unterwegs .reiter { top: 62px; }
 }
 .seg { flex: none; display: flex; gap: 4px; }
 .seg .chip { min-width: 44px; padding: 10px 0; text-align: center; }
+/* Der Zähler: zwei Tasten und der Wert dazwischen. Der Wert bekommt eine feste
+   Breite — sonst rückt bei jedem Tippen alles um die Breite einer Ziffer, und
+   die Taste unter dem Daumen wandert weg. */
+.zaehler { flex: none; display: flex; align-items: center; gap: 2px; }
+.zaehler-taste {
+  flex: none; width: 44px; height: 44px; padding: 0; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--card-2); border: 1px solid var(--line); color: var(--text);
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.zaehler-taste svg { width: 18px; height: 18px; }
+.zaehler-taste:disabled { opacity: .35; cursor: default; }
+.zaehler-wert {
+  min-width: 62px; text-align: center; font-size: 17px; color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.zaehler-wert small { display: block; font-size: 10px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--dim); margin-top: 1px; }
 /* Ab vier Knöpfen bliebe für den Hinweis eine Schlucht von wenigen Wörtern
    Breite. Dann rückt die Wahl unter den Text und nimmt die ganze Zeile. */
 .setting.breit { flex-wrap: wrap; }
@@ -2876,6 +2899,16 @@ var BOX_MAX = 4;
 // Ab dieser Leitner-Stufe gilt ein Wort als sitzend: Sätze werden damit
 // freigeschaltet, Lernsets damit abgeschlossen.
 var SATZ_STUFE = 2;
+// Die Auffrischfrist ist frei wählbar, aber nicht grenzenlos: Unter einem Tag
+// wäre «fertig» kein Zustand mehr, über einem Jahr keine Frist. Dazwischen
+// entscheidet der Nutzer, nicht eine Liste von vier Meinungen.
+var AUFFRISCH_MIN = 1;
+var AUFFRISCH_MAX = 365;
+function auffrischGrenzen(tage) {
+  var n = Math.round(tage);
+  if (!(n >= AUFFRISCH_MIN)) return 21;
+  return Math.min(AUFFRISCH_MAX, n);
+}
 var STORAGE_KEY = 'russisch_trainer_v1';
 // Stand der ausgelieferten Datei. Wird von tools/build.mjs gesetzt und geht in
 // jedes Ticket ein, damit ein Bericht sagt, welcher Stand gemeint war.
@@ -2883,7 +2916,7 @@ var APP_STAND = '2026-08-13'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '1.4.1'; /* == VERSION == */
+var APP_VERSION = '1.5.0'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -3420,7 +3453,9 @@ var ICON = {
   schluessel: svg('<circle cx="8" cy="8" r="3.6"/><path d="M10.6 10.6l8.4 8.4M16.4 16.4l2-2M14 14l2-2"/>'),
   // Weiter im Tutorial. Ein Pfeil, kein Wort: Die Sprechblase soll klein
   // bleiben, und was er tut, sagt schon die Punktreihe daneben.
-  pfeilRechts: svg('<path d="M4.5 12h14M13 6.5l5.5 5.5-5.5 5.5"/>')
+  pfeilRechts: svg('<path d="M4.5 12h14M13 6.5l5.5 5.5-5.5 5.5"/>'),
+  minus: svg('<path d="M6 12h12"/>'),
+  plus: svg('<path d="M6 12h12M12 6v12"/>')
 };
 
 // ── Sprachfakten ────────────────────────────────────────────
@@ -3726,7 +3761,7 @@ function mergeState(parsed) {
     });
     var stufe = d.settings.tippenStufe;
     if (!(stufe >= 1 && stufe <= BOX_MAX)) d.settings.tippenStufe = 3;
-    if ([7, 14, 21, 30].indexOf(d.settings.auffrischen) === -1) d.settings.auffrischen = 21;
+    d.settings.auffrischen = auffrischGrenzen(d.settings.auffrischen);
     // Gefragt ist der gespeicherte Wert, nicht der verschmolzene: Ein Stand von
     // vor ADR 0039 führt gar kein Schema, und die Vorgabe «dark» wäre gültig —
     // die Übersetzung der beiden alten Achsen käme nie zum Zug.
@@ -4105,6 +4140,12 @@ function tutStarten(ruhig) {
   tutOffen = true;
   tutLochStand = false;
   document.body.classList.add('tut-offen');
+  // **Hier**, nicht am Ende: Der Knopf auf Home steht oben, solange das
+  // Tutorial nie lief. Würde der Merker erst beim Schließen fallen, zeigte der
+  // vorletzte Schritt auf einen Knopf, der gleich darauf woandershin wandert —
+  // und sein eigener Text («immer hier unten») wäre in dem Moment falsch.
+  state.tutorialGesehen = true;
+  save();
   tutZeichnen();
   chiliAktualisieren(ruhig);
 }
@@ -4115,14 +4156,14 @@ function tutEnde() {
   // Die Blase bleibt noch stehen: Die Figur zieht **aus ihr heraus** zurück in
   // die Ansicht, und ihre alte Lage lässt sich nur messen, solange sie da ist.
   // Ein Klick ist eine Bewegung — der Ansichtswechsel und der Umzug sind einer.
+  // Neu gezeichnet wird in jedem Fall: Der Knopf hat seinen Platz gewechselt,
+  // und eine Übersicht, die ihn noch oben zeigt, ist eine Lüge über den Stand.
   chiliZusammen(function () {
     if (currentTab !== tutHeimTab) setTab(tutHeimTab);
+    else render();
   });
   document.getElementById('tutHof').hidden = true;
   document.getElementById('tutGespann').setAttribute('aria-hidden', 'true');
-  // Einmal gefragt ist gefragt — auch wer abbricht, wird nicht wieder gefragt.
-  state.tutorialGesehen = true;
-  save();
 }
 
 function tutWeiter() {
@@ -5370,7 +5411,14 @@ function empfehlung() {
 
 function renderHome() {
   var e = empfehlung();
-  var html = '<section>' +
+  // **Wer die App noch nicht kennt, findet den Knopf zuerst.** Solange das
+  // Tutorial nie lief, steht er ganz oben — über der Empfehlung, als Erstes im
+  // Bild. Danach wandert er ans Ende: Wer ihn einmal hatte, soll ihn übersehen
+  // dürfen, und der Platz oben gehört dann dem, was zu tun ist.
+  var neu = !state.tutorialGesehen;
+  var tutHtml = '<button class="tut-knopf' + (neu ? ' oben' : '') +
+    '" id="tutKnopf">Wie funktioniert das hier?</button>';
+  var html = '<section>' + (neu ? tutHtml : '') +
     '<button class="empfehlung" id="homeEmpf">' + maskottchen('klein') +
     '<span class="empf-text"><span class="empf-label">Als Nächstes</span>' +
     '<span class="empf-titel">' + esc(e.titel) + '</span>' +
@@ -5390,9 +5438,10 @@ function renderHome() {
     });
     html += '</div>';
   });
-  // Ruhig und ganz unten: Wer die App kennt, soll ihn übersehen dürfen — wer
-  // sich verirrt, scrollt ohnehin bis hierher.
-  html += '<button class="tut-knopf" id="tutKnopf">Wie funktioniert das hier?</button>';
+  // Ruhig und ganz unten — aber nur, wenn er nicht schon oben steht: Ihn
+  // zweimal zu zeichnen hieße, zwei Knöpfe mit derselben Kennung zu haben, und
+  // das Tutorial leuchtete dann den falschen an.
+  if (!neu) html += tutHtml;
   html += '</section>';
   main.innerHTML = html;
 
@@ -8973,6 +9022,56 @@ function einstReiterKopf() {
   });
 }
 
+// ── Der Zähler in den Einstellungen ─────────────────────────
+// Zwei Tasten und ein Wert. Gedrückt halten zählt weiter — ohne das wäre der
+// Weg von 21 auf 60 Tage vierzig Tipper, und der Zähler wäre schlechter als
+// die vier festen Stufen, die er ablöst.
+var zaehlerAnlauf = null;   // Wartezeit bis zur Wiederholung
+var zaehlerTakt = null;     // die Wiederholung selbst
+var zaehlerLief = false;    // hat die Wiederholung schon gezählt?
+
+function zaehlerSchritt(key, schritt) {
+  var alt = state.settings[key];
+  var neu = auffrischGrenzen((alt | 0) + schritt);
+  if (neu === alt) return false;
+  state.settings[key] = neu;
+  save();
+  return true;
+}
+
+// Nur die Zahl und die zwei Anschläge, nicht die ganze Ansicht.
+function zaehlerFrischen(wo) {
+  if (!wo) return;
+  var key = wo.querySelector('[data-zaehler]').dataset.zaehler;
+  var wert = state.settings[key];
+  var zahl = wo.querySelector('.zaehler-wert');
+  zahl.firstChild.nodeValue = String(wert);
+  wo.querySelectorAll('[data-zaehler]').forEach(function (t) {
+    var s = parseInt(t.dataset.schritt, 10);
+    t.disabled = s < 0 ? wert <= +wo.dataset.min : wert >= +wo.dataset.max;
+  });
+}
+
+function zaehlerHalten(tick) {
+  zaehlerLoslassen();
+  zaehlerAnlauf = setTimeout(function () {
+    zaehlerTakt = setInterval(function () {
+      zaehlerLief = true;
+      if (!tick()) zaehlerLoslassen();
+    }, 90);
+  }, 420);
+}
+
+function zaehlerLoslassen() {
+  if (zaehlerAnlauf) { clearTimeout(zaehlerAnlauf); zaehlerAnlauf = null; }
+  if (zaehlerTakt) { clearInterval(zaehlerTakt); zaehlerTakt = null; }
+}
+// Am Dokument, nicht am Knopf: Wer den Finger neben die Taste zieht und dort
+// loslässt, bekäme sonst einen Zähler, der weiterläuft.
+['pointerup', 'pointercancel', 'pointerleave'].forEach(function (art) {
+  document.addEventListener(art, zaehlerLoslassen);
+});
+
 function renderEinstellungen() {
   var s = state.settings;
 
@@ -8997,6 +9096,28 @@ function renderEinstellungen() {
         '" data-wert="' + w.wert + '">' + esc(w.text) + '</button>';
     });
     return html + '</span></div>';
+  }
+
+  // Ein Wert zum Hoch- und Runterzählen. Für eine **Frist** ist das die
+  // ehrlichere Form als vier Chips: Jede Zahl dazwischen ist eine gültige
+  // Antwort, und wer 18 Tage will, soll nicht zwischen 14 und 21 wählen müssen.
+  function zaehler(key, titel, hinweis, min, max, einheit) {
+    var wert = s[key];
+    function taste(schritt, name, symbol, aus) {
+      return '<button class="zaehler-taste" data-zaehler="' + key +
+        '" data-schritt="' + schritt + '" aria-label="' + esc(name) +
+        '"' + (aus ? ' disabled' : '') + '>' + symbol + '</button>';
+    }
+    return '<div class="setting"><span class="setting-text">' +
+      '<span class="setting-title">' + esc(titel) + '</span>' +
+      '<span class="setting-note">' + esc(hinweis) + '</span></span>' +
+      '<span class="zaehler" role="group" aria-label="' + esc(titel) + '"' +
+      ' data-min="' + min + '" data-max="' + max + '">' +
+      taste(-1, 'Ein Tag weniger', ICON.minus, wert <= min) +
+      '<span class="zaehler-wert" role="status">' + wert +
+      '<small>' + esc(einheit) + '</small></span>' +
+      taste(1, 'Ein Tag mehr', ICON.plus, wert >= max) +
+      '</span></div>';
   }
 
   function wahlText(key, titel, hinweis, werte) {
@@ -9026,9 +9147,9 @@ function renderEinstellungen() {
     wahl('tippenStufe', 'Tippen ab Stufe',
       'Ab welcher Leitner-Stufe ein Wort in «Tippen» erscheint. Stufe 3 heißt: drei Mal nacheinander richtig — richtig getippt macht es dann Stufe 4 voll.',
       [{ wert: 2, text: '2' }, { wert: 3, text: '3' }, { wert: 4, text: '4' }]) +
-    wahl('auffrischen', 'Auffrischen nach',
+    zaehler('auffrischen', 'Auffrischen nach',
       'Fertig Gelerntes verschwindet aus «Tippen» und «Übersetzen». Nach dieser Frist kommt es einmal zur Sicherheit zurück — richtig beantwortet, und es ist wieder draußen.',
-      [{ wert: 7, text: '7 T' }, { wert: 14, text: '14 T' }, { wert: 21, text: '21 T' }, { wert: 30, text: '30 T' }]) +
+      AUFFRISCH_MIN, AUFFRISCH_MAX, 'Tage') +
     '';
   teile.abgabe =
     schalter('confirmUeben', 'Bestätigen beim Vokabeltraining',
@@ -9119,6 +9240,24 @@ function renderEinstellungen() {
       save();
       renderEinstellungen();
     });
+  });
+  // Der Zähler zeichnet **an Ort und Stelle** nach, nicht über die ganze
+  // Ansicht: Wer die Taste hält, hielte sonst einen Knopf, den der Renderlauf
+  // gerade weggeworfen hat — und die Wiederholung liefe ins Leere.
+  main.querySelectorAll('[data-zaehler]').forEach(function (b) {
+    var schritt = parseInt(b.dataset.schritt, 10);
+    function tick() {
+      if (!zaehlerSchritt(b.dataset.zaehler, schritt)) { zaehlerLoslassen(); return false; }
+      zaehlerFrischen(b.parentNode);
+      return true;
+    }
+    b.addEventListener('click', function () {
+      // Nach einem Halten hat die Wiederholung schon gezählt; der Klick, der
+      // beim Loslassen noch kommt, würde sonst einen Tag draufsetzen.
+      if (zaehlerLief) { zaehlerLief = false; return; }
+      tick();
+    });
+    b.addEventListener('pointerdown', function () { zaehlerHalten(tick); });
   });
   // Den Tonknopf gibt es nur auf seinem Reiter.
   var tonKnopf = document.getElementById('tonTest');

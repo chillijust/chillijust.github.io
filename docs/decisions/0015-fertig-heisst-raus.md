@@ -66,3 +66,21 @@ verstellbar zu machen. Die Auffrischfrist dagegen ist Geschmackssache.
   übergeben den gewünschten Satz jetzt an `buildTransTask(satz)`.
 - Aufdecken zählt in «Übersetzen» als falsch und senkt die Stufe — das war vorher
   folgenlos.
+
+## Nachtrag · Die Frist ist frei (2026-08-13)
+
+Aus den vier Stufen 7/14/21/30 ist ein Zähler mit − und + geworden: 1 bis 365 Tage, in
+Schritten von einem. Vier Chips waren vier Meinungen darüber, welche Zahl sinnvoll ist —
+wer 18 Tage will, sollte nicht zwischen 14 und 21 wählen müssen.
+
+- Grenzen und Kappung stehen in `auffrischGrenzen()`, benutzt in `mergeState()` **und**
+  beim Zählen. Ein alter Stand mit 7, 14, 21 oder 30 überlebt unverändert.
+- **Gedrückt halten zählt weiter** (420 ms Anlauf, dann alle 90 ms). Ohne das wäre der
+  Weg von 21 auf 60 vierzig Tipper, und der Zähler wäre schlechter als das, was er
+  ablöst.
+- Der Zähler zeichnet **an Ort und Stelle** nach, nicht über `renderEinstellungen()`:
+  Wer die Taste hält, hielte sonst einen Knopf, den der Renderlauf gerade weggeworfen
+  hat.
+- Der Sicherungscode führte die Frist schon immer als blanke Zahl; er brauchte keine
+  Änderung.
+
