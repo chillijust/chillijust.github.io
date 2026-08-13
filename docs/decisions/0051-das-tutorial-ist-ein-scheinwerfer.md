@@ -27,10 +27,14 @@ ein.
 Drei Bausteine in einer Blase auf verdunkeltem Grund waren mehr Gliederung als Inhalt;
 jetzt steht dort ein Text, und das Beispiel ist sein letzter Satz.
 
-**Die Erklärung ist eine Sprechblase, und die Chili erzählt sie.** Sie steht darin, der
-Text neben ihr; die Blase trägt einen Zipfel zum Angeleuchteten, im Fuß eine Punktreihe
-statt der Zeile «Schritt 3 von 12» und rechts einen runden Pfeil. Der Ausgang ist ein
-stilles × in ihrer Ecke.
+**Die Chili erzählt, und zwar von dort, wovon sie spricht.** Sie steht frei auf dem
+verdunkelten Bild direkt neben dem Angeleuchteten — darüber, wenn es unten liegt, darunter
+sonst —, und der Text kommt als Sprechblase aus ihr heraus. Es gibt **keine Karte**, in
+der beides säße: kein Grund, kein Rahmen um das Gespann, nur die Figur und ihre Blase.
+Der Zipfel zeigt auf **sie**, nicht auf das Ziel; im Fuß der Blase eine Punktreihe statt
+der Zeile «Schritt 3 von 12», rechts ein runder Pfeil, in der Ecke ein stilles ×.
+
+**Sie springt von Schritt zu Schritt** — derselbe Wurfbogen wie überall in der App.
 
 **Der Einstieg ist ein Knopf ganz unten auf Home** («Wie funktioniert das hier?»), ruhig
 gestaltet — wer die App kennt, soll ihn übersehen dürfen. Beim allerersten Start bietet
@@ -61,14 +65,14 @@ das niemand sieht. `scrollIntoView({ block: 'center' })` läuft vor
 Übersicht; ihn zu erklären, ohne ihn zu zeigen, wäre Text über einen Knopf. Das Tutorial
 wechselt für diesen Schritt nach «Lernsets» und kehrt am Ende nach Home zurück.
 
-**Der Zipfel darf nie ins Nichts zeigen.** Wo oben kein Platz war und die Blase neben dem
-Ziel landet statt darüber, fällt er weg — ein Zeiger, der auf nichts zeigt, ist schlimmer
-als keiner. `tutZipfelSetzen()` rechnet das nach und setzt sonst `ohne-zipfel`.
+**Der Zipfel zeigt auf die Figur, nicht auf das Ziel.** Sie spricht — die Blase ist nur,
+was sie sagt. Damit kann er auch nie ins Nichts zeigen: Sie steht immer da, auch auf der
+Eingangsfrage, die nichts anleuchtet.
 
 **Die Blase ist in jedem Schema dunkel**, auch in den vier hellen. Das ist keine
 Nachlässigkeit gegenüber ADR 0039: Sie liegt auf einem abgedunkelten Bild, und eine helle
-Karte wäre dort der zweite Scheinwerfer — sie nähme dem ersten die Aussage. Die vier Werte
-stehen darum als lokale Eigenschaften auf `#tutKarte` selbst.
+Blase wäre dort der zweite Scheinwerfer — sie nähme dem ersten die Aussage. Die vier Werte
+stehen darum als lokale Eigenschaften auf `#tutSprech` selbst.
 
 **Der Ausgang sitzt in der Blase, nicht am Bildrand.** Oben rechts am Rand läge er über
 dem Menüknopf und sähe aus wie ein zweiter davon; die Kopfzeile ist besetzt.
@@ -82,10 +86,24 @@ zeigen soll.
 
 **Die Chili bleibt eine.** Im Tutorial ist ihr Platzhalter `#tutChili`, und
 `chiliPlatzhalter()` fragt danach **vor** allem anderen — sonst zöge jeder Renderlauf
-unter dem Overlay sie kurz in die Ansicht und wieder zurück. Zwischen den Schritten
-wechselt ihr Platz nicht; sie hüpft trotzdem, weil `chiliHuepfen()` den Hüpfer vom Umzug
-trennt. Beim **allerersten** Start fliegt sie nicht: Da liegt das Tutorial schon über dem
-ersten Bild, und ein Flug im Augenblick des Ladens sähe nach Fehler aus.
+unter dem Overlay sie kurz in die Ansicht und wieder zurück. Beim **allerersten** Start
+fliegt sie nicht: Da liegt das Tutorial schon über dem ersten Bild, und ein Flug im
+Augenblick des Ladens sähe nach Fehler aus.
+
+**Ihr Sprung wird in Bildkoordinaten gemessen** (`tutChiliLage()`), nicht wie sonst in
+Dokumentkoordinaten. Ihr Platzhalter bleibt derselbe — es bewegt sich der Behälter um sie
+herum —, also bemerkt `chiliAktualisieren()` keinen Umzug, und der Bogen wird in
+`tutSprung()` ausgelöst. Zwischen zwei Schritten wird einmal gescrollt; in
+Dokumentkoordinaten flöge sie um genau diese Strecke daneben. Das ist die eine benannte
+Ausnahme zu ADR 0012, dort nachgetragen.
+
+**Waagerecht rückt sie unter die Mitte des Ziels** (`tutChiliRuecken()`). Ohne das stünde
+sie links am Rand, während rechts oben der Trichter leuchtet — zwei Dinge auf einem
+dunklen Bild, die nichts miteinander zu tun zu haben scheinen.
+
+**Die großzügigere Seite gewinnt**, nicht die Bildschirmhälfte. Ein Ziel knapp über der
+Mitte kann oben weniger Platz haben als darunter, und ein Gespann, das nicht passt, legt
+sich auf das, wovon es spricht.
 
 **Nur die Eingangsfrage trägt beschriftete Knöpfe.** «Abbrechen» und «Loslegen» ist eine
 echte Wahl. Ab da gibt es nur noch «weiter» — dafür genügt ein Pfeil, und am letzten
@@ -98,6 +116,12 @@ Schritt wird daraus ein Haken.
 - Die zwölf Texte sagen zusammen, **in welcher Reihenfolge man übt**: Buchstaben, dann
   Lernsets, dann Tippen und Übersetzen, Grammatik ab dem zweiten Set, Freestyle und
   Power-Training nebenher. Schritt 8 fasst es in einem Satz.
+- **Die Suite prüft, dass das Gespann den Scheinwerfer nie verdeckt** und dass die Figur
+  senkrecht wie waagerecht daneben steht. Eine Erklärung, die auf dem liegt, wovon sie
+  spricht, ist keine.
+- **Der Prüfstand fährt seither im Format des Zielgeräts** (`--window-size=430,932`).
+  Vorher maß er einen Bildschirm, den niemand hat — bei einer Geometrie, die vom
+  verfügbaren Platz abhängt, ist das kein Prüfen, sondern Raten.
 - **Zwei Suiten mussten das Tutorial wegräumen**, bevor sie prüfen: `maskottchen` und
   `enter`. Beide laden mit leerem Speicher, also bietet die App es von selbst an — und
   die Figur steht dann in der Blase statt in einem Knopf. Das ist kein Störgeräusch,
@@ -107,6 +131,6 @@ Schritt wird daraus ein Haken.
 - Jedes Ziel kommt genau einmal vor — sonst erklärte das Tutorial zweimal dasselbe.
 - Die Texte duzen wie der Rest der App (ADR 0050); die Suite prüft es mit.
 - **Für die Messung schaltet die Suite den Übergang ab** — bei `#tutLoch` **und**
-  `#tutKarte`. Im kopflosen Browser läuft keine Zeit; ohne das stünde bei jeder Messung
+  `#tutGespann`. Im kopflosen Browser läuft keine Zeit; ohne das stünde bei jeder Messung
   noch der vorige Ort da. Wer nur eines der beiden abschaltet, misst die Vergangenheit
   des anderen — genau daran ist die Zipfelprüfung zuerst hängen geblieben.

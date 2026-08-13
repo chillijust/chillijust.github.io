@@ -81,8 +81,13 @@ for (const name of suiten) {
 
   let dom = '';
   try {
+    // **Im Format des Zielgeräts**, nicht in dem, was der kopflose Browser von
+    // sich aus nimmt. Alles, was Lagen misst — der Scheinwerfer des Tutorials,
+    // die Flammenreihe, die Trefferflächen —, prüfte sonst einen Bildschirm,
+    // den niemand hat, und wäre auf dem echten Gerät trotzdem falsch.
     dom = execFileSync(chrome, ['--headless', '--disable-gpu', '--no-sandbox',
-      '--virtual-time-budget=10000', '--dump-dom', pathToFileURL(seite).href],
+      '--window-size=430,932', '--virtual-time-budget=10000',
+      '--dump-dom', pathToFileURL(seite).href],
     { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] });
   } catch (e) {
     dom = e.stdout || '';

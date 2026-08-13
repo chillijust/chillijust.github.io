@@ -920,53 +920,67 @@ body.chili-steht #chiliBuehne { visibility: visible; }
 #tutHof.ohne-ziel { background: rgba(0, 0, 0, .82); }
 #tutHof.ohne-ziel #tutLoch { display: none; }
 
+/* Das Gespann: die Chili und ihre Sprechblase, sonst nichts. Kein Grund, kein
+   Rahmen — sie steht frei auf dem verdunkelten Bild neben dem, wovon sie
+   spricht. Der Behälter wird je Schritt **einmal** gesetzt; die Figur steht
+   darin im Fluss wie überall (ADR 0012). */
+#tutGespann {
+  position: fixed; z-index: 85; left: 14px; right: 14px;
+  /* Der Spalt ist nicht Zierde: Der Zipfel ragt 8 px aus der Blase, und ohne
+     ihn stünde die Figur darauf. */
+  display: flex; flex-direction: column; align-items: flex-start; gap: 9px;
+  pointer-events: none;   /* der leere Raum daneben fängt keine Zeiger ab */
+}
+#tutGespann > * { pointer-events: auto; }
+#tutGespann[aria-hidden="true"] { display: none; }
+/* Steht das Gespann **unter** dem Ziel, kommt die Chili nach oben und die
+   Blase darunter — der Zipfel dreht sich mit. */
+#tutGespann.chili-oben { flex-direction: column-reverse; }
+/* Die Ausrückung setzt tutChiliRuecken() je Schritt — sie steht unter der
+   Mitte dessen, wovon die Rede ist. */
+#tutChili { flex: none; width: 76px; height: 76px; margin-left: 16px; }
 /* Die Sprechblase. Sie ist in **jedem** Schema dunkel, auch in den hellen —
    und das ist keine Nachlässigkeit gegenüber ADR 0039: Sie liegt auf einem
-   abgedunkelten Bild. Eine helle Karte wäre dort der zweite Scheinwerfer und
+   abgedunkelten Bild. Eine helle Blase wäre dort der zweite Scheinwerfer und
    nähme dem ersten die Aussage. Die vier Werte stehen darum fest. */
-#tutKarte {
+#tutSprech {
   --tut-grund: #17161C;
   --tut-linie: rgba(255, 255, 255, .13);
   --tut-schrift: #F2F0EC;
   --tut-leise: rgba(242, 240, 236, .62);
-  position: fixed; z-index: 85; left: 14px; right: 14px;
+  position: relative; width: 100%;
   background: var(--tut-grund); border: 1px solid var(--tut-linie); border-radius: 18px;
   padding: 15px 16px 13px; color: var(--tut-schrift);
   box-shadow: 0 14px 38px rgba(0, 0, 0, .5);
 }
-#tutKarte[aria-hidden="true"] { display: none; }
-/* Die Chili erzählt: Sie steht in der Blase, der Text neben ihr. Wie überall
-   ist sie nur umgehängt, nie ein zweites Mal eingebettet (ADR 0012). */
-.tut-kopf { display: flex; align-items: flex-start; gap: 13px; }
-#tutChili { flex: none; width: 62px; height: 62px; margin-top: -2px; }
-#tutChili:empty { display: none; }
-#tutKarte .tut-text {
-  margin: 0; flex: 1; min-width: 0;
-  font-size: 15px; line-height: 1.5; color: var(--tut-schrift);
+#tutSprech .tut-text {
+  margin: 0; font-size: 15px; line-height: 1.5; color: var(--tut-schrift);
 }
-#tutKarte .btn-row { margin-top: 14px; }
+#tutSprech .btn-row { margin-top: 14px; }
+#tutSprech .btn-row[hidden] { display: none; }
 /* Jeder Schritt klappt die Blase neu auf — sonst wäre der Wechsel bloß ein
    ausgetauschter Text, und der Sprung der Chili käme aus dem Nichts. */
 @keyframes tutAuf {
   from { opacity: 0; transform: scale(.94); }
   to { opacity: 1; transform: scale(1); }
 }
-#tutKarte.klappt { animation: tutAuf .22s cubic-bezier(.3, .85, .4, 1); }
-#tutKarte .btn-row[hidden] { display: none; }
-/* Der Zipfel zeigt auf das, wovon die Rede ist. Ein gedrehtes Quadrat mit
-   demselben Grund; nur die zwei Kanten, die nach außen weisen, tragen die
-   Linie — die anderen beiden verschwinden unter der Karte. */
+#tutSprech.klappt { animation: tutAuf .3s .16s both cubic-bezier(.2, .8, .3, 1); }
+/* Der Zipfel zeigt auf die Chili — sie spricht, nicht die Blase. Ein gedrehtes
+   Quadrat mit demselben Grund; nur die zwei Kanten, die nach außen weisen,
+   tragen die Linie, die anderen beiden verschwinden unter der Blase. */
 #tutZipfel {
-  position: absolute; width: 14px; height: 14px;
+  position: absolute; left: 36px; width: 15px; height: 15px;
   background: var(--tut-grund); transform: rotate(45deg); border-radius: 2px;
+  bottom: -8px;
+  border-right: 1px solid var(--tut-linie); border-bottom: 1px solid var(--tut-linie);
 }
-#tutKarte.zipfel-oben #tutZipfel {
-  top: -8px; border-top: 1px solid var(--tut-linie); border-left: 1px solid var(--tut-linie);
+#tutGespann.chili-oben #tutZipfel {
+  bottom: auto; top: -8px;
+  border-right: none; border-bottom: none;
+  border-left: 1px solid var(--tut-linie); border-top: 1px solid var(--tut-linie);
 }
-#tutKarte.zipfel-unten #tutZipfel {
-  bottom: -8px; border-bottom: 1px solid var(--tut-linie); border-right: 1px solid var(--tut-linie);
-}
-#tutKarte.ohne-zipfel #tutZipfel { display: none; }
+/* Der Zipfel bleibt immer: Er zeigt auf die Figur, und die steht auch dann
+   da, wenn gerade nichts angeleuchtet wird. */
 /* Der Fuß: links die Punktreihe, rechts der Pfeil. Kein Wort — was er tut,
    sagt die Reihe daneben. */
 .tut-fuss { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
@@ -1003,10 +1017,11 @@ body.chili-steht #chiliBuehne { visibility: visible; }
 #tutZu[hidden] { display: none; }
 #tutZu svg { width: 17px; height: 17px; }
 /* Nur wo er wirklich steht, macht ihm die erste Zeile Platz. */
-#tutZu:not([hidden]) ~ .tut-kopf .tut-text { padding-right: 26px; }
+#tutZu:not([hidden]) ~ .tut-text { padding-right: 26px; }
 body.tut-offen { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
-  #tutLoch, #tutKarte, .tut-punkte i { transition: none; }
+  #tutLoch, .tut-punkte i { transition: none; }
+  #tutSprech.klappt { animation: none; }
 }
 
 /* Der Knopf am Ende der Übersicht. Ruhig: Wer die App kennt, soll ihn
@@ -1514,19 +1529,19 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
      durchsichtiges Rechteck über dem erklärten Feld; seinen riesigen Schatten
      legt es über alles Übrige. Kein clip-path, kein SVG — ein Element. -->
 <div id="tutHof" hidden aria-hidden="true"><div id="tutLoch"></div></div>
-<div id="tutKarte" role="dialog" aria-modal="true" aria-labelledby="tutText" aria-hidden="true">
-  <span id="tutZipfel" aria-hidden="true"></span>
-  <button id="tutZu" type="button" hidden></button>
-  <div class="tut-kopf">
-    <span id="tutChili" class="chili-platz"></span>
+<div id="tutGespann" role="dialog" aria-modal="true" aria-labelledby="tutText" aria-hidden="true">
+  <div id="tutSprech">
+    <span id="tutZipfel" aria-hidden="true"></span>
+    <button id="tutZu" type="button" hidden></button>
     <p class="tut-text" id="tutText"></p>
+    <div class="btn-row" id="tutKnoepfe"></div>
+    <div class="tut-fuss" id="tutFuss" hidden>
+      <div class="tut-punkte" id="tutPunkte" aria-hidden="true"></div>
+      <span class="tut-zaehler" id="tutZaehler"></span>
+      <button class="tut-vor" id="tutVor" type="button"></button>
+    </div>
   </div>
-  <div class="btn-row" id="tutKnoepfe"></div>
-  <div class="tut-fuss" id="tutFuss" hidden>
-    <div class="tut-punkte" id="tutPunkte" aria-hidden="true"></div>
-    <span class="tut-zaehler" id="tutZaehler"></span>
-    <button class="tut-vor" id="tutVor" type="button"></button>
-  </div>
+  <span id="tutChili" class="chili-platz"></span>
 </div>
 
 <!-- Der Jubel: ein Fenster über allem, für die seltenen großen Augenblicke.
@@ -2864,11 +2879,11 @@ var SATZ_STUFE = 2;
 var STORAGE_KEY = 'russisch_trainer_v1';
 // Stand der ausgelieferten Datei. Wird von tools/build.mjs gesetzt und geht in
 // jedes Ticket ein, damit ein Bericht sagt, welcher Stand gemeint war.
-var APP_STAND = '2026-08-12'; /* == STAND == */
+var APP_STAND = '2026-08-13'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '1.4.0'; /* == VERSION == */
+var APP_VERSION = '1.4.1'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -4104,7 +4119,7 @@ function tutEnde() {
     if (currentTab !== tutHeimTab) setTab(tutHeimTab);
   });
   document.getElementById('tutHof').hidden = true;
-  document.getElementById('tutKarte').setAttribute('aria-hidden', 'true');
+  document.getElementById('tutGespann').setAttribute('aria-hidden', 'true');
   // Einmal gefragt ist gefragt — auch wer abbricht, wird nicht wieder gefragt.
   state.tutorialGesehen = true;
   save();
@@ -4149,47 +4164,72 @@ function tutLochSetzen(ziel) {
   loch.style.left = (r.left - luft) + 'px';
   loch.style.width = (r.width + luft * 2) + 'px';
   loch.style.height = (r.height + luft * 2) + 'px';
-  return r;
+  // Zurück kommt das **Loch**, nicht das Ziel: Danach richtet sich das Gespann
+  // aus, und es soll die angeleuchtete Fläche freihalten — nicht bloß das
+  // Element darin. Sonst schneidet es genau um die Luft hinein.
+  return {
+    top: r.top - luft, left: r.left - luft,
+    width: r.width + luft * 2, height: r.height + luft * 2,
+    bottom: r.bottom + luft, right: r.right + luft
+  };
 }
 
-// Die Karte dorthin, wo Platz ist: unter das Ziel, wenn es oben steht, sonst
-// darüber. Ohne Ziel in die Mitte. Der Zipfel folgt und zeigt zurück.
-function tutKarteSetzen(r) {
-  var karte = document.getElementById('tutKarte');
-  karte.setAttribute('aria-hidden', 'false');
-  var hoehe = karte.getBoundingClientRect().height || 200;
+// Das Gespann neben den Scheinwerfer stellen — und zwar so, dass die **Chili**
+// daneben zu stehen kommt, nicht die Blase: Liegt das Ziel unten, steht sie
+// darüber und die Blase über ihr; liegt es oben, ist es umgekehrt. Ohne Ziel
+// steht das Gespann mittig und die Figur schweigt nicht, sondern erzählt bloß
+// ohne hinzuzeigen.
+//
+// Der Behälter wird hier **einmal je Schritt** gesetzt, nicht je Bild
+// nachgerechnet — die Figur steht darin im Fluss (ADR 0012). Während des
+// Tutorials liegt die Seite fest (`body.tut-offen`).
+function tutGespannSetzen(r) {
+  var g = document.getElementById('tutGespann');
+  g.setAttribute('aria-hidden', 'false');
   var schirm = window.innerHeight;
-  var oben, unten;
-  karte.classList.remove('zipfel-oben', 'zipfel-unten', 'ohne-zipfel');
+  var rand = 16;
+  var spalt = 12;
   if (!r) {
-    oben = Math.max(16, (schirm - hoehe) / 2);
-    karte.classList.add('ohne-zipfel');
-  } else if (r.top + r.height / 2 < schirm / 2) {
-    unten = false;
-    oben = Math.min(schirm - hoehe - 16, r.bottom + 16);
-    karte.classList.add('zipfel-oben');
-  } else {
-    unten = true;
-    oben = Math.max(16, r.top - hoehe - 16);
-    karte.classList.add('zipfel-unten');
+    // Die Eingangsfrage leuchtet nichts an: Gespann in die Mitte, die Figur an
+    // ihren gewohnten Platz links unter der Blase.
+    g.classList.remove('chili-oben');
+    var m = g.getBoundingClientRect();
+    document.getElementById('tutChili').style.marginLeft = '16px';
+    document.getElementById('tutZipfel').style.left = '46px';
+    g.style.top = Math.max(rand, (schirm - m.height) / 2) + 'px';
+    return;
   }
-  karte.style.top = oben + 'px';
-  if (r) tutZipfelSetzen(r, oben, hoehe, unten);
+  // **Die großzügigere Seite gewinnt**, nicht die Bildschirmhälfte. Ein Ziel
+  // knapp über der Mitte hat oben womöglich weniger Platz als darunter — und
+  // ein Gespann, das nicht passt, legt sich auf das, wovon es spricht.
+  var platzOben = r.top - spalt - rand;
+  var platzUnten = schirm - r.bottom - spalt - rand;
+  var darunter = platzUnten >= platzOben;
+  // Erst die Richtung, dann messen: Die Höhe hängt nicht davon ab, die
+  // Reihenfolge der Kinder schon — und der Zipfel sitzt danach anders.
+  g.classList.toggle('chili-oben', darunter);
+  var masse = g.getBoundingClientRect();
+  var hoehe = masse.height || 220;
+  g.style.top = (darunter
+    ? Math.min(schirm - hoehe - rand, r.bottom + spalt)
+    : Math.max(rand, r.top - hoehe - spalt)) + 'px';
+  tutChiliRuecken(r, masse);
 }
 
-// Der Zipfel steht über der Mitte des Ziels — aber nie so weit außen, dass er
-// die abgerundete Ecke der Blase anschneidet.
-function tutZipfelSetzen(r, oben, hoehe, unten) {
-  var karte = document.getElementById('tutKarte');
+// Waagerecht rückt die Figur unter die Mitte des Angeleuchteten — sonst stünde
+// sie links, während rechts oben der Trichter leuchtet, und niemand brächte
+// beides zusammen. Der Zipfel geht mit ihr, bleibt aber von den runden Ecken
+// der Blase weg.
+function tutChiliRuecken(r, masse) {
+  var chili = document.getElementById('tutChili');
   var zipfel = document.getElementById('tutZipfel');
-  var k = karte.getBoundingClientRect();
-  var mitte = r.left + r.width / 2 - k.left;
-  var rand = 22;
-  zipfel.style.left = Math.max(rand, Math.min(k.width - rand, mitte)) - 7 + 'px';
-  // Steht die Blase gar nicht neben dem Ziel — etwa weil oben kein Platz war —,
-  // zeigt ein Zipfel ins Nichts. Dann lieber keiner.
-  var zeigt = unten ? (oben + hoehe <= r.top + 2) : (oben >= r.bottom - 2);
-  if (!zeigt) karte.classList.add('ohne-zipfel');
+  var breite = 76;
+  var mitte = r.left + r.width / 2 - masse.left;
+  var links = Math.max(0, Math.min(masse.width - breite, mitte - breite / 2));
+  chili.style.marginLeft = links + 'px';
+  var ecke = 26;
+  zipfel.style.left =
+    Math.max(ecke, Math.min(masse.width - ecke, links + breite / 2)) - 7.5 + 'px';
 }
 
 function tutZeichnen() {
@@ -4203,11 +4243,15 @@ function tutZeichnen() {
       'was die Übungen voneinander wollen und wo was zu finden ist.';
     tutKnoepfe([['Abbrechen', 'ghost', tutEnde], ['Loslegen', 'primary', tutWeiter]]);
     tutFussSetzen(false);
-    tutKarteSetzen(null);
+    tutGespannSetzen(null);
     return;
   }
 
   var sch = TUTORIAL[tutSchritt];
+  // Wo stand die Figur, bevor sich etwas rührt? In **Bildkoordinaten**: Der
+  // Behälter liegt fest, und zwischen zwei Schritten wird gescrollt — in
+  // Dokumentkoordinaten flöge sie um die Scrollstrecke daneben.
+  var vorher = tutChiliLage();
   tutOrtSetzen(sch[0]);
   document.getElementById('tutText').textContent = sch[2];
   tutKnoepfe(null);
@@ -4221,21 +4265,39 @@ function tutZeichnen() {
       el.scrollIntoView();
     }
   }
-  tutKarteSetzen(tutLochSetzen(sch[1]));
-  // Zuletzt die Bewegung: Die Chili hüpft an ihrem neuen Platz auf, und die
-  // Blase klappt darum auf. Erst rechnen, dann bewegen — sonst spielte die
-  // Animation, während die Blase noch am alten Ort steht.
-  chiliHuepfen();
+  tutGespannSetzen(tutLochSetzen(sch[1]));
+  // Zuletzt die Bewegung: Erst rechnen, dann springen — sonst flöge sie zu
+  // einem Platz, den die Blase noch gar nicht eingenommen hat.
+  tutSprung(vorher);
   tutKlappen();
+}
+
+// Die Lage der Figur im **Bild**, nicht im Dokument. Für alles außerhalb des
+// Tutorials gilt weiter chiliLage(): Dort steht sie im Fluss der Seite und
+// scrollt mit, hier liegt sie in einem festen Behälter über allem.
+function tutChiliLage() {
+  var el = document.getElementById('tutChili');
+  if (!el) return null;
+  var r = el.getBoundingClientRect();
+  if (!r.width) return null;
+  return { x: r.left + r.width / 2, y: r.top + r.height / 2, b: r.width };
+}
+
+// Der Sprung von Schritt zu Schritt. Ihr Platzhalter bleibt derselbe — es
+// bewegt sich der Behälter darum herum —, also gibt es keinen Umzug, den
+// chiliAktualisieren() bemerken könnte. Der Bogen wird darum hier ausgelöst.
+function tutSprung(vorher) {
+  chiliFlug(vorher, tutChiliLage());
+  chiliHuepfen();
 }
 
 // Der Auftritt der Blase. Die Klasse muss weg und neu gesetzt werden, sonst
 // startet die Animation beim zweiten Schritt nicht wieder.
 function tutKlappen() {
-  var karte = document.getElementById('tutKarte');
-  karte.classList.remove('klappt');
-  void karte.offsetWidth;
-  karte.classList.add('klappt');
+  var blase = document.getElementById('tutSprech');
+  blase.classList.remove('klappt');
+  void blase.offsetWidth;
+  blase.classList.add('klappt');
 }
 
 // Der Fuß der Blase: die Punktreihe und der Pfeil. Er löst die zwei
@@ -4280,7 +4342,7 @@ document.getElementById('tutZu').setAttribute('aria-label', 'Tutorial beenden');
 // nicht mehr. Neu messen, nicht neu zeichnen.
 function tutNachmessen() {
   if (!tutOffen || tutSchritt < 0) return;
-  tutKarteSetzen(tutLochSetzen(TUTORIAL[tutSchritt][1]));
+  tutGespannSetzen(tutLochSetzen(TUTORIAL[tutSchritt][1]));
 }
 window.addEventListener('resize', tutNachmessen);
 window.addEventListener('orientationchange', tutNachmessen);

@@ -100,27 +100,31 @@ bleibt frei. Kein `clip-path`, kein SVG, keine vier Balken.
 | `tutWeiter()` | zählt hoch, am Ende `tutEnde()` |
 | `tutOrtSetzen(ort)` | wechselt die Ansicht, wenn ein Schritt woandershin zeigt |
 | `tutLochSetzen(ziel)` | scrollt das Ziel in die Mitte, misst es, setzt das Loch |
-| `tutKarteSetzen(r)` | legt die Blase unter das Ziel, wenn es oben liegt, sonst darüber |
-| `tutZipfelSetzen(…)` | schiebt den Zipfel über die Mitte des Ziels — oder nimmt ihn weg |
+| `tutGespannSetzen(r)` | stellt Chili und Blase neben das Loch, auf der Seite mit Platz |
+| `tutChiliRuecken(…)` | rückt die Figur waagerecht unter die Mitte des Ziels |
+| `tutSprung(vorher)` | löst den Wurfbogen aus — gemessen in Bildkoordinaten |
 | `tutFussSetzen(an)` | Punktreihe, Pfeil und × statt der beschrifteten Knöpfe |
 | `tutNachmessen()` | misst neu bei `resize` und `orientationchange` |
 
-Die Erklärung ist eine **Sprechblase, und die Chili erzählt sie**: Sie steht links darin,
-der Text neben ihr, der Zipfel zeigt zum Ziel. Im Fuß links eine Punktreihe (ein Zeichen
-je Schritt, das jetzige als Strich), rechts ein runder Pfeil — am letzten Schritt ein
-Haken. Die Zeile «Schritt 3 von 12» steht weiter im `#tutZaehler`, aber nur noch für
-Vorleser: Eine Punktreihe sagt einem Auge alles und einem Ohr nichts. Der Ausgang ist ein
-stilles × in der Ecke der Blase; nur die Eingangsfrage trägt zwei beschriftete Knöpfe,
-weil dort eine echte Wahl steht.
+**Die Chili erzählt, und zwar von dort, wovon sie spricht.** Es gibt keine Karte, in der
+beides säße: `#tutGespann` ist ein Behälter ohne Grund und Rahmen, darin die Figur und
+`#tutSprech`. Sie steht direkt neben dem Angeleuchteten — darüber, wenn es unten liegt,
+darunter sonst —, und der Zipfel der Blase zeigt auf **sie**. Im Fuß links eine Punktreihe
+(ein Zeichen je Schritt, das jetzige als Strich), rechts ein runder Pfeil — am letzten
+Schritt ein Haken. Die Zeile «Schritt 3 von 12» steht weiter im `#tutZaehler`, aber nur
+noch für Vorleser: Eine Punktreihe sagt einem Auge alles und einem Ohr nichts. Der Ausgang
+ist ein stilles × in der Ecke der Blase; nur die Eingangsfrage trägt zwei beschriftete
+Knöpfe, weil dort eine echte Wahl steht.
 
 Die Blase ist in **jedem** Schema dunkel — sie liegt auf einem abgedunkelten Bild, und
-eine helle Karte wäre dort der zweite Scheinwerfer.
+eine helle wäre dort der zweite Scheinwerfer.
 
 **Die Figur bleibt eine.** Ihr Platzhalter im Tutorial ist `#tutChili`, und
 `chiliPlatzhalter()` fragt danach vor allem anderen — sonst zöge jeder Renderlauf unter
-dem Overlay sie kurz in die Ansicht. Zwischen den Schritten wechselt ihr Platz nicht; den
-Hüpfer trägt `chiliHuepfen()`, das den Sprung vom Umzug trennt. Beim allerersten Start
-(`tutStarten(true)`) fliegt sie nicht.
+dem Overlay sie kurz in die Ansicht. Ihr Platzhalter wechselt zwischen den Schritten
+nicht; es bewegt sich der Behälter um sie herum, also löst `tutSprung()` den Bogen aus und
+misst dafür in **Bildkoordinaten** (`tutChiliLage()`) — die eine benannte Ausnahme zu
+ADR 0012. Beim allerersten Start (`tutStarten(true)`) fliegt sie nicht.
 
 **Der Rand des Lochs ist weich**: ein zweiter, innen liegender Schatten mit *derselben*
 Deckung wie der äußere. Nur bei gleicher Deckung gibt es am Rand keine Linie, sondern

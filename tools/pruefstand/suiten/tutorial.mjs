@@ -12,13 +12,15 @@ const test = String.raw`
 var log = [];
 function pruefe(n, c, e) { log.push((c ? 'PASS ' : 'FAIL ') + n + (e ? ' [' + e + ']' : '')); }
 function q(s) { return document.querySelector(s); }
-// Loch **und** Blase gleiten von Ziel zu Ziel. Im kopflosen Browser läuft
-// keine Zeit, also stünde bei jeder Messung noch der **alte** Ort da. Für die
-// Messung wird das Gleiten abgeschaltet — geprüft wird die Geometrie, nicht
-// die Animation. Wer hier eines der beiden vergisst, misst Vergangenheit.
+// Das Loch gleitet von Ziel zu Ziel, und die Blase klappt jedes Mal auf. Im
+// kopflosen Browser läuft keine Zeit — bei jeder Messung stünde also noch der
+// **alte** Zustand da. Für die Messung wird beides abgeschaltet; geprüft wird
+// die Geometrie, nicht die Animation. Wer eines davon vergisst, misst
+// Vergangenheit — genau daran ist die Zipfelprüfung schon einmal gescheitert.
 (function () {
   var s = document.createElement('style');
-  s.textContent = '#tutLoch, #tutKarte { transition: none !important; }';
+  s.textContent = '#tutLoch, #tutGespann { transition: none !important; }' +
+    '#tutSprech.klappt { animation: none !important; }';
   document.head.appendChild(s);
 })();
 function alle(s) { return Array.prototype.slice.call(document.querySelectorAll(s)); }
@@ -80,7 +82,7 @@ try {
       (letzte.compareDocumentPosition(q('#tutKnopf')) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
   })());
   pruefe('B3 vor dem Start ist nichts offen',
-    q('#tutHof').hidden && q('#tutKarte').getAttribute('aria-hidden') === 'true');
+    q('#tutHof').hidden && q('#tutGespann').getAttribute('aria-hidden') === 'true');
 
   // ── C · Erst die Frage, dann der Scheinwerfer ─────────────
   q('#tutKnopf').click();
@@ -93,7 +95,7 @@ try {
   // Abbrechen räumt auf.
   knopf('Abbrechen').click();
   pruefe('C5 Abbrechen schließt', !tutOffen && q('#tutHof').hidden &&
-    q('#tutKarte').getAttribute('aria-hidden') === 'true');
+    q('#tutGespann').getAttribute('aria-hidden') === 'true');
   pruefe('C6 und merkt sich das', state.tutorialGesehen === true);
   pruefe('C7 der Körper ist wieder frei', !document.body.classList.contains('tut-offen'));
 
@@ -105,6 +107,7 @@ try {
   var fehlt = [];
   var ohneLoch = [];
   var ohneZipfel = [];
+  var verdeckt = [];
   for (var i = 0; i < TUTORIAL.length; i++) {
     var sch = TUTORIAL[i];
     pruefe('D' + (i + 1) + ' Schritt ' + (i + 1) + ' · ' + sch[2].slice(0, 28),
@@ -124,27 +127,49 @@ try {
           Math.round(z.left) + ',' + Math.round(z.top) + ' ' +
           Math.round(z.width) + 'x' + Math.round(z.height) + ']');
       }
-      // Der Zipfel zeigt zum Ziel — und darf nie ins Nichts zeigen. Er sitzt
-      // entweder oben (Blase unter dem Ziel) oder unten (Blase darüber).
-      var kl = q('#tutKarte').classList;
+      // **Das Gespann darf den Scheinwerfer nie verdecken.** Eine Erklärung,
+      // die auf dem liegt, wovon sie spricht, ist keine.
+      var g = q('#tutGespann').getBoundingClientRect();
+      if (g.left < l.right - 1 && g.right > l.left + 1 &&
+          g.top < l.bottom - 1 && g.bottom > l.top + 1) {
+        verdeckt.push(sch[2].slice(0, 24) + ' [Gespann ' + Math.round(g.top) + '–' +
+          Math.round(g.bottom) + ' auf Loch ' + Math.round(l.top) + '–' +
+          Math.round(l.bottom) + ']');
+      }
+      // Der Zipfel zeigt auf die **Chili** — sie spricht, nicht die Blase.
+      var oben = q('#tutGespann').classList.contains('chili-oben');
       var zi = q('#tutZipfel').getBoundingClientRect();
-      var k = q('#tutKarte').getBoundingClientRect();
-      if (!kl.contains('ohne-zipfel')) {
-        var richtung = kl.contains('zipfel-oben') ? (k.top >= z.bottom - 20)
-          : kl.contains('zipfel-unten') ? (k.bottom <= z.top + 20) : false;
-        var waagerecht = zi.left >= k.left - 1 && zi.right <= k.right + 1;
-        if (!richtung || !waagerecht) {
-          ohneZipfel.push(sch[2] + ' [' + (kl.contains('zipfel-oben') ? 'oben' : 'unten') +
-            ' Karte ' + Math.round(k.top) + '–' + Math.round(k.bottom) +
-            ' Ziel ' + Math.round(z.top) + '–' + Math.round(z.bottom) + ']');
-        }
+      var ch = q('#tutChili').getBoundingClientRect();
+      var zeigt = oben ? (zi.top <= ch.bottom + 2) : (zi.bottom >= ch.top - 2);
+      var waagerecht = zi.left >= ch.left - 24 && zi.right <= ch.right + 24;
+      if (!zeigt || !waagerecht) {
+        ohneZipfel.push(sch[2].slice(0, 24) + ' [' + (oben ? 'Chili oben' : 'Chili unten') +
+          ' Zipfel ' + Math.round(zi.top) + '/' + Math.round(zi.left) +
+          ' Chili ' + Math.round(ch.top) + '/' + Math.round(ch.left) + ']');
+      }
+      // Und sie steht **neben** dem Angeleuchteten, nicht irgendwo: senkrecht
+      // dicht daran, waagerecht unter seiner Mitte. Genau das ging beim
+      // Trichter schief — er leuchtete rechts oben, sie stand links.
+      var abstand = oben ? (ch.top - l.bottom) : (l.top - ch.bottom);
+      if (abstand < -2 || abstand > 40) {
+        ohneZipfel.push(sch[2].slice(0, 24) + ': senkrecht ' + Math.round(abstand) + ' px daneben');
+      }
+      // Waagerecht darf sie nur abweichen, wo der Bildrand sie hält.
+      var chMitte = ch.left + ch.width / 2;
+      var lMitte = l.left + l.width / 2;
+      var amRand = chMitte < ch.width || chMitte > window.innerWidth - ch.width;
+      if (Math.abs(chMitte - lMitte) > l.width / 2 + 8 && !amRand) {
+        ohneZipfel.push(sch[2].slice(0, 24) + ': waagerecht bei ' + Math.round(chMitte) +
+          ' statt ' + Math.round(lMitte));
       }
     }
     if (i < TUTORIAL.length - 1) q('#tutVor').click();
   }
   pruefe('E1 jedes Ziel gibt es wirklich', fehlt.length === 0, fehlt.join(' | '));
   pruefe('E2 und das Loch liegt darüber', ohneLoch.length === 0, ohneLoch.join(' | '));
-  pruefe('E2b der Zipfel zeigt zum Ziel', ohneZipfel.length === 0, ohneZipfel.join(' | '));
+  pruefe('E2b das Gespann verdeckt den Scheinwerfer nie',
+    verdeckt.length === 0, verdeckt.join(' | '));
+  pruefe('E2c der Zipfel zeigt auf die Chili', ohneZipfel.length === 0, ohneZipfel.join(' | '));
   pruefe('E3 der letzte Schritt schließt ab',
     q('#tutVor').getAttribute('aria-label') === 'Fertig',
     q('#tutVor').getAttribute('aria-label'));

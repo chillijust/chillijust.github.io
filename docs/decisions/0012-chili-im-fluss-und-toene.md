@@ -68,3 +68,22 @@ schließt das Tippen die letzte Lücke: richtig geschrieben macht es Stufe 4 vol
   ohnehin Vorrang.
 - Wer `tippenAbStufe` von Hand auf 4 gestellt hatte, findet nach dem Wechsel Stufe 3
   vor; die Einstellung lässt sich in derselben Zeile zurückstellen.
+
+## Nachtrag · Die eine benannte Ausnahme (2026-08-13)
+
+Das Tutorial (ADR 0051) stellt die Figur neben das Angeleuchtete. Ihr Behälter
+`#tutGespann` liegt **fest über der Seite** und wird je Schritt einmal gesetzt — und der
+Sprung von Schritt zu Schritt wird in **Bildkoordinaten** gemessen (`tutChiliLage()`),
+nicht wie sonst in Dokumentkoordinaten (`chiliLage()`).
+
+Das widerspricht dieser Entscheidung nicht, sondern grenzt sie ein:
+
+- **Sie steht weiterhin im Fluss** — nämlich im Fluss ihres Behälters. Nichts an ihrer
+  Lage wird je Bild nachgerechnet, und es gibt keinen Scroll-Horcher.
+- **Während des Tutorials liegt die Seite fest** (`body.tut-offen`). Zwischen zwei
+  Schritten wird einmal gescrollt, damit das Ziel ins Bild kommt; danach steht alles
+  still. In Dokumentkoordinaten flöge sie um genau diese Scrollstrecke daneben.
+
+Was verboten bleibt: sie irgendwo anders über gerechnete Koordinaten aufzustellen oder
+ihr einen Scroll- oder Resize-Horcher mitzugeben.
+
