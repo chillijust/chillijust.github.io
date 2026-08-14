@@ -55,7 +55,7 @@ try {
 
   // ── A · Die Schritte selbst ───────────────────────────────
   reicherStand();
-  pruefe('A1 zwölf Schritte', TUTORIAL.length === 12, String(TUTORIAL.length));
+  pruefe('A1 dreizehn Schritte', TUTORIAL.length === 13, String(TUTORIAL.length));
   pruefe('A2 jeder hat Ort, Ziel und Text',
     TUTORIAL.every(function (s) { return s.length === 3; }));
   pruefe('A3 jeder Text ist kurz genug fürs Overlay',
@@ -215,7 +215,7 @@ try {
   pruefe('E3b während der Schritte gibt es keine beschrifteten Knöpfe',
     q('#tutKnoepfe').hidden && alle('#tutKnoepfe [data-tut]').length === 0);
   pruefe('E4 der Zähler stimmt — für das Ohr',
-    q('#tutZaehler').textContent === 'Schritt 12 von 12', q('#tutZaehler').textContent);
+    q('#tutZaehler').textContent === 'Schritt 13 von 13', q('#tutZaehler').textContent);
 
   // ── E5 · Die Punktreihe ───────────────────────────────────
   // Sie ersetzt die Zeile «Schritt 3 von 12». Ein Zeichen je Schritt, genau

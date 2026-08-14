@@ -83,6 +83,7 @@ const nomen = lies('nomen.json').wert;
 const kommentare = lies('kommentare.json').wert;
 const tutorial = lies('tutorial.json').wert;
 const betonung = lies('betonung.json').wert;
+const ortho = lies('ortho.json').wert;
 
 // ── Wortart und Geschlecht ───────────────────────────────────
 // Die Endung der Grundform verrät beides — meistens. Was die Regel liefert,
@@ -471,7 +472,7 @@ if (!Array.isArray(kommentare) || kommentare.length === 0) {
 // das prüft die Suite «tutorial» am echten DOM. Hier steht nur, was sich ohne
 // Browser feststellen lässt.
 const TUT_ORTE = ['home', 'lernsets', 'freestyle', 'tippen', 'uebersetzen',
-  'buchstaben', 'grammatik', 'power'];
+  'buchstaben', 'grammatik', 'schreibung', 'power'];
 if (!Array.isArray(tutorial) || tutorial.length < 5) {
   meckern('tutorial.json: erwartet eine Liste mit mindestens fünf Schritten');
 } else {
@@ -661,6 +662,31 @@ const betonungBlock = (name, obj) => {
   return zeilen.join('\n');
 };
 
+// Schreibregeln: je Regel ein Objekt, je Aufgabe eine Zeile. Die Lücke steht
+// nicht in den Daten — sie ergibt sich aus dem Paar «ist»/«klingt».
+const orthoBlock = (name, liste) => {
+  const zeilen = ['var ' + name + ' = ['];
+  liste.forEach((r, i) => {
+    zeilen.push('  {');
+    zeilen.push('    id: ' + jsStr(r.id) + ', name: ' + jsStr(r.name) + ', kurz: ' + jsStr(r.kurz) +
+      (r.hoerbar === false ? ', hoerbar: false' : '') + ',');
+    zeilen.push('    frage: ' + jsStr(r.frage) + ',');
+    zeilen.push('    deutungen: [' + r.deutungen.map(jsStr).join(', ') + '], richtig: ' + r.richtig + ',');
+    zeilen.push('    regel: ' + jsStr(r.regel) + ',');
+    zeilen.push('    merksatz: ' + jsStr(r.merksatz) + ',');
+    zeilen.push('    aufgaben: [');
+    r.aufgaben.forEach((a, k) => {
+      zeilen.push('      { ist: ' + jsStr(a.ist) + ', klingt: ' + jsStr(a.klingt) +
+        (a.pruef ? ', pruef: ' + jsStr(a.pruef) : '') + ', de: ' + jsStr(a.de) + ' }' +
+        (k < r.aufgaben.length - 1 ? ',' : ''));
+    });
+    zeilen.push('    ]');
+    zeilen.push('  }' + (i < liste.length - 1 ? ',' : ''));
+  });
+  zeilen.push('];');
+  return zeilen.join('\n');
+};
+
 const block = [
   START,
   objektBlock('VOCAB_THEMES', vokabeln, false),
@@ -684,6 +710,11 @@ const block = [
   listenBlock('TUTORIAL', tutorial, true),
   '',
   betonungBlock('BETONUNG', betonung),
+  '',
+  // **Steht bewusst zuletzt.** Die Prüfwörter tragen Betonungszeichen — die
+  // Suite «betonung» prüft, dass in den *Wortlisten* keines steht, und liest
+  // dafür bis zum ersten dieser beiden Blöcke.
+  orthoBlock('ORTHO', ortho),
   ENDE
 ].join('\n');
 
@@ -1099,6 +1130,101 @@ for (const [was, texte] of [
     }
     gesehen.set(k, t);
   }
+}
+
+// ── Schreibung: was man hört, und was man schreibt ──────────
+// **Eine Aufgabe ist ein Paar, keine Stelle.** Die erste Fassung dieser Datei
+// nannte die Lücke als Zeichenindex — und lag bei jedem dritten Wort daneben,
+// ohne dass es aufgefallen wäre. Jetzt stehen beide Schreibweisen da, die
+// richtige und die nach Gehör; wo sie sich unterscheiden, ist die Lücke. Das
+// lässt sich nachrechnen, und genau das tut dieser Absatz.
+const BETONT = '́';
+const orthoStelle = (ist, klingt) => {
+  let p = 0;
+  while (p < ist.length && p < klingt.length && ist[p] === klingt[p]) p++;
+  let s = 0;
+  while (s < ist.length - p && s < klingt.length - p &&
+    ist[ist.length - 1 - s] === klingt[klingt.length - 1 - s]) s++;
+  return { richtig: ist.slice(p, ist.length - s), falsch: klingt.slice(p, klingt.length - s) };
+};
+if (!Array.isArray(ortho) || ortho.length === 0) {
+  meckern('ortho.json: erwartet eine nicht-leere Liste von Regeln');
+} else {
+  const orthoIds = new Set();
+  ortho.forEach((r, i) => {
+    const wo = 'ortho.json #' + (i + 1) + (r && r.id ? ' (' + r.id + ')' : '');
+    if (!r || typeof r !== 'object' || Array.isArray(r)) return meckern(wo + ': erwartet ein Objekt');
+    ['id', 'name', 'kurz', 'frage', 'regel', 'merksatz'].forEach((f) => {
+      if (typeof r[f] !== 'string' || r[f].trim() === '') meckern(wo + ': «' + f + '» fehlt oder ist leer');
+    });
+    if (!/^[a-z]+$/.test(String(r.id))) meckern(wo + ': «id» nur Kleinbuchstaben');
+    // **Name und Kurzform stehen in Versalien-Etiketten.** «ь nach Zischlaut»
+    // wird dort zu «Ь NACH ZISCHLAUT», «жи · ши» zu «ЖИ · ШИ» — beides falsch
+    // gesetzt und schwer zu lesen. Kyrillisch gehört in den Regeltext, wo es
+    // die Klasse `cyr` trägt.
+    ['name', 'kurz'].forEach((f) => {
+      if (typeof r[f] === 'string' && istKyrillisch(r[f])) {
+        meckern(wo + ': «' + f + '» steht in Versalien — kein Kyrillisch darin');
+      }
+    });
+    if (orthoIds.has(r.id)) meckern(wo + ': doppelte Kennung «' + r.id + '»');
+    orthoIds.add(r.id);
+    // **Nicht jede Regel ist eine über den Klang.** Bei -тся/-ться und beim
+    // Weichzeichen klingen beide Schreibweisen gleich; «klingt» ist dort die
+    // andere Schreibweise, nicht die Lautung. Wer das verwechselt, stellt der
+    // Gegenüberstellung eine Behauptung voran, die nicht stimmt.
+    if (r.hoerbar !== undefined && r.hoerbar !== false) {
+      meckern(wo + ': «hoerbar» steht nur da, wenn es false ist');
+    }
+    // Wie bei den Grammatikbausteinen: drei Deutungen, eine trifft. Unter drei
+    // wäre es Raten mit halber Chance, kein Erkennen.
+    if (!Array.isArray(r.deutungen) || r.deutungen.length < 3) {
+      meckern(wo + ': «deutungen» braucht mindestens drei Möglichkeiten');
+    } else if (!Number.isInteger(r.richtig) || r.richtig < 0 || r.richtig >= r.deutungen.length) {
+      meckern(wo + ': «richtig» zeigt auf keine der Deutungen');
+    }
+    if (!Array.isArray(r.aufgaben) || r.aufgaben.length < 3) {
+      return meckern(wo + ': «aufgaben» braucht mindestens drei Wörter');
+    }
+    const gesehen = new Set();
+    r.aufgaben.forEach((a, k) => {
+      const wa = wo + ' » ' + (a && a.ist ? a.ist : 'Aufgabe ' + (k + 1));
+      if (!a || typeof a !== 'object' || Array.isArray(a)) return meckern(wa + ': erwartet ein Objekt');
+      Object.keys(a).forEach((f) => {
+        if (!['ist', 'klingt', 'pruef', 'de'].includes(f)) meckern(wa + ': unbekannte Angabe «' + f + '»');
+      });
+      ['ist', 'klingt', 'de'].forEach((f) => {
+        if (typeof a[f] !== 'string' || a[f].trim() === '') meckern(wa + ': «' + f + '» fehlt oder ist leer');
+      });
+      if (typeof a.ist !== 'string' || typeof a.klingt !== 'string') return;
+      if (!istKyrillisch(a.ist)) return meckern(wa + ': «ist» enthält kein Kyrillisch');
+      if (!istKyrillisch(a.klingt)) meckern(wa + ': «klingt» enthält kein Kyrillisch');
+      // Die richtige Schreibweise ist die Kennung der Aufgabe in ihrer Regel.
+      if (gesehen.has(a.ist)) meckern(wa + ': kommt in dieser Regel schon vor');
+      gesehen.add(a.ist);
+      // **Kein Betonungszeichen in «ist» und «klingt».** Beide stehen in der
+      // Aufgabe und werden verglichen, nicht nur gezeigt. Im Prüfwort ist es
+      // dagegen der ganze Witz: Es zeigt, wo die Betonung liegt.
+      [['ist', a.ist], ['klingt', a.klingt]].forEach(([f, w]) => {
+        if (w.indexOf(BETONT) !== -1) meckern(wa + ': «' + f + '» trägt ein Betonungszeichen');
+      });
+      if (a.pruef !== undefined) {
+        if (typeof a.pruef !== 'string' || !istKyrillisch(a.pruef)) {
+          meckern(wa + ': «pruef» ist kein kyrillisches Wort');
+        } else if (a.pruef.indexOf(BETONT) === -1) {
+          meckern(wa + ': ein Prüfwort ohne Betonungszeichen beweist nichts');
+        }
+      }
+      // Der Kern: genau **eine** Stelle darf sich unterscheiden — sonst lässt
+      // sich die Lücke nicht ausrechnen, und die Aufgabe fragte zwei Dinge.
+      const st = orthoStelle(a.ist, a.klingt);
+      if (st.richtig === st.falsch) meckern(wa + ': «ist» und «klingt» sind gleich');
+      else if (st.richtig.length > 1 || st.falsch.length > 1) {
+        meckern(wa + ': unterscheiden sich an mehr als einer Stelle — «' +
+          st.richtig + '» gegen «' + st.falsch + '»');
+      }
+    });
+  });
 }
 
 if (fehler.length) {

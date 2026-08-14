@@ -23,7 +23,7 @@ man der falschen.
 | 1 | Kleinkram mit Sofortnutzen | 1.5.2 | **fertig** · ADR 0052 · Suite `robust` |
 | 2 | Kontext-Lücke (W3) | 1.6.0 | **fertig** · ADR 0053 · Suite `luecke` |
 | 3 | Betonung | 1.7.0 | **fertig** · ADR 0054 · Suite `betonung` · Sätze folgen mit 6 |
-| 4 | Orthographie ohne Ton (E3 + Prüfwort) | 1.8.0 | offen |
+| 4 | Orthographie ohne Ton (E3 + Prüfwort) | 1.8.0 | **fertig** · ADR 0055 · Suite `schreibung` · neue Übung «Schreibung» |
 | 5 | Handling: Rekonstruktion, Tagesmaß, Fehlerprofil | 1.9.0 | offen |
 | 6 | Sätze wachsen (kleine Variante) | 2.0.0 | offen |
 | 7 | Buchstaben-Generatoren ohne Ton (D3, D4, D6) | 2.1.0 | offen |
@@ -162,6 +162,28 @@ Und die Regel „Ь nach Zischlaut" hat Ausnahmen, die der Plan verschweigt.
 **Absicherung:** Suite `schreibung` — jede Regel hat mindestens fünf Wörter, jedes
 `pruefwort` trägt die Betonung auf dem fraglichen Vokal, keine Regel widerspricht der
 Schreibweise im Wortschatz.
+
+### Umgesetzt als 1.8.0 — drei Abweichungen vom Entwurf oben
+
+1. **Acht Regeln, nicht neun.** Иканье ist weggefallen: Unbetontes е klingt wie и, aber
+   die Fälle, in denen das eine *Schreibentscheidung* ist, überschneiden sich fast völlig
+   mit Аканье, und wo sie es nicht tun, gibt es kein Prüfwort. Eine Regel ohne Probe wäre
+   Auswendiglernen — genau das, was die Übung ersetzen soll.
+2. **Das Prüfwort steht in `ortho.json`, nicht als Feld an der Vokabel.** Von den 46
+   Aufgabenwörtern stehen nur 14 überhaupt im Wortschatz — `лестница`, `конечно` und
+   `второй` sind Beispiele für eine Regel, keine Lernwörter. Ein Feld an der Vokabel hätte
+   für die übrigen 32 keinen Platz gehabt, und für die 14 hätte es `vokabeln.json`
+   angefasst — die Datei, deren Kennungen der Lernstand trägt. Sie bleibt unberührt.
+3. **Die Lücke ist kein Index, sondern ein Paar.** Die erste Fassung der Datei nannte die
+   Stelle als Zeichenposition und lag bei jedem dritten Wort daneben, ohne dass es
+   aufgefallen wäre — eine falsche Zahl sieht aus wie eine richtige. Jetzt stehen beide
+   Schreibweisen da (`ist` und `klingt`); wo sie sich unterscheiden, ist die Lücke. Build
+   und Suite rechnen es für jede Aufgabe nach (ADR 0055).
+
+Dazu zwei Entscheidungen, die der Entwurf offenließ: Die Übung **zählt in Serie und
+Antworten mit** — sie steht unter «Wörter», nicht unter «Freiwillig». Und **ab der
+Satzstufe wird das ganze Wort geschrieben** statt gewählt: Zwei Möglichkeiten sind eine
+Münze, und eine Regel darf auf der oberen Hälfte der Leiter nicht erratbar sein.
 
 ---
 

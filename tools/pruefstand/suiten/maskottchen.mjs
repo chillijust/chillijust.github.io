@@ -402,7 +402,7 @@ try {
 
   // L · Home als Lagebild
   setTab('home');
-  pruefe('L1 sieben Kacheln', alle('[data-uebung]').length === 7, String(alle('[data-uebung]').length));
+  pruefe('L1 acht Kacheln', alle('[data-uebung]').length === 8, String(alle('[data-uebung]').length));
   pruefe('L2 jede nennt ihren Stand',
     alle('.kachel-stand').every(function (x) { return x.textContent.length > 0; }));
   pruefe('L3 Empfehlung führt irgendwohin', !!q('#homeEmpf'));

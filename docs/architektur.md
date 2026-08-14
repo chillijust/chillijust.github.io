@@ -46,9 +46,10 @@ Favoriten oder allen und zeigt je Fakt, wie oft er dran war.
 
 **Der Fakt hat überall dieselbe Gestalt** (ADR 0049): `faktFaellig()` fragt beim
 **Weitergehen**, ob eine fällig ist, `faktKarteHtml()` und `faktKarteBinden(weiter, neu)`
-bauen sie. Vier Übungen zeigen dieselbe Karte — «Lernsets», «Tippen», «Übersetzen»,
-«Power-Training»; den früheren Streifen unter der Auflösung gibt es nicht mehr.
-«Buchstaben» und «Grammatik» bleiben draußen, weil sie nicht in `state.answered` zählen.
+bauen sie. Fünf Übungen zeigen dieselbe Karte — «Lernsets», «Tippen», «Übersetzen»,
+«Schreibung», «Power-Training»; den früheren Streifen unter der Auflösung gibt es nicht
+mehr. «Buchstaben» und «Grammatik» bleiben draußen, weil sie nicht in `state.answered`
+zählen.
 
 ## Kommentare
 
@@ -882,15 +883,16 @@ gehören nach der Regel aus ADR 0017 in `ansichtenZuruecksetzen()`.
 Format **2** (`CHG2~…`), eine einzige Zeile aus `A–Z a–z 0–9 . ~`:
 
 ```
-CHG2~<Wörter>~<Sätze>~<Fakten>~<Zahlen>~<Einstellungen>~<Buchstaben>~<Regeln>~<Prüfsumme>
+CHG2~<Wörter>~<Sätze>~<Fakten>~<Zahlen>~<Einstellungen>~<Buchstaben>~<Regeln>~<Schreibregeln>~<Prüfsumme>
 ```
 
 Ein Wort belegt zehn Zeichen: sechs für die **Kennung**, eines für die Stufe, drei für
 das Alter in Tagen seit `BK_BEZUG` (1. Januar 2026). Sätze und Buchstaben genauso, Fakten
-neun Zeichen (Kennung, Zähler, Favorit). Die Buchstaben stehen im achten Feld, der Grammatikstand im neunten; ältere
-Codes tragen sieben oder acht, darum wird die Prüfsumme immer aus dem letzten Feld
-gelesen. Der Grammatikstand führt **Regeln**, nicht Wörter — er bleibt darum winzig,
-gleich wie viel gelernt wurde. Bei vollem Lernstand ergibt das rund **5 KB statt 35 KB** —
+neun Zeichen (Kennung, Zähler, Favorit). Die Buchstaben stehen im achten Feld, der
+Grammatikstand im neunten, die Schreibregeln im zehnten; ältere Codes tragen sieben bis
+neun, darum wird die Prüfsumme immer aus dem letzten Feld gelesen. Grammatik- und
+Schreibstand führen **Regeln**, nicht Wörter — sie bleiben darum winzig, gleich wie viel
+gelernt wurde. Bei vollem Lernstand ergibt das rund **5 KB statt 35 KB** —
 Format 1 war der ganze Zustand als JSON in Base64, mit 380 kyrillischen Schlüsseln und
 Millisekunden-Zeitstempeln.
 
@@ -1351,6 +1353,66 @@ halbe Lösung.
 Der Name ist mit Bedacht gewählt: **nicht «Tipp»**. Der Knopf «Hinweis» in «Tippen» zeigt
 die Umschrift, ist also Lösungshilfe. Ein Tipp ist etwas, das man sich versagt — Wissen
 soll man sich holen.
+
+## Schreibung — was man hört, und was man schreibt
+
+Russisch schreibt nach dem Wortstamm, nicht nach dem Klang: `молоко` spricht sich
+«malakó» und steht doch mit zwei о da. Wer nach Gehör schreibt, schreibt falsch — und
+merkt es nie, weil er es richtig *hört*. Diese Übung isoliert genau die Entscheidung.
+
+Der Aufbau ist der von «Grammatik»: **Die Karteikarte ist die Regel**
+(`state.orthoBox`/`orthoSeen` führen die acht Regeln aus `ORTHO`), der Weg geht
+**entdecken → Regelkarte → anwenden**, und ab `SATZ_STUFE` wird geschrieben statt
+gewählt. Zwei Unterschiede zur Grammatik:
+
+- Sie steht auf Home unter **«Wörter»**, nicht unter «Freiwillig» — also **zählt sie in
+  Serie und `answered` mit**, und alle fünf Antworten kommt auch hier ein Fakt.
+- Ihre Aufgaben stehen fertig in den Daten. Es gibt hier nichts zu rechnen wie bei den
+  Formen: Eine Schreibung ist keine Funktion, sie ist eine Konvention.
+
+### Die Lücke ist ein Paar, keine Zahl (ADR 0055)
+
+In `data/ortho.json` steht je Aufgabe die richtige Schreibweise und die nach Gehör:
+
+```json
+{ "ist": "молоко", "klingt": "малоко", "pruef": "мо́лочный", "de": "Milch" }
+```
+
+`orthoStelle(a)` rechnet daraus die Lücke: gemeinsamer Anfang, gemeinsames Ende,
+dazwischen die eine Stelle — `м` + [`о`|`а`] + `локо`. Die erste Fassung der Datei nannte
+die Position als Zahl und lag bei **vierzehn** Wörtern daneben, ohne dass es aufgefallen
+wäre: Eine falsche Zahl sieht aus wie eine richtige. Ein Paar kann die Maschine
+nachrechnen, und Build wie Suite tun das für jede der 46 Aufgaben.
+
+**Eine leere Stelle ist ein gültiger Fall.** `врач` gegen `врачь` heißt «ь oder nichts»,
+`солнце` gegen `сонце` heißt «л oder nichts». Die Kachel dafür trägt den Text «nichts».
+
+### Das Prüfwort
+
+Wo eine Regel eine Probe hat, steht sie nach der Auflösung: `во́ды` — dort trägt die
+Stelle die Betonung und ist zu hören, **darum** `вода` mit о. Das ist die Technik, mit der
+russische Grundschulen es lehren, und die einzige, die auf unbekannte Wörter skaliert. Wo
+es keine gibt (`жи/ши`, stumme Buchstaben), steht der Merksatz der Regel.
+
+Das Prüfwort steht in `ortho.json`, **nicht** als Feld an der Vokabel: Von den 46
+Aufgabenwörtern stehen nur vierzehn im Wortschatz — `лестница` und `конечно` sind
+Beispiele für eine Regel, keine Lernwörter. `vokabeln.json` bleibt damit unberührt.
+
+### `hoerbar: false`
+
+Bei `-тся/-ться` und beim Weichzeichen klingen **beide** Schreibweisen gleich; `klingt`
+ist dort die andere Schreibweise, nicht die Lautung. Diese Regeln tragen `hoerbar: false`,
+und dann behauptet die Übung keine Lautung: In der Gegenüberstellung steht links die
+Bedeutung («lernen · was tun?» → `учиться`), und in der Aufgabe fehlt die Lautungszeile.
+Der Build lässt das Feld nur mit dem Wert `false` zu.
+
+### Kein Kyrillisch in `name` und `kurz`
+
+Beide stehen in Versalien-Etiketten. «ь nach Zischlaut» wurde dort zu «Ь NACH ZISCHLAUT»,
+«жи · ши» zu «ЖИ · ШИ». Die Regeln heißen darum «Akanje», «Zischlaut-Regeln»,
+«Verben auf -tsja», «Weichzeichen am Ende», «Endung -ogo und -ego» — der Build bricht ab,
+wenn Kyrillisch in eines der beiden Felder gerät. Im Regeltext bleibt es; dort trägt es
+die Klasse `cyr`.
 
 ## Bilanz im Detail
 

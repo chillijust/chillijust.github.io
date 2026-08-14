@@ -12,8 +12,13 @@ import { WURZEL, BAU, testseite } from '../helfer.mjs';
 const html = readFileSync(WURZEL + '/index.html', 'utf8');
 
 // Dateiprüfung: In den Wortlisten selbst darf **kein** Betonungszeichen stehen.
+// Zwei Blöcke tragen bewusst welche und stehen darum am Ende: BETONUNG kann
+// gar nichts anderes, und die Prüfwörter in ORTHO leben davon. Gelesen wird
+// bis zum ersten der beiden — welcher zuerst kommt, ist dann egal.
 const daten = html.slice(html.indexOf('DATEN:START'), html.indexOf('DATEN:ENDE'));
-const wortlisten = daten.slice(0, daten.indexOf('var BETONUNG'));
+const grenze = Math.min.apply(null, ['var BETONUNG', 'var ORTHO']
+  .map((m) => daten.indexOf(m)).filter((i) => i > 0));
+const wortlisten = daten.slice(0, grenze);
 const zeichen = (wortlisten.match(/́/g) || []).length;
 console.log('Betonungszeichen in den Wortlisten:', zeichen,
   zeichen === 0 ? '(keine · richtig)' : '(unerwartet!)');

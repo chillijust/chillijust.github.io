@@ -4,6 +4,7 @@
   ["home", "[data-uebung=\"tippen\"]", "Sobald ein Wort halbwegs sitzt, taucht es hier auf. Tippen ist die ehrlichste Übung: keine Auswahl, du schreibst selbst. Die kyrillische Tastatur kommt von allein."],
   ["home", "[data-uebung=\"uebersetzen\"]", "Sitzen alle Wörter eines Satzes, geht er hier auf. Erst legst du ihn aus Kacheln, später schreibst du ihn — und erst Russisch verstehen, dann Russisch bauen."],
   ["home", "[data-uebung=\"grammatik\"]", "Wenn dir auffällt, dass sich Wörter verändern: книга wird zu книгу, sobald man sie liest. Hier steht, warum. Freiwillig — aber ab dem zweiten Lernset lohnt es sich."],
+  ["home", "[data-uebung=\"schreibung\"]", "Russisch schreibt nicht, was es spricht: молоко klingt «malakó» und steht doch mit zwei о da. Hier lernst du die acht Regeln, an denen das liegt — mit der Probe, die sie auflöst."],
   ["home", "[data-uebung=\"freestyle\"]", "Zwischendurch, wenn du einfach üben willst: der ganze Wortschatz nach Thema, ohne Sperren und ohne Reihenfolge."],
   ["home", "[data-uebung=\"power\"]", "Schreibst du ein Wort dreimal hintereinander falsch, rutscht es zurück und schließt seinen Satz wieder. Hier holst du es heraus — drei auf einmal."],
   ["home", "#homeEmpf", "Kurz gesagt: Buchstaben, dann Lernsets, dann Tippen und Übersetzen. Merken musst du dir das nicht — hier oben steht immer, was als Nächstes dran ist."],

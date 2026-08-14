@@ -418,7 +418,7 @@ try {
   state.gramBox[GRAMMATIK[0].id] = 3;
   state.gramSeen[GRAMMATIK[0].id] = Date.now();
   var code = encodeBackup();
-  pruefe('J1 neun Felder', code.split('~').length === 9, String(code.split('~').length));
+  pruefe('J1 zehn Felder', code.split('~').length === 10, String(code.split('~').length));
   var zurueck = mergeState(decodeBackup(code));
   pruefe('J2 der Regelstand kommt zurück', zurueck.gramBox[GRAMMATIK[0].id] === 3);
   pruefe('J3 der Überblick nennt ihn', bkUeberblick(state).indexOf('1 Regel') !== -1,

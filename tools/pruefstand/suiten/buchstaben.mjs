@@ -126,13 +126,13 @@ try {
 
   // G · Home und Filter
   setTab('home');
-  pruefe('G1 fünfte Kachel auf Home ist «Buchstaben»',
+  pruefe('G1 sechste Kachel auf Home ist «Buchstaben»',
     alle('[data-uebung]').map(function (b) { return b.dataset.uebung; }).join(',') ===
-    'lernsets,freestyle,tippen,uebersetzen,buchstaben,grammatik,power',
+    'lernsets,freestyle,tippen,schreibung,uebersetzen,buchstaben,grammatik,power',
     alle('[data-uebung]').map(function (b) { return b.dataset.uebung; }).join(','));
   pruefe('G2 sie nennt ihren Stand',
-    alle('.kachel-stand')[4].textContent.indexOf('von 33') !== -1,
-    alle('.kachel-stand')[4].textContent);
+    alle('.kachel-stand')[5].textContent.indexOf('von 33') !== -1,
+    alle('.kachel-stand')[5].textContent);
   q('[data-uebung="buchstaben"]').click();
   pruefe('G3 die Kachel führt hin', currentTab === 'buchstaben');
   abcAnsicht = 'ueben'; abcRichtung = 'gemischt'; renderKopf();
@@ -155,12 +155,12 @@ try {
   pruefe('H2 er führt zur Tafel', !!q('#abcZurTafel'));
   pruefe('H3 auch der Leerzustand trägt den Kopf', alle('.paket-punkte .pp').length === 33);
   setTab('home');
-  pruefe('H4 die Kachel sagt es', alle('.kachel-stand')[4].textContent === 'alles gemeistert',
-    alle('.kachel-stand')[4].textContent);
+  pruefe('H4 die Kachel sagt es', alle('.kachel-stand')[5].textContent === 'alles gemeistert',
+    alle('.kachel-stand')[5].textContent);
 
   // I · Sicherungscode nimmt die Buchstaben mit
   var code = encodeBackup();
-  pruefe('I1 neun Felder', code.split('~').length === 9, String(code.split('~').length));
+  pruefe('I1 zehn Felder', code.split('~').length === 10, String(code.split('~').length));
   var zurueck = mergeState(decodeBackup(code));
   pruefe('I2 Buchstabenstände erhalten',
     ALPHABET.every(function (b) { return zurueck.abcBox[b[1]] === BOX_MAX; }));

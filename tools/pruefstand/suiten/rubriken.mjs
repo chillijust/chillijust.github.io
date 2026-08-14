@@ -17,7 +17,7 @@ try {
   setTab('home');
   var kacheln = alle('[data-uebung]').map(function (b) { return b.dataset.uebung; }).join(',');
   pruefe('A1 sieben Übungen auf Home',
-    kacheln === 'lernsets,freestyle,tippen,uebersetzen,buchstaben,grammatik,power', kacheln);
+    kacheln === 'lernsets,freestyle,tippen,schreibung,uebersetzen,buchstaben,grammatik,power', kacheln);
   pruefe('A2 App heißt Chillingo', q('h1').textContent.indexOf('Chillingo') === 0 &&
     document.title.indexOf('Chillingo') === 0);
   pruefe('A3 Doppeltipp-Zoom aus',

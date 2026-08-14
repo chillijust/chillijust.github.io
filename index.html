@@ -778,6 +778,13 @@ button.built-word:active { transform: scale(.95); }
 }
 .gram-fuss { text-align: left; margin-top: 12px; }
 
+/* Die Lücke in «Schreibung». Sie muss auch dann sichtbar breit sein, wenn gar
+   kein Zeichen hineingehört — «ь oder nichts» ist eine echte Frage. */
+.ortho-luecke {
+  display: inline-block; min-width: .62em; margin: 0 .05em;
+  border-bottom: 2px solid var(--gold);
+}
+
 /* Gemeistert — eine Zeile, kein Zwischenbildschirm. Sie soll auffallen, ohne
    den Weg zur nächsten Frage zu verstellen. */
 .meister {
@@ -2583,6 +2590,7 @@ var TUTORIAL = [
   ['home', '[data-uebung="tippen"]', 'Sobald ein Wort halbwegs sitzt, taucht es hier auf. Tippen ist die ehrlichste Übung: keine Auswahl, du schreibst selbst. Die kyrillische Tastatur kommt von allein.'],
   ['home', '[data-uebung="uebersetzen"]', 'Sitzen alle Wörter eines Satzes, geht er hier auf. Erst legst du ihn aus Kacheln, später schreibst du ihn — und erst Russisch verstehen, dann Russisch bauen.'],
   ['home', '[data-uebung="grammatik"]', 'Wenn dir auffällt, dass sich Wörter verändern: книга wird zu книгу, sobald man sie liest. Hier steht, warum. Freiwillig — aber ab dem zweiten Lernset lohnt es sich.'],
+  ['home', '[data-uebung="schreibung"]', 'Russisch schreibt nicht, was es spricht: молоко klingt «malakó» und steht doch mit zwei о da. Hier lernst du die acht Regeln, an denen das liegt — mit der Probe, die sie auflöst.'],
   ['home', '[data-uebung="freestyle"]', 'Zwischendurch, wenn du einfach üben willst: der ganze Wortschatz nach Thema, ohne Sperren und ohne Reihenfolge.'],
   ['home', '[data-uebung="power"]', 'Schreibst du ein Wort dreimal hintereinander falsch, rutscht es zurück und schließt seinen Satz wieder. Hier holst du es heraus — drei auf einmal.'],
   ['home', '#homeEmpf', 'Kurz gesagt: Buchstaben, dann Lernsets, dann Tippen und Übersetzen. Merken musst du dir das nicht — hier oben steht immer, was als Nächstes dran ist.'],
@@ -2895,6 +2903,127 @@ var BETONUNG = {
   'озеро': 1,
   'остров': 1
 };
+
+var ORTHO = [
+  {
+    id: 'akanje', name: 'Akanje', kurz: 'Unbetont klingt anders',
+    frage: 'Man hört «malakó» — geschrieben steht молоко. Warum?',
+    deutungen: ['Unbetontes о klingt wie а, geschrieben bleibt es о', 'Das Wort wird auch mit а geschrieben, beides geht', 'Es ist eine Ausnahme, die man auswendig lernt'], richtig: 0,
+    regel: 'Unbetontes о spricht sich wie а — geschrieben wird trotzdem о. Russisch schreibt nach dem Wortstamm, nicht nach dem Klang. Wer nach Gehör schreibt, schreibt малако.',
+    merksatz: 'Nur der betonte Vokal klingt so, wie er dasteht.',
+    aufgaben: [
+      { ist: 'молоко', klingt: 'малоко', pruef: 'мо\u0301лочный', de: 'Milch' },
+      { ist: 'вода', klingt: 'вада', pruef: 'во\u0301ды', de: 'Wasser' },
+      { ist: 'гора', klingt: 'гара', pruef: 'го\u0301ры', de: 'Berg' },
+      { ist: 'нога', klingt: 'нага', pruef: 'но\u0301ги', de: 'Bein' },
+      { ist: 'голова', klingt: 'галова', pruef: 'го\u0301ловы', de: 'Kopf' },
+      { ist: 'хорошо', klingt: 'харошо', pruef: 'хоро\u0301ший', de: 'gut' },
+      { ist: 'окно', klingt: 'акно', pruef: 'о\u0301кна', de: 'Fenster' },
+      { ist: 'сова', klingt: 'сава', pruef: 'со\u0301вы', de: 'Eule' }
+    ]
+  },
+  {
+    id: 'auslaut', name: 'Auslautverhärtung', kurz: 'Am Wortende wird hart',
+    frage: 'Man hört «gorat» — geschrieben steht город. Woher weiß man das д?',
+    deutungen: ['Man hängt einen Vokal an: города — dort hört man das д', 'Am Wortende schreibt man immer den weichen Laut', 'Das muss man sich bei jedem Wort merken'], richtig: 0,
+    regel: 'Am Wortende klingt б wie п, в wie ф, г wie к, д wie т, ж wie ш, з wie с. Geschrieben wird der Laut, den man hört, sobald ein Vokal dahinter steht.',
+    merksatz: 'Vokal dahinter bringen, dann hört man es.',
+    aufgaben: [
+      { ist: 'город', klingt: 'горот', pruef: 'города\u0301', de: 'Stadt' },
+      { ist: 'хлеб', klingt: 'хлеп', pruef: 'хле\u0301ба', de: 'Brot' },
+      { ist: 'друг', klingt: 'друк', pruef: 'дру\u0301га', de: 'Freund' },
+      { ist: 'сад', klingt: 'сат', pruef: 'са\u0301да', de: 'Garten' },
+      { ist: 'глаз', klingt: 'глас', pruef: 'гла\u0301за', de: 'Auge' },
+      { ist: 'нож', klingt: 'нош', pruef: 'ножа\u0301', de: 'Messer' },
+      { ist: 'снег', klingt: 'снек', pruef: 'сне\u0301га', de: 'Schnee' },
+      { ist: 'зуб', klingt: 'зуп', pruef: 'зу\u0301бы', de: 'Zahn' }
+    ]
+  },
+  {
+    id: 'stumm', name: 'Stumme Buchstaben', kurz: 'Geschrieben, nicht gesprochen',
+    frage: 'Man hört «schto» — geschrieben steht что. Was ist da los?',
+    deutungen: ['Manche Buchstaben stehen da, ohne gesprochen zu werden', 'Der Laut sch wird immer als ч geschrieben', 'Es ist ein Druckfehler, der sich eingebürgert hat'], richtig: 0,
+    regel: 'In einigen häufigen Wörtern steht ein Buchstabe, den man nicht hört: что und конечно spricht man mit ш, солнце ohne л, сердце ohne д. Es sind wenige Wörter — und man braucht sie täglich.',
+    merksatz: 'Was man nicht hört, steht trotzdem da.',
+    aufgaben: [
+      { ist: 'что', klingt: 'што', de: 'was' },
+      { ist: 'конечно', klingt: 'конешно', de: 'natürlich' },
+      { ist: 'солнце', klingt: 'сонце', de: 'Sonne' },
+      { ist: 'сердце', klingt: 'серце', de: 'Herz' },
+      { ist: 'поздно', klingt: 'позно', de: 'spät' },
+      { ist: 'лестница', klingt: 'лесница', de: 'Treppe' }
+    ]
+  },
+  {
+    id: 'schischi', name: 'Zischlaut-Regeln', kurz: 'Feste Verbindungen',
+    frage: 'Nach ж und ш hört man ein ы — geschrieben steht и. Warum?',
+    deutungen: ['Weil es so festgelegt ist — die Aussprache ändert daran nichts', 'Weil ж und ш immer weich ausgesprochen werden', 'Weil ы nach Zischlauten nicht aussprechbar wäre'], richtig: 0,
+    regel: 'жи und ши immer mit и, ча und ща immer mit а, чу und щу immer mit у. Das ist reine Rechtschreibung, sie gilt ohne Ausnahme — und sie ist die erste Regel, die russische Kinder lernen.',
+    merksatz: 'жи-ши mit и, ча-ща mit а, чу-щу mit у.',
+    aufgaben: [
+      { ist: 'жить', klingt: 'жыть', de: 'leben' },
+      { ist: 'машина', klingt: 'машына', de: 'Auto' },
+      { ist: 'широкий', klingt: 'шырокий', de: 'breit' },
+      { ist: 'часто', klingt: 'чясто', de: 'oft' },
+      { ist: 'чудо', klingt: 'чюдо', de: 'Wunder' },
+      { ist: 'площадь', klingt: 'площядь', de: 'Platz' },
+      { ist: 'живот', klingt: 'жывот', de: 'Bauch' }
+    ]
+  },
+  {
+    id: 'tsja', name: 'Verben auf -tsja', kurz: 'Mit Weichzeichen oder ohne', hoerbar: false,
+    frage: 'Beides klingt «-zza». Woran erkennt man, welches gemeint ist?',
+    deutungen: ['An der Frage: «was tun?» mit ь, «was tut er?» ohne', 'Am Wortende: nach Vokal mit ь, nach Konsonant ohne', 'Es ist gleichgültig, beide Schreibweisen sind erlaubt'], richtig: 0,
+    regel: 'Passt die Frage «что делать?» — also die Grundform —, steht ь: учиться. Passt «что делает?», steht keines: учится. Der Trick: Steht in der Frage ein ь, steht auch im Wort eines.',
+    merksatz: 'ь in der Frage, ь im Wort.',
+    aufgaben: [
+      { ist: 'учиться', klingt: 'учится', de: 'lernen · was tun?' },
+      { ist: 'учится', klingt: 'учиться', de: 'er lernt · was tut er?' },
+      { ist: 'нравиться', klingt: 'нравится', de: 'gefallen · was tun?' },
+      { ist: 'нравится', klingt: 'нравиться', de: 'es gefällt · was tut es?' }
+    ]
+  },
+  {
+    id: 'weichzeichen', name: 'Weichzeichen am Ende', kurz: 'Steht da, klingt nicht', hoerbar: false,
+    frage: 'ночь mit ь, врач ohne. Woran liegt das?',
+    deutungen: ['Am Geschlecht: weibliche Nomen bekommen ь, männliche nicht', 'An der Aussprache: ночь klingt weicher als врач', 'An der Silbenzahl des Wortes'], richtig: 0,
+    regel: 'Endet ein Nomen auf ж, ч, ш oder щ, steht ь nur bei weiblichen: ночь, дочь, вещь — aber врач, нож, товарищ. Bei Verben steht es immer: пишешь, идёшь.',
+    merksatz: 'Weiblich mit ь, männlich ohne. Verben immer mit.',
+    aufgaben: [
+      { ist: 'ночь', klingt: 'ноч', de: 'Nacht · weiblich' },
+      { ist: 'дочь', klingt: 'доч', de: 'Tochter · weiblich' },
+      { ist: 'вещь', klingt: 'вещ', de: 'Sache · weiblich' },
+      { ist: 'врач', klingt: 'врачь', de: 'Arzt · männlich' },
+      { ist: 'нож', klingt: 'ножь', de: 'Messer · männlich' },
+      { ist: 'пишешь', klingt: 'пишеш', de: 'du schreibst · Verb' }
+    ]
+  },
+  {
+    id: 'ogo', name: 'Endung -ogo und -ego', kurz: 'Geschriebenes g, gesprochenes w',
+    frage: 'Man hört «jewó» — geschrieben steht его. Warum das г?',
+    deutungen: ['In den Endungen -ого und -его spricht sich г wie в', 'Es ist ein alter Schreibfehler, der geblieben ist', 'Das г wird gar nicht gesprochen'], richtig: 0,
+    regel: 'In den Endungen -ого und -его klingt das г wie в: его spricht sich «jewó», нового «nówawa». Nur dort — sonst bleibt г ein г.',
+    merksatz: 'In der Endung klingt г wie в. Geschrieben bleibt г.',
+    aufgaben: [
+      { ist: 'его', klingt: 'ево', de: 'ihn · sein' },
+      { ist: 'нового', klingt: 'новово', de: 'des neuen' },
+      { ist: 'сегодня', klingt: 'севодня', de: 'heute' }
+    ]
+  },
+  {
+    id: 'assimilation', name: 'Stimmassimilation', kurz: 'Der Nachbar färbt ab',
+    frage: 'Man hört «fsjo» — geschrieben steht всё. Woher das в?',
+    deutungen: ['Vor einem stimmlosen Laut klingt в wie ф — geschrieben bleibt в', 'в und ф sind austauschbar', 'Das Wort wird auch фсё geschrieben'], richtig: 0,
+    regel: 'Ein stimmhafter Konsonant vor einem stimmlosen klingt selbst stimmlos: всё wie «fsjo», вчера wie «ftschirá». Geschrieben wird der Stamm, nicht der Klang.',
+    merksatz: 'Der Nachbar färbt den Klang, nicht die Schreibung.',
+    aufgaben: [
+      { ist: 'всё', klingt: 'фсё', de: 'alles' },
+      { ist: 'вчера', klingt: 'фчера', de: 'gestern' },
+      { ist: 'второй', klingt: 'фторой', de: 'der zweite' },
+      { ist: 'автобус', klingt: 'афтобус', de: 'Bus' }
+    ]
+  }
+];
 /* == DATEN:ENDE == */
 
 // ── FORMENMASCHINE ──────────────────────────────────────────
@@ -3243,7 +3372,7 @@ var APP_STAND = '2026-08-14'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '1.7.0'; /* == VERSION == */
+var APP_VERSION = '1.8.0'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -4074,6 +4203,9 @@ function defaultState() {
     // ist eine Regel, wenn sie viermal auf verschiedene Wörter gewirkt hat.
     gramBox: {},               // Leitner-Stufe je Baustein
     gramSeen: {},              // Zeitstempel je Baustein; fehlt er, ist er noch unentdeckt
+    // Schreibung: dieselbe Bauart, die Karteikarte ist die **Rechtschreibregel**.
+    orthoBox: {},              // Leitner-Stufe je Regel
+    orthoSeen: {},             // Zeitstempel je Regel; fehlt er, ist sie noch unentdeckt
     // Wie oft ein Wort in «Übersetzen» **hintereinander** falsch geschrieben
     // wurde. Richtig geschrieben löscht den Eintrag — nur eine Serie zählt.
     wortFehler: {},
@@ -4128,6 +4260,8 @@ function mergeState(parsed) {
   d.abcSeen = nurBuchstaben(d.abcSeen);
   d.gramBox = nurBausteine(d.gramBox);
   d.gramSeen = nurBausteine(d.gramSeen);
+  d.orthoBox = nurSchreibregeln(d.orthoBox);
+  d.orthoSeen = nurSchreibregeln(d.orthoSeen);
   d.wortFehler = migriereIds(d.wortFehler);
   d.patzer = migriereIds(d.patzer);
   d.leseFehler = nurBuchstaben(d.leseFehler);
@@ -4196,7 +4330,7 @@ function nurBuchstaben(obj) {
 // Jubel zurück, der jemandem zusteht.
 function nurJubelmarken(obj) {
   if (!obj || typeof obj !== 'object') return {};
-  var bekannt = { abc: true, regel: true };
+  var bekannt = { abc: true, regel: true, schreibung: true };
   for (var i = 0; i < LERNSETS.length; i++) bekannt['set:' + i] = true;
   Object.keys(VOCAB_THEMES).forEach(function (t) { bekannt['thema:' + t] = true; });
   var neu = {};
@@ -4210,6 +4344,16 @@ function nurBausteine(obj) {
   if (!obj || typeof obj !== 'object') return {};
   var bekannt = {};
   GRAMMATIK.forEach(function (b) { bekannt[b.id] = true; });
+  var neu = {};
+  Object.keys(obj).forEach(function (k) { if (bekannt[k]) neu[k] = obj[k]; });
+  return neu;
+}
+
+// Dasselbe für die Schreibregeln.
+function nurSchreibregeln(obj) {
+  if (!obj || typeof obj !== 'object') return {};
+  var bekannt = {};
+  ORTHO.forEach(function (r) { bekannt[r.id] = true; });
   var neu = {};
   Object.keys(obj).forEach(function (k) { if (bekannt[k]) neu[k] = obj[k]; });
   return neu;
@@ -4852,6 +4996,11 @@ var JUBEL = {
     ['ZEHN VON ZEHN REGELN!', 'Du beugst besser als mein Onkel, und der ist Russe.'],
     ['{m} von {m} Regeln.', 'Die ganze Grammatik dieser App sitzt. Ordentlich.']
   ],
+  schreibung: [
+    ['Alle {m} Schreibregeln.', 'Du schreibst nicht mehr, was du hörst. Genau darum geht es.'],
+    ['ACHT VON ACHT!', 'Kein малако mehr. Ich habe das gefürchtet, jetzt ist es vorbei.'],
+    ['{m} von {m} Regeln.', 'Die Rechtschreibung sitzt. Das ist der unsichtbare Teil.']
+  ],
   power: [
     ['Topf leer.', 'Alle gefallenen Wörter wieder oben. Als wäre nichts gewesen.'],
     ['ALLE ZURÜCKGEHOLT!', 'Kein einziges liegt mehr unten. Ich bin den Tränen nahe.'],
@@ -4928,10 +5077,12 @@ function jubelNachtragen() {
   });
   if (abcMeisterschaft() === ALPHABET.length) state.gefeiert.abc = 1;
   if (gramMeisterschaft() === GRAMMATIK.length) state.gefeiert.regel = 1;
+  if (orthoMeisterschaft() === ORTHO.length) state.gefeiert.schreibung = 1;
 }
 
 var JUBEL_ANLASS = {
-  set: 'Lernset', thema: 'Thema', abc: 'Alphabet', regel: 'Grammatik', power: 'Power-Training'
+  set: 'Lernset', thema: 'Thema', abc: 'Alphabet', regel: 'Grammatik',
+  schreibung: 'Schreibung', power: 'Power-Training'
 };
 
 // Ein Klang für den Augenblick statt des gewöhnlichen «richtig».
@@ -5087,7 +5238,7 @@ var letzterTab = 'home'; // die zuletzt offene Übung — Bezug eines Tickets
 // gleichrangige Kacheln sahen aus wie eine Schublade — mit Überschriften sieht
 // man, wozu jede gehört, und die Zahl der Kacheln erschreckt nicht mehr.
 var UEBUNG_GRUPPEN = [
-  { titel: 'Wörter', ids: ['lernsets', 'freestyle', 'tippen'] },
+  { titel: 'Wörter', ids: ['lernsets', 'freestyle', 'tippen', 'schreibung'] },
   { titel: 'Sätze', ids: ['uebersetzen'] },
   { titel: 'Freiwillig', ids: ['buchstaben', 'grammatik', 'power'] }
 ];
@@ -5095,6 +5246,7 @@ var UEBUNGEN = [
   { id: 'lernsets', name: 'Lernsets', note: 'Die Wörter der nächsten Sätze, Päckchen für Päckchen.' },
   { id: 'freestyle', name: 'Freestyle', note: 'Freies Vokabeltraining nach Thema, ohne Sperren.' },
   { id: 'tippen', name: 'Tippen', note: 'Selbst schreiben, mit kyrillischer Tastatur.' },
+  { id: 'schreibung', name: 'Schreibung', note: 'Warum man nicht schreibt, was man hört.' },
   { id: 'uebersetzen', name: 'Übersetzen', note: 'Ganze Sätze aus Wortkacheln bauen.' },
   { id: 'buchstaben', name: 'Buchstaben', note: 'Das kyrillische Alphabet — freiwillig.' },
   { id: 'grammatik', name: 'Grammatik', note: 'Warum ein Wort so dasteht — Regeln statt auswendig.' },
@@ -5159,7 +5311,8 @@ function filterSetzen(auf) {
 function filterHatWahl() {
   return currentTab === 'lernsets' || currentTab === 'freestyle' ||
     currentTab === 'tippen' || currentTab === 'uebersetzen' ||
-    currentTab === 'buchstaben' || currentTab === 'grammatik';
+    currentTab === 'buchstaben' || currentTab === 'grammatik' ||
+    currentTab === 'schreibung';
 }
 
 // Weicht etwas vom Regelfall ab? Nur dann ist der Knopf farbig.
@@ -5172,6 +5325,7 @@ function filterAktiv() {
   }
   if (currentTab === 'buchstaben') return abcRichtung !== 'gemischt' || abcStapel !== 'reihe';
   if (currentTab === 'grammatik') return gramWahl !== null;
+  if (currentTab === 'schreibung') return orthoWahl !== null;
   return false;
 }
 
@@ -5214,6 +5368,15 @@ function filterInhaltHtml() {
         gramWahl === b.id);
     });
     return filterGruppe('Baustein', bausteine);
+  }
+  if (currentTab === 'schreibung') {
+    var regeln = filterChip('orthowahl', '', 'Der Reihe nach', orthoWahl === null);
+    ORTHO.forEach(function (r) {
+      regeln += filterChip('orthowahl', r.id,
+        r.name + ' · ' + (orthoGemeistert(r) ? 'sitzt' : 'Stufe ' + orthoBox(r)),
+        orthoWahl === r.id);
+    });
+    return filterGruppe('Regel', regeln);
   }
   if (currentTab === 'tippen') {
     var stapel = filterChip('tmodus', 'lernen', 'Lernen · ' + tippenLernen().length,
@@ -5298,6 +5461,14 @@ function filterWaehlen(gruppe, wert) {
     gramRegelNeu = false;
     gramRegelOffen = false;
     renderGrammatik();
+    renderKopf();
+  } else if (gruppe === 'orthowahl') {
+    orthoWahl = wert || null;
+    orthoRegel = orthoWahl;
+    orthoQ = null;
+    orthoRegelNeu = false;
+    orthoRegelOffen = false;
+    renderSchreibung();
     renderKopf();
   } else if (gruppe === 'abcstapel') {
     if (abcStapel !== wert) {
@@ -5807,6 +5978,17 @@ function uebungsStand(id) {
       warm: sitzen === 0
     };
   }
+  if (id === 'schreibung') {
+    var sitzenS = orthoMeisterschaft();
+    if (!orthoPool().length) return { text: 'alle Regeln sitzen', leer: true };
+    var naechsteS = orthoWaehlen();
+    return {
+      text: naechsteS && !orthoEntdeckt(naechsteS)
+        ? naechsteS.name + ' · neu'
+        : sitzenS + ' von ' + ORTHO.length + ' Regeln',
+      warm: sitzenS === 0
+    };
+  }
   if (id === 'power') {
     var gefallen = ptPool().length;
     if (gefallen < PT_MINDEST) {
@@ -5938,6 +6120,7 @@ function render() {
   else if (currentTab === 'tippen') renderTippen();
   else if (currentTab === 'buchstaben') renderBuchstaben();
   else if (currentTab === 'grammatik') renderGrammatik();
+  else if (currentTab === 'schreibung') renderSchreibung();
   else if (currentTab === 'power') renderPower();
   else if (currentTab === 'einstellungen') renderEinstellungen();
   else if (currentTab === 'fakten') renderFakten();
@@ -6224,6 +6407,17 @@ function ansichtenZuruecksetzen() {
   gramEingabe = '';
   gramKb = null;
   gramRegelOffen = false;
+
+  orthoRegel = null;
+  orthoWahl = null;
+  orthoQ = null;
+  orthoPhase = 'ask';
+  orthoPicked = null;
+  orthoCorrect = null;
+  orthoEingabe = '';
+  orthoKb = null;
+  orthoRegelOffen = false;
+  orthoRegelNeu = false;
 
   ptSatz = null;
   ptQ = null;
@@ -8863,6 +9057,464 @@ function renderGrammatik() {
   });
 }
 
+// ── SCHREIBUNG ──────────────────────────────────────────────
+// Russisch schreibt nach dem Wortstamm, nicht nach dem Klang: молоко klingt
+// «malakó» und steht doch mit zwei о da. Wer nach Gehör schreibt, schreibt
+// falsch — und merkt es nie, weil er es richtig *hört*.
+//
+// Wie in «Grammatik» ist die Karteikarte darum die **Regel**, nicht das Wort.
+// Anders als dort zählt sie aber mit: Die Übung steht in der Gruppe «Wörter»,
+// nicht unter «Freiwillig». Sie prüft eine andere Fähigkeit als «Tippen» —
+// dort ruft man ein Wort ab, hier entscheidet man eine Schreibung.
+//
+// **Eine Aufgabe ist ein Paar.** In den Daten stehen die richtige Schreibweise
+// und die nach Gehör; wo sie sich unterscheiden, ist die Lücke. Die Stelle
+// steht nirgends als Zahl — eine Zahl kann danebenliegen, ohne dass es jemand
+// merkt, ein Paar nicht (ADR 0055).
+var orthoRegel = null;      // Kennung der laufenden Regel
+var orthoQ = null;          // die laufende Aufgabe
+var orthoPhase = 'ask';     // 'ask' · 'feedback'
+var orthoPicked = null;
+var orthoCorrect = null;
+var orthoEingabe = '';
+var orthoKb = null;
+var orthoRegelOffen = false;
+var orthoWahl = null;       // ausdrücklich gewählte Regel; null heißt: der Reihe nach
+var orthoRegelNeu = false;  // frisch entdeckt: die Regel steht ganzseitig da
+
+function orthoBox(r) { return state.orthoBox[r.id] || 0; }
+function orthoEntdeckt(r) { return state.orthoSeen[r.id] !== undefined; }
+function orthoGemeistert(r) { return orthoBox(r) >= BOX_MAX; }
+function orthoFaellig(r, jetzt) {
+  var seit = state.orthoSeen[r.id];
+  if (!seit) return true;
+  return jetzt - seit >= intervallFuer(orthoBox(r));
+}
+function orthoMeisterschaft() { return ORTHO.filter(orthoGemeistert).length; }
+
+function orthoFinde(id) {
+  return ORTHO.filter(function (r) { return r.id === id; })[0] || null;
+}
+
+function orthoPool() {
+  var jetzt = Date.now();
+  var offen = ORTHO.filter(function (r) { return !orthoGemeistert(r); });
+  var frisch = ORTHO.filter(function (r) { return orthoGemeistert(r) && orthoFaellig(r, jetzt); });
+  return offen.concat(frisch);
+}
+
+// Der Reihe nach wie bei den Bausteinen: Аканье trägt am meisten und steht
+// darum zuerst — ein Zufallsgriff verschenkte diese Ordnung.
+function orthoWaehlen() {
+  var pool = orthoPool();
+  return pool.length ? pool[0] : null;
+}
+
+function orthoAktuell() {
+  if (orthoWahl) {
+    var gewaehlt = orthoFinde(orthoWahl);
+    if (gewaehlt) { orthoRegel = gewaehlt.id; return gewaehlt; }
+    orthoWahl = null;
+  }
+  var r = orthoRegel ? orthoFinde(orthoRegel) : null;
+  if (!r) { r = orthoWaehlen(); orthoRegel = r ? r.id : null; }
+  return r;
+}
+
+// **Zählt mit.** «Buchstaben» und «Grammatik» bleiben aus Serie und Antworten
+// heraus, weil sie freiwillig sind; die Schreibung ist es nicht — sie steht bei
+// den Wörtern. Eine Übung, die auf Home unter «Wörter» steht und trotzdem die
+// Serie reißen lässt, widerspräche sich.
+function orthoUpdate(r, richtig) {
+  tempoNotieren();
+  var cur = orthoBox(r);
+  state.orthoBox[r.id] = richtig ? Math.min(BOX_MAX, cur + 1) : Math.max(0, cur - 1);
+  state.orthoSeen[r.id] = Date.now();
+  state.streak = richtig ? state.streak + 1 : 0;
+  if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+  state.answered++;
+  updateKopf();
+  save();
+}
+
+// Die Lücke: gemeinsamer Anfang, gemeinsames Ende, dazwischen die eine Stelle.
+// Sie kann leer sein — «ь oder nichts» ist genauso eine Entscheidung wie
+// «о oder а». Der Build stellt sicher, dass es nie mehr als eine ist.
+function orthoStelle(a) {
+  var ist = a.ist, klingt = a.klingt;
+  var p = 0;
+  while (p < ist.length && p < klingt.length && ist.charAt(p) === klingt.charAt(p)) p++;
+  var s = 0;
+  while (s < ist.length - p && s < klingt.length - p &&
+    ist.charAt(ist.length - 1 - s) === klingt.charAt(klingt.length - 1 - s)) s++;
+  return {
+    vor: ist.slice(0, p),
+    nach: ist.slice(ist.length - s),
+    richtig: ist.slice(p, ist.length - s),
+    falsch: klingt.slice(p, klingt.length - s)
+  };
+}
+
+function orthoFrageBauen() {
+  var r = orthoAktuell();
+  orthoPhase = 'ask';
+  uhrStellen();
+  orthoPicked = null;
+  orthoCorrect = null;
+  orthoEingabe = '';
+  meisterMeldung = null;
+  if (!r) { orthoQ = null; return; }
+
+  var pool = r.aufgaben;
+  if (orthoQ && orthoQ.regel === r.id && pool.length > 1) {
+    pool = pool.filter(function (a) { return a.ist !== orthoQ.aufgabe.ist; });
+  }
+  var a = pool[Math.floor(Math.random() * pool.length)];
+  var st = orthoStelle(a);
+  // Unter der Satzstufe wählen, darüber selbst schreiben — dieselbe Schwelle
+  // wie in «Grammatik». Zwei Möglichkeiten sind eine Münze; ab der Hälfte der
+  // Leiter darf eine Regel nicht mehr geraten werden können.
+  orthoQ = {
+    regel: r.id, aufgabe: a, stelle: st,
+    tippen: orthoBox(r) >= SATZ_STUFE,
+    optionen: shuffle([st.richtig, st.falsch])
+  };
+}
+
+function orthoAbgabeBereit() {
+  if (!orthoQ) return false;
+  if (orthoQ.tippen) return normalize(orthoEingabe) !== '';
+  return orthoPicked !== null;
+}
+
+function orthoPruefen() {
+  var q = orthoQ;
+  var r = orthoFinde(q.regel);
+  orthoCorrect = q.tippen
+    ? normalize(orthoEingabe) === normalize(q.aufgabe.ist)
+    : orthoPicked === q.stelle.richtig;
+  kommentarSetzen({
+    ok: orthoCorrect, loesung: q.aufgabe.ist, eingabe: q.tippen ? orthoEingabe : '',
+    getippt: !!q.tippen,
+    daneben: q.tippen ? danebenZeichen(orthoEingabe, q.aufgabe.ist) : (orthoCorrect ? 0 : 99)
+  });
+  var vorher = orthoBox(r);
+  orthoUpdate(r, orthoCorrect);
+  meisterMeldung = null;
+  meisterPruefen(vorher, orthoBox(r), 'Schreibregel', r.name,
+    orthoMeisterschaft() + ' von ' + ORTHO.length + ' Regeln', false);
+  if (vorher < BOX_MAX && orthoBox(r) >= BOX_MAX &&
+    orthoMeisterschaft() === ORTHO.length) {
+    jubelEinmal('schreibung', 'schreibung', { m: ORTHO.length });
+  }
+  meisterTon(orthoCorrect);
+  zuletztGeuebt('schreibung');
+  orthoPhase = 'feedback';
+  renderSchreibung();
+}
+
+// ── Entdecken ───────────────────────────────────────────────
+// Dieselbe Gegenüberstellung wie in «Grammatik» — und dieselben Klassen dafür,
+// die Anordnung ist die gleiche.
+//
+// **Was links steht, hängt daran, ob die Regel eine über den Klang ist.** Bei
+// Аканье steht links die Lautung: «малако → молоко». Bei -тся/-ться klingen
+// beide Schreibweisen gleich; links stünde dann eine Lüge. Dort steht die
+// Bedeutung — und genau sie entscheidet ja auch.
+function orthoPaare(r) {
+  return r.aufgaben.slice(0, 4).map(function (a) {
+    return {
+      links: r.hoerbar === false ? a.de : a.klingt,
+      rechts: a.ist,
+      kyrLinks: r.hoerbar !== false
+    };
+  });
+}
+
+function orthoEntdeckenHtml(r) {
+  var hoerbar = r.hoerbar !== false;
+  var html = '<p class="task-label">' + esc(r.name) + ' · entdecken</p>' +
+    '<div class="card"><p class="hint">' + esc(r.frage) + '</p><div class="gram-paare">' +
+    '<div class="gram-paar"><span class="gram-deutung">' +
+    (hoerbar ? 'gehört' : 'gemeint') + '</span>' +
+    '<span class="gram-pfeil" aria-hidden="true"></span>' +
+    '<span class="gram-deutung">geschrieben</span></div>';
+  orthoPaare(r).forEach(function (p) {
+    html += '<div class="gram-paar"><span class="' + (p.kyrLinks ? 'cyr' : 'gram-deutung') + '">' +
+      esc(p.links) + '</span>' +
+      '<span class="gram-pfeil" aria-hidden="true">→</span>' +
+      '<span class="cyr">' + esc(p.rechts) + '</span></div>';
+  });
+  html += '</div><div class="options">';
+  r.deutungen.forEach(function (d, i) {
+    var klasse = 'option';
+    if (orthoPhase === 'feedback') {
+      if (i === r.richtig) klasse += ' right';
+      else if (orthoPicked === i) klasse += ' wrong';
+      else klasse += ' muted';
+    } else if (orthoPicked === i) klasse += ' picked';
+    html += '<button class="' + klasse + '" data-orthodeutung="' + i + '"' +
+      (orthoPhase !== 'ask' ? ' disabled' : '') + '>' + esc(d) + '</button>';
+  });
+  html += '</div>';
+  if (orthoPhase === 'feedback') {
+    html += '<div class="feedback ' + (orthoCorrect ? 'good' : 'bad') + '"><p>' +
+      (orthoCorrect ? ICON.haken + 'Genau das ist es.' : ICON.kreuz + 'Nicht ganz — so ist es:') +
+      '</p></div>';
+  }
+  html += '</div><div class="btn-row">';
+  html += orthoPhase === 'ask'
+    ? '<button class="btn primary" id="orthoDeutungAb"' + (orthoPicked === null ? ' disabled' : '') +
+      '>Bestätigen</button>'
+    : '<button class="btn primary" id="orthoZurRegel">Die Regel →</button>';
+  return html + '</div>';
+}
+
+// ── Die Regelkarte ──────────────────────────────────────────
+// Die Tabelle bauen hier die Aufgaben selbst: Beispiele sind bei einer
+// Schreibregel dasselbe wie eine Tabelle, nur ehrlicher.
+function orthoRegelHtml(r, mitKnopf) {
+  var hoerbar = r.hoerbar !== false;
+  var html = '<div class="card gram-regel"><p class="task-label">' + esc(r.name) +
+    ' · ' + esc(r.kurz) + '</p>' +
+    '<p class="fact-text">' + esc(r.regel) + '</p><div class="gram-tabelle">';
+  r.aufgaben.slice(0, 5).forEach(function (a) {
+    html += '<div class="gram-zeile"><span class="gram-fall cyr">' + esc(a.ist) + '</span>' +
+      '<span class="gram-was">' + esc(a.de) + '</span>' +
+      '<span class="gram-bsp' + (hoerbar ? ' cyr' : '') + '">' +
+      (hoerbar ? esc(a.klingt) : '') + '</span></div>';
+  });
+  html += '</div><p class="gram-merk">' + esc(r.merksatz) + '</p></div>';
+  if (mitKnopf) {
+    html += '<div class="btn-row"><button class="btn primary" id="orthoZurUebung">' +
+      'Jetzt anwenden →</button></div>';
+  }
+  return html;
+}
+
+// ── Anwenden ────────────────────────────────────────────────
+function orthoUebenHtml(r) {
+  if (!orthoQ || orthoQ.regel !== r.id) orthoFrageBauen();
+  var q = orthoQ;
+  var st = q.stelle;
+  var a = q.aufgabe;
+  var stufe = orthoBox(r);
+  var dots = '';
+  for (var i = 0; i <= BOX_MAX; i++) {
+    dots += '<span class="' + (i <= stufe && stufe > 0 ? 'on' : '') + '"></span>';
+  }
+  var html = orthoKopfHtml(r) + '<p class="kachel-ort">' + esc(r.name) + '</p>' +
+    '<div class="card">' +
+    '<div class="card-meta"><span class="boxdots">' + dots + '</span>' +
+    '<span class="mitte">' + (q.tippen ? 'selbst schreiben' : 'wählen') + '</span>' +
+    '<span></span></div>';
+
+  html += '<p class="task-label">' +
+    (q.tippen ? 'Wie schreibt man das Wort?' : 'Was steht in der Lücke?') + '</p>' +
+    '<p class="word cyr">' + esc(st.vor) +
+    '<span class="ortho-luecke" aria-label="Lücke"> </span>' + esc(st.nach) + '</p>';
+  // Was die Aufgabe außer dem Wort vorgibt — dieselbe Zeile wie in «Grammatik».
+  // Die Lautung steht nur da, wo es eine gibt: Bei -тся/-ться klingen beide
+  // Schreibweisen gleich, dort entscheidet allein die Bedeutung.
+  html += gramVorgabe(a.de, r.hoerbar === false ? ''
+    : '<span class="cyr">' + esc(a.klingt) + '</span>');
+
+  if (q.tippen) {
+    html += orthoPhase === 'feedback'
+      ? pruefzeileHtml(orthoEingabe, a.ist, true, 'form')
+      : '<textarea id="orthoInput" rows="1" class="fliess cyr"' +
+        ' lang="ru" autocapitalize="off" autocorrect="off" spellcheck="false"' +
+        ' enterkeyhint="go" placeholder="Das ganze Wort schreiben …">' +
+        esc(orthoEingabe) + '</textarea>';
+  } else {
+    html += '<div class="options abc-optionen">';
+    q.optionen.forEach(function (o) {
+      var klasse = 'option' + (o ? ' cyr' : '');
+      if (orthoPhase === 'feedback') {
+        if (o === st.richtig) klasse += ' right';
+        else if (orthoPicked === o) klasse += ' wrong';
+        else klasse += ' muted';
+      } else if (orthoPicked === o) klasse += ' picked';
+      html += '<button class="' + klasse + '" data-orthoopt="' + esc(o) + '"' +
+        (orthoPhase !== 'ask' ? ' disabled' : '') + '>' +
+        (o ? esc(o) : 'nichts') + '</button>';
+    });
+    html += '</div>';
+  }
+
+  if (orthoPhase === 'feedback') {
+    html += '<div class="feedback ' + (orthoCorrect ? 'good' : 'bad') + '"><p>' +
+      (orthoCorrect ? ICON.haken + 'Richtig!'
+        : ICON.kreuz + 'So steht es: <strong class="cyr">' + esc(a.ist) + '</strong>') +
+      hoerknopf(a.ist, 'ru') + '</p></div>' +
+      kommentarHtml() + orthoWarumHtml(r, a) + meisterHtml();
+  }
+
+  html += '</div><div class="btn-row">';
+  if (orthoPhase === 'ask') {
+    html += '<button class="btn ghost" id="orthoWarum" aria-expanded="' +
+      (orthoRegelOffen ? 'true' : 'false') + '" aria-controls="orthoRegelKlapp">Mehr …</button>' +
+      '<button class="btn primary" id="orthoConfirm"' + (orthoAbgabeBereit() ? '' : ' disabled') +
+      '>' + (q.tippen ? 'Prüfen' : 'Bestätigen') + '</button>';
+  } else {
+    html += '<button class="btn primary" id="orthoNext">Weiter →</button>';
+  }
+  html += '</div>';
+  html += '<div class="regelklapp' + (orthoRegelOffen ? ' auf' : '') + '" id="orthoRegelKlapp"' +
+    ' aria-hidden="' + (orthoRegelOffen ? 'false' : 'true') + '"><div class="klappwrap">' +
+    orthoRegelHtml(r, false) + '</div></div>';
+  if (q.tippen && orthoPhase === 'ask') {
+    if (orthoKb === null) orthoKb = tastaturVorgabe(true);
+    html += '<button class="kb-toggle" id="orthoKbToggle">' +
+      (orthoKb ? 'Tastatur ausblenden' : 'Tastatur einblenden') + '</button>';
+    if (orthoKb) html += tastaturHtml('orthokey');
+  }
+  html += '<p class="session-info">' + orthoPool().length + ' offen · ' +
+    orthoMeisterschaft() + ' von ' + ORTHO.length + ' Regeln sitzen</p>';
+  return html;
+}
+
+// Die Begründung *zu diesem Wort*. Wo es ein Prüfwort gibt, ist es die Antwort:
+// Man muss nichts auswendig wissen, man muss die Stelle nur betont hören.
+function orthoWarumHtml(r, a) {
+  if (a.pruef) {
+    return '<p class="hint">Die Probe: <strong class="cyr">' + esc(a.pruef) +
+      '</strong> — dort trägt die Stelle die Betonung und ist zu hören. ' +
+      'Darum <strong class="cyr">' + esc(a.ist) + '</strong>.</p>';
+  }
+  return '<p class="hint">' + esc(r.merksatz) + '</p>';
+}
+
+// Kopf über der Aufgabe: ein Punkt je Regel, wie das Paket in «Lernsets».
+function orthoKopfHtml(r) {
+  var html = '<p class="task-label">Schreibregeln</p><div class="paket">' +
+    '<div class="paket-punkte" aria-hidden="true">';
+  ORTHO.forEach(function (x) { html += ppHtml(orthoBox(x)); });
+  html += '</div><p class="paket-text">' + orthoMeisterschaft() + ' von ' +
+    ORTHO.length + ' sitzen · gerade: ' + esc(r.name) + '</p></div>';
+  return html;
+}
+
+function renderSchreibung() {
+  if (faktKarte) {
+    main.innerHTML = faktKarteHtml();
+    faktKarteBinden(function () { renderSchreibung(); }, renderSchreibung);
+    chiliAktualisieren();
+    return;
+  }
+  var r = orthoAktuell();
+  if (!r) {
+    var jetzt = Date.now();
+    var ruhend = ORTHO.filter(function (x) {
+      return orthoGemeistert(x) && !orthoFaellig(x, jetzt);
+    }).length;
+    main.innerHTML = '<section><div class="leer">' + maskottchen('gross') +
+      '<h3>Alle Schreibregeln sitzen</h3><p>Alle ' + ORTHO.length +
+      ' Regeln sind ' + BOX_MAX + '× richtig angewandt. ' + ruhend +
+      ' ruhen bis zur nächsten Auffrischung.</p>' +
+      '<p class="naechste">Wiederholen kannst du trotzdem jederzeit: ' +
+      'Über die Auswahl oben lässt sich jede Regel einzeln vornehmen.</p>' +
+      '</div></section>';
+    return;
+  }
+
+  var html = '<section>';
+  if (!orthoEntdeckt(r)) html += orthoEntdeckenHtml(r);
+  else if (orthoRegelNeu) html += orthoKopfHtml(r) + orthoRegelHtml(r, true);
+  else html += orthoUebenHtml(r);
+  main.innerHTML = html + '</section>';
+
+  main.querySelectorAll('[data-orthodeutung]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      if (orthoPhase !== 'ask') return;
+      orthoPicked = parseInt(el.dataset.orthodeutung, 10);
+      renderSchreibung();
+    });
+  });
+  var ab = document.getElementById('orthoDeutungAb');
+  if (ab) ab.addEventListener('click', function () {
+    if (orthoPicked === null) return;
+    orthoCorrect = orthoPicked === r.richtig;
+    ton(orthoCorrect);
+    orthoPhase = 'feedback';
+    renderSchreibung();
+  });
+  var zurRegel = document.getElementById('orthoZurRegel');
+  if (zurRegel) zurRegel.addEventListener('click', function () {
+    // Entdeckt ist entdeckt — die Stufe steigt erst beim Anwenden.
+    state.orthoSeen[r.id] = Date.now();
+    save();
+    orthoRegelNeu = true;
+    orthoPhase = 'ask';
+    orthoPicked = null;
+    renderSchreibung();
+  });
+  var zurUebung = document.getElementById('orthoZurUebung');
+  if (zurUebung) zurUebung.addEventListener('click', function () {
+    orthoRegelNeu = false;
+    orthoFrageBauen();
+    renderSchreibung();
+  });
+
+  main.querySelectorAll('[data-orthoopt]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      if (orthoPhase !== 'ask') return;
+      orthoPicked = el.dataset.orthoopt;
+      if (state.settings.confirmUeben) renderSchreibung();
+      else orthoPruefen();
+    });
+  });
+  var feld = document.getElementById('orthoInput');
+  enterGibtAb(feld, 'orthoConfirm');
+  if (feld) feld.addEventListener('input', function () {
+    orthoEingabe = feld.value;
+    var k = document.getElementById('orthoConfirm');
+    if (k) k.disabled = !orthoAbgabeBereit();
+  });
+  var kb = document.getElementById('orthoKbToggle');
+  if (kb) kb.addEventListener('click', function () { orthoKb = !orthoKb; renderSchreibung(); });
+  main.querySelectorAll('[data-orthokey]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      if (orthoPhase !== 'ask') return;
+      var k = el.dataset.orthokey;
+      orthoEingabe = k === 'BS' ? orthoEingabe.slice(0, -1) : orthoEingabe + k;
+      var f = document.getElementById('orthoInput');
+      if (f) f.value = orthoEingabe;
+      var c = document.getElementById('orthoConfirm');
+      if (c) c.disabled = !orthoAbgabeBereit();
+    });
+  });
+  var warum = document.getElementById('orthoWarum');
+  if (warum) warum.addEventListener('click', function () {
+    // Nicht neu zeichnen — dieselbe Bewegung wie in «Grammatik»: Die Karte
+    // liegt schon da, nur zugeklappt.
+    orthoRegelOffen = !orthoRegelOffen;
+    var klapp = document.getElementById('orthoRegelKlapp');
+    if (klapp) {
+      klapp.classList.toggle('auf', orthoRegelOffen);
+      klapp.setAttribute('aria-hidden', orthoRegelOffen ? 'false' : 'true');
+    }
+    warum.setAttribute('aria-expanded', orthoRegelOffen ? 'true' : 'false');
+    if (orthoRegelOffen && klapp) {
+      setTimeout(function () {
+        try { klapp.scrollIntoView({ behavior: 'smooth', block: 'end' }); }
+        catch (e) { klapp.scrollIntoView(false); }
+      }, 380);
+    }
+  });
+  var conf = document.getElementById('orthoConfirm');
+  if (conf) conf.addEventListener('click', function () {
+    if (orthoAbgabeBereit()) orthoPruefen();
+  });
+  var next = document.getElementById('orthoNext');
+  if (next) next.addEventListener('click', function () {
+    orthoRegel = null;    // gemeisterte Regel abgeben, sonst dieselbe weiter
+    orthoFrageBauen();
+    faktFaellig();        // der Fakt liegt beim Weitergehen, nicht in der Auflösung
+    renderSchreibung();
+  });
+}
+
 // ── POWER-TRAINING ──────────────────────────────────────────
 // Wer ein Wort dreimal hintereinander verschreibt, verliert es (ADR 0033) —
 // und findet es danach irgendwann im großen Stapel wieder. Das ist richtig,
@@ -10309,12 +10961,13 @@ function bkPruefsumme(text) {
 var bkTabelle = null;
 function bkNachschlagen() {
   if (bkTabelle) return bkTabelle;
-  bkTabelle = { woerter: {}, saetze: {}, fakten: {}, buchstaben: {}, regeln: {} };
+  bkTabelle = { woerter: {}, saetze: {}, fakten: {}, buchstaben: {}, regeln: {}, schreibung: {} };
   ALL_VOCAB.forEach(function (v) { bkTabelle.woerter[bkKennung(v.id)] = v.id; });
   SENTENCES.forEach(function (x) { bkTabelle.saetze[bkKennung(x.ru)] = x.ru; });
   FACTS.forEach(function (f) { bkTabelle.fakten[bkKennung(f)] = faktId(f); });
   ALPHABET.forEach(function (b) { bkTabelle.buchstaben[bkKennung(b[1])] = b[1]; });
   GRAMMATIK.forEach(function (b) { bkTabelle.regeln[bkKennung(b.id)] = b.id; });
+  ORTHO.forEach(function (r) { bkTabelle.schreibung[bkKennung(r.id)] = r.id; });
   return bkTabelle;
 }
 
@@ -10378,8 +11031,11 @@ function encodeBackup() {
   // Neuntes Feld: der Grammatikstand. Er führt Regeln, nicht Wörter — darum
   // bleibt er winzig, egal wie viel gelernt wurde.
   var regeln = bkStaendeAus(state.gramBox, state.gramSeen, bkKennung);
+  // Zehntes Feld: die Schreibregeln. Auch sie führen Regeln, nicht Wörter.
+  var schreib = bkStaendeAus(state.orthoBox, state.orthoSeen, bkKennung);
 
-  var rumpf = [BK_KOPF, woerter, saetze, fakten.join(''), zahlen, einst, abc, regeln].join('~');
+  var rumpf = [BK_KOPF, woerter, saetze, fakten.join(''), zahlen, einst, abc, regeln,
+    schreib].join('~');
   return rumpf + '~' + bkPruefsumme(rumpf);
 }
 
@@ -10394,11 +11050,14 @@ function bkUeberblick(st) {
   Object.keys(st.abcBox || {}).forEach(function (k) { if (st.abcBox[k] > 0) ab++; });
   var re = 0;
   Object.keys(st.gramBox || {}).forEach(function (k) { if (st.gramBox[k] > 0) re++; });
+  var sr = 0;
+  Object.keys(st.orthoBox || {}).forEach(function (k) { if (st.orthoBox[k] > 0) sr++; });
   return w + (w === 1 ? ' Wort' : ' Wörter') + ' · ' +
     sa + (sa === 1 ? ' Satz' : ' Sätze') + ' · ' +
     fa + (fa === 1 ? ' Fakt' : ' Fakten') +
     (ab ? ' · ' + ab + (ab === 1 ? ' Buchstabe' : ' Buchstaben') : '') +
-    (re ? ' · ' + re + (re === 1 ? ' Regel' : ' Regeln') : '');
+    (re ? ' · ' + re + (re === 1 ? ' Regel' : ' Regeln') : '') +
+    (sr ? ' · ' + sr + (sr === 1 ? ' Schreibregel' : ' Schreibregeln') : '');
 }
 
 function decodeBackup(code) {
@@ -10420,6 +11079,8 @@ function decodeBackup(code) {
   if (teile.length > 7) bkStaendeNach(teile[6], t.buchstaben, d.abcBox, d.abcSeen);
   // Ältere Codes haben sieben oder acht Felder; ihr Grammatikstand bleibt leer.
   if (teile.length > 8) bkStaendeNach(teile[7], t.regeln, d.gramBox, d.gramSeen);
+  // Und wer noch kein zehntes Feld kennt, hat schlicht keine Schreibregeln gelernt.
+  if (teile.length > 9) bkStaendeNach(teile[8], t.schreibung, d.orthoBox, d.orthoSeen);
 
   var f = teile[3];
   for (var i = 0; i + BK_KENNUNG + 3 <= f.length; i += BK_KENNUNG + 3) {

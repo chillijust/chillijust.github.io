@@ -23,6 +23,8 @@ nicht «Rubrik». In dieser Reihenfolge:
 Stufe — Kacheln vor Tippen, RU→DE vor DE→RU),
 **Buchstaben** (das kyrillische Alphabet — freiwillig, eigener Lernstand, zählt nicht in
 Serie und Fortschritt; Einstieg ist das Üben, die Tafel liegt hinter einem eigenen Knopf),
+**Schreibung** (warum man nicht schreibt, was man hört — eine Regel je Karteikarte,
+zählt mit),
 **Grammatik** (warum ein Wort so dasteht — freiwillig, entdecken statt belehren),
 **Power-Training** (die zurückgefallenen Wörter zurückholen — drei auf einmal, ab drei
 gefallenen offen).
@@ -76,7 +78,14 @@ zweite Flug bricht den ersten ab. Ein runder Knopf, in den sie springt, braucht
   die er nicht kennt** — wer eine nennt, nimmt `{n}`, `{f}` oder `{s}`. Und **gelegt ist
   nicht geschrieben**: Lob für ё, Weichzeichen oder Wortlänge gibt es nur bei getippten
   Aufgaben.
-- **Der Jubel ist ein Fenster für das Seltene** (ADR 0044) — fünf Anlässe, ausgelöst nur
+- **Die Lücke ist ein Paar, keine Zahl** (ADR 0055). Eine Aufgabe in «Schreibung» nennt
+  beide Schreibweisen — die richtige (`ist`) und die nach Gehör (`klingt`); wo sie sich
+  unterscheiden, ist die Lücke. Eine Zahl kann danebenliegen, ohne dass es jemand merkt —
+  vierzehn taten es. Build und Suite rechnen jede Aufgabe nach. Eine **leere** Stelle ist
+  ein gültiger Fall («ь oder nichts»). `hoerbar: false` heißt: Beide Schreibweisen klingen
+  gleich, dort behauptet die Übung keine Lautung. **Kein Kyrillisch in `name` und `kurz`**
+  — beide stehen in Versalien-Etiketten.
+- **Der Jubel ist ein Fenster für das Seltene** (ADR 0044) — sechs Anlässe, ausgelöst nur
   am Übergang, Ton ausgelost. Ein einzelnes gemeistertes Wort bekommt weiter nur eine
   Zeile: Was oft passiert, darf keine Hürde werden.
 - **Eine Auszeichnung wird genau einmal gefeiert** (ADR 0047). Set, Thema, Alphabet und
@@ -126,7 +135,8 @@ zweite Flug bricht den ersten ab. Ein runder Knopf, in den sie springt, braucht
 index.html                die App — genau diese Datei wird ausgeliefert
 .nojekyll                 schaltet Jekyll ab, niemals löschen
 data/*.json               Lerninhalte, einzige Quelle für Vokabeln/Sätze/Fakten/
-                          Tastatur/Buchstaben/Grammatik/Verben/Nomen/Kommentare
+                          Tastatur/Buchstaben/Grammatik/Verben/Nomen/Kommentare/
+                          Tutorial/Betonung/Schreibregeln
 tools/build.mjs           /data prüfen und in index.html einbetten (--check = nur prüfen)
 tools/pruefen.mjs         Vor-Push-Prüfung von index.html
 tools/pruefstand/         Prüfstand: lauf.mjs, suiten/*.mjs, bild.mjs (siehe README dort)

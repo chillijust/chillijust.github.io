@@ -15,7 +15,7 @@ try {
   setTab('home');
   var kacheln = alle('[data-uebung]').map(function (b) { return b.dataset.uebung; }).join(',');
   pruefe('A1 Reihenfolge der Übungen',
-    kacheln === 'lernsets,freestyle,tippen,uebersetzen,buchstaben,grammatik,power', kacheln);
+    kacheln === 'lernsets,freestyle,tippen,schreibung,uebersetzen,buchstaben,grammatik,power', kacheln);
 
   // B · Lernsets statt Päckchen
   state.boxes = {}; state.lastSeen = {};
