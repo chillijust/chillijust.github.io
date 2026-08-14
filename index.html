@@ -1113,19 +1113,45 @@ body.tut-offen { overflow: hidden; }
   margin: 0 0 16px; border-color: var(--gold); color: var(--gold);
 }
 
-/* Die Zeile, in der die Chili nach jeder Auflösung etwas sagt. Sie trägt kein
-   Kästchen: Ein Kommentar ist ein Nebensatz, keine Meldung — was gerahmt ist,
-   verlangt Aufmerksamkeit, und die gehört der Auflösung darüber. */
-.kommentar {
-  margin: 12px 2px 0; font-size: 14px; line-height: 1.45; color: var(--dim);
-  font-style: italic;
-  animation: kommentarAuf .34s .06s both ease-out;
+/* Was die Chili nach einer Auflösung sagt — jetzt sagt sie es selbst (ADR
+   0060). Die Blase hängt unter ihr, endet rechts am Inhaltsrand und wächst
+   nach links, so weit der Satz sie braucht. Sie liegt über der Titelzeile:
+   Der Kopf ist unterwegs das ruhigste Stück der Seite, und ein Nebensatz darf
+   dort kurz stehen, ohne die Aufgabe zu verdecken. */
+#chiliBlase {
+  position: absolute; top: calc(100% + 9px); right: 0; z-index: 3;
+  width: max-content;
+  max-width: calc(100vw - var(--pad-links) - var(--pad-rechts));
+  /* Sie reicht immer bis unter die Figur — sonst stünde der Zipfel bei einem
+     kurzen Satz neben der Blase statt an ihr. */
+  min-width: calc(var(--zipfel, 100px) + 46px);
+  background: var(--card-2); border: 1px solid var(--line); border-radius: 14px;
+  padding: 9px 13px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .28);
+  animation: blaseAuf .34s .06s both ease-out;
 }
-@keyframes kommentarAuf {
-  from { opacity: 0; transform: translateY(3px); }
+#chiliBlase[hidden] { display: none; }
+#chiliBlase p {
+  margin: 0; font-size: 14px; line-height: 1.45; color: var(--fg);
+  font-style: italic;
+}
+/* Der Zipfel zeigt auf **sie**, nicht auf das Gesagte — dieselbe Regel wie im
+   Tutorial (ADR 0051). Zwei Dreiecke übereinander: das untere trägt die
+   Kante, das obere die Fläche. Wo die Figur steht, wird gemessen, nicht
+   geraten — in «Buchstaben» und «Übersetzen» schiebt ein weiterer Knopf sie
+   nach links. */
+#chiliBlase::before, #chiliBlase::after {
+  content: ''; position: absolute; bottom: 100%;
+  right: var(--zipfel, 100px);
+  border: 8px solid transparent; border-top: 0;
+}
+#chiliBlase::before { border-bottom-color: var(--line); }
+#chiliBlase::after { border-bottom-color: var(--card-2); margin-bottom: -1px; }
+@keyframes blaseAuf {
+  from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: none; }
 }
-@media (prefers-reduced-motion: reduce) { .kommentar { animation: none; } }
+@media (prefers-reduced-motion: reduce) { #chiliBlase { animation: none; } }
 .fakt-fuss { display: flex; align-items: center; gap: 12px; margin: 12px 0 0 16px; }
 .fakt-fuss .sternbtn { margin-left: auto; }
 
@@ -1627,6 +1653,12 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
       <button class="menueintrag" data-ziel="tickets" data-symbol="liste" role="menuitem">Tickets</button>
     </div></div>
     </div>
+    <!-- Was die Chili nach einer Auflösung sagt. Sie steht **nicht** in
+         `#chiliBuehne`: Die wird umgehängt, und die Blase flöge beim Öffnen
+         des Menüs mit in den runden Knopf. Also ein eigenes Stück in der
+         rechten Gruppe — rechts endet es an deren Rand, also am Inhaltsrand,
+         und wächst nach links, so weit der Satz es braucht. -->
+    <div id="chiliBlase" role="status" aria-live="polite" hidden><p id="chiliBlaseText"></p></div>
     </div>
     <div class="titelblock">
       <span class="eyebrow" id="kopfEyebrow">Русский · Тренажёр</span>
@@ -3756,7 +3788,7 @@ var APP_STAND = '2026-08-14'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.4.0'; /* == VERSION == */
+var APP_VERSION = '2.4.1'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -3869,6 +3901,10 @@ function chiliAktualisieren(ohneSprung) {
   if (chiliHalt || !chiliBuehne) return;
   var platz = chiliPlatzhalter();
   if (!platz) return;
+  // **Vor den Abbrüchen weiter unten.** Die Blase muss sich auch dann melden,
+  // wenn die Figur schon steht, wo sie hingehört — genau das ist der Fall
+  // zwischen zwei Aufgaben derselben Übung.
+  blaseAktualisieren(platz);
   // Der Knopf zeigt seinen ruhenden Punkt nur, solange er die Figur nicht
   // trägt — das gilt auch, wenn sich sonst nichts geändert hat.
   document.getElementById('menuKnopf')
@@ -5200,9 +5236,35 @@ function kommentarSetzen(erg) {
     { n: zeichen, f: e.daneben, s: state.streak });
 }
 
-function kommentarHtml() {
-  if (!kommentar) return '';
-  return '<p class="kommentar">' + esc(kommentar) + '</p>';
+// **Die Chili sagt es selbst** (ADR 0060). Bis 2.4.0 stand der Kommentar als
+// Zeile unter der Auflösung; jetzt hängt er als Sprechblase an der Figur im
+// Kopf. Zwei Dinge muss die Blase können, die eine Zeile nicht musste:
+//
+//   · **Verschwinden, sobald die Figur den Kopf verlässt** — im Menü, im
+//     Filter, im Wissensblatt, im Jubel, im Tutorial und auf der Faktkarte
+//     steht sie woanders, und eine Blase an einem leeren Platz wäre ein
+//     Zipfel ins Nichts.
+//   · **Ihren Zipfel messen.** Die Figur ist das erste Stück der rechten
+//     Gruppe, aber nicht immer gleich weit vom Rand: In «Buchstaben» steht
+//     der Tafelknopf neben ihr, in «Übersetzen» der Wissensknopf.
+//
+// Aufgerufen wird sie aus `chiliAktualisieren()` — dort und nur dort ist
+// bekannt, wo die Figur gerade steht.
+function blaseAktualisieren(platz) {
+  var blase = document.getElementById('chiliBlase');
+  if (!blase) return;
+  var daheim = document.getElementById('chiliPlatz');
+  if (!kommentar || platz !== daheim) { blase.hidden = true; return; }
+  var rechts = daheim.parentNode;
+  if (rechts && rechts.offsetWidth) {
+    var mitte = daheim.offsetLeft + daheim.offsetWidth / 2;
+    var zipfel = Math.max(20, Math.round(rechts.offsetWidth - mitte - 8));
+    blase.style.setProperty('--zipfel', zipfel + 'px');
+  }
+  // Erst der Text, dann sichtbar: Das Umschalten von `display: none` startet
+  // die Animation neu, und die soll den fertigen Satz zeigen.
+  document.getElementById('chiliBlaseText').textContent = kommentar;
+  blase.hidden = false;
 }
 
 // Wie viele Zeichen standen daneben? Dieselbe Rechnung wie in der Prüfzeile —
@@ -7521,7 +7583,7 @@ function renderUeben() {
       html += '<p class="luecke-satz cyr">' + esc(q.satz.ru) + '</p>';
     }
     html += '</div>' + hoerzeile(q.mode === 'luecke' ? q.satz.ru : q.word.ru,
-      q.mode === 'luecke' ? q.satz.de : q.word.de) + kommentarHtml() +
+      q.mode === 'luecke' ? q.satz.de : q.word.de) +
       meisterHtml() + leseFallHtml();
   }
 
@@ -8162,7 +8224,7 @@ function renderUebersetzen() {
     if (trCorrect) html += '<p>' + ICON.haken + 'Правильно — richtig übersetzt!</p>';
     else html += '<p>' + ICON.kreuz + (trRevealed ? 'Lösung: ' : 'Richtig wäre: ') +
       '<strong class="' + (promptIsRu ? '' : 'cyr') + '">' + esc(t.solution) + '</strong></p>';
-    html += '</div>' + hoerzeile(t.ru, t.de) + kommentarHtml() + patzerHtml() + meisterHtml();
+    html += '</div>' + hoerzeile(t.ru, t.de) + patzerHtml() + meisterHtml();
   }
 
   html += '</div>' + rekoHtml() + '<div class="btn-row">';
@@ -9816,7 +9878,7 @@ function gramUebenHtml(b) {
     } else {
       html += ICON.kreuz + 'Richtig wäre <strong class="cyr">' + esc(q.loesung) + '</strong>';
     }
-    html += '</p></div>' + kommentarHtml() + gramWarumHtml(b, q) + meisterHtml();
+    html += '</p></div>' + gramWarumHtml(b, q) + meisterHtml();
   }
 
   html += '</div>' + rekoHtml() + '<div class="btn-row">';
@@ -10410,7 +10472,7 @@ function orthoUebenHtml(r) {
       (orthoCorrect ? ICON.haken + 'Richtig!'
         : ICON.kreuz + 'So steht es: <strong class="cyr">' + esc(a.ist) + '</strong>') +
       hoerknopf(a.ist, 'ru') + '</p></div>' +
-      kommentarHtml() + orthoWarumHtml(r, a) + meisterHtml();
+      orthoWarumHtml(r, a) + meisterHtml();
   }
 
   html += '</div>' + rekoHtml() + '<div class="btn-row">';
@@ -10800,7 +10862,7 @@ function renderPower() {
     html += '<div class="feedback ' + (ptCorrect ? 'good' : 'bad') + '"><p>' +
       (ptCorrect ? ICON.haken + 'Правильно — richtig!'
         : ICON.kreuz + 'Richtig wäre <strong class="cyr">' + esc(betontesWort(q.wort.ru)) + '</strong>') +
-      '</p></div>' + hoerzeile(q.wort.ru, q.wort.de) + kommentarHtml() + meisterHtml();
+      '</p></div>' + hoerzeile(q.wort.ru, q.wort.de) + meisterHtml();
   }
 
   html += '</div>' + rekoHtml() + '<div class="btn-row">';
@@ -11157,7 +11219,7 @@ function renderTippen() {
   if (tResult === 'wrong') html += '<p class="feedback bad">' + ICON.kreuz + 'Richtig: <strong class="cyr">' + esc(betontesWort(w.ru)) + '</strong></p>';
   if (tResult === 'right') html += '<p class="feedback good">' + ICON.haken + 'Правильно — richtig!</p>';
   // Erst nach der Abgabe zu hören: vorher wäre die Aussprache die halbe Antwort.
-  if (tResult) html += hoerzeile(w.ru, w.de) + kommentarHtml() + meisterHtml();
+  if (tResult) html += hoerzeile(w.ru, w.de) + meisterHtml();
   html += '</div>' + rekoHtml() + '<div class="btn-row">';
   if (!tResult) {
     html += '<button class="btn ghost" id="tHintBtn">Hinweis</button>' +

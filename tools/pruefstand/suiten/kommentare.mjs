@@ -34,6 +34,11 @@ function mitWuerfel(wert, tun) {
 }
 
 try {
+  // Erst den Scheinwerfer aus. Solange das Tutorial läuft, steht die Figur in
+  // **seiner** Blase — die Kommentarblase schweigt dann zu Recht, und ohne
+  // diesen Zug prüfte die Suite bloß, dass zwei Blasen sich nicht ins Gehege
+  // kommen (ADR 0060).
+  tutEnde();
   // ── A · Die Töpfe ─────────────────────────────────────────
   state = defaultState(); ansichtenZuruecksetzen();
   var toepfe = ['richtig', 'trocken', 'serie', 'jo', 'weich', 'lang',
@@ -138,16 +143,22 @@ try {
   state.settings.kommentare = false;
   kommentarSetzen({ ok: true, loesung: 'дом', eingabe: 'дом', getippt: true, daneben: 0 });
   pruefe('G1 aus heißt aus', kommentar === '', kommentar);
-  pruefe('G2 und die Zeile bleibt weg', kommentarHtml() === '');
+  pruefe('G2 und die Blase bleibt weg', (function () {
+    chiliAktualisieren();
+    return q('#chiliBlase').hidden === true;
+  })());
   state.settings.kommentare = true;
 
-  // ── H · Die Zeile steht in fünf Übungen, nicht in sechs ───
+  // ── H · Die Blase steht in fünf Übungen, nicht in sechs ───
+  // Sie hängt an der Figur, und die zieht der Beobachter auf «main» nach —
+  // der läuft erst nach diesem Zug. Hier wird darum von Hand nachgezogen.
   function nachAntwort(tab, tun) {
     state = defaultState(); ansichtenZuruecksetzen();
     ALL_VOCAB.forEach(function (v) { state.boxes[v.id] = BOX_MAX; });
     setTab(tab);
     tun();
-    return !!q('.kommentar');
+    chiliAktualisieren();
+    return q('#chiliBlase').hidden === false;
   }
   pruefe('H1 «Lernsets» kommentiert', nachAntwort('lernsets', function () {
     uebNext(true);
@@ -175,6 +186,63 @@ try {
     abcAnsicht = 'ueben'; abcQ = null; renderBuchstaben();
     abcQ.modus = 'wahl'; abcPicked = abcQ.b[1]; abcPruefen(); renderBuchstaben();
   }));
+
+  // ── L · Die Blase hängt an der Figur (ADR 0060) ───────────
+  state = defaultState(); ansichtenZuruecksetzen();
+  ALL_VOCAB.forEach(function (v) { state.boxes[v.id] = BOX_MAX; });
+  setTab('lernsets');
+  uebNext(true);
+  kommentar = 'Probe.';
+  chiliAktualisieren();
+  var blase = q('#chiliBlase');
+
+  pruefe('L1 die alte Zeile gibt es nicht mehr', !q('.kommentar'));
+  // **Nicht in der Bühne.** Die wird umgehängt — sonst flöge die Blase beim
+  // Öffnen des Menüs mit in den runden Knopf.
+  pruefe('L2 sie steckt nicht in der Chili-Bühne',
+    !q('#chiliBuehne').contains(blase));
+  pruefe('L3 sondern in der rechten Kopfgruppe',
+    blase.parentNode.className === 'kopf-rechts', blase.parentNode.className);
+  pruefe('L4 sie sagt, was der Kommentar sagt',
+    q('#chiliBlaseText').textContent === kommentar, q('#chiliBlaseText').textContent);
+  pruefe('L5 sie meldet sich ruhig',
+    blase.getAttribute('role') === 'status' &&
+    blase.getAttribute('aria-live') === 'polite');
+
+  // **Der Zipfel wird gemessen, nicht geraten.** Die Figur ist das erste Stück
+  // der Gruppe, aber nicht immer gleich weit vom Rand: In «Buchstaben» steht
+  // der Tafelknopf neben ihr, in «Übersetzen» der Wissensknopf.
+  var ohne = parseFloat(blase.style.getPropertyValue('--zipfel'));
+  pruefe('L6 der Zipfel steht auf einem gemessenen Wert', ohne > 20, String(ohne));
+  q('#tafelKnopf').hidden = false;
+  chiliAktualisieren();
+  var mit = parseFloat(blase.style.getPropertyValue('--zipfel'));
+  q('#tafelKnopf').hidden = true;
+  chiliAktualisieren();
+  pruefe('L7 ein weiterer Knopf schiebt ihn mit', mit > ohne + 30,
+    ohne + ' -> ' + mit);
+
+  // **Sie endet am Inhaltsrand und wächst nach links.** Ein langer Satz darf
+  // bis dorthin, aber nicht darüber hinaus.
+  kommentar = 'Ein ziemlich langer Satz, der die Blase bis an den rechten Rand ' +
+    'wachsen lassen soll und dabei umbrechen muss, statt aus dem Bild zu laufen.';
+  chiliAktualisieren();
+  var r = blase.getBoundingClientRect();
+  pruefe('L8 auch ein langer Satz bleibt im Bild',
+    r.left >= 0 && r.right <= window.innerWidth + 1,
+    Math.round(r.left) + '..' + Math.round(r.right) + ' von ' + window.innerWidth);
+  pruefe('L9 und die Blase bleibt schmaler als das Bild',
+    r.width > 120 && r.width <= window.innerWidth,
+    String(Math.round(r.width)));
+
+  // **Verlässt die Figur den Kopf, geht die Blase mit.** Ein Zipfel, der auf
+  // einen leeren Platz zeigt, wäre schlimmer als gar keine Blase.
+  kommentar = 'Probe.';
+  chiliAktualisieren();
+  q('#menuKnopf').click();
+  pruefe('L10 im Menü schweigt sie', blase.hidden === true);
+  q('#menuKnopf').click();
+  pruefe('L11 und danach steht sie wieder da', blase.hidden === false);
 
   // ── I · Der Fakt hat überall dieselbe Gestalt ─────────────
   // Vorher: eigener Bildschirm in «Lernsets», Streifen in den drei anderen.

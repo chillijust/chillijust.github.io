@@ -78,13 +78,22 @@ zweite Flug bricht den ersten ab. Ein runder Knopf, in den sie springt, braucht
 - **Der Fakt hat überall dieselbe Gestalt, der Kommentar auch** (ADR 0049). Ein Fakt ist
   immer die Karte mit Sprechblase und Chili (`faktKarteHtml()`), gefragt beim
   **Weitergehen** über `faktFaellig()` — der Streifen unter der Auflösung ist weg. In
-  seiner Zeile steht jetzt nach **jeder** Auflösung ein Kommentar (`kommentarSetzen()`,
-  `kommentarHtml()`), in allen Übungen außer «Buchstaben». Die Sätze sind **Inhalt** und
+  seiner Zeile steht jetzt nach **jeder** Auflösung ein Kommentar (`kommentarSetzen()`),
+  in allen Übungen außer «Buchstaben». Die Sätze sind **Inhalt** und
   stehen in `data/kommentare.json`; das Mischungsverhältnis von trocken zu freundlich ist
   eine Eigenschaft der Liste, keine Zahl im Code. **Ein fester Satz behauptet keine Zahl,
   die er nicht kennt** — wer eine nennt, nimmt `{n}`, `{f}` oder `{s}`. Und **gelegt ist
   nicht geschrieben**: Lob für ё, Weichzeichen oder Wortlänge gibt es nur bei getippten
   Aufgaben.
+- **Die Chili sagt den Kommentar selbst** (ADR 0060). Er steht als Sprechblase
+  (`#chiliBlase`, geführt von `blaseAktualisieren()`) unter der Figur im Kopf, endet
+  rechts am Inhaltsrand und wächst nach links. Die Blase steht **nicht** in
+  `#chiliBuehne` — die wird umgehängt, und sie flöge beim Öffnen des Menüs mit in den
+  runden Knopf. Sie zeigt sich nur, **solange die Figur auf `#chiliPlatz` steht**, und
+  ihr Zipfel wird **gemessen**: In «Buchstaben» und «Übersetzen» schiebt ein weiterer
+  Knopf die Figur nach links. Geführt wird sie aus `chiliAktualisieren()` und sonst
+  nirgends. Wer sie in einer Suite prüft, schließt vorher das Tutorial (`tutEnde()`) —
+  dort steht die Figur in *seiner* Blase.
 - **Drei Strengen, drei Schalter** (ADR 0056). **Die Nachschrift** (`reko`,
   `rekoVerlangen/Html/Fertig/Binden`, geteilt von allen fünf Schreibaufgaben) hält nach
   einem Schreibfehler den «Weiter»-Knopf zu, **bewertet aber nichts** — sonst tippte man

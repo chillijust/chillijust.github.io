@@ -82,7 +82,21 @@ Drei Regeln halten das ehrlich:
   selbst getippt hat.
 
 Der Patzer-Kasten in «Übersetzen» behält nur noch, was Folgen ankündigt; wie knapp es war,
-sagt die Kommentarzeile darüber. Abschaltbar über die Einstellung `kommentare`.
+sagt die Chili. Abschaltbar über die Einstellung `kommentare`.
+
+**Gesagt wird es in einer Sprechblase** (ADR 0060). `#chiliBlase` hängt unter der Figur im
+Kopf, endet rechts am Inhaltsrand und wächst nach links. Geführt wird sie von
+`blaseAktualisieren()`, aufgerufen aus `chiliAktualisieren()` — dort und nur dort ist
+bekannt, wo die Figur gerade steht. Zwei Regeln tragen das:
+
+- **Sie steht nicht in `#chiliBuehne`.** Die wird umgehängt (ADR 0012); die Blase flöge
+  sonst beim Öffnen des Menüs mit in den runden Knopf. Sie zeigt sich nur, solange die
+  Figur auf `#chiliPlatz` steht — im Menü, im Filter, im Wissensblatt, im Jubel, im
+  Tutorial und auf der Faktkarte schweigt sie.
+- **Der Zipfel wird gemessen, nicht geraten.** Die Mitte von `#chiliPlatz` gegen die
+  Breite der rechten Gruppe, gesetzt als `--zipfel`; dieselbe Zahl trägt die `min-width`.
+  In «Buchstaben» steht der Tafelknopf neben der Figur, in «Übersetzen» der Wissensknopf —
+  ein fester Abstand zeigte dort daneben.
 
 ## Tutorial
 
