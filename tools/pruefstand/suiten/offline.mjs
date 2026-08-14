@@ -56,6 +56,18 @@ pruefeDatei('S12 die CSP öffnet genau eine Tür',
   cspZeile);
 pruefeDatei('S13 und bleibt sonst zu',
   cspZeile.indexOf("default-src 'none'") === 0 && !/https?:|\*/.test(cspZeile));
+// **Ohne Netz kommt kein Urteil.** `reg.update()` scheitert im Funkloch. Wer
+// das stillschweigend abfängt, meldet danach «Aktuell» — und behauptet damit
+// etwas über einen Stand, den die App nie gesehen hat (ADR 0052). Genau so
+// stand es in 2.4.0.
+pruefeDatei('S14 das Nachsehen sagt, woran es war',
+  /ende\('kein netz'\)/.test(html) && /ende\('unmoeglich'\)/.test(html) &&
+  /ende\('ok'\)/.test(html));
+pruefeDatei('S15 und der Knopf gibt es weiter',
+  /lage === 'kein netz'\) suchen\.textContent = 'Kein Netz';/.test(html));
+pruefeDatei('S16 «Aktuell» steht nur nach einer geglückten Anfrage',
+  (html.match(/'Aktuell'/g) || []).length === 1 &&
+  /else suchen\.textContent = swStand\.wartet \? 'Neue Fassung bereit' : 'Aktuell';/.test(html));
 console.log(ausser.join('\n'));
 if (ausser.some((z) => z.indexOf('FAIL') === 0)) {
   throw new Error('sw.js entspricht nicht der Absprache');

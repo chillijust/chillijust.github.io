@@ -44,7 +44,10 @@ ist. Den Status zeigt der Reiter **Actions** („pages build and deployment") od
 3. Auf dem iPhone: **Seit 2.4.0 erledigt das der Service Worker** (ADR 0059). Die
    abgelegte App startet aus ihrem eigenen Speicher, sieht im Hintergrund nach und meldet
    sich mit «Eine neue Fassung liegt bereit — jetzt laden». Wer nicht warten will, findet
-   unter **Einstellungen → App** den Knopf «Nachsehen».
+   unter **Einstellungen → App** den Knopf «Nachsehen». Er sagt danach, woran er war:
+   «Aktuell», «Neue Fassung bereit» oder — wenn die Anfrage gar nicht durchkam —
+   «Kein Netz». Bis 2.4.0 meldete er auch im Funkloch «Aktuell» und behauptete damit
+   etwas über einen Stand, den er nie gesehen hatte.
 
    Der frühere Rat — Verknüpfung löschen und neu anlegen — ist damit hinfällig. Klemmt
    trotzdem etwas, steht am selben Ort der Notausgang «Speicher der App leeren»: Er meldet

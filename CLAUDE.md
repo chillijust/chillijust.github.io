@@ -384,7 +384,10 @@ gibt es den Skill `ticket`.
   Einrichten:** Der neue Worker wartet, bis der Nutzer die Zeile «Jetzt laden» antippt.
   Klemmt etwas, gibt es den Notausgang in den Einstellungen unter «App» — er lässt den
   Lernstand unberührt. (Der frühere Rat «Verknüpfung löschen und neu anlegen» ist damit
-  erledigt.)
+  erledigt.) **Ohne Netz kommt kein Urteil:** «Nach Aktualisierung suchen» meldet dann
+  «Kein Netz», nicht «Aktuell» — die App behauptet nichts über einen Stand, den sie nie
+  gesehen hat (ADR 0052). «Offline bereit» bleibt richtig, die Auskunft liest nur, was
+  auf dem Gerät liegt.
 - **Touch-Ziele und `:hover`.** Auf iOS bleibt ein Hover-Zustand nach dem Tippen hängen;
   Zustände deshalb über Klassen setzen, nicht über `:hover`.
 - **Wörter, die dreimal hintereinander falsch geschrieben werden**, fallen auf

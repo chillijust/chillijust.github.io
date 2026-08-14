@@ -4968,17 +4968,22 @@ function swVersionHolen(fertig) {
 }
 
 // Nachsehen, ob es etwas Neues gibt — der Knopf in den Einstellungen.
+// **Ohne Netz kommt kein Urteil.** `reg.update()` scheitert im Funkloch — wer
+// das stillschweigend abfängt, meldet danach «Aktuell» und behauptet damit
+// etwas über einen Stand, den die App gar nicht gesehen hat (ADR 0052). Also
+// sagt der Rückruf, woran er war: 'ok' · 'kein netz' · 'unmoeglich'.
 function swNachsehen(fertig) {
+  function ende(lage) { if (fertig) fertig(lage); }
   try {
-    if (!navigator.serviceWorker) { if (fertig) fertig(); return; }
+    if (!navigator.serviceWorker) { ende('unmoeglich'); return; }
     navigator.serviceWorker.getRegistration().then(function (reg) {
-      if (!reg) { if (fertig) fertig(); return; }
+      if (!reg) { ende('unmoeglich'); return; }
       reg.update().then(function () {
         swWartendPruefen(reg);
-        if (fertig) fertig();
-      }).catch(function () { if (fertig) fertig(); });
-    }).catch(function () { if (fertig) fertig(); });
-  } catch (e) { if (fertig) fertig(); }
+        ende('ok');
+      }).catch(function () { ende('kein netz'); });
+    }).catch(function () { ende('kein netz'); });
+  } catch (e) { ende('unmoeglich'); }
 }
 
 // Übernehmen: den wartenden Worker vorlassen und danach einmal neu laden.
@@ -11660,11 +11665,16 @@ function renderEinstellungen() {
   var suchen = document.getElementById('swSuchen');
   if (suchen) suchen.addEventListener('click', function () {
     suchen.textContent = 'Sehe nach …';
-    swNachsehen(function () {
+    swNachsehen(function (lage) {
       swVersionHolen(function () {
         var feld = document.getElementById('swBereit');
+        // «Offline bereit» bleibt auch im Funkloch richtig — die Auskunft liest
+        // nur, was auf dem Gerät liegt, und braucht dafür kein Netz.
         if (feld) feld.textContent = swAuskunft();
-        if (suchen) suchen.textContent = swStand.wartet ? 'Neue Fassung bereit' : 'Aktuell';
+        if (!suchen) return;
+        if (lage === 'kein netz') suchen.textContent = 'Kein Netz';
+        else if (lage === 'unmoeglich') suchen.textContent = 'Nicht möglich';
+        else suchen.textContent = swStand.wartet ? 'Neue Fassung bereit' : 'Aktuell';
       });
     });
   });
