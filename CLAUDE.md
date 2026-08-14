@@ -275,12 +275,18 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
 - **Grammatik ist eine Funktion, kein Fakt** (ADR 0030). Die Karteikarte ist die **Regel**,
   nicht das Wort, und die Aufgabe verlangt ein bekanntes Wort in einer nie gesehenen Form —
   sonst prüft sie Auswendiglernen. Formen rechnet `grammForm()`; sie steht doppelt (App und
-  Build) und wird an den vermerkten Formen der Sätze gemessen. Zwölf Bausteine, sechs Formen
-  je Nomen (`akk`, `praep`, `gen`, `dat`, `instr`, `plural`); in `data/nomen.json` wird **jede Angabe für
+  Build) und wird an den vermerkten Formen der Sätze gemessen. Dreizehn Bausteine, sechs Formen
+  je Nomen (`akk`, `praep`, `gen`, `dat`, `instr`, `plural`) und die Zukunft aus `быть`
+  plus Grundform (`fut1s` … `fut3p`); in `data/nomen.json` wird **jede Angabe für
   sich** gegen die blanke Regel geprüft, nicht der Eintrag als Ganzes. **Eine Wortart-Angabe, die
   nur wiederholt, was die Endung sagt, lässt den Build scheitern** — sonst verdeckt die
   Liste die echten Ausnahmen. Dasselbe gilt für `data/verben.json`: **ein Eintrag, der
   dasselbe liefert wie die blanke Regel, bricht den Build ab** (ADR 0031).
+- **Ein vollendetes Verb hat kein Präsens** (ADR 0057). «скажу» heißt «ich werde sagen».
+  Der Aspekt steht als `aspekt: "pf"` in `data/verben.json` — **nur bei den vollendeten**,
+  unvollendet ist der Regelfall. `perfektiv()` schließt sie aus Präsens, Ich-Form und
+  Zukunft aus, der Build zusätzlich aus den Beispielen. Und **`быть` bekommt nie ein
+  `formen`-Feld**: «буду» ist Zukunft, nicht Gegenwart.
 - **Erklären und abfragen sind zwei Dinge.** Was sich nicht herleiten lässt, erklärt
   «Wissen» im Satz, aber die Übung fragt nicht danach — belebte männliche Nomen im
   Akkusativ, Verben mit eigenem Stamm (`писать` → `пиш-`), `быть` im Präsens (das es

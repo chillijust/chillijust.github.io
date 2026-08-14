@@ -103,12 +103,12 @@ try {
   // ── D · Zehn Bausteine, alle erreichbar ───────────────────
   // Keine feste Zahl: Mit den Sätzen wachsen auch die Regeln. Geprüft wird,
   // dass keine verschwindet und dass jede eine bekannte Aufgabe trägt.
-  pruefe('D1 die Regeln werden nicht weniger', GRAMMATIK.length >= 12,
+  pruefe('D1 die Regeln werden nicht weniger', GRAMMATIK.length >= 13,
     String(GRAMMATIK.length));
   pruefe('D2 jede hat eine bekannte Aufgabe',
     GRAMMATIK.every(function (b) {
       return ['geschlecht', 'akk', 'praep', 'gen', 'dat', 'instr', 'plural',
-        'praes', 'ichform', 'praet', 'adj'].indexOf(b.aufgabe) !== -1;
+        'praes', 'ichform', 'praet', 'fut', 'adj'].indexOf(b.aufgabe) !== -1;
     }));
   pruefe('D3 jede findet Wörter zum Üben',
     GRAMMATIK.every(function (b) {

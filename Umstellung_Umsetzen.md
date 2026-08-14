@@ -27,7 +27,7 @@ man der falschen.
 | 5 | Handling: Rekonstruktion, Tagesmaß, Fehlerprofil | 1.9.0 | **fertig** · ADR 0056 · Suite `strenge` · drei neue Einstellungen |
 | 6a | Sätze wachsen · Portion 1 + Dativ | 2.0.0 | **fertig** · ADR 0057 · Suite `lehrplan` · 102 Sätze, 51 % im Lernweg |
 | 6b | Sätze wachsen · Portion 2 + Instrumental | 2.1.0 | **fertig** · 211 Sätze, **100 %** im Lernweg, 35 Lernsets |
-| 6c | Aspektpaare und Futur | 2.2.0 | offen · **nur noch Grammatik** — die Abdeckung ist mit 6b erreicht |
+| 6c | Aspektpaare und Futur | 2.2.0 | **fertig** · Zukunft als Baustein · **Aspektübung verworfen**: nur zwei vollendete Verben im Wortschatz |
 | 7 | Buchstaben-Generatoren ohne Ton (D3, D4, D6) | 2.3.0 | offen |
 | 8 | Service Worker | 2.4.0 | offen |
 
@@ -305,7 +305,7 @@ wochenlang halbfertig herumliegt, wäre das Gegenteil davon.
 beschrieben: Die richtige Antwort in der Kontext-Lücke stand am Satzanfang als einzige
 groß da, und der Regel-Jubel behauptete «ZEHN VON ZEHN», als es elf wurden.
 
-## Etappe 7 · Buchstaben-Generatoren ohne Ton → 2.1.0
+## Etappe 7 · Buchstaben-Generatoren ohne Ton → 2.3.0
 
 Drei der sieben Dekodier-Generatoren des Plans brauchen keinen Ton.
 

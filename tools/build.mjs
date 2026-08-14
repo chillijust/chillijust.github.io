@@ -220,6 +220,14 @@ const instrumentalMit = (ru, art, tab) => {
   return ru + (/[жчшщц]$/.test(ru) ? 'ем' : 'ом');
 };
 const instrumental = (ru, art) => instrumentalMit(ru, art, nomen);
+// Die zusammengesetzte Zukunft: быть in der Person, dahinter die Grundform.
+// Sie gilt nur für **unvollendete** Verben — ein vollendetes bildet seine
+// Zukunft mit den Präsensendungen (скажу heißt «ich werde sagen»).
+const FUTUR_HILF = ['буду', 'будешь', 'будет', 'будем', 'будете', 'будут'];
+const futur = (ru, person) => {
+  const i = PERSONEN.indexOf(person);
+  return i === -1 ? null : FUTUR_HILF[i] + ' ' + ru;
+};
 const pluralMit = (ru, tab) => {
   const eigen = tab[ru] || null;
   if (eigen && eigen.starr) return ru;
@@ -318,6 +326,7 @@ const grammForm = (ru, art, rolle) => {
   if (rolle === 'gen') return istNomen(art) ? genitiv(ru, art) : null;
   if (rolle === 'dat') return istNomen(art) ? dativ(ru, art) : null;
   if (rolle === 'instr') return istNomen(art) ? instrumental(ru, art) : null;
+  if (rolle.indexOf('fut') === 0) return art === 'v' ? futur(ru, rolle.slice(3)) : null;
   if (rolle === 'plural') return istNomen(art) ? plural(ru, art) : null;
   if (rolle.indexOf('praet') === 0) return art === 'v' ? praeteritum(ru, rolle.slice(5)) : null;
   if (rolle.indexOf('praes') === 0) return art === 'v' ? praesens(ru, rolle.slice(5)) : null;
@@ -328,7 +337,10 @@ const GENUS_NAME = { m: 'männlich', w: 'weiblich', s: 'sächlich', p: 'Mehrzahl
 const GESCHLECHT_NAME = { m: 'männlich', w: 'weiblich', s: 'sächlich' };
 const ROLLEN = { akk: 'Akkusativ', praep: 'Präpositiv', gen: 'Genitiv', dat: 'Dativ',
   instr: 'Instrumental', plural: 'Mehrzahl' };
-PERSONEN.forEach((p) => { ROLLEN['praes' + p] = 'Präsens ' + p; });
+PERSONEN.forEach((p) => {
+  ROLLEN['praes' + p] = 'Präsens ' + p;
+  ROLLEN['fut' + p] = 'Zukunft ' + p;
+});
 GENERA.forEach((g) => {
   ROLLEN['praet' + g] = 'Vergangenheit ' + GENUS_NAME[g];
   ROLLEN['adj' + g] = 'Adjektiv ' + GENUS_NAME[g];
@@ -650,6 +662,7 @@ const verbenBlock = (name, obj) => {
     if (a.konj) teile.push('konj: ' + jsStr(a.konj));
     if (a.formen) teile.push('formen: [' + a.formen.map(jsStr).join(', ') + ']');
     if (a.praet) teile.push('praet: [' + a.praet.map(jsStr).join(', ') + ']');
+    if (a.aspekt) teile.push('aspekt: ' + jsStr(a.aspekt));
     zeilen.push('  ' + jsStr(k) + ': { ' + teile.join(', ') + ' }' +
       (i < schluessel.length - 1 ? ',' : ''));
   });
@@ -823,6 +836,7 @@ const jsonVerben = (obj) => {
     if (a.konj) teile.push('"konj": ' + jsonStr(a.konj));
     if (a.formen) teile.push('"formen": [' + a.formen.map(jsonStr).join(', ') + ']');
     if (a.praet) teile.push('"praet": [' + a.praet.map(jsonStr).join(', ') + ']');
+    if (a.aspekt) teile.push('"aspekt": ' + jsonStr(a.aspekt));
     zeilen.push('  ' + jsonStr(k) + ': { ' + teile.join(', ') + ' }' +
       (i < schluessel.length - 1 ? ',' : ''));
   });
@@ -909,7 +923,7 @@ if (!verben || typeof verben !== 'object' || Array.isArray(verben)) {
     if (!eintrag) return meckern(wo + ': steht nicht in vokabeln.json');
     if (wortart(eintrag) !== 'v') meckern(wo + ': ist dort kein Verb');
     if (!a || typeof a !== 'object' || Array.isArray(a)) return meckern(wo + ': erwartet ein Objekt');
-    const erlaubt = ['stamm', 'betont', 'konj', 'formen', 'praet'];
+    const erlaubt = ['stamm', 'betont', 'konj', 'formen', 'praet', 'aspekt'];
     Object.keys(a).forEach((k) => {
       if (!erlaubt.includes(k)) meckern(wo + ': unbekannte Angabe «' + k + '»');
     });
@@ -921,6 +935,12 @@ if (!verben || typeof verben !== 'object' || Array.isArray(verben)) {
     }
     if (a.konj !== undefined && a.konj !== 'i' && a.konj !== 'e') {
       meckern(wo + ': «konj» ist «i» oder «e»');
+    }
+    // **Nur «pf» steht da.** Unvollendet ist der Regelfall; ein Eintrag, der
+    // «ipf» sagt, sagt nichts. Und ein vollendetes Verb hat **kein Präsens** —
+    // «скажу» ist Zukunft, nicht Gegenwart. Genau dafür steht die Angabe.
+    if (a.aspekt !== undefined && a.aspekt !== 'pf') {
+      meckern(wo + ': «aspekt» steht nur da, wenn es «pf» ist');
     }
     // Die Vergangenheit steht getrennt: Sie folgt einer eigenen Regel und
     // stimmt bei den meisten Verben, auch wenn das Präsens abweicht.
@@ -938,7 +958,9 @@ if (!verben || typeof verben !== 'object' || Array.isArray(verben)) {
     }
     // Die Probe aufs Exempel: Was liefert die blanke Regel ohne diesen Eintrag?
     // Kommt dasselbe heraus, sagt der Eintrag nichts — dann weg damit.
-    const nurPraet = Object.keys(a).length === 1 && a.praet !== undefined;
+    // «praet» und «aspekt» sagen etwas über das Verb, ohne das Präsens zu
+    // ändern — sie dürfen darum allein stehen.
+    const nurPraet = Object.keys(a).every((k) => k === 'praet' || k === 'aspekt');
     const mit = verbBauMit(ru, verben);
     const ohne = verbBauMit(ru, { ...verben, [ru]: undefined });
     if (!nurPraet && mit && ohne && mit.join(' ') === ohne.join(' ')) {
@@ -1002,7 +1024,7 @@ if (!nomen || typeof nomen !== 'object' || Array.isArray(nomen)) {
 // zum Entdecken samt Deutungen, die Regel selbst, eine Tabelle und ein
 // Merksatz. Die Aufgabenart verweist auf eine Rolle, die die Maschine kennt.
 const AUFGABEN = ['geschlecht', 'akk', 'praes', 'ichform', 'praep',
-  'gen', 'dat', 'instr', 'plural', 'praet', 'adj'];
+  'gen', 'dat', 'instr', 'plural', 'praet', 'fut', 'adj'];
 const verbKlasse = (ru) => {
   if (/ться$/.test(ru)) return verbKlasse(ru.slice(0, -2));
   const eigen = verben[ru] || null;
@@ -1143,7 +1165,14 @@ if (!Array.isArray(grammatik) || grammatik.length === 0) {
           }
           return;
         }
-        if (verben[w]) meckern(wo + ': Beispiel «' + w + '» hat einen eigenen Stamm — nicht herleitbar');
+        // **Ein vollendetes Verb hat kein Präsens.** «скажу» heißt «ich werde
+        // sagen», nicht «ich sage» — es als Präsensbeispiel zu führen wäre
+        // eine Falschaussage, keine Schwierigkeit.
+        if (verben[w] && verben[w].aspekt === 'pf') {
+          meckern(wo + ': Beispiel «' + w + '» ist vollendet — es hat kein Präsens');
+        } else if (verben[w]) {
+          meckern(wo + ': Beispiel «' + w + '» hat einen eigenen Stamm — nicht herleitbar');
+        }
         if (b.klasse && klasse !== b.klasse) {
           meckern(wo + ': Beispiel «' + w + '» gehört zur ' + klasse + '-Reihe');
         }

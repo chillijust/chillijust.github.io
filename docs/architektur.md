@@ -1191,6 +1191,32 @@ Die Personalpronomen (`я → мне`, `он → ему`, …) haben eigene Form
 verrät. Sie stehen in der Fußnote des Bausteins und werden **nicht abgefragt** — erklären
 und abfragen sind zwei Dinge.
 
+### Die Zukunft — und warum быть kein Präsens bekommt
+
+`grammForm(ru, 'v', 'fut1s')` liefert «буду читать»: `быть` in der Person, dahinter die
+**unveränderte** Grundform. Nur der Helfer beugt sich. Das ist die einfachste Zeit des
+Russischen — und der einzige Ort, an dem `быть` überhaupt eine Form hat.
+
+**`быть` bekommt darum nie ein `formen`-Feld in `verben.json`.** Stünde dort `буду`,
+behauptete `praesens('быть', '1s')` eine Gegenwart, die es im Russischen nicht gibt: «буду»
+ist Zukunft. Die Suite `lehrplan` prüft das ausdrücklich.
+
+### Der Aspekt — eine Angabe, die eine Falschaussage verhindert
+
+`data/verben.json` führt `aspekt: "pf"` — **nur bei den vollendeten Verben**, denn
+unvollendet ist der Regelfall, und ein Eintrag, der «ipf» sagt, sagt nichts. `perfektiv()`
+schließt sie aus **Präsens, Ich-Form und Zukunft** aus:
+
+> **Ein vollendetes Verb hat kein Präsens.** «скажу» heißt «ich werde sagen», nicht «ich
+> sage», und «буду сказать» gibt es nicht.
+
+Der Build prüft dasselbe für die `beispiele` der Bausteine — mit eigener Fehlermeldung,
+damit der Grund dasteht und nicht bloß das Symptom.
+
+**Eine Aspektübung gibt es nicht**, und das ist Absicht: Im ganzen Wortschatz stehen genau
+zwei vollendete Verben (`сказать`, `встретить`). Eine Übung über Aspektpaare bräuchte
+Paare; sie zu zweit zu bauen wäre eine Attrappe (ADR 0057).
+
 ### Der Instrumental — und die einzige Endung, die an der Betonung hängt
 
 `grammForm(ru, art, 'instr')` rechnet Werkzeug und Begleitung: männlich und sächlich -ом,

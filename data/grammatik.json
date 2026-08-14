@@ -206,7 +206,7 @@
     ],
     "merksatz": "e-Reihe oder i-Reihe: Der Infinitiv entscheidet, nicht die Person.",
     "fussnote": "Nach к г х ж ч ш щ steht -у und -ат statt -ю und -ят — учу, учат. Auch das ist Rechtschreibung, keine Ausnahme.",
-    "beispiele": ["говорить", "любить", "учить", "смотреть", "видеть", "платить", "готовить", "стоить", "встретить", "звонить", "ходить", "носить", "просить", "сидеть", "строить", "помнить"]
+    "beispiele": ["говорить", "любить", "учить", "смотреть", "видеть", "платить", "готовить", "стоить", "звонить", "ходить", "носить", "просить", "сидеть", "строить", "помнить"]
   },
   {
     "id": "ichform",
@@ -227,7 +227,7 @@
     ],
     "merksatz": "Ein einziger Laut kippt, und nur in der Ich-Form.",
     "fussnote": "Das ist keine Unregelmäßigkeit, sondern Bequemlichkeit: Zwei Laute, die schlecht nebeneinander liegen, weichen einander aus. Wer die Regel hat, muss люблю nicht auswendig lernen.",
-    "beispiele": ["любить", "готовить", "платить", "видеть", "встретить", "спать", "ходить", "носить", "просить", "сидеть"]
+    "beispiele": ["любить", "готовить", "платить", "видеть", "спать", "ходить", "носить", "просить", "сидеть"]
   },
   {
     "id": "praeteritum",
@@ -248,5 +248,26 @@
     "merksatz": "Im Präsens zählt die Person, in der Vergangenheit das Geschlecht.",
     "fussnote": "Drei Verben gehen eigene Wege, weil sie nicht auf -ть enden: идти → шёл, шла; есть → ел, ела; мочь → мог, могла. Wer die Regel hat, sieht ihnen sofort an, dass sie Ausnahmen sind.",
     "beispiele": ["читать", "работать", "знать", "делать", "думать", "гулять", "играть", "слушать", "понимать", "говорить", "смотреть", "любить", "учить", "жить", "писать", "спать", "пить", "хотеть", "ехать", "готовить", "отвечать", "спрашивать", "открывать", "начинать", "звонить", "ходить", "просить", "сидеть", "покупать", "помогать"]
+  },
+  {
+    "id": "futur",
+    "name": "Zukunft",
+    "kurz": "Was morgen sein wird",
+    "aufgabe": "fut",
+    "frage": "«читать» wird zu «буду читать», «работать» zu «буду работать». Was passiert hier?",
+    "deutungen": ["Ein Helfer tritt davor, die Grundform bleibt unverändert", "Das Verb bekommt eine eigene Zukunftsendung", "Die Grundform allein reicht — der Zusammenhang sagt, wann"],
+    "richtig": 0,
+    "regel": "Die Zukunft ist zusammengesetzt: быть in der passenden Person, dahinter die unveränderte Grundform. Nur der Helfer wird gebeugt — буду, будешь, будет, будем, будете, будут. Das ist die einfachste Zeit des Russischen, und sie ist zugleich der einzige Ort, an dem быть überhaupt eine Form hat: Ein Präsens von «sein» gibt es nicht.",
+    "tabelle": [
+      ["я", "буду", "буду читать"],
+      ["ты", "будешь", "будешь читать"],
+      ["он · она", "будет", "будет работать"],
+      ["мы", "будем", "будем гулять"],
+      ["вы", "будете", "будете жить"],
+      ["они", "будут", "будут играть"]
+    ],
+    "merksatz": "Der Helfer beugt sich, die Grundform bleibt stehen.",
+    "fussnote": "Das gilt nur für unvollendete Verben. Ein vollendetes bildet seine Zukunft mit den Präsensendungen: «скажу» heißt «ich werde sagen», nicht «ich sage» — darum kommt es hier gar nicht vor. Und «Я был дома» ist die Vergangenheit von sein, die es sehr wohl gibt.",
+    "beispiele": ["читать", "писать", "работать", "говорить", "жить", "играть", "думать", "слушать", "смотреть", "гулять", "делать", "знать", "отдыхать", "ждать", "строить", "носить"]
   }
 ]

@@ -1,6 +1,6 @@
 # 0057 · Die Sätze tragen den Lehrplan
 
-**Stand:** angenommen · 2026-08-14 · Etappe 6 der Umstellung, Portionen 6a und 6b
+**Stand:** angenommen · 2026-08-14 · Etappe 6 der Umstellung, alle drei Portionen
 
 ## Ausgangslage
 
@@ -114,3 +114,37 @@ erst auffiel, als der Instrumental jedes Nomen durchgerechnet hat.
 
 Damit ist der Zweck von 6c ein anderer als geplant: Die Abdeckung ist erreicht, es geht
 dort nur noch um **Aspektpaare und Futur** — Grammatik, keine Reichweite.
+
+
+## Nachtrag · Portion 6c (2.2.0)
+
+Der Zweck war ein anderer als geplant: Die Abdeckung stand schon, es ging nur noch um
+**Aspektpaare und Futur**.
+
+**Die Zukunft** ist als dreizehnter Baustein dazugekommen — und sie ist die einfachste
+Zeit des Russischen: `быть` in der Person, dahinter die unveränderte Grundform. Nur der
+Helfer beugt sich. Neue Rollen `fut1s` … `fut3p` in `grammForm()`, in beiden Fassungen.
+
+Sie ist zugleich der einzige Ort, an dem `быть` überhaupt eine Form hat — ein Präsens von
+«sein» gibt es im Russischen nicht. Die Suite prüft darum ausdrücklich, dass `быть` **kein**
+`formen`-Feld in `verben.json` bekommt: Stünde dort `буду`, behauptete die App eine
+Gegenwart, die es nicht gibt.
+
+**Die Aspektpaare sind nicht gekommen — und das ist kein Versäumnis, sondern ein Befund.**
+Im ganzen Wortschatz stehen genau **zwei** vollendete Verben: `сказать` und `встретить`.
+Eine Übung über den Aspekt bräuchte Paare (`покупать` / `купить`), und die gibt es nicht;
+sie zu zweit zu bauen wäre eine Attrappe. Was der Aspekt stattdessen tut, ist **eine
+Falschaussage verhindern**:
+
+> **Ein vollendetes Verb hat kein Präsens.** «скажу» heißt «ich werde sagen», nicht «ich
+> sage». Vor dieser Portion konnte «встретить» als Präsensbeispiel auftauchen — der Build
+> hat es beim Einführen der Aspektangabe selbst gemeldet, mit der falschen Begründung
+> («eigener Stamm»), die jetzt die richtige ist.
+
+Der Aspekt steht darum als `aspekt: "pf"` in `verben.json` — **nur bei den vollendeten**,
+denn unvollendet ist der Regelfall, und ein Eintrag, der «ipf» sagt, sagt nichts. Er
+schließt sie aus Präsens, Ich-Form und Zukunft aus; der Build prüft dasselbe für die
+Beispiele der Bausteine.
+
+Eine echte Aspektübung gehört damit an eine Stelle, an der der Wortschatz wächst — nicht
+in diese Etappe. Das ist in `Umstellung_Umsetzen.md` unter «Nicht im Plan» vermerkt.

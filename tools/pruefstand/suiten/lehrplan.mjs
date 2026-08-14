@@ -188,6 +188,45 @@ try {
     grammForm('кофе', 'm', 'instr') === 'кофе' && grammForm('кофе', 'm', 'gen') === 'кофе',
     grammForm('кофе', 'm', 'gen'));
 
+  // ── E3 · Die Zukunft und der Aspekt ───────────────────────
+  pruefe('E23 es gibt einen Zukunft-Baustein',
+    GRAMMATIK.some(function (b) { return b.aufgabe === 'fut'; }));
+  pruefe('E24 der Helfer beugt sich, die Grundform bleibt',
+    grammForm('читать', 'v', 'fut1s') === 'буду читать' &&
+    grammForm('читать', 'v', 'fut3p') === 'будут читать',
+    grammForm('читать', 'v', 'fut1s'));
+  pruefe('E25 alle sechs Personen sind da', (function () {
+    var alleF = PERSONEN.map(function (p) { return grammForm('жить', 'v', 'fut' + p); });
+    return alleF.every(function (f) { return !!f; }) &&
+      alleF.filter(function (f, i) { return alleF.indexOf(f) !== i; }).length === 0;
+  })());
+  pruefe('E26 ein Nomen hat keine Zukunft', grammForm('книга', 'w', 'fut1s') === null);
+
+  // **Ein vollendetes Verb hat kein Präsens und keine zusammengesetzte
+  // Zukunft** — «скажу» heißt «ich werde sagen», nicht «ich sage».
+  pruefe('E27 der Aspekt ist vermerkt', perfektiv('сказать') && perfektiv('встретить'));
+  pruefe('E28 unvollendet ist der Regelfall',
+    !perfektiv('читать') && !perfektiv('работать') && !perfektiv('покупать'));
+  var futB = GRAMMATIK.filter(function (b) { return b.aufgabe === 'fut'; })[0];
+  var praesB = GRAMMATIK.filter(function (b) { return b.aufgabe === 'praes'; })[0];
+  pruefe('E29 kein vollendetes Verb im Zukunftsvorrat',
+    gramWortPool(futB).every(function (v) { return !perfektiv(v.ru); }),
+    gramWortPool(futB).filter(function (v) { return perfektiv(v.ru); })
+      .map(function (v) { return v.ru; }).join(' '));
+  pruefe('E30 und keines im Präsensvorrat',
+    gramWortPool(praesB).every(function (v) { return !perfektiv(v.ru); }),
+    gramWortPool(praesB).filter(function (v) { return perfektiv(v.ru); })
+      .map(function (v) { return v.ru; }).join(' '));
+  pruefe('E31 auch nicht unter den Beispielen',
+    GRAMMATIK.every(function (b) {
+      if (b.aufgabe !== 'praes' && b.aufgabe !== 'ichform' && b.aufgabe !== 'fut') return true;
+      return b.beispiele.every(function (w) { return !perfektiv(w); });
+    }));
+  // **быть hat kein Präsens** — «буду» ist Zukunft, und die App behauptet
+  // nirgends etwas anderes.
+  pruefe('E32 быть bekommt kein Präsens angedichtet',
+    !VERBEN['быть'] || !VERBEN['быть'].formen);
+
   // ── F · Der Jubel behauptet keine Zahl, die er nicht kennt ─
   var festeZahl = JUBEL.regel.filter(function (paar) {
     return /zehn|ZEHN|elf|ELF/.test(paar[0] + paar[1]);

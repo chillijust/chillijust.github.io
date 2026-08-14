@@ -2170,6 +2170,7 @@ var SENTENCES = [
   { ru: 'Пятьдесят и пятьдесят — это сто.', de: 'Fünfzig und fünfzig ist hundert.', stufe: 2, benoetigt: ['пятьдесят', 'это', 'сто'] },
   { ru: 'Ничего, может быть завтра.', de: 'Macht nichts, vielleicht morgen.', stufe: 2, benoetigt: ['ничего', 'может быть', 'завтра'] },
   { ru: 'Сегодня плохо, но завтра хорошо.', de: 'Heute ist es schlecht, aber morgen gut.', stufe: 2, benoetigt: ['сегодня', 'плохо', 'но', 'завтра', 'хорошо'] },
+  { ru: 'Завтра я буду работать.', de: 'Morgen werde ich arbeiten.', stufe: 2, benoetigt: ['завтра', 'я', 'быть', 'работать'], formen: { 'буду работать': ['работать', 'fut1s'] } },
   { ru: 'Я пью кефир утром.', de: 'Ich trinke morgens Kefir.', stufe: 2, benoetigt: ['я', 'пить', 'кефир', 'утро'], formen: { 'пью': ['пить', 'praes1s'], 'утром': ['утро', 'instr'] } },
   { ru: 'Дедушка пьёт квас каждый день.', de: 'Opa trinkt jeden Tag Kwas.', stufe: 2, benoetigt: ['дедушка', 'пить', 'квас', 'каждый', 'день'], formen: { 'пьёт': ['пить', 'praes3s'] } },
   { ru: 'Вечером мы пьём лимонад.', de: 'Abends trinken wir Limonade.', stufe: 2, benoetigt: ['вечер', 'мы', 'пить', 'лимонад'], formen: { 'Вечером': ['вечер', 'instr'], 'пьём': ['пить', 'praes1p'] } },
@@ -2188,6 +2189,7 @@ var SENTENCES = [
   { ru: 'Я не люблю серый цвет.', de: 'Ich mag die Farbe Grau nicht.', stufe: 2, benoetigt: ['я', 'не', 'любить', 'серый', 'цвет'], formen: { 'люблю': ['любить', 'praes1s'] } },
   { ru: 'Коричневый шкаф в комнате.', de: 'Der braune Schrank steht im Zimmer.', stufe: 2, benoetigt: ['коричневый', 'шкаф', 'в', 'комната'], formen: { 'комнате': ['комната', 'praep'] } },
   { ru: 'Он часто пишет письма бабушке.', de: 'Er schreibt der Oma oft Briefe.', stufe: 2, benoetigt: ['он', 'часто', 'писать', 'письмо', 'бабушка'], formen: { 'пишет': ['писать', 'praes3s'] } },
+  { ru: 'Они будут играть долго.', de: 'Sie werden lange spielen.', stufe: 2, benoetigt: ['они', 'быть', 'играть', 'долго'], formen: { 'будут играть': ['играть', 'fut3p'] } },
   { ru: 'Я иду в парк с братом.', de: 'Ich gehe mit meinem Bruder in den Park.', stufe: 2, benoetigt: ['я', 'идти', 'в', 'парк', 'с', 'брат'], formen: { 'иду': ['идти', 'praes1s'], 'братом': ['брат', 'instr'] } },
   { ru: 'На рынке фрукты и овощи.', de: 'Auf dem Markt gibt es Obst und Gemüse.', stufe: 2, benoetigt: ['на', 'рынок', 'фрукты', 'и', 'овощи'], formen: { 'рынке': ['рынок', 'praep'] } },
   { ru: 'Мы учимся в университете.', de: 'Wir studieren an der Universität.', stufe: 2, benoetigt: ['мы', 'учиться', 'в', 'университет'], formen: { 'учимся': ['учиться', 'praes1p'], 'университете': ['университет', 'praep'] } },
@@ -2258,6 +2260,7 @@ var SENTENCES = [
   { ru: 'Месяц и неделя — это тоже время.', de: 'Monat und Woche sind auch Zeit.', stufe: 2, benoetigt: ['месяц', 'и', 'неделя', 'это', 'тоже', 'время'] },
   { ru: 'Сколько стоит этот билет?', de: 'Wie viel kostet dieses Ticket?', stufe: 2, benoetigt: ['сколько', 'стоить', 'этот', 'билет'], formen: { 'стоит': ['стоить', 'praes3s'] } },
   { ru: 'Моя сестра живёт в Москве.', de: 'Meine Schwester wohnt in Moskau.', stufe: 2, benoetigt: ['моя', 'сестра', 'жить', 'в', 'Москва'], formen: { 'живёт': ['жить', 'praes3s'], 'Москве': ['Москва', 'praep'] } },
+  { ru: 'Он будет жить в Москве.', de: 'Er wird in Moskau leben.', stufe: 2, benoetigt: ['он', 'быть', 'жить', 'в', 'Москва'], formen: { 'будет жить': ['жить', 'fut3s'], 'Москве': ['Москва', 'praep'] } },
   { ru: 'Зимой в России идёт снег.', de: 'Im Winter schneit es in Russland.', stufe: 2, benoetigt: ['зима', 'в', 'Россия', 'идти', 'снег'], formen: { 'идёт': ['идти', 'praes3s'], 'России': ['Россия', 'praep'] } },
   { ru: 'Лошадь и корова живут в деревне.', de: 'Pferd und Kuh leben im Dorf.', stufe: 2, benoetigt: ['лошадь', 'и', 'корова', 'жить', 'в', 'деревня'], formen: { 'живут': ['жить', 'praes3p'], 'деревне': ['деревня', 'praep'] } },
   { ru: 'Он строит дом в деревне.', de: 'Er baut ein Haus im Dorf.', stufe: 2, benoetigt: ['он', 'строить', 'дом', 'в', 'деревня'], formen: { 'строит': ['строить', 'praes3s'], 'деревне': ['деревня', 'praep'] } },
@@ -2269,6 +2272,7 @@ var SENTENCES = [
   { ru: 'Остров в море.', de: 'Die Insel liegt im Meer.', stufe: 2, benoetigt: ['остров', 'в', 'море'], formen: { 'море': ['море', 'praep'] } },
   { ru: 'Я знаю, что ты делаешь.', de: 'Ich weiß, was du machst.', stufe: 3, benoetigt: ['я', 'знать', 'что', 'ты', 'делать'], formen: { 'знаю': ['знать', 'praes1s'], 'делаешь': ['делать', 'praes2s'] } },
   { ru: 'Тысяча — это очень много, ноль — это мало.', de: 'Tausend ist sehr viel, null ist wenig.', stufe: 3, benoetigt: ['тысяча', 'это', 'очень', 'много', 'ноль', 'мало'] },
+  { ru: 'Что ты будешь делать завтра?', de: 'Was wirst du morgen machen?', stufe: 3, benoetigt: ['что', 'ты', 'быть', 'делать', 'завтра'], formen: { 'будешь делать': ['делать', 'fut2s'] } },
   { ru: 'Каждое утро она пьёт кофе и читает новости.', de: 'Jeden Morgen trinkt sie Kaffee und liest die Nachrichten.', stufe: 3, benoetigt: ['каждый', 'утро', 'она', 'пить', 'кофе', 'и', 'читать', 'новости'], formen: { 'пьёт': ['пить', 'praes3s'], 'читает': ['читать', 'praes3s'] } },
   { ru: 'В понедельник и вторник я работаю.', de: 'Am Montag und Dienstag arbeite ich.', stufe: 3, benoetigt: ['в', 'понедельник', 'и', 'вторник', 'я', 'работать'], formen: { 'работаю': ['работать', 'praes1s'] } },
   { ru: 'В субботу и воскресенье мы дома.', de: 'Am Samstag und Sonntag sind wir zu Hause.', stufe: 3, benoetigt: ['в', 'суббота', 'воскресенье', 'мы', 'дом'], formen: { 'субботу': ['суббота', 'akk'] } },
@@ -2285,6 +2289,7 @@ var SENTENCES = [
   { ru: 'Подруга ждёт сына у школы.', de: 'Die Freundin wartet vor der Schule auf den Sohn.', stufe: 3, benoetigt: ['подруга', 'ждать', 'сын', 'у', 'школа'], formen: { 'ждёт': ['ждать', 'praes3s'], 'сына': ['сын', 'akk'], 'школы': ['школа', 'gen'] } },
   { ru: 'Я жду друга у метро.', de: 'Ich warte an der U-Bahn auf einen Freund.', stufe: 3, benoetigt: ['я', 'ждать', 'друг', 'у', 'метро'], formen: { 'жду': ['ждать', 'praes1s'], 'друга': ['друг', 'akk'] } },
   { ru: 'Бабушка готовит пирог с яблоком.', de: 'Oma backt einen Kuchen mit Apfel.', stufe: 3, benoetigt: ['бабушка', 'готовить', 'пирог', 'с', 'яблоко'], formen: { 'готовит': ['готовить', 'praes3s'], 'яблоком': ['яблоко', 'instr'] } },
+  { ru: 'Вечером мы будем гулять в парке.', de: 'Abends werden wir im Park spazieren gehen.', stufe: 3, benoetigt: ['вечер', 'мы', 'быть', 'гулять', 'в', 'парк'], formen: { 'Вечером': ['вечер', 'instr'], 'будем гулять': ['гулять', 'fut1p'], 'парке': ['парк', 'praep'] } },
   { ru: 'Светлая комната мне нравится.', de: 'Das helle Zimmer gefällt mir.', stufe: 3, benoetigt: ['светлый', 'комната', 'я', 'нравиться'], formen: { 'Светлая': ['светлый', 'adjw'], 'нравится': ['нравиться', 'praes3s'] } },
   { ru: 'Вечером мы встретили друзей в ресторане.', de: 'Am Abend trafen wir Freunde im Restaurant.', stufe: 3, benoetigt: ['вечер', 'мы', 'встретить', 'друг', 'в', 'ресторан'], formen: { 'ресторане': ['ресторан', 'praep'] } },
   { ru: 'Мы начинаем работу утром.', de: 'Wir beginnen die Arbeit morgens.', stufe: 3, benoetigt: ['мы', 'начинать', 'работа', 'утро'], formen: { 'начинаем': ['начинать', 'praes1p'], 'работу': ['работа', 'akk'], 'утром': ['утро', 'instr'] } },
@@ -2292,15 +2297,18 @@ var SENTENCES = [
   { ru: 'Кожа на руке очень светлая.', de: 'Die Haut an der Hand ist sehr hell.', stufe: 3, benoetigt: ['кожа', 'на', 'рука', 'очень', 'светлый'], formen: { 'руке': ['рука', 'praep'], 'светлая': ['светлый', 'adjw'] } },
   { ru: 'Пальто дорогое, но свитер дешёвый.', de: 'Der Mantel ist teuer, aber der Pullover ist billig.', stufe: 3, benoetigt: ['пальто', 'дорогой', 'но', 'свитер', 'дешёвый'], formen: { 'дорогое': ['дорогой', 'adjs'] } },
   { ru: 'В полдень солнце очень яркое.', de: 'Mittags ist die Sonne sehr hell.', stufe: 3, benoetigt: ['в', 'полдень', 'солнце', 'очень', 'яркий'], formen: { 'яркое': ['яркий', 'adjs'] } },
+  { ru: 'Вчера был дождь, завтра будет снег.', de: 'Gestern gab es Regen, morgen wird es Schnee geben.', stufe: 3, benoetigt: ['вчера', 'быть', 'дождь', 'завтра', 'снег'], formen: { 'был': ['быть', 'praetm'] } },
   { ru: 'Дождь, ветер и туман — плохая погода.', de: 'Regen, Wind und Nebel — schlechtes Wetter.', stufe: 3, benoetigt: ['дождь', 'ветер', 'и', 'туман', 'плохой', 'погода'], formen: { 'плохая': ['плохой', 'adjw'] } },
   { ru: 'Зимой мороз, летом жарко.', de: 'Im Winter Frost, im Sommer heiß.', stufe: 3, benoetigt: ['зима', 'мороз', 'лето', 'жарко'], formen: { 'Зимой': ['зима', 'instr'], 'летом': ['лето', 'instr'] } },
   { ru: 'Мышь маленькая, но слон большой.', de: 'Die Maus ist klein, aber der Elefant ist groß.', stufe: 3, benoetigt: ['мышь', 'маленький', 'но', 'слон', 'большой'], formen: { 'маленькая': ['маленький', 'adjw'] } },
   { ru: 'Он не только говорит по-русски, но и пишет письма.', de: 'Er spricht nicht nur Russisch, sondern schreibt auch Briefe.', stufe: 3, benoetigt: ['он', 'не', 'только', 'говорить', 'русский', 'но', 'и', 'писать', 'письмо'], formen: { 'говорит': ['говорить', 'praes3s'], 'пишет': ['писать', 'praes3s'] } },
   { ru: 'Я думаю, что русский язык трудный, но очень интересный.', de: 'Ich denke, dass Russisch schwierig, aber sehr interessant ist.', stufe: 3, benoetigt: ['я', 'думать', 'что', 'русский', 'язык', 'трудный', 'но', 'очень', 'интересный'], formen: { 'думаю': ['думать', 'praes1s'] } },
+  { ru: 'Вы будете слушать музыку?', de: 'Werden Sie Musik hören?', stufe: 3, benoetigt: ['вы', 'быть', 'слушать', 'музыка'], formen: { 'будете слушать': ['слушать', 'fut2p'], 'музыку': ['музыка', 'akk'] } },
   { ru: 'Компьютер и ручка на столе в офисе.', de: 'Computer und Stift liegen auf dem Tisch im Büro.', stufe: 3, benoetigt: ['компьютер', 'и', 'ручка', 'на', 'стол', 'в', 'офис'], formen: { 'столе': ['стол', 'praep'], 'офисе': ['офис', 'praep'] } },
   { ru: 'Учитель говорил медленно, и все поняли.', de: 'Der Lehrer sprach langsam, und alle verstanden.', stufe: 3, benoetigt: ['учитель', 'говорить', 'медленный', 'и', 'все', 'понимать'] },
   { ru: 'Учителю нравится этот вопрос.', de: 'Dem Lehrer gefällt diese Frage.', stufe: 3, benoetigt: ['учитель', 'нравиться', 'этот', 'вопрос'], formen: { 'Учителю': ['учитель', 'dat'], 'нравится': ['нравиться', 'praes3s'] } },
   { ru: 'Моя сестра хочет быть учителем.', de: 'Meine Schwester will Lehrerin werden.', stufe: 3, benoetigt: ['моя', 'сестра', 'хотеть', 'быть', 'учитель'], formen: { 'хочет': ['хотеть', 'praes3s'], 'учителем': ['учитель', 'instr'] } },
+  { ru: 'Учитель сказал, что мы будем читать.', de: 'Der Lehrer sagte, dass wir lesen werden.', stufe: 3, benoetigt: ['учитель', 'сказать', 'что', 'мы', 'быть', 'читать'], formen: { 'сказал': ['сказать', 'praetm'], 'будем читать': ['читать', 'fut1p'] } },
   { ru: 'Учитель спрашивает, студент отвечает.', de: 'Der Lehrer fragt, der Student antwortet.', stufe: 3, benoetigt: ['учитель', 'спрашивать', 'студент', 'отвечать'], formen: { 'спрашивает': ['спрашивать', 'praes3s'], 'отвечает': ['отвечать', 'praes3s'] } },
   { ru: 'Врач сказал, что нужно спать и не работать.', de: 'Der Arzt sagte, dass man schlafen und nicht arbeiten muss.', stufe: 3, benoetigt: ['врач', 'сказать', 'что', 'нужно', 'спать', 'и', 'не', 'работать'] },
   { ru: 'Мой папа работает врачом.', de: 'Mein Papa arbeitet als Arzt.', stufe: 3, benoetigt: ['мой', 'папа', 'работать', 'врач'], formen: { 'работает': ['работать', 'praes3s'], 'врачом': ['врач', 'instr'] } },
@@ -2588,7 +2596,7 @@ var GRAMMATIK = [
     tabelle: [['я', '-ю / -у', 'говорить → говорю'], ['ты', '-ишь', 'смотреть → смотришь'], ['он · она', '-ит', 'стоить → стоит'], ['мы', '-им', 'смотреть → смотрим'], ['вы', '-ите', 'любить → любите'], ['они', '-ят / -ат', 'учить → учат']],
     merksatz: 'e-Reihe oder i-Reihe: Der Infinitiv entscheidet, nicht die Person.',
     fussnote: 'Nach к г х ж ч ш щ steht -у und -ат statt -ю und -ят — учу, учат. Auch das ist Rechtschreibung, keine Ausnahme.',
-    beispiele: ['говорить', 'любить', 'учить', 'смотреть', 'видеть', 'платить', 'готовить', 'стоить', 'встретить', 'звонить', 'ходить', 'носить', 'просить', 'сидеть', 'строить', 'помнить']
+    beispiele: ['говорить', 'любить', 'учить', 'смотреть', 'видеть', 'платить', 'готовить', 'стоить', 'звонить', 'ходить', 'носить', 'просить', 'сидеть', 'строить', 'помнить']
   },
   {
     id: 'ichform', name: 'Die Ich-Form', kurz: 'Wo der Stamm kippt', aufgabe: 'ichform',
@@ -2599,7 +2607,7 @@ var GRAMMATIK = [
     tabelle: [['б п в ф м', '+ л', 'любить → люблю'], ['т', 'wird ч', 'платить → плачу'], ['д', 'wird ж', 'видеть → вижу'], ['с · з · г · х · ст', 'wandeln ebenso', 'zu ш · ж · ж · ш · щ'], ['ты · он · мы · вы · они', 'bleiben', 'любишь · любит · любят']],
     merksatz: 'Ein einziger Laut kippt, und nur in der Ich-Form.',
     fussnote: 'Das ist keine Unregelmäßigkeit, sondern Bequemlichkeit: Zwei Laute, die schlecht nebeneinander liegen, weichen einander aus. Wer die Regel hat, muss люблю nicht auswendig lernen.',
-    beispiele: ['любить', 'готовить', 'платить', 'видеть', 'встретить', 'спать', 'ходить', 'носить', 'просить', 'сидеть']
+    beispiele: ['любить', 'готовить', 'платить', 'видеть', 'спать', 'ходить', 'носить', 'просить', 'сидеть']
   },
   {
     id: 'praeteritum', name: 'Vergangenheit', kurz: 'Was gestern war', aufgabe: 'praet',
@@ -2610,6 +2618,16 @@ var GRAMMATIK = [
     merksatz: 'Im Präsens zählt die Person, in der Vergangenheit das Geschlecht.',
     fussnote: 'Drei Verben gehen eigene Wege, weil sie nicht auf -ть enden: идти → шёл, шла; есть → ел, ела; мочь → мог, могла. Wer die Regel hat, sieht ihnen sofort an, dass sie Ausnahmen sind.',
     beispiele: ['читать', 'работать', 'знать', 'делать', 'думать', 'гулять', 'играть', 'слушать', 'понимать', 'говорить', 'смотреть', 'любить', 'учить', 'жить', 'писать', 'спать', 'пить', 'хотеть', 'ехать', 'готовить', 'отвечать', 'спрашивать', 'открывать', 'начинать', 'звонить', 'ходить', 'просить', 'сидеть', 'покупать', 'помогать']
+  },
+  {
+    id: 'futur', name: 'Zukunft', kurz: 'Was morgen sein wird', aufgabe: 'fut',
+    frage: '«читать» wird zu «буду читать», «работать» zu «буду работать». Was passiert hier?',
+    deutungen: ['Ein Helfer tritt davor, die Grundform bleibt unverändert', 'Das Verb bekommt eine eigene Zukunftsendung', 'Die Grundform allein reicht — der Zusammenhang sagt, wann'], richtig: 0,
+    regel: 'Die Zukunft ist zusammengesetzt: быть in der passenden Person, dahinter die unveränderte Grundform. Nur der Helfer wird gebeugt — буду, будешь, будет, будем, будете, будут. Das ist die einfachste Zeit des Russischen, und sie ist zugleich der einzige Ort, an dem быть überhaupt eine Form hat: Ein Präsens von «sein» gibt es nicht.',
+    tabelle: [['я', 'буду', 'буду читать'], ['ты', 'будешь', 'будешь читать'], ['он · она', 'будет', 'будет работать'], ['мы', 'будем', 'будем гулять'], ['вы', 'будете', 'будете жить'], ['они', 'будут', 'будут играть']],
+    merksatz: 'Der Helfer beugt sich, die Grundform bleibt stehen.',
+    fussnote: 'Das gilt nur für unvollendete Verben. Ein vollendetes bildet seine Zukunft mit den Präsensendungen: «скажу» heißt «ich werde sagen», nicht «ich sage» — darum kommt es hier gar nicht vor. Und «Я был дома» ist die Vergangenheit von sein, die es sehr wohl gibt.',
+    beispiele: ['читать', 'писать', 'работать', 'говорить', 'жить', 'играть', 'думать', 'слушать', 'смотреть', 'гулять', 'делать', 'знать', 'отдыхать', 'ждать', 'строить', 'носить']
   }
 ];
 
@@ -2626,9 +2644,10 @@ var VERBEN = {
   'спать': { stamm: 'сп', konj: 'i' },
   'писать': { stamm: 'пиш' },
   'искать': { stamm: 'ищ' },
-  'сказать': { stamm: 'скаж' },
+  'сказать': { stamm: 'скаж', aspekt: 'pf' },
   'брать': { stamm: 'бер', betont: true },
-  'ждать': { stamm: 'жд', betont: true }
+  'ждать': { stamm: 'жд', betont: true },
+  'встретить': { aspekt: 'pf' }
 };
 
 var NOMEN = {
@@ -3573,6 +3592,22 @@ function verbIchWandel(ru) {
 }
 
 // Die eine Tür nach draußen. Rollen kommen einzeln dazu, je Baustein.
+// **Die zusammengesetzte Zukunft:** быть in der Person, dahinter die Grundform.
+// Sie gilt nur für **unvollendete** Verben. Ein vollendetes bildet seine Zukunft
+// mit den Präsensendungen — «скажу» heißt «ich werde sagen», nicht «ich sage».
+// Genau darum steht `быть` **nicht** mit Präsensformen in VERBEN: Ein Präsens
+// von быть gibt es im Russischen nicht, «буду» ist Zukunft.
+var FUTUR_HILF = ['буду', 'будешь', 'будет', 'будем', 'будете', 'будут'];
+function futur(ru, person) {
+  var i = PERSONEN.indexOf(person);
+  return i === -1 ? null : FUTUR_HILF[i] + ' ' + ru;
+}
+// Vollendet oder nicht. Unvollendet ist der Regelfall und steht darum nirgends.
+function perfektiv(ru) {
+  var eigen = VERBEN[ru];
+  return !!(eigen && eigen.aspekt === 'pf');
+}
+
 function grammForm(ru, art, rolle) {
   if (rolle === 'akk') return istNomen(art) ? akkusativ(ru, art) : null;
   if (rolle === 'praep') return istNomen(art) ? praepositiv(ru, art) : null;
@@ -3583,6 +3618,7 @@ function grammForm(ru, art, rolle) {
   if (rolle.indexOf('praet') === 0) {
     return art === 'v' ? praeteritum(ru, rolle.slice(5)) : null;
   }
+  if (rolle.indexOf('fut') === 0) return art === 'v' ? futur(ru, rolle.slice(3)) : null;
   if (rolle.indexOf('praes') === 0) {
     if (art !== 'v') return null;
     return praesens(ru, rolle.slice(5));
@@ -3646,7 +3682,7 @@ var APP_STAND = '2026-08-14'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.1.0'; /* == VERSION == */
+var APP_VERSION = '2.2.0'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -8724,6 +8760,13 @@ function gramUpdate(b, richtig) {
 function gramVerbPasst(b, v) {
   if (v.art !== 'v') return false;
   if (/ться$/.test(v.ru)) return false;      // rückbezüglich — eigener Baustein
+  // **Ein vollendetes Verb hat kein Präsens und keine zusammengesetzte
+  // Zukunft.** «скажу» heißt «ich werde sagen»; es als Gegenwart abzufragen
+  // wäre eine Falschaussage, und «буду сказать» gibt es nicht.
+  if (perfektiv(v.ru) && (b.aufgabe === 'praes' || b.aufgabe === 'ichform' ||
+    b.aufgabe === 'fut')) return false;
+  // Die Zukunft braucht nur die Grundform — jedes unvollendete Verb taugt.
+  if (b.aufgabe === 'fut') return true;
   // Die Vergangenheit hat ihre eigene Regel: Sie greift auch bei Verben mit
   // eigenem Präsensstamm (писать → писал), aber nicht bei denen mit eigener
   // Vergangenheit (идти → шёл) und nicht bei denen ohne -ть.
@@ -8838,6 +8881,16 @@ function gramAblenker(ru, richtig) {
 
 // Ablenker fürs Präsens: dasselbe Verb in anderen Personen. Auch sie sind echte
 // Formen — wer sie wählt, hat nicht falsch gebaut, sondern die falsche Person.
+// Die Zukunft in den anderen Personen — falsch, aber plausibel gebaut.
+function gramAblenkerFutur(ru, richtig) {
+  var aus = [];
+  PERSONEN.forEach(function (p) {
+    var f = futur(ru, p);
+    if (f && f !== richtig && aus.indexOf(f) === -1) aus.push(f);
+  });
+  return shuffle(aus).slice(0, 3);
+}
+
 function gramAblenkerPerson(ru, richtig) {
   var formen = verbBau(ru) || [];
   var aus = [];
@@ -8910,6 +8963,21 @@ function gramFrageBauen() {
       baustein: b.id, art: 'ichform', wort: wort, person: '1s',
       von: praesens(wort.ru, '2s'), loesung: ich, tippen: tippen,
       optionen: shuffle([ich].concat(gramAblenkerIch(wort.ru, ich)))
+    };
+    return;
+  }
+  // Zukunft: dieselbe Auslosung wie beim Präsens, nur bleibt die Grundform
+  // stehen — gebeugt wird der Helfer.
+  if (b.aufgabe === 'fut') {
+    var fperson = b.person || PERSONEN[Math.floor(Math.random() * PERSONEN.length)];
+    if (gramQ && gramQ.person === fperson && !b.person) {
+      fperson = PERSONEN[(PERSONEN.indexOf(fperson) + 1 + Math.floor(Math.random() * 5)) % 6];
+    }
+    var fform = futur(wort.ru, fperson);
+    gramQ = {
+      baustein: b.id, art: 'fut', wort: wort, person: fperson,
+      von: wort.ru, loesung: fform, tippen: tippen,
+      optionen: shuffle([fform].concat(gramAblenkerFutur(wort.ru, fform)))
     };
     return;
   }
@@ -9036,7 +9104,7 @@ function gramEntdeckenWoerter(b) {
   var pool = gramWortPool(b);
   // Bei Verben gibt es kein Geschlecht zu mischen — den Gegensatz stellt
   // gramPaare() über Personen und Reihen her.
-  if (b.aufgabe === 'praes' || b.aufgabe === 'ichform' ||
+  if (b.aufgabe === 'praes' || b.aufgabe === 'ichform' || b.aufgabe === 'fut' ||
     b.aufgabe === 'praet' || b.aufgabe === 'adj') return pool.slice(0, 4);
   var nach = function (g) {
     return pool.filter(function (v) { return geschlecht(v.art) === g; });
@@ -9109,6 +9177,18 @@ function gramPaare(b) {
         links: eins2.ru + ' · ' + plural(mz.ru, mz.art), rechts: adjektiv(eins2.ru, 'p'), kyr: true
       });
     }
+    return aus;
+  }
+  // Zukunft: ein Verb in vier Personen — gebeugt wird der Helfer, die
+  // Grundform bleibt stehen. Genau das soll auffallen.
+  if (b.aufgabe === 'fut') {
+    var einsF = gramEntdeckenWoerter(b)[0];
+    if (!einsF) return aus;
+    ['1s', '2s', '3s', '3p'].forEach(function (p) {
+      aus.push({
+        links: einsF.ru + ' · ' + PERSON_NAME[p], rechts: futur(einsF.ru, p), kyr: true
+      });
+    });
     return aus;
   }
   if (b.aufgabe === 'praes') {
@@ -9282,7 +9362,9 @@ function gramUebenHtml(b) {
           : '');
     } else {
       html += '<p class="task-label">' +
-        (q.art === 'ichform' ? 'Und in der Ich-Form?' : 'Die Form für diese Person') +
+        (q.art === 'ichform' ? 'Und in der Ich-Form?'
+          : q.art === 'fut' ? 'Und morgen? — die Zukunft'
+            : 'Die Form für diese Person') +
         '</p><p class="word cyr">' + esc(q.von) + '</p>' +
         gramVorgabe(q.wort.de,
           '<span class="cyr">' + esc(PERSON_NAME[q.person]) + '</span> — ' +
@@ -9376,6 +9458,12 @@ function gramWarumHtml(b, q) {
   }
   if (q.art === 'praes' || q.art === 'ichform') {
     return '<p class="hint">' + gramVerbWarum(v.ru, q.person, q.loesung) + '</p>';
+  }
+  if (q.art === 'fut') {
+    return '<p class="hint"><strong class="cyr">' + esc(v.ru) + '</strong> bleibt, wie es ' +
+      'ist — gebeugt wird nur der Helfer: für <span class="cyr">' +
+      esc(PERSON_NAME[q.person]) + '</span> heißt er <strong class="cyr">' +
+      esc(q.loesung.split(' ')[0]) + '</strong>.</p>';
   }
   if (q.art === 'praep') {
     return '<p class="hint">' + gramNomenWarum(v.ru, v.art, q.loesung) + '</p>';
