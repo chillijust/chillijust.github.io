@@ -212,6 +212,14 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   unmöglich — die Datei baut keine Verbindung auf. Grün heißt darum «Netz da», nicht
   «Internet erreichbar». Die Augenbraue ist auf Home leer und hält über `.eyebrow:empty`
   nur noch ihre Zeilenhöhe.
+- **Ein Knopf, der ein Ergebnis meldet, muss es auch ausführen können** (ADR 0062). Der
+  Knopf unter «App» sucht **und** lädt: `swKnopfTippen()` schaut auf `swStand.wartet` und
+  entscheidet danach. Dass «Update» darauf steht, ist **keine Lage**, sondern eine
+  Tatsache — sonst führt der Weg über die Einstellungen ins Leere, sobald der Hinweis
+  oben weggetippt ist. Drei Lagen (`ruhe`, `sucht`, `laedt`) gehören nach ADR 0017 in
+  `ansichtenZuruecksetzen()`. **Ein Ergebnis ist keine Beschriftung** — «Aktuell» und
+  «Kein Netz» treten nach zwei Sekunden ab. **Die Größe wechselt nie**, und
+  `swUebernehmen()` wird nur auf einen Tipp gerufen: Ein Update lädt nie von selbst.
 - **Die App sagt, was sie über sich weiß** (ADR 0052): Statuslampe im Kopf (ADR 0061),
   `storage.persist()` beim Start in `try/catch`, Erinnerung an die Sicherung nach 30 Tagen
   (erst ab 60 Antworten), Tempo je Übung in der Bilanz. **Die Uhr (`uhrStellen()`) steht
@@ -402,13 +410,16 @@ gibt es den Skill `ticket`.
 - **Der Service Worker liefert, was er gespeichert hat** — aus dem Speicher sofort, im
   Hintergrund nachsehen (ADR 0059). Der Cache heißt nach der Version; wer den Namen
   entkoppelt, liefert für immer den alten Stand aus. **Kein `skipWaiting` beim
-  Einrichten:** Der neue Worker wartet, bis der Nutzer die Zeile «Jetzt laden» antippt.
+  Einrichten:** Der neue Worker wartet, bis der Nutzer die Zeile «Jetzt laden» oder den
+  Knopf «Update» antippt (ADR 0062).
   Klemmt etwas, gibt es den Notausgang in den Einstellungen unter «App» — er lässt den
   Lernstand unberührt. (Der frühere Rat «Verknüpfung löschen und neu anlegen» ist damit
   erledigt.) **Ohne Netz kommt kein Urteil:** «Nach Aktualisierung suchen» meldet dann
   «Kein Netz», nicht «Aktuell» — die App behauptet nichts über einen Stand, den sie nie
   gesehen hat (ADR 0052). «Offline bereit» bleibt richtig, die Auskunft liest nur, was
-  auf dem Gerät liegt.
+  auf dem Gerät liegt. **`update()` ist fertig, bevor die neue Fassung wartet** — es
+  meldet das Ende der Anfrage, nicht das der Einrichtung; wer sofort urteilt, sagt
+  «Aktuell» und sieht sie eine Sekunde später auftauchen.
 - **`display` sticht `[hidden]`.** Wer einem Element im Stil ein `display` gibt (etwa
   `flex`), macht das Attribut `hidden` wirkungslos — die Hinweisleiste des Workers stand
   darum *immer* da, und die Suite bestätigte es, weil sie das **Attribut** prüfte statt

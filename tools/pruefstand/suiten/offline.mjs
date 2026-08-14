@@ -64,10 +64,30 @@ pruefeDatei('S14 das Nachsehen sagt, woran es war',
   /ende\('kein netz'\)/.test(html) && /ende\('unmoeglich'\)/.test(html) &&
   /ende\('ok'\)/.test(html));
 pruefeDatei('S15 und der Knopf gibt es weiter',
-  /lage === 'kein netz'\) suchen\.textContent = 'Kein Netz';/.test(html));
+  /lage === 'kein netz' \? 'Kein Netz'/.test(html) &&
+  /lage === 'unmoeglich' \? 'Nicht möglich'/.test(html));
 pruefeDatei('S16 «Aktuell» steht nur nach einer geglückten Anfrage',
   (html.match(/'Aktuell'/g) || []).length === 1 &&
-  /else suchen\.textContent = swStand\.wartet \? 'Neue Fassung bereit' : 'Aktuell';/.test(html));
+  /if \(!swStand\.wartet\) \{\s*\n\s*swKnopfMelden\(/.test(html));
+// **`update()` ist fertig, bevor die neue Fassung wartet.** Es meldet das Ende
+// der Anfrage, nicht das der Einrichtung: Der neue Worker steckt danach oft
+// noch in `installing`. Wer sofort urteilt, sagt «Aktuell» und sieht die neue
+// Fassung eine Sekunde später von selbst auftauchen — genau so war es in 2.4.2.
+pruefeDatei('S17 nach dem Nachsehen wird auf den neuen Worker gewartet',
+  /var neu = reg\.installing;/.test(html) &&
+  /neu\.addEventListener\('statechange'/.test(html) &&
+  /if \(neu\.state === 'installing'\) return;/.test(html));
+pruefeDatei('S18 und nicht ewig — der Ring dreht sich nicht für immer',
+  /setTimeout\(function \(\) \{ swWartendPruefen\(reg\); ende\('ok'\); \}, 8000\)/.test(html));
+// **Ein Update lädt nie von selbst.** `swUebernehmen()` steht genau zweimal:
+// am Knopf des Hinweises und im Knopf der Einstellungen. Beides ist ein Tipp
+// des Nutzers, nichts läuft im Hintergrund an.
+// Gezählt werden die **Aufrufe**, nicht die Erwähnungen: die Deklaration
+// zählt nicht mit, ein `setTimeout(swUebernehmen)` wäre einer zu viel.
+pruefeDatei('S19 übernommen wird nur auf Ansage',
+  (html.match(/swUebernehmen\(\);/g) || []).length === 1 &&
+  (html.match(/'click', swUebernehmen\)/g) || []).length === 1 &&
+  /if \(swStand\.wartet\) \{\s*\n\s*swKnopfLage = 'laedt';/.test(html));
 console.log(ausser.join('\n'));
 if (ausser.some((z) => z.indexOf('FAIL') === 0)) {
   throw new Error('sw.js entspricht nicht der Absprache');
@@ -179,6 +199,139 @@ try {
   var hell = q('[data-reiterblatt="darstellung"]');
   pruefe('C11 «Darstellung» blieb, was es war',
     !hell.querySelector('#swBereit') && !!hell.querySelector('[data-wahltext="schema"]'));
+
+  // ── E · Der Knopf «Suchen / Update» (ADR 0062) ───────────
+  // Bis 2.4.2 **meldete** er nur. Stand «Neue Fassung bereit» darauf, sah das
+  // aus wie ein Angebot — beim Tippen suchte er aber bloß noch einmal. Wer den
+  // Hinweis oben weggetippt hatte, kam an die Fassung gar nicht mehr heran.
+  einstReiter = 'app';
+  setTab('einstellungen');
+  var knopf = q('#swSuchen');
+  var notiz = knopf.closest('.setting').querySelector('.setting-note').textContent;
+  var masse = [];
+  function messen() {
+    var r = knopf.getBoundingClientRect();
+    masse.push(Math.round(r.width) + 'x' + Math.round(r.height));
+  }
+  swStand.wartet = null;
+  swKnopfLage = 'ruhe';
+  swKnopfMeldung = '';
+  swKnopfZeichnen();
+  pruefe('E1 in Ruhe heißt er «Suchen»', knopf.textContent === 'Suchen', knopf.textContent);
+  messen();
+
+  // Wartet eine Fassung, heißt er «Update» — **ohne** dass man erst suchen
+  // muss. Genau das war der Weg, der vorher ins Leere führte.
+  swStand.wartet = { postMessage: function () {} };
+  swKnopfZeichnen();
+  pruefe('E2 wartet eine Fassung, heißt er «Update»',
+    knopf.textContent === 'Update', knopf.textContent);
+  pruefe('E3 und ist farbig', knopf.classList.contains('sw-bereit') &&
+    getComputedStyle(knopf).backgroundColor ===
+      (function () {
+        var d = document.createElement('span');
+        d.style.color = getComputedStyle(document.documentElement).getPropertyValue('--gold').trim();
+        document.body.appendChild(d);
+        var f = getComputedStyle(d).color;
+        d.remove();
+        return f;
+      })(),
+    getComputedStyle(knopf).backgroundColor);
+  messen();
+
+  // Ein frisch gezeichneter Reiter darf das nicht vergessen.
+  renderEinstellungen();
+  knopf = q('#swSuchen');
+  pruefe('E4 auch nach einem Neuzeichnen', knopf.textContent === 'Update', knopf.textContent);
+
+  // Tippen heißt jetzt laden, nicht noch einmal suchen.
+  var uebernommen = 0;
+  var echtUebernehmen = swUebernehmen;
+  swUebernehmen = function () { uebernommen++; };
+  knopf.click();
+  pruefe('E5 ein Tipp lädt sie', uebernommen === 1 && swKnopfLage === 'laedt',
+    'übernommen ' + uebernommen + ' · Lage ' + swKnopfLage);
+  pruefe('E6 und zeigt einen Balken, keinen Text',
+    !!knopf.querySelector('.sw-balken') && !knopf.querySelector('.sw-ring'));
+  pruefe('E7 er sagt auch, was er tut',
+    knopf.getAttribute('aria-busy') === 'true' &&
+    (knopf.getAttribute('aria-label') || '').indexOf('Lädt') === 0,
+    knopf.getAttribute('aria-label'));
+  messen();
+  // Zweimal tippen lädt nicht zweimal.
+  knopf.click();
+  pruefe('E8 ein zweiter Tipp läuft ins Leere', uebernommen === 1);
+
+  // Der Weg des Suchens — mit einem gestellten Rückruf, denn über file:// gibt
+  // es keinen Worker.
+  var echtNachsehen = swNachsehen;
+  var lageAntwort = 'ok';
+  var haltRueckruf = null;
+  swNachsehen = function (fertig) { haltRueckruf = function () { fertig(lageAntwort); }; };
+  var echtVersion = swVersionHolen;
+  swVersionHolen = function (fertig) { if (fertig) fertig(); };
+  swStand.wartet = null;
+  ansichtenZuruecksetzen();
+  einstReiter = 'app';
+  renderEinstellungen();
+  knopf = q('#swSuchen');
+  pruefe('E9 Zurücksetzen bringt ihn in die Ruhe',
+    swKnopfLage === 'ruhe' && knopf.textContent === 'Suchen', knopf.textContent);
+  knopf.click();
+  pruefe('E10 beim Suchen dreht sich ein Ring',
+    swKnopfLage === 'sucht' && !!knopf.querySelector('.sw-ring') &&
+    !knopf.querySelector('.sw-balken'));
+  messen();
+  haltRueckruf();
+  pruefe('E11 ohne Fund steht kurz «Aktuell» da',
+    swKnopfLage === 'ruhe' && knopf.textContent === 'Aktuell', knopf.textContent);
+  messen();
+  // …und tritt wieder ab: Ein Ergebnis ist keine Beschriftung.
+  swKnopfMeldung = '';
+  swKnopfZeichnen();
+  pruefe('E12 und tritt dann wieder ab', knopf.textContent === 'Suchen', knopf.textContent);
+
+  // **Ohne Netz kommt kein Urteil** (ADR 0052) — auch nicht in diesem Knopf.
+  lageAntwort = 'kein netz';
+  knopf.click();
+  haltRueckruf();
+  pruefe('E13 im Funkloch sagt er «Kein Netz»', knopf.textContent === 'Kein Netz',
+    knopf.textContent);
+  messen();
+  swKnopfMeldung = '';
+  lageAntwort = 'unmoeglich';
+  knopf.click();
+  haltRueckruf();
+  pruefe('E14 ohne Worker «Nicht möglich»', knopf.textContent === 'Nicht möglich',
+    knopf.textContent);
+  messen();
+  // Findet sich eine, wird aus dem Suchen ein Angebot.
+  swKnopfMeldung = '';
+  lageAntwort = 'ok';
+  knopf.click();
+  swStand.wartet = { postMessage: function () {} };
+  haltRueckruf();
+  pruefe('E15 mit Fund wird er zum «Update»', knopf.textContent === 'Update',
+    knopf.textContent);
+  messen();
+
+  // **Die Größe wechselt nie.** Ein Knopf, der unter dem Daumen die Breite
+  // ändert, verschiebt alles daneben — und der zweite Tipp geht daneben.
+  var einmalig = masse.filter(function (m, i) { return masse.indexOf(m) === i; });
+  pruefe('E16 er behält in jeder Lage seine Größe', einmalig.length === 1,
+    masse.join(' · '));
+  // Und der Text daneben bleibt, was er war.
+  pruefe('E17 der Text daneben ändert sich nicht',
+    knopf.closest('.setting').querySelector('.setting-note').textContent === notiz);
+  // Er ist trotz allem ein Touch-Ziel.
+  pruefe('E18 und bleibt ein Touch-Ziel',
+    knopf.getBoundingClientRect().height >= 44, masse[0]);
+
+  swUebernehmen = echtUebernehmen;
+  swNachsehen = echtNachsehen;
+  swVersionHolen = echtVersion;
+  swStand.wartet = null;
+  ansichtenZuruecksetzen();
 
   // ── D · Der Lernstand bleibt außen vor ───────────────────
   // Der Notausgang wirft den **App**-Speicher weg, nicht den Fortschritt.

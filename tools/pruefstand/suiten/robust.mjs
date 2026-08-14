@@ -107,6 +107,17 @@ try {
     gruen === alsRgb(stil.getPropertyValue('--good')) &&
     rot === alsRgb(stil.getPropertyValue('--bad')),
     gruen + ' / ' + rot);
+  // Punkt und Wort sind **eine** Aussage: Die Farbe steht an der Hülle, beide
+  // erben sie. Ein graues Wort neben einem roten Punkt sähe aus wie zwei
+  // Angaben, von denen eine veraltet ist.
+  pruefe('B7b das Wort trägt dieselbe Farbe wie der Punkt',
+    getComputedStyle(wort).color === punktFarbe(),
+    getComputedStyle(wort).color + ' / ' + punktFarbe());
+  // Und es steht dicht daneben — nicht so weit weg, dass es zu etwas
+  // anderem zu gehören scheint.
+  pruefe('B7c und steht dicht daneben',
+    wort.getBoundingClientRect().left - punkt.getBoundingClientRect().right < 8,
+    (wort.getBoundingClientRect().left - punkt.getBoundingClientRect().right).toFixed(1) + ' px');
   // Unterwegs bleibt der Punkt, das Wort geht — der Kopf trägt dort den Namen
   // der Übung und den Rückweg.
   setTab('tippen');

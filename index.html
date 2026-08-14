@@ -183,20 +183,23 @@ h1 { font-family: Georgia, "Times New Roman", serif; font-size: 28px; margin: 0;
    Wort, sitzt aber außerhalb der Überschrift — so bleibt `#kopfTitel` genau
    der Name und sonst nichts. */
 .titelzeile { display: flex; align-items: baseline; min-width: 0; }
+/* Grün, solange ein Netz da ist, rot im Funkloch (ADR 0061). Golden war er,
+   solange er nichts sagte. Die Farbe steht **einmal** an der Hülle: Punkt und
+   Wort sind eine Aussage, nicht zwei — sie erben sie beide. */
 .netz-stand {
   flex: none; display: inline-flex; align-items: baseline;
   font-family: Georgia, "Times New Roman", serif; font-size: 28px; line-height: 1.1;
+  color: var(--good);
 }
-/* Grün, solange ein Netz da ist, rot im Funkloch (ADR 0061). Golden war er,
-   solange er nichts sagte. */
-.title-dot { color: var(--good); }
-.netz-stand.aus .title-dot { color: var(--bad); }
+.netz-stand.aus { color: var(--bad); }
+.title-dot { color: inherit; }
 /* Das Wort daneben in der Schrift der Kopfzeilen — dieselbe, in der bis 2.4.1
-   «Offline» unter dem Fortschritt stand. */
+   «Offline» unter dem Fortschritt stand. Es rückt dicht an den Punkt: Beides
+   zusammen ist eine Angabe. */
 .netz-wort {
-  margin-left: 8px;
+  margin-left: 4px; color: inherit;
   font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim);
+  font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
   white-space: nowrap;
 }
 .netz-stand.nur-punkt .netz-wort { display: none; }
@@ -823,6 +826,48 @@ button.built-word:active { transform: scale(.95); }
 .app-wert {
   flex: none; font-size: 14px; color: var(--gold);
   font-family: Georgia, serif; text-align: right;
+}
+
+/* Der Knopf für die Aktualisierung wechselt vier Mal, was er zeigt: «Suchen»,
+   einen Ring, «Update», einen Balken. **Seine Größe wechselt nie** — ein Knopf,
+   der unter dem Daumen die Breite ändert, verschiebt alles daneben und trifft
+   beim zweiten Tippen ins Leere. Die Breite ist die der längsten Beschriftung,
+   die Höhe die eines Touch-Ziels. */
+.sw-knopf {
+  flex: none; min-width: 132px; display: inline-flex;
+  align-items: center; justify-content: center;
+}
+/* Wartet eine Fassung, ist der Knopf kein Angebot mehr, sondern die Handlung —
+   also trägt er Gold. Beim Laden behält er es: Es ist derselbe Vorgang. */
+.sw-knopf.sw-bereit, .sw-knopf.sw-laedt {
+  background: var(--gold); border-color: var(--gold); color: var(--gold-ink);
+}
+/* Zwei Anzeigen, zwei Gestalten — sonst wüsste man nicht, was gerade läuft.
+   Der Ring dreht sich, solange gefragt wird; der Balken wandert, solange
+   geladen wird. */
+.sw-ring {
+  width: 17px; height: 17px; border-radius: 50%;
+  border: 2px solid var(--line); border-top-color: var(--gold);
+  animation: swDreht .8s linear infinite;
+}
+@keyframes swDreht { to { transform: rotate(360deg); } }
+.sw-balken {
+  position: relative; width: 62px; height: 4px; border-radius: 999px;
+  background: rgba(0, 0, 0, .2); overflow: hidden;
+}
+.sw-balken::after {
+  content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 40%;
+  border-radius: 999px; background: var(--gold-ink);
+  animation: swWandert 1.1s ease-in-out infinite;
+}
+@keyframes swWandert {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(260%); }
+}
+/* Wer keine Bewegung will, bekommt trotzdem eine Anzeige — sie steht dann
+   still. Nichts zu zeigen wäre schlimmer als sich nicht zu drehen. */
+@media (prefers-reduced-motion: reduce) {
+  .sw-ring, .sw-balken::after { animation: none; }
 }
 
 /* Die Leiste «neue Fassung bereit». Sie sitzt unter dem Kopf, nicht darüber:
@@ -3813,7 +3858,7 @@ var APP_STAND = '2026-08-14'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.4.2'; /* == VERSION == */
+var APP_VERSION = '2.4.3'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -4998,6 +5043,92 @@ function swAuskunft() {
 // Lernstand liegt im localStorage —, aber ein Neuladen ohne Netz schon.
 var swLeerenSicher = false;
 
+// ── Der Knopf «Suchen / Update» ─────────────────────────────
+// Er hatte bis 2.4.2 einen Konstruktionsfehler: Er **meldete** nur. Stand nach
+// dem Nachsehen «Neue Fassung bereit» darauf, sah das aus wie ein Angebot —
+// beim nächsten Tippen suchte er aber bloß noch einmal. Wer den Hinweis oben
+// weggetippt hatte, kam an die neue Fassung gar nicht mehr heran (ADR 0062).
+//
+// Jetzt ist er beides: Nachsehen **und** Übernehmen. Drei Lagen, die er
+// durchläuft, plus eine Tatsache, die er nur abbildet.
+//   'ruhe'  · «Suchen», oder für einen Augenblick, was herauskam
+//   'sucht' · der Ring — es wird nachgefragt
+//   'laedt' · der Balken — die wartende Fassung wird übernommen
+// Ob «Update» darauf steht, ist **keine Lage**, sondern hängt an
+// `swStand.wartet`: So heißt der Knopf auch dann, wenn man die Einstellungen
+// frisch öffnet und längst eine Fassung wartet.
+var swKnopfLage = 'ruhe';
+var swKnopfMeldung = '';
+var swKnopfUhr = null;
+
+// **Ein Ergebnis ist keine Beschriftung.** «Aktuell» und «Kein Netz» sagen,
+// was herauskam, und treten dann wieder ab — sonst stünde auf dem Knopf für
+// immer etwas, das man nicht drücken kann.
+function swKnopfMelden(text) {
+  swKnopfMeldung = text;
+  if (swKnopfUhr) clearTimeout(swKnopfUhr);
+  swKnopfUhr = setTimeout(function () {
+    swKnopfUhr = null;
+    swKnopfMeldung = '';
+    swKnopfZeichnen();
+  }, 2200);
+}
+
+function swKnopfZeichnen() {
+  var k = document.getElementById('swSuchen');
+  if (!k) return;
+  var arbeitet = swKnopfLage === 'sucht' || swKnopfLage === 'laedt';
+  var bereit = !arbeitet && !!swStand.wartet;
+  k.classList.toggle('sw-bereit', bereit);
+  k.classList.toggle('sw-laedt', swKnopfLage === 'laedt');
+  k.setAttribute('aria-busy', arbeitet ? 'true' : 'false');
+  if (swKnopfLage === 'sucht') {
+    k.innerHTML = '<span class="sw-ring" aria-hidden="true"></span>';
+    k.setAttribute('aria-label', 'Sucht nach einer neuen Fassung');
+    return;
+  }
+  if (swKnopfLage === 'laedt') {
+    k.innerHTML = '<span class="sw-balken" aria-hidden="true"></span>';
+    k.setAttribute('aria-label', 'Lädt die neue Fassung');
+    return;
+  }
+  k.removeAttribute('aria-label');
+  k.textContent = bereit ? 'Update' : (swKnopfMeldung || 'Suchen');
+}
+
+// Der eine Griff am Knopf. Was er tut, hängt daran, was gerade dasteht.
+function swKnopfTippen() {
+  if (swKnopfLage !== 'ruhe') return;   // während er arbeitet, tut er nichts
+  // **Geladen wird nur auf Ansage.** Der Worker legt sich nie von selbst vor;
+  // hier ist die eine Stelle, an der der Nutzer es verlangt.
+  if (swStand.wartet) {
+    swKnopfLage = 'laedt';
+    swKnopfZeichnen();
+    swUebernehmen();
+    return;
+  }
+  swKnopfMeldung = '';
+  if (swKnopfUhr) { clearTimeout(swKnopfUhr); swKnopfUhr = null; }
+  swKnopfLage = 'sucht';
+  swKnopfZeichnen();
+  swNachsehen(function (lage) {
+    swVersionHolen(function () {
+      var feld = document.getElementById('swBereit');
+      // «Offline bereit» bleibt auch im Funkloch richtig — die Auskunft liest
+      // nur, was auf dem Gerät liegt, und braucht dafür kein Netz.
+      if (feld) feld.textContent = swAuskunft();
+      swKnopfLage = 'ruhe';
+      // Wartet eine Fassung, sagt das der Knopf selbst — dann braucht es keine
+      // Meldung daneben.
+      if (!swStand.wartet) {
+        swKnopfMelden(lage === 'kein netz' ? 'Kein Netz'
+          : (lage === 'unmoeglich' ? 'Nicht möglich' : 'Aktuell'));
+      }
+      swKnopfZeichnen();
+    });
+  });
+}
+
 function swAnmelden() {
   try {
     if (!navigator.serviceWorker || !window.isSecureContext) return;
@@ -5051,14 +5182,34 @@ function swVersionHolen(fertig) {
 // etwas über einen Stand, den die App gar nicht gesehen hat (ADR 0052). Also
 // sagt der Rückruf, woran er war: 'ok' · 'kein netz' · 'unmoeglich'.
 function swNachsehen(fertig) {
-  function ende(lage) { if (fertig) fertig(lage); }
+  var raus = false;
+  function ende(lage) {
+    if (raus) return;   // der Rückruf kommt genau einmal
+    raus = true;
+    if (fertig) fertig(lage);
+  }
   try {
     if (!navigator.serviceWorker) { ende('unmoeglich'); return; }
     navigator.serviceWorker.getRegistration().then(function (reg) {
       if (!reg) { ende('unmoeglich'); return; }
       reg.update().then(function () {
         swWartendPruefen(reg);
-        ende('ok');
+        if (swStand.wartet) { ende('ok'); return; }
+        // **`update()` ist fertig, bevor die neue Fassung wartet.** Es meldet
+        // das Ende der Anfrage, nicht das Ende der Einrichtung — der neue
+        // Worker steckt danach oft noch in `installing`. Wer hier sofort
+        // urteilt, sagt «Aktuell» und sieht die neue Fassung eine Sekunde
+        // später von selbst auftauchen. Also auf ihn warten, wenn es ihn gibt.
+        var neu = reg.installing;
+        if (!neu) { ende('ok'); return; }
+        neu.addEventListener('statechange', function () {
+          if (neu.state === 'installing') return;
+          swWartendPruefen(reg);
+          ende('ok');
+        });
+        // Und nicht ewig: Ein Worker, der nicht fertig wird, darf den Knopf
+        // nicht für immer drehen lassen.
+        setTimeout(function () { swWartendPruefen(reg); ende('ok'); }, 8000);
       }).catch(function () { ende('kein netz'); });
     }).catch(function () { ende('kein netz'); });
   } catch (e) { ende('unmoeglich'); }
@@ -7234,6 +7385,12 @@ function ansichtenZuruecksetzen() {
   patzerMeldung = null;
   einstReiter = 'lernweg';
   swLeerenSicher = false;
+  // Der Knopf «Suchen / Update» kehrt in die Ruhe zurück. Ein Ring, der nach
+  // dem Einspielen einer Sicherung weiterdreht, wartete auf einen Rückruf, den
+  // es nicht mehr gibt. Was wartet, sagt danach wieder `swStand.wartet`.
+  swKnopfLage = 'ruhe';
+  swKnopfMeldung = '';
+  if (swKnopfUhr) { clearTimeout(swKnopfUhr); swKnopfUhr = null; }
   faktKarte = '';
   kommentar = '';
 }
@@ -11680,9 +11837,9 @@ function renderEinstellungen() {
     '<div class="setting"><span class="setting-text">' +
     '<span class="setting-title">Nach Aktualisierung suchen</span>' +
     '<span class="setting-note">Sieht nach, ob eine neue Fassung bereitliegt. ' +
-    'Findet sich eine, erscheint oben die Zeile zum Laden — von selbst passiert ' +
-    'nichts.</span></span>' +
-    '<button class="chip" id="swSuchen">Nachsehen</button></div>' +
+    'Findet sich eine, heißt der Knopf «Update» — geladen wird sie erst, wenn du ' +
+    'ihn drückst.</span></span>' +
+    '<button class="chip sw-knopf" id="swSuchen">Suchen</button></div>' +
     '<div class="setting"><span class="setting-text">' +
     '<span class="setting-title">Speicher der App leeren</span>' +
     '<span class="setting-note">Der Notausgang: meldet den Service Worker ab, wirft den ' +
@@ -11773,21 +11930,12 @@ function renderEinstellungen() {
   // Den App-Reiter gibt es erst, seit es einen Service Worker gibt — und seine
   // Knöpfe nur, wenn er offen ist.
   var suchen = document.getElementById('swSuchen');
-  if (suchen) suchen.addEventListener('click', function () {
-    suchen.textContent = 'Sehe nach …';
-    swNachsehen(function (lage) {
-      swVersionHolen(function () {
-        var feld = document.getElementById('swBereit');
-        // «Offline bereit» bleibt auch im Funkloch richtig — die Auskunft liest
-        // nur, was auf dem Gerät liegt, und braucht dafür kein Netz.
-        if (feld) feld.textContent = swAuskunft();
-        if (!suchen) return;
-        if (lage === 'kein netz') suchen.textContent = 'Kein Netz';
-        else if (lage === 'unmoeglich') suchen.textContent = 'Nicht möglich';
-        else suchen.textContent = swStand.wartet ? 'Neue Fassung bereit' : 'Aktuell';
-      });
-    });
-  });
+  if (suchen) {
+    // Zeichnen, nicht nur binden: Wartet schon eine Fassung, steht «Update»
+    // darauf, sobald der Reiter aufgeht — auch nach einem Neuzeichnen.
+    swKnopfZeichnen();
+    suchen.addEventListener('click', swKnopfTippen);
+  }
   var leeren = document.getElementById('swLeeren');
   if (leeren) leeren.addEventListener('click', function () {
     if (!swLeerenSicher) {
