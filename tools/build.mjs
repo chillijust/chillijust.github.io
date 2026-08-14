@@ -84,6 +84,7 @@ const kommentare = lies('kommentare.json').wert;
 const tutorial = lies('tutorial.json').wert;
 const betonung = lies('betonung.json').wert;
 const ortho = lies('ortho.json').wert;
+const paare = lies('paare.json').wert;
 
 // ── Wortart und Geschlecht ───────────────────────────────────
 // Die Endung der Grundform verrät beides — meistens. Was die Regel liefert,
@@ -345,6 +346,44 @@ GENERA.forEach((g) => {
   ROLLEN['praet' + g] = 'Vergangenheit ' + GENUS_NAME[g];
   ROLLEN['adj' + g] = 'Adjektiv ' + GENUS_NAME[g];
 });
+
+// Minimalpaare: zwei Buchstaben, die man verwechselt, und der Satz, der sie
+// auseinanderhält. Beide müssen im Alphabet stehen, und ein Paar darf nicht
+// zweimal dastehen — auch nicht andersherum.
+if (!Array.isArray(paare) || paare.length === 0) {
+  meckern('paare.json: erwartet eine nicht-leere Liste von Paaren');
+} else {
+  const zeichen = new Set(buchstaben.map((b) => b[1]));
+  const gesehenP = new Set();
+  paare.forEach((p, i) => {
+    const wo = 'paare.json #' + (i + 1);
+    if (!Array.isArray(p) || p.length !== 3) return meckern(wo + ': erwartet [a, b, Hinweis]');
+    const [a, b, hinweis] = p;
+    [a, b].forEach((c) => {
+      if (typeof c !== 'string' || [...c].length !== 1 || !zeichen.has(c)) {
+        meckern(wo + ': «' + c + '» ist kein Kleinbuchstabe aus buchstaben.json');
+      }
+    });
+    if (a === b) meckern(wo + ': ein Buchstabe ist kein Paar');
+    const schluessel = [a, b].sort().join('');
+    if (gesehenP.has(schluessel)) meckern(wo + ': das Paar «' + a + b + '» kommt schon vor');
+    gesehenP.add(schluessel);
+    if (typeof hinweis !== 'string' || hinweis.trim().length < 30) {
+      meckern(wo + ': der Hinweis erklärt zu wenig');
+    }
+    // **Die Aufgabe zeigt die Merkhilfe und lässt wählen.** Steht bei beiden
+    // dasselbe da, ist die Frage nicht zu beantworten.
+    const merk = (c) => {
+      const eintrag = buchstaben.filter((x) => x[1] === c)[0];
+      const t = eintrag ? String(eintrag[3]) : '';
+      const m = t.match(/^[^.!?]*[.!?]/);
+      return m ? m[0] : t;
+    };
+    if (merk(a) && merk(a) === merk(b)) {
+      meckern(wo + ': beide tragen dieselbe Merkhilfe — daran ist nichts zu unterscheiden');
+    }
+  });
+}
 
 // Sätze: { ru, de, stufe, benoetigt } — «benoetigt» nennt die Grundformen aus
 // dem Lehrplan, die ein Satz voraussetzt. Erst wenn die sitzen, wird er angeboten.
@@ -755,6 +794,8 @@ const block = [
   '',
   listenBlock('ALPHABET', buchstaben, true),
   '',
+  listenBlock('PAARE', paare, true),
+  '',
   grammatikBlock('GRAMMATIK', grammatik),
   '',
   verbenBlock('VERBEN', verben),
@@ -903,6 +944,7 @@ const dateien = [
   ['data/fakten.json', jsonListe(fakten, false)],
   ['data/tastatur.json', jsonListe(tastatur, true)],
   ['data/buchstaben.json', jsonListe(buchstaben, true)],
+  ['data/paare.json', jsonListe(paare, true)],
   ['data/grammatik.json', jsonGrammatik(grammatik)],
   ['data/verben.json', jsonVerben(verben)],
   ['data/nomen.json', jsonNomen(nomen)],

@@ -778,6 +778,13 @@ button.built-word:active { transform: scale(.95); }
 }
 .gram-fuss { text-align: left; margin-top: 12px; }
 
+/* Die Frage über der Auswahl in den schärfenden Buchstaben-Aufgaben — die
+   Merkhilfe beim Minimalpaar, die Bedeutung beim Betonungswort. */
+.abc-frage {
+  margin: 0 0 14px; font-family: Georgia, serif; font-size: 16px;
+  line-height: 1.5; color: var(--ice); text-align: center;
+}
+
 /* Die Nachschrift nach einem Schreibfehler. Sie steht **außerhalb** der
    Aufgabenkarte: Sie gehört nicht mehr zur Frage, sie ist der Weg weiter. */
 .reko {
@@ -2486,12 +2493,27 @@ var ALPHABET = [
   ['Ч', 'ч', 'tsch', 'Wie in «Tschüss». Sieht aus wie eine 4.'],
   ['Ш', 'ш', 'sch', 'Hartes sch wie in «Schule». Drei Zacken nach oben.'],
   ['Щ', 'щ', 'schtsch', 'Weiches, langes sch. Wie Ш, nur mit Schwänzchen.'],
-  ['Ъ', 'ъ', 'Härtezeichen', 'Spricht man nicht. Trennt die Silbe hart ab und kommt nie am Wortanfang.'],
+  ['Ъ', 'ъ', 'Härtezeichen', 'Trennt die Silbe hart ab, ohne selbst zu klingen — und steht nie am Wortanfang.'],
   ['Ы', 'ы', 'y', 'Dumpfes i, zwischen i und ü, weit hinten im Mund gebildet.'],
-  ['Ь', 'ь', 'Weichheitszeichen', 'Spricht man nicht. Macht den Buchstaben davor weich — «мать» statt «мат».'],
+  ['Ь', 'ь', 'Weichheitszeichen', 'Macht den Buchstaben davor weich, ohne selbst zu klingen — «мать» statt «мат».'],
   ['Э', 'э', 'e', 'Offenes e wie in «Ende». Das gespiegelte З.'],
   ['Ю', 'ю', 'ju', 'Wie «ju» in «Juni». Ein I mit angehängtem O.'],
   ['Я', 'я', 'ja', 'Wie «ja». Ein gespiegeltes R — und das letzte Zeichen im Alphabet.']
+];
+
+var PAARE = [
+  ['ш', 'щ', 'Beide zischen, aber щ ist länger und weicher — «schtsch» statt «sch». Im Schriftbild unterscheidet sie nur das Schwänzchen.'],
+  ['ж', 'ш', 'ж summt mit, ш nicht: «Journal» gegen «Schule». Man hört es an der Stimme, nicht am Zischen.'],
+  ['ч', 'щ', 'ч ist ein kurzes «tsch» wie in «Tschüss», щ ein langes weiches «schtsch».'],
+  ['и', 'ы', 'и ist ein helles i wie in «Kino», ы ein dumpfes, weit hinten gebildetes — es gibt im Deutschen nichts Vergleichbares.'],
+  ['е', 'ё', 'Die zwei Punkte machen den Unterschied: е ist «je», ё ist «jo». Und ё trägt immer die Betonung.'],
+  ['ь', 'ъ', 'Beide klingen selbst nicht. ь macht den Buchstaben davor weich, ъ trennt die Silbe hart ab.'],
+  ['б', 'в', 'б ist ein b, в ein w. Das lateinische B führt hier in die Irre — в ist der falsche Freund.'],
+  ['н', 'п', 'н ist ein n, п ein p. Das eine sieht aus wie H, das andere wie ein Tor.'],
+  ['и', 'й', 'й ist kein Vokal, sondern ein kurzes j am Silbenende. Das Häkchen entscheidet.'],
+  ['ц', 'ч', 'ц ist ein z wie in «Zahn», ч ein «tsch». Das Schwänzchen sitzt bei ц unten rechts.'],
+  ['р', 'п', 'р ist ein gerolltes r, п ein p. Das lateinische P passt auf keinen von beiden.'],
+  ['у', 'ч', 'у ist ein u, ч ein «tsch» — im Schriftbild fast dasselbe Häkchen, im Klang nichts Gemeinsames.']
 ];
 
 var GRAMMATIK = [
@@ -3682,7 +3704,7 @@ var APP_STAND = '2026-08-14'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.2.0'; /* == VERSION == */
+var APP_VERSION = '2.3.0'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -8180,6 +8202,76 @@ function leseWoerter() {
   return ALL_VOCAB.filter(function (v) { return wortLesbar(v, meister); });
 }
 
+// ── Drei Aufgaben, die das Alphabet schärfen (ADR 0058) ────
+// Erkennen ist nicht dasselbe wie unterscheiden. Wer «ш» kennt, kennt darum
+// noch nicht den Unterschied zu «щ» — und genau daran scheitert das Lesen.
+// Die drei Formen greifen erst, wenn ein Buchstabe schon einmal saß: Sie
+// schärfen, sie führen nicht ein.
+
+// **Die fünf Vokalpaare.** Der linke macht den Konsonanten davor hart, der
+// rechte weich. Das ist die tragende Unterscheidung des Russischen, und die
+// App erwähnte sie bisher nirgends.
+var VOKALPAARE = [['а', 'я'], ['о', 'ё'], ['у', 'ю'], ['ы', 'и'], ['э', 'е']];
+// Konsonanten, die die Unterscheidung überhaupt mitmachen. ж ш ц sind immer
+// hart, ч щ й immer weich — an ihnen zeigt sich nichts.
+var SILBEN_KONS = 'бвгдзклмнпрстф';
+
+function abcPaarZu(c) {
+  var aus = [];
+  PAARE.forEach(function (p) {
+    if (p[0] === c) aus.push([p[1], p[2]]);
+    else if (p[1] === c) aus.push([p[0], p[2]]);
+  });
+  return aus.length ? aus[Math.floor(Math.random() * aus.length)] : null;
+}
+// Der erste Satz der Merkhilfe. Der Rest nennt oft den Nachbarn beim Namen —
+// in einer Frage nach genau diesem Nachbarn wäre das die halbe Antwort.
+function abcErsterSatz(text) {
+  var m = String(text).match(/^[^.!?]*[.!?]/);
+  return m ? m[0] : String(text);
+}
+// Zu welchem Paar gehört der Vokal, und steht er auf der weichen Seite?
+function abcVokalPaar(c) {
+  for (var i = 0; i < VOKALPAARE.length; i++) {
+    if (VOKALPAARE[i][0] === c) return { paar: VOKALPAARE[i], weich: false };
+    if (VOKALPAARE[i][1] === c) return { paar: VOKALPAARE[i], weich: true };
+  }
+  return null;
+}
+// Das Wort mit dem Zeichen hinter dem n-ten Vokal — ohne die Betonungsliste
+// zu fragen. Sie sagt, welche Stelle richtig ist; hier werden alle gebaut.
+function abcBetontStelle(ru, n) {
+  var zaehler = 0;
+  for (var i = 0; i < ru.length; i++) {
+    if (VOKALE.indexOf(ru.charAt(i)) === -1) continue;
+    zaehler++;
+    if (zaehler === n) return ru.slice(0, i + 1) + '\u0301' + ru.slice(i + 1);
+  }
+  return ru;
+}
+function abcVokalzahl(ru) {
+  var n = 0;
+  for (var i = 0; i < ru.length; i++) if (VOKALE.indexOf(ru.charAt(i)) !== -1) n++;
+  return n;
+}
+// Ein Wort, dessen betonter Vokal **genau dieser Buchstabe** ist. Nur dann
+// gehört die Antwort zu diesem Buchstaben, und nur dann darf sie ihn bewerten.
+function abcBetonungsWort(c) {
+  var passt = ALL_VOCAB.filter(function (v) {
+    var b = BETONUNG[v.ru];
+    if (typeof b !== 'number') return false;          // mehrwortig oder ohne Angabe
+    if (abcVokalzahl(v.ru) < 2 || abcVokalzahl(v.ru) > 4) return false;
+    var zaehler = 0;
+    for (var i = 0; i < v.ru.length; i++) {
+      if (VOKALE.indexOf(v.ru.charAt(i)) === -1) continue;
+      zaehler++;
+      if (zaehler === b) return v.ru.charAt(i) === c;
+    }
+    return false;
+  });
+  return passt.length ? passt[Math.floor(Math.random() * passt.length)] : null;
+}
+
 function abcWaehlen() {
   var pool = abcPool();
   if (!pool.length) return null;
@@ -8213,6 +8305,90 @@ function abcZusatzKacheln(laut) {
   return shuffle(frei).slice(0, Math.min(laut.length <= 3 ? 2 : 3, frei.length));
 }
 
+// Eine der drei schärfenden Formen, wenn sie zu diesem Buchstaben passt.
+// Ausgelost unter den anwendbaren — sonst käme immer dieselbe.
+function abcSchaerfen(b) {
+  var c = b[1];
+  var wege = [];
+  if (abcPaarZu(c)) wege.push('paar');
+  if (abcVokalPaar(c)) wege.push('silbe');
+  if (VOKALE.indexOf(c) !== -1 && abcBetonungsWort(c)) wege.push('betonung');
+  // Die gewohnten Formen bleiben die Mehrheit: Sie prüfen den Buchstaben
+  // selbst, und darum geht es hier immer noch.
+  if (!wege.length || Math.random() > 0.45) return false;
+  var weg = wege[Math.floor(Math.random() * wege.length)];
+  if (weg === 'paar') return abcPaarAufgabe(b);
+  if (weg === 'silbe') return abcSilbenAufgabe(b);
+  return abcBetonungsAufgabe(b);
+}
+
+// D3 · Minimalpaar. Gezeigt wird die Merkhilfe, gewählt wird der Buchstabe —
+// **zwei Möglichkeiten, wie es der Sache entspricht**: Ein Minimalpaar hat
+// genau zwei Seiten. Wer den Unterschied kennt, trifft immer; wer rät, fällt
+// eine Stufe.
+function abcPaarAufgabe(b) {
+  var partner = abcPaarZu(b[1]);
+  var p = ALPHABET.filter(function (x) { return x[1] === partner[0]; })[0];
+  if (!p) return false;
+  abcQ = {
+    b: b, modus: 'paar', loesung: b[1], hinweis: partner[1],
+    frage: 'Welcher Buchstabe ist gemeint?', frage2: abcErsterSatz(b[3]),
+    options: shuffle([b, p]).map(function (x) {
+      return { id: x[1], text: x[0] + ' ' + x[1], kyr: true };
+    })
+  };
+  return true;
+}
+
+// D4 · Silbenleiter. ма–мя, мо–мё, му–мю, мы–ми, мэ–ме: Der Vokal entscheidet,
+// ob der Konsonant davor hart oder weich klingt. Gefragt ist die Seite, auf
+// der **dieser** Buchstabe steht — darum trägt die richtige Silbe ihn.
+function abcSilbenAufgabe(b) {
+  var lage = abcVokalPaar(b[1]);
+  var kons = shuffle(SILBEN_KONS.split(''));
+  if (kons.length < 4) return false;
+  var gegen = VOKALPAARE.filter(function (p) { return p !== lage.paar; });
+  var falsch = shuffle(gegen).slice(0, 3).map(function (p, i) {
+    return { id: kons[i + 1] + p[lage.weich ? 0 : 1], kyr: true };
+  });
+  var richtig = kons[0] + b[1];
+  abcQ = {
+    b: b, modus: 'silbe', loesung: richtig, weich: lage.weich,
+    frage: lage.weich ? 'Welche Silbe ist weich?' : 'Welche Silbe ist hart?',
+    hinweis: 'Nach ' + b[1] + ' klingt der Konsonant ' +
+      (lage.weich ? 'weich' : 'hart') + '. Die fünf Paare sind ' +
+      VOKALPAARE.map(function (p) { return p[0] + '–' + p[1]; }).join(', ') +
+      ' — links hart, rechts weich.',
+    options: shuffle([{ id: richtig, kyr: true }].concat(falsch)).map(function (o) {
+      return { id: o.id, text: o.id, kyr: true };
+    })
+  };
+  return true;
+}
+
+// D6 · Betonung setzen. Der betonte Vokal klingt voll, alle anderen fallen
+// zusammen — молоко spricht sich «malakó». Gewählt wird nicht der Vokal,
+// sondern das **ganze Wort in einer Lesart**: Bei молоко stünden sonst drei
+// gleiche Knöpfe nebeneinander.
+function abcBetonungsAufgabe(b) {
+  var wort = abcBetonungsWort(b[1]);
+  if (!wort) return false;
+  var n = abcVokalzahl(wort.ru);
+  var lesarten = [];
+  for (var i = 1; i <= n; i++) lesarten.push(abcBetontStelle(wort.ru, i));
+  abcQ = {
+    b: b, modus: 'betonung', wort: wort,
+    loesung: abcBetontStelle(wort.ru, BETONUNG[wort.ru]),
+    frage: 'Welcher Vokal trägt die Betonung?',
+    hinweis: 'Nur der betonte Vokal klingt voll. Alle anderen fallen zusammen — ' +
+      'darum spricht sich ' + wort.ru + ' nicht so, wie es dasteht.',
+    options: shuffle(lesarten).map(function (t) {
+      return { id: t, text: t, kyr: true };
+    })
+  };
+  return true;
+}
+
 function abcFrageBauen() {
   var b = abcWaehlen();
   if (!b) { abcQ = null; return; }
@@ -8243,6 +8419,15 @@ function abcFrageBauen() {
   gramRegelOffen = false;
   gramRegelNeu = false;
 
+  // **Schärfen statt einführen.** Erst ab Stufe 1 — wer den Buchstaben noch
+  // nie richtig hatte, braucht ihn ganz, nicht in Abgrenzung.
+  //
+  // Und nur bei «gemischt»: Die schärfenden Formen sind weder «Zeichen → Laut»
+  // noch die Gegenrichtung. Wer im Filter eine Richtung festlegt, hat damit
+  // etwas verlangt — ihm stattdessen eine Silbenleiter hinzustellen wäre ein
+  // gebrochenes Versprechen.
+  if (box >= 1 && abcRichtung === 'gemischt' && abcSchaerfen(b)) return;
+
   if (modus === 'kacheln') {
     var laut = b[2];
     var zeichen = laut.split('');
@@ -8257,7 +8442,7 @@ function abcFrageBauen() {
     return;
   }
 
-  // Ablenker: bei einem falschen Freund die anderen falschen Freunde, sonst
+// Ablenker: bei einem falschen Freund die anderen falschen Freunde, sonst
   // Buchstaben mit ähnlich langem Laut — beides ist schwerer als Zufall.
   var tueckisch = ABC_TUECKISCH.indexOf(b[1]) !== -1;
   var kandidaten = ALPHABET.filter(function (x) {
@@ -8289,6 +8474,10 @@ function abcPruefen() {
       return q.tiles.filter(function (t) { return t.key === k; })[0].ch;
     }).join('');
     abcCorrect = versuch === q.laut;
+  } else if (q.loesung !== undefined) {
+    // Die drei schärfenden Formen führen ihre Lösung selbst — sie fragen
+    // nicht nach dem Buchstaben, sondern nach dem, was er ausmacht.
+    abcCorrect = abcPicked === q.loesung;
   } else {
     abcCorrect = abcPicked === q.b[1];
   }
@@ -8370,10 +8559,12 @@ function abcUebenHtml() {
       '<button class="btn ghost" id="abcZurTafel">Tafel ansehen</button></div></div>';
   }
   var q = abcQ;
+  var schaerfe = q.loesung !== undefined;
   var zeichenFrage = q.modus !== 'laut';
   var box = abcBox(q.b);
-  var taskLabel = q.modus === 'kacheln' ? 'Setz den Laut zusammen'
-    : q.modus === 'zeichen' ? 'Wie klingt dieser Buchstabe?' : 'Welcher Buchstabe klingt so?';
+  var taskLabel = schaerfe ? q.frage
+    : q.modus === 'kacheln' ? 'Setz den Laut zusammen'
+      : q.modus === 'zeichen' ? 'Wie klingt dieser Buchstabe?' : 'Welcher Buchstabe klingt so?';
 
   // Dieselben Fortschrittspunkte wie über einer Vokabel — dieselbe Leiter,
   // dieselbe Farbfolge, damit man den Stand ohne Erklärung liest.
@@ -8387,11 +8578,36 @@ function abcUebenHtml() {
     '<div class="card-meta"><span class="boxdots">' + dots + '</span>' +
     '<span class="mitte">' + (q.modus === 'kacheln' ? 'legen' : 'wählen') + '</span>' +
     '<span></span></div>' +
-    '<p class="task-label">' + taskLabel + '</p>' +
-    '<p class="word' + (zeichenFrage ? ' cyr' : '') + '">' +
-    esc(zeichenFrage ? q.b[0] + ' ' + q.b[1] : q.b[2]) + '</p>';
+    '<p class="task-label">' + esc(taskLabel) + '</p>';
 
-  if (q.modus === 'kacheln') {
+  // Was über der Auswahl steht, hängt an der Form: das Minimalpaar zeigt die
+  // Merkhilfe, die Silbenleiter nur ihre Frage, die Betonung das Wort ohne
+  // Zeichen — mit Zeichen wäre sie beantwortet.
+  if (q.modus === 'paar') {
+    html += '<p class="abc-frage">' + esc(q.frage2 || '') + '</p>';
+  }
+  if (!schaerfe) {
+    html += '<p class="word' + (zeichenFrage ? ' cyr' : '') + '">' +
+      esc(zeichenFrage ? q.b[0] + ' ' + q.b[1] : q.b[2]) + '</p>';
+  } else if (q.modus === 'betonung') {
+    html += '<p class="word cyr">' + esc(q.wort.ru) + '</p>' +
+      '<p class="abc-frage">' + esc(q.wort.de) + '</p>';
+  }
+
+  if (schaerfe) {
+    html += '<div class="options abc-optionen">';
+    q.options.forEach(function (o, i) {
+      var klasse = 'option cyr';
+      if (abcPhase === 'feedback') {
+        if (o.id === q.loesung) klasse += ' right';
+        else if (abcPicked === o.id) klasse += ' wrong';
+        else klasse += ' muted';
+      } else if (abcPicked === o.id) klasse += ' picked';
+      html += '<button class="' + klasse + '" data-abcopt="' + i + '"' +
+        (abcPhase !== 'ask' ? ' disabled' : '') + '>' + esc(o.text) + '</button>';
+    });
+    html += '</div>';
+  } else if (q.modus === 'kacheln') {
     html += '<div class="slots">';
     for (var s = 0; s < q.laenge; s++) {
       var gefuellt = s < abcBuilt.length;
@@ -8430,13 +8646,19 @@ function abcUebenHtml() {
 
   if (abcPhase === 'feedback') {
     html += '<div class="feedback ' + (abcCorrect ? 'good' : 'bad') + '">';
-    html += abcCorrect
-      ? '<p>' + ICON.haken + 'Richtig!</p>'
-      : '<p>' + ICON.kreuz + (abcRevealed ? 'Lösung: ' : 'Richtig wäre: ') +
+    if (abcCorrect) html += '<p>' + ICON.haken + 'Richtig!</p>';
+    else if (schaerfe) {
+      html += '<p>' + ICON.kreuz + (abcRevealed ? 'Lösung: ' : 'Richtig wäre: ') +
+        '<strong class="cyr">' + esc(q.loesung) + '</strong></p>';
+    } else {
+      html += '<p>' + ICON.kreuz + (abcRevealed ? 'Lösung: ' : 'Richtig wäre: ') +
         '<strong class="cyr">' + esc(q.b[0] + ' ' + q.b[1]) +
         '</strong> — klingt wie ' + esc(q.b[2]) + '</p>';
+    }
     // Erst nach der Auflösung — vorher wäre der Laut die Antwort.
-    html += '</div>' + hoerzeile(q.b[1], null) + '<p class="hint">' + esc(q.b[3]) + '</p>' +
+    html += '</div>' +
+      (q.modus === 'betonung' ? hoerzeile(q.wort.ru, q.wort.de) : hoerzeile(q.b[1], null)) +
+      '<p class="hint">' + esc(schaerfe ? q.hinweis : q.b[3]) + '</p>' +
       meisterHtml();
   }
   html += '</div><div class="btn-row">';
@@ -8498,7 +8720,8 @@ function renderBuchstaben() {
   main.querySelectorAll('[data-abcopt]').forEach(function (b) {
     b.addEventListener('click', function () {
       if (abcPhase !== 'ask') return;
-      abcPicked = abcQ.options[parseInt(b.dataset.abcopt, 10)][1];
+      var o = abcQ.options[parseInt(b.dataset.abcopt, 10)];
+      abcPicked = abcQ.loesung !== undefined ? o.id : o[1];
       if (state.settings.confirmUeben) renderBuchstaben();
       else abcPruefen();
     });

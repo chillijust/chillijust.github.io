@@ -947,6 +947,26 @@ hinter dem runden Knopf links neben der Auswahl:
   Merkhilfe auf, samt Hörknopf. Ein Nachschlagewerk, keine Einstellung — darum ein
   eigener Ort und kein Eintrag im Auswahlpanel (ADR 0025).
 
+### Drei Formen, die schärfen statt einzuführen (ADR 0058)
+
+Erkennen und Unterscheiden sind zweierlei. Neben «Zeichen → Laut» und der Gegenrichtung
+gibt es darum drei Formen, die den Unterschied üben:
+
+- **Minimalpaar** — gefragt wird mit dem **ersten Satz** der Merkhilfe, gewählt wird einer
+  von **zwei** Buchstaben. Die Paare stehen in `data/paare.json`; der Build prüft, dass
+  die beiden ersten Sätze eines Paares sich unterscheiden.
+- **Silbenleiter** — `ма–мя, мо–мё, му–мю, мы–ми, мэ–ме`. Gefragt ist die Seite, auf der
+  der geübte Vokal steht, und die richtige Silbe trägt ihn. Konsonanten aus `SILBEN_KONS`;
+  ж ш ц sind immer hart, ч щ й immer weich.
+- **Betonung** — gewählt wird nicht der Vokal, sondern das **ganze Wort in einer Lesart**
+  (`мо́локо · моло́ко · молоко́`). Das Wort steht ohne Zeichen da. Die Aufgabe erscheint
+  nur bei Wörtern, deren betonter Vokal **genau dieser Buchstabe** ist — nur dann darf sie
+  ihn bewerten.
+
+Sie greifen **erst ab Stufe 1** und **nur bei «gemischt»**: Wer im Filter eine Richtung
+festlegt, bekommt sie auch. Ihre Fragen tragen ihre Lösung selbst (`abcQ.loesung`);
+`abcPruefen()` unterscheidet danach.
+
 ### Sitzen und meistern — dieselbe Mechanik wie bei den Wörtern
 
 Ein Buchstabe kennt **zwei Schwellen**, genau wie eine Vokabel:

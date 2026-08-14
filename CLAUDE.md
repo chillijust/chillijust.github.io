@@ -145,7 +145,7 @@ index.html                die App — genau diese Datei wird ausgeliefert
 .nojekyll                 schaltet Jekyll ab, niemals löschen
 data/*.json               Lerninhalte, einzige Quelle für Vokabeln/Sätze/Fakten/
                           Tastatur/Buchstaben/Grammatik/Verben/Nomen/Kommentare/
-                          Tutorial/Betonung/Schreibregeln
+                          Tutorial/Betonung/Schreibregeln/Minimalpaare
 tools/build.mjs           /data prüfen und in index.html einbetten (--check = nur prüfen)
 tools/pruefen.mjs         Vor-Push-Prüfung von index.html
 tools/pruefstand/         Prüfstand: lauf.mjs, suiten/*.mjs, bild.mjs (siehe README dort)
@@ -403,6 +403,13 @@ gibt es den Skill `ticket`.
 - **Wort umbenennen** setzt dessen Leitner-Stand zurück — die Kennung ist das russische
   Wort. Themen umzubenennen ist dagegen folgenlos. **Einen Satz umzuformulieren** setzt
   genauso seinen Stand in `satzBox`/`satzSeen` zurück; die Kennung ist der russische Satz.
+- **Erkennen ist nicht unterscheiden** (ADR 0058). «Buchstaben» hat drei schärfende
+  Formen: **Minimalpaar** (aus `data/paare.json`, zwei Möglichkeiten, gefragt wird mit dem
+  **ersten Satz** der Merkhilfe), **Silbenleiter** (hart/weich, die richtige Silbe trägt
+  den geübten Vokal) und **Betonung** (gewählt wird die Lesart des Wortes, nicht der
+  Vokal). Alle drei **schärfen, sie führen nicht ein** — erst ab Stufe 1 — und sie kommen
+  **nur bei «gemischt»**: Wer eine Richtung festlegt, hat etwas verlangt. Sie tragen ihre
+  Lösung in `abcQ.loesung`.
 - **Buchstaben kennen zwei Schwellen** wie Wörter (ADR 0024): «sitzt» ab `SATZ_STUFE`,
   «gemeistert» ab `BOX_MAX`. `abcPool()` fragt nach **gemeistert** — wer das auf «sitzt»
   umstellt, wirft die Buchstaben schon auf Stufe 2 aus der Übung und überspringt damit

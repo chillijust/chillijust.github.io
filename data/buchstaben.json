@@ -26,9 +26,9 @@
   ["Ч", "ч", "tsch", "Wie in «Tschüss». Sieht aus wie eine 4."],
   ["Ш", "ш", "sch", "Hartes sch wie in «Schule». Drei Zacken nach oben."],
   ["Щ", "щ", "schtsch", "Weiches, langes sch. Wie Ш, nur mit Schwänzchen."],
-  ["Ъ", "ъ", "Härtezeichen", "Spricht man nicht. Trennt die Silbe hart ab und kommt nie am Wortanfang."],
+  ["Ъ", "ъ", "Härtezeichen", "Trennt die Silbe hart ab, ohne selbst zu klingen — und steht nie am Wortanfang."],
   ["Ы", "ы", "y", "Dumpfes i, zwischen i und ü, weit hinten im Mund gebildet."],
-  ["Ь", "ь", "Weichheitszeichen", "Spricht man nicht. Macht den Buchstaben davor weich — «мать» statt «мат»."],
+  ["Ь", "ь", "Weichheitszeichen", "Macht den Buchstaben davor weich, ohne selbst zu klingen — «мать» statt «мат»."],
   ["Э", "э", "e", "Offenes e wie in «Ende». Das gespiegelte З."],
   ["Ю", "ю", "ju", "Wie «ju» in «Juni». Ein I mit angehängtem O."],
   ["Я", "я", "ja", "Wie «ja». Ein gespiegeltes R — und das letzte Zeichen im Alphabet."]

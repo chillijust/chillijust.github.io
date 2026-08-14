@@ -215,7 +215,16 @@ try {
     ALPHABET.filter(function (b) { return b[1] === 'ъ' || b[1] === 'ь'; })
       .every(function (b) { return !abcKachelbar(b); }));
   setTab('buchstaben');
-  abcAnsicht = 'ueben'; abcRichtung = 'zeichen'; abcQ = null;
+  abcAnsicht = 'ueben'; abcRichtung = 'zeichen';
+  // **Seit den schärfenden Formen ist die Kachelaufgabe nicht mehr sicher.**
+  // щ steht in zwei Minimalpaaren, und dann kommt manchmal jene Frage. Also
+  // so lange bauen, bis die gemeinte Form dasteht — das ist keine Nachsicht,
+  // die Kachelaufgabe muss ja weiterhin vorkommen.
+  abcQ = null;
+  for (var kv = 0; kv < 60 && (!abcQ || abcQ.modus !== 'kacheln'); kv++) {
+    abcQ = null;
+    abcFrageBauen();
+  }
   renderBuchstaben();
   pruefe('L4 ab Stufe 2 wird zusammengesetzt', abcQ.modus === 'kacheln', abcQ.modus);
   pruefe('L5 ein Fach je Zeichen des Lauts', alle('.slot').length === schtsch[2].length,
@@ -272,6 +281,130 @@ try {
   abcRichtung = 'laut'; abcQ = null;
   renderBuchstaben();
   pruefe('N1 keine Kacheln in der Gegenrichtung', abcQ.modus === 'laut' && !q('[data-abctile]'));
+  // ── P · Die drei schärfenden Formen (ADR 0058) ────────────
+  // Erkennen ist nicht dasselbe wie unterscheiden. Alle drei bewerten den
+  // Buchstaben, an dem sie hängen — sonst gehörten sie nicht hierher.
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  ALPHABET.forEach(function (b) { state.abcBox[b[1]] = 1; state.abcSeen[b[1]] = Date.now(); });
+  setTab('buchstaben');
+
+  function formVon(zeichen, modus) {
+    var b = ALPHABET.filter(function (x) { return x[1] === zeichen; })[0];
+    for (var i = 0; i < 400; i++) {
+      abcQ = null;
+      if (modus === 'paar' && abcPaarAufgabe(b)) return abcQ;
+      if (modus === 'silbe' && abcSilbenAufgabe(b)) return abcQ;
+      if (modus === 'betonung' && abcBetonungsAufgabe(b)) return abcQ;
+    }
+    return null;
+  }
+
+  var paarQ = formVon('щ', 'paar');
+  pruefe('P1 das Minimalpaar kommt zustande', !!paarQ);
+  pruefe('P2 es hat genau zwei Möglichkeiten — mehr hat ein Paar nicht',
+    paarQ.options.length === 2, String(paarQ.options.length));
+  pruefe('P3 die gesuchte ist dabei',
+    paarQ.options.some(function (o) { return o.id === 'щ'; }) && paarQ.loesung === 'щ');
+  pruefe('P4 die andere ist der Partner aus den Daten',
+    PAARE.some(function (p) {
+      var andere = paarQ.options.filter(function (o) { return o.id !== 'щ'; })[0].id;
+      return (p[0] === 'щ' && p[1] === andere) || (p[1] === 'щ' && p[0] === andere);
+    }));
+  pruefe('P5 gefragt wird mit der Merkhilfe, nicht mit dem Laut',
+    paarQ.frage2 && paarQ.frage2.length > 5 && paarQ.frage2.indexOf('щ') === -1,
+    paarQ.frage2);
+
+  var silbeQ = formVon('я', 'silbe');
+  pruefe('P6 die Silbenleiter kommt zustande', !!silbeQ);
+  pruefe('P7 vier Silben stehen zur Wahl', silbeQ.options.length === 4,
+    String(silbeQ.options.length));
+  pruefe('P8 die richtige trägt genau diesen Vokal',
+    silbeQ.loesung.charAt(1) === 'я' && silbeQ.weich === true, silbeQ.loesung);
+  pruefe('P9 die falschen tragen die andere Seite', (function () {
+    var hart = 'аоуыэ';
+    return silbeQ.options.filter(function (o) { return o.id !== silbeQ.loesung; })
+      .every(function (o) { return hart.indexOf(o.id.charAt(1)) !== -1; });
+  })(), silbeQ.options.map(function (o) { return o.id; }).join(' '));
+  var silbeHart = formVon('а', 'silbe');
+  pruefe('P10 bei einem harten Vokal dreht sich die Frage um',
+    silbeHart.weich === false && silbeHart.frage.indexOf('hart') !== -1,
+    silbeHart.frage);
+  pruefe('P11 immer vier verschiedene Konsonanten', (function () {
+    var k = silbeQ.options.map(function (o) { return o.id.charAt(0); });
+    return k.filter(function (c, i) { return k.indexOf(c) !== i; }).length === 0;
+  })());
+
+  var betQ = formVon('о', 'betonung');
+  pruefe('P12 die Betonungsaufgabe kommt zustande', !!betQ);
+  pruefe('P13 eine Lesart je Vokal',
+    betQ.options.length === abcVokalzahl(betQ.wort.ru), String(betQ.options.length));
+  pruefe('P14 die richtige Lesart stimmt mit der Betonungsliste überein',
+    betQ.loesung === abcBetontStelle(betQ.wort.ru, BETONUNG[betQ.wort.ru]));
+  pruefe('P15 der betonte Vokal ist genau dieser Buchstabe', (function () {
+    var i = betQ.loesung.indexOf('́');
+    return betQ.loesung.charAt(i - 1) === 'о';
+  })(), betQ.loesung);
+  // **Die Frage darf die Antwort nicht schon zeigen.**
+  pruefe('P16 das Wort steht ohne Zeichen da', betQ.wort.ru.indexOf('́') === -1);
+  pruefe('P17 jede Lesart trägt genau ein Zeichen',
+    betQ.options.every(function (o) { return (o.text.match(/́/g) || []).length === 1; }));
+
+  // Alle drei bewerten den Buchstaben — richtig hebt, falsch senkt.
+  ['paar', 'silbe', 'betonung'].forEach(function (m, i) {
+    var zeichen = m === 'paar' ? 'щ' : m === 'silbe' ? 'я' : 'о';
+    var b = ALPHABET.filter(function (x) { return x[1] === zeichen; })[0];
+    state.abcBox[zeichen] = 2;
+    abcQ = formVon(zeichen, m);
+    abcPhase = 'ask';
+    abcPicked = abcQ.loesung;
+    abcPruefen();
+    var hoch = abcBox(b) === 3;
+    abcQ = formVon(zeichen, m);
+    abcPhase = 'ask';
+    abcPicked = 'kaputt';
+    abcPruefen();
+    pruefe('P1' + (8 + i) + ' «' + m + '» bewertet den Buchstaben',
+      hoch && abcBox(b) === 2, m + ': ' + abcBox(b));
+  });
+
+  // **Sie führen nicht ein, sie schärfen** — auf Stufe 0 kommen sie nicht.
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  ALPHABET.forEach(function (b) { state.abcBox[b[1]] = 0; });
+  var frueh = [];
+  for (var mv = 0; mv < 120; mv++) {
+    abcQ = null;
+    abcFrageBauen();
+    if (abcQ && abcQ.loesung !== undefined) frueh.push(abcQ.modus);
+  }
+  pruefe('P21 auf Stufe 0 schärft nichts', frueh.length === 0, frueh.slice(0, 4).join(' '));
+
+  // **Wer eine Richtung festlegt, bekommt sie auch.** Die schärfenden Formen
+  // sind weder das eine noch das andere — sie kommen nur bei «gemischt».
+  ALPHABET.forEach(function (b) { state.abcBox[b[1]] = 2; state.abcSeen[b[1]] = Date.now(); });
+  ['zeichen', 'laut'].forEach(function (r) {
+    abcRichtung = r;
+    var fremd = [];
+    for (var rv = 0; rv < 120; rv++) {
+      abcQ = null;
+      abcFrageBauen();
+      if (abcQ && abcQ.loesung !== undefined) fremd.push(abcQ.modus);
+    }
+    pruefe('P22 «' + r + '» bleibt bei seiner Richtung', fremd.length === 0,
+      fremd.slice(0, 4).join(' '));
+  });
+  abcRichtung = 'gemischt';
+  var gesehen = {};
+  for (var gv = 0; gv < 600; gv++) {
+    abcQ = null;
+    abcFrageBauen();
+    if (abcQ && abcQ.loesung !== undefined) gesehen[abcQ.modus] = true;
+  }
+  pruefe('P23 bei «gemischt» kommen alle drei vor',
+    gesehen.paar && gesehen.silbe && gesehen.betonung,
+    Object.keys(gesehen).join(' '));
+
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);
 }
