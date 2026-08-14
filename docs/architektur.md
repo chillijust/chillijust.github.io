@@ -1612,6 +1612,13 @@ Leitner-Stand (`state.boxes`). Unterschiedlich ist nur, *welchen Ausschnitt* sie
 | Tippen | der ganze Wortschatz ab `settings.tippenStufe` (Vorgabe 3) — oder ein einzelnes Lernset, dann ab Stufe 1 |
 | Übersetzen | nur Sätze, deren Voraussetzungen alle mindestens `SATZ_STUFE` (2) haben |
 
+**Vier Aufgabenformen** baut `buildQuestion()`, abhängig von der Leitner-Stufe:
+`mc-de` und `mc-ru` unter der Kachelschwelle, `tiles` darüber — und ab `SATZ_STUFE` in der
+Hälfte der Fälle die **Kontext-Lücke** (`luecke`, ADR 0053), sofern das Wort in einem
+freigeschalteten Satz vorkommt. Sie zeigt den Satz mit einer Lücke, die deutsche Fassung
+darunter und vier Formen desselben Wortes zur Wahl; die Ablenker rechnet `grammForm()`.
+Der Hörknopf der Frageseite fehlt dort bewusst — er läse die Antwort vor.
+
 - **Lernsets** entstehen beim Start aus den Sätzen (`LERNSETS`): Die Sätze werden nach
   ihrem im Lehrplan spätesten Wort sortiert; ihre noch unbekannten Voraussetzungen füllen
   ein Set, bis `SET_MAX` (12) erreicht ist. Jedes Set kennt damit die Sätze, die es

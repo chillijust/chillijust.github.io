@@ -151,6 +151,13 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   Anführungszeichen. Gliederung über Kommentarbalken.
 - **Alle Ausgaben durch `esc()`**, Ereignisbehandler nach dem Setzen von `innerHTML`
   anhängen, nie als `onclick`-Attribut.
+- **Das Wort steht im Satz** (ADR 0053). «Lernsets» und «Freestyle» haben eine vierte
+  Aufgabenform: die **Kontext-Lücke**. Ab `SATZ_STUFE` und nur in einem **freigeschalteten**
+  Satz — ein Satz voller unbekannter Wörter erklärt nichts. Die Ablenker sind andere
+  **Formen desselben Wortes** aus `grammForm()`; unter zwei davon gibt es keine Lücke
+  (Pronomen haben keine). **Der Hörknopf schweigt, solange die Lücke offen ist** — er läse
+  die Antwort vor. Wer eine Aufgabenform hinzufügt, prüft `meister` und `hoeren` mit: Beide
+  gingen von drei aus und wurden davon flatterhaft.
 - **Die App sagt, was sie über sich weiß** (ADR 0052): Offline-Anzeige im Kopf,
   `storage.persist()` beim Start in `try/catch`, Erinnerung an die Sicherung nach 30 Tagen
   (erst ab 60 Antworten), Tempo je Übung in der Bilanz. **Die Uhr (`uhrStellen()`) steht

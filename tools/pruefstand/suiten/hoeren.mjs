@@ -46,6 +46,14 @@ try {
   ALL_VOCAB.slice(0, 20).forEach(function (v) { state.boxes[v.id] = 1; state.lastSeen[v.id] = Date.now() - 9 * TAG; });
   setTab('lernsets');
   uebNext(true);
+  // **Die Kontext-Lücke hat bewusst keinen Hörknopf** — er läse den Satz samt
+  // fehlendem Wort vor, also die Antwort. Hier geht es um die anderen drei
+  // Formen; ohne dieses Aussieben wäre die Suite von der Auslosung abhängig.
+  for (var v = 0; v < 60 && uebQ && uebQ.mode === 'luecke'; v++) {
+    uebQ = null; uebZuruecksetzen(); uebNext(true);
+  }
+  pruefe('B0 eine Aufgabe mit Frageseite', !!uebQ && uebQ.mode !== 'luecke',
+    uebQ ? uebQ.mode : 'keine');
   pruefe('B1 die Frage hat einen Hörknopf', !!q('.word [data-say]'));
   var knopf = q('.word [data-say]');
   var erwartet = uebQ.mode === 'mc-de' ? 'ru' : 'de';
@@ -118,6 +126,10 @@ try {
   // G · Der Zuhörer hängt an #main und überlebt jeden Renderlauf
   setTab('lernsets');
   uebNext(true);
+  // Auch hier: Die Kontext-Lücke trägt keinen Hörknopf auf der Frageseite.
+  for (var g = 0; g < 60 && uebQ && uebQ.mode === 'luecke'; g++) {
+    uebQ = null; uebZuruecksetzen(); uebNext(true);
+  }
   renderUeben();
   gesagt = [];
   q('.word [data-say]').click();

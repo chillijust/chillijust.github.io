@@ -21,7 +21,7 @@ man der falschen.
 | # | Etappe | Version | Stand |
 |---|---|---|---|
 | 1 | Kleinkram mit Sofortnutzen | 1.5.2 | **fertig** · ADR 0052 · Suite `robust` |
-| 2 | Kontext-Lücke (W3) | 1.6.0 | offen |
+| 2 | Kontext-Lücke (W3) | 1.6.0 | **fertig** · ADR 0053 · Suite `luecke` |
 | 3 | Betonung | 1.7.0 | offen |
 | 4 | Orthographie ohne Ton (E3 + Prüfwort) | 1.8.0 | offen |
 | 5 | Handling: Rekonstruktion, Tagesmaß, Fehlerprofil | 1.9.0 | offen |

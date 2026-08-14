@@ -1236,6 +1236,12 @@ body.unterwegs .reiter { top: 62px; }
 #offlineNote .punkt-aus {
   width: 6px; height: 6px; border-radius: 50%; background: var(--dim);
 }
+/* Die Lücke: Der Satz ist die Aufgabe, darum darf er umbrechen — anders als
+   ein einzelnes Wort, das immer in eine Zeile passt. Die deutsche Fassung steht
+   klein darunter; sie hilft beim Verstehen, ohne die Antwort zu verraten. */
+.card .word.luecke-satzfrage { font-size: 24px; line-height: 1.35; }
+.luecke-de { margin: 6px 0 0; font-size: 14px; color: var(--dim); text-align: center; }
+.luecke-satz { margin: 8px 0 0; font-size: 16px; }
 .backup-note.warnung { color: var(--text); border-left: 2px solid var(--gold); padding-left: 10px; }
 .zaehler { flex: none; display: flex; align-items: center; gap: 2px; }
 .zaehler-taste {
@@ -2933,7 +2939,7 @@ var APP_STAND = '2026-08-14'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '1.5.2'; /* == VERSION == */
+var APP_VERSION = '1.6.0'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -5657,6 +5663,81 @@ function zusatzBuchstaben(wort) {
   return shuffle(frei).slice(0, Math.min(wieviele, frei.length));
 }
 
+// ── Die Kontext-Lücke ───────────────────────────────────────
+// Ein Wort steht im Satz, nicht daneben. Statt «книга — was heißt das?» steht
+// da «Я читаю ___» und die Frage nach der Form. Das ist die didaktisch
+// stärkere Aufgabe: Man lernt das Wort und seine Beugung in einem Zug, und man
+// sieht, wozu es gut ist.
+//
+// **Sie greift nur, wo es einen Satz gibt, den man auch lesen kann** — also
+// einen freigeschalteten. Ein Satz voller unbekannter Wörter erklärt nichts.
+
+// Die Rollen, aus denen sich Ablenker bauen lassen. Sie müssen nicht sinnvoll
+// sein — sie sind ja falsch —, nur plausibel aussehen.
+var LUECKE_ROLLEN = {
+  n: ['akk', 'praep', 'gen', 'plural'],
+  v: ['praes1s', 'praes2s', 'praes3s', 'praes1p', 'praes3p'],
+  a: ['adjm', 'adjw', 'adjs', 'adjp']
+};
+
+// In welchen freigeschalteten Sätzen kommt das Wort vor, und in welcher Form?
+// Die Form steht entweder in `formen` vermerkt oder das Wort taucht in seiner
+// Grundform auf — beides zählt.
+function lueckeStellen(word) {
+  var treffer = [];
+  SENTENCES.forEach(function (satz) {
+    if (satz.benoetigt.indexOf(word.ru) === -1 || !satzFrei(satz)) return;
+    var form = null;
+    if (satz.formen) {
+      Object.keys(satz.formen).forEach(function (f) {
+        if (satz.formen[f][0] === word.ru) form = f;
+      });
+    }
+    // Ohne Vermerk steht das Wort unverändert im Satz — oder gar nicht, dann
+    // ist es nur eine Voraussetzung und keine Lücke.
+    if (!form && lueckeFindet(satz.ru, word.ru)) form = word.ru;
+    if (form && lueckeFindet(satz.ru, form)) treffer.push({ satz: satz, form: form });
+  });
+  return treffer;
+}
+
+// Steht dieses Wort als eigenes Wort im Satz? Groß am Satzanfang zählt mit,
+// eine Teilzeichenkette mitten in einem anderen Wort nicht.
+function lueckeFindet(ru, form) {
+  var wörter = ru.split(/[\s.,!?;:]+/);
+  for (var i = 0; i < wörter.length; i++) {
+    if (wörter[i].toLowerCase() === form.toLowerCase()) return true;
+  }
+  return false;
+}
+
+// Den Satz mit der Lücke — die getroffene Stelle wird zum Strich, alles andere
+// bleibt stehen, samt Satzzeichen.
+function lueckeText(ru, form) {
+  var raus = false;
+  return ru.replace(/[^\s.,!?;:]+/g, function (w) {
+    if (!raus && w.toLowerCase() === form.toLowerCase()) { raus = true; return '\u2014\u2014'; }
+    return w;
+  });
+}
+
+// Drei Ablenker: andere Formen desselben Wortes. Das ist der eigentliche
+// Gewinn — wer zwischen книга, книгу und книге wählt, lernt die Endung, nicht
+// die Vokabel.
+function lueckeAblenker(word, richtig) {
+  var rollen = LUECKE_ROLLEN[istNomen(word.art) ? 'n' : word.art] || [];
+  var kandidaten = [];
+  var gesehen = {};
+  gesehen[richtig.toLowerCase()] = true;
+  rollen.forEach(function (rolle) {
+    var f = grammForm(word.ru, word.art, rolle);
+    if (f && !gesehen[f.toLowerCase()]) { gesehen[f.toLowerCase()] = true; kandidaten.push(f); }
+  });
+  // Die Grundform selbst ist ein guter Ablenker, wenn sie es nicht schon ist.
+  if (!gesehen[word.ru.toLowerCase()]) kandidaten.push(word.ru);
+  return shuffle(kandidaten).slice(0, 3);
+}
+
 function buildQuestion() {
   var pool = uebPool();
   var word = waehleWort(pool, uebModus === 'lernsets' && uebAuswahl === 'alle');
@@ -5672,6 +5753,27 @@ function buildQuestion() {
   var kachelAb = uebLesen ? 1 : 2;
   if (box < kachelAb) mode = Math.random() < 0.5 ? 'mc-de' : 'mc-ru';
   else mode = canTile ? 'tiles' : 'mc-ru';
+
+  // Sitzt das Wort und steht es in einem lesbaren Satz, wird daraus eine
+  // Lücke — jedes zweite Mal, damit die Kachelaufgabe nicht verschwindet.
+  // Im Lesemodus nicht: Dort geht es um Buchstaben, nicht um Formen.
+  if (box >= SATZ_STUFE && !uebLesen && Math.random() < 0.5) {
+    var stellen = lueckeStellen(word);
+    if (stellen.length) {
+      var stelle = stellen[Math.floor(Math.random() * stellen.length)];
+      var ablenker = lueckeAblenker(word, stelle.form);
+      // Unter zwei Ablenkern wäre es keine Wahl, sondern eine Behauptung.
+      if (ablenker.length >= 2) {
+        return {
+          word: word, mode: 'luecke', satz: stelle.satz, form: stelle.form,
+          luecke: lueckeText(stelle.satz.ru, stelle.form),
+          options: shuffle([stelle.form].concat(ablenker)).map(function (f) {
+            return { id: f, ru: f };
+          })
+        };
+      }
+    }
+  }
 
   if (mode === 'tiles') {
     // Mehr Kacheln als Buchstaben: erst dadurch zeigt sich, ob die Schreibweise
@@ -5982,12 +6084,15 @@ function uebPruefen() {
       return q.tiles.filter(function (t) { return t.key === k; })[0].ch;
     }).join('');
     uebCorrect = normalize(attempt) === normalize(q.word.ru);
+  } else if (q.mode === 'luecke') {
+    uebCorrect = uebPicked === q.form;
   } else {
     uebCorrect = uebPicked === q.word.id;
   }
   leseMeldung = null;
+  var loesung = q.mode === 'luecke' ? q.form : q.word.ru;
   kommentarSetzen({
-    ok: uebCorrect, aufgedeckt: uebRevealed, loesung: q.word.ru,
+    ok: uebCorrect, aufgedeckt: uebRevealed, loesung: loesung,
     eingabe: attempt, getippt: false,
     daneben: q.mode === 'tiles' ? danebenZeichen(attempt, q.word.ru) : (uebCorrect ? 0 : 99)
   });
@@ -6063,6 +6168,11 @@ function renderUeben() {
   var promptRu = q.mode === 'mc-de';
   var prompt = (q.mode === 'tiles' || q.mode === 'mc-ru') ? q.word.de : q.word.ru;
   var taskLabel = q.mode === 'mc-de' ? 'Was bedeutet …' : q.mode === 'mc-ru' ? 'Welches Wort passt?' : 'Setz das Wort zusammen';
+  if (q.mode === 'luecke') {
+    promptRu = true;
+    prompt = q.luecke;
+    taskLabel = 'Welche Form fehlt?';
+  }
 
   var dots = '';
   for (var i = 0; i <= BOX_MAX; i++) dots += '<span class="' + (i <= box && box > 0 ? 'on' : '') + '"></span>';
@@ -6072,12 +6182,15 @@ function renderUeben() {
   html += '<p class="kachel-ort">' + esc(q.word.theme) + '</p>' +
     '<div class="card">' +
     '<div class="card-meta"><span class="boxdots">' + dots + '</span>' +
-    '<span class="mitte">' + (q.modus === 'tippen' ? 'selbst schreiben'
-      : q.modus === 'kacheln' ? 'legen' : 'wählen') + '</span>' +
+    '<span class="mitte">' + (q.mode === 'luecke' ? 'im Satz'
+      : q.mode === 'tiles' ? 'legen' : 'wählen') + '</span>' +
     '<span></span></div>' +
     '<p class="task-label">' + taskLabel + '</p>' +
-    '<p class="word' + (promptRu ? ' cyr' : '') + '">' + esc(prompt) +
-    hoerknopf(prompt, promptRu ? 'ru' : 'de') + '</p>';
+    '<p class="word' + (promptRu ? ' cyr' : '') +
+      (q.mode === 'luecke' ? ' luecke-satzfrage' : '') + '">' + esc(prompt) +
+    // Bei der Lücke schweigt der Knopf: Vorgelesen würde der Satz **mit** dem
+    // fehlenden Wort — die Antwort also. Nach der Auflösung steht er wieder da.
+    (q.mode === 'luecke' ? '' : hoerknopf(prompt, promptRu ? 'ru' : 'de')) + '</p>';
 
   if (q.mode === 'tiles') {
     html += '<div class="slots cyr">';
@@ -6097,18 +6210,25 @@ function renderUeben() {
     }
   }
 
-  if (q.mode === 'mc-de' || q.mode === 'mc-ru') {
+  // Die deutsche Fassung steht mit da: Ohne sie wäre die Lücke ein Ratespiel
+  // über die Bedeutung statt eine Frage nach der Form.
+  if (q.mode === 'luecke') {
+    html += '<p class="luecke-de">' + esc(q.satz.de) + '</p>';
+  }
+
+  if (q.mode === 'mc-de' || q.mode === 'mc-ru' || q.mode === 'luecke') {
+    var richtigeId = q.mode === 'luecke' ? q.form : q.word.id;
     html += '<div class="options">';
     q.options.forEach(function (opt, oi) {
       var cls = '';
       if (uebPhase === 'feedback') {
-        if (opt.id === q.word.id) cls = ' right';
+        if (opt.id === richtigeId) cls = ' right';
         else if (opt.id === uebPicked) cls = ' wrong';
         else cls = ' muted';
       } else if (opt.id === uebPicked) {
         cls = ' picked';
       }
-      html += '<button class="option' + (q.mode === 'mc-ru' ? ' cyr' : '') + cls + '" data-opt="' + oi + '"' +
+      html += '<button class="option' + (q.mode !== 'mc-de' ? ' cyr' : '') + cls + '" data-opt="' + oi + '"' +
         (uebPhase !== 'ask' ? ' disabled' : '') + '>' +
         esc(q.mode === 'mc-de' ? opt.de : opt.ru) + '</button>';
     });
@@ -6118,10 +6238,20 @@ function renderUeben() {
   if (uebPhase === 'feedback') {
     html += '<div class="feedback ' + (uebCorrect ? 'good' : 'bad') + '">';
     if (uebCorrect) html += '<p>' + ICON.haken + 'Правильно — richtig!</p>';
-    else html += '<p>' + ICON.kreuz + (uebRevealed ? 'Lösung: ' : 'Richtig wäre: ') +
+    else if (q.mode === 'luecke') {
+      html += '<p>' + ICON.kreuz + (uebRevealed ? 'Lösung: ' : 'Richtig wäre: ') +
+        '<strong class="cyr">' + esc(q.form) + '</strong> — von ' +
+        '<span class="cyr">' + esc(q.word.ru) + '</span>, ' + esc(q.word.de) + '</p>';
+    } else html += '<p>' + ICON.kreuz + (uebRevealed ? 'Lösung: ' : 'Richtig wäre: ') +
       '<strong class="cyr">' + esc(q.word.ru) + '</strong> — ' + esc(q.word.de) +
       ' <span class="translit">[' + esc(q.word.tr) + ']</span></p>';
-    html += '</div>' + hoerzeile(q.word.ru, q.word.de) + kommentarHtml() +
+    // Nach der Auflösung steht der ganze Satz da — das ist der Zweck der
+    // Übung: das Wort an seinem Platz zu sehen, nicht die Endung allein.
+    if (q.mode === 'luecke') {
+      html += '<p class="luecke-satz cyr">' + esc(q.satz.ru) + '</p>';
+    }
+    html += '</div>' + hoerzeile(q.mode === 'luecke' ? q.satz.ru : q.word.ru,
+      q.mode === 'luecke' ? q.satz.de : q.word.de) + kommentarHtml() +
       meisterHtml() + leseFallHtml();
   }
 

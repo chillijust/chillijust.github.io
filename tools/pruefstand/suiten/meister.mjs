@@ -158,8 +158,13 @@ warte(function () {}).then(function () {
         if (b) b.click();
       });
     } else {
+      // **Vier Aufgabenformen, nicht drei.** Die Kontext-Lücke fragt nach der
+      // gebeugten Form im Satz, nicht nach der Vokabel — wer hier nur mc-de und
+      // mc-ru kennt, tippt auf gut Glück daneben, und zwar nur manchmal.
+      var richtig = uebQ.mode === 'luecke' ? uebQ.form
+        : uebQ.mode === 'mc-de' ? wort.de : wort.ru;
       alle('[data-opt]').filter(function (b) {
-        return b.textContent === (uebQ.mode === 'mc-de' ? wort.de : wort.ru);
+        return b.textContent === richtig;
       })[0].click();
     }
     q('#uebConfirm').click();
@@ -183,11 +188,14 @@ warte(function () {}).then(function () {
     // und die Zahl der Prüfungen schwankte still von Lauf zu Lauf.
     for (var w = 0; w < 40; w++) { uebNext(true); if (uebQ && uebQ.mode !== 'tiles') break; }
     pruefe('E0 eine Wahlfrage erreicht', !!uebQ && uebQ.mode !== 'tiles', uebQ && uebQ.mode);
+    var eRichtig = uebQ.mode === 'luecke' ? uebQ.form
+      : uebQ.mode === 'mc-de' ? uebQ.word.de : uebQ.word.ru;
     alle('[data-opt]').filter(function (b) {
-      return b.textContent === (uebQ.mode === 'mc-de' ? uebQ.word.de : uebQ.word.ru);
+      return b.textContent === eRichtig;
     })[0].click();
     q('#uebConfirm').click();
-    pruefe('E1 Auffrischen meldet nicht', uebCorrect === true && !q('.meister'));
+    pruefe('E1 Auffrischen meldet nicht', uebCorrect === true && !q('.meister'),
+      uebQ.mode + '/' + String(uebCorrect));
 
     // F · Sätze werden zweimal getippt
     state = defaultState();
