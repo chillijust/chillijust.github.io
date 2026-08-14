@@ -1354,6 +1354,68 @@ Der Name ist mit Bedacht gewählt: **nicht «Tipp»**. Der Knopf «Hinweis» in 
 die Umschrift, ist also Lösungshilfe. Ein Tipp ist etwas, das man sich versagt — Wissen
 soll man sich holen.
 
+## Drei Strengen — und drei Schalter dafür
+
+Etappe 5 hat drei Dinge nachgetragen, die eine Übung von einem Kartenstapel unterscheiden.
+Alle drei sind Einstellungen: Eine Strenge ohne Ausschalter wäre eine Zumutung (ADR 0056).
+
+### Die Nachschrift
+
+Nach einem **Schreibfehler** steht unter der Auflösung die richtige Schreibweise und ein
+leeres Feld. Erst wenn das Wort einmal richtig nachgeschrieben ist, öffnet «Weiter». Ein
+Zustand (`reko`), ein Baustein (`rekoHtml()`), ein Binder (`rekoBinden(neu)`) — geteilt von
+allen fünf Schreibaufgaben: «Tippen», «Übersetzen», «Grammatik», «Schreibung» und dem
+Power-Training. Jede ruft in ihrer Prüffunktion `rekoVerlangen(loesung, getippt, richtig,
+satz)` und hängt `rekoHtml()` zwischen Karte und Knopfreihe.
+
+**Sie bewertet nichts.** Die Antwort ist längst gezählt, die Stufe längst gefallen, die
+Serie längst gerissen — die Nachschrift hält nur den Knopf zu. Wäre sie eine zweite
+Bewertung, könnte man sich aus einem Fehler heraustippen.
+
+Einstellung `rekonstruktion`: **`woerter`** (Vorgabe) · `immer` (auch ganze Sätze) · `nie`.
+Kachelaufgaben bleiben immer draußen — gelegt ist nicht geschrieben —, deutsche Lösungen
+auch, und wer «Aufdecken» drückt, hat nichts behauptet und schreibt nichts nach (ADR 0033).
+
+Seit es sie gibt, blenden «Tippen» und «Übersetzen» ihre eigene Tastatur in der Auflösung
+aus. Sie stand dort schon vorher ohne Eingabefeld; jetzt stünden zwei übereinander.
+
+### Das Tagesmaß
+
+`state.neuHeute = { tag, n }` zählt, wie viel **Neues** heute angefangen wurde.
+Hochgezählt wird in `updateBox()` genau dann, wenn ein Wort noch keinen Zeitstempel hatte —
+davor, denn gleich darauf steht er da. Der Tag ist `heuteNr()`, also `JJJJMMTT` aus dem
+Kalender des Geräts: Wer um 23:50 anfängt, hat um 00:10 einen neuen Tag.
+
+**Gebremst wird an genau einer Stelle:** `waehleWort()` bekommt seinen Vorrat durch
+`uebVorrat()`, und der lässt bei vollem Maß nur durch, was schon einen Zeitstempel hat.
+«Lernsets», «Freestyle» und «Tippen» teilen sich diese Auswahl; in «Tippen» ist der Filter
+ohnehin wirkungslos, dort ist nichts unbekannt.
+
+Wiederholungen, die «Alle»-Stapel und alles Begonnene bleiben **unbegrenzt** — eine Grenze
+darauf wäre eine Grenze aufs Üben und widerspräche ADR 0048.
+
+Bremst das Maß einen ganzen Vorrat aus, steht ein eigener Leerzustand da, mit zwei
+Ausgängen: «Wiederholen» und «Maß ändern». Und `uebungsStand('lernsets')` meldet dann
+`leer`, damit die Empfehlung nicht dorthin schickt.
+
+Einstellung `tagesmass`, Vorgabe 8, Bereich 0–30. **Null heißt «ohne Grenze»** — und der
+Zähler sagt das auch: `zaehlerAnzeige()` tauscht dort beide Hälften, ein Gedankenstrich
+über «ohne Grenze». «0 neu/Tag» hieße wörtlich das Gegenteil.
+
+### Das Fehlerprofil
+
+`state.verwechselt = { wortId: { andereId: wie oft } }`, notiert in `uebPruefen()` bei
+Wortkacheln — nur dort steht auf beiden Seiten eine Vokabel; in der Lücke sind die Kacheln
+Formen. `verwechseltMit(id)` gibt sie sortiert zurück, `buildQuestion()` nimmt daraus
+**höchstens zwei** der drei Ablenker. Drei bekannte machten aus der Frage eine
+Wiedervorlage.
+
+Einstellung `fehlerprofil`, Vorgabe an. `VERWECHSELT_MAX` deckelt jeden Zähler bei 20.
+
+**Weder `verwechselt` noch `neuHeute` stehen im Sicherungscode.** Beides sind Beobachtungen
+über dieses Gerät, kein Lernstand — dieselbe Linie wie `tempo` (ADR 0052) und
+`wortFehler`/`patzer` (ADR 0033).
+
 ## Schreibung — was man hört, und was man schreibt
 
 Russisch schreibt nach dem Wortstamm, nicht nach dem Klang: `молоко` spricht sich
@@ -1640,6 +1702,9 @@ auf einen sinnvollen Bereich:
 | `tastaturAuto` | **an** | Verlangt eine Aufgabe Kyrillisch, klappt die eingebaute Tastatur gleich auf. Aus: Sie holen sie bei Bedarf. Wo Deutsch gefragt ist, kommt sie nie. |
 | `betonung` | `lernen` | Wann Betonungszeichen zu sehen sind: `lernen` (bis Stufe 3), `immer`, `nie` (ADR 0054). |
 | `auffrischen` | 21 | Tage, bis Fertiges einmal zur Sicherheit zurückkommt. **Frei wählbar von 1 bis 365** über einen Zähler mit − und + (ADR 0015). |
+| `tagesmass` | 8 | Wie viele Wörter an einem Tag **neu** anfangen dürfen. Zähler von 0 bis 30; **0 heißt «ohne Grenze»**. Wiederholen bleibt unbegrenzt (ADR 0056). |
+| `fehlerprofil` | an | Ablenker aus den eigenen Verwechslungen statt aus dem Zufall (ADR 0056). |
+| `rekonstruktion` | `woerter` | Nach einem Schreibfehler das Wort einmal nachschreiben: `woerter` · `immer` (auch Sätze) · `nie` (ADR 0056). |
 | `schema` | `dark` | Farbschema: `dark`, `classic`, `gruen`, `blau`, `rosa`. Steuert `data-schema` am `<html>`-Element; `dark` trägt keines. |
 
 Die meisten Einstellungen sind Schalter oder eine Chip-Reihe; `auffrischen` ist ein

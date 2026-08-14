@@ -78,6 +78,15 @@ zweite Flug bricht den ersten ab. Ein runder Knopf, in den sie springt, braucht
   die er nicht kennt** — wer eine nennt, nimmt `{n}`, `{f}` oder `{s}`. Und **gelegt ist
   nicht geschrieben**: Lob für ё, Weichzeichen oder Wortlänge gibt es nur bei getippten
   Aufgaben.
+- **Drei Strengen, drei Schalter** (ADR 0056). **Die Nachschrift** (`reko`,
+  `rekoVerlangen/Html/Fertig/Binden`, geteilt von allen fünf Schreibaufgaben) hält nach
+  einem Schreibfehler den «Weiter»-Knopf zu, **bewertet aber nichts** — sonst tippte man
+  sich aus dem Fehler heraus. Nur bei Getipptem, nur bei Kyrillisch, Sätze nur auf
+  ausdrückliche Ansage. **Das Tagesmaß** bremst an genau einer Stelle (`uebVorrat()` in
+  `waehleWort()`) und **nur Neues** — Wiederholen bleibt unbegrenzt (ADR 0048); der Tag
+  kommt aus `heuteNr()`, dem Kalender des Geräts. **Das Fehlerprofil** (`state.verwechselt`)
+  liefert höchstens **zwei** der drei Ablenker; drei wären eine Wiedervorlage.
+  `verwechselt` und `neuHeute` gehören zum Gerät und stehen **nicht** im Sicherungscode.
 - **Die Lücke ist ein Paar, keine Zahl** (ADR 0055). Eine Aufgabe in «Schreibung» nennt
   beide Schreibweisen — die richtige (`ist`) und die nach Gehör (`klingt`); wo sie sich
   unterscheiden, ist die Lücke. Eine Zahl kann danebenliegen, ohne dass es jemand merkt —
@@ -186,8 +195,10 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   aufgefüllt — `state.settings` nie als Ganzes aus dem Speicher übernehmen. Die
   Einstellungen sind nach Fragen gegliedert: **Lernweg**, **Abgabe**, **Eingabe**,
   **Darstellung und Ton**. Eine **Frist ist ein Zähler**, keine Chip-Reihe (ADR 0015):
-  Grenzen in `auffrischGrenzen()`, Gedrückthalten zählt weiter, und er zeichnet **an Ort
-  und Stelle** nach — ein Renderlauf würde die gehaltene Taste wegwerfen. Soll eine geänderte Vorgabe auch bestehende Geräte
+  Grenzen und Vorgabe je Schlüssel in `ZAEHLER`/`zaehlerGrenzen()`, Gedrückthalten zählt
+  weiter, und er zeichnet **an Ort und Stelle** nach — ein Renderlauf würde die gehaltene
+  Taste wegwerfen. Was im Feld steht, sagt `zaehlerAnzeige()`: Beim Tagesmaß heißt Null
+  «ohne Grenze», nicht «null neue Wörter». Soll eine geänderte Vorgabe auch bestehende Geräte
   erreichen, den Schlüssel umbenennen — der alte Wert fällt in `mergeState()` weg.
 - **Vorlesen nur über `hoerknopf(text, sprache)`** — der Text hängt als `data-say` am
   Knopf, ein einziger Zuhörer auf `#main` bedient alle. Nie einen eigenen Zuhörer je

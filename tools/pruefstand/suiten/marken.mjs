@@ -53,6 +53,10 @@ try {
   ALL_VOCAB.forEach(function (v) { state.boxes[v.id] = BOX_MAX; });
   state.settings.tippenStufe = 2;
   tippenModus = 'lernen';
+  // Die Nachschrift nach einem Schreibfehler hält den «Weiter»-Knopf zu — hier
+  // geht es aber um die Prüfzeile, nicht um das Tor. Die Suite «strenge» prüft
+  // es an seiner eigenen Stelle.
+  state.settings.rekonstruktion = 'nie';
   setTab('tippen');
   // Ein längeres Wort erzwingen: Bei «он» bleibt nach dem Verdrehen des ersten
   // Zeichens nichts Grünes übrig, und die Prüfung flackerte je nach Losglück.

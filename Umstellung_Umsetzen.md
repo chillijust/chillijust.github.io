@@ -24,7 +24,7 @@ man der falschen.
 | 2 | Kontext-Lücke (W3) | 1.6.0 | **fertig** · ADR 0053 · Suite `luecke` |
 | 3 | Betonung | 1.7.0 | **fertig** · ADR 0054 · Suite `betonung` · Sätze folgen mit 6 |
 | 4 | Orthographie ohne Ton (E3 + Prüfwort) | 1.8.0 | **fertig** · ADR 0055 · Suite `schreibung` · neue Übung «Schreibung» |
-| 5 | Handling: Rekonstruktion, Tagesmaß, Fehlerprofil | 1.9.0 | offen |
+| 5 | Handling: Rekonstruktion, Tagesmaß, Fehlerprofil | 1.9.0 | **fertig** · ADR 0056 · Suite `strenge` · drei neue Einstellungen |
 | 6 | Sätze wachsen (kleine Variante) | 2.0.0 | offen |
 | 7 | Buchstaben-Generatoren ohne Ton (D3, D4, D6) | 2.1.0 | offen |
 | 8 | Service Worker | 2.2.0 | offen |
@@ -213,6 +213,26 @@ will, schaltet sie ab.
 **Risiko:** gering technisch, **mittel im Gefühl**. Punkt (a) kann als Gängelung
 ankommen. Wenn er nervt, drehen wir ihn auf „nur bei Wörtern, die schon zurückgefallen sind".
 **Absicherung:** Suite `strenge`.
+
+### Umgesetzt als 1.9.0 — vier Festlegungen, die der Entwurf offenließ
+
+1. **Die Nachschrift bewertet nichts.** Die Antwort ist längst gezählt, die Stufe längst
+   gefallen; die Nachschrift hält nur den «Weiter»-Knopf zu. Wäre sie eine zweite
+   Bewertung, könnte man sich aus einem Fehler heraustippen.
+2. **Der Rückzug ist gleich eingebaut.** Statt eines Schalters gibt es drei Stellungen —
+   **Wörter** (Vorgabe) · **Auch Sätze** · **Nie**. Ein sechswortiger russischer Satz auf
+   einer Bildschirmtastatur ist keine Übung mehr, sondern eine Strafe; wer sie trotzdem
+   will, stellt sie ein. Damit ist die im Plan vorgesehene zweite Runde nicht nötig.
+3. **Null heißt beim Tagesmaß «ohne Grenze», und der Zähler sagt das auch.** «0 neu/Tag»
+   hieße wörtlich das Gegenteil. Bei Null tauschen beide Hälften des Zählers ihren Text.
+4. **Das Fehlerprofil steht nicht im Sicherungscode**, ebenso wenig wie der Tageszähler.
+   Beides sind Beobachtungen über dieses Gerät, kein Lernstand — dieselbe Linie wie beim
+   Tempo (ADR 0052). Ein Tageszähler, der aus einer drei Wochen alten Sicherung
+   zurückkäme, wäre schlicht falsch.
+
+Dazu ein Fund nebenbei: **«Tippen» und «Übersetzen» zeigten ihre Tastatur auch in der
+Auflösung** — ohne Eingabefeld, also als Attrappe. Seit die Nachschrift eine eigene
+mitbringt, standen dort zwei übereinander; jetzt keine.
 
 ---
 

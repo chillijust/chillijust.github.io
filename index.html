@@ -778,6 +778,21 @@ button.built-word:active { transform: scale(.95); }
 }
 .gram-fuss { text-align: left; margin-top: 12px; }
 
+/* Die Nachschrift nach einem Schreibfehler. Sie steht **außerhalb** der
+   Aufgabenkarte: Sie gehört nicht mehr zur Frage, sie ist der Weg weiter. */
+.reko {
+  margin: 12px 0 0; padding: 13px 15px; border-radius: 14px;
+  background: var(--card); border: 1px solid var(--line);
+  border-left: 3px solid var(--bad);
+}
+.reko.sitzt { border-left-color: var(--good); }
+.reko .task-label { margin: 0 0 6px; }
+.reko-vorlage {
+  margin: 0 0 10px; font-family: Georgia, serif; font-size: 22px;
+  color: var(--gold); letter-spacing: .01em;
+}
+.reko textarea { margin: 0; }
+
 /* Die Lücke in «Schreibung». Sie muss auch dann sichtbar breit sein, wenn gar
    kein Zeichen hineingehört — «ь oder nichts» ist eine echte Frage. */
 .ortho-luecke {
@@ -3360,11 +3375,27 @@ var SATZ_STUFE = 2;
 // entscheidet der Nutzer, nicht eine Liste von vier Meinungen.
 var AUFFRISCH_MIN = 1;
 var AUFFRISCH_MAX = 365;
-function auffrischGrenzen(tage) {
-  var n = Math.round(tage);
-  if (!(n >= AUFFRISCH_MIN)) return 21;
-  return Math.min(AUFFRISCH_MAX, n);
+// Das Tagesmaß für **neues** Material. Ohne Grenze lernt man an einem guten
+// Abend vierzig Wörter — und bekommt sie drei Wochen später alle am selben Tag
+// zurück. Null heißt: keine Grenze; darüber gibt es keine, denn jenseits von
+// dreißig neuen Wörtern am Tag ist die Zahl keine Bremse mehr (ADR 0056).
+var TAGESMASS_MIN = 0;
+var TAGESMASS_MAX = 30;
+
+// **Grenzen und Vorgabe je Zähler an einer Stelle.** Sonst rechnet die Taste
+// mit anderen Zahlen, als beim Laden geprüft werden — und ein Wert, den man
+// nicht eintippen kann, steht trotzdem im Stand.
+var ZAEHLER = {
+  auffrischen: { min: AUFFRISCH_MIN, max: AUFFRISCH_MAX, vorgabe: 21 },
+  tagesmass: { min: TAGESMASS_MIN, max: TAGESMASS_MAX, vorgabe: 8 }
+};
+function zaehlerGrenzen(key, wert) {
+  var g = ZAEHLER[key];
+  var n = Math.round(wert);
+  if (!(n >= g.min)) return g.vorgabe;
+  return Math.min(g.max, n);
 }
+function auffrischGrenzen(tage) { return zaehlerGrenzen('auffrischen', tage); }
 var STORAGE_KEY = 'russisch_trainer_v1';
 // Stand der ausgelieferten Datei. Wird von tools/build.mjs gesetzt und geht in
 // jedes Ticket ein, damit ein Bericht sagt, welcher Stand gemeint war.
@@ -3372,7 +3403,7 @@ var APP_STAND = '2026-08-14'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '1.8.0'; /* == VERSION == */
+var APP_VERSION = '1.9.0'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -4175,6 +4206,14 @@ function defaultSettings() {
     requireComplete: false,    // Bestätigen erst bei vollständiger Lösung
     tippenStufe: 3,            // ab welcher Leitner-Stufe ein Wort im Tippen erscheint
     auffrischen: 21,           // Tage, bis Fertiges zur Sicherheit noch einmal drankommt
+    // Wie viele **neue** Wörter an einem Tag anfangen dürfen. 0 heißt: keine
+    // Grenze. Wiederholungen bleiben immer unbegrenzt (ADR 0056).
+    tagesmass: 8,
+    // Nach einem Schreibfehler das Wort einmal richtig nachschreiben:
+    // nie · woerter (einzelne Wörter und Formen, Vorgabe) · immer (auch Sätze).
+    rekonstruktion: 'woerter',
+    // Ablenker aus den eigenen Verwechslungen statt aus dem Zufall.
+    fehlerprofil: true,
     // Betonungszeichen: immer · lernen (bis das Wort fast sitzt) · nie
     betonung: 'lernen',
     // Verlangt eine Aufgabe Kyrillisch, kommt die eingebaute Tastatur von
@@ -4221,6 +4260,15 @@ function defaultState() {
     // Richtig gelegt löscht den Eintrag — wie wortFehler eine Momentaufnahme
     // und darum nicht im Sicherungscode (ADR 0035).
     leseFehler: {},
+    // **Womit** ein Wort verwechselt wurde, nicht nur *dass* es falsch war:
+    // { wortId: { andereId: wie oft } }. Daraus kommen die Ablenker (ADR 0056).
+    // Eine Beobachtung, kein Lernstand — darum wie `tempo` nicht im
+    // Sicherungscode.
+    verwechselt: {},
+    // Wie viel **Neues** heute schon angefangen wurde: { tag, n }. Der Tag ist
+    // eine Zahl aus dem Kalender des Geräts, damit kein Zeitzonenversatz einen
+    // Tag verschluckt. Gehört zum Gerät, nicht in die Sicherung.
+    neuHeute: { tag: 0, n: 0 },
     zuletzt: null,             // { uebung, zeit } — woran zuletzt gearbeitet wurde
     streak: 0,
     bestStreak: 0,
@@ -4265,6 +4313,8 @@ function mergeState(parsed) {
   d.wortFehler = migriereIds(d.wortFehler);
   d.patzer = migriereIds(d.patzer);
   d.leseFehler = nurBuchstaben(d.leseFehler);
+  d.verwechselt = nurVerwechslungen(d.verwechselt);
+  if (!d.neuHeute || typeof d.neuHeute.tag !== 'number') d.neuHeute = { tag: 0, n: 0 };
   d.gefeiert = nurJubelmarken(d.gefeiert);
   // «Zuletzt» zeigt auf eine Übung, die es noch gibt — sonst führte die
   // Empfehlung nach einem Umbau ins Leere.
@@ -4289,6 +4339,10 @@ function mergeState(parsed) {
     var stufe = d.settings.tippenStufe;
     if (!(stufe >= 1 && stufe <= BOX_MAX)) d.settings.tippenStufe = 3;
     d.settings.auffrischen = auffrischGrenzen(d.settings.auffrischen);
+    d.settings.tagesmass = zaehlerGrenzen('tagesmass', d.settings.tagesmass);
+    if (['nie', 'woerter', 'immer'].indexOf(d.settings.rekonstruktion) === -1) {
+      d.settings.rekonstruktion = 'woerter';
+    }
     // Gefragt ist der gespeicherte Wert, nicht der verschmolzene: Ein Stand von
     // vor ADR 0039 führt gar kein Schema, und die Vorgabe «dark» wäre gültig —
     // die Übersetzung der beiden alten Achsen käme nie zum Zug.
@@ -4346,6 +4400,26 @@ function nurBausteine(obj) {
   GRAMMATIK.forEach(function (b) { bekannt[b.id] = true; });
   var neu = {};
   Object.keys(obj).forEach(function (k) { if (bekannt[k]) neu[k] = obj[k]; });
+  return neu;
+}
+
+// Das Verwechslungsprofil führt Wörter auf beiden Seiten — außen das gefragte,
+// innen das gewählte. Beide müssen den Umbenennungen folgen, sonst schleppt es
+// Kennungen mit, die es nicht mehr gibt.
+function nurVerwechslungen(obj) {
+  if (!obj || typeof obj !== 'object') return {};
+  var neu = {};
+  Object.keys(obj).forEach(function (k) {
+    if (!VOKABEL[k]) return;
+    var innen = obj[k];
+    if (!innen || typeof innen !== 'object') return;
+    var sauber = {};
+    var wieviele = 0;
+    Object.keys(innen).forEach(function (j) {
+      if (j !== k && VOKABEL[j] && innen[j] > 0) { sauber[j] = innen[j]; wieviele++; }
+    });
+    if (wieviele) neu[k] = sauber;
+  });
   return neu;
 }
 
@@ -5121,9 +5195,70 @@ function tempoSchnitt(tab) {
   return (t && t.n >= 5) ? t.ms / t.n / 1000 : null;
 }
 
+// ── Tagesmaß ────────────────────────────────────────────────
+// Ohne Grenze lernt man an einem guten Abend vierzig neue Wörter — und bekommt
+// sie drei Wochen später alle am selben Tag zurück. Die Lawine steht dann nicht
+// im Kalender, sie steht im Lernstand, und sie kommt bestimmt.
+//
+// **Gebremst wird nur Neues.** Wiederholungen, die «Alle»-Stapel und alles,
+// womit schon einmal gearbeitet wurde, bleiben unbegrenzt — eine Grenze darauf
+// wäre eine Grenze aufs Üben und widerspräche ADR 0048.
+//
+// Der Tag kommt aus dem Kalender des Geräts, nicht aus einer Millisekundenzahl:
+// Wer um 23:50 anfängt, hat um 00:10 einen neuen Tag, und das ist richtig so.
+function heuteNr() {
+  var d = new Date();
+  return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+}
+function neuHeute() {
+  var h = state.neuHeute;
+  return (h && h.tag === heuteNr()) ? (h.n || 0) : 0;
+}
+function neuGezaehlt() {
+  var heute = heuteNr();
+  if (!state.neuHeute || state.neuHeute.tag !== heute) state.neuHeute = { tag: heute, n: 0 };
+  state.neuHeute.n++;
+}
+function tagesmassVoll() {
+  var grenze = state.settings.tagesmass;
+  return !!grenze && neuHeute() >= grenze;
+}
+// Was aus einem Vorrat trotz voller Bremse noch drankommen darf: alles, womit
+// schon einmal gearbeitet wurde.
+function uebVorrat(pool) {
+  if (!tagesmassVoll()) return pool;
+  return pool.filter(function (v) { return state.lastSeen[v.id]; });
+}
+
+// ── Fehlerprofil ────────────────────────────────────────────
+// Der Bestand merkte sich, *dass* etwas falsch war. Womit es verwechselt wurde,
+// ging verloren — und genau das ist die Auskunft, aus der eine Übung besser
+// wird als ein Kartenstapel: Wer «сестра» für «сестру» hält, soll die beiden
+// wiedersehen, nicht «автобус».
+var VERWECHSELT_MAX = 20;   // mehr sagt nichts mehr, macht den Stand aber größer
+function verwechseltNotieren(gefragt, gewaehlt) {
+  if (!state.settings.fehlerprofil) return;
+  if (!gefragt || !gewaehlt || gefragt === gewaehlt) return;
+  if (!VOKABEL[gefragt] || !VOKABEL[gewaehlt]) return;
+  var topf = state.verwechselt[gefragt] || (state.verwechselt[gefragt] = {});
+  topf[gewaehlt] = Math.min(VERWECHSELT_MAX, (topf[gewaehlt] || 0) + 1);
+}
+// Die eigenen Verwechslungen zu einem Wort, die häufigste zuerst.
+function verwechseltMit(id) {
+  if (!state.settings.fehlerprofil) return [];
+  var topf = state.verwechselt[id];
+  if (!topf) return [];
+  return Object.keys(topf).sort(function (a, b) { return topf[b] - topf[a]; })
+    .map(function (k) { return VOKABEL[k]; })
+    .filter(function (v) { return !!v; });
+}
+
 function updateBox(id, correct) {
   tempoNotieren();
   var cur = state.boxes[id] || 0;
+  // **Neu ist, was noch nie dran war.** Der Zeitstempel fehlt genau dann, und
+  // gleich darauf steht er da — also zählt es hier, davor.
+  if (!state.lastSeen[id]) neuGezaehlt();
   state.boxes[id] = correct ? Math.min(BOX_MAX, cur + 1) : Math.max(0, cur - 1);
   state.lastSeen[id] = Date.now();
   state.streak = correct ? state.streak + 1 : 0;
@@ -5921,6 +6056,9 @@ function uebungsStand(id) {
   var jetzt = Date.now();
   if (id === 'lernsets') {
     var set = LERNSETS[aktuellesSet()];
+    // Bremst das Tagesmaß das ganze Set aus, ist hier nichts zu holen — und
+    // eine Übung ohne Arbeit wird nie empfohlen.
+    if (!uebVorrat(set.woerter).length) return { text: 'Tagesmaß erreicht', leer: true };
     var offen = set.woerter.filter(function (v) { return (state.boxes[v.id] || 0) < SATZ_STUFE; }).length;
     return offen
       ? { text: 'Set ' + (aktuellesSet() + 1) + ' · ' + offen + ' offen', warm: true }
@@ -6171,6 +6309,10 @@ function uebPool() {
 // «nurWiederholen» überspringt die ersten beiden Stufen: Wer ausdrücklich
 // wiederholt, will den ganzen Bestand, nicht bloß das noch Unbekannte.
 function waehleWort(pool, nurWiederholen) {
+  // **Die eine Stelle, an der das Tagesmaß greift** (ADR 0056). Sie liegt hier,
+  // weil «Lernsets», «Freestyle» und «Tippen» sich diese Auswahl teilen — in
+  // «Tippen» ist der Filter ohnehin wirkungslos, dort ist nichts unbekannt.
+  pool = uebVorrat(pool);
   if (!pool.length) return null;
   var jetzt = Date.now();
   var faellige = pool.filter(function (v) { return (state.boxes[v.id] || 0) > 0 && faellig(v, jetzt); });
@@ -6331,13 +6473,22 @@ function buildQuestion() {
       tiles: tiles.map(function (ch, k) { return { ch: ch, key: k }; })
     };
   }
-  // Ablenker aus allem, womit schon gearbeitet wurde — sonst wiederholen sich
+  // **Die eigenen Verwechslungen zuerst** (ADR 0056). Wer «сестра» schon einmal
+  // für «сестру» gehalten hat, soll die beiden wiedersehen — das ist der
+  // Unterschied zwischen einem Kartenstapel und einem Trainer. Höchstens zwei
+  // davon: Drei bekannte Ablenker machten aus der Frage eine Wiedervorlage.
+  var distractors = verwechseltMit(word.id).slice(0, 2);
+  // Der Rest aus allem, womit schon gearbeitet wurde — sonst wiederholen sich
   // innerhalb eines Sets immer dieselben drei. Gleiches Thema zuerst, das fordert mehr.
   var quelle = verwechslungsPool();
   if (quelle.length < 4) quelle = ALL_VOCAB;
-  var sameTheme = quelle.filter(function (v) { return v.theme === word.theme && v.id !== word.id; });
-  var others = quelle.filter(function (v) { return v.theme !== word.theme && v.id !== word.id; });
-  var distractors = shuffle(sameTheme).concat(shuffle(others)).slice(0, 3);
+  var drin = { };
+  drin[word.id] = true;
+  distractors.forEach(function (v) { drin[v.id] = true; });
+  var frei = quelle.filter(function (v) { return !drin[v.id]; });
+  var sameTheme = frei.filter(function (v) { return v.theme === word.theme; });
+  var others = frei.filter(function (v) { return v.theme !== word.theme; });
+  distractors = distractors.concat(shuffle(sameTheme)).concat(shuffle(others)).slice(0, 3);
   return { word: word, mode: mode, options: shuffle([word].concat(distractors)) };
 }
 // Setzt die laufende Frage zurück, ohne zu zeichnen.
@@ -6427,6 +6578,7 @@ function ansichtenZuruecksetzen() {
   ptKb = null;
   ptCorrect = null;
   gramRegelNeu = false;
+  reko = null;
   meisterMeldung = null;
 
   faktenFilter = 'gesehen';
@@ -6642,6 +6794,9 @@ function uebPruefen() {
     uebCorrect = uebPicked === q.form;
   } else {
     uebCorrect = uebPicked === q.word.id;
+    // Womit verwechselt wurde — nur bei Wortkacheln, denn nur dort steht auf
+    // beiden Seiten eine Vokabel. In der Lücke sind die Kacheln Formen.
+    if (!uebCorrect && !uebRevealed) verwechseltNotieren(q.word.id, uebPicked);
   }
   leseMeldung = null;
   var loesung = q.mode === 'luecke' ? q.form : q.word.ru;
@@ -6700,9 +6855,39 @@ function renderUeben() {
   }
   if (!uebQ) uebQ = buildQuestion();
   if (!uebQ) {
-    // Leer heißt hier zweierlei. Im Lesemodus kann der Vorrat weggeschmolzen
-    // sein, weil ein Buchstabe zurückgefallen ist — dann muss der Weg hinaus
-    // sichtbar sein, sonst steht man vor einer leeren Seite ohne Knopf.
+    // **Leer heißt hier dreierlei.** Neben dem Lesemodus kann jetzt auch das
+    // Tagesmaß bremsen — dann ist der Vorrat nicht leer, sondern zugehalten,
+    // und das muss dastehen. Ein Ausgang gehört dazu: Wiederholen bleibt immer
+    // erlaubt, und die Grenze steht in den Einstellungen.
+    if (uebPool().length && tagesmassVoll()) {
+      main.innerHTML = '<section>' + uebKopfHtml() +
+        '<div class="leer">' + maskottchen('gross') +
+        '<h3>Das Tagesmaß ist erreicht</h3>' +
+        '<p>' + neuHeute() + ' neue Wörter heute — mehr Neues wäre in drei Wochen eine ' +
+        'Lawine. Wiederholen kannst du weiter, so viel du magst.</p>' +
+        '<div class="btn-row">' +
+        '<button class="btn ghost" id="massEinst">Maß ändern</button>' +
+        '<button class="btn primary" id="massWiederholen">Wiederholen</button>' +
+        '</div></div></section>';
+      var einst = document.getElementById('massEinst');
+      if (einst) einst.addEventListener('click', function () {
+        einstReiter = 'lernweg';
+        setTab('einstellungen');
+      });
+      var wdh = document.getElementById('massWiederholen');
+      if (wdh) wdh.addEventListener('click', function () {
+        if (uebModus === 'lernsets') uebAuswahl = 'alle';
+        else uebThema = 'Alle';
+        uebLesen = false;
+        uebZuruecksetzen();
+        renderUeben();
+        renderKopf();
+      });
+      return;
+    }
+    // Im Lesemodus kann der Vorrat weggeschmolzen sein, weil ein Buchstabe
+    // zurückgefallen ist — dann muss der Weg hinaus sichtbar sein, sonst steht
+    // man vor einer leeren Seite ohne Knopf.
     main.innerHTML = '<section>' + uebKopfHtml() +
       (uebLesen
         ? '<div class="leer">' + maskottchen('gross') +
@@ -7152,6 +7337,10 @@ function trPruefen() {
 function trFinish(ok) {
   trCorrect = ok;
   trPhase = 'feedback';
+  // Nur die russische Seite, und nur wer aufgibt, hat nichts geschrieben. Ein
+  // ganzer Satz ist die Ausnahme, nicht die Vorgabe (ADR 0056).
+  rekoVerlangen(trTask.satz.ru, trTask.art === 'tippen' && !!trTask.loesungRu && !trRevealed,
+    ok, true);
   var vorher = satzBox(trTask.satz);
   satzUpdate(trTask.satz, ok);
   meisterMeldung = null;
@@ -7445,7 +7634,7 @@ function renderUebersetzen() {
     html += '</div>' + hoerzeile(t.ru, t.de) + kommentarHtml() + patzerHtml() + meisterHtml();
   }
 
-  html += '</div><div class="btn-row">';
+  html += '</div>' + rekoHtml() + '<div class="btn-row">';
   if (trPhase === 'ask') {
     html += '<button class="btn ghost" id="trReveal">Aufdecken</button>';
     // Beim Schreiben braucht es die Abgabe immer \u2014 anders als bei den Kacheln
@@ -7455,17 +7644,18 @@ function renderUebersetzen() {
         '>' + (getippt ? 'Pr\u00fcfen' : 'Best\u00e4tigen') + '</button>';
     }
   } else {
-    html += '<button class="btn primary" id="trNext">Weiter \u2192</button>';
+    html += '<button class="btn primary" id="trNext"' + (rekoFertig() ? '' : ' disabled') +
+      '>Weiter \u2192</button>';
   }
   html += '</div>';
 
   // Die eingebaute Tastatur nur, wo sie hilft: Ein deutscher Satz l\u00e4sst sich
   // mit der Ger\u00e4tetastatur schreiben, ein kyrillischer oft nicht.
-  if (getippt && t.loesungRu) {
+  if (getippt && t.loesungRu && trPhase === 'ask') {
     if (trKb === null) trKb = tastaturVorgabe(t.loesungRu);
     html += '<button class="kb-toggle" id="trKbToggle">' +
       (trKb ? 'Tastatur ausblenden' : 'Tastatur einblenden') + '</button>';
-    if (trKb && trPhase === 'ask') html += tastaturHtml('trkey');
+    if (trKb) html += tastaturHtml('trkey');
   }
 
   if (ptOffen()) {
@@ -7559,7 +7749,10 @@ function renderUebersetzen() {
       renderUebersetzen();
     });
   } else {
+    rekoBinden(renderUebersetzen);
     document.getElementById('trNext').addEventListener('click', function () {
+      if (!rekoFertig()) return;
+      reko = null;
       // Der Fakt kommt beim Weitergehen, nicht in der Auflösung.
       if (faktFaellig()) { renderUebersetzen(); return; }
       buildTransTask();
@@ -8099,6 +8292,75 @@ function tastaturHtml(attr) {
   return html + '</div>';
 }
 
+// ── REKONSTRUKTION ──────────────────────────────────────────
+// Die Lösung anzusehen genügt nicht. Wer sich verschreibt, schreibt das Wort
+// einmal richtig nach, bevor es weitergeht — die Hand lernt beim Schreiben,
+// nicht beim Lesen (ADR 0056).
+//
+// **Sie bewertet nichts.** Die Antwort ist längst gezählt, die Stufe längst
+// gefallen; die Nachschrift hält nur den «Weiter»-Knopf zu. Wäre sie eine
+// zweite Bewertung, könnte man sich aus einem Fehler heraustippen.
+//
+// **Nur bei getippten Aufgaben und nur bei Kyrillisch** — gelegt ist nicht
+// geschrieben, und einen deutschen Satz nachzuschreiben lehrt kein Russisch.
+// Ganze Sätze bleiben in der Vorgabe draußen: Sechs Wörter auf einer
+// Bildschirmtastatur sind keine Übung mehr, sondern eine Strafe. Wer sie will,
+// stellt «immer» ein.
+var reko = null;   // { loesung, eingabe, kb } — die verlangte Nachschrift
+
+function rekoVerlangen(loesung, getippt, richtig, satz) {
+  reko = null;
+  var wahl = state.settings.rekonstruktion;
+  if (wahl === 'nie' || !getippt || richtig || !loesung) return;
+  if (satz && wahl !== 'immer') return;
+  reko = { loesung: loesung, eingabe: '', kb: null };
+}
+// Steht der Weg weiter offen? Ohne Nachschrift immer, sonst erst wenn sie sitzt.
+function rekoFertig() {
+  return !reko || normalize(reko.eingabe) === normalize(reko.loesung);
+}
+function rekoHtml() {
+  if (!reko) return '';
+  var fertig = rekoFertig();
+  var html = '<div class="reko' + (fertig ? ' sitzt' : '') + '">' +
+    '<p class="task-label">' + (fertig ? 'Sitzt' : 'Schreib es einmal richtig') + '</p>' +
+    '<p class="reko-vorlage cyr">' + esc(reko.loesung) + '</p>';
+  html += fertig
+    ? pruefzeileHtml(reko.eingabe, reko.loesung, true, 'form')
+    : '<textarea id="rekoInput" rows="1" class="fliess cyr"' +
+      ' lang="ru" autocapitalize="off" autocorrect="off" spellcheck="false"' +
+      ' placeholder="nachschreiben …">' + esc(reko.eingabe) + '</textarea>';
+  html += '</div>';
+  if (!fertig) {
+    if (reko.kb === null) reko.kb = tastaturVorgabe(true);
+    html += '<button class="kb-toggle" id="rekoKbToggle">' +
+      (reko.kb ? 'Tastatur ausblenden' : 'Tastatur einblenden') + '</button>';
+    if (reko.kb) html += tastaturHtml('rekokey');
+  }
+  return html;
+}
+// `neu` zeichnet die laufende Übung noch einmal — die Nachschrift steckt in
+// deren Ansicht, und der «Weiter»-Knopf gehört ihr auch.
+function rekoBinden(neu) {
+  if (!reko) return;
+  var feld = document.getElementById('rekoInput');
+  if (feld) feld.addEventListener('input', function () {
+    reko.eingabe = feld.value;
+    if (rekoFertig()) { ton(true); neu(); }
+  });
+  var kb = document.getElementById('rekoKbToggle');
+  if (kb) kb.addEventListener('click', function () { reko.kb = !reko.kb; neu(); });
+  main.querySelectorAll('[data-rekokey]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      var k = el.dataset.rekokey;
+      reko.eingabe = k === 'BS' ? reko.eingabe.slice(0, -1) : reko.eingabe + k;
+      var f = document.getElementById('rekoInput');
+      if (f) f.value = reko.eingabe;
+      if (rekoFertig()) { ton(true); neu(); }
+    });
+  });
+}
+
 // ── GRAMMATIK ───────────────────────────────────────────────
 // Vokabeln sind Fakten, Regeln sind Funktionen. Darum ist hier die Karteikarte
 // die **Regel** und nicht das Wort: Gemeistert ist sie, wenn sie viermal auf
@@ -8468,6 +8730,7 @@ function gramPruefen() {
     gramMeisterschaft() === GRAMMATIK.length) {
     jubelEinmal('regel', 'regel', { m: GRAMMATIK.length });
   }
+  rekoVerlangen(q.loesung, !!q.tippen, gramCorrect, false);
   meisterTon(gramCorrect);
   zuletztGeuebt('grammatik');
   gramPhase = 'feedback';
@@ -8767,14 +9030,15 @@ function gramUebenHtml(b) {
     html += '</p></div>' + kommentarHtml() + gramWarumHtml(b, q) + meisterHtml();
   }
 
-  html += '</div><div class="btn-row">';
+  html += '</div>' + rekoHtml() + '<div class="btn-row">';
   if (gramPhase === 'ask') {
     html += '<button class="btn ghost" id="gramWarum" aria-expanded="' +
       (gramRegelOffen ? 'true' : 'false') + '" aria-controls="gramRegelKlapp">Mehr \u2026</button>' +
       '<button class="btn primary" id="gramConfirm"' + (gramAbgabeBereit() ? '' : ' disabled') +
       '>' + (q.tippen ? 'Prüfen' : 'Bestätigen') + '</button>';
   } else {
-    html += '<button class="btn primary" id="gramNext">Weiter →</button>';
+    html += '<button class="btn primary" id="gramNext"' + (rekoFertig() ? '' : ' disabled') +
+      '>Weiter →</button>';
   }
   html += '</div>';
   // Die Karte steht immer im Baum, nur zugeklappt — sonst gäbe es nichts, was
@@ -9049,8 +9313,11 @@ function renderGrammatik() {
   if (conf) conf.addEventListener('click', function () {
     if (gramAbgabeBereit()) gramPruefen();
   });
+  rekoBinden(renderGrammatik);
   var next = document.getElementById('gramNext');
   if (next) next.addEventListener('click', function () {
+    if (!rekoFertig()) return;
+    reko = null;
     gramBaustein = null;    // gemeisterte Regel abgeben, sonst dieselbe weiter
     gramFrageBauen();
     renderGrammatik();
@@ -9207,6 +9474,7 @@ function orthoPruefen() {
     orthoMeisterschaft() === ORTHO.length) {
     jubelEinmal('schreibung', 'schreibung', { m: ORTHO.length });
   }
+  rekoVerlangen(q.aufgabe.ist, !!q.tippen, orthoCorrect, false);
   meisterTon(orthoCorrect);
   zuletztGeuebt('schreibung');
   orthoPhase = 'feedback';
@@ -9350,14 +9618,15 @@ function orthoUebenHtml(r) {
       kommentarHtml() + orthoWarumHtml(r, a) + meisterHtml();
   }
 
-  html += '</div><div class="btn-row">';
+  html += '</div>' + rekoHtml() + '<div class="btn-row">';
   if (orthoPhase === 'ask') {
     html += '<button class="btn ghost" id="orthoWarum" aria-expanded="' +
       (orthoRegelOffen ? 'true' : 'false') + '" aria-controls="orthoRegelKlapp">Mehr …</button>' +
       '<button class="btn primary" id="orthoConfirm"' + (orthoAbgabeBereit() ? '' : ' disabled') +
       '>' + (q.tippen ? 'Prüfen' : 'Bestätigen') + '</button>';
   } else {
-    html += '<button class="btn primary" id="orthoNext">Weiter →</button>';
+    html += '<button class="btn primary" id="orthoNext"' + (rekoFertig() ? '' : ' disabled') +
+      '>Weiter →</button>';
   }
   html += '</div>';
   html += '<div class="regelklapp' + (orthoRegelOffen ? ' auf' : '') + '" id="orthoRegelKlapp"' +
@@ -9506,8 +9775,11 @@ function renderSchreibung() {
   if (conf) conf.addEventListener('click', function () {
     if (orthoAbgabeBereit()) orthoPruefen();
   });
+  rekoBinden(renderSchreibung);
   var next = document.getElementById('orthoNext');
   if (next) next.addEventListener('click', function () {
+    if (!rekoFertig()) return;
+    reko = null;
     orthoRegel = null;    // gemeisterte Regel abgeben, sonst dieselbe weiter
     orthoFrageBauen();
     faktFaellig();        // der Fakt liegt beim Weitergehen, nicht in der Auflösung
@@ -9645,6 +9917,7 @@ function ptPruefen() {
   meisterMeldung = null;
   meisterPruefen(vorher, state.boxes[q.wort.id], 'Wort', q.wort.ru + ' — ' + q.wort.de,
     woerterGemeistert() + ' von ' + ALL_VOCAB.length + ' Wörtern');
+  rekoVerlangen(q.wort.ru, q.stufe !== 'kacheln', richtig, false);
   meisterTon(richtig);
   if (richtig) q.eintrag.treffer++;
   else q.eintrag.treffer = Math.max(0, q.eintrag.treffer - 1);
@@ -9735,12 +10008,13 @@ function renderPower() {
       '</p></div>' + hoerzeile(q.wort.ru, q.wort.de) + kommentarHtml() + meisterHtml();
   }
 
-  html += '</div><div class="btn-row">';
+  html += '</div>' + rekoHtml() + '<div class="btn-row">';
   if (ptPhase === 'ask') {
     html += '<button class="btn primary" id="ptConfirm"' + (ptAbgabeBereit() ? '' : ' disabled') +
       '>Prüfen</button>';
   } else {
-    html += '<button class="btn primary" id="ptNext">Weiter →</button>';
+    html += '<button class="btn primary" id="ptNext"' + (rekoFertig() ? '' : ' disabled') +
+      '>Weiter →</button>';
   }
   html += '</div>';
 
@@ -9795,8 +10069,11 @@ function ptBinden() {
   if (confirm) confirm.addEventListener('click', function () {
     if (ptAbgabeBereit()) ptPruefen();
   });
+  rekoBinden(renderPower);
   var next = document.getElementById('ptNext');
   if (next) next.addEventListener('click', function () {
+    if (!rekoFertig()) return;
+    reko = null;
     if (faktFaellig()) { renderPower(); return; }
     ptFrageBauen(); renderPower();
   });
@@ -10086,18 +10363,25 @@ function renderTippen() {
   if (tResult === 'right') html += '<p class="feedback good">' + ICON.haken + 'Правильно — richtig!</p>';
   // Erst nach der Abgabe zu hören: vorher wäre die Aussprache die halbe Antwort.
   if (tResult) html += hoerzeile(w.ru, w.de) + kommentarHtml() + meisterHtml();
-  html += '</div><div class="btn-row">';
+  html += '</div>' + rekoHtml() + '<div class="btn-row">';
   if (!tResult) {
     html += '<button class="btn ghost" id="tHintBtn">Hinweis</button>' +
       '<button class="btn primary" id="tCheck">Prüfen</button>';
   } else {
-    html += '<button class="btn primary" id="tNext">Nächstes Wort \u2192</button>';
+    html += '<button class="btn primary" id="tNext"' + (rekoFertig() ? '' : ' disabled') +
+      '>Nächstes Wort \u2192</button>';
   }
   html += '</div>';
-  html += '<button class="kb-toggle" id="tKbToggle">' + (tKb ? 'Tastatur ausblenden' : 'Tastatur einblenden') + '</button>';
-  // Dieselbe Tastatur wie in den anderen drei Übungen — sie stand hier
-  // gleichlautend ein zweites Mal, und ein Layout an zwei Stellen ist eines zu viel.
-  if (tKb) html += tastaturHtml('key');
+  // **Nur solange es ein Feld gibt.** In der Auflösung ist das Eingabefeld weg,
+  // und eine Tastatur ohne Feld ist eine Attrappe — seit es die Nachschrift
+  // gibt, stünden dazu zwei Tastaturen übereinander.
+  if (!tResult) {
+    html += '<button class="kb-toggle" id="tKbToggle">' +
+      (tKb ? 'Tastatur ausblenden' : 'Tastatur einblenden') + '</button>';
+    // Dieselbe Tastatur wie in den anderen Übungen — sie stand hier
+    // gleichlautend ein zweites Mal, und ein Layout an zwei Stellen ist eines zu viel.
+    if (tKb) html += tastaturHtml('key');
+  }
   html += '<p class="session-info">' + pool.length +
     (tippenModus === 'wiederholung' ? ' zum Auffrischen' : ' offen') + ' · ' +
     stats.correct + ' richtig · ' + stats.wrong + ' falsch' +
@@ -10112,6 +10396,7 @@ function renderTippen() {
     if (tResult) return;
     var ok = normalize(tEingabe) === normalize(w.ru);
     tResult = ok ? 'right' : 'wrong';
+    rekoVerlangen(w.ru, true, ok, false);
     kommentarSetzen({
       ok: ok, loesung: w.ru, eingabe: tEingabe, getippt: true,
       daneben: danebenZeichen(tEingabe, w.ru)
@@ -10139,13 +10424,17 @@ function renderTippen() {
   });
   var checkBtn = document.getElementById('tCheck');
   if (checkBtn) checkBtn.addEventListener('click', check);
+  rekoBinden(renderTippen);
   var nextBtn = document.getElementById('tNext');
   if (nextBtn) nextBtn.addEventListener('click', function () {
+    if (!rekoFertig()) return;
+    reko = null;
     // Der Fakt kommt beim Weitergehen, nicht in der Auflösung.
     if (faktFaellig()) { renderTippen(); return; }
     tippenWeiter();
   });
-  document.getElementById('tKbToggle').addEventListener('click', function () {
+  var tKbKnopf = document.getElementById('tKbToggle');
+  if (tKbKnopf) tKbKnopf.addEventListener('click', function () {
     tKb = !tKb;
     renderTippen();
   });
@@ -10289,11 +10578,19 @@ var zaehlerLief = false;    // hat die Wiederholung schon gezählt?
 
 function zaehlerSchritt(key, schritt) {
   var alt = state.settings[key];
-  var neu = auffrischGrenzen((alt | 0) + schritt);
+  var neu = zaehlerGrenzen(key, (alt | 0) + schritt);
   if (neu === alt) return false;
   state.settings[key] = neu;
   save();
   return true;
+}
+
+// Was im Zähler steht. **Null ist kein Wert, sondern eine Abwesenheit** — «0
+// neu/Tag» hieße «gar nichts Neues», gemeint ist aber «keine Grenze». Darum
+// tauschen beide Hälften den Text.
+function zaehlerAnzeige(key, wert, einheit) {
+  if (key === 'tagesmass' && !wert) return { zahl: '\u2014', einheit: 'ohne Grenze' };
+  return { zahl: String(wert), einheit: einheit };
 }
 
 // Nur die Zahl und die zwei Anschläge, nicht die ganze Ansicht.
@@ -10301,8 +10598,10 @@ function zaehlerFrischen(wo) {
   if (!wo) return;
   var key = wo.querySelector('[data-zaehler]').dataset.zaehler;
   var wert = state.settings[key];
+  var a = zaehlerAnzeige(key, wert, wo.dataset.einheit || '');
   var zahl = wo.querySelector('.zaehler-wert');
-  zahl.firstChild.nodeValue = String(wert);
+  zahl.firstChild.nodeValue = a.zahl;
+  zahl.querySelector('small').textContent = a.einheit;
   wo.querySelectorAll('[data-zaehler]').forEach(function (t) {
     var s = parseInt(t.dataset.schritt, 10);
     t.disabled = s < 0 ? wert <= +wo.dataset.min : wert >= +wo.dataset.max;
@@ -10358,8 +10657,10 @@ function renderEinstellungen() {
   // Ein Wert zum Hoch- und Runterzählen. Für eine **Frist** ist das die
   // ehrlichere Form als vier Chips: Jede Zahl dazwischen ist eine gültige
   // Antwort, und wer 18 Tage will, soll nicht zwischen 14 und 21 wählen müssen.
-  function zaehler(key, titel, hinweis, min, max, einheit) {
+  function zaehler(key, titel, hinweis, einheit) {
+    var g = ZAEHLER[key];
     var wert = s[key];
+    var a = zaehlerAnzeige(key, wert, einheit);
     function taste(schritt, name, symbol, aus) {
       return '<button class="zaehler-taste" data-zaehler="' + key +
         '" data-schritt="' + schritt + '" aria-label="' + esc(name) +
@@ -10369,11 +10670,11 @@ function renderEinstellungen() {
       '<span class="setting-title">' + esc(titel) + '</span>' +
       '<span class="setting-note">' + esc(hinweis) + '</span></span>' +
       '<span class="zaehler" role="group" aria-label="' + esc(titel) + '"' +
-      ' data-min="' + min + '" data-max="' + max + '">' +
-      taste(-1, 'Ein Tag weniger', ICON.minus, wert <= min) +
-      '<span class="zaehler-wert" role="status">' + wert +
-      '<small>' + esc(einheit) + '</small></span>' +
-      taste(1, 'Ein Tag mehr', ICON.plus, wert >= max) +
+      ' data-min="' + g.min + '" data-max="' + g.max + '" data-einheit="' + esc(einheit) + '">' +
+      taste(-1, 'Einen weniger', ICON.minus, wert <= g.min) +
+      '<span class="zaehler-wert" role="status">' + esc(a.zahl) +
+      '<small>' + esc(a.einheit) + '</small></span>' +
+      taste(1, 'Einen mehr', ICON.plus, wert >= g.max) +
       '</span></div>';
   }
 
@@ -10411,7 +10712,15 @@ function renderEinstellungen() {
        { wert: 'nie', text: 'Nie' }]) +
     zaehler('auffrischen', 'Auffrischen nach',
       'Fertig Gelerntes verschwindet aus «Tippen» und «Übersetzen». Nach dieser Frist kommt es einmal zur Sicherheit zurück — richtig beantwortet, und es ist wieder draußen.',
-      AUFFRISCH_MIN, AUFFRISCH_MAX, 'Tage') +
+      'Tage') +
+    zaehler('tagesmass', 'Neue Wörter am Tag',
+      'Wie viele Wörter an einem Tag neu anfangen dürfen. Ohne Grenze lernst du an einem ' +
+      'guten Abend vierzig — und bekommst sie drei Wochen später alle am selben Tag zurück. ' +
+      'Wiederholen bleibt immer unbegrenzt.',
+      'neu/Tag') +
+    schalter('fehlerprofil', 'Ablenker aus deinen Fehlern',
+      'Die App merkt sich, womit du ein Wort verwechselt hast, und stellt genau diese ' +
+      'Wörter wieder nebeneinander. Aus: Die Ablenker kommen aus dem Zufall.') +
     '';
   teile.abgabe =
     schalter('confirmUeben', 'Bestätigen beim Vokabeltraining',
@@ -10420,7 +10729,13 @@ function renderEinstellungen() {
       'Satz erst zusammenstellen, dann mit «Bestätigen» abgeben. Aus: Der Satz zählt, sobald das letzte Wort liegt.') +
     schalter('requireComplete', 'Erst bei vollständiger Lösung',
       'Bestätigen ist erst möglich, wenn alle Buchstaben beziehungsweise Wörter liegen. Verrät dadurch die Länge der Lösung.',
-      ohneBestaetigung) + '';
+      ohneBestaetigung) +
+    wahlText('rekonstruktion', 'Nach einem Schreibfehler',
+      'Die Lösung anzusehen genügt nicht — die Hand lernt beim Schreiben. Wer sich ' +
+      'verschreibt, schreibt das Wort einmal richtig nach, bevor es weitergeht. Gewertet ' +
+      'wird dabei nichts mehr. «Auch Sätze» nimmt ganze Sätze dazu.',
+      [{ wert: 'woerter', text: 'Wörter' }, { wert: 'immer', text: 'Auch Sätze' },
+       { wert: 'nie', text: 'Nie' }]) + '';
   teile.eingabe =
     schalter('tastaturAuto', 'Kyrillische Tastatur von selbst',
       'Verlangt eine Aufgabe Kyrillisch, klappt die eingebaute Tastatur gleich auf. ' +
