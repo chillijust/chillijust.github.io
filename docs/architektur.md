@@ -1576,6 +1576,7 @@ auf einen sinnvollen Bereich:
 | `requireComplete` | aus | „Bestätigen" ist erst möglich, wenn die Lösung vollständig ist. Verrät dadurch deren Länge. |
 | `tippenStufe` | 3 | Ab welcher Leitner-Stufe ein Wort in „Tippen" erscheint (1 bis 4). Ein **gewähltes Lernset sticht diese Schwelle** und beginnt bei 1 (ADR 0048). |
 | `tastaturAuto` | **an** | Verlangt eine Aufgabe Kyrillisch, klappt die eingebaute Tastatur gleich auf. Aus: Sie holen sie bei Bedarf. Wo Deutsch gefragt ist, kommt sie nie. |
+| `betonung` | `lernen` | Wann Betonungszeichen zu sehen sind: `lernen` (bis Stufe 3), `immer`, `nie` (ADR 0054). |
 | `auffrischen` | 21 | Tage, bis Fertiges einmal zur Sicherheit zurückkommt. **Frei wählbar von 1 bis 365** über einen Zähler mit − und + (ADR 0015). |
 | `schema` | `dark` | Farbschema: `dark`, `classic`, `gruen`, `blau`, `rosa`. Steuert `data-schema` am `<html>`-Element; `dark` trägt keines. |
 

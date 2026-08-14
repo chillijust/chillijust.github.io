@@ -22,7 +22,7 @@ man der falschen.
 |---|---|---|---|
 | 1 | Kleinkram mit Sofortnutzen | 1.5.2 | **fertig** · ADR 0052 · Suite `robust` |
 | 2 | Kontext-Lücke (W3) | 1.6.0 | **fertig** · ADR 0053 · Suite `luecke` |
-| 3 | Betonung | 1.7.0 | offen |
+| 3 | Betonung | 1.7.0 | **fertig** · ADR 0054 · Suite `betonung` · Sätze folgen mit 6 |
 | 4 | Orthographie ohne Ton (E3 + Prüfwort) | 1.8.0 | offen |
 | 5 | Handling: Rekonstruktion, Tagesmaß, Fehlerprofil | 1.9.0 | offen |
 | 6 | Sätze wachsen (kleine Variante) | 2.0.0 | offen |

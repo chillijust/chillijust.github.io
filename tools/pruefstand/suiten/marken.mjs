@@ -19,6 +19,11 @@ function verdreht(wort) {
   return (c === 'т' ? 'д' : 'т') + wort.slice(1);
 }
 
+// Der angezeigte Text trägt seit 1.7.0 Betonungszeichen — eine Lesehilfe, die
+// mit der Schreibung nichts zu tun hat. Wer im Text nach einem Wort sucht,
+// sucht darum **ohne** das Zeichen.
+function ohneBetonung(t) { return (t || '').replace(/\u0301/g, ''); }
+
 try {
   // ── A · Die Gestalten ─────────────────────────────────────
   state = defaultState();
@@ -71,7 +76,11 @@ try {
   pruefe('B8 grün und rot gemischt',
     alle('.pruefzeile .z-ok').length > 0 && alle('.pruefzeile .z-weg').length > 0,
     alle('.pruefzeile .z-ok').length + '/' + alle('.pruefzeile .z-weg').length);
-  pruefe('B9 die Lösung steht weiter darunter', main.textContent.indexOf(wort) !== -1);
+  pruefe('B9 die Lösung steht weiter darunter',
+    ohneBetonung(main.textContent).indexOf(wort) !== -1);
+  pruefe('B9b und trägt die Betonung, wenn das Wort eine hat',
+    !BETONUNG[wort] || main.textContent.indexOf('\u0301') !== -1,
+    wort + '/' + String(BETONUNG[wort]));
 
   // Weiter: neues Wort, leeres Feld.
   tippe(q('#tNext'));
@@ -176,7 +185,8 @@ try {
     q('.pruefzeile').textContent === verdreht(pw), q('.pruefzeile').textContent);
   pruefe('D7 grün und rot gemischt',
     alle('.pruefzeile .z-ok').length > 0 && alle('.pruefzeile .z-weg').length > 0);
-  pruefe('D8 das richtige Wort steht weiter darunter', main.textContent.indexOf(pw) !== -1);
+  pruefe('D8 das richtige Wort steht weiter darunter',
+    ohneBetonung(main.textContent).indexOf(pw) !== -1);
 
   // ── E · Kacheln bekommen keine Prüfzeile ──────────────────
   // In «Übersetzen» tun sie es auch nicht — gelegt ist nicht geschrieben.

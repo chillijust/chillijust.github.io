@@ -151,6 +151,12 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   Anführungszeichen. Gliederung über Kommentarbalken.
 - **Alle Ausgaben durch `esc()`**, Ereignisbehandler nach dem Setzen von `innerHTML`
   anhängen, nie als `onclick`-Attribut.
+- **Die Betonung ist eine Zahl** (ADR 0054), keine zweite Schreibweise: `data/betonung.json`
+  sagt, der wievielte Vokal sie trägt. **Nie ins Wort schreiben** — die Kennung im
+  Lernstand *ist* das russische Wort, und ein Tippfehler darin löscht einen Lernstand.
+  Angezeigt **nur** über `ruAnzeige()`/`betontesWort()`; verglichen wird nie mit ihr
+  (`normalize()` wirft U+0301 weg), gesprochen auch nicht. Die Einstellung `betonung`
+  blendet sie ab Stufe 3 aus — im Druck steht keine.
 - **Das Wort steht im Satz** (ADR 0053). «Lernsets» und «Freestyle» haben eine vierte
   Aufgabenform: die **Kontext-Lücke**. Ab `SATZ_STUFE` und nur in einem **freigeschalteten**
   Satz — ein Satz voller unbekannter Wörter erklärt nichts. Die Ablenker sind andere

@@ -2591,6 +2591,310 @@ var TUTORIAL = [
   ['home', '#menuKnopf', 'Hinter den drei Strichen liegen Bilanz, Sicherung, Einstellungen und Tickets. Die Sicherung ist wichtig — dein Fortschritt liegt nur auf diesem Gerät.'],
   ['home', '#tutKnopf', 'Diesen Knopf findest du immer auf der Übersicht — ab jetzt ganz unten. Er zeigt dir alles noch einmal, sooft du willst. Los geht es: Die Buchstaben warten.']
 ];
+
+var BETONUNG = {
+  'она': 2,
+  'оно': 2,
+  'они': 2,
+  'это': 1,
+  'привет': 2,
+  'пока': 2,
+  'спасибо': 2,
+  'пожалуйста': 2,
+  'извините': 3,
+  'хорошо': 3,
+  'плохо': 1,
+  'конечно': 2,
+  'ничего': 3,
+  'может быть': 1,
+  'доброе утро': [1, 4],
+  'добрый день': [1, 3],
+  'добрый вечер': [1, 3],
+  'до свидания': 3,
+  'как дела': 3,
+  'добро пожаловать': [2, 4],
+  'через': 1,
+  'моя': 2,
+  'этот': 1,
+  'каждый': 1,
+  'много': 1,
+  'мало': 1,
+  'очень': 1,
+  'сколько': 1,
+  'мама': 1,
+  'папа': 1,
+  'сестра': 2,
+  'бабушка': 1,
+  'дедушка': 1,
+  'подруга': 2,
+  'семья': 2,
+  'жена': 2,
+  'родители': 2,
+  'дядя': 1,
+  'идти': 2,
+  'читать': 2,
+  'писать': 2,
+  'говорить': 3,
+  'работать': 2,
+  'любить': 2,
+  'делать': 1,
+  'книга': 1,
+  'газета': 2,
+  'письмо': 2,
+  'новости': 1,
+  'работа': 2,
+  'город': 1,
+  'улица': 1,
+  'магазин': 3,
+  'школа': 1,
+  'кошка': 1,
+  'собака': 2,
+  'деньги': 1,
+  'домой': 2,
+  'квартира': 2,
+  'комната': 1,
+  'кухня': 1,
+  'окно': 2,
+  'кровать': 2,
+  'диван': 2,
+  'полка': 1,
+  'зеркало': 1,
+  'холодильник': 3,
+  'лампа': 1,
+  'ванная': 1,
+  'туалет': 3,
+  'молоко': 3,
+  'мясо': 1,
+  'рыба': 1,
+  'яблоко': 1,
+  'каша': 1,
+  'масло': 1,
+  'яйцо': 2,
+  'сахар': 1,
+  'картошка': 2,
+  'овощи': 1,
+  'фрукты': 1,
+  'колбаса': 3,
+  'курица': 1,
+  'ужин': 1,
+  'пирог': 2,
+  'мороженое': 2,
+  'вода': 2,
+  'кофе': 1,
+  'пиво': 1,
+  'вино': 2,
+  'водка': 1,
+  'кефир': 2,
+  'компот': 2,
+  'лимонад': 3,
+  'один': 2,
+  'четыре': 2,
+  'восемь': 1,
+  'девять': 1,
+  'десять': 1,
+  'двадцать': 1,
+  'тридцать': 1,
+  'сорок': 1,
+  'пятьдесят': 3,
+  'тысяча': 1,
+  'сегодня': 2,
+  'завтра': 1,
+  'вчера': 2,
+  'сейчас': 2,
+  'утро': 1,
+  'вечер': 1,
+  'минута': 2,
+  'неделя': 2,
+  'месяц': 1,
+  'понедельник': 3,
+  'вторник': 1,
+  'среда': 2,
+  'четверг': 2,
+  'пятница': 1,
+  'суббота': 2,
+  'воскресенье': 3,
+  'полдень': 1,
+  'секунда': 2,
+  'весна': 2,
+  'лето': 1,
+  'осень': 1,
+  'зима': 2,
+  'слушать': 1,
+  'смотреть': 2,
+  'учить': 2,
+  'учиться': 2,
+  'понимать': 3,
+  'хотеть': 2,
+  'видеть': 1,
+  'играть': 2,
+  'ехать': 1,
+  'бежать': 2,
+  'думать': 1,
+  'отвечать': 3,
+  'спрашивать': 1,
+  'открывать': 3,
+  'закрывать': 3,
+  'большой': 2,
+  'маленький': 1,
+  'новый': 1,
+  'старый': 1,
+  'молодой': 3,
+  'хороший': 2,
+  'плохой': 2,
+  'красивый': 2,
+  'горячий': 2,
+  'холодный': 2,
+  'холодно': 1,
+  'тепло': 2,
+  'жарко': 1,
+  'быстрый': 1,
+  'медленный': 1,
+  'интересный': 3,
+  'умный': 1,
+  'сильный': 1,
+  'слабый': 1,
+  'важный': 1,
+  'дорогой': 3,
+  'трудный': 1,
+  'красный': 1,
+  'синий': 1,
+  'голубой': 3,
+  'белый': 1,
+  'серый': 1,
+  'коричневый': 2,
+  'оранжевый': 2,
+  'розовый': 1,
+  'фиолетовый': 3,
+  'светлый': 1,
+  'яркий': 1,
+  'если': 1,
+  'когда': 2,
+  'потому что': 3,
+  'чтобы': 1,
+  'хотя': 2,
+  'нужно': 1,
+  'тоже': 1,
+  'только': 1,
+  'уже': 2,
+  'тогда': 2,
+  'часто': 1,
+  'долго': 1,
+  'сказать': 2,
+  'площадь': 1,
+  'рынок': 1,
+  'университет': 5,
+  'вокзал': 2,
+  'поезд': 1,
+  'автобус': 2,
+  'машина': 2,
+  'метро': 2,
+  'аэропорт': 4,
+  'аптека': 2,
+  'больница': 2,
+  'ресторан': 3,
+  'музей': 2,
+  'церковь': 1,
+  'давать': 2,
+  'покупать': 3,
+  'платить': 2,
+  'помогать': 3,
+  'готовить': 2,
+  'гулять': 2,
+  'нравиться': 1,
+  'стоить': 1,
+  'искать': 2,
+  'встретить': 1,
+  'начинать': 3,
+  'отдыхать': 3,
+  'повторять': 3,
+  'считать': 2,
+  'звонить': 2,
+  'ходить': 2,
+  'носить': 2,
+  'просить': 2,
+  'сидеть': 2,
+  'строить': 1,
+  'помнить': 1,
+  'голова': 3,
+  'ухо': 1,
+  'рука': 2,
+  'нога': 2,
+  'живот': 2,
+  'плечо': 2,
+  'колено': 2,
+  'сердце': 1,
+  'кожа': 1,
+  'волосы': 1,
+  'спина': 2,
+  'палец': 1,
+  'одежда': 2,
+  'рубашка': 2,
+  'футболка': 2,
+  'брюки': 1,
+  'джинсы': 1,
+  'свитер': 1,
+  'платье': 1,
+  'юбка': 1,
+  'куртка': 1,
+  'пальто': 2,
+  'шапка': 1,
+  'обувь': 1,
+  'ботинки': 2,
+  'носки': 2,
+  'перчатки': 2,
+  'очки': 2,
+  'погода': 2,
+  'солнце': 1,
+  'небо': 1,
+  'ветер': 1,
+  'облако': 1,
+  'звезда': 2,
+  'луна': 2,
+  'гроза': 2,
+  'туман': 2,
+  'мороз': 2,
+  'птица': 1,
+  'лошадь': 1,
+  'корова': 2,
+  'свинья': 2,
+  'коза': 2,
+  'утка': 1,
+  'медведь': 2,
+  'лиса': 2,
+  'заяц': 1,
+  'язык': 2,
+  'русский': 1,
+  'музыка': 1,
+  'ручка': 1,
+  'бумага': 2,
+  'телефон': 3,
+  'компьютер': 2,
+  'офис': 1,
+  'вопрос': 2,
+  'сумка': 1,
+  'учитель': 2,
+  'студент': 2,
+  'инженер': 3,
+  'время': 1,
+  'путешествие': 3,
+  'билет': 2,
+  'паспорт': 1,
+  'гостиница': 2,
+  'багаж': 2,
+  'карта': 1,
+  'дорога': 2,
+  'граница': 2,
+  'Москва': 2,
+  'Россия': 2,
+  'деревня': 2,
+  'море': 1,
+  'гора': 2,
+  'дерево': 1,
+  'цветок': 2,
+  'река': 2,
+  'озеро': 1,
+  'остров': 1
+};
 /* == DATEN:ENDE == */
 
 // ── FORMENMASCHINE ──────────────────────────────────────────
@@ -2939,7 +3243,7 @@ var APP_STAND = '2026-08-14'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '1.6.0'; /* == VERSION == */
+var APP_VERSION = '1.7.0'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -3520,7 +3824,57 @@ function naechsterFakt() {
 
 // ── Hilfsfunktionen ─────────────────────────────────────────
 function normalize(s) {
-  return (s || '').toLowerCase().replace(/ё/g, 'е').replace(/[.,!?;:]/g, '').replace(/\s+/g, ' ').trim();
+  // Das Betonungszeichen fliegt zuerst raus: Es ist eine Lesehilfe, keine
+  // Schreibung. Niemand tippt es, und niemand soll dafür bestraft werden, wenn
+  // es doch einmal in einer Zwischenablage steckt.
+  return (s || '').replace(/\u0301/g, '')
+    .toLowerCase().replace(/ё/g, 'е').replace(/[.,!?;:]/g, '').replace(/\s+/g, ' ').trim();
+}
+
+// ── Betonung ────────────────────────────────────────────────
+// Ohne sie lässt sich ein russisches Wort nicht aussprechen: Der betonte Vokal
+// klingt voll, alle anderen fallen zusammen — молоко́ heißt gesprochen
+// «malakó». Die Angabe steht als **Zahl** in `data/betonung.json` (der
+// wievielte Vokal), nie als zweite Schreibweise des Wortes: Die Kennung im
+// Lernstand ist das Wort selbst, und ein Tippfehler darin wäre teuer.
+//
+// Gezeigt wird sie **nur** — verglichen wird nie mit ihr. `normalize()` wirft
+// das Zeichen weg, bevor irgendetwas geprüft wird.
+var VOKALE = 'аеёиоуыэюяАЕЁИОУЫЭЮЯ';
+
+// Setzt das Zeichen U+0301 hinter den betonten Vokal. Ohne Angabe, bei einem
+// einsilbigen Wort oder wo ё steht, bleibt das Wort, wie es ist — dort ist die
+// Betonung ohnehin eindeutig.
+function betontesWort(ru) {
+  var wo = BETONUNG[ru];
+  if (!wo) return ru;
+  var liste = typeof wo === 'number' ? [wo] : wo;
+  var n = 0;
+  var raus = '';
+  for (var i = 0; i < ru.length; i++) {
+    raus += ru.charAt(i);
+    if (VOKALE.indexOf(ru.charAt(i)) !== -1) {
+      n++;
+      if (liste.indexOf(n) !== -1) raus += '\u0301';
+    }
+  }
+  return raus;
+}
+
+// Wann sie zu sehen ist. «lernen» ist die Vorgabe: solange das Wort noch nicht
+// sitzt. Wer es kann, soll es lesen wie im Buch — dort steht kein Zeichen.
+function betonungZeigen(ru) {
+  var wahl = state.settings.betonung;
+  if (wahl === 'nie') return false;
+  if (wahl === 'immer') return true;
+  return (state.boxes[ru] || 0) < BOX_MAX - 1;
+}
+
+// Ein russisches Wort, wie es angezeigt gehört. **Immer durch diese Funktion**,
+// nie von Hand — sonst steht das Zeichen an einer Stelle und an der nächsten
+// nicht, und niemand weiß, warum.
+function ruAnzeige(ru) {
+  return betonungZeigen(ru) ? betontesWort(ru) : ru;
 }
 
 // ── Buchstabe für Buchstabe ─────────────────────────────────
@@ -3656,6 +4010,9 @@ function speak(text, sprache) {
 // ihre Knöpfe zu verdrahten.
 function hoerknopf(text, sprache) {
   if (!text) return '';
+  // Das Betonungszeichen ist für die Augen. Was gesprochen wird, bekommt es
+  // nicht — eine Sprachausgabe soll nicht raten müssen, was das soll.
+  text = text.replace(/\u0301/g, '');
   return '<button class="speak" data-say="' + esc(text) + '" data-lang="' +
     (sprache === 'de' ? 'de' : 'ru') + '" aria-label="Anhören' +
     (sprache === 'de' ? ', deutsch' : ', russisch') + '">' + ICON.lautsprecher + '</button>';
@@ -3665,7 +4022,8 @@ function hoerknopf(text, sprache) {
 // Lautsprecher nebeneinander nicht sagen, welcher welche Sprache spricht.
 function hoerzeile(ru, de) {
   var chip = function (text, sprache, name) {
-    return '<button class="chip" data-say="' + esc(text) + '" data-lang="' + sprache + '">' +
+    return '<button class="chip" data-say="' + esc(text.replace(/\u0301/g, '')) +
+      '" data-lang="' + sprache + '">' +
       ICON.lautsprecher + name + '</button>';
   };
   return '<div class="hoerzeile">' + (ru ? chip(ru, 'ru', 'Russisch') : '') +
@@ -3688,6 +4046,8 @@ function defaultSettings() {
     requireComplete: false,    // Bestätigen erst bei vollständiger Lösung
     tippenStufe: 3,            // ab welcher Leitner-Stufe ein Wort im Tippen erscheint
     auffrischen: 21,           // Tage, bis Fertiges zur Sicherheit noch einmal drankommt
+    // Betonungszeichen: immer · lernen (bis das Wort fast sitzt) · nie
+    betonung: 'lernen',
     // Verlangt eine Aufgabe Kyrillisch, kommt die eingebaute Tastatur von
     // selbst — dafür ist sie da. Neuer Schlüssel, weil die alte Vorgabe «aus»
     // war und die neue auch bestehende Geräte erreichen soll.
@@ -6166,7 +6526,7 @@ function renderUeben() {
   var q = uebQ;
   var box = state.boxes[q.word.id] || 0;
   var promptRu = q.mode === 'mc-de';
-  var prompt = (q.mode === 'tiles' || q.mode === 'mc-ru') ? q.word.de : q.word.ru;
+  var prompt = (q.mode === 'tiles' || q.mode === 'mc-ru') ? q.word.de : ruAnzeige(q.word.ru);
   var taskLabel = q.mode === 'mc-de' ? 'Was bedeutet …' : q.mode === 'mc-ru' ? 'Welches Wort passt?' : 'Setz das Wort zusammen';
   if (q.mode === 'luecke') {
     promptRu = true;
@@ -6230,7 +6590,7 @@ function renderUeben() {
       }
       html += '<button class="option' + (q.mode !== 'mc-de' ? ' cyr' : '') + cls + '" data-opt="' + oi + '"' +
         (uebPhase !== 'ask' ? ' disabled' : '') + '>' +
-        esc(q.mode === 'mc-de' ? opt.de : opt.ru) + '</button>';
+        esc(q.mode === 'mc-de' ? opt.de : ruAnzeige(opt.ru)) + '</button>';
     });
     html += '</div>';
   }
@@ -6243,7 +6603,7 @@ function renderUeben() {
         '<strong class="cyr">' + esc(q.form) + '</strong> — von ' +
         '<span class="cyr">' + esc(q.word.ru) + '</span>, ' + esc(q.word.de) + '</p>';
     } else html += '<p>' + ICON.kreuz + (uebRevealed ? 'Lösung: ' : 'Richtig wäre: ') +
-      '<strong class="cyr">' + esc(q.word.ru) + '</strong> — ' + esc(q.word.de) +
+      '<strong class="cyr">' + esc(betontesWort(q.word.ru)) + '</strong> — ' + esc(q.word.de) +
       ' <span class="translit">[' + esc(q.word.tr) + ']</span></p>';
     // Nach der Auflösung steht der ganze Satz da — das ist der Zweck der
     // Übung: das Wort an seinem Platz zu sehen, nicht die Endung allein.
@@ -8719,7 +9079,7 @@ function renderPower() {
   if (ptPhase === 'feedback') {
     html += '<div class="feedback ' + (ptCorrect ? 'good' : 'bad') + '"><p>' +
       (ptCorrect ? ICON.haken + 'Правильно — richtig!'
-        : ICON.kreuz + 'Richtig wäre <strong class="cyr">' + esc(q.wort.ru) + '</strong>') +
+        : ICON.kreuz + 'Richtig wäre <strong class="cyr">' + esc(betontesWort(q.wort.ru)) + '</strong>') +
       '</p></div>' + hoerzeile(q.wort.ru, q.wort.de) + kommentarHtml() + meisterHtml();
   }
 
@@ -9070,7 +9430,7 @@ function renderTippen() {
         ' placeholder="кириллица \u2026" lang="ru" autocapitalize="off"' +
         ' autocorrect="off" spellcheck="false" enterkeyhint="go">');
 
-  if (tResult === 'wrong') html += '<p class="feedback bad">' + ICON.kreuz + 'Richtig: <strong class="cyr">' + esc(w.ru) + '</strong></p>';
+  if (tResult === 'wrong') html += '<p class="feedback bad">' + ICON.kreuz + 'Richtig: <strong class="cyr">' + esc(betontesWort(w.ru)) + '</strong></p>';
   if (tResult === 'right') html += '<p class="feedback good">' + ICON.haken + 'Правильно — richtig!</p>';
   // Erst nach der Abgabe zu hören: vorher wäre die Aussprache die halbe Antwort.
   if (tResult) html += hoerzeile(w.ru, w.de) + kommentarHtml() + meisterHtml();
@@ -9392,6 +9752,11 @@ function renderEinstellungen() {
     wahl('tippenStufe', 'Tippen ab Stufe',
       'Ab welcher Leitner-Stufe ein Wort in «Tippen» erscheint. Stufe 3 heißt: drei Mal nacheinander richtig — richtig getippt macht es dann Stufe 4 voll.',
       [{ wert: 2, text: '2' }, { wert: 3, text: '3' }, { wert: 4, text: '4' }]) +
+    wahlText('betonung', 'Betonungszeichen',
+      'Der betonte Vokal klingt voll, alle anderen fallen zusammen — молоко́ spricht sich «malakó». ' +
+      'Beim Lernen hilft das Zeichen; im Druck steht es nicht.',
+      [{ wert: 'lernen', text: 'Beim Lernen' }, { wert: 'immer', text: 'Immer' },
+       { wert: 'nie', text: 'Nie' }]) +
     zaehler('auffrischen', 'Auffrischen nach',
       'Fertig Gelerntes verschwindet aus «Tippen» und «Übersetzen». Nach dieser Frist kommt es einmal zur Sicherheit zurück — richtig beantwortet, und es ist wieder draußen.',
       AUFFRISCH_MIN, AUFFRISCH_MAX, 'Tage') +

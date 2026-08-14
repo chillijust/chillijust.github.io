@@ -82,6 +82,7 @@ const verben = lies('verben.json').wert;
 const nomen = lies('nomen.json').wert;
 const kommentare = lies('kommentare.json').wert;
 const tutorial = lies('tutorial.json').wert;
+const betonung = lies('betonung.json').wert;
 
 // ── Wortart und Geschlecht ───────────────────────────────────
 // Die Endung der Grundform verrät beides — meistens. Was die Regel liefert,
@@ -500,6 +501,47 @@ if (!Array.isArray(tutorial) || tutorial.length < 5) {
   });
 }
 
+// Betonung: Welcher Vokal trägt sie — gezählt vom ersten, 1-basiert.
+//
+// **Gespeichert wird eine Zahl, nicht das betonte Wort.** Ein zweites Mal
+// hingeschriebenes Wort kann Tippfehler tragen, und ein Tippfehler im Wort wäre
+// hier fatal: Die Kennung im Lernstand *ist* das russische Wort. Eine Zahl kann
+// nur zu groß sein, und genau das steht unten.
+const VOKALE = 'аеёиоуыэюя';
+const vokalzahl = (w) => Array.from(w.toLowerCase()).filter((c) => VOKALE.indexOf(c) !== -1).length;
+{
+  const bekannt = {};
+  Object.keys(vokabeln).forEach((t) => vokabeln[t].forEach((w) => { bekannt[w[0]] = true; }));
+  Object.keys(betonung).forEach((wort) => {
+    if (wort === '_') return;
+    const wo = 'betonung.json «' + wort + '»';
+    if (!bekannt[wort]) return meckern(wo + ': dieses Wort gibt es im Wortschatz nicht');
+    const n = vokalzahl(wort);
+    const liste = Array.isArray(betonung[wort]) ? betonung[wort] : [betonung[wort]];
+    liste.forEach((i) => {
+      if (typeof i !== 'number' || i < 1 || i > n || i !== Math.round(i)) {
+        meckern(wo + ': ' + i + ' ist kein Vokal — das Wort hat ' + n);
+      }
+    });
+    // Mehrere Angaben nur, wo es mehrere Wörter gibt.
+    const woerter = wort.split(' ').length;
+    if (liste.length > woerter) meckern(wo + ': mehr Betonungen als Wörter');
+    if (liste.length > 1 && liste.some((a, k) => k > 0 && a <= liste[k - 1])) {
+      meckern(wo + ': die Angaben stehen nicht in der Reihenfolge der Vokale');
+    }
+  });
+  // **Was fehlt, fällt auf.** Ein Wort ohne Angabe wird ohne Zeichen gezeigt —
+  // das ist zulässig, aber es soll niemandem entgehen.
+  const ohne = [];
+  Object.keys(vokabeln).forEach((t) => vokabeln[t].forEach((w) => {
+    if (vokalzahl(w[0]) > 1 && w[0].indexOf('ё') === -1 && !(w[0] in betonung)) ohne.push(w[0]);
+  }));
+  if (ohne.length) {
+    console.log('Ohne Betonungsangabe: ' + ohne.length + ' — ' + ohne.slice(0, 12).join(' ') +
+      (ohne.length > 12 ? ' …' : ''));
+  }
+}
+
 if (fehler.length) {
   console.error('Prüfung fehlgeschlagen:\n' + fehler.map((f) => '  · ' + f).join('\n'));
   process.exit(1);
@@ -607,6 +649,18 @@ const satzBlock = (name, liste) => {
   return zeilen.join('\n');
 };
 
+// Ein Wort je Zeile, «_» fällt weg — der Erklärtext gehört in die Datei, nicht
+// in die ausgelieferte Datei.
+const betonungBlock = (name, obj) => {
+  const zeilen = ['var ' + name + ' = {'];
+  Object.keys(obj).filter((k) => k !== '_').forEach((k, i, a) => {
+    const wert = Array.isArray(obj[k]) ? '[' + obj[k].join(', ') + ']' : String(obj[k]);
+    zeilen.push('  ' + jsStr(k) + ': ' + wert + (i < a.length - 1 ? ',' : ''));
+  });
+  zeilen.push('};');
+  return zeilen.join('\n');
+};
+
 const block = [
   START,
   objektBlock('VOCAB_THEMES', vokabeln, false),
@@ -628,6 +682,8 @@ const block = [
   listenBlock('KOMMENTARE', kommentare, true),
   '',
   listenBlock('TUTORIAL', tutorial, true),
+  '',
+  betonungBlock('BETONUNG', betonung),
   ENDE
 ].join('\n');
 
