@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Vor-Push-Prüfung für index.html.
+// Vor-Push-Prüfung für index.html **und sw.js**.
 //
 //   node tools/pruefen.mjs
 //
@@ -13,6 +13,11 @@ import { dirname, join } from 'node:path';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
+// Seit 2.4.0 gehört eine zweite Datei zum Auslieferungspfad (ADR 0059). Sie
+// bekommt dieselben Regeln — nur die eine, die für sie sinnlos wäre, nicht:
+// `fetch` ist im Service Worker der Zweck, nicht der Verstoß.
+const SW_PFAD = join(ROOT, 'sw.js');
+const sw = existsSync(SW_PFAD) ? readFileSync(SW_PFAD, 'utf8') : null;
 
 const fehler = [];
 const hinweise = [];
@@ -63,6 +68,47 @@ if (!csp) {
   for (const pflicht of ["default-src 'none'", 'img-src data:']) {
     if (!csp[1].includes(pflicht)) fehler.push('Content-Security-Policy ohne «' + pflicht + '».');
   }
+  // **Die eine benannte Ausnahme.** Ohne sie ließe sich der Service Worker
+  // nicht anmelden; mehr als 'self' darf sie nie werden.
+  if (sw && !csp[1].includes("worker-src 'self'")) {
+    fehler.push("Content-Security-Policy ohne «worker-src 'self'» — sw.js ließe sich " +
+      'nicht anmelden.');
+  }
+  const offen = csp[1].match(/(?:worker|script|connect|img|style|font|frame)-src[^;]*/g) || [];
+  const fremd = offen.filter((teil) => /https?:|\*/.test(teil));
+  if (fremd.length) {
+    fehler.push('Content-Security-Policy lässt Fremdes zu: ' + fremd.join(' · '));
+  }
+}
+
+// 4e · sw.js an derselben Leine. Er läuft auf derselben Domain und darf
+// genauso wenig nach draußen greifen wie die App selbst.
+if (sw) {
+  const swAdressen = [...new Set([...sw.matchAll(/https?:\/\/[^\s'"<>)]+/g)].map((m) => m[0]))];
+  if (swAdressen.length) {
+    fehler.push('Fremdadressen in sw.js: ' + swAdressen.join(', ') +
+      ' — auch der Service Worker greift nirgendwohin.');
+  }
+  if (/\bimportScripts\s*\(/.test(sw)) {
+    fehler.push('sw.js lädt mit importScripts nach — der Auslieferungspfad bleibt bei zwei Dateien.');
+  }
+  const swGeheim = [...sw.matchAll(/\b(gh[pousr]_[A-Za-z0-9]{16,}|github_pat_[A-Za-z0-9_]{20,}|Authorization\s*:|Bearer\s+[A-Za-z0-9._-]{16,})/g)];
+  if (swGeheim.length) {
+    fehler.push('Sieht in sw.js nach einem Zugangsschlüssel aus — auch diese Datei ist öffentlich.');
+  }
+  if (!/var SW_VERSION = '\d+\.\d+\.\d+'; \/\* == VERSION == \*\//.test(sw)) {
+    fehler.push('sw.js ohne gestempelte SW_VERSION — «node tools/build.mjs» setzt sie.');
+  }
+  // **Der Cache muss die Version im Namen tragen.** Sonst legt ein neuer Stand
+  // keinen neuen Speicher an, und der alte bliebe für immer liegen.
+  if (!/CACHE\s*=\s*'[^']*'\s*\+\s*SW_VERSION/.test(sw)) {
+    fehler.push('sw.js: der Cache-Name führt die Version nicht mit — ein neuer Stand ' +
+      'käme dann nie beim Nutzer an.');
+  }
+  // Ohne Ausgang wäre ein verschluckter Worker auf dem Telefon nicht zu retten.
+  if (!/swAufraeumen/.test(html)) {
+    fehler.push('Der Notausgang fehlt: index.html kennt kein swAufraeumen().');
+  }
 }
 
 // 5 · keine Zeichen aus dem Emoji-Bereich (iOS rendert sie als farbige Grafik)
@@ -103,6 +149,7 @@ const marker = html.includes('/* == DATEN:START') && html.includes('/* == DATEN:
 if (!marker) fehler.push('Datenmarker in index.html fehlen — tools/build.mjs kann nicht greifen.');
 
 console.log('index.html · ' + html.split('\n').length + ' Zeilen · ' + (html.length / 1024).toFixed(0) + ' KB');
+if (sw) console.log('sw.js · ' + sw.split('\n').length + ' Zeilen · ' + (sw.length / 1024).toFixed(1) + ' KB');
 hinweise.forEach((h) => console.log('Hinweis: ' + h));
 
 if (fehler.length) {

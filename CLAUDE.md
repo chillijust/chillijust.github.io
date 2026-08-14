@@ -9,8 +9,9 @@ mir, statt still eine Seite zu wählen.
 
 ## Projekt
 
-**Chillingo** — Web-App zum Russischlernen (Kyrillisch lesen, schreiben, übersetzen) als
-**eine einzelne, offline lauffähige HTML-Datei**. Gehostet über GitHub Pages unter
+**Chillingo** — Web-App zum Russischlernen (Kyrillisch lesen, schreiben, übersetzen).
+**Alles Inhaltliche steht in einer einzigen HTML-Datei**; seit 2.4.0 liegt daneben ein
+Service Worker, der nichts anderes tut, als sie beiseitezulegen (ADR 0059). Gehostet über GitHub Pages unter
 https://chillijust.github.io/. Zielgerät: iPhone 15 Pro Max (iOS 26.5.2), installiert über
 „Zum Home-Bildschirm" als PWA im Vollbild.
 
@@ -45,6 +46,12 @@ zweite Flug bricht den ersten ab. Ein runder Knopf, in den sie springt, braucht
 ## Harte Rahmenbedingungen — nicht verhandelbar
 
 - Kein React, kein JSX, kein Build-Schritt, keine npm-Toolchain im Auslieferungspfad.
+- **Zwei Dateien, nicht mehr** (ADR 0059): `index.html` und `sw.js`. Alles Inhaltliche
+  steht in der ersten; der Worker kennt kein Wort Russisch. Die CSP trägt dafür genau eine
+  Ausnahme, `worker-src 'self'` — **`connect-src` bleibt weg**, die Seite selbst baut
+  weiterhin keine Verbindung auf. `pruefen.mjs` hält `sw.js` an dieselbe Leine wie
+  `index.html` und bricht ab, wenn eine Direktive mehr aufmacht. Ein `manifest.json` gibt
+  es bewusst nicht.
 - Keine externen Ressourcen: keine CDNs, keine Google Fonts, keine externen Bilder, keine
   API-Aufrufe. Alles inline. Symbole als Inline-SVG über `ICON` — **keine Emoji-Zeichen**,
   iOS rendert sie als farbige Grafik. `tools/pruefen.mjs` bricht darüber ab. Die
@@ -141,7 +148,8 @@ zweite Flug bricht den ersten ab. Ein runder Knopf, in den sie springt, braucht
 ## Verzeichnisse
 
 ```
-index.html                die App — genau diese Datei wird ausgeliefert
+index.html                die App — hier steht alles Inhaltliche
+sw.js                     Service Worker: legt die App beiseite, mehr nicht (ADR 0059)
 .nojekyll                 schaltet Jekyll ab, niemals löschen
 data/*.json               Lerninhalte, einzige Quelle für Vokabeln/Sätze/Fakten/
                           Tastatur/Buchstaben/Grammatik/Verben/Nomen/Kommentare/
@@ -370,9 +378,13 @@ gibt es den Skill `ticket`.
 - **`speechSynthesis`** braucht auf iOS eine Nutzergeste, liefert Stimmen erst
   verzögert und schweigt im Stummschalter-Modus. Nie in einen Ablauf einbauen, der ohne
   Sprachausgabe nicht funktioniert; Aufrufe in `try/catch`.
-- **Safari-Cache.** Eine bestehende Home-Bildschirm-Verknüpfung hält ihren eigenen
-  Cache. Zeigt sie nach einem Deploy noch den alten Stand: Verknüpfung löschen und neu
-  anlegen.
+- **Der Service Worker liefert, was er gespeichert hat** — aus dem Speicher sofort, im
+  Hintergrund nachsehen (ADR 0059). Der Cache heißt nach der Version; wer den Namen
+  entkoppelt, liefert für immer den alten Stand aus. **Kein `skipWaiting` beim
+  Einrichten:** Der neue Worker wartet, bis der Nutzer die Zeile «Jetzt laden» antippt.
+  Klemmt etwas, gibt es den Notausgang in den Einstellungen unter «App» — er lässt den
+  Lernstand unberührt. (Der frühere Rat «Verknüpfung löschen und neu anlegen» ist damit
+  erledigt.)
 - **Touch-Ziele und `:hover`.** Auf iOS bleibt ein Hover-Zustand nach dem Tippen hängen;
   Zustände deshalb über Klassen setzen, nicht über `:hover`.
 - **Wörter, die dreimal hintereinander falsch geschrieben werden**, fallen auf
@@ -442,8 +454,6 @@ gibt es den Skill `ticket`.
 
 ## Offen
 
-- Service Worker und Manifest stehen im Zielkonflikt mit der Ein-Datei-Vorgabe
-  (ADR 0001). Bewusst unentschieden — vor einer Umsetzung mit mir klären.
 - `apple-mobile-web-app-capable` gilt als veraltet zugunsten von
   `mobile-web-app-capable`. Safari braucht weiterhin die alte Variante; beide zu setzen
   wäre die saubere Lösung, ist aber noch nicht umgesetzt.

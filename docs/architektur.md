@@ -1928,6 +1928,40 @@ Die Pfade stehen einmal in `FLAMME_PFADE`; `ICON.flamme` (weiter Ausschnitt, fü
 Knopf neben anderen Symbolen) und `ICON.flammeEng` (eng beschnitten, damit die Flamme
 ihren Platz in der Reihe füllt) unterscheiden sich allein im `viewBox`.
 
+## Der Service Worker — die zweite Datei
+
+Bis 2.4.0 hing «offline» am Browser-Cache: eine Hoffnung, keine Zusage. `sw.js` (3,8 KB)
+legt die App ausdrücklich beiseite (ADR 0059). **Er kennt kein Wort Russisch** — alles
+Inhaltliche bleibt in `index.html`.
+
+**Aus dem Speicher sofort, im Hintergrund nachsehen.** Die ausgelieferte Datei ist über
+600 KB; «Netz zuerst» hieße, bei jedem Start darauf zu warten. Die gespeicherte Fassung
+geht sofort raus, die Anfrage läuft trotzdem und legt das Ergebnis für das nächste Mal ab.
+
+**Der Cache heißt nach der Version** (`chillingo-2.4.0`), gestempelt von `build.mjs` wie
+`APP_VERSION`. Ohne das legte ein neuer Stand keinen neuen Speicher an — der klassische
+Fehler, bei dem ein Worker für immer die alte Fassung ausliefert. `pruefen.mjs` bricht ab,
+wenn der Name die Version nicht mitführt.
+
+**Kein `skipWaiting` beim Einrichten.** Der neue Worker wartet; die Zeile «Eine neue
+Fassung liegt bereit» erscheint unter dem Kopf, und erst ihr Knopf schickt
+`{ art: 'uebernehmen' }`. Kein Blatt, kein Zwang — und wer sie wegtippt, sieht sie in
+dieser Sitzung nicht wieder.
+
+**Die CSP trägt genau eine Ausnahme:** `worker-src 'self'`. Ohne sie ließe sich nichts
+anmelden, denn `script-src 'unsafe-inline'` erlaubt Inline-Code, aber kein Laden einer
+Skriptdatei. **`connect-src` bleibt weg** — die Seite selbst baut weiterhin keine
+Verbindung auf.
+
+**Der Notausgang** (`swAufraeumen()`, Einstellungen → App) meldet den Worker ab, wirft die
+Caches weg und lädt neu. Auf einem Telefon gibt es keine Entwicklerwerkzeuge; ohne ihn wäre
+ein verschluckter Worker nicht zu retten. **Der Lernstand bleibt** — der liegt im
+`localStorage`.
+
+**Was der Prüfstand nicht kann:** Service Worker laufen nicht unter `file://`. Ob der
+Worker offline trägt, zeigt nur das Gerät. Die Suite `offline` prüft dafür alles andere —
+vor allem, dass die App **ohne** ihn genauso läuft wie vorher.
+
 ## Persistenz
 
 `load()` und `save()` sprechen `localStorage` unter dem Schlüssel

@@ -41,11 +41,20 @@ ist. Den Status zeigt der Reiter **Actions** („pages build and deployment") od
    lang den alten Stand.
 2. Erwartet: die App erscheint sofort — kein Benutzername als Überschrift, kein
    sichtbarer HTML-Text, keine Theme-Leiste.
-3. Auf dem iPhone: Eine bereits abgelegte Home-Bildschirm-Verknüpfung hält ihren eigenen
-   Cache. Zeigt sie noch die alte Seite, die Verknüpfung löschen und neu anlegen. Der
-   Lernstand bleibt dabei erhalten, weil er am Ursprung (`chillijust.github.io`) hängt
-   und nicht an der Verknüpfung — sicherheitshalber vorher trotzdem den Sicherungscode
-   aus der Bilanz notieren.
+3. Auf dem iPhone: **Seit 2.4.0 erledigt das der Service Worker** (ADR 0059). Die
+   abgelegte App startet aus ihrem eigenen Speicher, sieht im Hintergrund nach und meldet
+   sich mit «Eine neue Fassung liegt bereit — jetzt laden». Wer nicht warten will, findet
+   unter **Einstellungen → App** den Knopf «Nachsehen».
+
+   Der frühere Rat — Verknüpfung löschen und neu anlegen — ist damit hinfällig. Klemmt
+   trotzdem etwas, steht am selben Ort der Notausgang «Speicher der App leeren»: Er meldet
+   den Worker ab und lädt neu. Der Lernstand bleibt dabei unberührt, er hängt am Ursprung
+   (`chillijust.github.io`) und nicht am Worker — sicherheitshalber vorher trotzdem den
+   Sicherungscode aus der Bilanz notieren.
+4. **Zwei Dateien gehören zum Stand**, `index.html` und `sw.js`. Beide werden von
+   `build.mjs` mit derselben Version gestempelt; steht in `sw.js` eine andere, legt ein
+   neuer Stand keinen neuen Speicher an und kommt beim Nutzer nie an. `pruefen.mjs`
+   bricht darüber ab.
 
 ## Eigene Domain (geplant: chillingo.…)
 

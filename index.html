@@ -9,8 +9,19 @@
 <!-- Die Regel «keine externen Ressourcen» wird hier für den Browser
      erzwingbar: nichts darf geladen und nichts gesendet werden. Erlaubt sind
      nur eingebettete Bilder (data:) und der eigene Inline-Code. Verweise, die
-     man antippt, bleiben davon unberührt — nur das Ticket-Ziel auf GitHub. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+     man antippt, bleiben davon unberührt — nur das Ticket-Ziel auf GitHub.
+
+     **Eine benannte Ausnahme** (ADR 0059): `worker-src 'self'` lässt genau eine
+     Datei von genau dieser Domain zu — sw.js. Ohne sie ließe sich der Service
+     Worker gar nicht anmelden, denn `script-src 'unsafe-inline'` erlaubt
+     Inline-Code, aber kein Laden einer Skriptdatei.
+
+     **`connect-src` bleibt weg.** Die Seite selbst baut weiterhin keine
+     Verbindung auf — sie meldet den Worker an, mehr nicht; dessen Anfragen
+     laufen in seinem eigenen Zusammenhang. Die Zusage «diese Seite sendet
+     nichts» gilt unverändert, und die Suite «tickets» prüft sie.
+     `pruefen.mjs` hält sw.js an dieselbe Regel wie index.html. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; worker-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
 <meta name="referrer" content="no-referrer">
 <!-- App-Symbol für «Zum Home-Bildschirm»: das Maskottchen aus docs/IMG_2942.png,
      auf 180 px verkleinert und als Daten-URI eingebettet, damit die Datei allein
@@ -778,6 +789,36 @@ button.built-word:active { transform: scale(.95); }
 }
 .gram-fuss { text-align: left; margin-top: 12px; }
 
+/* Was die App über sich weiß, steht rechts wie ein Schalter — nur ist es
+   keiner, sondern eine Auskunft. */
+.app-wert {
+  flex: none; font-size: 14px; color: var(--gold);
+  font-family: Georgia, serif; text-align: right;
+}
+
+/* Die Leiste «neue Fassung bereit». Sie sitzt unter dem Kopf, nicht darüber:
+   Sie unterbricht nichts, sie steht nur da. */
+/* **display: flex sticht [hidden].** Ohne diese Zeile stünde die Leiste immer
+   da — sie war im Bildschirmfoto sofort zu sehen, obwohl das Attribut gesetzt
+   war. Wer einer verborgenen Hülle ein display gibt, nimmt ihr das Verbergen. */
+#swNeu[hidden] { display: none; }
+#swNeu {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 14px calc(9px + env(safe-area-inset-bottom, 0px) * 0);
+  padding-left: max(14px, env(safe-area-inset-left));
+  padding-right: max(14px, env(safe-area-inset-right));
+  background: var(--card); border-bottom: 1px solid var(--line);
+  font-size: 14px; color: var(--text);
+}
+#swNeu span { flex: 1; }
+#swNeu .btn { padding: 8px 14px; font-size: 14px; min-height: 40px; }
+.sw-zu {
+  flex: none; width: 36px; height: 36px; padding: 0;
+  display: grid; place-items: center;
+  background: none; border: 0; color: var(--dim); cursor: pointer;
+}
+.sw-zu .icon { width: 16px; height: 16px; }
+
 /* Die Frage über der Auswahl in den schärfenden Buchstaben-Aufgaben — die
    Merkhilfe beim Minimalpaar, die Bedeutung beim Betonungswort. */
 .abc-frage {
@@ -1213,12 +1254,16 @@ input.err, textarea.err { border-color: var(--bad); }
 }
 .reiter::-webkit-scrollbar { display: none; }
 body.unterwegs .reiter { top: 62px; }
+/* Seit dem fünften Reiter («App») wird es eng: Bei 430 px stand «Darstellung»
+   noch, «App» ragte hinaus. Die Leiste ließ sich zwar schieben, aber ein Reiter,
+   den man erst suchen muss, ist keiner. Also enger und eine Spur kleiner —
+   scrollen bleibt als Rückfall. */
 .reiter-knopf {
-  flex: 1 0 auto; min-height: 44px; padding: 0 14px;
+  flex: 1 0 auto; min-height: 44px; padding: 0 11px;
   border: 1px solid var(--line); border-radius: 999px;
   background: var(--card-2); color: var(--dim);
   box-shadow: inset 0 1px 0 var(--lip);
-  font-size: 13px; cursor: pointer; white-space: nowrap;
+  font-size: 12.5px; cursor: pointer; white-space: nowrap;
   transition: color .18s, border-color .18s, background .18s;
 }
 .reiter-knopf.active { border-color: var(--gold); color: var(--gold); background: var(--card); }
@@ -1595,6 +1640,13 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
       <span id="offlineNote" role="status" aria-live="polite" hidden></span>
       <span id="saveNote" role="status" aria-live="polite"></span>
     </div>
+  </div>
+  <!-- Eine neue Fassung liegt bereit. **Kein Blatt, kein Zwang** — eine Zeile,
+       die man laden oder wegtippen kann (ADR 0059). -->
+  <div id="swNeu" role="status" aria-live="polite" hidden>
+    <span>Eine neue Fassung liegt bereit.</span>
+    <button class="btn ghost" id="swLaden" type="button">Jetzt laden</button>
+    <button class="sw-zu" id="swSpaeter" type="button" aria-label="Später"></button>
   </div>
 </header>
 
@@ -3704,7 +3756,7 @@ var APP_STAND = '2026-08-14'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.3.0'; /* == VERSION == */
+var APP_VERSION = '2.4.0'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -4825,6 +4877,140 @@ function speicherFesthalten() {
   try {
     if (navigator.storage && navigator.storage.persist) navigator.storage.persist();
   } catch (e) { /* ohne Zusage lebt die App weiter, nur riskanter */ }
+}
+
+// ── Der Service Worker ──────────────────────────────────────
+// Bis 2.4.0 hing «offline» am Browser-Cache. Das ging, war aber eine Hoffnung:
+// Safari darf ihn jederzeit wegräumen. Der Worker legt die App ausdrücklich
+// beiseite — aus der Hoffnung wird eine Zusage (ADR 0059).
+//
+// **Alles hier läuft in try/catch und darf fehlschlagen.** Ohne Worker ist die
+// App genau das, was sie vorher war: eine Datei, die im Browser-Cache liegt.
+// Kein Ablauf setzt ihn voraus — und im Prüfstand, der über `file://` lädt,
+// gibt es ihn gar nicht.
+var swStand = { bereit: false, version: '', wartet: null, gemeldet: false };
+
+// Der Hinweis erscheint einmal je Sitzung. Wer ihn wegtippt, hat entschieden;
+// beim nächsten Start steht er wieder da, solange die Fassung wartet.
+function swHinweisZeigen() {
+  var leiste = document.getElementById('swNeu');
+  if (!leiste || swStand.gemeldet) return;
+  swStand.gemeldet = true;
+  leiste.hidden = false;
+}
+function swHinweisBinden() {
+  var zu = document.getElementById('swSpaeter');
+  if (zu) {
+    zu.innerHTML = ICON.kreuz;
+    zu.addEventListener('click', function () {
+      document.getElementById('swNeu').hidden = true;
+    });
+  }
+  var laden = document.getElementById('swLaden');
+  if (laden) laden.addEventListener('click', swUebernehmen);
+}
+
+// Ein Satz statt eines Häkchens: «ja» allein sagt nicht, welcher Stand liegt.
+function swAuskunft() {
+  if (!navigator.serviceWorker) return 'nicht unterstützt';
+  if (!swStand.bereit) return 'noch nicht';
+  return swStand.version ? 'ja · ' + swStand.version : 'ja';
+}
+// Der Notausgang fragt einmal nach. Ein Fehlgriff wäre kein Drama — der
+// Lernstand liegt im localStorage —, aber ein Neuladen ohne Netz schon.
+var swLeerenSicher = false;
+
+function swAnmelden() {
+  try {
+    if (!navigator.serviceWorker || !window.isSecureContext) return;
+    navigator.serviceWorker.register('./sw.js').then(function (reg) {
+      swWartendPruefen(reg);
+      reg.addEventListener('updatefound', function () {
+        var neu = reg.installing;
+        if (!neu) return;
+        neu.addEventListener('statechange', function () { swWartendPruefen(reg); });
+      });
+    }).catch(function () { /* kein Worker, kein Problem */ });
+    // Übernimmt ein neuer Worker, ist die alte Seite veraltet — einmal neu
+    // laden, und zwar nur einmal.
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+      if (swStand.neuladen) window.location.reload();
+    });
+    swVersionHolen();
+  } catch (e) { /* siehe oben */ }
+}
+
+// Wartet eine neue Fassung? Nur dann, und nur wenn schon eine läuft — beim
+// allerersten Besuch ist der «neue» Worker schlicht der erste.
+function swWartendPruefen(reg) {
+  try {
+    var wartet = reg.waiting;
+    if (!wartet || !navigator.serviceWorker.controller) return;
+    swStand.wartet = wartet;
+    swHinweisZeigen();
+  } catch (e) { /* nichts zu melden */ }
+}
+
+// Welche Fassung liegt gespeichert? Der Worker weiß es, die Seite nicht: Sie
+// zeigt ihre eigene, und das ist beim Warten auf eine neue gerade nicht dasselbe.
+function swVersionHolen(fertig) {
+  try {
+    var ctrl = navigator.serviceWorker && navigator.serviceWorker.controller;
+    if (!ctrl) { if (fertig) fertig(); return; }
+    swStand.bereit = true;
+    var kanal = new MessageChannel();
+    kanal.port1.onmessage = function (e) {
+      swStand.version = (e.data && e.data.version) || '';
+      if (fertig) fertig();
+    };
+    ctrl.postMessage({ art: 'version' }, [kanal.port2]);
+  } catch (e) { if (fertig) fertig(); }
+}
+
+// Nachsehen, ob es etwas Neues gibt — der Knopf in den Einstellungen.
+function swNachsehen(fertig) {
+  try {
+    if (!navigator.serviceWorker) { if (fertig) fertig(); return; }
+    navigator.serviceWorker.getRegistration().then(function (reg) {
+      if (!reg) { if (fertig) fertig(); return; }
+      reg.update().then(function () {
+        swWartendPruefen(reg);
+        if (fertig) fertig();
+      }).catch(function () { if (fertig) fertig(); });
+    }).catch(function () { if (fertig) fertig(); });
+  } catch (e) { if (fertig) fertig(); }
+}
+
+// Übernehmen: den wartenden Worker vorlassen und danach einmal neu laden.
+function swUebernehmen() {
+  try {
+    if (!swStand.wartet) { window.location.reload(); return; }
+    swStand.neuladen = true;
+    swStand.wartet.postMessage({ art: 'uebernehmen' });
+  } catch (e) { window.location.reload(); }
+}
+
+// **Der Notausgang.** Ein Worker, der sich verschluckt, ist auf einem Telefon
+// kaum loszuwerden — es gibt keine Entwicklerwerkzeuge und keinen harten
+// Neuladen-Knopf. Also gehört der Ausgang in die App: abmelden, Speicher
+// leeren, neu laden. Der Lernstand liegt im localStorage und bleibt unberührt.
+function swAufraeumen(fertig) {
+  var schritte = [];
+  try {
+    if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+      schritte.push(navigator.serviceWorker.getRegistrations().then(function (alle) {
+        return Promise.all(alle.map(function (r) { return r.unregister(); }));
+      }));
+    }
+    if (window.caches && caches.keys) {
+      schritte.push(caches.keys().then(function (namen) {
+        return Promise.all(namen.map(function (n) { return caches.delete(n); }));
+      }));
+    }
+  } catch (e) { /* was nicht geht, geht nicht */ }
+  Promise.all(schritte).catch(function () { return null; }).then(function () {
+    if (fertig) fertig();
+  });
 }
 
 // Wie viele Tage seit der letzten Sicherung? -1 heißt: noch nie gesichert.
@@ -6932,6 +7118,7 @@ function ansichtenZuruecksetzen() {
   meisterMeldung = null;
   patzerMeldung = null;
   einstReiter = 'lernweg';
+  swLeerenSicher = false;
   faktKarte = '';
   kommentar = '';
 }
@@ -11059,7 +11246,10 @@ var EINST_REITER = [
   { id: 'lernweg', name: 'Lernweg' },
   { id: 'abgabe', name: 'Abgabe' },
   { id: 'eingabe', name: 'Eingabe' },
-  { id: 'darstellung', name: 'Darstellung' }
+  { id: 'darstellung', name: 'Darstellung' },
+  // Fünfter Reiter statt einer Zeile bei «Darstellung»: Was die App über sich
+  // selbst weiß, hat mit Farben nichts zu tun (ADR 0059).
+  { id: 'app', name: 'App' }
 ];
 var einstReiter = 'lernweg';
 
@@ -11362,6 +11552,32 @@ function renderEinstellungen() {
     '<button class="chip" id="tonTest">Abspielen</button></div>' +
     '<p class="settings-note" id="tonStand">' + esc(tonAuskunft()) + '</p>';
 
+  // **Was die App über sich selbst weiß.** Kein Schalter ist hier — es gibt
+  // nichts einzustellen, nur nachzusehen. Der Service Worker ist entweder da
+  // oder nicht; erzwingen lässt er sich nicht (ADR 0059).
+  teile.app =
+    '<div class="setting"><span class="setting-text">' +
+    '<span class="setting-title">Offline bereit</span>' +
+    '<span class="setting-note">Ist die App auf diesem Gerät abgelegt? Dann läuft sie ' +
+    'auch ohne Netz — nicht nur, solange der Browser sie zufällig noch im Zwischenspeicher ' +
+    'hat.</span></span>' +
+    '<span class="app-wert" id="swBereit">' + esc(swAuskunft()) + '</span></div>' +
+    '<div class="setting"><span class="setting-text">' +
+    '<span class="setting-title">Nach Aktualisierung suchen</span>' +
+    '<span class="setting-note">Sieht nach, ob eine neue Fassung bereitliegt. ' +
+    'Findet sich eine, erscheint oben die Zeile zum Laden — von selbst passiert ' +
+    'nichts.</span></span>' +
+    '<button class="chip" id="swSuchen">Nachsehen</button></div>' +
+    '<div class="setting"><span class="setting-text">' +
+    '<span class="setting-title">Speicher der App leeren</span>' +
+    '<span class="setting-note">Der Notausgang: meldet den Service Worker ab, wirft den ' +
+    'abgelegten Stand weg und lädt neu. Dein Lernstand bleibt — der liegt woanders. ' +
+    'Nur nötig, wenn die App nach einer Aktualisierung klemmt.</span></span>' +
+    '<button class="chip" id="swLeeren">' +
+    (swLeerenSicher ? 'Wirklich leeren?' : 'Leeren') + '</button></div>' +
+    '<p class="settings-note">Chillingo ' + esc(APP_VERSION) + ' läuft gerade. ' +
+    'Steht oben eine andere Fassung, wartet sie darauf, übernommen zu werden.</p>';
+
   var reiter = '<div class="reiter" role="tablist">';
   EINST_REITER.forEach(function (r) {
     reiter += '<button class="reiter-knopf' + (r.id === einstReiter ? ' active' : '') +
@@ -11439,6 +11655,30 @@ function renderEinstellungen() {
     });
     b.addEventListener('pointerdown', function () { zaehlerHalten(tick); });
   });
+  // Den App-Reiter gibt es erst, seit es einen Service Worker gibt — und seine
+  // Knöpfe nur, wenn er offen ist.
+  var suchen = document.getElementById('swSuchen');
+  if (suchen) suchen.addEventListener('click', function () {
+    suchen.textContent = 'Sehe nach …';
+    swNachsehen(function () {
+      swVersionHolen(function () {
+        var feld = document.getElementById('swBereit');
+        if (feld) feld.textContent = swAuskunft();
+        if (suchen) suchen.textContent = swStand.wartet ? 'Neue Fassung bereit' : 'Aktuell';
+      });
+    });
+  });
+  var leeren = document.getElementById('swLeeren');
+  if (leeren) leeren.addEventListener('click', function () {
+    if (!swLeerenSicher) {
+      swLeerenSicher = true;
+      renderEinstellungen();
+      return;
+    }
+    leeren.textContent = 'Räume auf …';
+    swAufraeumen(function () { window.location.reload(); });
+  });
+
   // Den Tonknopf gibt es nur auf seinem Reiter.
   var tonKnopf = document.getElementById('tonTest');
   if (tonKnopf) tonKnopf.addEventListener('click', function () {
@@ -12461,6 +12701,8 @@ chiliAktualisieren();
 meldeKnopfZeigen();
 offlineZeigen();
 speicherFesthalten();
+swHinweisBinden();
+swAnmelden();
 
 // Beim allerersten Start das Tutorial anbieten — genau einmal. Wer nie eine
 // Antwort gegeben hat, hat die App noch nicht gesehen; wer abbricht, bekommt

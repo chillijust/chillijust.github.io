@@ -1382,11 +1382,23 @@ if (!/var APP_VERSION = '\d+\.\d+\.\d+';/.test(neu)) {
   process.exit(1);
 }
 
+// **Der Service Worker trägt dieselbe Version.** Sein Cache heißt danach —
+// stünde dort eine alte Zahl, legte ein neuer Stand keinen neuen Speicher an
+// und der alte bliebe für immer liegen (ADR 0059).
+const SW = join(ROOT, 'sw.js');
+const swAlt = readFileSync(SW, 'utf8');
+if (!/var SW_VERSION = '[^']*'; \/\* == VERSION == \*\//.test(swAlt)) {
+  console.error('sw.js: SW_VERSION nicht gefunden — die Version kann nicht gestempelt werden.');
+  process.exit(1);
+}
+const swNeu = swAlt.replace(/var SW_VERSION = '[^']*';/, "var SW_VERSION = '" + version + "';");
+
 // Der Stand allein ist kein Grund, «nicht auf Stand» zu melden: er ändert sich
 // jeden Tag von selbst. Verglichen wird darum ohne ihn.
 const ohneStand = (t) => t.replace(/var APP_STAND = '[^']*';/, '');
 const abweichungen = [];
 if (ohneStand(neu) !== ohneStand(html)) abweichungen.push('index.html');
+if (swNeu !== swAlt) abweichungen.push('sw.js');
 for (const [pfad, inhalt] of dateien) {
   if (readFileSync(join(ROOT, pfad), 'utf8') !== inhalt) abweichungen.push(pfad);
 }
@@ -1399,6 +1411,7 @@ if (nurPruefen) {
   console.log('Alles auf Stand.');
 } else {
   if (neu !== html) writeFileSync(HTML, neu);
+  if (swNeu !== swAlt) writeFileSync(SW, swNeu);
   for (const [pfad, inhalt] of dateien) writeFileSync(join(ROOT, pfad), inhalt);
   console.log(abweichungen.length ? 'Aktualisiert: ' + abweichungen.join(', ') : 'Keine Änderung nötig.');
 }

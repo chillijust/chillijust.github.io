@@ -29,7 +29,7 @@ man der falschen.
 | 6b | Sätze wachsen · Portion 2 + Instrumental | 2.1.0 | **fertig** · 211 Sätze, **100 %** im Lernweg, 35 Lernsets |
 | 6c | Aspektpaare und Futur | 2.2.0 | **fertig** · Zukunft als Baustein · **Aspektübung verworfen**: nur zwei vollendete Verben im Wortschatz |
 | 7 | Buchstaben-Generatoren ohne Ton (D3, D4, D6) | 2.3.0 | **fertig** · ADR 0058 · drei Formen in «Buchstaben», Suite +23 |
-| 8 | Service Worker | 2.4.0 | offen |
+| 8 | Service Worker | 2.4.0 | **fertig** · ADR 0059 · Suite `offline` · **ohne Manifest** |
 
 Stände: `offen` · `läuft` · `fertig` · `verworfen (Grund)`
 
@@ -322,7 +322,7 @@ Aufgabenformen in der bestehenden Übung.
 
 ---
 
-## Etappe 8 · Service Worker → 2.2.0
+## Etappe 8 · Service Worker → 2.4.0
 
 **Entschieden am 2026‑08‑13: ja, und zwar zuletzt.** Er ändert nichts am Lernen, macht
 aber das Ausliefern ab dann angenehmer — und darum kommt er, wenn alles andere steht.

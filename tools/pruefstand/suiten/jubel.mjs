@@ -33,9 +33,15 @@ function setVoll(nr, stufe) {
 // und ein erfundener Modus wie «wahl» lässt die Ansicht auf q.options greifen,
 // die es dort nicht gibt. Also so lange neu bauen, bis eine Auswahlfrage
 // dasteht, und nur den Buchstaben austauschen.
+// **Gebraucht wird eine Frage nach dem Buchstaben selbst.** Die schärfenden
+// Formen (ADR 0058) haben auch Optionen, tragen ihre Lösung aber selbst — dort
+// wäre «der Buchstabe» nicht die richtige Antwort, und der Jubel bliebe aus.
 function abcAufFrage(b) {
-  for (var i = 0; i < 40 && (!abcQ || !abcQ.options); i++) { abcQ = null; abcFrageBauen(); }
-  if (!abcQ || !abcQ.options) { log.push('FAIL Aufbau: keine Auswahlfrage zu bekommen'); return; }
+  var brauchbar = function () {
+    return abcQ && abcQ.options && abcQ.loesung === undefined;
+  };
+  for (var i = 0; i < 80 && !brauchbar(); i++) { abcQ = null; abcFrageBauen(); }
+  if (!brauchbar()) { log.push('FAIL Aufbau: keine Auswahlfrage zu bekommen'); return; }
   abcQ.b = b;
 }
 
