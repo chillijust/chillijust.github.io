@@ -1,6 +1,10 @@
 # 0038 · Der Farbton ist eine zweite Achse
 
-**Stand:** angenommen · 2026-08-08
+**Stand:** **ersetzt** durch [ADR 0039](0039-ein-farbschema-statt-zweier-achsen.md) · 2026-08-08
+
+> Die zweite Achse gibt es nicht mehr: Farbton und Helligkeit sind zu **einem** Schema
+> zusammengefallen (Dark · Classic · Grün · Blau · Rosa). Der Eintrag bleibt stehen, weil
+> er festhält, warum die getrennten Achsen am Gerät nicht trugen.
 
 ## Ausgangslage
 

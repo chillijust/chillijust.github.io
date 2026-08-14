@@ -173,7 +173,10 @@ tools/skaliere.py         PNG auf Icon-Größe bringen (ohne Bildbibliothek)
 tools/appikon.py          App-Symbol bauen: Grund tauschen, Sprechblase umdrehen
 tools/palette.py          getönte Paletten aus dem neutralen Grundton rechnen
 docs/                     Architektur, Datenmodell, Deploy, Entscheidungen (ADRs)
-docs/decisions/           kurze ADRs, fortlaufend nummeriert
+docs/decisions/           kurze ADRs, fortlaufend nummeriert — README.md ist der Index
+docs/archiv/              abgearbeitete Pläne; nichts davon ist offen, nichts wird
+                          nachgeführt. Wo es einer heutigen Regel widerspricht, ist es
+                          überholt
 ```
 
 Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
@@ -397,6 +400,11 @@ gibt es den Skill `ticket`.
   «Kein Netz», nicht «Aktuell» — die App behauptet nichts über einen Stand, den sie nie
   gesehen hat (ADR 0052). «Offline bereit» bleibt richtig, die Auskunft liest nur, was
   auf dem Gerät liegt.
+- **`display` sticht `[hidden]`.** Wer einem Element im Stil ein `display` gibt (etwa
+  `flex`), macht das Attribut `hidden` wirkungslos — die Hinweisleiste des Workers stand
+  darum *immer* da, und die Suite bestätigte es, weil sie das **Attribut** prüfte statt
+  der Sichtbarkeit. Zu jedem solchen Element gehört `[hidden] { display: none; }`, und
+  eine Prüfung fragt `getComputedStyle`.
 - **Touch-Ziele und `:hover`.** Auf iOS bleibt ein Hover-Zustand nach dem Tippen hängen;
   Zustände deshalb über Klassen setzen, nicht über `:hover`.
 - **Wörter, die dreimal hintereinander falsch geschrieben werden**, fallen auf
@@ -469,6 +477,6 @@ gibt es den Skill `ticket`.
 - `apple-mobile-web-app-capable` gilt als veraltet zugunsten von
   `mobile-web-app-capable`. Safari braucht weiterhin die alte Variante; beide zu setzen
   wäre die saubere Lösung, ist aber noch nicht umgesetzt.
-- Eigene Skills unter `.claude/skills/` (github-pages, ios-webapp,
-  vanilla-app-architecture, offline-pwa, lerninhalt-pflege) sind vorgesehen, aber noch
-  nicht angelegt — siehe `docs/uebergabe-prompt.md`.
+- Angelegt sind die Skills `pruefstand` und `ticket`. Weitere (github-pages, ios-webapp,
+  offline-pwa, lerninhalt-pflege) waren einmal vorgesehen; ob sie gebraucht werden, ist
+  offen — bisher hat keine Arbeit an ihnen gefehlt.
