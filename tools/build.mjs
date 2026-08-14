@@ -182,6 +182,24 @@ const genitivMit = (ru, art, tab) => {
   return ru + 'а';
 };
 const genitiv = (ru, art) => genitivMit(ru, art, nomen);
+// Dativ Einzahl — der Fall des Empfängers: «дай маме», «мне нравится».
+// Männlich und sächlich nehmen -у/-ю, weiblich -е. Der Stamm ist derselbe wie
+// im Genitiv; wo der flüchtige Vokal fällt, steht darum auch hier ein Eintrag.
+const dativMit = (ru, art, tab) => {
+  const eigen = tab[ru] || null;
+  if (eigen && eigen.starr) return ru;
+  if (eigen && eigen.dat) return eigen.dat;
+  if (/ия$/.test(ru)) return ru.slice(0, -1) + 'и';
+  if (/(ий|ие)$/.test(ru)) return ru.slice(0, -2) + 'ию';
+  if (/[ая]$/.test(ru)) return ru.slice(0, -1) + 'е';
+  if (/ь$/.test(ru)) return ru.slice(0, -1) + (geschlecht(art) === 'w' ? 'и' : 'ю');
+  if (/о$/.test(ru)) return ru.slice(0, -1) + 'у';
+  // Wie im Genitiv: nach ж ч ш щ ц steht unbetont kein weicher Vokal.
+  if (/е$/.test(ru)) return ru.slice(0, -1) + (/[жчшщц]$/.test(ru.slice(0, -1)) ? 'у' : 'ю');
+  if (/й$/.test(ru)) return ru.slice(0, -1) + 'ю';
+  return ru + 'у';
+};
+const dativ = (ru, art) => dativMit(ru, art, nomen);
 const pluralMit = (ru, tab) => {
   const eigen = tab[ru] || null;
   if (eigen && eigen.starr) return ru;
@@ -278,6 +296,7 @@ const grammForm = (ru, art, rolle) => {
   if (rolle === 'akk') return istNomen(art) ? akkusativ(ru, art) : null;
   if (rolle === 'praep') return istNomen(art) ? praepositiv(ru, art) : null;
   if (rolle === 'gen') return istNomen(art) ? genitiv(ru, art) : null;
+  if (rolle === 'dat') return istNomen(art) ? dativ(ru, art) : null;
   if (rolle === 'plural') return istNomen(art) ? plural(ru, art) : null;
   if (rolle.indexOf('praet') === 0) return art === 'v' ? praeteritum(ru, rolle.slice(5)) : null;
   if (rolle.indexOf('praes') === 0) return art === 'v' ? praesens(ru, rolle.slice(5)) : null;
@@ -286,7 +305,8 @@ const grammForm = (ru, art, rolle) => {
 };
 const GENUS_NAME = { m: 'männlich', w: 'weiblich', s: 'sächlich', p: 'Mehrzahl' };
 const GESCHLECHT_NAME = { m: 'männlich', w: 'weiblich', s: 'sächlich' };
-const ROLLEN = { akk: 'Akkusativ', praep: 'Präpositiv', gen: 'Genitiv', plural: 'Mehrzahl' };
+const ROLLEN = { akk: 'Akkusativ', praep: 'Präpositiv', gen: 'Genitiv', dat: 'Dativ',
+  plural: 'Mehrzahl' };
 PERSONEN.forEach((p) => { ROLLEN['praes' + p] = 'Präsens ' + p; });
 GENERA.forEach((g) => {
   ROLLEN['praet' + g] = 'Vergangenheit ' + GENUS_NAME[g];
@@ -626,6 +646,7 @@ const nomenBlock = (name, obj) => {
     if (a.starr) teile.push('starr: true');
     if (a.praep) teile.push('praep: ' + jsStr(a.praep));
     if (a.gen) teile.push('gen: ' + jsStr(a.gen));
+    if (a.dat) teile.push('dat: ' + jsStr(a.dat));
     if (a.plural) teile.push('plural: ' + jsStr(a.plural));
     zeilen.push('  ' + jsStr(k) + ': { ' + teile.join(', ') + ' }' +
       (i < schluessel.length - 1 ? ',' : ''));
@@ -830,6 +851,7 @@ const jsonNomen = (obj) => {
     if (a.starr) teile.push('"starr": true');
     if (a.praep) teile.push('"praep": ' + jsonStr(a.praep));
     if (a.gen) teile.push('"gen": ' + jsonStr(a.gen));
+    if (a.dat) teile.push('"dat": ' + jsonStr(a.dat));
     if (a.plural) teile.push('"plural": ' + jsonStr(a.plural));
     zeilen.push('  ' + jsonStr(k) + ': { ' + teile.join(', ') + ' }' +
       (i < schluessel.length - 1 ? ',' : ''));
@@ -916,7 +938,7 @@ if (!nomen || typeof nomen !== 'object' || Array.isArray(nomen)) {
     const art = wortart(eintrag);
     if (!istNomen(art)) meckern(wo + ': ist dort kein Nomen');
     if (!a || typeof a !== 'object' || Array.isArray(a)) return meckern(wo + ': erwartet ein Objekt');
-    const FAELLE = ['praep', 'gen', 'plural'];
+    const FAELLE = ['praep', 'gen', 'dat', 'plural'];
     Object.keys(a).forEach((k) => {
       if (k !== 'starr' && !FAELLE.includes(k)) meckern(wo + ': unbekannte Angabe «' + k + '»');
     });
@@ -935,6 +957,7 @@ if (!nomen || typeof nomen !== 'object' || Array.isArray(nomen)) {
     const blank = {
       praep: praepositivMit(ru, geschlecht(art), {}),
       gen: genitivMit(ru, geschlecht(art), {}),
+      dat: dativMit(ru, geschlecht(art), {}),
       plural: pluralMit(ru, {}),
     };
     if (a.starr) {
@@ -955,7 +978,7 @@ if (!nomen || typeof nomen !== 'object' || Array.isArray(nomen)) {
 // zum Entdecken samt Deutungen, die Regel selbst, eine Tabelle und ein
 // Merksatz. Die Aufgabenart verweist auf eine Rolle, die die Maschine kennt.
 const AUFGABEN = ['geschlecht', 'akk', 'praes', 'ichform', 'praep',
-  'gen', 'plural', 'praet', 'adj'];
+  'gen', 'dat', 'plural', 'praet', 'adj'];
 const verbKlasse = (ru) => {
   if (/ться$/.test(ru)) return verbKlasse(ru.slice(0, -2));
   const eigen = verben[ru] || null;

@@ -25,9 +25,11 @@ man der falschen.
 | 3 | Betonung | 1.7.0 | **fertig** · ADR 0054 · Suite `betonung` · Sätze folgen mit 6 |
 | 4 | Orthographie ohne Ton (E3 + Prüfwort) | 1.8.0 | **fertig** · ADR 0055 · Suite `schreibung` · neue Übung «Schreibung» |
 | 5 | Handling: Rekonstruktion, Tagesmaß, Fehlerprofil | 1.9.0 | **fertig** · ADR 0056 · Suite `strenge` · drei neue Einstellungen |
-| 6 | Sätze wachsen (kleine Variante) | 2.0.0 | offen |
-| 7 | Buchstaben-Generatoren ohne Ton (D3, D4, D6) | 2.1.0 | offen |
-| 8 | Service Worker | 2.2.0 | offen |
+| 6a | Sätze wachsen · Portion 1 + Dativ | 2.0.0 | **fertig** · ADR 0057 · Suite `lehrplan` · 102 Sätze, 51 % im Lernweg |
+| 6b | Sätze wachsen · Portion 2 + Instrumental | 2.1.0 | offen |
+| 6c | Sätze wachsen · Portion 3 + Aspekt und Futur | 2.2.0 | offen |
+| 7 | Buchstaben-Generatoren ohne Ton (D3, D4, D6) | 2.3.0 | offen |
+| 8 | Service Worker | 2.4.0 | offen |
 
 Stände: `offen` · `läuft` · `fertig` · `verworfen (Grund)`
 
@@ -281,6 +283,27 @@ Kacheln, an mehr Sets und daran, dass «Übersetzen» deutlich voller wird.
 **Absicherung:** Der Build prüft bereits das meiste. Dazu eine Suite `lehrplan`: Anteil
 der Wörter im Lernweg (Ziel > 90 %), kein Set über `SET_MAX`, jede Stufe hat genug Sätze,
 und die Jubelmarken werden nach dem Neuschnitt korrekt nachgetragen.
+
+### Portion 6a ausgeliefert als 2.0.0
+
+47 Sätze statt der geplanten 30 — die Themen **Farben, Körper, Kleidung und Tiere** lagen
+vollständig außerhalb des Lernwegs, und sie halb zu erschließen hätte wenig gebracht.
+Dazu der **Dativ** wie geplant.
+
+| | vorher | jetzt | Ziel nach 6c |
+|---|---|---|---|
+| Sätze | 55 | **102** | ~150 |
+| Wörter im Lernweg | 133 (34 %) | **201 (51 %)** | > 90 % |
+| Lernsets | 12 | **18** | ~33 |
+| Grammatik-Bausteine | 10 | **11** | 13 |
+
+**Die Portionen bekommen eigene Versionen** (2.0.0 · 2.1.0 · 2.2.0), Etappe 7 und 8
+rücken entsprechend nach. Jede Portion ist für sich lieferbar und geprüft; eine, die
+wochenlang halbfertig herumliegt, wäre das Gegenteil davon.
+
+**Zwei Fehler hat die neue Datenmenge ans Licht gebracht** — beide in ADR 0057
+beschrieben: Die richtige Antwort in der Kontext-Lücke stand am Satzanfang als einzige
+groß da, und der Regel-Jubel behauptete «ZEHN VON ZEHN», als es elf wurden.
 
 ## Etappe 7 · Buchstaben-Generatoren ohne Ton → 2.1.0
 

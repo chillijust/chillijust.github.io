@@ -1174,6 +1174,23 @@ eigenem Stamm mitspielen (`спишь → сплю`). Ihre Ablenker enthalten au
 das es nicht gibt — den ungewandelten Stamm mit der Endung («платю» neben «плачу»). Genau
 das ist der Fehler, um den es geht.
 
+### Der Dativ — und warum er das Gegenteil braucht
+
+`grammForm(ru, art, 'dat')` rechnet den Fall des Empfängers: männlich und sächlich -у/-ю,
+weiblich -е, weiblich auf -ь aber -и, -ия wird -ии. **Der Dativstamm ist der
+Genitivstamm** — wo dort ein Vokal fällt (`день → дня`), fällt er auch hier (`дню`); die
+zwölf Ausnahmen in `nomen.json` folgen darum eins zu eins den Genitiv-Einträgen.
+
+Beim Präpositiv schließt `gramWortPool()` Lebewesen **aus** — «в маме» ist Unsinn. Beim
+Dativ ist es genau umgekehrt: **Empfangen kann nur, wer lebt.** «книге нравится» wäre
+tadellos gebeugt und trotzdem sinnlos, also lässt der Vorrat für ihn nur Belebtes durch.
+Die Regel selbst gilt trotzdem für jedes Nomen; im Satz führt «Wissen» sie vor. Dieselbe
+Vorsicht, andere Richtung (ADR 0043).
+
+Die Personalpronomen (`я → мне`, `он → ему`, …) haben eigene Formen, die keine Regel
+verrät. Sie stehen in der Fußnote des Bausteins und werden **nicht abgefragt** — erklären
+und abfragen sind zwei Dinge.
+
 ### Der Präpositiv — und warum er ausgesuchte Wörter braucht
 
 Der Ortsfall nach в und на. Die Regel ist die einfachste von allen: **fast alles endet
@@ -1475,6 +1492,35 @@ Beide stehen in Versalien-Etiketten. «ь nach Zischlaut» wurde dort zu «Ь NA
 «Verben auf -tsja», «Weichzeichen am Ende», «Endung -ogo und -ego» — der Build bricht ab,
 wenn Kyrillisch in eines der beiden Felder gerät. Im Regeltext bleibt es; dort trägt es
 die Klasse `cyr`.
+
+## Der Lehrplan: warum die Sätze ihn tragen
+
+**Lernsets entstehen ausschließlich aus Sätzen.** `LERNSETS` sortiert die Sätze nach ihrem
+im Lehrplan spätesten Wort und füllt daraus Päckchen zu höchstens `SET_MAX` Wörtern. Daraus
+folgt etwas, das lange niemandem auffiel: **Ein Wort, das kein Satz braucht, liegt in
+keinem Set.** Es schaltet nichts frei, taucht in «Übersetzen» nie auf und ist nur über
+«Freestyle» und «Tippen» erreichbar — die Übungen ohne Lehrplan.
+
+Vor Etappe 6 lagen so 262 von 395 Wörtern außerhalb. Mehr Vokabeln hätten das Verhältnis
+verschlechtert; mehr **Sätze** holen die vorhandenen nach Hause (ADR 0057).
+
+`data/saetze.json` steht darum **nach Stufe und Reifegrad sortiert** — wer die Datei liest,
+sieht den Weg, und die Sets entstehen aus derselben Ordnung. Die Suite `lehrplan` prüft es.
+
+### Der Neuschnitt der Sets
+
+Kommen Sätze dazu, werden die Päckchen neu geschnitten — und `set:7` in `state.gefeiert`
+meint dann etwas anderes als vorher. `setSchnittPruefen()` merkt sich in
+`state.setSchnitt` die **Zahl der Sets**, unter der die Marken entstanden sind; stimmt sie
+nicht mehr, fallen alle `set:*`-Marken weg und `jubelNachtragen()` bestimmt sie neu. Der
+Aufruf steht an beiden Stellen, an denen ein fremder Stand hereinkommt: in `load()` und
+nach dem Einspielen einer Sicherung — **jeweils vor** `jubelNachtragen()`.
+
+Themen, Alphabet und Regeln bleiben unberührt: Die hängen nicht am Schnitt.
+
+**Was beim Wachsen nicht passieren darf:** einen bestehenden Satz umformulieren. Der
+Sicherungscode führt Sätze über einen Hash ihres Textes — ein geänderter Text macht alte
+Codes an dieser Stelle ungültig. Neue Sätze sind unkritisch.
 
 ## Bilanz im Detail
 

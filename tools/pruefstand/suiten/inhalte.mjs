@@ -14,7 +14,10 @@ function lerne(woerter, stufe) {
 
 try {
   // A · Daten
-  pruefe('A1 Sätze sind eine Liste', Array.isArray(SENTENCES) && SENTENCES.length === 55, String(SENTENCES.length));
+  // Keine feste Zahl, aus demselben Grund wie beim Wortschatz: Die Sätze
+  // wachsen mit jeder Etappe. Geprüft wird, dass sie nicht schrumpfen.
+  pruefe('A1 Sätze sind eine Liste', Array.isArray(SENTENCES) && SENTENCES.length >= 102,
+    String(SENTENCES.length));
   pruefe('A2 jeder Satz nennt Voraussetzungen',
     SENTENCES.every(function (s) { return s.benoetigt && s.benoetigt.length > 0; }));
   var ids = {};
@@ -40,7 +43,9 @@ try {
   trTask = null; buildTransTask(); renderUebersetzen();
   pruefe('B3 nach dem Lernen ist der Satz da', freieSaetze(1).length === 1 && !!q('.built'), ersterSatz.ru);
   filterSetzen(true); renderFilter();
-  pruefe('B4 die Auswahl zählt mit', q('[data-fw="stufe"][data-fv="1"]').textContent.indexOf('1/20') !== -1,
+  var stufe1 = SENTENCES.filter(function (x) { return x.stufe === 1; }).length;
+  pruefe('B4 die Auswahl zählt mit',
+    q('[data-fw="stufe"][data-fv="1"]').textContent.indexOf('1/' + stufe1) !== -1,
     q('[data-fw="stufe"][data-fv="1"]').textContent);
   filterSetzen(false);
   state.boxes[ersterSatz.benoetigt[0]] = SATZ_STUFE - 1;
@@ -64,7 +69,12 @@ try {
   state.boxes = {}; state.lastSeen = {};
   ALL_VOCAB.forEach(function (v) { state.boxes[v.id] = BOX_MAX; state.lastSeen[v.id] = Date.now(); });
   trLevel = 1; trModus = 'lernen'; trTask = null; buildTransTask(); renderUebersetzen();
-  pruefe('D1 alle Sätze offen', freieSaetze(1).length === 20 && freieSaetze(3).length === 15);
+  pruefe('D1 alle Sätze offen', (function () {
+    return [1, 2, 3].every(function (n) {
+      return freieSaetze(n).length ===
+        SENTENCES.filter(function (x) { return x.stufe === n; }).length;
+    });
+  })(), freieSaetze(1).length + '/' + freieSaetze(2).length + '/' + freieSaetze(3).length);
   var tokens = trTask.targetTokens.slice();
   tokens.forEach(function (tok) {
     var b = alle('[data-wtile]').filter(function (x) { return x.textContent === tok && !x.disabled; })[0];

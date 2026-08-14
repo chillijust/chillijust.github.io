@@ -123,8 +123,12 @@ try {
   pruefe('G1 drei Gruppen', alle('.filtergruppe').length === 3 &&
     alle('.filter-titel').map(function (x) { return x.textContent; }).join(',') === 'Stufe,Richtung,Stapel',
     alle('.filter-titel').map(function (x) { return x.textContent; }).join(','));
+  // Die Zahl steht in den Daten, nicht hier: Mit jeder Etappe kommen Sätze
+  // dazu, und eine festgeschriebene Zahl wäre nur ein Wartungsposten.
+  var wieviele = SENTENCES.filter(function (x) { return x.stufe === 1; }).length;
   pruefe('G2 Stufen mit Bestand',
-    q('[data-fw="stufe"][data-fv="1"]').textContent.indexOf('Stufe 1 · 20/20') === 0,
+    q('[data-fw="stufe"][data-fv="1"]').textContent
+      .indexOf('Stufe 1 \u00b7 ' + wieviele + '/' + wieviele) === 0,
     q('[data-fw="stufe"][data-fv="1"]').textContent);
   pruefe('G3 Regelfall ungefärbt', !q('#filterKnopf').classList.contains('aktiv'));
   pruefe('G3b «Gemischt» ist der Regelfall',

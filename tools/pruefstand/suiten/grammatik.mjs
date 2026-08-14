@@ -56,7 +56,21 @@ try {
   pruefe('B4 männliche Sache bleibt', grammForm('стол', 'm', 'akk') === 'стол');
   pruefe('B5 männliches Lebewesen nimmt -а', grammForm('брат', 'mb', 'akk') === 'брата');
   pruefe('B6 weiblich auf -ь bleibt', grammForm('дверь', 'w', 'akk') === 'дверь');
-  pruefe('B7 unbekannte Rolle sagt nein', grammForm('книга', 'w', 'dat') === null);
+  pruefe('B7 unbekannte Rolle sagt nein', grammForm('книга', 'w', 'quatsch') === null);
+  // Dativ: männlich und sächlich -у/-ю, weiblich -е, weiblich auf -ь aber -и.
+  pruefe('B8 Dativ weiblich -а wird -е', grammForm('книга', 'w', 'dat') === 'книге');
+  pruefe('B9 Dativ männlich nimmt -у', grammForm('брат', 'mb', 'dat') === 'брату');
+  pruefe('B10 Dativ männlich -ь nimmt -ю', grammForm('учитель', 'mb', 'dat') === 'учителю',
+    grammForm('учитель', 'mb', 'dat'));
+  pruefe('B11 Dativ weiblich -ь nimmt -и', grammForm('дверь', 'w', 'dat') === 'двери');
+  pruefe('B12 Dativ sächlich -о wird -у', grammForm('окно', 's', 'dat') === 'окну');
+  pruefe('B13 Dativ auf -ия wird -ии', grammForm('Россия', 'w', 'dat') === 'России');
+  pruefe('B14 der flüchtige Vokal fällt auch hier',
+    grammForm('день', 'm', 'dat') === 'дню' && grammForm('ребёнок', 'mb', 'dat') === 'ребёнку',
+    grammForm('день', 'm', 'dat'));
+  pruefe('B15 ein starres Lehnwort bleibt', grammForm('метро', 's', 'dat') === 'метро');
+  pruefe('B16 nach ц kein weicher Vokal', grammForm('сердце', 's', 'dat') === 'сердцу',
+    grammForm('сердце', 's', 'dat'));
 
   // C · Der Beweis: jede vermerkte Form im Satz
   var geprueft = 0, daneben = [];

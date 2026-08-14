@@ -101,6 +101,27 @@
     "beispiele": ["город", "стол", "магазин", "школа", "дом", "квартира", "комната", "кухня", "окно", "парк", "университет", "вокзал", "банк", "аптека", "больница", "ресторан", "музей", "офис", "сумка", "гостиница", "деревня", "река", "озеро", "пляж", "остров", "Москва", "Россия", "книга", "письмо", "улица", "машина", "автобус", "поезд", "дорога"]
   },
   {
+    "id": "dativ",
+    "name": "Dativ",
+    "kurz": "Wem?",
+    "aufgabe": "dat",
+    "frage": "«Мама» wird zu «маме», «брат» zu «брату». Wonach richtet sich das?",
+    "deutungen": ["Nach dem Geschlecht: weiblich -е, männlich und sächlich -у", "Nach der Belebtheit, wie im Akkusativ", "Nach der Präposition, wie im Präpositiv"],
+    "richtig": 0,
+    "regel": "Der Dativ nennt den, für den etwas geschieht: wem man schreibt, wem man hilft, wem etwas gefällt. Männlich und sächlich nehmen -у, weiblich -е — genau umgekehrt zum Akkusativ, wo die Männlichen unverändert bleiben und die Weiblichen sich ändern. Und er ist der Fall hinter «нравится»: Nicht ich mag die Musik, der Musik gefällt es mir.",
+    "tabelle": [
+      ["männlich", "+ -у", "брат → брату"],
+      ["männlich -й / -ь", "wird -ю", "учитель → учителю"],
+      ["sächlich -о", "wird -у", "окно → окну"],
+      ["weiblich -а / -я", "wird -е", "мама → маме"],
+      ["weiblich -ь", "wird -и", "дверь → двери"],
+      ["-ия", "wird -ии", "Россия → России"]
+    ],
+    "merksatz": "Wem? Männlich -у, weiblich -е. Und «мне нравится» heißt: mir gefällt.",
+    "fussnote": "Die Personalpronomen haben eigene Formen, die keine Regel verrät: я → мне, ты → тебе, он → ему, она → ей, мы → нам, вы → вам, они → им. Auch das Alter steht im Dativ: «Брату двадцать лет» — der Bruder ist zwanzig.",
+    "beispiele": ["мама", "папа", "бабушка", "дедушка", "подруга", "тётя", "дядя", "внук", "кошка", "собака", "птица", "корова", "коза", "утка", "медведь", "волк", "лиса", "мышь", "слон", "лошадь", "курица", "свинья", "студент", "врач", "инженер"]
+  },
+  {
     "id": "adjektiv",
     "name": "Übereinstimmung",
     "kurz": "Wenn ein Wort sich nach einem anderen richtet",

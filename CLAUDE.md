@@ -275,8 +275,8 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
 - **Grammatik ist eine Funktion, kein Fakt** (ADR 0030). Die Karteikarte ist die **Regel**,
   nicht das Wort, und die Aufgabe verlangt ein bekanntes Wort in einer nie gesehenen Form —
   sonst prüft sie Auswendiglernen. Formen rechnet `grammForm()`; sie steht doppelt (App und
-  Build) und wird an den vermerkten Formen der Sätze gemessen. Zehn Bausteine, vier Formen
-  je Nomen (`akk`, `praep`, `gen`, `plural`); in `data/nomen.json` wird **jede Angabe für
+  Build) und wird an den vermerkten Formen der Sätze gemessen. Elf Bausteine, fünf Formen
+  je Nomen (`akk`, `praep`, `gen`, `dat`, `plural`); in `data/nomen.json` wird **jede Angabe für
   sich** gegen die blanke Regel geprüft, nicht der Eintrag als Ganzes. **Eine Wortart-Angabe, die
   nur wiederholt, was die Endung sagt, lässt den Build scheitern** — sonst verdeckt die
   Liste die echten Ausnahmen. Dasselbe gilt für `data/verben.json`: **ein Eintrag, der
@@ -295,6 +295,14 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
 - **Kein Kyrillisch in Versalien-Etiketten** (`.task-label`, `kurz` der Bausteine):
   «в на» liest sich als «B HA». `.cyr` ist von `text-transform` ausgenommen — im
   Datenfeld hilft das aber nicht, dort gehört gar kein Kyrillisch hin.
+- **Die Sätze tragen den Lehrplan** (ADR 0057). Ein Wort ohne Satz liegt in keinem Set
+  und ist nur über «Freestyle» und «Tippen» erreichbar — mehr Vokabeln allein bringen
+  darum nichts, mehr Sätze alles. `data/saetze.json` steht **nach Stufe und Reifegrad
+  sortiert**. **Nichts Bestehendes umformulieren:** Die Kennung eines Satzes im
+  Sicherungscode ist sein Text. Schneidet der Zuwachs die Lernsets neu, wird
+  `state.setSchnitt` ungültig, und `setSchnittPruefen()` wirft die `set:*`-Marken weg —
+  sonst meint «set:7» etwas anderes als vorher. **Der Dativ verlangt Lebewesen**
+  («книге нравится» ist Unsinn), der Präpositiv umgekehrt Orte.
 - **Die Reihenfolge in `data/vokabeln.json` ist der Lehrplan.** Aus ihr und den
   Satzvoraussetzungen bauen sich die Lernsets (`SET_MAX`, `SATZ_STUFE`); Ergänzungen ans
   Ende des passenden Themas.
