@@ -26,7 +26,9 @@ try {
 
   // B · Lernsets
   state.boxes = {}; state.lastSeen = {};
-  pruefe('B1 Sets gebildet', LERNSETS.length >= 8 && LERNSETS.length <= 20, String(LERNSETS.length));
+  // Keine Obergrenze mehr: Mit den Sätzen wachsen die Sets. Geprüft wird, dass
+  // überhaupt welche entstehen — die Suite «lehrplan» sieht sie sich genauer an.
+  pruefe('B1 Sets gebildet', LERNSETS.length >= 8, String(LERNSETS.length));
   pruefe('B2 jedes Set hat Wörter und Sätze',
     LERNSETS.every(function (s) { return s.woerter.length > 0 && s.saetze.length > 0; }));
   pruefe('B3 kein Wort in zwei Sets', (function () {

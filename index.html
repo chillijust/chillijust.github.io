@@ -2102,6 +2102,12 @@ var VOCAB_THEMES = {
 };
 
 var SENTENCES = [
+  { ru: 'Нет, спасибо. Пока!', de: 'Nein, danke. Tschüss!', stufe: 1, benoetigt: ['нет', 'спасибо', 'пока'] },
+  { ru: 'Да, конечно. Пожалуйста!', de: 'Ja, natürlich. Bitte!', stufe: 1, benoetigt: ['да', 'конечно', 'пожалуйста'] },
+  { ru: 'Добрый день! Спасибо, хорошо.', de: 'Guten Tag! Danke, gut.', stufe: 1, benoetigt: ['добрый день', 'спасибо', 'хорошо'] },
+  { ru: 'Привет! Как дела?', de: 'Hallo! Wie geht\'s?', stufe: 1, benoetigt: ['привет', 'как дела'] },
+  { ru: 'До свидания! Добро пожаловать.', de: 'Auf Wiedersehen! Willkommen.', stufe: 1, benoetigt: ['до свидания', 'добро пожаловать'] },
+  { ru: 'Доброе утро, папа!', de: 'Guten Morgen, Papa!', stufe: 1, benoetigt: ['доброе утро', 'папа'] },
   { ru: 'Это мой брат.', de: 'Das ist mein Bruder.', stufe: 1, benoetigt: ['это', 'мой', 'брат'] },
   { ru: 'Это моя семья.', de: 'Das ist meine Familie.', stufe: 1, benoetigt: ['это', 'моя', 'семья'] },
   { ru: 'Он работает.', de: 'Er arbeitet.', stufe: 1, benoetigt: ['он', 'работать'], formen: { 'работает': ['работать', 'praes3s'] } },
@@ -2111,19 +2117,31 @@ var SENTENCES = [
   { ru: 'Я живу в городе.', de: 'Ich wohne in der Stadt.', stufe: 1, benoetigt: ['я', 'жить', 'в', 'город'], formen: { 'живу': ['жить', 'praes1s'], 'городе': ['город', 'praep'] } },
   { ru: 'Это дом.', de: 'Das ist ein Haus.', stufe: 1, benoetigt: ['это', 'дом'] },
   { ru: 'Мама дома.', de: 'Mama ist zu Hause.', stufe: 1, benoetigt: ['мама', 'дом'] },
+  { ru: 'Мои родители дома.', de: 'Meine Eltern sind zu Hause.', stufe: 1, benoetigt: ['мой', 'родители', 'дом'] },
+  { ru: 'Добрый вечер! Я дома.', de: 'Guten Abend! Ich bin zu Hause.', stufe: 1, benoetigt: ['добрый вечер', 'я', 'дом'] },
   { ru: 'Мы идём домой.', de: 'Wir gehen nach Hause.', stufe: 1, benoetigt: ['мы', 'идти', 'домой'], formen: { 'идём': ['идти', 'praes1p'] } },
+  { ru: 'Ванная и туалет здесь.', de: 'Bad und Toilette sind hier.', stufe: 1, benoetigt: ['ванная', 'и', 'туалет', 'здесь'] },
   { ru: 'Хлеб на столе.', de: 'Das Brot ist auf dem Tisch.', stufe: 1, benoetigt: ['хлеб', 'на', 'стол'], formen: { 'столе': ['стол', 'praep'] } },
+  { ru: 'Я не ем мясо.', de: 'Ich esse kein Fleisch.', stufe: 1, benoetigt: ['я', 'не', 'есть', 'мясо'], formen: { 'ем': ['есть', 'praes1s'] } },
+  { ru: 'Рыба и рис — это ужин.', de: 'Fisch und Reis sind das Abendessen.', stufe: 1, benoetigt: ['рыба', 'и', 'рис', 'это', 'ужин'] },
   { ru: 'Я люблю чай.', de: 'Ich mag Tee.', stufe: 1, benoetigt: ['я', 'любить', 'чай'], formen: { 'люблю': ['любить', 'praes1s'] } },
   { ru: 'Я пью кофе.', de: 'Ich trinke Kaffee.', stufe: 1, benoetigt: ['я', 'пить', 'кофе'], formen: { 'пью': ['пить', 'praes1s'] } },
+  { ru: 'Водка — это не вода.', de: 'Wodka ist kein Wasser.', stufe: 1, benoetigt: ['водка', 'это', 'не', 'вода'] },
+  { ru: 'Четыре и три — это семь.', de: 'Vier und drei ist sieben.', stufe: 1, benoetigt: ['четыре', 'и', 'три', 'это', 'семь'] },
+  { ru: 'Шесть и два — это восемь.', de: 'Sechs und zwei ist acht.', stufe: 1, benoetigt: ['шесть', 'и', 'два', 'это', 'восемь'] },
+  { ru: 'Пять и четыре — это девять.', de: 'Fünf und vier ist neun.', stufe: 1, benoetigt: ['пять', 'и', 'четыре', 'это', 'девять'] },
   { ru: 'Утром я ем кашу.', de: 'Morgens esse ich Brei.', stufe: 1, benoetigt: ['утро', 'я', 'есть', 'каша'], formen: { 'кашу': ['каша', 'akk'], 'ем': ['есть', 'praes1s'] } },
   { ru: 'Мы смотрим новости.', de: 'Wir schauen die Nachrichten.', stufe: 1, benoetigt: ['мы', 'смотреть', 'новости'], formen: { 'смотрим': ['смотреть', 'praes1p'] } },
   { ru: 'Кошка спит.', de: 'Die Katze schläft.', stufe: 1, benoetigt: ['кошка', 'спать'], formen: { 'спит': ['спать', 'praes3s'] } },
   { ru: 'Дети играют.', de: 'Die Kinder spielen.', stufe: 1, benoetigt: ['ребёнок', 'играть'], formen: { 'играют': ['играть', 'praes3p'] } },
   { ru: 'Собака бежит.', de: 'Der Hund rennt.', stufe: 1, benoetigt: ['собака', 'бежать'], formen: { 'бежит': ['бежать', 'praes3s'] } },
+  { ru: 'Овощи очень хорошие.', de: 'Das Gemüse ist sehr gut.', stufe: 1, benoetigt: ['овощи', 'очень', 'хороший'], formen: { 'хорошие': ['хороший', 'adjp'] } },
   { ru: 'Вода холодная.', de: 'Das Wasser ist kalt.', stufe: 1, benoetigt: ['вода', 'холодный'] },
   { ru: 'Сегодня холодно.', de: 'Heute ist es kalt.', stufe: 1, benoetigt: ['сегодня', 'холодно'] },
   { ru: 'Фиолетовый — тёмный цвет.', de: 'Violett ist eine dunkle Farbe.', stufe: 1, benoetigt: ['фиолетовый', 'тёмный', 'цвет'] },
   { ru: 'Оранжевый — это тоже цвет.', de: 'Orange ist auch eine Farbe.', stufe: 1, benoetigt: ['оранжевый', 'это', 'тоже', 'цвет'] },
+  { ru: 'Извините, где вокзал?', de: 'Entschuldigung, wo ist der Bahnhof?', stufe: 1, benoetigt: ['извините', 'где', 'вокзал'] },
+  { ru: 'Один, два, три — я считаю.', de: 'Eins, zwei, drei — ich zähle.', stufe: 1, benoetigt: ['один', 'два', 'три', 'я', 'считать'], formen: { 'считаю': ['считать', 'praes1s'] } },
   { ru: 'Моя рука холодная.', de: 'Meine Hand ist kalt.', stufe: 1, benoetigt: ['моя', 'рука', 'холодный'], formen: { 'холодная': ['холодный', 'adjw'] } },
   { ru: 'Брюки и джинсы — это одежда.', de: 'Hose und Jeans sind Kleidung.', stufe: 1, benoetigt: ['брюки', 'и', 'джинсы', 'это', 'одежда'] },
   { ru: 'Платье и юбка — это тоже одежда.', de: 'Kleid und Rock sind auch Kleidung.', stufe: 1, benoetigt: ['платье', 'юбка', 'это', 'тоже', 'одежда'] },
@@ -2131,26 +2149,74 @@ var SENTENCES = [
   { ru: 'Небо сегодня голубое.', de: 'Der Himmel ist heute hellblau.', stufe: 1, benoetigt: ['небо', 'сегодня', 'голубой'], formen: { 'голубое': ['голубой', 'adjs'] } },
   { ru: 'Медведь спит долго.', de: 'Der Bär schläft lange.', stufe: 1, benoetigt: ['медведь', 'спать', 'долго'], formen: { 'спит': ['спать', 'praes3s'] } },
   { ru: 'Заяц очень быстрый.', de: 'Der Hase ist sehr schnell.', stufe: 1, benoetigt: ['заяц', 'очень', 'быстрый'] },
+  { ru: 'Гора очень большая.', de: 'Der Berg ist sehr groß.', stufe: 1, benoetigt: ['гора', 'очень', 'большой'], formen: { 'большая': ['большой', 'adjw'] } },
+  { ru: 'Мы идём на пляж.', de: 'Wir gehen zum Strand.', stufe: 1, benoetigt: ['мы', 'идти', 'на', 'пляж'], formen: { 'идём': ['идти', 'praes1p'] } },
+  { ru: 'Я живу с мужем.', de: 'Ich lebe mit meinem Mann zusammen.', stufe: 2, benoetigt: ['я', 'жить', 'с', 'муж'], formen: { 'живу': ['жить', 'praes1s'], 'мужем': ['муж', 'instr'] } },
+  { ru: 'Кто там? Я не знаю.', de: 'Wer ist da? Ich weiß es nicht.', stufe: 2, benoetigt: ['кто', 'там', 'я', 'не', 'знать'], formen: { 'знаю': ['знать', 'praes1s'] } },
   { ru: 'Я пишу письмо сестре.', de: 'Ich schreibe meiner Schwester einen Brief.', stufe: 2, benoetigt: ['я', 'писать', 'письмо', 'сестра'], formen: { 'пишу': ['писать', 'praes1s'], 'сестре': ['сестра', 'dat'] } },
   { ru: 'У меня есть кошка и собака.', de: 'Ich habe eine Katze und einen Hund.', stufe: 2, benoetigt: ['у', 'я', 'есть', 'кошка', 'и', 'собака'] },
+  { ru: 'Дочь и жена в комнате.', de: 'Tochter und Ehefrau sind im Zimmer.', stufe: 2, benoetigt: ['дочь', 'и', 'жена', 'в', 'комната'], formen: { 'комнате': ['комната', 'praep'] } },
+  { ru: 'Кровать, диван и полка в квартире.', de: 'Bett, Sofa und Regal in der Wohnung.', stufe: 2, benoetigt: ['кровать', 'диван', 'и', 'полка', 'в', 'квартира'], formen: { 'квартире': ['квартира', 'praep'] } },
+  { ru: 'Твой ключ и наше зеркало.', de: 'Dein Schlüssel und unser Spiegel.', stufe: 2, benoetigt: ['твой', 'ключ', 'и', 'наш', 'зеркало'] },
+  { ru: 'Я ем суп с хлебом.', de: 'Ich esse Suppe mit Brot.', stufe: 2, benoetigt: ['я', 'есть', 'суп', 'с', 'хлеб'], formen: { 'ем': ['есть', 'praes1s'], 'хлебом': ['хлеб', 'instr'] } },
+  { ru: 'Я люблю суп с картошкой.', de: 'Ich mag Suppe mit Kartoffeln.', stufe: 2, benoetigt: ['я', 'любить', 'суп', 'с', 'картошка'], formen: { 'люблю': ['любить', 'praes1s'], 'картошкой': ['картошка', 'instr'] } },
   { ru: 'В магазине много фруктов.', de: 'Im Laden gibt es viel Obst.', stufe: 2, benoetigt: ['в', 'магазин', 'много', 'фрукты'], formen: { 'магазине': ['магазин', 'praep'] } },
+  { ru: 'На столе масло, соль и колбаса.', de: 'Auf dem Tisch liegen Butter, Salz und Wurst.', stufe: 2, benoetigt: ['на', 'стол', 'масло', 'соль', 'колбаса'], formen: { 'столе': ['стол', 'praep'] } },
+  { ru: 'Курица в холодильнике.', de: 'Das Hähnchen ist im Kühlschrank.', stufe: 2, benoetigt: ['курица', 'в', 'холодильник'], formen: { 'холодильнике': ['холодильник', 'praep'] } },
+  { ru: 'Он пьёт чай с сахаром.', de: 'Er trinkt Tee mit Zucker.', stufe: 2, benoetigt: ['он', 'пить', 'чай', 'с', 'сахар'], formen: { 'пьёт': ['пить', 'praes3s'], 'сахаром': ['сахар', 'instr'] } },
+  { ru: 'Она пьёт кофе с молоком.', de: 'Sie trinkt Kaffee mit Milch.', stufe: 2, benoetigt: ['она', 'пить', 'кофе', 'с', 'молоко'], formen: { 'пьёт': ['пить', 'praes3s'], 'молоком': ['молоко', 'instr'] } },
+  { ru: 'Пиво и вино — это не компот.', de: 'Bier und Wein sind kein Kompott.', stufe: 2, benoetigt: ['пиво', 'и', 'вино', 'это', 'не', 'компот'] },
+  { ru: 'Двадцать, тридцать, сорок — это много.', de: 'Zwanzig, dreißig, vierzig — das ist viel.', stufe: 2, benoetigt: ['двадцать', 'тридцать', 'сорок', 'это', 'много'] },
+  { ru: 'Пятьдесят и пятьдесят — это сто.', de: 'Fünfzig und fünfzig ist hundert.', stufe: 2, benoetigt: ['пятьдесят', 'это', 'сто'] },
+  { ru: 'Ничего, может быть завтра.', de: 'Macht nichts, vielleicht morgen.', stufe: 2, benoetigt: ['ничего', 'может быть', 'завтра'] },
+  { ru: 'Сегодня плохо, но завтра хорошо.', de: 'Heute ist es schlecht, aber morgen gut.', stufe: 2, benoetigt: ['сегодня', 'плохо', 'но', 'завтра', 'хорошо'] },
+  { ru: 'Я пью кефир утром.', de: 'Ich trinke morgens Kefir.', stufe: 2, benoetigt: ['я', 'пить', 'кефир', 'утро'], formen: { 'пью': ['пить', 'praes1s'], 'утром': ['утро', 'instr'] } },
+  { ru: 'Дедушка пьёт квас каждый день.', de: 'Opa trinkt jeden Tag Kwas.', stufe: 2, benoetigt: ['дедушка', 'пить', 'квас', 'каждый', 'день'], formen: { 'пьёт': ['пить', 'praes3s'] } },
+  { ru: 'Вечером мы пьём лимонад.', de: 'Abends trinken wir Limonade.', stufe: 2, benoetigt: ['вечер', 'мы', 'пить', 'лимонад'], formen: { 'Вечером': ['вечер', 'instr'], 'пьём': ['пить', 'praes1p'] } },
   { ru: 'Мы едим в восемь часов.', de: 'Wir essen um acht Uhr.', stufe: 2, benoetigt: ['мы', 'есть', 'в', 'восемь', 'час'], formen: { 'едим': ['есть', 'praes1p'] } },
+  { ru: 'Сегодня среда, завтра четверг.', de: 'Heute ist Mittwoch, morgen Donnerstag.', stufe: 2, benoetigt: ['сегодня', 'среда', 'завтра', 'четверг'] },
+  { ru: 'Я хочу яйцо и сок.', de: 'Ich möchte ein Ei und einen Saft.', stufe: 2, benoetigt: ['я', 'хотеть', 'яйцо', 'и', 'сок'], formen: { 'хочу': ['хотеть', 'praes1s'] } },
+  { ru: 'Они не могут спать.', de: 'Sie können nicht schlafen.', stufe: 2, benoetigt: ['они', 'не', 'мочь', 'спать'], formen: { 'могут': ['мочь', 'praes3p'] } },
+  { ru: 'Это окно. Оно большое.', de: 'Das ist ein Fenster. Es ist groß.', stufe: 2, benoetigt: ['это', 'окно', 'оно', 'большой'], formen: { 'большое': ['большой', 'adjs'] } },
+  { ru: 'Старый стул и новая лампа.', de: 'Ein alter Stuhl und eine neue Lampe.', stufe: 2, benoetigt: ['старый', 'стул', 'и', 'новый', 'лампа'], formen: { 'новая': ['новый', 'adjw'] } },
+  { ru: 'Мороженое очень холодное.', de: 'Das Eis ist sehr kalt.', stufe: 2, benoetigt: ['мороженое', 'очень', 'холодный'], formen: { 'холодное': ['холодный', 'adjs'] } },
   { ru: 'Сегодня на улице тепло и хорошо.', de: 'Heute ist es draußen warm und schön.', stufe: 2, benoetigt: ['сегодня', 'на', 'улица', 'тепло', 'и', 'хорошо'], formen: { 'улице': ['улица', 'praep'] } },
+  { ru: 'Горячий суп и красный чай.', de: 'Heiße Suppe und roter Tee.', stufe: 2, benoetigt: ['горячий', 'суп', 'и', 'красный', 'чай'] },
   { ru: 'Я пью зелёный чай каждое утро.', de: 'Ich trinke jeden Morgen grünen Tee.', stufe: 2, benoetigt: ['я', 'пить', 'зелёный', 'чай', 'каждый', 'утро'], formen: { 'пью': ['пить', 'praes1s'], 'каждое': ['каждый', 'adjs'] } },
+  { ru: 'Синий и жёлтый — это не чёрный.', de: 'Blau und Gelb sind nicht Schwarz.', stufe: 2, benoetigt: ['синий', 'и', 'жёлтый', 'это', 'не', 'чёрный'] },
   { ru: 'У бабушки белая кошка.', de: 'Oma hat eine weiße Katze.', stufe: 2, benoetigt: ['у', 'бабушка', 'белый', 'кошка'], formen: { 'бабушки': ['бабушка', 'gen'], 'белая': ['белый', 'adjw'] } },
   { ru: 'Я не люблю серый цвет.', de: 'Ich mag die Farbe Grau nicht.', stufe: 2, benoetigt: ['я', 'не', 'любить', 'серый', 'цвет'], formen: { 'люблю': ['любить', 'praes1s'] } },
   { ru: 'Коричневый шкаф в комнате.', de: 'Der braune Schrank steht im Zimmer.', stufe: 2, benoetigt: ['коричневый', 'шкаф', 'в', 'комната'], formen: { 'комнате': ['комната', 'praep'] } },
   { ru: 'Он часто пишет письма бабушке.', de: 'Er schreibt der Oma oft Briefe.', stufe: 2, benoetigt: ['он', 'часто', 'писать', 'письмо', 'бабушка'], formen: { 'пишет': ['писать', 'praes3s'] } },
+  { ru: 'Я иду в парк с братом.', de: 'Ich gehe mit meinem Bruder in den Park.', stufe: 2, benoetigt: ['я', 'идти', 'в', 'парк', 'с', 'брат'], formen: { 'иду': ['идти', 'praes1s'], 'братом': ['брат', 'instr'] } },
+  { ru: 'На рынке фрукты и овощи.', de: 'Auf dem Markt gibt es Obst und Gemüse.', stufe: 2, benoetigt: ['на', 'рынок', 'фрукты', 'и', 'овощи'], formen: { 'рынке': ['рынок', 'praep'] } },
   { ru: 'Мы учимся в университете.', de: 'Wir studieren an der Universität.', stufe: 2, benoetigt: ['мы', 'учиться', 'в', 'университет'], formen: { 'учимся': ['учиться', 'praes1p'], 'университете': ['университет', 'praep'] } },
   { ru: 'Поезд идёт через десять минут.', de: 'Der Zug fährt in zehn Minuten.', stufe: 2, benoetigt: ['поезд', 'идти', 'через', 'десять', 'минута'], formen: { 'идёт': ['идти', 'praes3s'] } },
+  { ru: 'Автобус идёт на вокзал.', de: 'Der Bus fährt zum Bahnhof.', stufe: 2, benoetigt: ['автобус', 'идти', 'на', 'вокзал'], formen: { 'идёт': ['идти', 'praes3s'] } },
+  { ru: 'Мы едем в аэропорт.', de: 'Wir fahren zum Flughafen.', stufe: 2, benoetigt: ['мы', 'ехать', 'в', 'аэропорт'], formen: { 'едем': ['ехать', 'praes1p'] } },
+  { ru: 'Машина у банка.', de: 'Das Auto steht bei der Bank.', stufe: 2, benoetigt: ['машина', 'у', 'банк'], formen: { 'банка': ['банк', 'gen'] } },
   { ru: 'Где здесь аптека?', de: 'Wo ist hier eine Apotheke?', stufe: 2, benoetigt: ['где', 'здесь', 'аптека'] },
+  { ru: 'Церковь на площади.', de: 'Die Kirche steht auf dem Platz.', stufe: 2, benoetigt: ['церковь', 'на', 'площадь'], formen: { 'площади': ['площадь', 'praep'] } },
+  { ru: 'Вы видите мост?', de: 'Sehen Sie die Brücke?', stufe: 2, benoetigt: ['вы', 'видеть', 'мост'], formen: { 'видите': ['видеть', 'praes2p'] } },
+  { ru: 'Тогда я беру деньги.', de: 'Dann nehme ich das Geld.', stufe: 2, benoetigt: ['тогда', 'я', 'брать', 'деньги'], formen: { 'беру': ['брать', 'praes1s'] } },
   { ru: 'Я хочу купить новую книгу.', de: 'Ich möchte ein neues Buch kaufen.', stufe: 2, benoetigt: ['я', 'хотеть', 'покупать', 'новый', 'книга'], formen: { 'книгу': ['книга', 'akk'], 'хочу': ['хотеть', 'praes1s'] } },
+  { ru: 'Мама покупает молоко и сыр.', de: 'Mama kauft Milch und Käse.', stufe: 2, benoetigt: ['мама', 'покупать', 'молоко', 'и', 'сыр'], formen: { 'покупает': ['покупать', 'praes3s'] } },
+  { ru: 'Мы платим в магазине.', de: 'Wir zahlen im Geschäft.', stufe: 2, benoetigt: ['мы', 'платить', 'в', 'магазин'], formen: { 'платим': ['платить', 'praes1p'], 'магазине': ['магазин', 'praep'] } },
   { ru: 'Мы помогаем бабушке.', de: 'Wir helfen der Oma.', stufe: 2, benoetigt: ['мы', 'помогать', 'бабушка'], formen: { 'помогаем': ['помогать', 'praes1p'], 'бабушке': ['бабушка', 'dat'] } },
   { ru: 'Она готовит ужин на кухне.', de: 'Sie kocht das Abendessen in der Küche.', stufe: 2, benoetigt: ['она', 'готовить', 'ужин', 'на', 'кухня'], formen: { 'готовит': ['готовить', 'praes3s'], 'кухне': ['кухня', 'praep'] } },
   { ru: 'Вечером мы гуляем в парке.', de: 'Abends spazieren wir im Park.', stufe: 2, benoetigt: ['вечер', 'мы', 'гулять', 'в', 'парк'], formen: { 'гуляем': ['гулять', 'praes1p'], 'парке': ['парк', 'praep'] } },
+  { ru: 'Мы гуляем с собакой.', de: 'Wir gehen mit dem Hund spazieren.', stufe: 2, benoetigt: ['мы', 'гулять', 'с', 'собака'], formen: { 'гуляем': ['гулять', 'praes1p'], 'собакой': ['собака', 'instr'] } },
   { ru: 'Ребёнку нравится собака.', de: 'Dem Kind gefällt der Hund.', stufe: 2, benoetigt: ['ребёнок', 'нравиться', 'собака'], formen: { 'Ребёнку': ['ребёнок', 'dat'], 'нравится': ['нравиться', 'praes3s'] } },
+  { ru: 'В пятницу мы отдыхаем.', de: 'Am Freitag ruhen wir uns aus.', stufe: 2, benoetigt: ['в', 'пятница', 'мы', 'отдыхать'], formen: { 'пятницу': ['пятница', 'akk'], 'отдыхаем': ['отдыхать', 'praes1p'] } },
+  { ru: 'Дети ходят в школу.', de: 'Die Kinder gehen zur Schule.', stufe: 2, benoetigt: ['ребёнок', 'ходить', 'в', 'школа'], formen: { 'Дети': ['ребёнок', 'plural'], 'ходят': ['ходить', 'praes3p'], 'школу': ['школа', 'akk'] } },
+  { ru: 'Я прошу воду, пожалуйста.', de: 'Ich bitte um Wasser, bitte.', stufe: 2, benoetigt: ['я', 'просить', 'вода', 'пожалуйста'], formen: { 'прошу': ['просить', 'praes1s'], 'воду': ['вода', 'akk'] } },
+  { ru: 'Дедушка сидит с внуком.', de: 'Opa sitzt mit dem Enkel zusammen.', stufe: 2, benoetigt: ['дедушка', 'сидеть', 'с', 'внук'], formen: { 'сидит': ['сидеть', 'praes3s'], 'внуком': ['внук', 'instr'] } },
+  { ru: 'Я помню этот день.', de: 'Ich erinnere mich an diesen Tag.', stufe: 2, benoetigt: ['я', 'помнить', 'этот', 'день'], formen: { 'помню': ['помнить', 'praes1s'] } },
+  { ru: 'Я думаю головой.', de: 'Ich denke mit dem Kopf.', stufe: 2, benoetigt: ['я', 'думать', 'голова'], formen: { 'думаю': ['думать', 'praes1s'], 'головой': ['голова', 'instr'] } },
   { ru: 'У ребёнка большие глаза.', de: 'Das Kind hat große Augen.', stufe: 2, benoetigt: ['у', 'ребёнок', 'большой', 'глаз'], formen: { 'ребёнка': ['ребёнок', 'gen'], 'большие': ['большой', 'adjp'], 'глаза': ['глаз', 'plural'] } },
   { ru: 'У кошки маленький нос.', de: 'Die Katze hat eine kleine Nase.', stufe: 2, benoetigt: ['у', 'кошка', 'маленький', 'нос'], formen: { 'кошки': ['кошка', 'gen'] } },
+  { ru: 'Он говорит ртом.', de: 'Er spricht mit dem Mund.', stufe: 2, benoetigt: ['он', 'говорить', 'рот'], formen: { 'говорит': ['говорить', 'praes3s'], 'ртом': ['рот', 'instr'] } },
+  { ru: 'Кошка спит на плече.', de: 'Die Katze schläft auf der Schulter.', stufe: 2, benoetigt: ['кошка', 'спать', 'на', 'плечо'], formen: { 'спит': ['спать', 'praes3s'], 'плече': ['плечо', 'praep'] } },
   { ru: 'Кошка спит на колене.', de: 'Die Katze schläft auf dem Knie.', stufe: 2, benoetigt: ['кошка', 'спать', 'на', 'колено'], formen: { 'спит': ['спать', 'praes3s'], 'колене': ['колено', 'praep'] } },
   { ru: 'Сердце работает каждый день.', de: 'Das Herz arbeitet jeden Tag.', stufe: 2, benoetigt: ['сердце', 'работать', 'каждый', 'день'], formen: { 'работает': ['работать', 'praes3s'] } },
   { ru: 'Волосы у мамы тёмные.', de: 'Mamas Haare sind dunkel.', stufe: 2, benoetigt: ['волосы', 'у', 'мама', 'тёмный'], formen: { 'мамы': ['мама', 'gen'], 'тёмные': ['тёмный', 'adjp'] } },
@@ -2163,47 +2229,90 @@ var SENTENCES = [
   { ru: 'Я ношу шапку каждый день.', de: 'Ich trage jeden Tag eine Mütze.', stufe: 2, benoetigt: ['я', 'носить', 'шапка', 'каждый', 'день'], formen: { 'шапку': ['шапка', 'akk'] } },
   { ru: 'Обувь у двери.', de: 'Die Schuhe stehen an der Tür.', stufe: 2, benoetigt: ['обувь', 'у', 'дверь'], formen: { 'двери': ['дверь', 'gen'] } },
   { ru: 'Я ищу носки и перчатки.', de: 'Ich suche Socken und Handschuhe.', stufe: 2, benoetigt: ['я', 'искать', 'носки', 'и', 'перчатки'], formen: { 'ищу': ['искать', 'praes1s'] } },
+  { ru: 'Ботинки, шарф и очки в шкафу.', de: 'Schuhe, Schal und Brille sind im Schrank.', stufe: 2, benoetigt: ['ботинки', 'шарф', 'и', 'очки', 'в', 'шкаф'], formen: { 'шкафу': ['шкаф', 'praep'] } },
+  { ru: 'Мы говорим о погоде.', de: 'Wir sprechen über das Wetter.', stufe: 2, benoetigt: ['мы', 'говорить', 'о', 'погода'], formen: { 'говорим': ['говорить', 'praes1p'], 'погоде': ['погода', 'praep'] } },
   { ru: 'Тёмное небо и яркие звёзды.', de: 'Dunkler Himmel und leuchtende Sterne.', stufe: 2, benoetigt: ['тёмный', 'небо', 'и', 'яркий', 'звезда'], formen: { 'Тёмное': ['тёмный', 'adjs'], 'яркие': ['яркий', 'adjp'], 'звёзды': ['звезда', 'plural'] } },
+  { ru: 'Сейчас ночь, луна и звёзды.', de: 'Jetzt ist Nacht, Mond und Sterne.', stufe: 2, benoetigt: ['сейчас', 'ночь', 'луна', 'и', 'звезда'], formen: { 'звёзды': ['звезда', 'plural'] } },
+  { ru: 'Луна и солнце на небе.', de: 'Mond und Sonne sind am Himmel.', stufe: 2, benoetigt: ['луна', 'и', 'солнце', 'на', 'небо'], formen: { 'небе': ['небо', 'praep'] } },
+  { ru: 'Вчера была гроза.', de: 'Gestern gab es ein Gewitter.', stufe: 2, benoetigt: ['вчера', 'быть', 'гроза'], formen: { 'была': ['быть', 'praetw'] } },
+  { ru: 'Гром и гроза — это не облако.', de: 'Donner und Gewitter sind keine Wolke.', stufe: 2, benoetigt: ['гром', 'и', 'гроза', 'это', 'не', 'облако'] },
   { ru: 'Свинья и коза едят фрукты.', de: 'Schwein und Ziege fressen Obst.', stufe: 2, benoetigt: ['свинья', 'и', 'коза', 'есть', 'фрукты'], formen: { 'едят': ['есть', 'praes3p'] } },
   { ru: 'У медведя большой живот.', de: 'Der Bär hat einen großen Bauch.', stufe: 2, benoetigt: ['у', 'медведь', 'большой', 'живот'], formen: { 'медведя': ['медведь', 'gen'] } },
+  { ru: 'У медведя большая спина.', de: 'Der Bär hat einen breiten Rücken.', stufe: 2, benoetigt: ['у', 'медведь', 'большой', 'спина'], formen: { 'медведя': ['медведь', 'gen'], 'большая': ['большой', 'adjw'] } },
   { ru: 'У слона большие уши.', de: 'Der Elefant hat große Ohren.', stufe: 2, benoetigt: ['у', 'слон', 'большой', 'ухо'], formen: { 'слона': ['слон', 'gen'], 'большие': ['большой', 'adjp'], 'уши': ['ухо', 'plural'] } },
   { ru: 'Каждый день я учу русский язык.', de: 'Jeden Tag lerne ich Russisch.', stufe: 2, benoetigt: ['каждый', 'день', 'я', 'учить', 'русский', 'язык'], formen: { 'учу': ['учить', 'praes1s'] } },
   { ru: 'Она говорит по-русски очень хорошо.', de: 'Sie spricht sehr gut Russisch.', stufe: 2, benoetigt: ['она', 'говорить', 'русский', 'очень', 'хорошо'], formen: { 'говорит': ['говорить', 'praes3s'] } },
   { ru: 'Мне нравится слушать музыку.', de: 'Ich höre gern Musik.', stufe: 2, benoetigt: ['я', 'нравиться', 'слушать', 'музыка'], formen: { 'музыку': ['музыка', 'akk'], 'нравится': ['нравиться', 'praes3s'] } },
   { ru: 'Маме нравится музыка.', de: 'Mama gefällt die Musik.', stufe: 2, benoetigt: ['мама', 'нравиться', 'музыка'], formen: { 'Маме': ['мама', 'dat'], 'нравится': ['нравиться', 'praes3s'] } },
+  { ru: 'Ваш телефон уже здесь.', de: 'Ihr Telefon ist schon hier.', stufe: 2, benoetigt: ['ваш', 'телефон', 'уже', 'здесь'] },
   { ru: 'Я не понимаю этот вопрос.', de: 'Ich verstehe diese Frage nicht.', stufe: 2, benoetigt: ['я', 'не', 'понимать', 'этот', 'вопрос'], formen: { 'понимаю': ['понимать', 'praes1s'] } },
+  { ru: 'Это очень важный вопрос.', de: 'Das ist eine sehr wichtige Frage.', stufe: 2, benoetigt: ['это', 'очень', 'важный', 'вопрос'] },
+  { ru: 'Он берёт ключ и сумку.', de: 'Er nimmt den Schlüssel und die Tasche.', stufe: 2, benoetigt: ['он', 'брать', 'ключ', 'и', 'сумка'], formen: { 'берёт': ['брать', 'praes3s'], 'сумку': ['сумка', 'akk'] } },
+  { ru: 'Бумага ещё в сумке.', de: 'Das Papier ist noch in der Tasche.', stufe: 2, benoetigt: ['бумага', 'ещё', 'в', 'сумка'], formen: { 'сумке': ['сумка', 'praep'] } },
+  { ru: 'Учитель повторяет вопрос.', de: 'Der Lehrer wiederholt die Frage.', stufe: 2, benoetigt: ['учитель', 'повторять', 'вопрос'], formen: { 'повторяет': ['повторять', 'praes3s'] } },
   { ru: 'Врач смотрит на ногу.', de: 'Der Arzt schaut sich das Bein an.', stufe: 2, benoetigt: ['врач', 'смотреть', 'на', 'нога'], formen: { 'смотрит': ['смотреть', 'praes3s'], 'ногу': ['нога', 'akk'] } },
+  { ru: 'Врач смотрит на зуб.', de: 'Der Arzt schaut sich den Zahn an.', stufe: 2, benoetigt: ['врач', 'смотреть', 'на', 'зуб'], formen: { 'смотрит': ['смотреть', 'praes3s'] } },
   { ru: 'Мой друг работает инженером.', de: 'Mein Freund arbeitet als Ingenieur.', stufe: 2, benoetigt: ['мой', 'друг', 'работать', 'инженер'], formen: { 'работает': ['работать', 'praes3s'] } },
   { ru: 'Врачу нужно время.', de: 'Der Arzt braucht Zeit.', stufe: 2, benoetigt: ['врач', 'нужно', 'время'], formen: { 'Врачу': ['врач', 'dat'] } },
+  { ru: 'Секунда, минута, час — это время.', de: 'Sekunde, Minute, Stunde — das ist Zeit.', stufe: 2, benoetigt: ['секунда', 'минута', 'час', 'это', 'время'] },
+  { ru: 'Месяц и неделя — это тоже время.', de: 'Monat und Woche sind auch Zeit.', stufe: 2, benoetigt: ['месяц', 'и', 'неделя', 'это', 'тоже', 'время'] },
   { ru: 'Сколько стоит этот билет?', de: 'Wie viel kostet dieses Ticket?', stufe: 2, benoetigt: ['сколько', 'стоить', 'этот', 'билет'], formen: { 'стоит': ['стоить', 'praes3s'] } },
   { ru: 'Моя сестра живёт в Москве.', de: 'Meine Schwester wohnt in Moskau.', stufe: 2, benoetigt: ['моя', 'сестра', 'жить', 'в', 'Москва'], formen: { 'живёт': ['жить', 'praes3s'], 'Москве': ['Москва', 'praep'] } },
   { ru: 'Зимой в России идёт снег.', de: 'Im Winter schneit es in Russland.', stufe: 2, benoetigt: ['зима', 'в', 'Россия', 'идти', 'снег'], formen: { 'идёт': ['идти', 'praes3s'], 'России': ['Россия', 'praep'] } },
   { ru: 'Лошадь и корова живут в деревне.', de: 'Pferd und Kuh leben im Dorf.', stufe: 2, benoetigt: ['лошадь', 'и', 'корова', 'жить', 'в', 'деревня'], formen: { 'живут': ['жить', 'praes3p'], 'деревне': ['деревня', 'praep'] } },
+  { ru: 'Он строит дом в деревне.', de: 'Er baut ein Haus im Dorf.', stufe: 2, benoetigt: ['он', 'строить', 'дом', 'в', 'деревня'], formen: { 'строит': ['строить', 'praes3s'], 'деревне': ['деревня', 'praep'] } },
   { ru: 'Летом мы едем на море.', de: 'Im Sommer fahren wir ans Meer.', stufe: 2, benoetigt: ['лето', 'мы', 'ехать', 'на', 'море'], formen: { 'едем': ['ехать', 'praes1p'] } },
   { ru: 'Волк и лиса живут в лесу.', de: 'Wolf und Fuchs leben im Wald.', stufe: 2, benoetigt: ['волк', 'и', 'лиса', 'жить', 'в', 'лес'], formen: { 'живут': ['жить', 'praes3p'], 'лесу': ['лес', 'praep'] } },
   { ru: 'Птица на дереве.', de: 'Der Vogel sitzt auf dem Baum.', stufe: 2, benoetigt: ['птица', 'на', 'дерево'], formen: { 'дереве': ['дерево', 'praep'] } },
+  { ru: 'Цветок на окне.', de: 'Die Blume steht auf dem Fensterbrett.', stufe: 2, benoetigt: ['цветок', 'на', 'окно'], formen: { 'окне': ['окно', 'praep'] } },
   { ru: 'Утка на озере.', de: 'Die Ente ist auf dem See.', stufe: 2, benoetigt: ['утка', 'на', 'озеро'], formen: { 'озере': ['озеро', 'praep'] } },
+  { ru: 'Остров в море.', de: 'Die Insel liegt im Meer.', stufe: 2, benoetigt: ['остров', 'в', 'море'], formen: { 'море': ['море', 'praep'] } },
+  { ru: 'Я знаю, что ты делаешь.', de: 'Ich weiß, was du machst.', stufe: 3, benoetigt: ['я', 'знать', 'что', 'ты', 'делать'], formen: { 'знаю': ['знать', 'praes1s'], 'делаешь': ['делать', 'praes2s'] } },
+  { ru: 'Тысяча — это очень много, ноль — это мало.', de: 'Tausend ist sehr viel, null ist wenig.', stufe: 3, benoetigt: ['тысяча', 'это', 'очень', 'много', 'ноль', 'мало'] },
   { ru: 'Каждое утро она пьёт кофе и читает новости.', de: 'Jeden Morgen trinkt sie Kaffee und liest die Nachrichten.', stufe: 3, benoetigt: ['каждый', 'утро', 'она', 'пить', 'кофе', 'и', 'читать', 'новости'], formen: { 'пьёт': ['пить', 'praes3s'], 'читает': ['читать', 'praes3s'] } },
+  { ru: 'В понедельник и вторник я работаю.', de: 'Am Montag und Dienstag arbeite ich.', stufe: 3, benoetigt: ['в', 'понедельник', 'и', 'вторник', 'я', 'работать'], formen: { 'работаю': ['работать', 'praes1s'] } },
+  { ru: 'В субботу и воскресенье мы дома.', de: 'Am Samstag und Sonntag sind wir zu Hause.', stufe: 3, benoetigt: ['в', 'суббота', 'воскресенье', 'мы', 'дом'], formen: { 'субботу': ['суббота', 'akk'] } },
+  { ru: 'Я открываю окно, она закрывает дверь.', de: 'Ich öffne das Fenster, sie schließt die Tür.', stufe: 3, benoetigt: ['я', 'открывать', 'окно', 'она', 'закрывать', 'дверь'], formen: { 'открываю': ['открывать', 'praes1s'], 'закрывает': ['закрывать', 'praes3s'] } },
   { ru: 'Я думаю, что зима в этом году будет холодной.', de: 'Ich denke, dass der Winter dieses Jahr kalt wird.', stufe: 3, benoetigt: ['я', 'думать', 'что', 'зима', 'в', 'этот', 'год', 'быть', 'холодный'], formen: { 'думаю': ['думать', 'praes1s'], 'году': ['год', 'praep'] } },
+  { ru: 'Весной тепло, осенью холодно.', de: 'Im Frühling ist es warm, im Herbst kalt.', stufe: 3, benoetigt: ['весна', 'тепло', 'осень', 'холодно'], formen: { 'Весной': ['весна', 'instr'], 'осенью': ['осень', 'instr'] } },
+  { ru: 'Папа сильный, ребёнок слабый, но умный.', de: 'Papa ist stark, das Kind ist schwach, aber klug.', stufe: 3, benoetigt: ['папа', 'сильный', 'ребёнок', 'слабый', 'но', 'умный'] },
   { ru: 'Эту книгу я читал, когда был молодой.', de: 'Dieses Buch las ich, als ich jung war.', stufe: 3, benoetigt: ['этот', 'книга', 'я', 'читать', 'когда', 'быть', 'молодой'], formen: { 'книгу': ['книга', 'akk'] } },
   { ru: 'Хотя было холодно, дети играли на улице.', de: 'Obwohl es kalt war, spielten die Kinder auf der Straße.', stufe: 3, benoetigt: ['хотя', 'быть', 'холодно', 'ребёнок', 'играть', 'на', 'улица'], formen: { 'улице': ['улица', 'praep'] } },
   { ru: 'Чтобы хорошо читать, нужно много работать.', de: 'Um gut zu lesen, muss man viel arbeiten.', stufe: 3, benoetigt: ['чтобы', 'хорошо', 'читать', 'нужно', 'много', 'работать'] },
+  { ru: 'Мы едем на метро в музей.', de: 'Wir fahren mit der U-Bahn ins Museum.', stufe: 3, benoetigt: ['мы', 'ехать', 'на', 'метро', 'в', 'музей'], formen: { 'едем': ['ехать', 'praes1p'] } },
+  { ru: 'Я иду через мост в больницу.', de: 'Ich gehe über die Brücke ins Krankenhaus.', stufe: 3, benoetigt: ['я', 'идти', 'через', 'мост', 'в', 'больница'], formen: { 'иду': ['идти', 'praes1s'], 'больницу': ['больница', 'akk'] } },
+  { ru: 'Я даю книгу брату.', de: 'Ich gebe meinem Bruder das Buch.', stufe: 3, benoetigt: ['я', 'давать', 'книга', 'брат'], formen: { 'даю': ['давать', 'praes1s'], 'книгу': ['книга', 'akk'], 'брату': ['брат', 'dat'] } },
+  { ru: 'Подруга ждёт сына у школы.', de: 'Die Freundin wartet vor der Schule auf den Sohn.', stufe: 3, benoetigt: ['подруга', 'ждать', 'сын', 'у', 'школа'], formen: { 'ждёт': ['ждать', 'praes3s'], 'сына': ['сын', 'akk'], 'школы': ['школа', 'gen'] } },
+  { ru: 'Я жду друга у метро.', de: 'Ich warte an der U-Bahn auf einen Freund.', stufe: 3, benoetigt: ['я', 'ждать', 'друг', 'у', 'метро'], formen: { 'жду': ['ждать', 'praes1s'], 'друга': ['друг', 'akk'] } },
+  { ru: 'Бабушка готовит пирог с яблоком.', de: 'Oma backt einen Kuchen mit Apfel.', stufe: 3, benoetigt: ['бабушка', 'готовить', 'пирог', 'с', 'яблоко'], formen: { 'готовит': ['готовить', 'praes3s'], 'яблоком': ['яблоко', 'instr'] } },
   { ru: 'Светлая комната мне нравится.', de: 'Das helle Zimmer gefällt mir.', stufe: 3, benoetigt: ['светлый', 'комната', 'я', 'нравиться'], formen: { 'Светлая': ['светлый', 'adjw'], 'нравится': ['нравиться', 'praes3s'] } },
   { ru: 'Вечером мы встретили друзей в ресторане.', de: 'Am Abend trafen wir Freunde im Restaurant.', stufe: 3, benoetigt: ['вечер', 'мы', 'встретить', 'друг', 'в', 'ресторан'], formen: { 'ресторане': ['ресторан', 'praep'] } },
+  { ru: 'Мы начинаем работу утром.', de: 'Wir beginnen die Arbeit morgens.', stufe: 3, benoetigt: ['мы', 'начинать', 'работа', 'утро'], formen: { 'начинаем': ['начинать', 'praes1p'], 'работу': ['работа', 'akk'], 'утром': ['утро', 'instr'] } },
   { ru: 'Я звоню другу каждый вечер.', de: 'Ich rufe meinen Freund jeden Abend an.', stufe: 3, benoetigt: ['я', 'звонить', 'друг', 'каждый', 'вечер'], formen: { 'звоню': ['звонить', 'praes1s'], 'другу': ['друг', 'dat'] } },
   { ru: 'Кожа на руке очень светлая.', de: 'Die Haut an der Hand ist sehr hell.', stufe: 3, benoetigt: ['кожа', 'на', 'рука', 'очень', 'светлый'], formen: { 'руке': ['рука', 'praep'], 'светлая': ['светлый', 'adjw'] } },
   { ru: 'Пальто дорогое, но свитер дешёвый.', de: 'Der Mantel ist teuer, aber der Pullover ist billig.', stufe: 3, benoetigt: ['пальто', 'дорогой', 'но', 'свитер', 'дешёвый'], formen: { 'дорогое': ['дорогой', 'adjs'] } },
+  { ru: 'В полдень солнце очень яркое.', de: 'Mittags ist die Sonne sehr hell.', stufe: 3, benoetigt: ['в', 'полдень', 'солнце', 'очень', 'яркий'], formen: { 'яркое': ['яркий', 'adjs'] } },
+  { ru: 'Дождь, ветер и туман — плохая погода.', de: 'Regen, Wind und Nebel — schlechtes Wetter.', stufe: 3, benoetigt: ['дождь', 'ветер', 'и', 'туман', 'плохой', 'погода'], formen: { 'плохая': ['плохой', 'adjw'] } },
+  { ru: 'Зимой мороз, летом жарко.', de: 'Im Winter Frost, im Sommer heiß.', stufe: 3, benoetigt: ['зима', 'мороз', 'лето', 'жарко'], formen: { 'Зимой': ['зима', 'instr'], 'летом': ['лето', 'instr'] } },
   { ru: 'Мышь маленькая, но слон большой.', de: 'Die Maus ist klein, aber der Elefant ist groß.', stufe: 3, benoetigt: ['мышь', 'маленький', 'но', 'слон', 'большой'], formen: { 'маленькая': ['маленький', 'adjw'] } },
   { ru: 'Он не только говорит по-русски, но и пишет письма.', de: 'Er spricht nicht nur Russisch, sondern schreibt auch Briefe.', stufe: 3, benoetigt: ['он', 'не', 'только', 'говорить', 'русский', 'но', 'и', 'писать', 'письмо'], formen: { 'говорит': ['говорить', 'praes3s'], 'пишет': ['писать', 'praes3s'] } },
   { ru: 'Я думаю, что русский язык трудный, но очень интересный.', de: 'Ich denke, dass Russisch schwierig, aber sehr interessant ist.', stufe: 3, benoetigt: ['я', 'думать', 'что', 'русский', 'язык', 'трудный', 'но', 'очень', 'интересный'], formen: { 'думаю': ['думать', 'praes1s'] } },
+  { ru: 'Компьютер и ручка на столе в офисе.', de: 'Computer und Stift liegen auf dem Tisch im Büro.', stufe: 3, benoetigt: ['компьютер', 'и', 'ручка', 'на', 'стол', 'в', 'офис'], formen: { 'столе': ['стол', 'praep'], 'офисе': ['офис', 'praep'] } },
   { ru: 'Учитель говорил медленно, и все поняли.', de: 'Der Lehrer sprach langsam, und alle verstanden.', stufe: 3, benoetigt: ['учитель', 'говорить', 'медленный', 'и', 'все', 'понимать'] },
   { ru: 'Учителю нравится этот вопрос.', de: 'Dem Lehrer gefällt diese Frage.', stufe: 3, benoetigt: ['учитель', 'нравиться', 'этот', 'вопрос'], formen: { 'Учителю': ['учитель', 'dat'], 'нравится': ['нравиться', 'praes3s'] } },
+  { ru: 'Моя сестра хочет быть учителем.', de: 'Meine Schwester will Lehrerin werden.', stufe: 3, benoetigt: ['моя', 'сестра', 'хотеть', 'быть', 'учитель'], formen: { 'хочет': ['хотеть', 'praes3s'], 'учителем': ['учитель', 'instr'] } },
+  { ru: 'Учитель спрашивает, студент отвечает.', de: 'Der Lehrer fragt, der Student antwortet.', stufe: 3, benoetigt: ['учитель', 'спрашивать', 'студент', 'отвечать'], formen: { 'спрашивает': ['спрашивать', 'praes3s'], 'отвечает': ['отвечать', 'praes3s'] } },
   { ru: 'Врач сказал, что нужно спать и не работать.', de: 'Der Arzt sagte, dass man schlafen und nicht arbeiten muss.', stufe: 3, benoetigt: ['врач', 'сказать', 'что', 'нужно', 'спать', 'и', 'не', 'работать'] },
+  { ru: 'Мой папа работает врачом.', de: 'Mein Papa arbeitet als Arzt.', stufe: 3, benoetigt: ['мой', 'папа', 'работать', 'врач'], formen: { 'работает': ['работать', 'praes3s'], 'врачом': ['врач', 'instr'] } },
   { ru: 'Мой брат сказал, что купит билеты на поезд.', de: 'Mein Bruder sagte, dass er Zugtickets kaufen wird.', stufe: 3, benoetigt: ['мой', 'брат', 'сказать', 'что', 'покупать', 'билет', 'на', 'поезд'] },
   { ru: 'Мы долго искали гостиницу, потому что город был большой.', de: 'Wir suchten lange ein Hotel, weil die Stadt groß war.', stufe: 3, benoetigt: ['мы', 'долго', 'искать', 'гостиница', 'потому что', 'город', 'быть', 'большой'], formen: { 'гостиницу': ['гостиница', 'akk'] } },
+  { ru: 'Паспорт, багаж и карта — это путешествие.', de: 'Pass, Gepäck und Karte — das ist eine Reise.', stufe: 3, benoetigt: ['паспорт', 'багаж', 'и', 'карта', 'это', 'путешествие'] },
+  { ru: 'Дорога идёт через границу.', de: 'Der Weg führt über die Grenze.', stufe: 3, benoetigt: ['дорога', 'идти', 'через', 'граница'], formen: { 'идёт': ['идти', 'praes3s'], 'границу': ['граница', 'akk'] } },
   { ru: 'В этом году я хочу поехать в Россию.', de: 'Dieses Jahr möchte ich nach Russland fahren.', stufe: 3, benoetigt: ['в', 'этот', 'год', 'я', 'хотеть', 'ехать', 'Россия'], formen: { 'Россию': ['Россия', 'akk'], 'хочу': ['хотеть', 'praes1s'], 'году': ['год', 'praep'] } },
   { ru: 'Когда я был ребёнком, мы часто ездили к бабушке в деревню.', de: 'Als ich ein Kind war, fuhren wir oft zur Oma ins Dorf.', stufe: 3, benoetigt: ['когда', 'я', 'быть', 'ребёнок', 'мы', 'часто', 'ехать', 'к', 'бабушка', 'в', 'деревня'], formen: { 'деревню': ['деревня', 'akk'] } },
-  { ru: 'Если завтра будет хорошая погода, мы поедем на море.', de: 'Wenn morgen gutes Wetter ist, fahren wir ans Meer.', stufe: 3, benoetigt: ['если', 'завтра', 'быть', 'хороший', 'погода', 'мы', 'ехать', 'на', 'море'] }
+  { ru: 'Тётя и дядя едут из деревни.', de: 'Tante und Onkel kommen aus dem Dorf.', stufe: 3, benoetigt: ['тётя', 'и', 'дядя', 'ехать', 'из', 'деревня'], formen: { 'едут': ['ехать', 'praes3p'], 'деревни': ['деревня', 'gen'] } },
+  { ru: 'Если завтра будет хорошая погода, мы поедем на море.', de: 'Wenn morgen gutes Wetter ist, fahren wir ans Meer.', stufe: 3, benoetigt: ['если', 'завтра', 'быть', 'хороший', 'погода', 'мы', 'ехать', 'на', 'море'] },
+  { ru: 'Мы гуляем в лесу у реки.', de: 'Wir spazieren im Wald am Fluss.', stufe: 3, benoetigt: ['мы', 'гулять', 'в', 'лес', 'у', 'река'], formen: { 'гуляем': ['гулять', 'praes1p'], 'лесу': ['лес', 'praep'], 'реки': ['река', 'gen'] } }
 ];
 
 var FACTS = [
@@ -2439,6 +2548,16 @@ var GRAMMATIK = [
     beispiele: ['мама', 'папа', 'бабушка', 'дедушка', 'подруга', 'тётя', 'дядя', 'внук', 'кошка', 'собака', 'птица', 'корова', 'коза', 'утка', 'медведь', 'волк', 'лиса', 'мышь', 'слон', 'лошадь', 'курица', 'свинья', 'студент', 'врач', 'инженер']
   },
   {
+    id: 'instrumental', name: 'Instrumental', kurz: 'Womit? Mit wem?', aufgabe: 'instr',
+    frage: '«с братом», «с книгой», «пишу ручкой» — was haben diese Formen gemeinsam?',
+    deutungen: ['Sie nennen die Begleitung oder das Werkzeug: mit wem, womit', 'Sie nennen den Ort, an dem etwas geschieht', 'Sie stehen immer nach с, sonst nirgends'], richtig: 0,
+    regel: 'Der Instrumental sagt, womit oder mit wem. Nach с heißt er «zusammen mit», ohne Präposition «mit Hilfe von»: пишу ручкой — ich schreibe mit dem Stift. Männlich und sächlich nehmen -ом, weiblich -ой, weiblich auf -ь aber -ью. Und er nennt den Beruf: он работает врачом.',
+    tabelle: [['männlich', '+ -ом', 'стол → столом'], ['männlich -й / -ь', 'wird -ем', 'музей → музеем'], ['sächlich -о', 'wird -ом', 'окно → окном'], ['weiblich -а', 'wird -ой', 'книга → книгой'], ['weiblich -я', 'wird -ей', 'кухня → кухней'], ['weiblich -ь', 'wird -ью', 'дверь → дверью']],
+    merksatz: 'Womit? Männlich -ом, weiblich -ой. Und «с» davor heißt: zusammen.',
+    fussnote: 'Nach ж ч ш щ ц entscheidet die Betonung: unbetont steht ein е (му\u0301жем), betont ein о (врачо\u0301м). Der Instrumental nennt auch die Zeit, ohne jede Präposition: утром, вечером, зимой, летом — morgens, abends, im Winter, im Sommer.',
+    beispiele: ['стол', 'книга', 'ручка', 'бумага', 'сумка', 'молоко', 'хлеб', 'сахар', 'масло', 'суп', 'чай', 'вода', 'ключ', 'телефон', 'компьютер', 'машина', 'поезд', 'автобус', 'карта', 'брат', 'папа', 'мама', 'бабушка', 'дедушка', 'подруга', 'собака', 'кошка', 'друг', 'муж', 'учитель', 'врач', 'инженер', 'студент']
+  },
+  {
     id: 'adjektiv', name: 'Übereinstimmung', kurz: 'Wenn ein Wort sich nach einem anderen richtet', aufgabe: 'adj',
     partner: ['стол', 'парк', 'магазин', 'книга', 'машина', 'улица', 'комната', 'окно', 'письмо', 'море'],
     frage: 'Dasselbe Adjektiv, vier Nomen. Woran richtet es sich?',
@@ -2513,24 +2632,24 @@ var VERBEN = {
 };
 
 var NOMEN = {
-  'ребёнок': { praep: 'ребёнке', gen: 'ребёнка', dat: 'ребёнку', plural: 'дети' },
-  'рынок': { praep: 'рынке', gen: 'рынка', dat: 'рынку', plural: 'рынки' },
-  'цветок': { praep: 'цветке', gen: 'цветка', dat: 'цветку', plural: 'цветы' },
-  'палец': { praep: 'пальце', gen: 'пальца', dat: 'пальцу', plural: 'пальцы' },
-  'заяц': { praep: 'зайце', gen: 'зайца', dat: 'зайцу', plural: 'зайцы' },
-  'день': { praep: 'дне', gen: 'дня', dat: 'дню', plural: 'дни' },
-  'полдень': { praep: 'полдне', gen: 'полдня', dat: 'полдню' },
-  'ветер': { praep: 'ветре', gen: 'ветра', dat: 'ветру', plural: 'ветры' },
+  'ребёнок': { praep: 'ребёнке', gen: 'ребёнка', dat: 'ребёнку', instr: 'ребёнком', plural: 'дети' },
+  'рынок': { praep: 'рынке', gen: 'рынка', dat: 'рынку', instr: 'рынком', plural: 'рынки' },
+  'цветок': { praep: 'цветке', gen: 'цветка', dat: 'цветку', instr: 'цветком', plural: 'цветы' },
+  'палец': { praep: 'пальце', gen: 'пальца', dat: 'пальцу', instr: 'пальцем', plural: 'пальцы' },
+  'заяц': { praep: 'зайце', gen: 'зайца', dat: 'зайцу', instr: 'зайцем', plural: 'зайцы' },
+  'день': { praep: 'дне', gen: 'дня', dat: 'дню', instr: 'днём', plural: 'дни' },
+  'полдень': { praep: 'полдне', gen: 'полдня', dat: 'полдню', instr: 'полднем' },
+  'ветер': { praep: 'ветре', gen: 'ветра', dat: 'ветру', instr: 'ветром', plural: 'ветры' },
   'церковь': { praep: 'церкви', gen: 'церкви', dat: 'церкви', plural: 'церкви' },
-  'дочь': { praep: 'дочери', gen: 'дочери', dat: 'дочери', plural: 'дочери' },
-  'время': { praep: 'времени', gen: 'времени', dat: 'времени', plural: 'времена' },
+  'дочь': { praep: 'дочери', gen: 'дочери', dat: 'дочери', instr: 'дочерью', plural: 'дочери' },
+  'время': { praep: 'времени', gen: 'времени', dat: 'времени', instr: 'временем', plural: 'времена' },
   'год': { praep: 'году' },
   'лес': { praep: 'лесу', plural: 'леса' },
   'шкаф': { praep: 'шкафу' },
   'мост': { praep: 'мосту' },
   'аэропорт': { praep: 'аэропорту' },
   'нос': { praep: 'носу' },
-  'рот': { praep: 'рту', gen: 'рта', dat: 'рту', plural: 'рты' },
+  'рот': { praep: 'рту', gen: 'рта', dat: 'рту', instr: 'ртом', plural: 'рты' },
   'глаз': { praep: 'глазу', plural: 'глаза' },
   'снег': { praep: 'снегу', plural: 'снега' },
   'час': { praep: 'часу' },
@@ -2550,7 +2669,7 @@ var NOMEN = {
   'вечер': { plural: 'вечера' },
   'свитер': { plural: 'свитера' },
   'ухо': { plural: 'уши' },
-  'плечо': { plural: 'плечи' },
+  'плечо': { instr: 'плечом', plural: 'плечи' },
   'колено': { plural: 'колени' },
   'яблоко': { plural: 'яблоки' },
   'сестра': { plural: 'сёстры' },
@@ -2558,7 +2677,12 @@ var NOMEN = {
   'жена': { plural: 'жёны' },
   'муж': { plural: 'мужья' },
   'озеро': { plural: 'озёра' },
-  'небо': { plural: 'небеса' }
+  'небо': { plural: 'небеса' },
+  'ключ': { instr: 'ключом' },
+  'врач': { instr: 'врачом' },
+  'багаж': { instr: 'багажом' },
+  'дождь': { instr: 'дождём' },
+  'кофе': { starr: true }
 };
 
 var KOMMENTARE = [
@@ -3236,6 +3360,40 @@ function dativ(ru, art) {
   return ru + 'у';
 }
 
+// Instrumental Einzahl — der Fall des Werkzeugs und der Begleitung: «с мамой»,
+// «пишу ручкой», «он врач по профессии».
+//   männlich Konsonant → -ом    стол → столом
+//   männlich -й / -ь    → -ем   музей → музеем, медведь → медведем
+//   sächlich -о / -е    → -ом/-ем окно → окном, море → морем
+//   weiblich -а         → -ой   книга → книгой
+//   weiblich -я         → -ей   кухня → кухней
+//   weiblich -ь         → -ью   дверь → дверью
+//   auf -ия             → -ией  Россия → Россией
+// **Nach ж ч ш щ ц steht unbetont ein е, betont ein о** — мужем gegen врачом.
+// Die Regel hier nimmt das unbetonte an, weil es der häufigere Fall ist; die
+// betonten stehen in NOMEN. Die Betonung selbst wird dafür **nicht** befragt:
+// Sie ist Anzeige, nicht Rechengrundlage (ADR 0054).
+function instrumental(ru, art) {
+  var eigen = NOMEN[ru] || null;
+  if (eigen && eigen.starr) return ru;
+  if (eigen && eigen.instr) return eigen.instr;
+  if (/ия$/.test(ru)) return ru.slice(0, -2) + 'ией';
+  if (/(ий|ие)$/.test(ru)) return ru.slice(0, -2) + 'ием';
+  if (/ь$/.test(ru)) {
+    return geschlecht(art) === 'w' ? ru.slice(0, -1) + 'ью' : ru.slice(0, -1) + 'ем';
+  }
+  if (/я$/.test(ru)) return ru.slice(0, -1) + 'ей';
+  if (/а$/.test(ru)) {
+    return ru.slice(0, -1) + (/[жчшщц]$/.test(ru.slice(0, -1)) ? 'ей' : 'ой');
+  }
+  if (/о$/.test(ru)) {
+    return ru.slice(0, -1) + (/[жчшщц]$/.test(ru.slice(0, -1)) ? 'ем' : 'ом');
+  }
+  if (/е$/.test(ru)) return ru.slice(0, -1) + 'ем';
+  if (/й$/.test(ru)) return ru.slice(0, -1) + 'ем';
+  return ru + (/[жчшщц]$/.test(ru) ? 'ем' : 'ом');
+}
+
 // Mehrzahl im ersten Fall. Die Endung der Grundform entscheidet, nicht das
 // Geschlecht — und die eine Rechtschreibregel: nach к г х ж ч ш щ nie ы.
 //   männlich Konsonant → -ы     стол → столы
@@ -3420,6 +3578,7 @@ function grammForm(ru, art, rolle) {
   if (rolle === 'praep') return istNomen(art) ? praepositiv(ru, art) : null;
   if (rolle === 'gen') return istNomen(art) ? genitiv(ru, art) : null;
   if (rolle === 'dat') return istNomen(art) ? dativ(ru, art) : null;
+  if (rolle === 'instr') return istNomen(art) ? instrumental(ru, art) : null;
   if (rolle === 'plural') return istNomen(art) ? plural(ru, art) : null;
   if (rolle.indexOf('praet') === 0) {
     return art === 'v' ? praeteritum(ru, rolle.slice(5)) : null;
@@ -3487,7 +3646,7 @@ var APP_STAND = '2026-08-14'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.0.0'; /* == VERSION == */
+var APP_VERSION = '2.1.0'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -8623,7 +8782,7 @@ function gramWortPool(b) {
   // lebt. «книге нравится» ist tadellos gebeugt und trotzdem Unsinn; hier
   // steht die Vorsicht genau andersherum als beim Präpositiv.
   if (b.aufgabe === 'praep' || b.aufgabe === 'plural' || b.aufgabe === 'gen' ||
-    b.aufgabe === 'dat') {
+    b.aufgabe === 'dat' || b.aufgabe === 'instr') {
     var taugt = function (v) {
       if (!v || NOMEN[v.ru] || !istNomen(v.art)) return false;
       if (b.aufgabe === 'praep') return !belebt(v.art);
@@ -8892,7 +9051,8 @@ function gramEntdeckenWoerter(b) {
   // gerade, dass es *keinen* gibt — dreimal dieselbe Endung, und genau das soll
   // auffallen, weil der Akkusativ es anders macht.
   if (b.aufgabe === 'geschlecht' || b.aufgabe === 'praep' ||
-    b.aufgabe === 'plural' || b.aufgabe === 'gen' || b.aufgabe === 'dat') {
+    b.aufgabe === 'plural' || b.aufgabe === 'gen' || b.aufgabe === 'dat' ||
+    b.aufgabe === 'instr') {
     nimm(nach('w'), 1); nimm(nach('m'), 1); nimm(nach('s'), 1); nimm(pool, 1);
   } else {
     nimm(nach('w'), 2); nimm(nach('s'), 1); nimm(nach('m'), 1);
@@ -8979,7 +9139,7 @@ function gramPaare(b) {
       rechts: b.aufgabe === 'geschlecht'
         ? GESCHLECHT_NAME[geschlecht(v.art)]
         : (b.aufgabe === 'praep' ? 'в ' : b.aufgabe === 'gen' ? 'нет '
-          : b.aufgabe === 'dat' ? 'к ' : '') +
+          : b.aufgabe === 'dat' ? 'к ' : b.aufgabe === 'instr' ? 'с ' : '') +
           grammForm(v.ru, v.art, b.aufgabe),
       kyr: b.aufgabe !== 'geschlecht'
     });
@@ -9094,12 +9254,13 @@ function gramUebenHtml(b) {
     html += '</div>';
   } else {
     if (q.art === 'akk' || q.art === 'praep' || q.art === 'gen' ||
-      q.art === 'dat' || q.art === 'plural') {
+      q.art === 'dat' || q.art === 'instr' || q.art === 'plural') {
       var FALLFRAGE = {
         praep: 'Wo? — die Form nach <span class="cyr">в</span> und <span class="cyr">на</span>',
         akk: 'Wen? Was? — die Form dazu',
         gen: 'Was fehlt? — die Form nach <span class="cyr">нет</span>',
         dat: 'Wem? — die Form nach <span class="cyr">к</span> und bei <span class="cyr">нравится</span>',
+        instr: 'Womit? Mit wem? — die Form nach <span class="cyr">с</span>',
         plural: 'Und in der Mehrzahl?'
       };
       html += '<p class="task-label">' + FALLFRAGE[q.art] + '</p>' +
@@ -9241,7 +9402,7 @@ function gramWarumHtml(b, q) {
         '<strong class="cyr">' + esc(q.loesung) + '</strong>. '
       : '') + warum + '</p>';
   }
-  if (q.art === 'gen' || q.art === 'dat' || q.art === 'plural') {
+  if (q.art === 'gen' || q.art === 'dat' || q.art === 'instr' || q.art === 'plural') {
     var letzt = v.ru.slice(-1);
     var neuLetzt = q.loesung.slice(v.ru.length - 1);
     return '<p class="hint">' + esc(v.ru) + ' ist ' + GESCHLECHT_NAME[g] + ' und endet auf ' +

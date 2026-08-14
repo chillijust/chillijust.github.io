@@ -275,8 +275,8 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
 - **Grammatik ist eine Funktion, kein Fakt** (ADR 0030). Die Karteikarte ist die **Regel**,
   nicht das Wort, und die Aufgabe verlangt ein bekanntes Wort in einer nie gesehenen Form —
   sonst prüft sie Auswendiglernen. Formen rechnet `grammForm()`; sie steht doppelt (App und
-  Build) und wird an den vermerkten Formen der Sätze gemessen. Elf Bausteine, fünf Formen
-  je Nomen (`akk`, `praep`, `gen`, `dat`, `plural`); in `data/nomen.json` wird **jede Angabe für
+  Build) und wird an den vermerkten Formen der Sätze gemessen. Zwölf Bausteine, sechs Formen
+  je Nomen (`akk`, `praep`, `gen`, `dat`, `instr`, `plural`); in `data/nomen.json` wird **jede Angabe für
   sich** gegen die blanke Regel geprüft, nicht der Eintrag als Ganzes. **Eine Wortart-Angabe, die
   nur wiederholt, was die Endung sagt, lässt den Build scheitern** — sonst verdeckt die
   Liste die echten Ausnahmen. Dasselbe gilt für `data/verben.json`: **ein Eintrag, der
@@ -302,7 +302,10 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   Sicherungscode ist sein Text. Schneidet der Zuwachs die Lernsets neu, wird
   `state.setSchnitt` ungültig, und `setSchnittPruefen()` wirft die `set:*`-Marken weg —
   sonst meint «set:7» etwas anderes als vorher. **Der Dativ verlangt Lebewesen**
-  («книге нравится» ist Unsinn), der Präpositiv umgekehrt Orte.
+  («книге нравится» ist Unsinn), der Präpositiv umgekehrt Orte. **Im Instrumental
+  entscheidet nach ж ч ш щ ц die Betonung** über die Endung — die Regel nimmt das
+  unbetonte `е` an, die betonten stehen in `nomen.json`; die Betonungsliste wird dafür
+  **nicht** befragt (ADR 0054).
 - **Die Reihenfolge in `data/vokabeln.json` ist der Lehrplan.** Aus ihr und den
   Satzvoraussetzungen bauen sich die Lernsets (`SET_MAX`, `SATZ_STUFE`); Ergänzungen ans
   Ende des passenden Themas.

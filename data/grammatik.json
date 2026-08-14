@@ -122,6 +122,27 @@
     "beispiele": ["мама", "папа", "бабушка", "дедушка", "подруга", "тётя", "дядя", "внук", "кошка", "собака", "птица", "корова", "коза", "утка", "медведь", "волк", "лиса", "мышь", "слон", "лошадь", "курица", "свинья", "студент", "врач", "инженер"]
   },
   {
+    "id": "instrumental",
+    "name": "Instrumental",
+    "kurz": "Womit? Mit wem?",
+    "aufgabe": "instr",
+    "frage": "«с братом», «с книгой», «пишу ручкой» — was haben diese Formen gemeinsam?",
+    "deutungen": ["Sie nennen die Begleitung oder das Werkzeug: mit wem, womit", "Sie nennen den Ort, an dem etwas geschieht", "Sie stehen immer nach с, sonst nirgends"],
+    "richtig": 0,
+    "regel": "Der Instrumental sagt, womit oder mit wem. Nach с heißt er «zusammen mit», ohne Präposition «mit Hilfe von»: пишу ручкой — ich schreibe mit dem Stift. Männlich und sächlich nehmen -ом, weiblich -ой, weiblich auf -ь aber -ью. Und er nennt den Beruf: он работает врачом.",
+    "tabelle": [
+      ["männlich", "+ -ом", "стол → столом"],
+      ["männlich -й / -ь", "wird -ем", "музей → музеем"],
+      ["sächlich -о", "wird -ом", "окно → окном"],
+      ["weiblich -а", "wird -ой", "книга → книгой"],
+      ["weiblich -я", "wird -ей", "кухня → кухней"],
+      ["weiblich -ь", "wird -ью", "дверь → дверью"]
+    ],
+    "merksatz": "Womit? Männlich -ом, weiblich -ой. Und «с» davor heißt: zusammen.",
+    "fussnote": "Nach ж ч ш щ ц entscheidet die Betonung: unbetont steht ein е (му\u0301жем), betont ein о (врачо\u0301м). Der Instrumental nennt auch die Zeit, ohne jede Präposition: утром, вечером, зимой, летом — morgens, abends, im Winter, im Sommer.",
+    "beispiele": ["стол", "книга", "ручка", "бумага", "сумка", "молоко", "хлеб", "сахар", "масло", "суп", "чай", "вода", "ключ", "телефон", "компьютер", "машина", "поезд", "автобус", "карта", "брат", "папа", "мама", "бабушка", "дедушка", "подруга", "собака", "кошка", "друг", "муж", "учитель", "врач", "инженер", "студент"]
+  },
+  {
     "id": "adjektiv",
     "name": "Übereinstimmung",
     "kurz": "Wenn ein Wort sich nach einem anderen richtet",

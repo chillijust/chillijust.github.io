@@ -1191,6 +1191,22 @@ Die Personalpronomen (`я → мне`, `он → ему`, …) haben eigene Form
 verrät. Sie stehen in der Fußnote des Bausteins und werden **nicht abgefragt** — erklären
 und abfragen sind zwei Dinge.
 
+### Der Instrumental — und die einzige Endung, die an der Betonung hängt
+
+`grammForm(ru, art, 'instr')` rechnet Werkzeug und Begleitung: männlich und sächlich -ом,
+weiblich -ой, weiblich auf -я aber -ей, auf -ь sogar -ью.
+
+**Nach ж ч ш щ ц entscheidet die Betonung über die Endung** — `му́жем` gegen `врачо́м`. Das
+ist der einzige Fall in der ganzen Formenmaschine, in dem eine Endung nicht aus den
+Buchstaben folgt. Die Betonungsdaten lägen seit ADR 0054 vor, werden aber **nicht
+befragt**: Die Betonung ist Anzeige, nicht Rechengrundlage, und sie steht nur bei 301 von
+395 Wörtern. Die Regel nimmt darum das unbetonte `е` an — der häufigere Fall —, und die
+betonten stehen in `nomen.json`.
+
+Der Instrumental nennt auch die Zeit, ganz ohne Präposition: `утром`, `вечером`, `зимой`,
+`летом`. Für den **Übungsvorrat** taugen solche Wörter trotzdem nicht — «с утром» ist
+Unsinn —, darum nennt der Baustein wie Präpositiv und Dativ seine Wörter selbst.
+
 ### Der Präpositiv — und warum er ausgesuchte Wörter braucht
 
 Der Ortsfall nach в und на. Die Regel ist die einfachste von allen: **fast alles endet

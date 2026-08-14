@@ -1,6 +1,6 @@
 # 0057 · Die Sätze tragen den Lehrplan
 
-**Stand:** angenommen · 2026-08-14 · Etappe 6 der Umstellung, Portion 6a
+**Stand:** angenommen · 2026-08-14 · Etappe 6 der Umstellung, Portionen 6a und 6b
 
 ## Ausgangslage
 
@@ -92,6 +92,25 @@ Regel, die für die Kommentare schon galt (ADR 0049).
   Fixpunkte** — eine Suite, die «genau 102 Sätze» verlangt, wäre bei 6b rot, ohne dass
   etwas kaputt wäre, und dann gewöhnt man sich das Rot an. Vier bestehende Suiten mussten
   aus demselben Grund von festen Zahlen auf gerechnete umgestellt werden.
-- **Portion 6a von dreien.** 6b bringt den Instrumental, 6c die Aspektpaare und das Futur;
-  erst danach ist das Ziel von über 90 % erreicht. Die Untergrenze in der Suite steigt mit
-  jeder Portion mit.
+- **Portion 6a von dreien.** 6b bringt den Instrumental, 6c die Aspektpaare und das Futur.
+  Die Untergrenze in der Suite steigt mit jeder Portion mit.
+
+## Nachtrag · Portion 6b (2.1.0)
+
+109 weitere Sätze — **211 insgesamt, und damit liegen alle 395 Wörter im Lernweg.** Das
+Ziel von «über 90 %» ist mit 100 % übertroffen; aus 12 Lernsets sind 35 geworden. Dazu der
+**Instrumental** als zwölfter Grammatik-Baustein.
+
+**Der Instrumental hat eine Eigenheit, die keiner der anderen Fälle hat: Nach ж ч ш щ ц
+entscheidet die Betonung über die Endung** — `му́жем` gegen `врачо́м`. Die Betonungsdaten
+lägen seit ADR 0054 vor, aber sie werden **nicht befragt**: Die Betonung ist Anzeige, nicht
+Rechengrundlage, und sie steht nur bei 301 von 395 Wörtern. Die Regel nimmt darum das
+unbetonte `е` an — der häufigere Fall —, und die vier betonten stehen in `nomen.json`. Das
+sind vier Einträge statt acht in der Gegenrichtung, und die Suite prüft beide Seiten.
+
+**Ein Fund nebenbei:** `кофе` ist unbeugbar, stand aber nicht als `starr` in `nomen.json`.
+Die blanke Regel machte daraus im Genitiv «кофя» — ein Fehler, der seit jeher dalag und
+erst auffiel, als der Instrumental jedes Nomen durchgerechnet hat.
+
+Damit ist der Zweck von 6c ein anderer als geplant: Die Abdeckung ist erreicht, es geht
+dort nur noch um **Aspektpaare und Futur** — Grammatik, keine Reichweite.

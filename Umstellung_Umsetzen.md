@@ -26,8 +26,8 @@ man der falschen.
 | 4 | Orthographie ohne Ton (E3 + Prüfwort) | 1.8.0 | **fertig** · ADR 0055 · Suite `schreibung` · neue Übung «Schreibung» |
 | 5 | Handling: Rekonstruktion, Tagesmaß, Fehlerprofil | 1.9.0 | **fertig** · ADR 0056 · Suite `strenge` · drei neue Einstellungen |
 | 6a | Sätze wachsen · Portion 1 + Dativ | 2.0.0 | **fertig** · ADR 0057 · Suite `lehrplan` · 102 Sätze, 51 % im Lernweg |
-| 6b | Sätze wachsen · Portion 2 + Instrumental | 2.1.0 | offen |
-| 6c | Sätze wachsen · Portion 3 + Aspekt und Futur | 2.2.0 | offen |
+| 6b | Sätze wachsen · Portion 2 + Instrumental | 2.1.0 | **fertig** · 211 Sätze, **100 %** im Lernweg, 35 Lernsets |
+| 6c | Aspektpaare und Futur | 2.2.0 | offen · **nur noch Grammatik** — die Abdeckung ist mit 6b erreicht |
 | 7 | Buchstaben-Generatoren ohne Ton (D3, D4, D6) | 2.3.0 | offen |
 | 8 | Service Worker | 2.4.0 | offen |
 

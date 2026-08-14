@@ -38,17 +38,17 @@ try {
     s.benoetigt.forEach(function (w) { imWeg[w] = true; });
   });
   var anteil = Object.keys(imWeg).length / ALL_VOCAB.length;
-  pruefe('A1 der Lernweg deckt mindestens die Hälfte des Wortschatzes',
-    anteil >= 0.5, Math.round(anteil * 100) + ' %');
+  pruefe('A1 der Lernweg deckt den Wortschatz', anteil >= 0.99,
+    Math.round(anteil * 100) + ' %');
   // **Ein Wort ohne Satz ist ein Wort ohne Weg.** Es steht in keinem Set,
-  // schaltet nichts frei und taucht in «Übersetzen» nie auf. Die Zahl darf
-  // fallen, nie steigen — darum steht sie hier als Obergrenze.
+  // schaltet nichts frei und taucht in «Übersetzen» nie auf. Seit 2.1.0 gibt
+  // es keines mehr — und ein neues Wort ohne Satz soll auffallen, sofort.
   var heimatlos = ALL_VOCAB.filter(function (v) { return !imWeg[v.id]; });
-  pruefe('A2 die heimatlosen Wörter werden weniger, nicht mehr',
-    heimatlos.length <= 194, String(heimatlos.length));
+  pruefe('A2 kein Wort steht außerhalb des Lernwegs', heimatlos.length === 0,
+    heimatlos.map(function (v) { return v.ru; }).join(' '));
 
   // ── B · Die Lernsets ──────────────────────────────────────
-  pruefe('B1 es gibt mehr als ein Dutzend Sets', LERNSETS.length >= 12,
+  pruefe('B1 aus zwölf Sets sind viele geworden', LERNSETS.length >= 30,
     String(LERNSETS.length));
   var zuGross = LERNSETS.filter(function (s) { return s.woerter.length > SET_MAX; });
   pruefe('B2 kein Set geht über SET_MAX', zuGross.length === 0,
@@ -73,7 +73,7 @@ try {
   // ── C · Die Satzstufen ────────────────────────────────────
   [1, 2, 3].forEach(function (n) {
     var wieviele = SENTENCES.filter(function (s) { return s.stufe === n; }).length;
-    pruefe('C' + n + ' Stufe ' + n + ' hat Bestand', wieviele >= 15, String(wieviele));
+    pruefe('C' + n + ' Stufe ' + n + ' hat Bestand', wieviele >= 40, String(wieviele));
   });
   // Innerhalb einer Stufe stehen die Sätze nach Reifegrad — wer die Datei
   // liest, soll den Weg sehen, und die Sets entstehen aus derselben Ordnung.
@@ -165,6 +165,28 @@ try {
   pruefe('E11 die Lösung ist die Dativform',
     gramQ && gramQ.loesung === grammForm(gramQ.wort.ru, gramQ.wort.art, 'dat'),
     gramQ ? gramQ.wort.ru + ' → ' + gramQ.loesung : 'keine Frage');
+
+  // ── E2 · Der Instrumental ─────────────────────────────────
+  pruefe('E12 es gibt einen Instrumental-Baustein',
+    GRAMMATIK.some(function (b) { return b.aufgabe === 'instr'; }));
+  pruefe('E13 männlich nimmt -ом', grammForm('стол', 'm', 'instr') === 'столом');
+  pruefe('E14 weiblich -а nimmt -ой', grammForm('книга', 'w', 'instr') === 'книгой');
+  pruefe('E15 weiblich -я nimmt -ей', grammForm('кухня', 'w', 'instr') === 'кухней');
+  pruefe('E16 weiblich -ь nimmt -ью', grammForm('дверь', 'w', 'instr') === 'дверью');
+  pruefe('E17 sächlich -о nimmt -ом', grammForm('окно', 's', 'instr') === 'окном');
+  pruefe('E18 sächlich -е nimmt -ем', grammForm('море', 's', 'instr') === 'морем');
+  // **Nach ж ч ш щ ц entscheidet die Betonung.** Die Regel nimmt das
+  // unbetonte е an; die betonten stehen in NOMEN, und dass beides stimmt,
+  // steht hier.
+  pruefe('E19 unbetont nach Zischlaut ein е', grammForm('муж', 'mb', 'instr') === 'мужем',
+    grammForm('муж', 'mb', 'instr'));
+  pruefe('E20 betont nach Zischlaut ein о', grammForm('врач', 'mb', 'instr') === 'врачом',
+    grammForm('врач', 'mb', 'instr'));
+  pruefe('E21 der flüchtige Vokal fällt auch hier',
+    grammForm('день', 'm', 'instr') === 'днём', grammForm('день', 'm', 'instr'));
+  pruefe('E22 ein starres Lehnwort bleibt',
+    grammForm('кофе', 'm', 'instr') === 'кофе' && grammForm('кофе', 'm', 'gen') === 'кофе',
+    grammForm('кофе', 'm', 'gen'));
 
   // ── F · Der Jubel behauptet keine Zahl, die er nicht kennt ─
   var festeZahl = JUBEL.regel.filter(function (paar) {
