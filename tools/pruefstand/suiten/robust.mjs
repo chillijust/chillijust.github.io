@@ -57,27 +57,92 @@ try {
   }
   try { Object.defineProperty(navigator, 'storage', { configurable: true, value: echt }); } catch (e) {}
 
-  // ── B · Die Offline-Anzeige ───────────────────────────────
-  // Offline ist bei dieser App kein Fehler, sondern der gedachte Normalfall.
-  var n = q('#offlineNote');
-  pruefe('B1 die Anzeige steht im Kopf', !!n);
+  // ── B · Die Statuslampe im Namen (ADR 0061) ───────────────
+  // Offline ist bei dieser App kein Fehler, sondern der gedachte Normalfall —
+  // die Anzeige ist darum der Punkt hinter dem Namen, nicht eine Warnung.
+  // **Die Farbe trägt die Aussage nie allein**, solange Platz für das Wort ist:
+  // Auf Home steht es daneben, unterwegs übernimmt das Vorlesefeld.
+  setTab('home');
+  var n = q('#netzStand');
+  var punkt = q('#netzPunkt');
+  var wort = q('#netzWort');
+  pruefe('B1 die Lampe steht im Kopf', !!n && !!punkt && !!wort);
+  pruefe('B2 der Punkt sitzt direkt hinter dem Namen',
+    Math.abs(punkt.getBoundingClientRect().left -
+      q('#kopfTitel').getBoundingClientRect().right) < 2,
+    punkt.getBoundingClientRect().left.toFixed(0) + ' / ' +
+    q('#kopfTitel').getBoundingClientRect().right.toFixed(0));
   var echtOnline = Object.getOwnPropertyDescriptor(Navigator.prototype, 'onLine');
   function setzeOnline(wert) {
     Object.defineProperty(navigator, 'onLine', { configurable: true, get: function () { return wert; } });
   }
+  function punktFarbe() { return getComputedStyle(punkt).color; }
   setzeOnline(true);
-  offlineZeigen();
-  pruefe('B2 online bleibt sie weg', n.hidden === true);
+  netzZeigen();
+  var gruen = punktFarbe();
+  pruefe('B3 online sagt sie «Online»',
+    wort.textContent === 'Online' && punkt.getAttribute('aria-label') === 'Online',
+    wort.textContent);
+  pruefe('B4 und das Wort ist zu sehen',
+    getComputedStyle(wort).display !== 'none' && !n.classList.contains('nur-punkt'));
   setzeOnline(false);
-  offlineZeigen();
-  pruefe('B3 offline steht sie da', n.hidden === false && n.textContent.indexOf('Offline') !== -1,
-    n.textContent);
+  netzZeigen();
+  var rot = punktFarbe();
+  pruefe('B5 offline sagt sie «Offline»',
+    wort.textContent === 'Offline' && punkt.getAttribute('aria-label') === 'Offline',
+    wort.textContent);
+  pruefe('B6 und der Punkt wechselt die Farbe', rot !== gruen, gruen + ' / ' + rot);
+  // Rot und Grün sind nicht irgendwelche Farben, sondern die Signalfarben des
+  // Schemas — sonst hieße «falsch» in der App etwas anderes als hier.
+  var stil = getComputedStyle(document.documentElement);
+  function alsRgb(v) {
+    var d = document.createElement('span');
+    d.style.color = v.trim();
+    document.body.appendChild(d);
+    var f = getComputedStyle(d).color;
+    d.remove();
+    return f;
+  }
+  pruefe('B7 sie nimmt --good und --bad',
+    gruen === alsRgb(stil.getPropertyValue('--good')) &&
+    rot === alsRgb(stil.getPropertyValue('--bad')),
+    gruen + ' / ' + rot);
+  // Unterwegs bleibt der Punkt, das Wort geht — der Kopf trägt dort den Namen
+  // der Übung und den Rückweg.
+  setTab('tippen');
+  pruefe('B8 unterwegs steht der Punkt allein',
+    n.classList.contains('nur-punkt') && getComputedStyle(wort).display === 'none');
+  pruefe('B9 die Farbe bleibt trotzdem richtig', punktFarbe() === rot);
+  // Er ist keine Zierde: Wer nicht sieht, muss ihn hören können.
+  pruefe('B10 und wird vorgelesen',
+    punkt.getAttribute('role') === 'img' && punkt.getAttribute('aria-label') === 'Offline');
+  pruefe('B11 das Wort daneben aber nicht doppelt',
+    wort.getAttribute('aria-hidden') === 'true');
+  // Der Name der Ansicht ist genau der Name — die Lampe steht daneben, nicht
+  // darin. Sonst hieße die Übung «Tippen.».
+  pruefe('B12 die Überschrift trägt nur den Namen', q('#kopfTitel').textContent === 'Tippen',
+    q('#kopfTitel').textContent);
   setzeOnline(true);
-  offlineZeigen();
-  pruefe('B4 und verschwindet wieder', n.hidden === true);
+  netzZeigen();
+  pruefe('B13 und der Weg zurück geht auch', punktFarbe() === gruen);
   try {
     if (echtOnline) Object.defineProperty(navigator, 'onLine', echtOnline);
   } catch (e) {}
+  setTab('home');
+  netzZeigen();
+
+  // ── B2 · Die Augenbraue auf Home ──────────────────────────
+  // «Русский · Тренажёр» ist weg, ihr Platz nicht: Ohne Zeilenbox rückte
+  // «Chillingo» an den Bildschirmrand.
+  pruefe('B14 auf Home steht dort nichts', q('#kopfEyebrow').textContent === '',
+    q('#kopfEyebrow').textContent);
+  pruefe('B15 der Platz bleibt trotzdem',
+    q('#kopfEyebrow').getBoundingClientRect().height > 6,
+    q('#kopfEyebrow').getBoundingClientRect().height.toFixed(1) + ' px');
+  setTab('tickets');
+  pruefe('B16 unterwegs sagt sie weiter, wo man ist',
+    q('#kopfEyebrow').textContent === 'Menü', q('#kopfEyebrow').textContent);
+  setTab('home');
 
   // ── C · Die Erinnerung an die Sicherung ───────────────────
   // Sie darf nicht kommen, solange es nichts zu verlieren gibt, und sie muss

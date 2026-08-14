@@ -1,6 +1,8 @@
 # 0052 · Was die App über sich selbst weiß
 
 **Stand:** angenommen · 2026-08-13 · Etappe 1 der Umstellung
+**Teilweise abgelöst:** Punkt 2 (die Offline-Anzeige) durch ADR 0061 — sie ist seit 2.4.2
+die Statuslampe im Namen. Alles Übrige gilt unverändert.
 
 ## Ausgangslage
 
@@ -26,7 +28,8 @@ niemand konnte es nachsehen.
    Der Browser darf ablehnen, und dann passiert eben nichts.
 2. **Eine Offline-Anzeige im Kopf** — dort, wo sonst «gespeichert» erscheint. Sie ist
    ruhig gestaltet, weil Offline bei dieser App kein Fehler ist, sondern der gedachte
-   Normalfall.
+   Normalfall. *(Überholt durch ADR 0061: Der Ort ist seit 2.4.2 der Punkt hinter dem
+   Namen, und die Anzeige sagt auch, wenn ein Netz da ist.)*
 3. **Eine Erinnerung an die Sicherung** in der Bilanz, wenn seit 30 Tagen keine erzeugt
    wurde — aber erst ab 60 beantworteten Aufgaben. Eine Zeile, kein Blatt.
 4. **Tempo je Übung** (`state.tempo`): Zeit vom fertigen Aufbau der Aufgabe bis zur

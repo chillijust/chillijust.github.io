@@ -75,7 +75,7 @@ Wer neu dazukommt und nur fünf lesen will:
 | [0049](0049-die-chili-sagt-etwas-dazu.md) | Die Chili sagt etwas dazu | Gestalt des Kommentars geändert durch 0060 |
 | [0050](0050-die-app-duzt.md) | Die App duzt | |
 | [0051](0051-das-tutorial-ist-ein-scheinwerfer.md) | Das Tutorial ist ein Scheinwerfer | |
-| [0052](0052-was-die-app-ueber-sich-selbst-weiss.md) | Was die App über sich selbst weiß | |
+| [0052](0052-was-die-app-ueber-sich-selbst-weiss.md) | Was die App über sich selbst weiß | Offline-Anzeige abgelöst durch 0061 |
 | [0053](0053-das-wort-steht-im-satz.md) | Das Wort steht im Satz | |
 | [0054](0054-betonung-als-zahl.md) | Die Betonung ist eine Zahl | |
 | [0055](0055-die-luecke-ist-ein-paar.md) | Die Lücke ist ein Paar | |
@@ -84,6 +84,7 @@ Wer neu dazukommt und nur fünf lesen will:
 | [0058](0058-erkennen-ist-nicht-unterscheiden.md) | Erkennen ist nicht unterscheiden | |
 | [0059](0059-der-service-worker.md) | Der Service Worker — die zweite Datei | |
 | [0060](0060-die-chili-sagt-es-selbst.md) | Die Chili sagt es selbst | |
+| [0061](0061-der-punkt-ist-die-lampe.md) | Der Punkt hinter dem Namen ist die Statuslampe | |
 
 ## Einen neuen anlegen
 

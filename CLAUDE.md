@@ -203,7 +203,16 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   (Pronomen haben keine). **Der Hörknopf schweigt, solange die Lücke offen ist** — er läse
   die Antwort vor. Wer eine Aufgabenform hinzufügt, prüft `meister` und `hoeren` mit: Beide
   gingen von drei aus und wurden davon flatterhaft.
-- **Die App sagt, was sie über sich weiß** (ADR 0052): Offline-Anzeige im Kopf,
+- **Der Punkt hinter dem Namen ist die Statuslampe** (ADR 0061) — grün mit Netz, rot ohne,
+  geführt aus `netzZeigen()` und sonst nirgends. Er steht **neben** `#kopfTitel`, nie
+  darin: Die Überschrift trägt genau den Namen der Ansicht, sonst hieße die Übung
+  «Tippen.». Auf Home steht das Wort daneben, unterwegs trägt der Punkt es allein — dort
+  sagt es sein `aria-label`, denn **die Farbe trägt nie allein**. Gefragt wird
+  `navigator.onLine`; ein Knopf zum Nachmessen wäre nicht bloß unnötig, sondern
+  unmöglich — die Datei baut keine Verbindung auf. Grün heißt darum «Netz da», nicht
+  «Internet erreichbar». Die Augenbraue ist auf Home leer und hält über `.eyebrow:empty`
+  nur noch ihre Zeilenhöhe.
+- **Die App sagt, was sie über sich weiß** (ADR 0052): Statuslampe im Kopf (ADR 0061),
   `storage.persist()` beim Start in `try/catch`, Erinnerung an die Sicherung nach 30 Tagen
   (erst ab 60 Antworten), Tempo je Übung in der Bilanz. **Die Uhr (`uhrStellen()`) steht
   in den Aufgabenbauern, nicht im Renderlauf** — sonst misst sie das Tippen statt das

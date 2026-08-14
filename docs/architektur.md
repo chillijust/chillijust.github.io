@@ -402,12 +402,22 @@ nach oben.
 
 | | Home | unterwegs |
 | --- | --- | --- |
-| Augenbraue | `Русский · Тренажёр` | `Übung` oder `Menü` |
-| Titel | `Chillingo.` | Name der Ansicht |
+| Augenbraue | leer (hält nur den Platz) | `Übung` oder `Menü` |
+| Titel | `Chillingo` | Name der Ansicht |
+| Statuslampe | Punkt **und** Wort | nur der Punkt |
 | links | — | Zurück-Pfeil |
 | Fortschrittsleiste | ja | nein |
 | Position | `relative`, scrollt mit | `sticky` |
 | Hintergrund | durchsichtig | `--bg` |
+
+**Der Punkt hinter dem Namen ist die Statuslampe** (ADR 0061): grün, solange das Gerät
+ein Netz hat, rot im Funkloch. Er steht **neben** `#kopfTitel`, nicht darin — die
+Überschrift trägt genau den Namen der Ansicht und sonst nichts. Geführt wird die Lampe
+aus `netzZeigen()` und sonst nirgends; `renderKopf()` ruft sie am Ende auf (die Ansicht
+entscheidet über das Wort), die Ereignisse `online`/`offline` rufen sie direkt (das Netz
+entscheidet über die Farbe). Die Augenbraue ist auf Home leer und hält über
+`.eyebrow:empty::before` nur noch ihre Zeilenhöhe — ohne sie rutschte der Titel an den
+Bildschirmrand.
 
 Die Klasse `unterwegs` am `<body>` schaltet das um. Eine Reiterleiste gibt es nicht mehr
 (ADR 0018) — und damit auch keine kompakte Zone, die den Streifen darüber füllen müsste.

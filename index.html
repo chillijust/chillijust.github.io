@@ -172,8 +172,34 @@ button { font-family: inherit; }
 #chiliPlatz { width: 34px; height: 34px; margin-right: 2px; }
 .chili-platz { flex: none; position: relative; }
 .eyebrow { display: block; font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--dim); margin-bottom: 4px; font-family: Georgia, serif; }
+/* Auf Home steht dort nichts mehr — der Name trägt sich selbst. Der Platz
+   bleibt trotzdem stehen: Ein leeres Element hätte keine Zeilenbox, und
+   «Chillingo» rückte um zehn Pixel nach oben an den Bildschirmrand. Das
+   Zeichen ohne Breite baut die Zeile auf, ohne etwas zu zeigen oder
+   vorzulesen. */
+.eyebrow:empty::before { content: '\200B'; }
 h1 { font-family: Georgia, "Times New Roman", serif; font-size: 28px; margin: 0; font-weight: 600; line-height: 1.1; }
-.title-dot { color: var(--gold); }
+/* Der Name und die Lampe stehen in einer Zeile: Der Punkt gehört optisch zum
+   Wort, sitzt aber außerhalb der Überschrift — so bleibt `#kopfTitel` genau
+   der Name und sonst nichts. */
+.titelzeile { display: flex; align-items: baseline; min-width: 0; }
+.netz-stand {
+  flex: none; display: inline-flex; align-items: baseline;
+  font-family: Georgia, "Times New Roman", serif; font-size: 28px; line-height: 1.1;
+}
+/* Grün, solange ein Netz da ist, rot im Funkloch (ADR 0061). Golden war er,
+   solange er nichts sagte. */
+.title-dot { color: var(--good); }
+.netz-stand.aus .title-dot { color: var(--bad); }
+/* Das Wort daneben in der Schrift der Kopfzeilen — dieselbe, in der bis 2.4.1
+   «Offline» unter dem Fortschritt stand. */
+.netz-wort {
+  margin-left: 8px;
+  font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim);
+  white-space: nowrap;
+}
+.netz-stand.nur-punkt .netz-wort { display: none; }
 
 .iconbtn {
   flex: none; width: 44px; height: 44px; border-radius: 50%; padding: 0;
@@ -264,6 +290,9 @@ body.unterwegs .titelblock {
 body.unterwegs .masthead { flex-wrap: wrap; row-gap: 0; }
 body.unterwegs h1 { font-size: 21px; letter-spacing: .01em; white-space: nowrap; }
 body.unterwegs .eyebrow { margin-bottom: 0; flex: none; }
+/* Unterwegs schrumpft der Name — die Lampe muss mit, sonst stünde hinter
+   «Tippen» ein Punkt aus der Home-Zeile. */
+body.unterwegs .netz-stand { font-size: 21px; }
 
 .rundbtn {
   flex: none; width: 44px; height: 44px; border-radius: 50%; padding: 0;
@@ -1326,16 +1355,6 @@ body.unterwegs .reiter { top: 62px; }
 /* Der Zähler: zwei Tasten und der Wert dazwischen. Der Wert bekommt eine feste
    Breite — sonst rückt bei jedem Tippen alles um die Breite einer Ziffer, und
    die Taste unter dem Daumen wandert weg. */
-/* Offline ist kein Fehler, sondern der Normalfall dieser App — die Anzeige
-   ist darum ruhig und steht dort, wo sonst «gespeichert» erscheint. */
-#offlineNote {
-  flex: none; display: inline-flex; align-items: center; gap: 5px;
-  font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim);
-}
-#offlineNote[hidden] { display: none; }
-#offlineNote .punkt-aus {
-  width: 6px; height: 6px; border-radius: 50%; background: var(--dim);
-}
 /* Die Lücke: Der Satz ist die Aufgabe, darum darf er umbrechen — anders als
    ein einzelnes Wort, das immer in eine Zeile passt. Die deutsche Fassung steht
    klein darunter; sie hilft beim Verstehen, ohne die Antwort zu verraten. */
@@ -1661,15 +1680,21 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
     <div id="chiliBlase" role="status" aria-live="polite" hidden><p id="chiliBlaseText"></p></div>
     </div>
     <div class="titelblock">
-      <span class="eyebrow" id="kopfEyebrow">Русский · Тренажёр</span>
-      <h1 id="kopfTitel">Chillingo<span class="title-dot">.</span></h1>
+      <span class="eyebrow" id="kopfEyebrow"></span>
+      <!-- Der Punkt hinter dem Namen ist die Statuslampe (ADR 0061). Er steht
+           **neben** der Überschrift, nicht darin: `#kopfTitel` soll genau der
+           Name bleiben, den die Ansicht trägt. Vorgelesen wird die Lampe, nicht
+           das Wort daneben — sonst käme die Auskunft doppelt. -->
+      <div class="titelzeile">
+        <h1 id="kopfTitel">Chillingo</h1>
+        <span id="netzStand" class="netz-stand"><span class="title-dot" id="netzPunkt" role="img" aria-label="Online">.</span><span class="netz-wort" id="netzWort" aria-hidden="true">Online</span></span>
+      </div>
     </div>
   </div>
   <div id="kopfFortschritt">
     <div class="kopf-rail"><div class="kopf-fill" id="kopfFill" style="width:0"></div></div>
     <div class="kopf-meta">
       <span class="kopf-label" id="kopfLabel"></span>
-      <span id="offlineNote" role="status" aria-live="polite" hidden></span>
       <span id="saveNote" role="status" aria-live="polite"></span>
     </div>
   </div>
@@ -3788,7 +3813,7 @@ var APP_STAND = '2026-08-14'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.4.1'; /* == VERSION == */
+var APP_VERSION = '2.4.2'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -4891,19 +4916,36 @@ function zeigeStatus(art, text) {
   }
 }
 
-// ── Offline und Speicher ────────────────────────────────────
-// Die App ist offline gedacht — also soll sie auch sagen, wenn sie es gerade
-// ist. Das ist keine Fehlermeldung: Wer im Zug übt, soll sehen, dass alles
+// ── Netz und Speicher ───────────────────────────────────────
+// Die App ist offline gedacht — also soll sie auch sagen, woran sie gerade ist.
+// Das ist keine Fehlermeldung: Wer im Zug übt, soll sehen, dass alles
 // weiterläuft, statt sich zu fragen, ob etwas fehlt.
-function offlineZeigen() {
-  var n = document.getElementById('offlineNote');
-  if (!n) return;
-  var weg = typeof navigator.onLine === 'boolean' && !navigator.onLine;
-  n.hidden = !weg;
-  if (weg) n.innerHTML = '<span class="punkt-aus"></span><span>Offline</span>';
+//
+// Die Anzeige ist der Punkt hinter dem Namen (ADR 0061) — grün mit Wort auf
+// Home, unterwegs der Punkt allein. Gefragt wird `navigator.onLine`, und das
+// ist eine Auskunft des Geräts, keine Messung: Es sagt «hier ist ein Netz»,
+// nicht «das Internet ist erreichbar». Nachmessen ginge nur mit einer
+// Verbindung, und die baut diese Datei bewusst nie auf. Rot stimmt darum
+// immer, grün steht unter Vorbehalt.
+function netzWeg() {
+  return typeof navigator.onLine === 'boolean' && !navigator.onLine;
 }
-window.addEventListener('online', offlineZeigen);
-window.addEventListener('offline', offlineZeigen);
+function netzZeigen() {
+  var n = document.getElementById('netzStand');
+  if (!n) return;
+  var weg = netzWeg();
+  var wort = weg ? 'Offline' : 'Online';
+  n.classList.toggle('aus', weg);
+  // Unterwegs trägt der Kopf den Namen der Übung — dort bleibt der Punkt
+  // allein, das Wort daneben wäre eine zweite Angabe in einer knappen Zeile.
+  n.classList.toggle('nur-punkt', currentTab !== 'home');
+  var punkt = document.getElementById('netzPunkt');
+  var text = document.getElementById('netzWort');
+  if (punkt) punkt.setAttribute('aria-label', wort);
+  if (text) text.textContent = wort;
+}
+window.addEventListener('online', netzZeigen);
+window.addEventListener('offline', netzZeigen);
 
 // Safari räumt Website-Daten nach etwa einer Woche ohne Nutzung weg. Eine zum
 // Home-Bildschirm hinzugefügte App ist davon ausgenommen — aber nur sie, und
@@ -6398,12 +6440,18 @@ function renderKopf() {
   // In einer Detailansicht der Bilanz trägt der Kopf deren Namen und nennt
   // darüber, wo man ist — der Pfeil führt dann auch dorthin zurück.
   var detail = currentTab === 'bilanz' && bilanzDetail;
+  // Auf Home bleibt die Augenbraue leer: «Русский · Тренажёр» sagte nichts,
+  // was der Name darunter nicht schon sagt. Ihr Platz bleibt trotzdem stehen
+  // (siehe `.eyebrow:empty`), damit der Titel nicht nach oben rutscht.
   document.getElementById('kopfEyebrow').textContent = daheim
-    ? 'Русский · Тренажёр'
+    ? ''
     : (detail ? 'Bilanz' : (UEBUNG_NAME[currentTab] ? 'Übung' : 'Menü'));
-  var titel = document.getElementById('kopfTitel');
-  if (daheim) titel.innerHTML = 'Chillingo<span class="title-dot">.</span>';
-  else titel.textContent = detail ? (DETAIL_NAME[bilanzDetail] || 'Bilanz') : ansichtName(currentTab);
+  document.getElementById('kopfTitel').textContent = daheim
+    ? 'Chillingo'
+    : (detail ? (DETAIL_NAME[bilanzDetail] || 'Bilanz') : ansichtName(currentTab));
+  // Die Lampe hängt an der Ansicht: Ob das Wort daneben steht, entscheidet
+  // sich hier — die Farbe entscheidet das Netz.
+  netzZeigen();
   document.querySelectorAll('.menueintrag').forEach(function (b) {
     b.classList.toggle('active', b.dataset.ziel === currentTab);
   });
@@ -12771,7 +12819,7 @@ render();
 menuSetzen(false);
 chiliAktualisieren();
 meldeKnopfZeigen();
-offlineZeigen();
+netzZeigen();
 speicherFesthalten();
 swHinweisBinden();
 swAnmelden();
