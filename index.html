@@ -222,7 +222,12 @@ body.unterwegs header {
    der Platz (Regelkarte, Tastatur), fallen die Automargen auf null und nichts
    wird oben abgeschnitten. Nur Übungen — Listen wie Bilanz gehören nach oben. */
 body.aufgabe { display: flex; flex-direction: column; min-height: 100vh; }
+/* `100vh` rechnet auf iOS die Adressleiste mit, die gar nicht da ist — die
+   Seite ist damit zu hoch und wackelt beim Scrollen. `svh` ist die kleinste
+   Höhe (Leiste sichtbar), `dvh` die aktuelle; die eine Zeile bleibt als
+   Rückfall für alte Browser stehen, die keines von beiden kennen. */
 @supports (min-height: 100svh) { body.aufgabe { min-height: 100svh; } }
+@supports (min-height: 100dvh) { body.aufgabe { min-height: 100dvh; } }
 body.aufgabe #main { flex: 1 0 auto; display: flex; flex-direction: column; }
 /* Zwei Streben teilen den freien Raum 2:1 — der Block sitzt damit auf zwei
    Dritteln der Höhe, tiefer als die Mitte, aber nicht am Boden geklebt.
@@ -1221,6 +1226,17 @@ body.unterwegs .reiter { top: 62px; }
 /* Der Zähler: zwei Tasten und der Wert dazwischen. Der Wert bekommt eine feste
    Breite — sonst rückt bei jedem Tippen alles um die Breite einer Ziffer, und
    die Taste unter dem Daumen wandert weg. */
+/* Offline ist kein Fehler, sondern der Normalfall dieser App — die Anzeige
+   ist darum ruhig und steht dort, wo sonst «gespeichert» erscheint. */
+#offlineNote {
+  flex: none; display: inline-flex; align-items: center; gap: 5px;
+  font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim);
+}
+#offlineNote[hidden] { display: none; }
+#offlineNote .punkt-aus {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--dim);
+}
+.backup-note.warnung { color: var(--text); border-left: 2px solid var(--gold); padding-left: 10px; }
 .zaehler { flex: none; display: flex; align-items: center; gap: 2px; }
 .zaehler-taste {
   flex: none; width: 44px; height: 44px; padding: 0; border-radius: 12px;
@@ -1541,6 +1557,7 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
     <div class="kopf-rail"><div class="kopf-fill" id="kopfFill" style="width:0"></div></div>
     <div class="kopf-meta">
       <span class="kopf-label" id="kopfLabel"></span>
+      <span id="offlineNote" role="status" aria-live="polite" hidden></span>
       <span id="saveNote" role="status" aria-live="polite"></span>
     </div>
   </div>
@@ -2912,11 +2929,11 @@ function auffrischGrenzen(tage) {
 var STORAGE_KEY = 'russisch_trainer_v1';
 // Stand der ausgelieferten Datei. Wird von tools/build.mjs gesetzt und geht in
 // jedes Ticket ein, damit ein Bericht sagt, welcher Stand gemeint war.
-var APP_STAND = '2026-08-13'; /* == STAND == */
+var APP_STAND = '2026-08-14'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '1.5.1'; /* == VERSION == */
+var APP_VERSION = '1.5.2'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -3723,6 +3740,12 @@ function defaultState() {
     // Angebot, das nach einem Abbruch verschwindet, wäre keins.
     tutorialGesehen: false,
     tutorialFertig: false,
+    // Wann zuletzt ein Sicherungscode erzeugt wurde. 0 heißt: noch nie.
+    gesichertAm: 0,
+    // Wie lange eine Antwort im Schnitt braucht, je Übung: { n, ms }. Kein
+    // Lernstand, sondern eine Beobachtung — sie sagt, ob etwas *sitzt* oder nur
+    // *gewusst* wird. Ein Wort, das vier Sekunden braucht, ist nicht abrufbar.
+    tempo: {},
     settings: defaultSettings()
   };
 }
@@ -3884,6 +3907,44 @@ function zeigeStatus(art, text) {
       statusTimer = setTimeout(function () { n.innerHTML = ''; }, 400);
     }, 2000);
   }
+}
+
+// ── Offline und Speicher ────────────────────────────────────
+// Die App ist offline gedacht — also soll sie auch sagen, wenn sie es gerade
+// ist. Das ist keine Fehlermeldung: Wer im Zug übt, soll sehen, dass alles
+// weiterläuft, statt sich zu fragen, ob etwas fehlt.
+function offlineZeigen() {
+  var n = document.getElementById('offlineNote');
+  if (!n) return;
+  var weg = typeof navigator.onLine === 'boolean' && !navigator.onLine;
+  n.hidden = !weg;
+  if (weg) n.innerHTML = '<span class="punkt-aus"></span><span>Offline</span>';
+}
+window.addEventListener('online', offlineZeigen);
+window.addEventListener('offline', offlineZeigen);
+
+// Safari räumt Website-Daten nach etwa einer Woche ohne Nutzung weg. Eine zum
+// Home-Bildschirm hinzugefügte App ist davon ausgenommen — aber nur sie, und
+// nur solange sie so benutzt wird. Der Antrag hier kostet nichts und kann alles
+// retten; abgelehnt wird er still, denn erzwingen lässt er sich nicht.
+function speicherFesthalten() {
+  try {
+    if (navigator.storage && navigator.storage.persist) navigator.storage.persist();
+  } catch (e) { /* ohne Zusage lebt die App weiter, nur riskanter */ }
+}
+
+// Wie viele Tage seit der letzten Sicherung? -1 heißt: noch nie gesichert.
+function sicherungAlter() {
+  if (!state.gesichertAm) return -1;
+  return Math.floor((Date.now() - state.gesichertAm) / TAG);
+}
+// Erinnert wird erst, wenn es etwas zu verlieren gibt — wer zehn Antworten
+// gegeben hat, braucht noch keinen Sicherungscode.
+var SICHERUNG_FRIST = 30;
+function sicherungFaellig() {
+  if (state.answered < 60) return false;
+  var alter = sicherungAlter();
+  return alter === -1 || alter >= SICHERUNG_FRIST;
 }
 
 // Die Farbschemata. Eine Liste, keine zwei Achsen: «Dark» ist eines davon, und
@@ -4513,7 +4574,38 @@ function meisterTon(richtig) {
   else ton(richtig);
 }
 
+// ── Tempo ───────────────────────────────────────────────────
+// Wie lange eine Antwort braucht, ist eine eigene Auskunft: Ein Wort, das vier
+// Sekunden kostet, ist gewusst, aber nicht abrufbar — und Lesen besteht aus
+// Abruf, nicht aus Wissen. Gemessen wird von der fertigen Aufgabe bis zur
+// Abgabe, je Übung gemittelt.
+//
+// **Die Uhr steht in den Aufgabenbauern, nicht im Renderlauf.** Eine Ansicht
+// wird auch neu gezeichnet, wenn nur die Tastatur aufklappt; die Uhr dort zu
+// stellen hieße, jede Nachdenkpause zu verschenken.
+var aufgabeSeit = 0;
+function uhrStellen() { aufgabeSeit = Date.now(); }
+
+function tempoNotieren() {
+  if (!aufgabeSeit) return;
+  var ms = Date.now() - aufgabeSeit;
+  aufgabeSeit = 0;
+  // Über zwei Minuten war es keine Antwort, sondern eine Pause. Solche Werte
+  // würden den Schnitt für immer verderben.
+  if (ms < 200 || ms > 120000) return;
+  var topf = state.tempo[currentTab] || (state.tempo[currentTab] = { n: 0, ms: 0 });
+  topf.n++;
+  topf.ms += ms;
+}
+
+// Der Schnitt in Sekunden, oder null, wenn zu wenig gemessen wurde.
+function tempoSchnitt(tab) {
+  var t = state.tempo[tab];
+  return (t && t.n >= 5) ? t.ms / t.n / 1000 : null;
+}
+
 function updateBox(id, correct) {
+  tempoNotieren();
   var cur = state.boxes[id] || 0;
   state.boxes[id] = correct ? Math.min(BOX_MAX, cur + 1) : Math.max(0, cur - 1);
   state.lastSeen[id] = Date.now();
@@ -4606,6 +4698,7 @@ function satzFaellig(s, jetzt) {
   return jetzt - seit >= intervallFuer(satzBox(s));
 }
 function satzUpdate(s, richtig) {
+  tempoNotieren();
   var cur = satzBox(s);
   state.satzBox[s.ru] = richtig ? Math.min(BOX_MAX, cur + 1) : Math.max(0, cur - 1);
   state.satzSeen[s.ru] = Date.now();
@@ -5654,6 +5747,9 @@ function ansichtenZuruecksetzen() {
   abcCorrect = null;
   abcBuilt = [];
   abcRevealed = false;
+  // Die Uhr steht hier **nicht**: Zurücksetzen ist keine Aufgabe, und eine Uhr,
+  // die dabei anspringt, misst die Zeit bis zur nächsten — samt aller Pausen.
+  aufgabeSeit = 0;
 
   ansichtStapel.length = 0;
 
@@ -5716,6 +5812,7 @@ function uebNext(skipFact) {
     return;
   }
   uebQ = buildQuestion();
+  uhrStellen();
   uebPhase = 'ask';
   uebBuilt = [];
   meisterMeldung = null;
@@ -6332,6 +6429,7 @@ function buildTransTask(vorgabe) {
   trBuilt = [];
   trEingabe = '';
   trPhase = 'ask';
+  uhrStellen();
   trCorrect = null;
   trRevealed = false;
   meisterMeldung = null;
@@ -6827,6 +6925,7 @@ function abcGelernt() { return ALPHABET.filter(abcSitzt).length; }
 function abcMeisterschaft() { return ALPHABET.filter(abcGemeistert).length; }
 
 function abcUpdate(b, richtig) {
+  tempoNotieren();
   var cur = abcBox(b);
   state.abcBox[b[1]] = richtig ? Math.min(BOX_MAX, cur + 1) : Math.max(0, cur - 1);
   state.abcSeen[b[1]] = Date.now();
@@ -6934,6 +7033,7 @@ function abcFrageBauen() {
     ? 'kacheln' : basis;
 
   abcPhase = 'ask';
+  uhrStellen();
   abcPicked = null;
   abcCorrect = null;
   abcBuilt = [];
@@ -7378,6 +7478,7 @@ function gramAktuell() {
 }
 
 function gramUpdate(b, richtig) {
+  tempoNotieren();
   var cur = gramBox(b);
   state.gramBox[b.id] = richtig ? Math.min(BOX_MAX, cur + 1) : Math.max(0, cur - 1);
   state.gramSeen[b.id] = Date.now();
@@ -7543,6 +7644,7 @@ function gramAblenkerGenus(bauen, richtig) {
 function gramFrageBauen() {
   var b = gramAktuell();
   gramPhase = 'ask';
+  uhrStellen();
   gramPicked = null;
   gramCorrect = null;
   gramEingabe = '';
@@ -8346,6 +8448,7 @@ function ptStufe(treffer) {
 function ptFrageBauen() {
   var eintrag = ptNaechstes();
   ptPhase = 'ask';
+  uhrStellen();
   ptEingabe = '';
   ptBuilt = [];
   meisterMeldung = null;
@@ -8793,6 +8896,7 @@ function tippenWeiter() {
   tEingabe = '';
   meisterMeldung = null;
   tWord = waehleWort(tippenPool());
+  uhrStellen();
   renderTippen();
 }
 
@@ -8816,7 +8920,7 @@ function renderTippen() {
   var pool = tippenPool();
   // Während der Rückmeldung bleibt das Wort stehen, auch wenn es nach einem
   // Fehler unter die Schwelle gerutscht ist — sonst verschwände die Auflösung.
-  if (!tResult && (!tWord || pool.indexOf(tWord) === -1)) tWord = waehleWort(pool);
+  if (!tResult && (!tWord || pool.indexOf(tWord) === -1)) { tWord = waehleWort(pool); uhrStellen(); }
   if (!tWord) { renderTippenLeer(); return; }
   var w = tWord;
   var stats = state.typingStats;
@@ -10038,6 +10142,31 @@ function renderBilanz() {
       ' gemeistert</p>';
   }
 
+  // Tempo: eine Beobachtung, kein Urteil. Sie steht erst da, wenn genug
+  // gemessen wurde — eine Zahl aus drei Antworten wäre Rauschen.
+  var tempoZeilen = [];
+  UEBUNGEN.forEach(function (u) {
+    var sek = tempoSchnitt(u.id);
+    if (sek !== null) tempoZeilen.push(u.name + ' ' + sek.toFixed(1) + ' s');
+  });
+  if (tempoZeilen.length) {
+    html += '<h2>Tempo</h2><p class="backup-note">Im Schnitt je Antwort: ' +
+      esc(tempoZeilen.join(' · ')) + '. Was schnell kommt, sitzt — was lange dauert, ' +
+      'ist gewusst, aber noch nicht abrufbar.</p>';
+  }
+
+  // Die Erinnerung an die Sicherung: eine Zeile, kein Blatt. Wer sie ignoriert,
+  // wird nicht bedrängt — sie steht beim nächsten Mal wieder da.
+  if (sicherungFaellig()) {
+    var alter = sicherungAlter();
+    html += '<p class="backup-note warnung">' +
+      (alter === -1
+        ? 'Du hast noch nie einen Sicherungscode erzeugt.'
+        : 'Deine letzte Sicherung ist ' + alter + ' Tage her.') +
+      ' Dein Fortschritt liegt nur auf diesem Gerät — im Menü unter «Sicherung» ' +
+      'gibt es einen Code zum Kopieren.</p>';
+  }
+
   html += '<h2>Leitner-Stufen</h2><div class="boxes">';
   counts.forEach(function (n, bi) {
     var h = Math.max(4, n / ALL_VOCAB.length * 100);
@@ -10142,6 +10271,11 @@ function renderSicherung() {
     backupCode = encodeBackup();
     backupOpen = true;
     backupMsg = '';
+    // Erzeugt zählt als gesichert: Ob der Code danach wirklich irgendwo landet,
+    // kann die App nicht wissen — und öfter zu erinnern als nötig wäre lästiger
+    // als einmal zu wenig.
+    state.gesichertAm = Date.now();
+    save();
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(backupCode).then(function () {
         backupMsg = 'Code in die Zwischenablage kopiert.';
@@ -10250,6 +10384,8 @@ render();
 menuSetzen(false);
 chiliAktualisieren();
 meldeKnopfZeigen();
+offlineZeigen();
+speicherFesthalten();
 
 // Beim allerersten Start das Tutorial anbieten — genau einmal. Wer nie eine
 // Antwort gegeben hat, hat die App noch nicht gesehen; wer abbricht, bekommt

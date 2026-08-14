@@ -7,7 +7,9 @@ const html = readFileSync(WURZEL + '/index.html', 'utf8');
 const bilder = html.split('data:image/png;base64,').length - 1;
 console.log('Bilddaten in der Datei:', bilder,
   bilder === 3 ? '(App-Symbol, Reiter-Symbol, freigestellte Chili · richtig)' : '(unerwartet!)');
-if (bilder !== 3) process.exit(1);
+// `throw` statt `process.exit`: Ein Abbruch mitten im Bauen beendet sonst den
+// **Läufer** — ohne Ausgabe, ohne Grund, ohne die Zeile darüber.
+if (bilder !== 3) throw new Error('Bilddaten: ' + bilder + ' statt 3');
 
 const test = `
 var log = [];

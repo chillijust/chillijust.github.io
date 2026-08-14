@@ -151,6 +151,13 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   Anführungszeichen. Gliederung über Kommentarbalken.
 - **Alle Ausgaben durch `esc()`**, Ereignisbehandler nach dem Setzen von `innerHTML`
   anhängen, nie als `onclick`-Attribut.
+- **Die App sagt, was sie über sich weiß** (ADR 0052): Offline-Anzeige im Kopf,
+  `storage.persist()` beim Start in `try/catch`, Erinnerung an die Sicherung nach 30 Tagen
+  (erst ab 60 Antworten), Tempo je Übung in der Bilanz. **Die Uhr (`uhrStellen()`) steht
+  in den Aufgabenbauern, nicht im Renderlauf** — sonst misst sie das Tippen statt das
+  Denken —, und `ansichtenZuruecksetzen()` hält sie an. `state.tempo` und
+  `state.gesichertAm` gehören zum Gerät und stehen **nicht** im Sicherungscode.
+  `min-height` steht dreifach: `100vh` als Rückfall, dann `svh`, dann `dvh`.
 - **Neue Einstellung:** Vorgabe in `defaultSettings()`, Zeile in `renderEinstellungen()`,
   Abfrage an der wirksamen Stelle. Gespeicherte Stände werden über `mergeState()`
   aufgefüllt — `state.settings` nie als Ganzes aus dem Speicher übernehmen. Die
@@ -281,6 +288,9 @@ node tools/pruefstand/lauf.mjs -q jubel flammen
 rot ist. Notausgang, wenn es wirklich raus muss: `PRUEFSTAND=aus` vor den Befehl. Ein
 GitHub-Lauf (`.github/workflows/pruefstand.yml`) prüft dasselbe noch einmal unabhängig
 von jeder Sitzung.
+
+**Eine Suite bricht mit `throw` ab, nie mit `process.exit()`** — ein Ausstieg beim Bauen
+beendet den Läufer selbst, ohne Ausgabe und ohne Grund.
 
 **Wer index.html anfasst, sichert die Änderung mit einer Prüfung ab** — der Prüfstand
 ist das Gedächtnis für jeden Fehler, der schon einmal da war. Wie eine Suite entsteht:

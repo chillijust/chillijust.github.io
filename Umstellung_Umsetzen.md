@@ -7,7 +7,8 @@ also **eine Datei, keine externen Ressourcen, kein Nachladen**.
 Alles hier Aufgeführte ist unter dieser Bedingung machbar. Was sie bricht, steht am Ende
 unter „Nicht im Plan" — mit Begründung, damit später niemand rät, warum es fehlt.
 
-**Stand:** Entwurf, wartet auf Freigabe · angelegt 2026‑08‑13 · Ausgangsstand 1.5.1
+**Stand:** **freigegeben am 2026‑08‑13** · Ausgangsstand 1.5.1 ·
+Sicherung: Zweig `backup/stand-1.5.1-2026-08-13`
 
 ---
 
@@ -19,13 +20,14 @@ man der falschen.
 
 | # | Etappe | Version | Stand |
 |---|---|---|---|
-| 1 | Kleinkram mit Sofortnutzen | 1.5.2 | offen |
+| 1 | Kleinkram mit Sofortnutzen | 1.5.2 | **fertig** · ADR 0052 · Suite `robust` |
 | 2 | Kontext-Lücke (W3) | 1.6.0 | offen |
 | 3 | Betonung | 1.7.0 | offen |
 | 4 | Orthographie ohne Ton (E3 + Prüfwort) | 1.8.0 | offen |
 | 5 | Handling: Rekonstruktion, Tagesmaß, Fehlerprofil | 1.9.0 | offen |
-| 6 | Wortschatz und Sätze wachsen | 2.0.0 | offen |
+| 6 | Sätze wachsen (kleine Variante) | 2.0.0 | offen |
 | 7 | Buchstaben-Generatoren ohne Ton (D3, D4, D6) | 2.1.0 | offen |
+| 8 | Service Worker | 2.2.0 | offen |
 
 Stände: `offen` · `läuft` · `fertig` · `verworfen (Grund)`
 
@@ -192,48 +194,51 @@ ankommen. Wenn er nervt, drehen wir ihn auf „nur bei Wörtern, die schon zurü
 
 ---
 
-## Etappe 6 · Wortschatz und Sätze wachsen → 2.0.0
+## Etappe 6 · Sätze wachsen → 2.0.0
 
-Der große Inhaltsblock, und der Grund für die erste Ziffer: Der Lernweg wird ein anderer.
+**Kleine Variante, so entschieden:** Der Wortschatz bleibt bei 395. Die **Sätze** wachsen
+von 55 auf rund 150.
 
-**Ziel:** 700 Wörter, davon **möglichst alle im Lernweg** — also rund 250 Sätze statt 55.
-Erste Ziffer der Version, weil sich die Lernsets neu schneiden: Aus 12 Sets werden etwa
-55, und bestehende Sets verschieben sich. Der Lernstand je Wort bleibt erhalten (die
-Kennung ändert sich nicht), aber „Set 7" bedeutet danach etwas anderes.
+Das ist nicht der bescheidenere Weg, sondern der wirksamere. Heute liegen 262 der 395
+Wörter außerhalb des Lernwegs — sie kommen in keinem Satz vor, gehören zu keinem Set und
+tauchen in «Übersetzen» nie auf. 300 neue Vokabeln hätten das Verhältnis verschlechtert;
+100 neue Sätze holen die vorhandenen nach Hause.
+
+**Ziel:** möglichst alle 395 Wörter im Lernweg. Aus 12 Lernsets werden etwa 33.
+
+**Erste Ziffer der Version, weil sich der Lernstand anders liest:** Die Jubelmarken in
+`state.gefeiert` heißen `set:0`, `set:1`, … — schneidet man die Sets neu, meint `set:7`
+etwas anderes als vorher. Ohne Migration würden Sets als gefeiert gelten, die es nicht
+sind, und umgekehrt. Die Marken werden darum beim Laden einmal verworfen und über
+`jubelNachtragen()` neu bestimmt; der Wortschatz-Fortschritt selbst bleibt unberührt.
 
 **In Portionen, jede für sich lieferbar:**
 
 | Portion | Inhalt | Grammatik, die dazukommt |
 |---|---|---|
-| 6a | +100 Wörter, +45 Sätze | Dativ (Empfänger, `мне нра́вится`, Alter) |
-| 6b | +100 Wörter, +45 Sätze | Instrumental (`с` + I, Beruf) |
-| 6c | +100 Wörter, +55 Sätze | Aspektpaare, Futur |
-| 6d | Rest auf 700, Sätze auf ~250 | Verben der Bewegung, Rektion |
+| 6a | +30 Sätze über die heute heimatlosen Themen | Dativ (Empfänger, `мне нра́вится`, Alter) |
+| 6b | +30 Sätze | Instrumental (`с` + I, Beruf) |
+| 6c | +35 Sätze | Aspektpaare, Futur |
 
-Jede Portion bringt ihre Wörter **vollständig** mit: Übersetzung, Lautschrift, Betonung,
-Wortart, wo nötig `pruefwort` — deshalb steht diese Etappe **nach** 3 und 4. Andersherum
-wäre es dieselbe Arbeit zweimal.
+Jeder neue Satz bringt `benoetigt`, `formen` und die betonte Fassung mit — deshalb steht
+diese Etappe **nach** 3 und 4. Andersherum wäre es dieselbe Arbeit zweimal.
 
-**Was sich ändert:** fast nur **Hintergrund**. Die Oberfläche bleibt, wie sie ist; es
-steht nur mehr dahinter. Sichtbar wird es an den Zahlen auf den Kacheln und daran, dass
-der Fortschrittsbalken langsamer wächst.
+**Was sich ändert:** fast nur **Hintergrund**. Sichtbar wird es an den Zahlen auf den
+Kacheln, an mehr Sets und daran, dass «Übersetzen» deutlich voller wird.
 **Risiko:** **das größte in diesem Plan**, aber nicht technisch.
 - Die Sätze müssen alle `benoetigt`-Wörter kennen, sonst bricht der Build ab. Das ist gut
   so, kostet aber Sorgfalt.
 - Jeder neue Baustein muss ADR 0043 genügen: `в маме` ist tadellos gebeugt und trotzdem
   Unsinn. Dativ und Instrumental sind dafür anfälliger als alles bisher — `с водой` geht
   nur manchmal.
-- Der **Sicherungscode führt Inhalte über einen Hash des Textes**. Neue Wörter sind
-  unkritisch; ein *geänderter* Text einer bestehenden Vokabel macht alte Codes an dieser
+- Der **Sicherungscode führt Inhalte über einen Hash des Textes**. Neue Sätze sind
+  unkritisch; ein *geänderter* Text eines bestehenden Satzes macht alte Codes an dieser
   Stelle ungültig. Regel für diese Etappe: **nichts Bestehendes umformulieren.**
-- Die Datei wächst. Heute 492 KB, davon 63 KB Daten. Nach 6d etwa 640 KB — für eine Seite,
-  die einmal geladen und dann gecacht wird, unkritisch, aber es gehört gesagt.
+- Die Datei wächst von heute 492 KB auf etwa 560 KB. Unkritisch, aber es gehört gesagt.
 
-**Absicherung:** Der Build prüft bereits das meiste (unbekannte Wörter, doppelte
-Kennungen, Wortart-Angaben, die nur die Regel wiederholen). Dazu eine Suite `lehrplan`:
-Anteil der Wörter im Lernweg, kein Set über `SET_MAX`, jede Stufe hat genug Sätze.
-
----
+**Absicherung:** Der Build prüft bereits das meiste. Dazu eine Suite `lehrplan`: Anteil
+der Wörter im Lernweg (Ziel > 90 %), kein Set über `SET_MAX`, jede Stufe hat genug Sätze,
+und die Jubelmarken werden nach dem Neuschnitt korrekt nachgetragen.
 
 ## Etappe 7 · Buchstaben-Generatoren ohne Ton → 2.1.0
 
@@ -252,6 +257,43 @@ Aufgabenformen in der bestehenden Übung.
 
 ---
 
+## Etappe 8 · Service Worker → 2.2.0
+
+**Entschieden am 2026‑08‑13: ja, und zwar zuletzt.** Er ändert nichts am Lernen, macht
+aber das Ausliefern ab dann angenehmer — und darum kommt er, wenn alles andere steht.
+
+Heute hängt „offline" am Browser-Cache. Das funktioniert, ist aber eine Hoffnung: Safari
+darf diesen Cache jederzeit wegräumen, und wer dann im Funkloch sitzt, sieht eine leere
+Seite. Ein Service Worker legt die Datei ausdrücklich beiseite — aus der Hoffnung wird
+eine Zusage.
+
+Der zweite Gewinn steht seit Monaten als Fallstrick in `CLAUDE.md`: *„Eine bestehende
+Home-Bildschirm-Verknüpfung hält ihren eigenen Cache. Zeigt sie nach einem Deploy noch den
+alten Stand: Verknüpfung löschen und neu anlegen."* Das fällt weg. Der Service Worker
+merkt eine neue Fassung und bietet sie an.
+
+**Was dazukommt:**
+- `sw.js` — der Service Worker selbst, wenige Zeilen: beim Einrichten die App ablegen,
+  bei jeder Anfrage die abgelegte Fassung liefern, im Hintergrund nach einer neuen sehen.
+- `manifest.json` — Name, Symbol, Startadresse, Vollbild.
+- In den **Einstellungen**, Reiter «Darstellung und Ton» oder ein neuer Reiter «App»:
+  «Offline bereit» mit Häkchen, «Nach Aktualisierung suchen» als Knopf, und die Fassung,
+  die **wirklich läuft** — nicht die, die im Code steht.
+- Ein ruhiger Hinweis, wenn eine neue Fassung bereitliegt. Kein Blatt, kein Zwang.
+
+**Was sich ändert:** **Hintergrund**, plus drei Zeilen in den Einstellungen.
+**Risiko: gering im Betrieb, aber es fällt ADR 0001.** Aus einer Datei werden drei. Alles
+Inhaltliche bleibt in `index.html`; die beiden Helfer sind zusammen unter 5 KB.
+**Der eigentliche Fallstrick ist ein anderer:** Ein Service Worker, der zu gierig
+zwischenspeichert, liefert für immer den alten Stand aus. Die Regel dagegen heißt
+**Netz zuerst für die App-Datei, Speicher zuerst für alles andere** — und ein
+Notausgang, der den Speicher leert, gehört in die Einstellungen.
+**Absicherung:** Suite `offline` — der Worker meldet sich an, die Fassung wird gemeldet,
+der Notausgang leert wirklich. Dazu `pruefen.mjs`: `sw.js` und `manifest.json` dürfen
+keine Fremdadresse enthalten, genau wie `index.html`.
+
+---
+
 ## Nicht im Plan — und warum
 
 Damit später niemand rätselt, ob es vergessen wurde:
@@ -266,20 +308,6 @@ Damit später niemand rätselt, ob es vergessen wurde:
 | **Zwei Nutzertypen, Kompetenzvektor, Einstufung** | Diese App hat **einen** Nutzer, und der ist Typ A. Ein Einstufungsmodul mit fünf Messungen wäre Aufwand für eine Unterscheidung, die hier niemand braucht. Der Typ-A/B-Diskriminator ist außerdem das Hör-Diktat — ohne Audio nicht baubar |
 | **Fortschrittsring statt Balken** | Der Balken sagt heute die Wahrheit: 700 Wörter sind endlich. Erst wenn der Wortschatz offen wächst, wird er zur Lüge. Ohne Reader also nicht |
 | **Generatorschicht unter den Übungen** | Strukturell richtig (`GAP.md` §2.5), aber ein Umbau am laufenden Motor ohne sichtbaren Gewinn. Die Etappen 2, 4 und 7 bringen je zwei bis drei neue Aufgabenformen — **danach** ist zu sehen, ob sich der Umbau lohnt. Vorher wäre es Vorratsarbeit |
-
-### Eine Entscheidung, die Ihnen gehört
-
-**Ein Service Worker würde die Webapp-Funktion nicht brechen, sondern stärken.** Heute
-hängt „offline" am Browser-Cache — das funktioniert, ist aber eine Hoffnung, keine
-Zusage. Ein Service Worker macht daraus eine Garantie und erlaubt außerdem, eine neue
-Version sauber zu erkennen statt sie über einen gelöschten Home-Bildschirm-Eintrag
-einzusammeln.
-
-Der Preis: **eine zweite und dritte Datei** (`sw.js`, `manifest.json`) — und damit fällt
-ADR 0001. Das steht seit dem ersten Tag als bewusst offene Frage in `docs/architektur.md`.
-
-Ich schlage das **nicht** von mir aus vor und habe es nicht eingeplant. Wenn Sie es wollen,
-ist es eine eigene Etappe von etwa zwei Tagen.
 
 ---
 
@@ -298,12 +326,12 @@ ist es eine eigene Etappe von etwa zwei Tagen.
   einer Zeile im Kopf, was daraus wurde. Sie werden nicht gelöscht — sie sind die
   Begründung für alles, was danach im Code steht.
 
-## Was ich von Ihnen brauche
+## Freigabe
 
-1. **Freigabe der Reihenfolge** — oder eine andere. Etappe 6 ist die einzige, die auf
-   Vorarbeit angewiesen ist (3 und 4); der Rest ließe sich umsortieren.
-2. **Eine Ansage zum Wortschatz.** 700 Wörter *mit* 250 Sätzen ist viel Inhaltsarbeit.
-   Wenn Ihnen das zu weit geht, ist die ehrlichere kleine Variante: **bei 395 Wörtern
-   bleiben und nur die Sätze auf ~150 bringen.** Das holt die 262 heimatlosen Wörter in
-   den Lernweg und ist didaktisch der größere Sprung als 300 neue Vokabeln.
-3. **Service Worker: ja oder nein.**
+Erteilt am 2026‑08‑13, mit zwei Festlegungen:
+
+1. **Wortschatz: kleine Variante.** 395 Wörter bleiben, die Sätze wachsen auf ~150
+   (Etappe 6).
+2. **Service Worker: ja**, als letzte Etappe 8.
+
+Begonnen wird mit Etappe 1 und 2.
