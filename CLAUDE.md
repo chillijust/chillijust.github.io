@@ -31,7 +31,10 @@ zählt mit),
 **Power-Training** (die zurückgefallenen Wörter zurückholen — drei auf einmal, ab drei
 gefallenen offen).
 Keine Übungen, sondern **im Menü** (runder Knopf, drei Striche), in dieser
-Reihenfolge: **Einstellungen**, **Bilanz**, **Sicherung**, **Tickets**. Dazu **Sprachfakten** aus der Faktenkarte oder der
+Reihenfolge: **Einstellungen**, **Bilanz**, **Sicherung**, **Tickets**. Die Menükarte
+**misst ihren Inhalt** (`#menuPanel { width: max-content }`, ADR 0076) — eine feste
+Breite ist eine Behauptung über Inhalt, der sich ändert. Die Auswahl- und
+Wissensblätter behalten ihre 232 px: Chip-Reihen sollen umbrechen, nicht dehnen. Dazu **Sprachfakten** aus der Faktenkarte oder der
 Bilanz. Eine Reiterleiste gibt es nicht — der Kopf trägt unterwegs den Rückweg.
 
 Maskottchen ist die Chili — freigestellt aus `docs/IMG_2942.png` mit

@@ -446,10 +446,22 @@ body.im-menu #menuKnopf.mit-chili .punkt { opacity: 0; transition-delay: 0s; }
 .menupanel {
   position: absolute; top: calc(100% + 8px); right: 0; z-index: 30;
   width: 232px; max-width: 78vw;
+  /* Die Auswahl- und Wissensblätter behalten die feste Breite: Sie tragen
+     Chip-Reihen, und die dürfen umbrechen statt die Karte zu dehnen. */
   display: grid; grid-template-rows: 0fr; overflow: hidden;
   transition: grid-template-rows .36s cubic-bezier(.3, .8, .3, 1), opacity .2s;
   opacity: 0; pointer-events: none;
 }
+
+/* **Das Menü ist so breit wie sein längster Eintrag** (ADR 0076). Die festen
+   232 px stammten aus einer Zeit mit anderen Wörtern: Gemessen endet der
+   längste Eintrag bei 143 px, es standen also 89 px leer. Aufgefallen ist das
+   erst, als «Einstellungen» in die erste Zeile rückte — das Auge nimmt die
+   oberste Zeile als Maß, und eine Karte, deren erste Zeile weit vor dem Rand
+   endet, sieht zu breit aus. Sie war es die ganze Zeit.
+   `max-content` statt einer neuen festen Zahl: Ein Eintrag, der später
+   dazukommt, dehnt die Karte, statt abgeschnitten zu werden. */
+#menuPanel { width: max-content; min-width: 176px; }
 
 /* Die Rasterzeile ist der Behälter, nicht die Karte: Ränder und Innenabstände
    der Karte zählten sonst zur Zeilenhöhe, und zugeklappt bliebe ein Streifen. */
@@ -4114,7 +4126,7 @@ var APP_STAND = '2026-08-15'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.4.17T'; /* == VERSION == */
+var APP_VERSION = '2.4.18T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten

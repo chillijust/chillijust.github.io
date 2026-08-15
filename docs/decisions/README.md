@@ -99,6 +99,7 @@ Wer neu dazukommt und nur fünf lesen will:
 | [0073](0073-auch-saetze-heisst-alle-stufen.md) | «Auch Sätze» wirkt auf allen Stufen, gelegt wie getippt | ergänzt 0056, 0070 |
 | [0074](0074-null-anteil-klappfeld.md) | Null heißt «gar nicht», der Anteil in Prozent, der Bezug ein Klappfeld | ergänzt 0015, 0069 |
 | [0075](0075-defizite-und-drei-rubriken.md) | Die Bilanz zeigt Defizite, die Übersicht wird eingerichtet | ergänzt 0066 |
+| [0076](0076-das-menue-misst-seinen-inhalt.md) | Das Menü ist so breit wie sein längster Eintrag | ergänzt 0019 |
 
 ## Einen neuen anlegen
 

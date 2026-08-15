@@ -282,6 +282,42 @@ try {
     Math.abs(q('#menuPanel').getBoundingClientRect().right - q('.masthead').getBoundingClientRect().right) < 1,
     q('#menuPanel').getBoundingClientRect().width.toFixed(0) + ' von ' +
     q('.masthead').getBoundingClientRect().width.toFixed(0));
+  // **Die Karte ist so breit wie ihr längster Eintrag** (ADR 0076). Die festen
+  // 232 px stammten aus einer Zeit mit anderen Wörtern und ließen 89 px leer.
+  // Gemessen wird der Abstand vom Ende des breitesten Textes zum Kartenrand:
+  // Er darf nicht wieder davonlaufen — und er darf auch nicht null werden,
+  // sonst klebte die Schrift am Rand.
+  pruefe('K9c die Karte sitzt eng um ihren längsten Eintrag', (function () {
+    var karte = q('#menuPanel .menuinhalt').getBoundingClientRect();
+    var weiteste = 0;
+    alle('.menueintrag').forEach(function (b) {
+      var r = document.createRange();
+      r.selectNodeContents(b);
+      weiteste = Math.max(weiteste, r.getBoundingClientRect().right);
+    });
+    var luft = karte.right - weiteste;
+    return luft >= 12 && luft <= 48;
+  })(), (function () {
+    var karte = q('#menuPanel .menuinhalt').getBoundingClientRect();
+    var w = 0;
+    alle('.menueintrag').forEach(function (b) {
+      var r = document.createRange();
+      r.selectNodeContents(b);
+      w = Math.max(w, r.getBoundingClientRect().right);
+    });
+    return (karte.right - w).toFixed(1) + ' px Luft';
+  })());
+  // Ein längerer Eintrag dehnt die Karte, statt abgeschnitten zu werden — dafür
+  // steht max-content statt einer neuen festen Zahl.
+  pruefe('K9d ein längeres Wort dehnt sie, statt zu klemmen', (function () {
+    var e = q('.menueintrag');
+    var alt = e.textContent;
+    var vorher = q('#menuPanel').getBoundingClientRect().width;
+    e.textContent = 'Ein sehr langer Eintragsname';
+    var nachher = q('#menuPanel').getBoundingClientRect().width;
+    e.textContent = alt;
+    return nachher > vorher;
+  })());
   pruefe('K9c es liegt als Ebene darüber', getComputedStyle(q('#menuPanel')).position === 'absolute');
   document.body.click();
   pruefe('K13 daneben tippen schließt', !menuOffen);
