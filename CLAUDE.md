@@ -305,8 +305,12 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   Code die falschen Felder.
 - **Tickets liegen in `chillingo_tickets_v1`**, nicht im Lernstand — der Sicherungscode
   soll schlank bleiben. Sie verlassen das Gerät nie von selbst: ein Knopf bündelt sie zu
-  einem Text zum Kopieren (ADR 0016). Der Bezug heißt **Ort**, nicht «Übung» — er kann
-  auch die Übersicht oder eine Menüansicht sein. Vom Blatt führt eine Zeile in die Liste;
+  einem Text zum Kopieren (ADR 0016), und `ticketsLesen()` liest **genau diese Form**
+  wieder ein (ADR 0069) — was nicht passt, wird übersprungen, nicht geraten, und Bekanntes
+  nicht verdoppelt. Der Bezug heißt **Ort**, nicht «Übung» — er kann auch die Übersicht
+  oder eine Menüansicht sein, und er ist eine **Chip-Reihe**: **Die App führt keine
+  Klappmenüs**, die Suite `filter` liest den Quelltext danach ab und springt auch auf ein
+  Vorkommen im Kommentar an. Vom Blatt führt eine Zeile in die Liste;
   sie klappt nur zu, sie leert nicht.
 - **Die Kachel liegt in jedem Schema über dem Grund**, die Kopfzeile nimmt überall den
   Grund. In «Dark» ist der Grund beinahe schwarz und warmneutral, die Kachel deutlich

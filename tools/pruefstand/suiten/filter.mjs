@@ -4,9 +4,13 @@ import { WURZEL, BAU, testseite } from '../helfer.mjs';
 const html = readFileSync(WURZEL + '/index.html', 'utf8');
 
 // Keine Klappmenüs mehr in der Datei
+// **Mit `throw`, nicht mit `process.exit()`.** Ein Ausstieg beim Bauen beendet
+// den Läufer selbst — ohne Ausgabe, ohne Grund und ohne die übrigen Suiten.
+// Genau das passierte, als hier zum ersten Mal wieder ein `<select>` auftauchte:
+// Der Lauf brach nach «fertig» ab, und die Meldung dazu war eine leere Zeile.
 const selects = (html.match(/<select/g) || []).length;
 console.log('<select> im Quelltext:', selects, selects === 0 ? '· keine mehr' : '· unerwartet!');
-if (selects) process.exit(1);
+if (selects) throw new Error('Die App hat keine Klappmenüs — ' + selects + ' <select> gefunden');
 
 const test = String.raw`
 var log = [];

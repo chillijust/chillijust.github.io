@@ -134,9 +134,22 @@ try {
     parseFloat(getComputedStyle(q('#meldeTitel')).fontSize) >= 16);
   pruefe('F3 Textfeld zoomt nicht heran',
     parseFloat(getComputedStyle(q('#meldeText')).fontSize) >= 16);
-  pruefe('F3b der Bezug nennt die Ansicht darunter',
-    q('#meldeBezugName').textContent === 'Lernsets' && q('#meldeBezug').checked,
-    q('#meldeBezugName').textContent);
+  // **Der Bezug ist eine Wahl** (ADR 0069), kein Haken: vorbelegt mit der
+  // Ansicht, über der das Blatt steht, aber änderbar.
+  // **Der Bezug ist eine Wahl** (ADR 0069), kein Haken: vorbelegt mit der
+  // Ansicht, über der das Blatt steht, aber änderbar. Und **kein Klappmenü** —
+  // die App führt keine; es ist dieselbe Chip-Reihe wie überall.
+  pruefe('F3b der Bezug steht auf der Ansicht darunter',
+    q('#meldeBezug [data-bezug="lernsets"]').classList.contains('active') &&
+    meldeBezugWahl === 'lernsets', meldeBezugWahl);
+  pruefe('F3c und bietet jede Seite an', (function () {
+    var werte = alle('#meldeBezug [data-bezug]').map(function (o) { return o.dataset.bezug; });
+    return werte[0] === '' && werte.indexOf('home') !== -1 &&
+      werte.indexOf('bilanz') !== -1 && werte.length === meldeSeiten().length + 1;
+  })(), alle('#meldeBezug [data-bezug]').length + ' Einträge');
+  pruefe('F3d genau eine ist gewählt',
+    alle('#meldeBezug .chip.active').length === 1,
+    String(alle('#meldeBezug .chip.active').length));
   var vorher2 = tickets.length;
   q('#meldeSichern').click();
   pruefe('F4 ohne Titel wird nichts gespeichert', tickets.length === vorher2 && meldeOffen);
@@ -152,13 +165,24 @@ try {
   // F2 · Ohne Bezug
   setTab('bilanz');
   q('#meldeKnopf').click();
-  q('#meldeBezug').checked = false;
-  q('#meldeBezug').dispatchEvent(new Event('change'));
+  q('#meldeBezug [data-bezug=""]').click();
   q('#meldeTitel').value = 'Ohne Bezug';
   q('#meldeSichern').click();
-  pruefe('F7 abgehakter Bezug bleibt leer', tickets[0].reiter === '', '«' + tickets[0].reiter + '»');
-  pruefe('F8 und fehlt im Text', ticketAbschnitt(tickets[0], 1).indexOf('- Übung:') === -1);
-  pruefe('F9 der Haken merkt sich nichts über das Ticket hinaus', meldeBezugAn === true);
+  pruefe('F7 «Keine Seite» bleibt leer', tickets[0].reiter === '', '«' + tickets[0].reiter + '»');
+  pruefe('F8 und fehlt im Text', ticketAbschnitt(tickets[0], 1).indexOf('- Ort:') === -1);
+  // Die Wahl merkt sich nichts über das Ticket hinaus — beim nächsten steht
+  // wieder die Seite da, über der man ist.
+  pruefe('F9 die Wahl fällt auf die aktuelle Seite zurück',
+    meldeBezugWahl === meldeBezugQuelle(), meldeBezugWahl);
+  // **Eine andere Seite lässt sich wählen** — das war der ganze Punkt: Wer
+  // erst später merkt, dass es um etwas anderes ging, muss nicht dorthin
+  // zurück und von vorn anfangen.
+  q('#meldeKnopf').click();
+  q('#meldeBezug [data-bezug="buchstaben"]').click();
+  q('#meldeTitel').value = 'Betrifft woanders';
+  q('#meldeSichern').click();
+  pruefe('F9b eine fremde Seite lässt sich wählen', tickets[0].reiter === 'Buchstaben',
+    tickets[0].reiter);
 
   // F3 · Ziehen: nur nach unten, weit genug schließt
   q('#meldeKnopf').click();
@@ -282,6 +306,76 @@ try {
     setTab('einstellungen');
     return main.textContent.indexOf('Chillingo ' + APP_VERSION) !== -1;
   })());
+
+
+  // ── Y · Tickets einlesen (ADR 0069) ──────────────────────
+  // Der gebündelte Text verlässt das Gerät seit ADR 0016; zurück kam nichts.
+  // Gelesen wird genau die Form, die ticketsAlsText() schreibt.
+  tickets = [];
+  ticketsSichern();
+  ticketAnlegen('bug', 'Ein Fehler', 'Zwei Zeilen\nText dazu', 'lernsets');
+  ticketAnlegen('feature', 'Ein Wunsch', 'Kurz.', null);
+  var text = ticketsAlsText(tickets);
+  var gelesen = ticketsLesen(text);
+  pruefe('Y1 der eigene Text wird wieder verstanden', gelesen.length === 2,
+    String(gelesen.length));
+  pruefe('Y2 Art, Titel und Ort kommen mit', (function () {
+    var f = gelesen.filter(function (t) { return t.titel === 'Ein Fehler'; })[0];
+    return f && f.art === 'bug' && f.reiter === 'Lernsets' &&
+      f.text.indexOf('Zwei Zeilen') === 0 && f.text.indexOf('Text dazu') !== -1;
+  })(), JSON.stringify(gelesen[0]));
+  pruefe('Y3 ein Wunsch bleibt ein Wunsch', (function () {
+    var w = gelesen.filter(function (t) { return t.titel === 'Ein Wunsch'; })[0];
+    return w && w.art === 'feature' && w.reiter === '';
+  })());
+  // **Was schon da ist, bleibt** — dasselbe zweimal einzufügen verdoppelt nichts.
+  var e1 = ticketsUebernehmen(gelesen);
+  pruefe('Y4 Bekanntes wird nicht verdoppelt',
+    e1.dazu === 0 && e1.schon === 2 && tickets.length === 2,
+    JSON.stringify(e1) + ' / ' + tickets.length);
+  // Auf einem leeren Gerät kommen sie an.
+  tickets = [];
+  var e2 = ticketsUebernehmen(gelesen);
+  pruefe('Y5 auf einem leeren Gerät kommen sie an',
+    e2.dazu === 2 && tickets.length === 2, JSON.stringify(e2));
+  pruefe('Y6 und behalten ihre Reihenfolge', (function () {
+    var sortiert = tickets.slice().sort(function (a, b) { return a.erstellt - b.erstellt; });
+    return sortiert[0].titel === 'Ein Fehler';
+  })(), tickets.map(function (t) { return t.titel; }).join());
+  // **Nichts verstanden heißt nichts getan.**
+  pruefe('Y7 Unsinn ergibt kein Ticket', ticketsLesen('Hallo Welt').length === 0);
+  pruefe('Y8 auch leerer Text nicht', ticketsLesen('').length === 0);
+  // Ein Kopf ohne Ticketabschnitt ebenfalls nicht.
+  pruefe('Y9 ein Kopf allein auch nicht',
+    ticketsLesen('# Chillingo · 2 Tickets\n\n---\nGerät: x\n').length === 0);
+  // Die Oberfläche: ein Feld, das aufklappt, und ein Knopf, der einliest.
+  tickets = [];
+  ticketsSichern();
+  ansichtenZuruecksetzen();
+  setTab('tickets');
+  pruefe('Y10 der Einstieg steht auch im Leerzustand da', !!q('#tkImportKnopf'));
+  pruefe('Y11 und ist zugeklappt',
+    getComputedStyle(q('#tkImportBlatt')).display === 'none');
+  q('#tkImportKnopf').click();
+  pruefe('Y12 ein Tipp klappt ihn auf',
+    tkImportOffen === true && getComputedStyle(q('#tkImportBlatt')).display !== 'none');
+  q('#tkImportFeld').value = text;
+  q('#tkImportLesen').click();
+  pruefe('Y13 der Knopf liest ein', tickets.length === 2, String(tickets.length));
+  pruefe('Y14 und sagt, was ankam',
+    tkImportMeldung.indexOf('2') === 0 && tkImportMeldung.indexOf('übernommen') !== -1,
+    tkImportMeldung);
+  q('#tkImportKnopf').click();
+  q('#tkImportFeld').value = 'Nichts davon ist ein Ticket';
+  q('#tkImportLesen').click();
+  pruefe('Y15 Unverstandenes ändert nichts',
+    tickets.length === 2 && tkImportMeldung.indexOf('kein Ticket') !== -1, tkImportMeldung);
+  pruefe('Y16 Ansichtszustand wird zurückgesetzt', (function () {
+    ansichtenZuruecksetzen();
+    return tkImportOffen === false && tkImportMeldung === '';
+  })());
+  tickets = [];
+  ticketsSichern();
 
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);

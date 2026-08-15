@@ -239,13 +239,13 @@ h1 { font-family: Georgia, "Times New Roman", serif; font-size: 28px; margin: 0;
      und der Punkt ist die Grenze, weil das Wort rechts von ihm steht und
      rechts abgeschnitten wird. */
   display: inline-block; overflow: hidden; max-width: 8em; opacity: 1;
-  transition: max-width .5s ease, opacity .4s ease, margin-left .5s ease;
+  transition: max-width 1s ease, opacity .8s ease, margin-left 1s ease;
 }
 .netz-stand.eingeklappt .netz-wort { max-width: 0; opacity: 0; margin-left: 0; }
 /* Unterwegs gibt es das Wort gar nicht — kein Einklappen, kein Platz. */
 .netz-stand.nur-punkt .netz-wort { display: none; }
 @media (prefers-reduced-motion: reduce) {
-  .netz-wort { transition: opacity .4s ease; }
+  .netz-wort { transition: opacity .8s ease; }
   .netz-stand.eingeklappt .netz-wort { max-width: 0; margin-left: 0; }
 }
 
@@ -590,10 +590,6 @@ body.filter-offen .kachel-knopf { opacity: 0; pointer-events: none; }
 .kachel .icon { width: 22px; height: 22px; color: var(--ice); }
 
 .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
-select {
-  flex: 1; min-width: 140px; min-height: 44px; padding: 10px 12px; border-radius: 10px;
-  border: 1px solid var(--line); background: var(--card); color: var(--text); font-size: 14px;
-}
 .chip {
   padding: 10px 16px; min-height: 44px; border-radius: 999px; border: 1px solid var(--line);
   background: var(--card); color: var(--dim); font-size: 13px; cursor: pointer;
@@ -1486,6 +1482,17 @@ body.unterwegs .reiter { top: 62px; }
 .blattkarte .setting:last-child { border-bottom: none; }
 .blattkarte .settings-note { margin-bottom: 12px; }
 .settings-note { font-size: 12px; color: var(--dim); line-height: 1.5; margin: 16px 0 0; }
+/* Die Bezugszeile im Meldeblatt: ein Wort und eine Auswahl, nebeneinander. */
+.bezug-wahl { margin-top: 12px; }
+.bezug-wahl .bezug-text {
+  display: block; font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--dim); margin-bottom: 8px;
+}
+/* Vierzehn Seiten passen nicht in eine Zeile und sollen das Blatt auch nicht
+   füllen: Die Reihe bricht um und rollt, wenn es mehr wird. */
+.bezug-chips { margin-top: 0; max-height: 112px; overflow-y: auto; }
+.bezug-chips .chip { padding: 7px 12px; font-size: 12px; min-height: 34px; }
+
 .mehr {
   display: block; margin: 12px auto 0; background: none; border: none; color: var(--ice);
   font-size: 12px; min-height: 44px; cursor: pointer; text-decoration: underline;
@@ -1898,11 +1905,17 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
     <input type="text" class="zeile" id="meldeTitel" maxlength="120"
       placeholder="Worum geht es? Kurz und knapp." autocapitalize="sentences" spellcheck="false">
     <textarea class="fliess" id="meldeText" rows="4" placeholder="Was ist passiert, was hattest du erwartet?"></textarea>
-    <label class="bezug" for="meldeBezug">
-      <input type="checkbox" id="meldeBezug" checked>
-      <span class="bezug-kasten" aria-hidden="true"></span>
-      <span class="bezug-text">Betrifft <strong id="meldeBezugName">Home</strong></span>
-    </label>
+    <!-- **Der Bezug ist eine Wahl, kein Haken** (ADR 0069). Der Haken konnte nur
+         die Seite bestätigen, über der man gerade stand — wer erst später
+         merkt, dass es eigentlich um eine andere ging, musste dorthin
+         zurückgehen und von vorn anfangen. Vorgewählt ist weiterhin die
+         aktuelle Seite; «Keine» steht ganz oben, weil das die Antwort auf
+         dieselbe Frage ist, die der Haken beantwortete. -->
+    <div class="bezug-wahl">
+      <span class="bezug-text">Betrifft</span>
+      <div class="chipwrap bezug-chips" id="meldeBezug" role="group"
+        aria-label="Welche Seite betrifft es?"></div>
+    </div>
     <button class="blatt-link" id="meldeAlle">Alle Tickets →</button>
     <div class="btn-row">
       <button class="btn ghost" id="meldeAbbruch">Abbrechen</button>
@@ -3959,7 +3972,7 @@ var APP_STAND = '2026-08-15'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.4.10T'; /* == VERSION == */
+var APP_VERSION = '2.4.11T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -4375,6 +4388,105 @@ function ticketsAlsText(liste) {
   return kopf + koerper + '\n---\n' +
     (jeTicket ? '' : 'App-Stand: ' + staende[0] + '\n') +
     'Gerät: ' + reihe[reihe.length - 1].geraet + '\n';
+}
+
+// ── Tickets einlesen ────────────────────────────────────────
+// **Der gebündelte Text ist auch eine Eingabe** (ADR 0069). Er verlässt das
+// Gerät als Text zum Kopieren (ADR 0016); zurück kam bisher nichts. Wer die
+// Tickets auf ein zweites Gerät bringen oder eine Kopie wiederherstellen
+// wollte, tippte sie ab.
+//
+// Gelesen wird genau das Format, das `ticketsAlsText()` schreibt — kein
+// allgemeiner Markdown-Leser, sondern der Gegenpart zu einer bekannten Form.
+// Was nicht passt, wird übersprungen statt geraten: Ein halb verstandenes
+// Ticket wäre schlimmer als keines.
+function ticketsLesen(text) {
+  var zeilen = String(text).replace(/\r/g, '').split('\n');
+  var raus = [];
+  var akt = null;
+  var standAlle = '';
+  var geraetAlle = '';
+  function fertig() {
+    if (!akt) return;
+    akt.text = akt.text.replace(/^\s+|\s+$/g, '');
+    if (akt.titel) raus.push(akt);
+    akt = null;
+  }
+  zeilen.forEach(function (z) {
+    // «## 3 · Fehler: Der Titel» — die Überschrift eines Tickets.
+    var kopf = /^##\s+\d+\s*·\s*(Fehler|Wunsch)\s*:\s*(.+)$/.exec(z);
+    if (kopf) {
+      fertig();
+      akt = { art: kopf[1] === 'Fehler' ? 'bug' : 'feature', titel: kopf[2].replace(/\s+$/, ''),
+        text: '', reiter: '', stand: '', erstellt: 0, geaendert: 0 };
+      return;
+    }
+    // Die Angaben unter einem Ticket. Sie stehen als Aufzählung und sind das
+    // Einzige, was am Zeilenanfang mit «- » beginnt.
+    var feld = /^-\s+(Ort|App-Stand|Erstellt|Geändert)\s*:\s*(.+)$/.exec(z);
+    if (feld && akt) {
+      if (feld[1] === 'Ort') akt.reiter = feld[2].replace(/\s+$/, '');
+      else if (feld[1] === 'App-Stand') akt.stand = feld[2].split('·')[0].replace(/\s+$/, '');
+      else if (feld[1] === 'Erstellt') akt.erstellt = datumLesen(feld[2]);
+      else akt.geaendert = datumLesen(feld[2]);
+      return;
+    }
+    // Der Fuß gilt für alle, die keinen eigenen Stand tragen.
+    var fuss = /^(App-Stand|Gerät)\s*:\s*(.+)$/.exec(z);
+    if (fuss) {
+      fertig();
+      if (fuss[1] === 'Gerät') geraetAlle = fuss[2].replace(/\s+$/, '');
+      else standAlle = fuss[2].split('·')[0].replace(/\s+$/, '');
+      return;
+    }
+    if (/^#\s/.test(z) || /^---\s*$/.test(z)) { fertig(); return; }
+    if (akt) akt.text += z + '\n';
+  });
+  fertig();
+  raus.forEach(function (t) {
+    if (!t.stand) t.stand = standAlle;
+    t.geraet = geraetAlle;
+  });
+  return raus;
+}
+
+// «2026-08-15 13:19 (UTC+02)» — dieselbe Form, die `datumLang()` schreibt.
+// Gelesen wird sie als **Ortszeit dieses Geräts**: Die Zeitzone im Text gehört
+// zum Gerät, von dem der Text kam, und eine Minute Versatz ist hier belanglos
+// gegen die Gefahr, sich an einer Zeitzonenrechnung zu vertun.
+function datumLesen(text) {
+  var m = /(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/.exec(String(text));
+  if (!m) return 0;
+  var d = new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]);
+  var z = d.getTime();
+  return isNaN(z) ? 0 : z;
+}
+
+// Eingelesene Tickets übernehmen. **Was schon da ist, bleibt, wie es ist** —
+// erkannt an Titel und Erstellzeit. Ein zweites Einfügen desselben Textes darf
+// die Liste nicht verdoppeln.
+function ticketsUebernehmen(neue) {
+  var dazu = 0;
+  var schon = 0;
+  neue.forEach(function (n) {
+    var da = tickets.filter(function (t) {
+      return t.titel === n.titel && (!n.erstellt || !t.erstellt ||
+        Math.abs(t.erstellt - n.erstellt) < 60000);
+    })[0];
+    if (da) { schon++; return; }
+    var jetzt = n.erstellt || Date.now();
+    tickets.forEach(function (x) { if (x.erstellt === jetzt) jetzt = jetzt + 1; });
+    tickets.unshift({
+      id: Date.now().toString(36) + Math.floor(Math.random() * 1296).toString(36),
+      art: n.art, titel: n.titel.slice(0, 120), text: n.text.slice(0, 4000),
+      reiter: n.reiter, stand: n.stand || APP_STAND, version: n.stand || APP_VERSION,
+      geraet: n.geraet || '', erstellt: jetzt,
+      geaendert: n.geaendert || 0, uebergeben: null
+    });
+    dazu++;
+  });
+  if (dazu) ticketsSichern();
+  return { dazu: dazu, schon: schon };
 }
 
 function ticketsOffen() {
@@ -5186,7 +5298,10 @@ function netzWeg() {
 // einem Wechsel des Netzes und bei der Rückkehr auf Home. Ein Renderlauf
 // allein ist kein Anlass, sonst stünde das Wort nach jedem Blattwechsel wieder
 // da und die Frist liefe nie ab.
-var NETZ_FRIST = 4200;
+// Doppelt so lange wie in 2.4.4, und das Einklappen selbst dauert doppelt so
+// lange: «halb so schnell verschwinden» meint beides — später anfangen und
+// gemächlicher zugehen.
+var NETZ_FRIST = 8400;
 var netzZuletzt = '';
 var netzWarDaheim = false;
 var netzUhr = null;
@@ -7077,8 +7192,13 @@ document.getElementById('meldeAbbruch').addEventListener('click', function () {
   meldeSetzen(false);
   meldeLeeren();
 });
-document.getElementById('meldeBezug').addEventListener('change', function (e) {
-  meldeBezugAn = e.target.checked;
+// Ein Zuhörer für die ganze Reihe: Die Chips werden bei jedem Öffnen neu
+// gezeichnet, ein Zuhörer je Chip müsste also jedes Mal mitwandern.
+document.getElementById('meldeBezug').addEventListener('click', function (e) {
+  var b = e.target.closest ? e.target.closest('[data-bezug]') : null;
+  if (!b) return;
+  meldeBezugWahl = b.dataset.bezug;
+  document.getElementById('meldeBezug').innerHTML = meldeBezugHtml();
 });
 // Vom Blatt in die Liste. Nur zuklappen, nicht leeren: Ein Entwurf überlebt
 // das Zuklappen, und ihn beim Nachsehen wegzuwerfen wäre die böseste Falle
@@ -7099,10 +7219,9 @@ document.getElementById('meldeSichern').addEventListener('click', function () {
   // Beim Ändern bleibt der schon vergebene Bezug stehen; wird der Haken erst
   // jetzt gesetzt, trägt er die Ansicht ein, über der das Blatt steht.
   if (meldeBearbeitet) {
-    ticketAendern(meldeBearbeitet, meldeArt, titel.value, text,
-      meldeBezugAn ? (meldeBezugName || ansichtName(meldeBezugQuelle())) : '');
+    ticketAendern(meldeBearbeitet, meldeArt, titel.value, text, meldeBezugText());
   }
-  else ticketAnlegen(meldeArt, titel.value, text, meldeBezugAn ? meldeBezugQuelle() : null);
+  else ticketAnlegen(meldeArt, titel.value, text, meldeBezugWahl || null);
   meldeSetzen(false);
   meldeLeeren();
   if (currentTab === 'tickets') renderTickets();
@@ -7893,6 +8012,8 @@ function ansichtenZuruecksetzen() {
   backupMsg = '';
   confirmReset = false;
   tkAusgabe = '';
+  tkImportOffen = false;
+  tkImportMeldung = '';
   meldeBearbeitet = null;
   meisterMeldung = null;
   patzerMeldung = null;
@@ -12668,14 +12789,55 @@ function renderFakten() {
 // deckt nur den unteren Teil ab, damit man weiter sieht, worum es geht.
 var meldeOffen = false;
 var meldeArt = 'bug';
-var meldeBezugAn = true;
+// **Die gewählte Seite** (ADR 0069) — leer heißt «keine». Vorbelegt wird sie
+// beim Öffnen des Blattes mit der Ansicht, über der man steht; ab dann gilt,
+// was der Nutzer gewählt hat.
+var meldeBezugWahl = '';
 // Die Kennung des Tickets, das gerade bearbeitet wird — sonst null.
 var meldeBearbeitet = null;
-var meldeBezugName = '';   // beim Bearbeiten der schon vergebene Bezug
 
 function meldeBezugQuelle() {
   // Die Ansicht, über der man steht — die ist gemeint, nicht «Tickets».
   return currentTab === 'tickets' ? letzterTab : currentTab;
+}
+
+// **Alle Seiten, die man meinen kann** (ADR 0069) — Übersicht, die acht
+// Übungen, die Menüansichten. In derselben Reihenfolge wie in der App, damit
+// die Liste sich wie die App liest und nicht wie ein Datenmodell.
+function meldeSeiten() {
+  var raus = [{ id: 'home', name: ansichtName('home') }];
+  UEBUNG_GRUPPEN.forEach(function (g) {
+    g.ids.forEach(function (id) {
+      if (UEBUNG_NAME[id]) raus.push({ id: id, name: UEBUNG_NAME[id] });
+    });
+  });
+  Object.keys(ANSICHT_NAME).forEach(function (id) {
+    raus.push({ id: id, name: ANSICHT_NAME[id] });
+  });
+  return raus;
+}
+
+// Was im Ticket landet: der **Name** der Seite, nicht ihre Kennung — er steht
+// im gebündelten Text und soll dort lesbar sein.
+function meldeBezugText() {
+  return meldeBezugWahl ? ansichtName(meldeBezugWahl) : '';
+}
+
+// **Chips, kein Klappmenü.** Die App führt keine Klappmenüs — auf iOS wären das
+// Rädchen, die die halbe Seite verdecken, und überall sonst steht die Auswahl
+// offen da. Die Suite `filter` liest den Quelltext danach ab; sie darf das
+// Wort also nicht einmal in einem Kommentar finden. Hier ist es dieselbe Reihe
+// wie bei den Kacheln, nur mit einer Wahl statt vieler.
+function meldeBezugHtml() {
+  var html = '<button class="chip' + (meldeBezugWahl ? '' : ' active') +
+    '" role="radio" aria-checked="' + (meldeBezugWahl ? 'false' : 'true') +
+    '" data-bezug="">Keine</button>';
+  meldeSeiten().forEach(function (s) {
+    var an = s.id === meldeBezugWahl;
+    html += '<button class="chip' + (an ? ' active' : '') + '" role="radio" aria-checked="' +
+      (an ? 'true' : 'false') + '" data-bezug="' + esc(s.id) + '">' + esc(s.name) + '</button>';
+  });
+  return html;
 }
 
 function meldeArtHtml() {
@@ -12696,10 +12858,7 @@ function meldeFuellen() {
       meldeFuellen();
     });
   });
-  document.getElementById('meldeBezugName').textContent = meldeBearbeitet
-    ? (meldeBezugName || ansichtName(meldeBezugQuelle()))
-    : ansichtName(meldeBezugQuelle());
-  document.getElementById('meldeBezug').checked = meldeBezugAn;
+  document.getElementById('meldeBezug').innerHTML = meldeBezugHtml();
   document.getElementById('meldeSichern').textContent = meldeBearbeitet ? 'Ändern' : 'Sichern';
   document.getElementById('meldeAbbruch').textContent = meldeBearbeitet ? 'Verwerfen' : 'Abbrechen';
   // In der Liste selbst führt der Weg nirgendwohin — und beim Bearbeiten käme
@@ -12713,8 +12872,11 @@ function meldeBearbeiten(id) {
   if (!t) return;
   meldeBearbeitet = id;
   meldeArt = t.art;
-  meldeBezugAn = !!t.reiter;
-  meldeBezugName = t.reiter;
+  // Im Ticket steht der **Name** der Seite; für die Auswahl wird die Kennung
+  // dazu gesucht. Eine Seite, die es nicht mehr gibt, fällt auf «keine» —
+  // besser als eine Auswahl, die auf etwas zeigt, das fehlt.
+  meldeBezugWahl = '';
+  meldeSeiten().forEach(function (x) { if (x.name === t.reiter) meldeBezugWahl = x.id; });
   document.getElementById('meldeTitel').value = t.titel;
   document.getElementById('meldeText').value = t.text;
   meldeSetzen(true);
@@ -12746,6 +12908,10 @@ function meldeSetzen(auf) {
   var hof = document.getElementById('meldeHof');
   if (auf) {
     hof.hidden = false;
+    // **Vorgewählt ist die Seite, über der man steht** (ADR 0069) — aber nur
+    // bei einem frischen Entwurf. Ein angefangenes Ticket behält seine Wahl,
+    // sonst spränge sie beim Zuklappen und Wiederöffnen zurück.
+    if (!meldeBearbeitet && !meldeBezugWahl) meldeBezugWahl = meldeBezugQuelle();
     meldeFuellen();
   } else {
     blatt.style.transform = '';
@@ -12761,9 +12927,10 @@ function meldeLeeren() {
   document.getElementById('meldeTitel').value = '';
   document.getElementById('meldeText').value = '';
   meldeArt = 'bug';
-  meldeBezugAn = true;
+  // Zurück auf die Seite, über der man steht — die ist beim nächsten Ticket
+  // wieder die wahrscheinlichste.
+  meldeBezugWahl = meldeBezugQuelle();
   meldeBearbeitet = null;
-  meldeBezugName = '';
   meldeKnopfZeigen();
 }
 
@@ -12816,6 +12983,30 @@ function meldeZiehenBinden() {
 
 // ── TICKETS ─────────────────────────────────────────────────
 var tkAusgabe = '';     // gebündelter Text, sichtbar bis «Fertig»
+// **Der Rückweg** (ADR 0069): ein Feld, in das ein gebündelter Text eingefügt
+// wird. Ansichtszustand — nach ADR 0017 gehört beides in
+// `ansichtenZuruecksetzen()`.
+var tkImportOffen = false;
+var tkImportMeldung = '';
+
+// Das Feld zum Einfügen. Zugeklappt ist es eine Zeile, offen ein Feld mit
+// einem Knopf — dieselbe Gestalt wie «Alle Übungen» auf der Übersicht.
+function tkImportHtml() {
+  var html = '<button class="alle-knopf" id="tkImportKnopf" aria-expanded="' +
+    (tkImportOffen ? 'true' : 'false') + '" aria-controls="tkImportBlatt">' +
+    '<span>Tickets einfügen</span>' + ICON.winkelRunter + '</button>' +
+    '<div class="alle-klapp" id="tkImportBlatt"' + (tkImportOffen ? '' : ' hidden') + '>' +
+    '<p class="backup-note">Einen kopierten Ticket-Text hier einfügen. Was schon in der ' +
+    'Liste steht, bleibt unberührt — dasselbe zweimal einzufügen verdoppelt nichts.</p>' +
+    '<textarea class="fliess" id="tkImportFeld" rows="6" ' +
+    'placeholder="# Chillingo · 3 Tickets …" spellcheck="false"></textarea>';
+  if (tkImportMeldung) {
+    html += '<p class="backup-note">' + esc(tkImportMeldung) + '</p>';
+  }
+  html += '<div class="btn-row"><button class="btn primary" id="tkImportLesen">' +
+    'Einlesen</button></div></div>';
+  return html;
+}
 
 function renderTickets() {
   var offen = ticketsOffen();
@@ -12866,6 +13057,7 @@ function renderTickets() {
           'Übergebene löschen (' + uebergeben + ')</button></div>';
       }
     }
+    html += tkImportHtml();
 
     html += '<p class="settings-note">Neue Tickets schreibst du über den Knopf unten rechts — ' +
       'von jeder Ansicht aus. Ein Tipp auf eine Zeile holt das Ticket zum Ändern zurück; ' +
@@ -12924,6 +13116,33 @@ function renderTickets() {
       renderTickets();
     });
   }
+
+  var impKnopf = document.getElementById('tkImportKnopf');
+  if (impKnopf) impKnopf.addEventListener('click', function () {
+    tkImportOffen = !tkImportOffen;
+    tkImportMeldung = '';
+    renderTickets();
+  });
+  var impLesen = document.getElementById('tkImportLesen');
+  if (impLesen) impLesen.addEventListener('click', function () {
+    var feld = document.getElementById('tkImportFeld');
+    var neue = ticketsLesen(feld ? feld.value : '');
+    if (!neue.length) {
+      // **Nichts verstanden heißt nichts getan.** Ein halb geratenes Ticket
+      // wäre schlimmer als keines.
+      tkImportMeldung = 'Darin steht kein Ticket, das ich lesen kann. Erwartet wird der ' +
+        'Text, den «kopieren» erzeugt.';
+      renderTickets();
+      return;
+    }
+    var e = ticketsUebernehmen(neue);
+    tkImportMeldung = e.dazu
+      ? e.dazu + (e.dazu === 1 ? ' Ticket übernommen' : ' Tickets übernommen') +
+        (e.schon ? ', ' + e.schon + ' war' + (e.schon === 1 ? '' : 'en') + ' schon da' : '') + '.'
+      : 'Alles davon steht schon in der Liste.';
+    tkImportOffen = false;
+    renderTickets();
+  });
 
   document.getElementById('tkBack').addEventListener('click', zurueckGehen);
 }

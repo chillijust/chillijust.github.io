@@ -92,6 +92,7 @@ Wer neu dazukommt und nur fünf lesen will:
 | [0066](0066-der-weg-und-die-wahl.md) | Die Reihenfolge ist der Weg, die Empfehlung eine Leiter | |
 | [0067](0067-fuenf-tickets-und-ein-merkzettel.md) | Fünf Tickets — und ein Merkzettel für Erklärungen | |
 | [0068](0068-die-marke-und-der-ort.md) | Die Schreibmarke gehört ins Feld, der Ort überlebt das Update | |
+| [0069](0069-der-rueckweg-und-die-wahl.md) | Der Rückweg für Tickets, und der Bezug wird eine Wahl | |
 
 ## Einen neuen anlegen
 
