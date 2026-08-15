@@ -58,6 +58,11 @@
   --glow: #1F1E1B;
   --lip: rgba(255, 255, 255, .035);
   --shade: rgba(0, 0, 0, .28);
+  /* Der Atem des Scheinwerfers (ADR 0083): eine Aufhellung **auf** dem Ziel.
+     Wie stark sie sein darf, hängt davon ab, wie hell die Fläche darunter
+     schon ist — auf dem fast schwarzen Grund genügt ein Zehntel, auf einer
+     hellen Kachel wäre davon nichts zu sehen. Darum steht der Wert zweimal. */
+  --tut-atem: rgba(255, 255, 255, .12);
   /* Die Figur wirft keinen Schatten mehr (ADR 0071). Der Wert stand hier zwei
      Fassungen lang, erst kräftig, dann kurz — der viereckige Rand blieb in
      Safari beides Mal sichtbar. Ein Weichzeichner, den der Browser in eine
@@ -106,6 +111,10 @@
      dazu trägt der Schatten bei, nicht nur die Helligkeit. */
   --shade: rgba(35, 39, 46, .10);
   --blatt: var(--card);
+  /* Die hellen Kacheln liegen bei 89 % Helligkeit — ein Zehntel Weiß darauf
+     wäre kein Atmen, sondern nichts. Mehr als ein Drittel wäre dagegen zu
+     viel: Der Schein liegt **über** der Schrift und nimmt ihr den Kontrast. */
+  --tut-atem: rgba(255, 255, 255, .35);
 }
 
 /* Die Flächen. Gerechnet von tools/palette.py: eine Staffelung der Helligkeit
@@ -1191,18 +1200,27 @@ body.chili-steht #chiliBuehne { visibility: visible; }
    außerhalb des Bildes und flöge sichtbar aus der Ecke heran. Von Schritt zu
    Schritt wandert es dagegen — dort ist die Bewegung die Erklärung. */
 #tutLoch.springt { transition: none; }
-/* **Ein Aufleuchten alle vier Sekunden** (ADR 0081). Das Loch selbst hat seit
-   ADR 0067 keinen Rand — jeder stehende Streifen unverdunkelten Grundes zieht
-   den Blick stärker an als das Angeleuchtete. Ein Ring, der zweimal kurz
-   auftaucht und wieder verschwindet, tut das nicht: Er sagt «hier», solange
-   man hinsieht, und ist danach wieder fort.
-   Der große Schatten muss in jedem Bild mitgeschrieben werden — `box-shadow`
-   ist eine Eigenschaft, nicht zwei. */
-#tutLoch { animation: tutPuls 4s ease-in-out infinite; }
-@keyframes tutPuls {
-  0%, 12%, 100% { box-shadow: 0 0 0 9999px rgba(0, 0, 0, .82); }
-  4%  { box-shadow: 0 0 0 3px var(--akzent), 0 0 0 9999px rgba(0, 0, 0, .82); }
-  8%  { box-shadow: 0 0 0 3px rgba(0, 0, 0, 0), 0 0 0 9999px rgba(0, 0, 0, .82); }
+/* **Ein ruhiges Atmen** (ADR 0083, löst den Puls aus ADR 0081 ab).
+   Der Ring von damals stand **außerhalb** des Lochs und lag in derselben
+   Eigenschaft wie die Verdunklung. `box-shadow` ist aber eine **Liste**, und
+   eine Liste mit zwei Einträgen läßt sich nicht gegen eine mit einem
+   interpolieren: Der Browser schaltet hart um, und für einen Augenblick war
+   gar kein Schatten da — der ganze Bildschirm blitzte auf. Genau so wurde es
+   gemeldet.
+
+   Jetzt atmet eine Fläche **innerhalb** des Lochs, langsam ein und aus. Sie
+   liegt in einem eigenen Kind, denn eine Deckung auf dem Loch selbst nähme den
+   Schatten mit — das wäre dasselbe Blitzen mit anderer Ursache. Den Radius
+   erbt sie vom Loch, und das mißt ihn am Ziel: Was leuchtet, endet an der
+   Kante der Kachel und nicht einen Pixel weiter (ADR 0067). */
+#tutLoch::after {
+  content: ''; position: absolute; inset: 0;
+  border-radius: inherit; background: var(--tut-atem);
+  opacity: 0; animation: tutAtem 5.6s ease-in-out infinite;
+}
+@keyframes tutAtem {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
 }
 /* Ohne Ziel — die Eingangsfrage — deckt der Hof selbst ab, und das Loch geht
    weg. Es außerhalb des Bildes zu parken reicht **nicht**: Der Schatten wächst
@@ -1312,9 +1330,11 @@ body.chili-steht #chiliBuehne { visibility: visible; }
 body.tut-offen { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   #tutLoch, .tut-punkte i { transition: none; }
-  /* Wer keine Bewegung will, bekommt den Ring **stehend** statt blinkend —
-     ganz wegzulassen nähme ihm die Auskunft, die er trägt. */
-  #tutLoch { animation: none; box-shadow: 0 0 0 2px var(--akzent), 0 0 0 9999px rgba(0, 0, 0, .82); }
+  /* Wer keine Bewegung will, bekommt den Schein **stehend** statt atmend —
+     ganz wegzulassen nähme ihm die Auskunft, die er trägt. Ein stehender
+     **Rand** wäre etwas anderes und bleibt verboten (ADR 0067); das hier ist
+     eine Fläche innerhalb des Ziels. */
+  #tutLoch::after { animation: none; opacity: .6; }
   #tutSprech.klappt { animation: none; }
 }
 
@@ -4282,7 +4302,7 @@ var APP_STAND = '2026-08-15'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.5.0T'; /* == VERSION == */
+var APP_VERSION = '2.5.0T2'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten

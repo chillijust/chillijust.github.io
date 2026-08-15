@@ -27,7 +27,7 @@ Wegen gerufen: beim Start **mit** Rückruf, und zusätzlich bei
 **Die Regel dahinter:** Wer etwas asynchron erfragt und den Rückruf wegläßt,
 hat nicht gefragt — er hat nur gesendet.
 
-## 2 · Der Scheinwerfer leuchtet auf
+## 2 · Der Scheinwerfer leuchtet auf ⚠︎ abgelöst durch 0083
 
 **Befund:** «Die hervorgehobenen Bereiche sollen kurz aufleuchten (alle 4 s), um
 sie erkenntlicher zu machen — dezent, schlicht.»

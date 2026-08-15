@@ -119,20 +119,30 @@ try {
   pruefe('B3 vor dem Start ist nichts offen',
     q('#tutHof').hidden && q('#tutGespann').getAttribute('aria-hidden') === 'true');
 
-  // ── B9 · Der Scheinwerfer leuchtet auf (ADR 0081) ─────────
-  // Ein Ring, der alle vier Sekunden kurz auftaucht: Er sagt «hier», solange
-  // man hinsieht, und ist danach wieder fort. Ein stehender Rand täte das
-  // nicht — er zöge den Blick dauerhaft von dem ab, was er umrahmt (ADR 0067).
-  pruefe('B9 das Loch trägt einen wiederkehrenden Puls', (function () {
-    var st = getComputedStyle(q('#tutLoch'));
-    return st.animationName === 'tutPuls' &&
+  // ── B9 · Der Scheinwerfer atmet (ADR 0083, löst 0081 ab) ──
+  // Nicht mehr ein Ring, der aufblitzt, sondern eine Fläche, die langsam ein
+  // und aus atmet — und zwar innerhalb des Ziels. Der Ring lag in derselben
+  // box-shadow-Liste wie die Verdunklung; zwei Einträge gegen einen lassen
+  // sich nicht interpolieren, also fiel die Verdunklung für einen Augenblick
+  // ganz weg und der ganze Bildschirm blitzte auf.
+  pruefe('B9 der Atem sitzt im Kind, nicht im Loch', (function () {
+    var st = getComputedStyle(q('#tutLoch'), '::after');
+    return st.animationName === 'tutAtem' &&
       st.animationIterationCount === 'infinite' &&
-      parseFloat(st.animationDuration) === 4;
-  })(), getComputedStyle(q('#tutLoch')).animationName + ' / ' +
-    getComputedStyle(q('#tutLoch')).animationDuration);
-  pruefe('B9b und der große Schatten bleibt dabei stehen',
-    getComputedStyle(q('#tutLoch')).boxShadow.indexOf('9999px') !== -1,
-    getComputedStyle(q('#tutLoch')).boxShadow.slice(0, 60));
+      parseFloat(st.animationDuration) > 4;
+  })(), getComputedStyle(q('#tutLoch'), '::after').animationName + ' / ' +
+    getComputedStyle(q('#tutLoch'), '::after').animationDuration);
+  // Läge die Deckung auf dem Loch selbst, blendete sie den Schatten mit aus —
+  // dasselbe Blitzen, nur mit anderer Ursache.
+  pruefe('B9b das Loch selbst wird nicht angefaßt',
+    getComputedStyle(q('#tutLoch')).animationName === 'none',
+    getComputedStyle(q('#tutLoch')).animationName);
+  // Ein einziger Schatten, und der bleibt: Sobald zwei darin stünden, wäre
+  // die Liste wieder nicht interpolierbar.
+  pruefe('B9c und trägt genau einen Schatten, den großen', (function () {
+    var s = getComputedStyle(q('#tutLoch')).boxShadow;
+    return s.indexOf('9999px') !== -1 && s.split('rgb').length === 2;
+  })(), getComputedStyle(q('#tutLoch')).boxShadow.slice(0, 60));
 
   // ── C · Erst die Frage, dann der Scheinwerfer ─────────────
   q('#tutKnopf').click();
@@ -364,6 +374,16 @@ try {
   pruefe('Z2 und trägt den Radius des Ziels',
     getComputedStyle(loch).borderRadius === getComputedStyle(ziel).borderRadius,
     getComputedStyle(loch).borderRadius + ' / ' + getComputedStyle(ziel).borderRadius);
+  // Und der Atem endet an derselben Kante — er erbt den gemessenen Radius,
+  // statt einen eigenen zu behaupten. Sonst leuchtete es über die Ecken hinaus.
+  pruefe('Z2b der Atem endet an der Kante des Ziels', (function () {
+    var a = getComputedStyle(loch, '::after');
+    var lr2 = loch.getBoundingClientRect();
+    return a.borderRadius === getComputedStyle(ziel).borderRadius &&
+      Math.abs(parseFloat(a.width) - lr2.width) < 1 &&
+      Math.abs(parseFloat(a.height) - lr2.height) < 1;
+  })(), getComputedStyle(loch, '::after').borderRadius + ' / ' +
+    getComputedStyle(loch, '::after').width);
   // Ein runder Knopf bleibt rund — ein fester Wert schnitte ihm die Ecken auf.
   for (var zk = 0; zk < TUTORIALS.home.length; zk++) {
     if (TUTORIALS.home[zk][1] === '#menuKnopf') tutSchritt = zk;

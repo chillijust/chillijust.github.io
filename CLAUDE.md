@@ -229,7 +229,16 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   blass stehen. *(Seit ADR 0067 gegenstandslos: Es gibt keinen weichen Rand mehr. **Das
   Loch liegt genau auf dem Ziel** — keine Luft, harte Kante, und der Radius wird am Ziel
   **gemessen**: Jeder Streifen unverdunkelten Grundes daneben ist ein leuchtender Rahmen,
-  und ein fester Radius schnitte einem runden Knopf die Ecken auf.)* **Der Einstiegsknopf wechselt die Gestalt** (ADR 0080): goldenes
+  und ein fester Radius schnitte einem runden Knopf die Ecken auf.)* **Der Schein atmet**
+  (ADR 0083): eine Fläche **innerhalb** des Ziels (`#tutLoch::after`, 5,6 s, Radius
+  geerbt), nicht mehr ein Ring außen herum. Der `box-shadow` des Lochs wird dabei **gar
+  nicht angefaßt** — er ist eine **Liste**, und eine Liste mit zwei Einträgen läßt sich
+  nicht gegen eine mit einem interpolieren: Der Browser schaltet hart um, und für einen
+  Augenblick fehlt die Verdunklung ganz. Genau davon blitzte der ganze Bildschirm auf.
+  Eine Deckung auf dem Loch selbst hätte dieselbe Wirkung, darum das eigene Kind. Die
+  Deckung steht **zweimal** wie die Flächen: `.12` auf dem dunklen Grund, `.35` auf den
+  hellen Kacheln — und mehr nicht, der Schein liegt über der Schrift. **Der Einstiegsknopf
+  wechselt die Gestalt** (ADR 0080): goldenes
   Angebot ganz oben, bis das Tutorial **einmal ganz** lief, danach das Fragezeichen im
   Kopf — aber immer nur **eines** von beiden. Zwei Merker: `tutorialGesehen` (fällt beim Öffnen, steuert das
   automatische Angebot) und `tutorialFertig` (fällt nach dem letzten Schritt, steuert den
@@ -375,7 +384,10 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   ausgeliefert, damit sie am Gerät angesehen werden kann. Fällt das T weg, ist sie
   freigegeben. Es gehört **in** die Zahl: Der Cache des Workers heißt nach der Version,
   und «2.4.6T» und «2.4.6» müssen zwei Stände sein, sonst käme die freigegebene Fassung
-  nie an.
+  nie an. **Aus demselben Grund darf das T zählen** (ADR 0083): Wird an einer angesagten
+  Fassung ein zweites Mal nachgebessert, heißt die nächste Ansicht `2.5.0T2` — ein eigener
+  Cache, und bei der Abnahme fällt das T samt Ziffer weg. Die angesagte Zahl bleibt, was
+  sie ist.
 - **`APP_STAND` setzt `tools/build.mjs`**, nicht die Hand. Der Wert geht in jedes Ticket
   ein. `--check` vergleicht ohne ihn, sonst wäre die Datei jeden Tag «nicht auf Stand».
 - **Ein Entwurf im Meldeblatt überlebt das Zuklappen.** Nur «Abbrechen» wirft ihn weg;

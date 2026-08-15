@@ -106,6 +106,7 @@ Wer neu dazukommt und nur fünf lesen will:
 | [0080](0080-der-tutorialknopf-wird-klein.md) | Der Tutorial-Knopf wird klein und rund und zieht in den Kopf | ändert 0079 |
 | [0081](0081-fuenf-tickets-vom-geraet.md) | Fünf Tickets — Auskunft, Puls, Liste, Gestalt, Leiste | ändert 0078, 0080 |
 | [0082](0082-zwei-plaetze-und-ein-klappfeld.md) | Zwei Plätze für die Leiste, ein Klappfeld für die Optionen | ändert 0081, 0044 |
+| [0083](0083-der-scheinwerfer-atmet.md) | Der Scheinwerfer atmet innerhalb des Ziels, statt zu blitzen | löst 0081 §2 ab |
 
 ## Einen neuen anlegen
 

@@ -440,7 +440,7 @@ try {
   // Fassung stehen (ADR 0064). Ein Ticket vom Gerät soll genau sagen, welcher
   // Stand gemeint war; gerade bei einer Fassung zur Ansicht ist das wichtig.
   pruefe('Z3 die Version ist dreiteilig, mit oder ohne T',
-    /^\d+\.\d+\.\d+T?$/.test(APP_VERSION), APP_VERSION);
+    /^\d+\.\d+\.\d+(T\d*)?$/.test(APP_VERSION), APP_VERSION);
   var txt = ticketsAlsText(tickets);
   pruefe('Z4 der Fu\u00df nennt beide',
     txt.indexOf('App-Stand: ' + APP_VERSION + ' \u00b7 ' + APP_STAND) !== -1,

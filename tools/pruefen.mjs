@@ -96,7 +96,7 @@ if (sw) {
   if (swGeheim.length) {
     fehler.push('Sieht in sw.js nach einem Zugangsschlüssel aus — auch diese Datei ist öffentlich.');
   }
-  if (!/var SW_VERSION = '\d+\.\d+\.\d+T?'; \/\* == VERSION == \*\//.test(sw)) {
+  if (!/var SW_VERSION = '\d+\.\d+\.\d+(T\d*)?'; \/\* == VERSION == \*\//.test(sw)) {
     fehler.push('sw.js ohne gestempelte SW_VERSION — «node tools/build.mjs» setzt sie.');
   }
   // **Der Cache muss die Version im Namen tragen.** Sonst legt ein neuer Stand

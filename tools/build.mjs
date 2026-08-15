@@ -1420,11 +1420,18 @@ const version = readFileSync(join(ROOT, 'VERSION'), 'utf8').trim();
 // ist sie freigegeben. Es gehört mit in die Zahl, nicht daneben: Der Cache des
 // Workers heißt nach der Version, und «2.4.6T» und «2.4.6» sollen zwei
 // verschiedene Stände sein, sonst käme die freigegebene Fassung nie an.
-if (!/^\d+\.\d+\.\d+T?$/.test(version)) {
+//
+// **Und aus demselben Grund darf das T zählen.** Wird an einer angesagten
+// Fassung zweimal nachgebessert, bevor sie abgenommen ist, hieße die zweite
+// Ansicht wieder «2.5.0T» — derselbe Cache, dieselbe alte Datei auf dem Gerät.
+// «2.5.0T2» ist ein eigener Stand und wird bei der Abnahme trotzdem zu
+// «2.5.0»: Die angesagte Zahl bleibt, was sie ist.
+if (!/^\d+\.\d+\.\d+(T\d*)?$/.test(version)) {
   meckern('VERSION: erwartet drei Zahlen, etwa «1.0.0» — dahinter darf ein «T» ' +
-    'für eine noch nicht abgenommene Fassung stehen. Dort steht «' + version + '»');
+    '(auch «T2», «T3» …) für eine noch nicht abgenommene Fassung stehen. ' +
+    'Dort steht «' + version + '»');
 }
-if (/T$/.test(version)) {
+if (/T\d*$/.test(version)) {
   console.log('Hinweis: «' + version + '» ist eine Fassung zur Ansicht — das T fällt bei der Abnahme weg.');
 }
 const stempeln = (t) => t
@@ -1437,7 +1444,7 @@ if (!/var APP_STAND = '\d{4}-\d{2}-\d{2}';/.test(neu)) {
   console.error('index.html: APP_STAND nicht gefunden — der Stand kann nicht gestempelt werden.');
   process.exit(1);
 }
-if (!/var APP_VERSION = '\d+\.\d+\.\d+T?';/.test(neu)) {
+if (!/var APP_VERSION = '\d+\.\d+\.\d+(T\d*)?';/.test(neu)) {
   console.error('index.html: APP_VERSION nicht gefunden — die Version kann nicht gestempelt werden.');
   process.exit(1);
 }
