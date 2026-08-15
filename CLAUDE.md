@@ -284,7 +284,9 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   und `--good` mit: Sie hängen daran, und unter der Leiter liegt keine Grenze mehr.
 - **Ein Schema tönt nur die Flächen** (ADR 0039) — `--bg`, `--card`, `--card-2`,
   `--line`, `--glow`. Seit ADR 0063 sind die hellen Gründe **satte Farben** (77 %
-  Helligkeit) und die Kachel fast weiß (96,5 %). **Wer die Leiter verschiebt, rechnet die
+  Helligkeit), und **die Kachel ist ein hellerer Ton derselben Farbe, kein Weiß** (89 %
+  Helligkeit, 90 % der Sättigung) — sonst sieht sie aus wie ein Blatt Papier, das jemand
+  auf eine Farbe gelegt hat. **Wer die Leiter verschiebt, rechnet die
   Schrift nach** — gegen *jede* der vier Paletten, nicht gegen die freundlichste; Rosa ist
   in der Leuchtdichte die dunkelste. Maßstab: «dim» hält überall AA (4,5), die
   Signalfarben 3,0. Auf der **Kachel** stehen alle Schemata gleich da (10 % Spielraum),

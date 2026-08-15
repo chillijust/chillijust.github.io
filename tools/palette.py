@@ -22,14 +22,20 @@ def hsl2hex(h, s, l):
     return '#%02X%02X%02X' % tuple(round(x * 255) for x in (r, g, b))
 
 # Helligkeit und Sättigungsanteil je Fläche. `anteil` bezieht sich auf die
-# Sättigung des Schemas: Die hellen Flächen tragen nur einen Hauch davon,
-# sonst wirkten sie schmutzig statt cremig.
+# Sättigung des Schemas.
+#
+# **Die Kachel ist ein hellerer Ton derselben Farbe, kein Weiß.** Bis 2.4.4 trug
+# sie nur 42 Prozent der Sättigung und war damit praktisch weiß — sie sah aus
+# wie ein Blatt Papier, das jemand auf eine Farbe gelegt hat, statt wie eine
+# Fläche desselben Materials. Jetzt trägt sie 90 Prozent: derselbe Ton, nur
+# heller. Der Abstand zum Grund fällt dadurch von 1,36 auf 1,21 — das ist
+# gewollt und liegt weiterhin über der Grenze aus ADR 0041 (1,15).
 FLAECHEN = [
     ('bg',     77.0, 1.00),
-    ('card',   96.5, 0.42),
-    ('card-2', 88.0, 0.72),
-    ('line',   68.0, 0.85),
-    ('glow',   96.5, 0.42),
+    ('card',   89.0, 0.90),
+    ('card-2', 82.0, 1.00),
+    ('line',   68.0, 0.95),
+    ('glow',   89.0, 0.90),
 ]
 
 # Farbton und Sättigung je Schema. «classic» ist der warme Cremeton, den die

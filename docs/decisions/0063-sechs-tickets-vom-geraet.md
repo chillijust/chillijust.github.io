@@ -81,16 +81,25 @@ darauf zu landen wäre eine leere Seite als Empfang.
 das neben der Kachel (95,2) kaum auffiel. Auf dem Gerät wirkte das ausgewaschen.
 
 **Entscheidung** (nach Vorlagen und ausdrücklicher Wahl): Der Grund sinkt auf **77
-Prozent** und wird deutlich satter, die Kachel steigt auf **96,5** und wird fast weiß.
-Der Abstand zwischen beiden wächst damit von acht auf über achtzehn Punkte — die Kachel
-ist eine eigene Fläche auf einer Farbe, kein heller Hauch auf einem hellen Grund.
+Prozent** und wird deutlich satter.
 
-| | Grund alt | Grund neu |
-| --- | --- | --- |
-| Classic | `#E7E2D7` | `#DDCFAC` |
-| Grün | `#D5E9DF` | `#A6E3C6` |
-| Blau | `#D3E0EB` | `#A7C9E2` |
-| Rosa | `#EBD3D9` | `#E2A7D0` |
+**Die Kachel ist ein hellerer Ton derselben Farbe, kein Weiß.** Der erste Anlauf setzte
+sie auf 96,5 Prozent Helligkeit mit nur 42 Prozent der Sättigung — sie sah damit aus wie
+ein Blatt Papier, das jemand auf eine Farbe gelegt hat, statt wie eine Fläche desselben
+Materials. Die Vorlage macht es umgekehrt: dieselbe Farbe, nur heller. Jetzt steht sie
+bei **89 Prozent Helligkeit und 90 Prozent der Sättigung**.
+
+Der Abstand zum Grund fällt dadurch von 1,36 auf **1,21**. Das ist gewollt und liegt
+weiterhin über der Grenze aus ADR 0041 (1,15) — was die Kachel abhebt, ist neben der
+Helligkeit ihr Schatten (`--shade`) und ihre Kante (`--line`), nicht der Farbabstand
+allein.
+
+| | Grund alt | Grund neu | Kachel alt | Kachel neu |
+| --- | --- | --- | --- | --- |
+| Classic | `#E7E2D7` | `#DDCFAC` | `#F5F4F1` | `#EEE8D8` |
+| Grün | `#D5E9DF` | `#A6E3C6` | `#F0F6F3` | `#D6F0E4` |
+| Blau | `#D3E0EB` | `#A7C9E2` | `#F0F3F6` | `#D6E5F0` |
+| Rosa | `#EBD3D9` | `#E2A7D0` | `#F6F0F1` | `#F0D6E8` |
 
 **Dark bleibt unberührt.** Die gemeinsame Helligkeitsstaffel bleibt: alle vier Schemata
 nach derselben Leiter, nur Farbton und Sättigung wandern (`tools/palette.py`). Rosa
@@ -126,11 +135,15 @@ nicht mehr erfüllbar, und zwar aus einem physikalischen Grund: Zwei Farben glei
 HSL-Helligkeit haben nicht dieselbe Leuchtdichte, ein Gelb ist heller als ein Blau. Der
 Abstand ist die Folge davon, dass es Farben sind.
 
-Die Prüfung ist darum **geteilt**, nicht aufgeweicht: Auf der **Kachel** — die in jedem
-Schema fast weiß ist und den Lehrstoff trägt — gilt die zehn-Prozent-Regel unverändert,
-und dort gehört sie hin («richtig» darf auf Rosa nicht anders aussehen als auf Grün). Auf
-dem **Grund** darf der Abstand bis dreißig Prozent gehen; was dort schützt, sind die
-absoluten Grenzen `F1b`, `F1c`, `F2` und `F3`, und die sind unverändert.
+Die Prüfung ist darum **geteilt**, nicht aufgeweicht: Auf der **Kachel** — die den
+Lehrstoff trägt — gilt die zehn-Prozent-Regel unverändert, und dort gehört sie hin
+(«richtig» darf auf Rosa nicht anders aussehen als auf Grün). Auf dem **Grund** darf der
+Abstand bis dreißig Prozent gehen; was dort schützt, sind die absoluten Grenzen `F1b`,
+`F1c`, `F2` und `F3`, und die sind unverändert.
+
+Dass die zehn Prozent auf der Kachel auch dann noch halten, als sie getönt wurde, ist
+kein Zufall: Bei 89 Prozent Helligkeit liegen die vier Paletten in der Leuchtdichte noch
+dicht genug beieinander. Wer sie weiter absenkt, prüft das nach.
 
 Eine dritte Prüfung (`E2` in `extras`) verglich den Grund gegen eine **abgeschriebene
 Zahl**. Sie fragt jetzt die Liste `SCHEMATA` — die Paletten werden gerechnet und dürfen
