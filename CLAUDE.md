@@ -153,7 +153,10 @@ zweite Flug bricht den ersten ab. Ein runder Knopf, in den sie springt, braucht
   `chiliPlatzhalter()` **vor** allem anderen; ihr Sprung wird in **Bildkoordinaten**
   gemessen (`tutChiliLage()`) — die eine benannte Ausnahme zu ADR 0012. **Der weiche Rand
   des Lochs braucht dieselbe Deckung wie der äußere Schatten** — sonst bleibt die Linie
-  blass stehen. **Der Einstiegsknopf wandert**: goldenes Angebot ganz oben,
+  blass stehen. *(Seit ADR 0067 gegenstandslos: Es gibt keinen weichen Rand mehr. **Das
+  Loch liegt genau auf dem Ziel** — keine Luft, harte Kante, und der Radius wird am Ziel
+  **gemessen**: Jeder Streifen unverdunkelten Grundes daneben ist ein leuchtender Rahmen,
+  und ein fester Radius schnitte einem runden Knopf die Ecken auf.)* **Der Einstiegsknopf wandert**: goldenes Angebot ganz oben,
   bis das Tutorial **einmal ganz** lief, danach ruhig ganz unten — aber immer nur
   **einmal** im Dokument. Zwei Merker: `tutorialGesehen` (fällt beim Öffnen, steuert das
   automatische Angebot) und `tutorialFertig` (fällt nach dem letzten Schritt, steuert den

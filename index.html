@@ -1102,14 +1102,17 @@ body.chili-steht #chiliBuehne { visibility: visible; }
    liegender Schatten läuft von der Kante nach innen aus und trifft dort auf
    die Dunkelheit ringsum. So gibt es keine Linie mehr, nur einen Übergang —
    eine harte goldene Umrandung sah ausgeschnitten aus. */
-/* **Angeleuchtet wird die Kachel, nicht ihr Hof** (ADR 0067). Bis 2.4.8 stand
-   das Loch 22 px weiter außen und lief nach innen weich aus. Auf dem fast
-   schwarzen Grund war das ein Hauch; auf einer satten Farbe wurde daraus ein
-   heller Rahmen um die Kachel, und der zog den Blick stärker an als das, was er
-   zeigen sollte. Jetzt liegt das Loch dicht an und hat eine harte Kante — der
-   Radius ist der der Kachel. */
+/* **Angeleuchtet wird das Ziel, sonst nichts** (ADR 0067). Bis 2.4.8 stand das
+   Loch 22 px weiter außen und lief nach innen weich aus. Auf dem fast schwarzen
+   Grund war das ein Hauch; auf einer satten Farbe wurde daraus ein heller
+   Rahmen, und der zog den Blick stärker an als das, was er zeigen sollte.
+   2.4.9T ließ noch vier Pixel stehen — auch die waren zu sehen.
+
+   Jetzt liegt das Loch **genau** auf dem Ziel. Der Radius wird **gemessen**,
+   nicht gesetzt: Eine Kachel hat 18 px, ein runder Knopf die Hälfte seiner
+   Breite. Ein fester Wert schnitte an einem von beiden die Ecken auf. */
 #tutLoch {
-  position: absolute; border-radius: 18px;
+  position: absolute;
   box-shadow: 0 0 0 9999px rgba(0, 0, 0, .82);
   transition: top .28s ease, left .28s ease, width .28s ease, height .28s ease;
 }
@@ -3955,7 +3958,7 @@ var APP_STAND = '2026-08-15'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.4.9T'; /* == VERSION == */
+var APP_VERSION = '2.4.9'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -5868,21 +5871,25 @@ function tutLochSetzen(ziel) {
   }
   hof.classList.remove('ohne-ziel');
   var r = el.getBoundingClientRect();
-  // Knapp: Gerade so viel, dass die Kante der Kachel und ihr Schatten nicht
-  // angeschnitten werden. Mehr wäre ein leuchtender Rahmen um sie herum
-  // (ADR 0067) — und der zöge den Blick stärker an als die Kachel selbst.
-  var luft = 4;
-  loch.style.top = (r.top - luft) + 'px';
-  loch.style.left = (r.left - luft) + 'px';
-  loch.style.width = (r.width + luft * 2) + 'px';
-  loch.style.height = (r.height + luft * 2) + 'px';
+  // **Keine Luft.** Das Loch liegt auf dem Ziel, nicht darum herum: Jeder
+  // Streifen unverdunkelten Grundes daneben ist ein leuchtender Rahmen, und
+  // der zieht den Blick stärker an als das Angeleuchtete selbst (ADR 0067).
+  //
+  // Der Radius kommt vom Ziel, nicht aus dem Stil des Lochs — eine Kachel hat
+  // 18 px, ein runder Knopf die Hälfte seiner Breite. Ein fester Wert schnitte
+  // an einem von beiden die Ecken auf.
+  loch.style.top = r.top + 'px';
+  loch.style.left = r.left + 'px';
+  loch.style.width = r.width + 'px';
+  loch.style.height = r.height + 'px';
+  loch.style.borderRadius = getComputedStyle(el).borderRadius || '0';
   // Zurück kommt das **Loch**, nicht das Ziel: Danach richtet sich das Gespann
   // aus, und es soll die angeleuchtete Fläche freihalten — nicht bloß das
   // Element darin. Sonst schneidet es genau um die Luft hinein.
   return {
-    top: r.top - luft, left: r.left - luft,
-    width: r.width + luft * 2, height: r.height + luft * 2,
-    bottom: r.bottom + luft, right: r.right + luft
+    top: r.top, left: r.left,
+    width: r.width, height: r.height,
+    bottom: r.bottom, right: r.right
   };
 }
 

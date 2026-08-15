@@ -70,10 +70,18 @@ fast schwarzen Grund war das ein Hauch. Auf den satten Farben seit ADR 0063 wurd
 ein **heller Rahmen** um die Kachel — und der zog den Blick stärker an als das, was er
 zeigen sollte.
 
-Jetzt: 4 px Luft, harte Kante, und der Radius ist der der Kachel (18 px statt 20). Der
-weiche Innenrand entfällt ganz — damit erledigt sich auch die Warnung aus ADR 0051, dass
-er dieselbe Deckung brauche wie der äußere Schatten. Was es nicht gibt, kann nicht blass
-stehenbleiben.
+Der erste Anlauf ließ 4 px stehen. **Auch die waren zu sehen** — auf einer satten Fläche
+ist jeder Streifen unverdunkelten Grundes ein Rahmen. Jetzt liegt das Loch **genau** auf
+dem Ziel: keine Luft, harte Kante.
+
+Und der Radius wird **gemessen**, nicht gesetzt (`getComputedStyle(el).borderRadius`).
+Eine Kachel hat 18 px, ein runder Knopf die Hälfte seiner Breite — ein fester Wert
+schnitte an einem von beiden die Ecken auf. Vorher fiel das nicht auf, weil die 22 px
+Luft ohnehin alles verwischten.
+
+Der weiche Innenrand entfällt ganz — damit erledigt sich auch die Warnung aus ADR 0051,
+dass er dieselbe Deckung brauche wie der äußere Schatten. Was es nicht gibt, kann nicht
+blass stehenbleiben.
 
 ## 5 · Die Blase bekommt einen Rand
 
@@ -91,5 +99,6 @@ stehenbleibt — sonst hätte der Zipfel keinen Rand oder einen doppelt so dicke
   `merkSternHtml()`, `merkBinden()`, `renderMerkzettel()`, `swAuskunftGelesen()`,
   Ansicht `merkzettel`.
 - Der Sicherungscode hat **elf** Felder statt zehn; sechs Suiten trugen die Zahl.
-- `luft` in `tutLochSetzen()` von 22 auf 4; der `inset`-Schatten des Lochs ist fort.
+- Die Luft in `tutLochSetzen()` ist fort (22 → 0), der `inset`-Schatten des Lochs auch,
+  und der Radius kommt jetzt vom Ziel. Neu: Abschnitt Z in `tutorial` (4 Prüfungen).
 - Neu: Abschnitt M in `grammatik` (13 Prüfungen).

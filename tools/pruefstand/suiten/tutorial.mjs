@@ -303,6 +303,49 @@ try {
     !q('#tutHof').classList.contains('ohne-ziel') &&
     (mitFarbe === 'transparent' || mitFarbe === 'rgba(0, 0, 0, 0)'), mitFarbe);
   tutEnde();
+
+  // ── Z · Das Loch liegt auf dem Ziel (ADR 0067) ───────────
+  // Jeder Streifen unverdunkelten Grundes neben dem Angeleuchteten ist ein
+  // leuchtender Rahmen — und der zieht den Blick stärker an als das, was er
+  // zeigen soll. Erst waren es 22 px, dann 4; jetzt sind es keine.
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  setTab('home');
+  tutStarten(false);
+  for (var zs = 0; zs < TUTORIAL.length; zs++) {
+    if (TUTORIAL[zs][1].indexOf('lernsets') !== -1) tutSchritt = zs;
+  }
+  tutZeichnen();
+  var ziel = q(TUTORIAL[tutSchritt][1]);
+  var loch = q('#tutLoch');
+  var zr = ziel.getBoundingClientRect();
+  var lr = loch.getBoundingClientRect();
+  pruefe('Z1 das Loch liegt genau auf dem Ziel',
+    Math.abs(lr.top - zr.top) < 1 && Math.abs(lr.left - zr.left) < 1 &&
+    Math.abs(lr.width - zr.width) < 1 && Math.abs(lr.height - zr.height) < 1,
+    [lr.top - zr.top, lr.left - zr.left, lr.width - zr.width, lr.height - zr.height]
+      .map(function (n) { return n.toFixed(1); }).join(' / '));
+  // Der Radius wird gemessen, nicht gesetzt: Eine Kachel hat 18 px.
+  pruefe('Z2 und trägt den Radius des Ziels',
+    getComputedStyle(loch).borderRadius === getComputedStyle(ziel).borderRadius,
+    getComputedStyle(loch).borderRadius + ' / ' + getComputedStyle(ziel).borderRadius);
+  // Ein runder Knopf bleibt rund — ein fester Wert schnitte ihm die Ecken auf.
+  for (var zk = 0; zk < TUTORIAL.length; zk++) {
+    if (TUTORIAL[zk][1] === '#menuKnopf') tutSchritt = zk;
+  }
+  tutZeichnen();
+  pruefe('Z3 ein runder Knopf bleibt rund',
+    getComputedStyle(q('#tutLoch')).borderRadius ===
+    getComputedStyle(q('#menuKnopf')).borderRadius,
+    getComputedStyle(q('#tutLoch')).borderRadius);
+  // **Kein weicher Innenrand mehr** — was es nicht gibt, kann nicht blass
+  // stehenbleiben (die Warnung aus ADR 0051 ist damit erledigt).
+  pruefe('Z4 der Schatten deckt nur nach außen',
+    getComputedStyle(q('#tutLoch')).boxShadow.indexOf('inset') === -1,
+    getComputedStyle(q('#tutLoch')).boxShadow);
+  tutEnde();
+  ansichtenZuruecksetzen();
+
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);
 }
