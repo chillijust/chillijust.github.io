@@ -123,7 +123,7 @@ try {
   pruefe('E3 Stufe 2 ist die blassere von beiden',
     parseFloat(getComputedStyle(pp[2].querySelector('svg')).opacity) <
     parseFloat(getComputedStyle(pp[3].querySelector('svg')).opacity));
-  pruefe('E4 Stufe 4 trägt --gold', farbe(pp[BOX_MAX]) === tokenFarbe('--gold'), farbe(pp[BOX_MAX]));
+  pruefe('E4 Stufe 4 trägt den Akzent', farbe(pp[BOX_MAX]) === tokenFarbe('--akzent'), farbe(pp[BOX_MAX]));
   pruefe('E5 der Strich trägt --line',
     getComputedStyle(pp[0]).backgroundColor === tokenFarbe('--line'),
     getComputedStyle(pp[0]).backgroundColor);

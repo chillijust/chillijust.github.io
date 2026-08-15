@@ -51,13 +51,18 @@
      das alte #8B93A1 mit 4,7 : 1 — auf den Chips darüber nur noch mit 4,3. */
   --dim: #939AA7;
   --ice: #8FB4EA;
-  --gold: #D2A24E;
-  --gold-ink: #14110A;
+  --akzent: #D2A24E;
+  --akzent-ink: #14110A;
   --good: #5FBF8F;
   --bad: #E07A6E;
   --glow: #1F1E1B;
   --lip: rgba(255, 255, 255, .035);
   --shade: rgba(0, 0, 0, .28);
+  /* Der Schatten der Figur steht als eigener Wert, nicht fest im Filter: Auf
+     dem fast schwarzen Grund darf er kräftig sein, auf einer satten Farbe wird
+     aus demselben Schwarz ein grauer Schleier — die Farbe wird entsättigt, und
+     das sieht nicht nach Schatten aus, sondern nach einem Fleck (ADR 0064). */
+  --figur-schatten: 0 6px 12px rgba(0, 0, 0, .4);
 }
 /* Ein Farbschema ist eine Palette, nicht zwei Achsen. «Dark» ist das :root
    darüber — es trägt kein Attribut, wie zuvor die Vorgabe keines trug. Die vier
@@ -90,14 +95,19 @@
      vier Paletten, nicht gegen die freundlichste. */
   --dim: #434851;
   --ice: #2D5AA0;
-  --gold: #765619;
-  --gold-ink: #FFFFFF;
+  /* Der Akzent selbst steht **je Schema** (ADR 0064): ein tiefer Ton derselben
+     Farbe wie der Grund. Was darauf steht, ist überall Weiß — jeder der vier
+     hält dafür über 6,5. */
+  --akzent-ink: #FFFFFF;
   --good: #266749;
   --bad: #9D3B34;
   --lip: rgba(255, 255, 255, .7);
   /* Etwas kräftiger als im dunklen Schema: Die Kachel soll sich abheben, und
      dazu trägt der Schatten bei, nicht nur die Helligkeit. */
   --shade: rgba(35, 39, 46, .10);
+  /* Kürzer, näher an der Figur und im Ton des Textes statt in reinem Schwarz.
+     Was nicht weit streut, kann auch nicht als Kasten stehenbleiben. */
+  --figur-schatten: 0 3px 5px rgba(35, 39, 46, .18);
   --blatt: var(--card);
 }
 
@@ -111,6 +121,7 @@
   --card-2: #E4D9BE;
   --line: #CEBC8D;
   --glow: #EEE8D8;
+  --akzent: #6E561B;
 }
 :root[data-schema="gruen"] {
   --bg: #A6E3C6;
@@ -118,6 +129,7 @@
   --card-2: #B9E9D3;
   --line: #85D6B0;
   --glow: #D6F0E4;
+  --akzent: #1B6A45;
 }
 :root[data-schema="blau"] {
   --bg: #A7C9E2;
@@ -125,6 +137,7 @@
   --card-2: #BAD5E8;
   --line: #87B4D4;
   --glow: #D6E5F0;
+  --akzent: #1F567D;
 }
 :root[data-schema="rosa"] {
   --bg: #E2A7D0;
@@ -132,6 +145,7 @@
   --card-2: #E8BADA;
   --line: #D487BD;
   --glow: #F0D6E8;
+  --akzent: #832165;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 /* Doppeltipp vergrößert nicht mehr; Aufziehen mit zwei Fingern bleibt möglich. */
@@ -236,13 +250,13 @@ h1 { font-family: Georgia, "Times New Roman", serif; font-size: 28px; margin: 0;
   height: 3px; border-radius: 999px; background: var(--line);
   margin: 14px 0 7px; overflow: hidden;
 }
-.kopf-fill { height: 100%; background: var(--gold); border-radius: 999px; transition: width .35s; }
+.kopf-fill { height: 100%; background: var(--akzent); border-radius: 999px; transition: width .35s; }
 .kopf-meta { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; min-height: 13px; }
 .kopf-label {
   font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.kopf-serie { color: var(--gold); }
+.kopf-serie { color: var(--akzent); }
 #saveNote {
   flex: none; font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
   color: var(--dim); display: inline-flex; align-items: center; gap: 4px;
@@ -345,7 +359,7 @@ body.unterwegs .netz-stand { font-size: 21px; }
   width: 18px; height: 2px; border-radius: 2px; background: currentColor;
   transition: transform .34s cubic-bezier(.4, 0, .2, 1), opacity .28s;
 }
-.burger[aria-expanded="true"], body.im-menu .burger { color: var(--gold); border-color: var(--gold); }
+.burger[aria-expanded="true"], body.im-menu .burger { color: var(--akzent); border-color: var(--akzent); }
 /* Einmal im Menü angekommen, bleiben die Striche unten — der Knopf zeigt dann
    die Chili oder, wenn die anderswo gebraucht wird, einen ruhenden Punkt. */
 .burger[aria-expanded="true"] .strich, body.im-menu .burger .strich {
@@ -360,9 +374,9 @@ body.unterwegs .netz-stand { font-size: 21px; }
   opacity: 0; transition: opacity .3s .2s;
   display: flex; align-items: center; justify-content: center;
 }
-.punkt .flamme { width: 20px; height: 20px; color: var(--gold); display: block; }
+.punkt .flamme { width: 20px; height: 20px; color: var(--akzent); display: block; }
 .flamme-aussen, .flamme-innen { transform-origin: 50% 88%; }
-.flamme-innen { color: var(--gold-ink); opacity: .55; }
+.flamme-innen { color: var(--akzent-ink); opacity: .55; }
 /* Geflackert wird nur, wo Gold steht: im Knopf und auf der letzten Stufe. Die
    kleineren Flammen der Zwischenstufen stehen still — sonst zappelt eine ganze
    Reihe, und die goldene fiele nicht mehr auf. */
@@ -421,15 +435,15 @@ body.wissen-offen #wissenPanel { grid-template-rows: 1fr; opacity: 1; pointer-ev
   color: var(--text); font-size: 15px; text-align: left;
 }
 .menueintrag .icon { color: var(--dim); }
-.menueintrag.active { color: var(--gold); background: var(--card-2); }
-.menueintrag.active .icon { color: var(--gold); }
+.menueintrag.active { color: var(--akzent); background: var(--card-2); }
+.menueintrag.active .icon { color: var(--akzent); }
 
 /* Der Auswahlknopf steht neben dem Menü und öffnet dasselbe Aufklapp-Panel.
    Weicht die Auswahl vom Regelfall ab, färbt er sich wie ein gesetzter Chip. */
-#filterKnopf.aktiv { border-color: var(--gold); color: var(--gold); }
+#filterKnopf.aktiv { border-color: var(--akzent); color: var(--akzent); }
 /* Der Tafelknopf zeigt nicht «abweichend», sondern «hier stehen Sie». */
 #tafelKnopf.aktiv { border-color: var(--ice); color: var(--ice); }
-#filterKnopf[aria-expanded="true"] { border-color: var(--gold); color: var(--gold); }
+#filterKnopf[aria-expanded="true"] { border-color: var(--akzent); color: var(--akzent); }
 /* Aufgeklappt weicht das Symbol nach unten und die Chili nimmt seinen Platz —
    dieselbe Bewegung wie beim Menü, nur mit einem Zeichen statt drei Strichen.
    Trägt die Figur gerade eine Ansicht, bleibt ein ruhender Punkt zurück, damit
@@ -455,7 +469,7 @@ body.wissen-offen #wissenPanel { grid-template-rows: 1fr; opacity: 1; pointer-ev
    der Kachel. */
 #wissenHuelle { position: relative; display: flex; }
 #wissenKnopf { overflow: visible; z-index: 40; }
-#wissenKnopf[aria-expanded="true"] { border-color: var(--gold); color: var(--gold); }
+#wissenKnopf[aria-expanded="true"] { border-color: var(--akzent); color: var(--akzent); }
 #wissenKnopf[aria-expanded="true"] .knopfzeichen { transform: translateY(26px); opacity: 0; }
 #wissenKnopf[aria-expanded="true"] .punkt { opacity: .8; }
 #wissenKnopf[aria-expanded="true"].mit-chili .punkt { opacity: 0; transition-delay: 0s; }
@@ -509,7 +523,7 @@ body.filter-offen .kachel-knopf { opacity: 0; pointer-events: none; }
 .abc-kachel.s1::after { transform: scaleX(.25); background: var(--dim); }
 .abc-kachel.s2::after { transform: scaleX(.5); background: var(--ice); opacity: .6; }
 .abc-kachel.s3::after { transform: scaleX(.75); background: var(--ice); }
-.abc-kachel.s4::after { transform: scaleX(1); background: var(--gold); }
+.abc-kachel.s4::after { transform: scaleX(1); background: var(--akzent); }
 /* Zwei Klassen, damit die Regel die allgemeine .options-Regel schlägt — die
    steht weiter unten im Stylesheet und gewönne sonst bei gleicher Stärke. */
 .options.abc-optionen { grid-template-columns: 1fr 1fr; }
@@ -528,7 +542,7 @@ body.filter-offen .kachel-knopf { opacity: 0; pointer-events: none; }
 }
 .empfehlung:active { transform: scale(.99); }
 .empf-text { flex: 1; min-width: 0; }
-.empf-label { display: block; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); margin-bottom: 5px; }
+.empf-label { display: block; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--akzent); margin-bottom: 5px; }
 .empf-titel { display: block; font-family: Georgia, serif; font-size: 19px; line-height: 1.25; }
 .empf-note { display: block; font-size: 13px; color: var(--dim); margin-top: 5px; line-height: 1.4; }
 
@@ -560,7 +574,7 @@ body.filter-offen .kachel-knopf { opacity: 0; pointer-events: none; }
    gelesen zu werden — nach ihm richtet sich die Antwort. */
 .wort-partner { color: var(--dim); font-size: .72em; }
 .kachel-stand { margin-top: auto; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
-.kachel-stand.faellig { color: var(--gold); }
+.kachel-stand.faellig { color: var(--akzent); }
 .kachel .icon { width: 22px; height: 22px; color: var(--ice); }
 
 .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
@@ -572,7 +586,7 @@ select {
   padding: 10px 16px; min-height: 44px; border-radius: 999px; border: 1px solid var(--line);
   background: var(--card); color: var(--dim); font-size: 13px; cursor: pointer;
 }
-.chip.active { border-color: var(--gold); color: var(--gold); }
+.chip.active { border-color: var(--akzent); color: var(--akzent); }
 
 .paket { margin: -4px 0 14px; }
 /* Der Fortschritt einer Sammlung: ein Zeichen je Wort. Was noch nicht
@@ -597,7 +611,7 @@ select {
 .pp.s1 svg { width: 6px;   height: 8px;  color: var(--dim); }
 .pp.s2 svg { width: 7.5px; height: 10px; opacity: .6; }
 .pp.s3 svg { width: 9px;   height: 12px; }
-.pp.s4 svg { width: 11px;  height: 15px; color: var(--gold); }
+.pp.s4 svg { width: 11px;  height: 15px; color: var(--akzent); }
 /* Vier Takte, damit eine Reihe goldener Flammen lebt statt im Gleichschritt zu
    pulsen. Negative Verzögerung: Sie brennen von Anfang an, nur versetzt. */
 .pp:nth-child(4n+1) .flamme-aussen { animation-delay: -.4s; }
@@ -607,7 +621,7 @@ select {
 .pp:nth-child(4n+2) .flamme-innen { animation-delay: -.8s; }
 .pp:nth-child(4n+3) .flamme-innen { animation-delay: -.1s; }
 .paket-text { font-size: 11px; color: var(--dim); margin: 0; }
-.paket-frei { color: var(--gold); }
+.paket-frei { color: var(--akzent); }
 
 /* Der Lesemodus im Freestyle: über dem Thema, volle Breite, damit er auffällt
    ohne zu drängen. Eingeschaltet trägt er Gold — dieselbe Sprache wie ein
@@ -626,9 +640,9 @@ select {
   background: var(--card); color: var(--dim); font-size: 11px; text-align: center;
 }
 .lese-schalter.an {
-  border-color: var(--gold); color: var(--gold); background: var(--card);
+  border-color: var(--akzent); color: var(--akzent); background: var(--card);
 }
-.lese-schalter.an .ls-zahl { background: var(--gold); color: var(--gold-ink); }
+.lese-schalter.an .ls-zahl { background: var(--akzent); color: var(--akzent-ink); }
 
 .leer {
   border: 1px dashed var(--line); border-radius: 16px; padding: 28px 20px; text-align: center;
@@ -665,7 +679,7 @@ select {
 .card.mit-knopf .card-meta { padding-right: 44px; }
 .boxdots { display: flex; gap: 4px; }
 .boxdots span { width: 6px; height: 6px; border-radius: 50%; border: 1px solid var(--line); }
-.boxdots span.on { background: var(--gold); border-color: var(--gold); }
+.boxdots span.on { background: var(--akzent); border-color: var(--akzent); }
 .card-theme { text-transform: uppercase; letter-spacing: .12em; }
 
 .task-label { font-size: 11px; text-transform: uppercase; letter-spacing: .14em; color: var(--dim); margin: 0 0 6px; }
@@ -687,7 +701,7 @@ select {
   font-size: 15px; color: var(--dim);
 }
 .gv-trenner { width: 4px; height: 4px; border-radius: 50%; background: var(--line); }
-.gv-verlangt { font-size: 17px; color: var(--gold); font-weight: 600; }
+.gv-verlangt { font-size: 17px; color: var(--akzent); font-weight: 600; }
 .gv-verlangt .cyr { font-size: 19px; }
 
 /* Abschluss einer Power-Runde: was aus jedem Wort geworden ist. */
@@ -721,7 +735,7 @@ select {
   width: 32px; height: 42px; border-bottom: 2px solid var(--line);
   font-size: 24px; display: flex; align-items: center; justify-content: center;
 }
-.slot.filled { border-bottom-color: var(--gold); }
+.slot.filled { border-bottom-color: var(--akzent); }
 
 .tiles { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
 .tile {
@@ -739,7 +753,7 @@ select {
 .built-placeholder { font-size: 12px; color: var(--dim); }
 .built-word {
   font-size: 17px; min-height: 44px; padding: 8px 12px; border-radius: 8px;
-  background: var(--card-2); border: 1px solid var(--gold); color: var(--text);
+  background: var(--card-2); border: 1px solid var(--akzent); color: var(--text);
 }
 button.built-word { cursor: pointer; }
 button.built-word:active { transform: scale(.95); }
@@ -756,7 +770,7 @@ button.built-word:active { transform: scale(.95); }
   padding: 13px 14px; min-height: 48px; border-radius: 12px; border: 1px solid var(--line);
   background: var(--card-2); color: var(--text); font-size: 16px; cursor: pointer;
 }
-.option.picked { border-color: var(--gold); color: var(--gold); background: var(--card); }
+.option.picked { border-color: var(--akzent); color: var(--akzent); background: var(--card); }
 .option.right { border-color: var(--good); color: var(--good); }
 .option.wrong { border-color: var(--bad); color: var(--bad); }
 .option.muted { opacity: .35; }
@@ -784,7 +798,7 @@ button.built-word:active { transform: scale(.95); }
 .wissen-zeile { margin: 0 0 6px; font-size: 13px; color: var(--dim); }
 .wissen-regel {
   margin: 0; font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
-  color: var(--gold);
+  color: var(--akzent);
 }
 .wissen-regel.offen { color: var(--dim); letter-spacing: 0; text-transform: none; font-size: 12px; }
 .wissen-warum { margin: 6px 0 0; font-size: 13px; line-height: 1.5; }
@@ -831,11 +845,11 @@ button.built-word:active { transform: scale(.95); }
   background: var(--card-2); font-size: 13px;
 }
 .gram-fall { color: var(--text); }
-.gram-was { color: var(--gold); font-size: 12px; }
+.gram-was { color: var(--akzent); font-size: 12px; }
 .gram-bsp { color: var(--dim); }
 .gram-merk {
   margin: 0; padding: 11px 13px; border-radius: 10px;
-  border-left: 3px solid var(--gold); background: var(--card-2);
+  border-left: 3px solid var(--akzent); background: var(--card-2);
   font-family: Georgia, serif; font-size: 15px; line-height: 1.5;
 }
 .gram-fuss { text-align: left; margin-top: 12px; }
@@ -843,7 +857,7 @@ button.built-word:active { transform: scale(.95); }
 /* Was die App über sich weiß, steht rechts wie ein Schalter — nur ist es
    keiner, sondern eine Auskunft. */
 .app-wert {
-  flex: none; font-size: 14px; color: var(--gold);
+  flex: none; font-size: 14px; color: var(--akzent);
   font-family: Georgia, serif; text-align: right;
 }
 
@@ -859,7 +873,7 @@ button.built-word:active { transform: scale(.95); }
 /* Wartet eine Fassung, ist der Knopf kein Angebot mehr, sondern die Handlung —
    also trägt er Gold. Beim Laden behält er es: Es ist derselbe Vorgang. */
 .sw-knopf.sw-bereit, .sw-knopf.sw-laedt {
-  background: var(--gold); border-color: var(--gold); color: var(--gold-ink);
+  background: var(--akzent); border-color: var(--akzent); color: var(--akzent-ink);
 }
 /* **Eine Anzeige, zwei Farben.** Erst waren es zwei Gestalten — Ring beim
    Suchen, Balken beim Laden. Das war ein Unterschied zu viel: Beide Male
@@ -867,11 +881,11 @@ button.built-word:active { transform: scale(.95); }
    worauf. Der Ring nimmt darum auf Gold die Farbe der Schrift darauf. */
 .sw-ring {
   width: 17px; height: 17px; border-radius: 50%;
-  border: 2px solid var(--line); border-top-color: var(--gold);
+  border: 2px solid var(--line); border-top-color: var(--akzent);
   animation: swDreht .8s linear infinite;
 }
 .sw-knopf.sw-laedt .sw-ring {
-  border-color: rgba(255, 255, 255, .35); border-top-color: var(--gold-ink);
+  border-color: rgba(255, 255, 255, .35); border-top-color: var(--akzent-ink);
 }
 @keyframes swDreht { to { transform: rotate(360deg); } }
 /* Wer keine Bewegung will, bekommt trotzdem eine Anzeige — sie steht dann
@@ -924,7 +938,7 @@ button.built-word:active { transform: scale(.95); }
 .reko .task-label { margin: 0 0 6px; }
 .reko-vorlage {
   margin: 0 0 10px; font-family: Georgia, serif; font-size: 22px;
-  color: var(--gold); letter-spacing: .01em;
+  color: var(--akzent); letter-spacing: .01em;
 }
 .reko textarea { margin: 0; }
 
@@ -932,7 +946,7 @@ button.built-word:active { transform: scale(.95); }
    kein Zeichen hineingehört — «ь oder nichts» ist eine echte Frage. */
 .ortho-luecke {
   display: inline-block; min-width: .62em; margin: 0 .05em;
-  border-bottom: 2px solid var(--gold);
+  border-bottom: 2px solid var(--akzent);
 }
 
 /* Gemeistert — eine Zeile, kein Zwischenbildschirm. Sie soll auffallen, ohne
@@ -940,11 +954,11 @@ button.built-word:active { transform: scale(.95); }
 .meister {
   display: flex; align-items: center; gap: 10px; margin-top: 14px;
   padding: 11px 14px; border-radius: 12px;
-  border: 1px solid var(--gold); background: var(--card-2);
+  border: 1px solid var(--akzent); background: var(--card-2);
   animation: meisterAuf .42s cubic-bezier(.2, .9, .3, 1);
 }
-.meister .icon { width: 19px; height: 19px; color: var(--gold); flex: none; }
-.meister strong { display: block; font-size: 14px; color: var(--gold); }
+.meister .icon { width: 19px; height: 19px; color: var(--akzent); flex: none; }
+.meister strong { display: block; font-size: 14px; color: var(--akzent); }
 .meister-wort { display: block; font-size: 15px; margin-top: 2px; }
 .meister-note {
   display: block; font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
@@ -973,7 +987,7 @@ button.built-word:active { transform: scale(.95); }
    statt der grauen Linie. */
 .lese-wink {
   position: relative; margin-top: 16px; padding: 12px 14px; border-radius: 12px;
-  border: 1px solid var(--gold); background: var(--card-2); text-align: left;
+  border: 1px solid var(--akzent); background: var(--card-2); text-align: left;
 }
 /* Der Schließknopf sitzt in der Ecke und greift über den Rand hinaus, damit
    die Trefferfläche 44 px erreicht, ohne den Text zu verdrängen. */
@@ -983,9 +997,9 @@ button.built-word:active { transform: scale(.95); }
   background: none; border: 0; color: var(--dim); cursor: pointer;
 }
 .lw-zu .icon { width: 15px; height: 15px; }
-.lw-zu:active { color: var(--gold); }
+.lw-zu:active { color: var(--akzent); }
 .lese-wink strong { padding-right: 32px; }
-.lese-wink strong { display: block; font-size: 14px; color: var(--gold); }
+.lese-wink strong { display: block; font-size: 14px; color: var(--akzent); }
 .lw-note { display: block; font-size: 12px; color: var(--dim); margin-top: 5px; }
 .lw-los { margin-top: 12px; width: 100%; }
 
@@ -999,7 +1013,7 @@ button.built-word:active { transform: scale(.95); }
 .lf-zeichen { display: block; font-size: 20px; margin-top: 4px; }
 .lf-note { display: block; font-size: 12px; color: var(--dim); margin-top: 5px; }
 
-.chili { display: block; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .35)); }
+.chili { display: block; filter: drop-shadow(var(--figur-schatten)); }
 .chili.gross { width: 104px; height: 104px; margin: 0 auto 16px; }
 .chili.klein { width: 76px; height: 76px; flex: none; margin: 0; }
 .chili.winzig { width: 30px; height: 30px; flex: none; }
@@ -1013,7 +1027,7 @@ button.built-word:active { transform: scale(.95); }
 body.chili-steht #chiliBuehne { visibility: visible; }
 #chiliFigur {
   width: 100%; height: 100%; display: block;
-  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, .4));
+  filter: drop-shadow(var(--figur-schatten));
 }
 /* Der Sprung: ducken, Bogen, federn — kurz und schnell. */
 #chiliFigur.springt { animation: chiliSprung .23s cubic-bezier(.3, .85, .4, 1); }
@@ -1040,13 +1054,13 @@ body.chili-steht #chiliBuehne { visibility: visible; }
 
 /* Die Chili spricht: Blase oben, Figur darunter links, Zipfel dazwischen. */
 .sprechblase {
-  position: relative; background: var(--card); border: 1px solid var(--gold);
+  position: relative; background: var(--card); border: 1px solid var(--akzent);
   border-radius: 20px; padding: 18px 18px 16px; text-align: left;
   box-shadow: inset 0 1px 0 var(--lip), 0 8px 20px -14px var(--shade);
 }
 .sprechblase::after {
   content: ''; position: absolute; left: 34px; bottom: -8px; width: 15px; height: 15px;
-  background: var(--card); border-right: 1px solid var(--gold); border-bottom: 1px solid var(--gold);
+  background: var(--card); border-right: 1px solid var(--akzent); border-bottom: 1px solid var(--akzent);
   transform: rotate(45deg);
 }
 .sprechblase .fact-label { text-align: left; margin: 0 0 8px; }
@@ -1192,8 +1206,8 @@ body.tut-offen { overflow: hidden; }
    Wer die App kennt, soll ihn übersehen dürfen, ohne ihn suchen zu müssen. */
 .tut-knopf {
   display: block; width: 40%; margin: 22px 0 4px auto; padding: 13px 10px;
-  background: none; border: 1px dashed var(--gold); border-radius: 14px;
-  color: var(--gold); font: inherit; font-size: 14px; cursor: pointer;
+  background: none; border: 1px dashed var(--akzent); border-radius: 14px;
+  color: var(--akzent); font: inherit; font-size: 14px; cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
 /* Oben ist er ein Angebot, unten eine Auskunft. Dieselbe Farbe, aber
@@ -1201,7 +1215,7 @@ body.tut-offen { overflow: hidden; }
    ihn nicht überlesen. */
 .tut-knopf.oben {
   margin: 0 0 16px auto; border-style: solid;
-  background: var(--gold); color: var(--gold-ink);
+  background: var(--akzent); color: var(--akzent-ink);
 }
 
 /* Was die Chili nach einer Auflösung sagt — jetzt sagt sie es selbst (ADR
@@ -1246,8 +1260,8 @@ body.tut-offen { overflow: hidden; }
 .fakt-fuss { display: flex; align-items: center; gap: 12px; margin: 12px 0 0 16px; }
 .fakt-fuss .sternbtn { margin-left: auto; }
 
-.jubel { border-color: var(--gold); }
-.jubel .word { color: var(--gold); }
+.jubel { border-color: var(--akzent); }
+.jubel .word { color: var(--akzent); }
 .jubel .hint { margin-top: 10px; }
 .fact-kopf { display: flex; align-items: center; gap: 10px; }
 .fact-kopf .fact-label { flex: 1; text-align: left; margin-bottom: 0; }
@@ -1256,7 +1270,7 @@ body.tut-offen { overflow: hidden; }
   display: inline-flex; align-items: center; justify-content: center;
   background: none; border: none; color: var(--dim); cursor: pointer;
 }
-.sternbtn.an { color: var(--gold); }
+.sternbtn.an { color: var(--akzent); }
 .sternbtn:active { transform: scale(.92); }
 
 .faktenliste { display: flex; flex-direction: column; gap: 10px; }
@@ -1268,7 +1282,7 @@ body.tut-offen { overflow: hidden; }
 .faktzeile.neu { border-style: dashed; opacity: .7; }
 .fakttext { flex: 1; font-size: 14px; line-height: 1.5; }
 .faktzahl { display: block; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); margin-top: 6px; }
-.fact-label { display: block; font-family: Georgia, serif; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
+.fact-label { display: block; font-family: Georgia, serif; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--akzent); margin-bottom: 10px; }
 .fact-text { font-size: 17px; line-height: 1.55; margin: 0; text-align: left; }
 
 input[type="text"] {
@@ -1328,7 +1342,7 @@ input.err, textarea.err { border-color: var(--bad); }
   cursor: pointer; font-weight: 600; border: 1px solid transparent;
 }
 .btn:disabled { opacity: .4; }
-.btn.primary { background: var(--gold); color: var(--gold-ink); }
+.btn.primary { background: var(--akzent); color: var(--akzent-ink); }
 .btn.ghost { background: none; border-color: var(--line); color: var(--dim); }
 .btn.danger { background: none; border-color: var(--bad); color: var(--bad); }
 
@@ -1337,7 +1351,7 @@ input.err, textarea.err { border-color: var(--bad); }
   min-width: 44px; min-height: 44px; flex: none;
   display: flex; align-items: center; justify-content: center;
 }
-.gearbtn.active { color: var(--gold); }
+.gearbtn.active { color: var(--akzent); }
 
 .setting {
   display: flex; align-items: center; gap: 14px; padding: 14px 0;
@@ -1358,8 +1372,8 @@ input.err, textarea.err { border-color: var(--bad); }
   background: var(--dim); transition: transform .15s, background .15s;
 }
 .switch:disabled { opacity: .35; cursor: default; }
-.switch.on { border-color: var(--gold); background: rgba(210, 162, 78, .18); }
-.switch.on .knob { transform: translateX(20px); background: var(--gold); }
+.switch.on { border-color: var(--akzent); background: rgba(210, 162, 78, .18); }
+.switch.on .knob { transform: translateX(20px); background: var(--akzent); }
 /* Die Reiterleiste klebt oben unter dem Kopf: Sie sagt, wo man ist, und das
    soll sie auch nach dem Scrollen noch tun. Die Knöpfe sind dieselbe Gestalt
    wie Menü- und Auswahlknopf — runder Rand, gedämpfte Fläche, aktiv in Gold. */
@@ -1383,7 +1397,7 @@ body.unterwegs .reiter { top: 62px; }
   font-size: 12.5px; cursor: pointer; white-space: nowrap;
   transition: color .18s, border-color .18s, background .18s;
 }
-.reiter-knopf.active { border-color: var(--gold); color: var(--gold); background: var(--card); }
+.reiter-knopf.active { border-color: var(--akzent); color: var(--akzent); background: var(--card); }
 .reiter-knopf:active { transform: scale(.96); }
 
 /* Das Fenster über der Bahn. Es schneidet ab, was links und rechts steht —
@@ -1401,7 +1415,7 @@ body.unterwegs .reiter { top: 62px; }
 /* Die Einstellungen sitzen auf demselben Blatt wie das Menü: gerundete Karte,
    Goldrand, eigene Fläche über dem Grund. */
 .blattkarte {
-  background: var(--blatt); border: 1px solid var(--gold); border-radius: 18px;
+  background: var(--blatt); border: 1px solid var(--akzent); border-radius: 18px;
   padding: 4px 16px 8px; min-height: 34vh;
   box-shadow: inset 0 1px 0 var(--lip), 0 12px 26px var(--shade);
 }
@@ -1423,7 +1437,7 @@ body.unterwegs .reiter { top: 62px; }
 .card .word.luecke-satzfrage { font-size: 24px; line-height: 1.35; }
 .luecke-de { margin: 6px 0 0; font-size: 14px; color: var(--dim); text-align: center; }
 .luecke-satz { margin: 8px 0 0; font-size: 16px; }
-.backup-note.warnung { color: var(--text); border-left: 2px solid var(--gold); padding-left: 10px; }
+.backup-note.warnung { color: var(--text); border-left: 2px solid var(--akzent); padding-left: 10px; }
 .zaehler { flex: none; display: flex; align-items: center; gap: 2px; }
 .zaehler-taste {
   flex: none; width: 44px; height: 44px; padding: 0; border-radius: 12px;
@@ -1457,7 +1471,7 @@ body.unterwegs .reiter { top: 62px; }
   min-width: 27px; min-height: 44px; padding: 9px 3px; border-radius: 8px; font-size: 17px;
   border: 1px solid var(--line); background: var(--card); color: var(--text); cursor: pointer;
 }
-.key:active { background: var(--gold); color: var(--gold-ink); }
+.key:active { background: var(--akzent); color: var(--akzent-ink); }
 .key.wide { min-width: 46px; font-size: 14px; }
 /* Die Leertaste steht allein in der letzten Reihe — breit und mittig, wie man
    es von jeder Tastatur kennt. Der Daumen trifft sie, ohne hinzusehen. */
@@ -1468,9 +1482,9 @@ body.unterwegs .reiter { top: 62px; }
   background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; text-align: center;
   box-shadow: inset 0 1px 0 var(--lip), 0 6px 18px -12px var(--shade);
 }
-.stat.accent { border-color: var(--gold); }
+.stat.accent { border-color: var(--akzent); }
 .stat-value { display: block; font-size: 25px; font-weight: 600; font-family: Georgia, serif; }
-.stat.accent .stat-value { color: var(--gold); }
+.stat.accent .stat-value { color: var(--akzent); }
 .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--dim); }
 
 h2 { font-family: Georgia, serif; font-size: 16px; margin: 24px 0 12px; font-weight: 600; }
@@ -1513,7 +1527,7 @@ h2 { font-family: Georgia, serif; font-size: 16px; margin: 24px 0 12px; font-wei
 .boxstat { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
 .boxbar-wrap { height: 90px; width: 100%; display: flex; align-items: flex-end; justify-content: center; }
 .boxbar { width: 55%; background: var(--ice); border-radius: 5px 5px 0 0; min-height: 4px; opacity: .85; }
-.boxbar.gold { background: var(--gold); opacity: 1; }
+.boxbar.gold { background: var(--akzent); opacity: 1; }
 .boxnum { font-size: 13px; font-weight: 600; }
 .boxlabel { font-size: 10px; color: var(--dim); }
 
@@ -1521,7 +1535,7 @@ h2 { font-family: Georgia, serif; font-size: 16px; margin: 24px 0 12px; font-wei
 .theme-row { display: grid; grid-template-columns: 112px 1fr 46px; gap: 8px; align-items: center; font-size: 12px; }
 .theme-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--dim); }
 .theme-bar { height: 6px; background: var(--card); border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
-.theme-fill { height: 100%; background: var(--gold); }
+.theme-fill { height: 100%; background: var(--akzent); }
 .theme-count { text-align: right; color: var(--dim); }
 
 .backup-note { font-size: 12px; color: var(--dim); margin: 0 0 4px; }
@@ -1563,7 +1577,7 @@ textarea.fliess { font-family: inherit; word-break: normal; line-height: 1.5; ba
 .tkart.feature { border-color: var(--ice); color: var(--ice); }
 .tksenden {
   flex: none; min-height: 44px; display: inline-flex; align-items: center; padding: 0 14px;
-  border-radius: 10px; border: 1px solid var(--gold); background: var(--gold); color: var(--gold-ink);
+  border-radius: 10px; border: 1px solid var(--akzent); background: var(--akzent); color: var(--akzent-ink);
   font-size: 13px; text-decoration: none;
 }
 .tkzeile.gesendet .tksenden { background: none; color: var(--dim); border-color: var(--line); }
@@ -1585,10 +1599,10 @@ textarea.fliess { font-family: inherit; word-break: normal; line-height: 1.5; ba
 #meldeKnopf:active { transform: scale(.93); }
 body.melden-offen #meldeKnopf { opacity: 0; pointer-events: none; transform: scale(.8); }
 /* Ein liegen gebliebener Entwurf zeigt sich am Knopf — sonst wäre er vergessen. */
-#meldeKnopf.hat-entwurf { border-color: var(--gold); color: var(--gold); }
+#meldeKnopf.hat-entwurf { border-color: var(--akzent); color: var(--akzent); }
 #meldeKnopf.hat-entwurf::after {
   content: ''; position: absolute; top: 6px; right: 6px;
-  width: 8px; height: 8px; border-radius: 50%; background: var(--gold);
+  width: 8px; height: 8px; border-radius: 50%; background: var(--akzent);
 }
 
 /* Das Jubelfenster liegt über allem, auch über dem Meldeblatt: Es kommt selten
@@ -1609,7 +1623,7 @@ body.jubel-offen #jubelHof { opacity: 1; }
 #jubelBlatt[aria-hidden="true"] { display: none; }
 .jubel-karte {
   pointer-events: auto; width: 100%; max-width: 340px; text-align: center;
-  background: var(--blatt); border: 1px solid var(--gold); border-radius: 20px;
+  background: var(--blatt); border: 1px solid var(--akzent); border-radius: 20px;
   padding: 22px 20px 18px;
   box-shadow: inset 0 1px 0 var(--lip), 0 18px 40px var(--shade);
   transform: scale(.9); opacity: 0;
@@ -1657,7 +1671,7 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
   background: none; border: 0; border-top: 1px solid var(--line);
   color: var(--ice); font: inherit; font-size: 13px; cursor: pointer;
 }
-.blatt-link:active { color: var(--gold); }
+.blatt-link:active { color: var(--akzent); }
 
 .bezug {
   display: flex; align-items: center; gap: 12px;
@@ -1671,13 +1685,13 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
 }
 .bezug-kasten::after {
   content: ''; width: 11px; height: 6px; margin-top: -3px;
-  border-left: 2px solid var(--gold-ink); border-bottom: 2px solid var(--gold-ink);
+  border-left: 2px solid var(--akzent-ink); border-bottom: 2px solid var(--akzent-ink);
   transform: rotate(-45deg) scale(.6); opacity: 0; transition: opacity .15s, transform .15s;
 }
-.bezug input:checked + .bezug-kasten { background: var(--gold); border-color: var(--gold); }
+.bezug input:checked + .bezug-kasten { background: var(--akzent); border-color: var(--akzent); }
 .bezug input:checked + .bezug-kasten::after { opacity: 1; transform: rotate(-45deg) scale(1); }
 .bezug-text { font-size: 14px; color: var(--dim); }
-.bezug input:checked ~ .bezug-text strong { color: var(--gold); }
+.bezug input:checked ~ .bezug-text strong { color: var(--akzent); }
 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
@@ -12372,7 +12386,7 @@ var DONUT_R = 42;
 var DONUT_U = 2 * Math.PI * DONUT_R;
 
 // Die Stufenfarben — dieselben wie bei den Fortschrittspunkten.
-var STUFEN_FARBE = ['var(--line)', 'var(--dim)', 'var(--ice);opacity:.6', 'var(--ice)', 'var(--gold)'];
+var STUFEN_FARBE = ['var(--line)', 'var(--dim)', 'var(--ice);opacity:.6', 'var(--ice)', 'var(--akzent)'];
 
 function donut(teile, wert, text, klein) {
   var summe = 0;
@@ -12676,7 +12690,7 @@ function renderBilanzDetail() {
       else gesperrt++;
     });
     var st = [
-      { wert: sitzt, farbe: 'var(--gold)', name: 'Sitzt' },
+      { wert: sitzt, farbe: 'var(--akzent)', name: 'Sitzt' },
       { wert: offen, farbe: 'var(--ice)', name: 'Freigeschaltet, noch offen' },
       { wert: gesperrt, farbe: 'var(--line)', name: 'Noch gesperrt' }
     ];
@@ -12718,7 +12732,7 @@ function renderBilanzDetail() {
   if (bilanzDetail === 'serie') {
     var jetzt = state.streak, best = state.bestStreak;
     html += donut([
-      { wert: jetzt, farbe: 'var(--gold)' },
+      { wert: jetzt, farbe: 'var(--akzent)' },
       { wert: Math.max(0, best - jetzt), farbe: 'var(--line)' }
     ], jetzt, best ? 'von ' + best + ' in Folge' : 'in Folge');
     html += '<p class="detail-fuss">Die Serie zählt richtige Antworten hintereinander und ' +

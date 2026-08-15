@@ -240,7 +240,7 @@ try {
     getComputedStyle(knopf).backgroundColor ===
       (function () {
         var d = document.createElement('span');
-        d.style.color = getComputedStyle(document.documentElement).getPropertyValue('--gold').trim();
+        d.style.color = getComputedStyle(document.documentElement).getPropertyValue('--akzent').trim();
         document.body.appendChild(d);
         var f = getComputedStyle(d).color;
         d.remove();
@@ -269,7 +269,7 @@ try {
     var farbe = getComputedStyle(knopf.querySelector('.sw-ring')).borderTopColor;
     var d = document.createElement('span');
     d.style.color = getComputedStyle(document.documentElement)
-      .getPropertyValue('--gold-ink').trim();
+      .getPropertyValue('--akzent-ink').trim();
     document.body.appendChild(d);
     var soll = getComputedStyle(d).color;
     d.remove();

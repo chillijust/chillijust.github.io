@@ -534,7 +534,7 @@ try {
   pruefe('P9 sie sind gezeichnet, nicht getippt',
     flammen.every(function (f) { return f.tagName.toLowerCase() === 'svg'; }));
   pruefe('P10 und golden', getComputedStyle(flammen[0]).color ===
-    getComputedStyle(document.documentElement).getPropertyValue('--gold').trim() ||
+    getComputedStyle(document.documentElement).getPropertyValue('--akzent').trim() ||
     getComputedStyle(flammen[0]).color.indexOf('rgb') === 0,
     getComputedStyle(flammen[0]).color);
   pruefe('P11 sie flackern', (function () {

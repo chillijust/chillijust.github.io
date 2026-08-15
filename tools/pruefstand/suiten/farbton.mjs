@@ -130,7 +130,11 @@ try {
   // ── D · Nur die Flächen wandern ───────────────────────────
   setze('classic');
   var neutral = {};
-  ['--text', '--dim', '--gold', '--good', '--bad', '--ice'].forEach(function (v) {
+  // **Der Akzent gehört nicht mehr dazu** (ADR 0064): Er ist seit 2.4.6 ein
+  // tiefer Ton derselben Farbe wie der Grund und wandert darum mit. Schrift und
+  // **Signal**farben stehen weiter einmal für alle — sonst hieße «richtig» auf
+  // Rosa etwas anderes als auf Grün, und das wäre eine Aussage, keine Zierde.
+  ['--text', '--dim', '--good', '--bad', '--ice'].forEach(function (v) {
     neutral[v] = stil(v);
   });
   pruefe('D1 Schrift und Signalfarben sind in allen hellen Schemata gleich',
@@ -138,6 +142,32 @@ try {
       setze(f);
       return Object.keys(neutral).every(function (v) { return stil(v) === neutral[v]; });
     }));
+  // Der Akzent dagegen **muss** wandern — ein Schema, das ihn vom Nachbarn
+  // erbt, hätte ihn vergessen.
+  var akzente = HELL.map(function (f) { setze(f); return stil('--akzent'); });
+  pruefe('D1b der Akzent wandert dagegen mit',
+    akzente.filter(function (a, i) { return akzente.indexOf(a) === i; }).length === HELL.length,
+    akzente.join(' '));
+  // Und er trägt kleine Schrift: Etiketten, Serie, Stand einer Kachel.
+  var akzMin = 99, akzWo = '';
+  HELL.forEach(function (f) {
+    setze(f);
+    ['--bg', '--card', '--card-2'].forEach(function (fl) {
+      var k = kontrast(stil('--akzent'), stil(fl));
+      if (k < akzMin) { akzMin = k; akzWo = f + ' auf ' + fl; }
+    });
+  });
+  pruefe('D1c und hält überall AA', akzMin >= 4.5, akzMin.toFixed(2) + ' bei ' + akzWo);
+  // Was auf ihm steht, muss auch lesbar sein — er ist an einigen Stellen eine
+  // Fläche, nicht nur eine Schriftfarbe (Tutorialknopf, «Bestätigen»).
+  var inkMin = 99, inkWo = '';
+  ALLE.forEach(function (f) {
+    setze(f);
+    var k = kontrast(stil('--akzent-ink'), stil('--akzent'));
+    if (k < inkMin) { inkMin = k; inkWo = f; }
+  });
+  pruefe('D1d und was darauf steht, bleibt lesbar', inkMin >= 4.5,
+    inkMin.toFixed(2) + ' bei ' + inkWo);
   pruefe('D2 die Flächen dagegen wandern',
     ['--bg', '--card', '--card-2', '--line', '--glow'].every(function (v) {
       setze('gruen');
@@ -163,7 +193,7 @@ try {
   // gegen «classic»: Der Maßstab ist selbst mitgewandert, und die Zahlen
   // stehen heute über denen von vorher.
   var PAARE = [['--text', '--bg'], ['--text', '--card'], ['--dim', '--bg'],
-    ['--gold', '--card'], ['--good', '--card'], ['--bad', '--card'], ['--ice', '--card']];
+    ['--akzent', '--card'], ['--good', '--card'], ['--bad', '--card'], ['--ice', '--card']];
   // **Wo die Gleichheit zählt, ist die Kachel.** Dort steht der Lehrstoff, und
   // dort darf «richtig» auf Rosa nicht anders aussehen als auf Grün — die
   // Kachel ist in jedem Schema fast weiß, der Vergleich also fair.
@@ -221,8 +251,8 @@ try {
 
   // Die Bedienfläche trägt kleine Schrift — Chips, Schalter, Tastenkappen.
   // Vor dem Abdunkeln stand «dim» dort bei 2,8 und Gold bei 2,6.
-  var KLEIN = [['--dim', '--card-2'], ['--gold', '--card-2'],
-    ['--dim', '--bg'], ['--dim', '--card'], ['--gold', '--card']];
+  var KLEIN = [['--dim', '--card-2'], ['--akzent', '--card-2'],
+    ['--dim', '--bg'], ['--dim', '--card'], ['--akzent', '--card']];
   var kleinste = 99, woK = '';
   HELL.forEach(function (f) {
     setze(f);

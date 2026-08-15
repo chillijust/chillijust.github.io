@@ -48,10 +48,51 @@ SCHEMATA = {
     'rosa':    {'h': 318, 's': 50},
 }
 
+# ── Der Akzent ─────────────────────────────────────────────
+# Bis 2.4.5 gab es **ein** Gold für alle vier hellen Schemata. Auf «classic»
+# war das stimmig — es ist der Cremeton der App —, auf Mint und Rosa war es
+# eine Fremdfarbe: braun auf grün, braun auf pink (ADR 0064).
+#
+# Jetzt ist der Akzent ein **tiefer Ton derselben Farbe** wie der Grund. Seine
+# Helligkeit wird nicht gesetzt, sondern **gesucht**: Er soll auf jeder der
+# drei Flächen mindestens AKZENT_ZIEL halten und dabei so hell wie möglich
+# bleiben, damit er Farbe zeigt statt fast schwarz zu sein. Ein fester Wert je
+# Schema läge sonst bei jedem Farbton woanders — ein Blau ist bei gleicher
+# HSL-Helligkeit dunkler als ein Gelb.
+AKZENT_S = 60
+AKZENT_ZIEL = 4.5
+
+def _leuchtdichte(rgb):
+    def k(c):
+        c /= 255
+        return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+    r, g, b = (k(x) for x in rgb)
+    return .2126 * r + .7152 * g + .0722 * b
+
+def _kontrast(a, b):
+    la, lb = _leuchtdichte(a), _leuchtdichte(b)
+    hell, dunkel = max(la, lb), min(la, lb)
+    return (hell + .05) / (dunkel + .05)
+
+def _rgb(h, s, l):
+    r, g, b = colorsys.hls_to_rgb(h / 360, l / 100, s / 100)
+    return tuple(round(x * 255) for x in (r, g, b))
+
+def akzent(h, s):
+    flaechen = [_rgb(h, s * anteil, l) for _, l, anteil in FLAECHEN[:3]]
+    hellster = None
+    for zehntel in range(200, 500):
+        l = zehntel / 10
+        c = _rgb(h, AKZENT_S, l)
+        if min(_kontrast(c, f) for f in flaechen) >= AKZENT_ZIEL:
+            hellster = l
+    return hsl2hex(h, AKZENT_S, hellster)
+
 if __name__ == '__main__':
     for name, t in SCHEMATA.items():
         werte = ['--%s: %s;' % (k, hsl2hex(t['h'], t['s'] * anteil, l))
                  for k, l, anteil in FLAECHEN]
+        werte.append('--akzent: %s;' % akzent(t['h'], t['s']))
         print(':root[data-schema="%s"] {' % name)
         for w in werte:
             print('  ' + w)
