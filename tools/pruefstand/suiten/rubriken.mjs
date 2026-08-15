@@ -288,12 +288,22 @@ try {
   state = defaultState();
   ansichtenZuruecksetzen();
   setTab('home');
-  pruefe('X1 die Vorgabe zeigt alles', state.settings.homeAus.length === 0 &&
-    alle('#homeAlle [data-uebung]').length === 8);
+  // Seit ADR 0075 teilt sich die Seite in «Meine Auswahl» und «Weitere
+  // Übungen» — was oben steht, wiederholt sich unten nicht. Gezählt wird
+  // darum über die ganze Seite, und dass nichts doppelt steht, ist Teil der
+  // Zusage.
+  function aufHome() {
+    return alle('#main [data-uebung]').map(function (b) { return b.dataset.uebung; });
+  }
+  pruefe('X1 die Vorgabe zeigt alles, jede genau einmal',
+    state.settings.homeAus.length === 0 && aufHome().length === 8 &&
+    aufHome().filter(function (x, i) { return aufHome().indexOf(x) !== i; }).length === 0,
+    aufHome().join());
   state.settings.homeAus = ['freestyle', 'grammatik'];
   renderHome();
-  pruefe('X2 Abgewähltes verschwindet', alle('#homeAlle [data-uebung]').length === 6 &&
-    !q('#homeAlle [data-uebung="freestyle"]'));
+  pruefe('X2 Abgewähltes verschwindet',
+    aufHome().length === 6 && aufHome().indexOf('freestyle') === -1,
+    aufHome().join());
   pruefe('X3 auch aus dem Fälligen',
     !q('#main [data-uebung="grammatik"]'));
   // Eine Gruppe, aus der alles weg ist, bekommt keine Überschrift über nichts.
@@ -311,28 +321,86 @@ try {
   tutStarten(false);
   renderHome();
   pruefe('X6 im Tutorial stehen alle acht da',
-    alle('#homeAlle [data-uebung]').length === 8 && !!q('[data-uebung="buchstaben"]'));
+    alle('#homeAlle [data-uebung]').length === 8 && !!q('[data-uebung="buchstaben"]'),
+    String(alle('#homeAlle [data-uebung]').length));
   tutEnde();
-  // Der Schalter steht in den Einstellungen und schaltet wirklich.
+  // ── X7ff · Das Einrichte-Fenster (ADR 0075) ──────────────
+  // Aus der Schalterreihe ist ein eigenes Fenster geworden: drei Rubriken,
+  // eine Reihenfolge, und ein Weg zurück zur Automatik.
   state.settings.homeAus = [];
+  state.settings.homeOben = null;
   einstReiter = 'darstellung';
   setTab('einstellungen');
-  pruefe('X7 es gibt acht Schalter', alle('[data-kachel]').length === 8,
-    String(alle('[data-kachel]').length));
-  pruefe('X8 alle stehen auf an',
-    alle('[data-kachel]').every(function (b) { return b.getAttribute('aria-checked') === 'true'; }));
-  q('[data-kachel="tippen"]').click();
-  pruefe('X9 ein Tipp räumt sie weg', state.settings.homeAus.indexOf('tippen') !== -1,
+  pruefe('X7 die Einstellungen führen ins Fenster', !!q('#zuEinrichten'));
+  q('#zuEinrichten').click();
+  pruefe('X7b es öffnet sich', currentTab === 'einrichten' && !!q('[data-liste="oben"]'));
+  pruefe('X8 alle acht stehen darin, jede genau einmal', (function () {
+    var ids = alle('.einr-zeile').map(function (z) { return z.dataset.eid; });
+    return ids.length === 8 && ids.filter(function (x, i) { return ids.indexOf(x) !== i; }).length === 0;
+  })(), alle('.einr-zeile').map(function (z) { return z.dataset.eid; }).join());
+  pruefe('X8b und es gibt drei Rubriken',
+    alle('.einr-liste').length === 3 &&
+    alle('.einr-liste').map(function (l) { return l.dataset.liste; }).join() ===
+      'oben,weitere,versteckt');
+
+  // Der Pfeil nach unten schiebt eine Rubrik weiter — bis ins Versteck.
+  var vorher = einrRubrik('tippen');
+  q('[data-runter="tippen"]').click();
+  pruefe('X9 der Pfeil schiebt eine Rubrik weiter',
+    einrRubrik('tippen') !== vorher, vorher + ' -> ' + einrRubrik('tippen'));
+  while (einrRubrik('tippen') !== 'versteckt') q('[data-runter="tippen"]').click();
+  pruefe('X9b ganz unten heißt versteckt',
+    state.settings.homeAus.indexOf('tippen') !== -1 && !kachelSichtbar('tippen'),
     state.settings.homeAus.join());
-  pruefe('X10 und der Schalter sagt es',
-    q('[data-kachel="tippen"]').getAttribute('aria-checked') === 'false');
-  q('[data-kachel="tippen"]').click();
-  pruefe('X11 der nächste holt sie zurück', state.settings.homeAus.length === 0);
+  pruefe('X9c und am Anschlag ist der Pfeil zu',
+    q('[data-runter="tippen"]').disabled === true);
+  // Und wieder herauf.
+  q('[data-hoch="tippen"]').click();
+  pruefe('X10 der Weg zurück geht auch',
+    einrRubrik('tippen') === 'weitere' && kachelSichtbar('tippen'),
+    einrRubrik('tippen'));
+
+  // **Von Hand hingezogen bleibt stehen** — auch ohne Arbeit. Das ist der
+  // Unterschied zwischen «fällig» und «meine Auswahl».
+  q('[data-hoch="tippen"]').click();
+  pruefe('X10b oben angekommen', einrRubrik('tippen') === 'oben' &&
+    state.settings.homeOben.indexOf('tippen') !== -1, String(state.settings.homeOben));
+  setTab('home');
+  pruefe('X10c die Kachel steht oben in «Meine Auswahl»',
+    !!q('#main .gruppe-titel') &&
+    main.textContent.indexOf('Meine Auswahl') !== -1 &&
+    homeOben(null).indexOf('tippen') !== -1,
+    homeOben(null).join());
+  pruefe('X10d und nicht noch einmal unter «Weitere»',
+    !q('#homeAlle [data-uebung="tippen"]'));
+  pruefe('X10e der untere Bereich heißt jetzt «Weitere Übungen»',
+    q('#homeAlleKnopf').textContent.indexOf('Weitere Übungen') !== -1,
+    q('#homeAlleKnopf').textContent);
+
+  // «Automatisch verteilen» gibt die obere Rubrik zurück an die App — das
+  // Versteck aber nicht: Verstecken ist eine eigene Entscheidung.
+  state.settings.homeAus = ['grammatik'];
+  setTab('einrichten');
+  q('#einrAuto').click();
+  pruefe('X11 «Automatisch verteilen» stellt oben auf Automatik',
+    state.settings.homeOben === null, String(state.settings.homeOben));
+  pruefe('X11b und lässt das Versteckte versteckt',
+    state.settings.homeAus.join() === 'grammatik', state.settings.homeAus.join());
+  state.settings.homeAus = [];
   // Sie gehört zum Gerät, nicht zum Lernstand.
   state.settings.homeAus = ['tippen'];
+  state.settings.homeOben = ['power'];
   pruefe('X12 sie steht nicht im Sicherungscode',
-    (decodeBackup(encodeBackup()).settings.homeAus || []).length === 0,
+    (decodeBackup(encodeBackup()).settings.homeAus || []).length === 0 &&
+    !decodeBackup(encodeBackup()).settings.homeOben,
     JSON.stringify((decodeBackup(encodeBackup()).settings || {}).homeAus));
+  // Eine neue Übung taucht von selbst auf: Gespeichert wird das Abweichende,
+  // nicht der Bestand (ADR 0066).
+  pruefe('X12b eine unbekannte Kennung in der Auswahl fällt weg',
+    homeOben(null).indexOf('gibtesnicht') === -1, (function () {
+      state.settings.homeOben = ['power', 'gibtesnicht'];
+      return homeOben(null).join();
+    })());
   state = defaultState();
   ansichtenZuruecksetzen();
 

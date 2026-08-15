@@ -1536,6 +1536,56 @@ body.unterwegs .reiter { top: 62px; }
 .blattkarte .setting:last-child { border-bottom: none; }
 .blattkarte .settings-note { margin-bottom: 12px; }
 .settings-note { font-size: 12px; color: var(--dim); line-height: 1.5; margin: 16px 0 0; }
+/* Die Defizite in der Bilanz: je eine Karte, Zahl rechts, darunter der Grund
+   und ein Weg dorthin (ADR 0075). */
+/* Das Einrichte-Fenster: drei Kästen, in die man Zeilen zieht (ADR 0075). */
+.einr-note { margin: 4px 0 8px; }
+.einr-liste {
+  min-height: 56px; padding: 6px; border-radius: 14px;
+  border: 1px dashed var(--line); background: var(--card);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.einr-liste.ziel { border-style: solid; border-color: var(--akzent); }
+.einr-leer { margin: 0; padding: 12px 8px; font-size: 12px; color: var(--dim); text-align: center; }
+.einr-zeile {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; min-height: 48px; border-radius: 11px;
+  background: var(--card-2); border: 1px solid var(--line);
+  font-size: 15px; color: var(--text);
+  touch-action: none;   /* sonst scrollt die Seite statt zu ziehen */
+  -webkit-tap-highlight-color: transparent;
+}
+.einr-zeile.zieht {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  z-index: 60; box-shadow: 0 10px 24px -8px var(--shade); opacity: .95;
+}
+/* Der Griff sagt ohne Wort, dass man die Zeile anfassen darf. */
+.einr-griff {
+  flex: none; width: 16px; height: 10px; margin-left: 2px;
+  border-top: 2px solid var(--dim); border-bottom: 2px solid var(--dim);
+}
+.einr-name { flex: 1; }
+.einr-pfeil {
+  flex: none; width: 40px; height: 40px; padding: 0; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: 1px solid var(--line); color: var(--dim); cursor: pointer;
+}
+.einr-pfeil:disabled { opacity: .3; }
+.einr-pfeil .icon { width: 16px; height: 16px; }
+.einr-zeile [data-hoch] .icon { transform: rotate(180deg); }
+.einst-weiter { flex: none; min-width: 96px; }
+
+.defizite { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+.defizit {
+  padding: 13px 15px; border-radius: 14px;
+  background: var(--card-2); border: 1px solid var(--line);
+}
+.defizit-kopf { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.defizit-titel { font-size: 14px; font-weight: 600; color: var(--text); }
+.defizit-zahl { font-size: 20px; font-weight: 700; color: var(--bad); flex: none; }
+.defizit-text { margin: 6px 0 0; font-size: 14px; color: var(--ice); line-height: 1.4; }
+.defizit-warum { margin: 6px 0 0; font-size: 12px; color: var(--dim); line-height: 1.5; }
+.defizit .blatt-link { margin-top: 8px; }
 /* Die Bezugszeile im Meldeblatt: ein Wort und eine Auswahl, nebeneinander. */
 .bezug-wahl { margin-top: 12px; }
 .bezug-wahl .bezug-text {
@@ -4064,7 +4114,7 @@ var APP_STAND = '2026-08-15'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.4.16T'; /* == VERSION == */
+var APP_VERSION = '2.4.17T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -5113,6 +5163,11 @@ function defaultSettings() {
     // sichtbar. Steht **nicht** im Sicherungscode: Was einer auf seinem Gerät
     // sehen will, ist kein Lernstand.
     homeAus: [],
+    // **null heißt automatisch** (ADR 0075). Ein Array heißt: Der Nutzer hat
+    // die obere Rubrik selbst eingerichtet, und dann steht dort genau das —
+    // auch wenn gerade nichts zu tun ist. «Automatisch verteilen» stellt
+    // wieder auf null.
+    homeOben: null,
     // Ein Schema, nicht zwei Achsen: «Dark» ist die Vorgabe, «Classic» das
     // helle Cremeweiß, die drei Farben sind Cremetöne (ADR 0039). Neuer
     // Schlüssel, damit bestehende Geräte die Umstellung mitbekommen.
@@ -6815,7 +6870,8 @@ var UEBUNG_NAME = { home: 'Übersicht' };
 UEBUNGEN.forEach(function (u) { UEBUNG_NAME[u.id] = u.name; });
 var ANSICHT_NAME = {
   bilanz: 'Bilanz', sicherung: 'Sicherung', einstellungen: 'Einstellungen',
-  fakten: 'Sprachfakten', merkzettel: 'Gemerkt', tickets: 'Tickets'
+  fakten: 'Sprachfakten', merkzettel: 'Gemerkt', tickets: 'Tickets',
+  einrichten: 'Übersicht einrichten'
 };
 var DETAIL_NAME = {
   woerter: 'Wörter', saetze: 'Sätze', antworten: 'Antworten', serie: 'Serie'
@@ -7771,11 +7827,12 @@ function renderHome() {
     '<span class="empf-titel">' + esc(e.titel) + '</span>' +
     '<span class="empf-note">' + esc(e.note) + '</span></span></button>';
 
-  // **Außerdem fällig**: höchstens drei, und nur, wo wirklich Arbeit wartet.
-  // Was empfohlen ist, steht schon oben und wird hier nicht wiederholt.
-  var offen = homeFaellig(e.ziel);
+  // **Meine Auswahl** (ADR 0075): automatisch das Fällige, oder genau das, was
+  // im Einrichte-Fenster hierhergezogen wurde. Was empfohlen ist, steht schon
+  // oben und wird hier nicht wiederholt.
+  var offen = homeOben(e.ziel);
   if (offen.length) {
-    html += '<p class="gruppe-titel">Außerdem fällig</p>' +
+    html += '<p class="gruppe-titel">Meine Auswahl</p>' +
       '<div class="kachelfeld">' + offen.map(kachelHtml).join('') + '</div>';
   }
 
@@ -7784,10 +7841,11 @@ function renderHome() {
   // Ziel, das es gar nicht gibt, wäre ein stiller Fehler (ADR 0051).
   html += '<button class="alle-knopf" id="homeAlleKnopf" aria-expanded="' +
     (homeOffen ? 'true' : 'false') + '" aria-controls="homeAlle">' +
-    '<span>Alle Übungen</span>' + ICON.winkelRunter + '</button>' +
+    '<span>Weitere Übungen</span>' + ICON.winkelRunter + '</button>' +
     '<div class="alle-klapp" id="homeAlle"' + (homeOffen ? '' : ' hidden') + '>';
+  var weitere = homeWeitere(offen);
   UEBUNG_GRUPPEN.forEach(function (g) {
-    var sichtbar = g.ids.filter(kachelSichtbar);
+    var sichtbar = g.ids.filter(function (id) { return weitere.indexOf(id) !== -1; });
     // Eine Gruppe, aus der alles ausgeräumt ist, hat auch keine Überschrift
     // verdient — sonst stünde dort ein Titel über nichts.
     if (!sichtbar.length) return;
@@ -7795,6 +7853,12 @@ function renderHome() {
       '<div class="kachelfeld' + (sichtbar.length === 1 ? ' breit' : '') + '">' +
       sichtbar.map(kachelHtml).join('') + '</div>';
   });
+  // Alles oben und nichts übrig: Der Bereich bekommt eine Zeile statt einer
+  // Leere — ein aufklappbarer Kasten, in dem nichts steht, sieht kaputt aus.
+  if (!weitere.length) {
+    html += '<p class="backup-note">Alles steht schon oben. Im Fenster ' +
+      '«Übersicht einrichten» lässt sich das ändern.</p>';
+  }
   html += '</div>';
 
   // Ruhig und ganz unten — aber nur, wenn er nicht schon oben steht: Ihn
@@ -7868,6 +7932,52 @@ function homeFaellig(ausser) {
   return warm.concat(rest).slice(0, HOME_FAELLIG_MAX);
 }
 
+// Alle Übungen in ihrer Lehrplanreihenfolge — die Quelle für alle drei
+// Rubriken, damit keine sie in eigener Ordnung führt.
+function alleUebungIds() {
+  var raus = [];
+  UEBUNG_GRUPPEN.forEach(function (g) {
+    g.ids.forEach(function (id) { if (uebungVon(id)) raus.push(id); });
+  });
+  return raus;
+}
+
+// **Die obere Rubrik: «Meine Auswahl»** (ADR 0075). Zwei Zustände, und der
+// Unterschied ist der ganze Punkt des Fensters:
+//
+//   `homeOben === null`  automatisch — was gerade fällig ist, höchstens drei
+//   ein Array           von Hand eingerichtet — genau das, und zwar immer
+//
+// Von Hand hingezogen heißt «ich will sie sehen»: Eine angeheftete Kachel
+// bleibt auch stehen, wenn sie «alles gelernt» meldet. Sonst verschwände
+// etwas, das der Nutzer gerade hingestellt hat, und das sähe aus wie ein
+// Fehler. Die Höchstzahl gilt dann auch nicht — er hat ja gewählt.
+function homeOben(ausser) {
+  var eigen = state.settings.homeOben;
+  // Die Automatik wiederholt nicht, was sie eben selbst vorgeschlagen hat.
+  if (!eigen) return homeFaellig(ausser);
+  // Von Hand ist etwas anderes: Wer eine Übung hierhergezogen hat, will sie
+  // hier sehen — auch wenn sie gerade obendrein empfohlen wird. Sie steht dann
+  // einmal als Empfehlungskarte und einmal als Kachel, und das ist kein
+  // Widerspruch, sondern seine Anordnung.
+  return eigen.filter(function (id) {
+    return uebungVon(id) && kachelSichtbar(id);
+  });
+}
+
+// **Weitere Übungen**: alles Übrige. Nicht mehr «alle» — was oben steht,
+// wiederholt sich hier nicht, sonst hieße «weitere» nichts.
+//
+// Im Tutorial stehen sie **alle** darin: Acht seiner Schritte zeigen auf je
+// eine Kachel, und ein Wähler, der ins Leere zeigt, ist ein stiller Fehler
+// (ADR 0051).
+function homeWeitere(oben) {
+  return alleUebungIds().filter(function (id) {
+    if (tutOffen) return true;
+    return kachelSichtbar(id) && oben.indexOf(id) === -1;
+  });
+}
+
 function render() {
   // Erst nach Hause, dann zeichnen: Steckt die Wissenshülle noch in der alten
   // Kachel, wirft `main.innerHTML` sie mit weg — Knopf, Blatt und Zuhörer
@@ -7891,6 +8001,7 @@ function render() {
   else if (currentTab === 'merkzettel') renderMerkzettel();
   else if (currentTab === 'tickets') renderTickets();
   else if (currentTab === 'sicherung') renderSicherung();
+  else if (currentTab === 'einrichten') renderEinrichten();
   else renderBilanz();
   wissenUmhaengen();
   updateKopf();
@@ -12653,28 +12764,19 @@ function renderEinstellungen() {
       '><span class="knob"></span></button></div>';
   }
 
-  // **Welche Kacheln die Übersicht zeigt** (ADR 0066). Acht Chips, jeder ein
-  // Schalter. Gespeichert wird das Ausgeräumte (`homeAus`), nicht das
-  // Behaltene — so taucht eine neue Übung bei einem bestehenden Gerät von
-  // selbst auf, statt still zu fehlen.
+  // **Ein Weg statt einer Schalterreihe** (ADR 0075). Acht Chips konnten nur
+  // «zeigen» und «wegräumen»; das Einrichten ist jetzt ein eigenes Fenster,
+  // weil es drei Rubriken und eine Reihenfolge kennt.
   function kachelWahl() {
-    var chips = '';
-    UEBUNG_GRUPPEN.forEach(function (g) {
-      g.ids.forEach(function (id) {
-        var u = uebungVon(id);
-        if (!u) return;
-        var an = kachelSichtbar(id);
-        chips += '<button class="chip' + (an ? ' active' : '') +
-          '" role="switch" aria-checked="' + (an ? 'true' : 'false') +
-          '" data-kachel="' + id + '">' + esc(u.name) + '</button>';
-      });
-    });
-    return '<div class="setting setting-breit"><span class="setting-text">' +
-      '<span class="setting-title">Kacheln auf der Übersicht</span>' +
-      '<span class="setting-note">Was du hier abwählst, verschwindet aus der Übersicht ' +
-      'und wird auch nicht mehr vorgeschlagen. Die Übung bleibt, sie steht nur nicht ' +
-      'mehr im Weg. Während des Tutorials sind alle zu sehen.</span></span>' +
-      '<div class="chipwrap kachelwahl">' + chips + '</div></div>';
+    var oben = state.settings.homeOben;
+    var weg = (state.settings.homeAus || []).length;
+    var stand = (oben ? oben.length + ' oben' : 'automatisch') +
+      (weg ? ' · ' + weg + ' versteckt' : '');
+    return '<div class="setting"><span class="setting-text">' +
+      '<span class="setting-title">Übersicht einrichten</span>' +
+      '<span class="setting-note">Welche Übungen die Übersicht zeigt, in welcher ' +
+      'Rubrik und in welcher Reihenfolge. Zurzeit: ' + esc(stand) + '.</span></span>' +
+      '<button class="btn ghost einst-weiter" id="zuEinrichten">Öffnen</button></div>';
   }
 
   // Auswahl aus mehreren Werten (Leitner-Stufe) als Chip-Reihe.
@@ -12867,17 +12969,8 @@ function renderEinstellungen() {
       renderEinstellungen();
     });
   });
-  main.querySelectorAll('[data-kachel]').forEach(function (b) {
-    b.addEventListener('click', function () {
-      var id = b.dataset.kachel;
-      var aus = state.settings.homeAus.slice();
-      var i = aus.indexOf(id);
-      if (i === -1) aus.push(id); else aus.splice(i, 1);
-      state.settings.homeAus = aus;
-      save();
-      renderEinstellungen();
-    });
-  });
+  var zuEinr = document.getElementById('zuEinrichten');
+  if (zuEinr) zuEinr.addEventListener('click', function () { setTab('einrichten'); });
   main.querySelectorAll('[data-wahltext]').forEach(function (b) {
     b.addEventListener('click', function () {
       state.settings[b.dataset.wahltext] = b.dataset.wert;
@@ -13816,6 +13909,123 @@ function renderBilanzDetail() {
   });
 }
 
+// ── Defizite ────────────────────────────────────────────────
+// **Die App weiß vier Dinge über die eigenen Schwächen** und hat sie bisher
+// nur für sich behalten: die zurückgefallenen Wörter (ADR 0033), das
+// Fehlerprofil (ADR 0056), die Buchstaben unter der Schwelle und was gerade
+// überfällig ist. Sie stehen an drei verschiedenen Stellen im Zustand — hier
+// kommen sie zusammen.
+//
+// **Jede Zeile nennt einen Weg dorthin.** Ein Defizit ohne Ausgang ist ein
+// Vorwurf; mit Ausgang ist es ein Vorschlag. Wo die zuständige Übung gerade
+// nicht offen ist, entfällt der Knopf — er führte sonst ins Leere.
+function defizite() {
+  var raus = [];
+  var jetzt = Date.now();
+
+  // 1 · Zurückgefallen. Dreimal falsch geschrieben heißt: Der Satz ist wieder
+  // zu, und das Wort steht im Topf des Power-Trainings.
+  var topf = ptPool();
+  if (topf.length) {
+    raus.push({
+      titel: 'Zurückgefallen',
+      zahl: topf.length,
+      text: topf.slice(0, 4).map(function (v) { return v.ru; }).join(', ') +
+        (topf.length > 4 ? ' und ' + (topf.length - 4) + ' weitere' : ''),
+      warum: topf.length === 1
+        ? 'Ein Wort ist dreimal hintereinander falsch geschrieben worden und hat damit seinen Satz geschlossen.'
+        : 'Diese Wörter sind dreimal hintereinander falsch geschrieben worden und haben damit ihre Sätze geschlossen.',
+      ziel: ptOffen() ? 'power' : null,
+      knopf: 'Zum Power-Training'
+    });
+  }
+
+  // 2 · Verwechslungen. Nur Paare, die mehr als einmal vorkamen — ein
+  // einzelner Fehlgriff ist ein Ausrutscher, kein Muster.
+  var paare = [];
+  Object.keys(state.verwechselt || {}).forEach(function (id) {
+    var v = VOKABEL[id];
+    if (!v) return;
+    Object.keys(state.verwechselt[id]).forEach(function (mit) {
+      var w = VOKABEL[mit];
+      if (!w || state.verwechselt[id][mit] < 2) return;
+      paare.push({ n: state.verwechselt[id][mit], text: v.ru + ' / ' + w.ru });
+    });
+  });
+  paare.sort(function (a, b) { return b.n - a.n; });
+  if (paare.length) {
+    raus.push({
+      titel: 'Verwechselt',
+      zahl: paare.length,
+      text: paare.slice(0, 3).map(function (p) { return p.text; }).join(' · '),
+      warum: 'Diese Wörter hast du mehrfach füreinander gehalten. Sie kommen dir ' +
+        'in «Lernsets» und «Freestyle» künftig gemeinsam unter.',
+      ziel: 'freestyle',
+      knopf: 'Zu «Freestyle»'
+    });
+  }
+
+  // 3 · Zeichen. Buchstaben unter der Satzschwelle tragen jedes Wort mit, in
+  // dem sie vorkommen — sie sind das Defizit, das am weitesten wirkt.
+  var wacklig = ALPHABET.filter(function (b) { return abcBox(b) < SATZ_STUFE; });
+  if (wacklig.length) {
+    raus.push({
+      titel: 'Zeichen sitzen noch nicht',
+      zahl: wacklig.length,
+      text: wacklig.slice(0, 8).map(function (b) { return b[1]; }).join(' '),
+      warum: 'Ein Buchstabe, der nicht sitzt, macht jedes Wort schwer, in dem er vorkommt.',
+      ziel: 'buchstaben',
+      knopf: 'Zu «Buchstaben»'
+    });
+  }
+
+  // 4 · Überfällig. Nicht «offen» — das wäre der Lernweg. Fällig heißt: Es war
+  // schon einmal da und die Frist ist um.
+  var woerterFaellig = faelligeAnzahl(freigeschalteteWoerter());
+  var saetzeFaellig = SENTENCES.filter(function (x) {
+    return satzFrei(x) && satzBox(x) > 0 && satzFaellig(x, jetzt);
+  }).length;
+  if (woerterFaellig + saetzeFaellig > 0) {
+    var teile = [];
+    if (woerterFaellig) teile.push(woerterFaellig + (woerterFaellig === 1 ? ' Wort' : ' Wörter'));
+    if (saetzeFaellig) teile.push(saetzeFaellig + (saetzeFaellig === 1 ? ' Satz' : ' Sätze'));
+    raus.push({
+      titel: 'Überfällig',
+      zahl: woerterFaellig + saetzeFaellig,
+      text: teile.join(' · '),
+      warum: 'Die Wiedervorlage ist durch. Je länger es liegt, desto mehr davon ' +
+        'musst du neu lernen statt aufzufrischen.',
+      ziel: woerterFaellig >= saetzeFaellig ? 'lernsets' : 'uebersetzen',
+      knopf: woerterFaellig >= saetzeFaellig ? 'Zu «Lernsets»' : 'Zu «Übersetzen»'
+    });
+  }
+  return raus;
+}
+
+function defiziteHtml() {
+  var liste = defizite();
+  var html = '<h2>Defizite</h2>';
+  if (!liste.length) {
+    return html + '<p class="backup-note">Nichts liegt quer: keine zurückgefallenen ' +
+      'Wörter, keine wiederkehrenden Verwechslungen, alle Zeichen sitzen, nichts ' +
+      'überfällig. Hier steht sonst, woran es gerade hakt.</p>';
+  }
+  html += '<div class="defizite">';
+  liste.forEach(function (d, i) {
+    html += '<div class="defizit">' +
+      '<div class="defizit-kopf"><span class="defizit-titel">' + esc(d.titel) + '</span>' +
+      '<span class="defizit-zahl">' + d.zahl + '</span></div>' +
+      '<p class="defizit-text' + (d.titel === 'Zeichen sitzen noch nicht' ||
+        d.titel === 'Zurückgefallen' || d.titel === 'Verwechselt' ? ' cyr' : '') + '">' +
+      esc(d.text) + '</p>' +
+      '<p class="defizit-warum">' + esc(d.warum) + '</p>' +
+      (d.ziel ? '<button class="blatt-link" data-defizit="' + esc(d.ziel) + '">' +
+        esc(d.knopf) + ' →</button>' : '') +
+      '</div>';
+  });
+  return html + '</div>';
+}
+
 function renderBilanz() {
   if (bilanzDetail) { renderBilanzDetail(); return; }
   var counts = [];
@@ -13843,6 +14053,10 @@ function renderBilanz() {
     stat('Beantwortet', state.answered, 'antworten') +
     stat('Beste Serie', state.bestStreak, 'serie', true) +
     '</div>';
+
+  // **Vor dem Lernweg.** Was quer liegt, gehört nach oben — darunter steht,
+  // wie weit man ist, und das liest sich anders, wenn man weiß, was klemmt.
+  html += defiziteHtml();
 
   var aktuell = aktuellesSet();
   var frei = freigeschalteteWoerter();
@@ -13978,11 +14192,213 @@ function renderBilanz() {
       renderKopf();
     });
   });
+  // Jedes Defizit nennt einen Weg dorthin — ein Defizit ohne Ausgang ist ein
+  // Vorwurf, mit Ausgang ein Vorschlag.
+  main.querySelectorAll('[data-defizit]').forEach(function (b) {
+    b.addEventListener('click', function () { setTab(b.dataset.defizit); });
+  });
   document.getElementById('zuFakten').addEventListener('click', function () { setTab('fakten'); });
   var zuMerk = document.getElementById('zuMerk');
   if (zuMerk) zuMerk.addEventListener('click', function () { setTab('merkzettel'); });
   var mehr = document.getElementById('themenMehr');
   if (mehr) mehr.addEventListener('click', function () { themenOffen = !themenOffen; renderBilanz(); });
+}
+
+// ── ÜBERSICHT EINRICHTEN ────────────────────────────────────
+// **Drei Rubriken, ein Fenster** (ADR 0075). Bis 2.4.16 war das eine Reihe von
+// acht Schaltern in den Einstellungen — sie konnte nur «zeigen» und
+// «wegräumen», und die Ordnung oben blieb der App überlassen.
+//
+// Gespeichert wird **das Abweichende**, nicht der Bestand: `homeAus` sagt, was
+// versteckt ist, `homeOben` (oder null) was oben steht. Eine neue Übung taucht
+// damit von selbst unter «Weitere» auf, statt still zu fehlen — dieselbe Regel
+// wie seit ADR 0066.
+var EINR_RUBRIKEN = [
+  { id: 'oben', titel: 'Meine Auswahl',
+    note: 'Steht auf der Übersicht ganz oben — auch dann, wenn dort gerade nichts zu tun ist.' },
+  { id: 'weitere', titel: 'Weitere Übungen',
+    note: 'Liegt hinter dem Knopf «Weitere Übungen».' },
+  { id: 'versteckt', titel: 'Versteckt',
+    note: 'Taucht auf der Übersicht nicht auf und wird auch nicht vorgeschlagen. Die Übung bleibt erreichbar — im Tutorial stehen alle da.' }
+];
+
+// In welcher Rubrik steckt eine Übung gerade?
+function einrRubrik(id) {
+  if (!kachelSichtbar(id)) return 'versteckt';
+  return homeOben(null).indexOf(id) !== -1 ? 'oben' : 'weitere';
+}
+
+// Verschieben — und zwar so, dass hinterher **beide** Listen stimmen. Wer nur
+// eine anfasst, bekommt eine Übung, die in zwei Rubriken steht.
+function einrSetzen(id, rubrik, wohin) {
+  var aus = (state.settings.homeAus || []).slice();
+  var i = aus.indexOf(id);
+  // Die obere Rubrik wird mit der ersten Bewegung von Hand eingerichtet: Was
+  // die Automatik gerade zeigt, ist der Ausgangspunkt — sonst spränge beim
+  // ersten Ziehen alles andere weg.
+  var oben = (state.settings.homeOben || homeOben(null)).slice();
+  var k = oben.indexOf(id);
+  if (k !== -1) oben.splice(k, 1);
+  if (i !== -1) aus.splice(i, 1);
+
+  if (rubrik === 'versteckt') aus.push(id);
+  if (rubrik === 'oben') {
+    var stelle = typeof wohin === 'number' ? Math.max(0, Math.min(oben.length, wohin)) : oben.length;
+    oben.splice(stelle, 0, id);
+  }
+  state.settings.homeAus = aus;
+  state.settings.homeOben = oben;
+  save();
+}
+
+function einrZeileHtml(id, rubrik, erster, letzter) {
+  var u = uebungVon(id);
+  if (!u) return '';
+  return '<div class="einr-zeile" data-eid="' + esc(id) + '" data-rubrik="' + esc(rubrik) + '">' +
+    '<span class="einr-griff" aria-hidden="true"></span>' +
+    '<span class="einr-name">' + esc(u.name) + '</span>' +
+    '<button class="einr-pfeil" data-hoch="' + esc(id) + '"' + (erster ? ' disabled' : '') +
+    ' aria-label="' + esc(u.name) + ' eine Rubrik nach oben">' + ICON.winkelRunter + '</button>' +
+    '<button class="einr-pfeil" data-runter="' + esc(id) + '"' + (letzter ? ' disabled' : '') +
+    ' aria-label="' + esc(u.name) + ' eine Rubrik nach unten">' + ICON.winkelRunter + '</button>' +
+    '</div>';
+}
+
+function renderEinrichten() {
+  var html = '<section>' +
+    '<p class="settings-note">Zieh eine Übung in eine andere Rubrik — oder nimm die ' +
+    'beiden Pfeile, wenn das Ziehen hakt. Die Reihenfolge in «Meine Auswahl» ist die ' +
+    'Reihenfolge auf der Übersicht.</p>';
+
+  EINR_RUBRIKEN.forEach(function (r, ri) {
+    var drin = alleUebungIds().filter(function (id) { return einrRubrik(id) === r.id; });
+    if (r.id === 'oben' && state.settings.homeOben) {
+      // Von Hand eingerichtet: die gespeicherte Reihenfolge, nicht die des Lehrplans.
+      drin = state.settings.homeOben.filter(function (id) { return einrRubrik(id) === 'oben'; });
+    }
+    html += '<h2>' + esc(r.titel) + '</h2>' +
+      '<p class="settings-note einr-note">' + esc(r.note) + '</p>' +
+      '<div class="einr-liste" data-liste="' + r.id + '">';
+    drin.forEach(function (id) {
+      html += einrZeileHtml(id, r.id, ri === 0, ri === EINR_RUBRIKEN.length - 1);
+    });
+    if (!drin.length) html += '<p class="einr-leer">Nichts hier. Zieh etwas herüber.</p>';
+    html += '</div>';
+  });
+
+  html += '<div class="btn-row">' +
+    '<button class="btn ghost" id="einrAuto">Automatisch verteilen</button>' +
+    '<button class="btn primary" id="einrFertig">Fertig</button></div>' +
+    '<p class="settings-note">«Automatisch verteilen» gibt die obere Rubrik wieder der ' +
+    'App: Sie zeigt dann, was gerade fällig ist, höchstens drei. Versteckte Übungen ' +
+    'bleiben versteckt — das ist eine eigene Entscheidung.</p></section>';
+  main.innerHTML = html;
+
+  document.getElementById('einrAuto').addEventListener('click', function () {
+    state.settings.homeOben = null;
+    save();
+    renderEinrichten();
+  });
+  document.getElementById('einrFertig').addEventListener('click', function () { setTab('home'); });
+  main.querySelectorAll('[data-hoch]').forEach(function (b) {
+    b.addEventListener('click', function () { einrSchieben(b.dataset.hoch, -1); });
+  });
+  main.querySelectorAll('[data-runter]').forEach(function (b) {
+    b.addEventListener('click', function () { einrSchieben(b.dataset.runter, 1); });
+  });
+  einrZiehenBinden();
+}
+
+// Eine Rubrik weiter — der Weg für Finger, die nicht ziehen wollen, und der
+// einzige, den eine Tastatur kennt.
+function einrSchieben(id, richtung) {
+  var jetzt = einrRubrik(id);
+  var i = 0;
+  EINR_RUBRIKEN.forEach(function (r, k) { if (r.id === jetzt) i = k; });
+  var ziel = EINR_RUBRIKEN[i + richtung];
+  if (!ziel) return;
+  einrSetzen(id, ziel.id);
+  renderEinrichten();
+}
+
+// ── Ziehen ──────────────────────────────────────────────────
+// Zeigerereignisse statt Touch: Sie decken Finger, Maus und Stift mit einem
+// Satz Zuhörer ab, und `setPointerCapture` hält den Zeiger auch dann bei der
+// Zeile, wenn sie unter ihm wegrutscht. Erst ab acht Pixeln wird daraus ein
+// Ziehen — sonst verlöre jeder Tipp auf einen Pfeil sein Ereignis.
+var einrZug = null;
+
+function einrZiehenBinden() {
+  main.querySelectorAll('.einr-zeile').forEach(function (zeile) {
+    zeile.addEventListener('pointerdown', function (e) {
+      if (e.target.closest && e.target.closest('.einr-pfeil')) return;
+      einrZug = {
+        el: zeile, id: zeile.dataset.eid,
+        startY: e.clientY, startX: e.clientX, laeuft: false,
+        breite: zeile.getBoundingClientRect().width,
+        griffY: e.clientY - zeile.getBoundingClientRect().top
+      };
+      try { zeile.setPointerCapture(e.pointerId); } catch (err) { /* dann eben ohne */ }
+    });
+    zeile.addEventListener('pointermove', function (e) {
+      if (!einrZug || einrZug.el !== zeile) return;
+      if (!einrZug.laeuft) {
+        if (Math.abs(e.clientY - einrZug.startY) < 8 &&
+          Math.abs(e.clientX - einrZug.startX) < 8) return;
+        einrZug.laeuft = true;
+        zeile.classList.add('zieht');
+        zeile.style.width = einrZug.breite + 'px';
+      }
+      e.preventDefault();
+      zeile.style.top = (e.clientY - einrZug.griffY) + 'px';
+      einrZielZeigen(e.clientY);
+    });
+    var loslassen = function (e) {
+      if (!einrZug || einrZug.el !== zeile) return;
+      var lief = einrZug.laeuft;
+      var y = e.clientY;
+      zeile.classList.remove('zieht');
+      zeile.style.width = '';
+      zeile.style.top = '';
+      einrZug = null;
+      main.querySelectorAll('.einr-liste').forEach(function (l) { l.classList.remove('ziel'); });
+      if (!lief) return;
+      var ziel = einrListeBei(y);
+      if (!ziel) return;
+      einrSetzen(zeile.dataset.eid, ziel.dataset.liste, einrStelleBei(ziel, y));
+      renderEinrichten();
+    };
+    zeile.addEventListener('pointerup', loslassen);
+    zeile.addEventListener('pointercancel', loslassen);
+  });
+}
+
+// Über welcher Rubrik hängt der Finger? Gemessen an den Kästen, nicht über
+// `elementFromPoint` — die gezogene Zeile läge sonst immer selbst darunter.
+function einrListeBei(y) {
+  var treffer = null;
+  main.querySelectorAll('.einr-liste').forEach(function (l) {
+    var r = l.getBoundingClientRect();
+    if (y >= r.top - 12 && y <= r.bottom + 12) treffer = l;
+  });
+  return treffer;
+}
+function einrZielZeigen(y) {
+  var ziel = einrListeBei(y);
+  main.querySelectorAll('.einr-liste').forEach(function (l) {
+    l.classList.toggle('ziel', l === ziel);
+  });
+}
+// An welcher Stelle innerhalb der Rubrik? Über der Mitte einer Zeile heißt
+// davor — das ist die Erwartung, die jede Liste der Welt weckt.
+function einrStelleBei(liste, y) {
+  var stelle = 0;
+  liste.querySelectorAll('.einr-zeile').forEach(function (z) {
+    if (z.classList.contains('zieht')) return;
+    var r = z.getBoundingClientRect();
+    if (y > r.top + r.height / 2) stelle++;
+  });
+  return stelle;
 }
 
 // ── SICHERUNG ───────────────────────────────────────────────

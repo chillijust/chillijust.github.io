@@ -282,16 +282,24 @@ try {
   state = defaultState();
   ansichtenZuruecksetzen();
   setTab('home');
-  // Sie steht weiter bei den Wörtern und hinter «Tippen» — die Gruppe beginnt
-  // seit ADR 0066 nur eine Stelle später, weil «Zeichen» davor steht.
+  // Sie steht weiter bei den Wörtern und hinter «Tippen». **Nach Namen fragen,
+  // nicht nach Platz** (ADR 0066): Seit ADR 0075 nimmt «Meine Auswahl» oben
+  // einige Kacheln auf, und welche das sind, hängt vom Lernstand ab. Geprüft
+  // wird darum die Reihenfolge **unter denen, die unten stehen**.
+  var unten = alle('#homeAlle [data-uebung]').map(function (b) { return b.dataset.uebung; });
+  var plan = ['buchstaben', 'lernsets', 'freestyle', 'tippen', 'schreibung',
+    'power', 'grammatik', 'uebersetzen'];
   pruefe('G1 die Kachel steht bei den Wörtern, hinter «Tippen»',
-    alle('#homeAlle [data-uebung]').map(function (b) { return b.dataset.uebung; }).slice(0, 5).join() ===
-    'buchstaben,lernsets,freestyle,tippen,schreibung',
-    alle('#homeAlle [data-uebung]').map(function (b) { return b.dataset.uebung; }).join());
+    unten.join() === plan.filter(function (id) { return unten.indexOf(id) !== -1; }).join() &&
+    plan.indexOf('schreibung') > plan.indexOf('tippen'),
+    unten.join());
+  // Und sie ist irgendwo auf der Seite zu finden — in welcher Rubrik, ist eine
+  // Frage der Einrichtung, nicht dieser Suite.
+  var kachel = q('#main [data-uebung="schreibung"] .kachel-stand');
   pruefe('G2 sie nennt die neue Regel beim Namen',
-    q('#homeAlle [data-uebung="schreibung"] .kachel-stand').textContent.indexOf(ORTHO[0].name) !== -1,
-    q('#homeAlle [data-uebung="schreibung"] .kachel-stand').textContent);
-  q('#homeAlle [data-uebung="schreibung"]').click();
+    !!kachel && kachel.textContent.indexOf(ORTHO[0].name) !== -1,
+    kachel ? kachel.textContent : 'keine Kachel');
+  q('#main [data-uebung="schreibung"]').click();
   pruefe('G3 die Kachel führt hin', currentTab === 'schreibung');
   pruefe('G4 der Regelfall färbt den Filter nicht',
     !q('#filterKnopf').classList.contains('aktiv'));

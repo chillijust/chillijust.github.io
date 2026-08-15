@@ -402,11 +402,14 @@ try {
 
   // L · Home als Lagebild
   setTab('home');
-  // Seit 2.4.7 steht oben eine kurze Auswahl des Fälligen; dieselbe Übung kann
-  // darum zweimal im Baum stehen. Das volle Angebot liegt in «#homeAlle»
-  // (ADR 0065).
-  pruefe('L1 acht Kacheln', alle('#homeAlle [data-uebung]').length === 8,
-    String(alle('#homeAlle [data-uebung]').length));
+  // Seit ADR 0075 heißt der untere Bereich «Weitere Übungen» und trägt genau
+  // das: Was oben in «Meine Auswahl» steht, wiederholt sich dort nicht.
+  // Gezählt wird darum über die ganze Seite — und zwar **ohne Doppelte**.
+  var aufHome = alle('#main [data-uebung]').map(function (b) { return b.dataset.uebung; });
+  pruefe('L1 acht Kacheln, jede genau einmal',
+    aufHome.length === 8 &&
+    aufHome.filter(function (x, i) { return aufHome.indexOf(x) !== i; }).length === 0,
+    aufHome.join());
   pruefe('L2 jede nennt ihren Stand',
     alle('.kachel-stand').every(function (x) { return x.textContent.length > 0; }));
   pruefe('L3 Empfehlung führt irgendwohin', !!q('#homeEmpf'));

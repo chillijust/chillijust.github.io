@@ -153,14 +153,31 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   an `.flamme-aussen` allein. Die Farben der Stufen sind unverändert — die Gestalt trägt
   die Aussage, die Farbe bestätigt sie.
 - **Die Übersicht zeigt einen Weg, nicht das Angebot** (ADR 0065). Drei Zonen: die
-  Empfehlung, darunter **höchstens drei** fällige Kacheln (`homeFaellig()` — ohne
-  `gesperrt`, ohne `leer`, ohne das Empfohlene selbst), darunter «Alle Übungen» mit den
-  drei Gruppen **Zeichen · Wörter · Sätze** — und ihre Reihenfolge **ist** der Lernweg
-  (ADR 0066); «Freiwillig» als Gruppe gibt es nicht mehr, das sagt die Kachel selbst.
-  **Der Nutzer räumt aus, was er nicht braucht** (`settings.homeAus`, Einstellungen →
-  Darstellung): gespeichert wird das **Weggeräumte**, damit eine neue Übung von selbst
-  auftaucht; sie steht **nicht** im Sicherungscode. `kachelSichtbar()` fragt zuerst
-  `tutOffen` — vor dem Scheinwerfer stehen immer alle acht. **Alle acht stehen immer im Baum**,
+  Empfehlung, darunter **«Meine Auswahl»** (`homeOben()`), darunter **«Weitere Übungen»**
+  (`homeWeitere()`) mit den drei Gruppen **Zeichen · Wörter · Sätze** — und ihre
+  Reihenfolge **ist** der Lernweg (ADR 0066); «Freiwillig» als Gruppe gibt es nicht mehr,
+  das sagt die Kachel selbst. **«Weitere» heißt weitere**: Was oben steht, wiederholt sich
+  unten nicht, und **nichts steht zweimal auf der Seite** (ADR 0075).
+- **Die Übersicht wird eingerichtet, nicht nur ausgeräumt** (ADR 0075). Die Ansicht
+  `einrichten` (Einstellungen → Darstellung) hat drei Rubriken zum Hineinziehen.
+  Gespeichert wird **das Abweichende**: `settings.homeAus` (versteckt) und
+  `settings.homeOben` — **`null` heißt automatisch** (dann `homeFaellig()`: höchstens
+  drei, ohne `gesperrt`, ohne `leer`, ohne das Empfohlene), ein Array heißt «von Hand
+  eingerichtet». So taucht eine neue Übung von selbst unter «Weitere» auf; beide stehen
+  **nicht** im Sicherungscode. **Von Hand hingezogen bleibt stehen**, auch wenn dort
+  nichts zu tun ist, und die Höchstzahl gilt dann nicht — die Automatik beantwortet «was
+  ist jetzt zu tun», eine Anordnung «was will ich sehen». Beim Ziehen gehören
+  `touch-action: none` und eine Schwelle von acht Pixeln dazu; die Zielrubrik wird an den
+  **Kästen** gemessen, nicht über `elementFromPoint` (die gezogene Zeile läge selbst
+  darunter). Zwei Pfeile je Zeile bleiben als zweiter Weg — eine Einrichtung, die sich nur
+  ziehen lässt, ist für den, bei dem das hakt, keine.
+- **Die Bilanz zeigt Defizite** (ADR 0075), vor dem Lernweg: Zurückgefallenes,
+  Verwechslungen (erst ab dem **zweiten** Mal — ein Ausrutscher ist kein Muster), Zeichen
+  unter der Schwelle, Überfälliges. **Jede Zeile nennt einen Grund und einen Weg
+  dorthin**; wo die Übung gesperrt ist, entfällt der Knopf, statt ins Leere zu führen.
+- **Alle acht stehen im Tutorial im Baum** (ADR 0051). `kachelSichtbar()` und
+  `homeWeitere()` fragen zuerst `tutOffen` — vor dem Scheinwerfer stehen immer alle acht
+  unten. **Alle acht stehen dann im Baum**,
   nur zugeklappt: Acht Tutorial-Schritte zeigen auf je eine Kachel, und der Scheinwerfer
   klappt selbst auf, wenn sein Ziel nicht **sichtbar** ist (`getClientRects()`, nicht
   `querySelector` — ein `[hidden]` findet der sehr wohl). `kachelHtml()` steht einmal für
