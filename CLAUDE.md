@@ -112,7 +112,12 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   Schreibweise so wenig wie der, der es falsch tippt; wer unter fertigen Wörtern wählt,
   behauptet keine. Kyrillisch gelegt wird nur in «Lernsets/Freestyle» und im
   Power-Training — die Kacheln in «Buchstaben» tragen die Umschrift, die in «Übersetzen»
-  ganze Wörter eines Satzes. **`reko = null` steht in `aufgabeBeginnt()`**, nicht nur in
+  ganze Wörter eines Satzes. **Beim Satz gilt eine andere Frage** (ADR 0073): nicht «wurde
+  eine Schreibweise behauptet», sondern «hat der Nutzer es verlangt». «Auch Sätze» wirkt
+  darum auf **allen fünf Stufen**, gelegt wie getippt — aber weiter nur auf der russischen
+  Seite. Wer hier etwas prüft, prüft **die ganze Leiter**: Form und Richtung steigen mit
+  der Satzstufe, und eine Prüfung an einer Stelle war drei Stufen lang grün, während die
+  Einstellung dort schwieg. **`reko = null` steht in `aufgabeBeginnt()`**, nicht nur in
   `rekoVerlangen()`: «Aufdecken» führt an jeder Prüfung vorbei, und die Nachschrift der
   vorigen Aufgabe stünde sonst über der nächsten — derselbe Fehler wie beim Kommentar der
   Chili. **Das Tagesmaß** bremst an genau einer Stelle (`uebVorrat()` in

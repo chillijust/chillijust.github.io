@@ -135,6 +135,54 @@ try {
   trDir = 'de-ru'; trLevel = satz.stufe; trTask = null;
   setTab('uebersetzen');
   buildTransTask(satz);
+
+  // **«Auch Sätze» heißt alle fünf Stufen, nicht zwei** (ADR 0073). Die Form
+  // steigt mit der Satzstufe — erst Kacheln, dann Tippen — und die Richtung
+  // wechselt mit ihr. Bis 2.4.14 verlangte die Einstellung nur bei getippten
+  // Aufgaben etwas und griff damit in zwei von fünf Stufen. Geprüft wird
+  // darum die ganze Leiter, nicht eine Stelle darauf.
+  (function () {
+    var vorher = state.settings.rekonstruktion;
+    state.settings.rekonstruktion = 'immer';
+    var d = SENTENCES.filter(satzFrei)[0];
+    var alterDir = trDir, alterModus = trModus;
+    trDir = 'gemischt'; trModus = 'alle'; trLevel = d.stufe;
+    var gesehen = [];
+    for (var box = 0; box <= BOX_MAX; box++) {
+      state.satzBox[d.ru] = box;
+      trTask = null;
+      buildTransTask(d);
+      if (trTask.art === 'tippen') trEingabe = 'квак квак';
+      else trBuilt = [trTask.tiles[0].key];
+      trPruefen();
+      renderUebersetzen();
+      gesehen.push(box + ':' + trTask.art + '/' + (trTask.loesungRu ? 'ru' : 'de') +
+        '=' + (reko ? 'ja' : 'nein'));
+      // Auf der russischen Seite muss sie kommen — gelegt wie getippt.
+      if (trTask.loesungRu) {
+        pruefe('D5.' + box + ' Stufe ' + box + ' (' + trTask.art + ', nach RU) verlangt sie',
+          !!reko && reko.loesung === d.ru && q('#trNext').disabled === true,
+          reko ? 'da, Weiter ' + (q('#trNext').disabled ? 'zu' : 'offen') : 'keine');
+      } else {
+        // Auf der deutschen nicht: Einen deutschen Satz abzuschreiben lehrt
+        // kein Russisch. Das ist eine Entscheidung, keine Lücke.
+        pruefe('D6.' + box + ' Stufe ' + box + ' (nach DE) verlangt nichts',
+          reko === null && q('#trNext').disabled === false,
+          reko ? 'doch' : 'richtig');
+      }
+    }
+    pruefe('D7 die Leiter hat beide Formen und beide Richtungen',
+      /kacheln/.test(gesehen.join()) && /tippen/.test(gesehen.join()) &&
+      /\/ru=/.test(gesehen.join()) && /\/de=/.test(gesehen.join()),
+      gesehen.join(' '));
+    state.settings.rekonstruktion = vorher;
+    trDir = alterDir; trModus = alterModus;
+    delete state.satzBox[d.ru];
+    trTask = null;
+    trDir = 'de-ru'; trLevel = satz.stufe;
+    setTab('uebersetzen');
+    buildTransTask(satz);
+  })();
   if (trTask && trTask.art === 'tippen' && trTask.loesungRu) {
     trEingabe = 'квакквак';
     trPruefen();

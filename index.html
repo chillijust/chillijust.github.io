@@ -4026,7 +4026,7 @@ var APP_STAND = '2026-08-15'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.4.14T'; /* == VERSION == */
+var APP_VERSION = '2.4.15T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -8912,9 +8912,17 @@ function trFinish(ok) {
   trCorrect = ok;
   trPhase = 'feedback';
   // Nur die russische Seite, und nur wer aufgibt, hat nichts geschrieben. Ein
-  // ganzer Satz ist die Ausnahme, nicht die Vorgabe (ADR 0056).
-  rekoVerlangen(trTask.satz.ru, trTask.art === 'tippen' && !!trTask.loesungRu && !trRevealed,
-    ok, true);
+  // ganzer Satz ist die Ausnahme, nicht die Vorgabe (ADR 0056) — er kommt erst
+  // auf ausdrückliche Ansage, und `satz = true` hält ihn dort.
+  //
+  // **Gelegt zählt hier mit, und aus einem anderen Grund als in ADR 0070**
+  // (siehe ADR 0073). Dort war die Frage, ob eine Antwort eine *Schreibweise*
+  // behauptet; hier ist sie es nicht: Wer «auch Sätze» einstellt, verlangt,
+  // jeden falschen Satz einmal hinzuschreiben — wie die Antwort zustande kam,
+  // spielt dabei keine Rolle. Bis 2.4.14 griff die Einstellung darum nur in
+  // zwei von fünf Stufen: Stufe 1 legt den russischen Satz aus Wortkacheln,
+  // und die waren ausgeschlossen.
+  rekoVerlangen(trTask.satz.ru, !!trTask.loesungRu && !trRevealed, ok, true);
   var vorher = satzBox(trTask.satz);
   satzUpdate(trTask.satz, ok);
   meisterMeldung = null;
