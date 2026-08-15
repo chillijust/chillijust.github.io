@@ -159,8 +159,9 @@ zweite Flug bricht den ersten ab. Ein runder Knopf, in den sie springt, braucht
   automatische Angebot) und `tutorialFertig` (fällt nach dem letzten Schritt, steuert den
   Platz). Ein Abbruch setzt nur den ersten.
 - **Die Einstellungen haben Reiter** (ADR 0045). Reihenfolge: **App · Darstellung ·
-  Lernweg · Antworten · Tastatur**; geöffnet wird bei «Lernweg», nicht beim ersten — «App»
-  hat nichts einzustellen (ADR 0063). Was nur auf einem Reiter steht, ist beim Binden nicht
+  Lernweg · Antworten · Tastatur**; geöffnet wird beim **ersten** Reiter
+  (`EINST_REITER[0].id`, ADR 0067) — eine zweite Meinung über die Reihenfolge wäre eine zu
+  viel. Was nur auf einem Reiter steht, ist beim Binden nicht
   immer da — vor `addEventListener` prüfen. `einstReiter` gehört in
   `ansichtenZuruecksetzen()`. **Eine Prüfung rechnet ihre Sollwerte aus der Stelle in
   `EINST_REITER`**, nie aus einer festen Zahl — die Reihenfolge ist eine Entscheidung und
@@ -292,6 +293,13 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
 - **Ein Entwurf im Meldeblatt überlebt das Zuklappen.** Nur «Abbrechen» wirft ihn weg;
   Ziehen und Danebentippen schließen bloß. Wer das ändert, nimmt dem Blatt seinen Sinn
   (ADR 0025).
+- **Was sich merken lässt, merkt sich gleich** (ADR 0067). Ein Sprachfakt trug seit jeher
+  einen Stern; seit 2.4.9 auch jede Regelkarte in «Grammatik» und «Schreibung»
+  (`merkSternHtml()`, gebunden über `merkBinden()`). Gespeichert wird eine flache Menge mit
+  Präfix in `state.merk` — `g:` für einen Baustein, `o:` für eine Schreibregel —, gelesen
+  über `gemerkteRegeln()`, gezeigt in der Ansicht **«Gemerkt»**. Sie steht als **elftes
+  Feld** im Sicherungscode: **angehängt, nicht eingeschoben**, sonst liest ein älterer
+  Code die falschen Felder.
 - **Tickets liegen in `chillingo_tickets_v1`**, nicht im Lernstand — der Sicherungscode
   soll schlank bleiben. Sie verlassen das Gerät nie von selbst: ein Knopf bündelt sie zu
   einem Text zum Kopieren (ADR 0016). Der Bezug heißt **Ort**, nicht «Übung» — er kann

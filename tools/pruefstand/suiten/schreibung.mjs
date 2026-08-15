@@ -328,7 +328,7 @@ try {
   state.orthoBox.akanje = 3;
   state.orthoSeen.akanje = Date.now();
   var code = encodeBackup();
-  pruefe('H1 zehn Felder', code.split('~').length === 10, String(code.split('~').length));
+  pruefe('H1 elf Felder', code.split('~').length === 11, String(code.split('~').length));
   var zurueck = mergeState(decodeBackup(code));
   pruefe('H2 der Schreibstand kommt zurück', zurueck.orthoBox.akanje === 3,
     String(zurueck.orthoBox.akanje));

@@ -90,6 +90,7 @@ Wer neu dazukommt und nur fünf lesen will:
 | [0064](0064-der-akzent-gehoert-zum-schema.md) | Der Akzent gehört zum Schema, der Schatten auch | |
 | [0065](0065-ein-weg-statt-einer-wand.md) | Ein Weg statt einer Wand — und ein Strich, der nicht mitgeschrieben wird | |
 | [0066](0066-der-weg-und-die-wahl.md) | Die Reihenfolge ist der Weg, die Empfehlung eine Leiter | |
+| [0067](0067-fuenf-tickets-und-ein-merkzettel.md) | Fünf Tickets — und ein Merkzettel für Erklärungen | |
 
 ## Einen neuen anlegen
 

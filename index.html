@@ -830,7 +830,15 @@ button.built-word:active { transform: scale(.95); }
 .gram-deutung { font-size: 14px; color: var(--ice); }
 
 /* Die Regelkarte: erst der Satz, dann die Tabelle, dann der Merksatz. */
-.gram-regel { text-align: left; }
+.gram-regel { text-align: left; position: relative; }
+/* Der Stern an einer Regelkarte sitzt oben rechts — er soll die Zeile darunter
+   nicht anschieben, und die Kopfzeile der Karte ist kurz genug, dass er nie
+   darauf steht. */
+.regelstern {
+  position: absolute; top: 8px; right: 8px; z-index: 1;
+  width: 44px; height: 44px; display: grid; place-items: center;
+}
+.gram-regel .task-label { padding-right: 44px; }
 
 /* «Mehr …» klappt die Karte auf — dieselbe Art wie beim Menü: über die
    Zeilenhöhe eines Rasters, damit keine feste Höhe geraten werden muss. Die
@@ -869,9 +877,12 @@ button.built-word:active { transform: scale(.95); }
 /* Was die App über sich weiß, steht rechts wie ein Schalter — nur ist es
    keiner, sondern eine Auskunft. */
 .app-wert {
-  flex: none; font-size: 14px; color: var(--akzent);
+  flex: none; font-size: 14px; color: var(--dim);
   font-family: Georgia, serif; text-align: right;
 }
+/* Liegt die App wirklich auf dem Gerät, trägt die Zahl das Signal — sie steht
+   dann für «ja» (ADR 0067). Das Wort dazu hört, wer vorlesen lässt. */
+.app-wert.bereit { color: var(--good); }
 
 /* Der Knopf für die Aktualisierung wechselt vier Mal, was er zeigt: «Suchen»,
    einen Ring, «Update», einen Balken. **Seine Größe wechselt nie** — ein Knopf,
@@ -1091,10 +1102,15 @@ body.chili-steht #chiliBuehne { visibility: visible; }
    liegender Schatten läuft von der Kante nach innen aus und trifft dort auf
    die Dunkelheit ringsum. So gibt es keine Linie mehr, nur einen Übergang —
    eine harte goldene Umrandung sah ausgeschnitten aus. */
+/* **Angeleuchtet wird die Kachel, nicht ihr Hof** (ADR 0067). Bis 2.4.8 stand
+   das Loch 22 px weiter außen und lief nach innen weich aus. Auf dem fast
+   schwarzen Grund war das ein Hauch; auf einer satten Farbe wurde daraus ein
+   heller Rahmen um die Kachel, und der zog den Blick stärker an als das, was er
+   zeigen sollte. Jetzt liegt das Loch dicht an und hat eine harte Kante — der
+   Radius ist der der Kachel. */
 #tutLoch {
-  position: absolute; border-radius: 20px;
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, .82),
-              inset 0 0 20px 10px rgba(0, 0, 0, .82);
+  position: absolute; border-radius: 18px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, .82);
   transition: top .28s ease, left .28s ease, width .28s ease, height .28s ease;
 }
 /* Beim **ersten** Erscheinen darf nichts gleiten: Das Loch stünde sonst noch
@@ -1264,9 +1280,13 @@ body.tut-offen { overflow: hidden; }
   /* Sie reicht immer bis unter die Figur — sonst stünde der Zipfel bei einem
      kurzen Satz neben der Blase statt an ihr. */
   min-width: calc(var(--zipfel, 100px) + 46px);
-  background: var(--card-2); border: 1px solid var(--line); border-radius: 14px;
-  padding: 9px 13px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, .28);
+  /* **Der Rand trägt die Akzentfarbe** (ADR 0067): Die Blase steht über der
+     Titelzeile des Kopfes, und mit der Linie des Schemas verschwamm sie dort
+     mit allem anderen. Zwei Pixel, damit sie auch neben der Kachelkante noch
+     als eigene Fläche zu lesen ist. */
+  background: var(--card-2); border: 2px solid var(--akzent); border-radius: 14px;
+  padding: 8px 12px;
+  box-shadow: 0 8px 20px var(--shade);
   animation: blaseAuf .34s .06s both ease-out;
 }
 #chiliBlase[hidden] { display: none; }
@@ -1282,10 +1302,16 @@ body.tut-offen { overflow: hidden; }
 #chiliBlase::before, #chiliBlase::after {
   content: ''; position: absolute; bottom: 100%;
   right: var(--zipfel, 100px);
-  border: 8px solid transparent; border-top: 0;
+  border: 9px solid transparent; border-top: 0;
 }
-#chiliBlase::before { border-bottom-color: var(--line); }
-#chiliBlase::after { border-bottom-color: var(--card-2); margin-bottom: -1px; }
+#chiliBlase::before { border-bottom-color: var(--akzent); }
+/* Zwei Pixel schmaler und zwei tiefer: So bleibt vom unteren Dreieck genau die
+   Randstärke der Blase stehen — sonst hätte der Zipfel keinen Rand oder einen
+   doppelt so dicken. */
+#chiliBlase::after {
+  border-bottom-color: var(--card-2); margin-bottom: -2px;
+  border-width: 0 7px 7px; right: calc(var(--zipfel, 100px) + 2px);
+}
 @keyframes blaseAuf {
   from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: none; }
@@ -3929,7 +3955,7 @@ var APP_STAND = '2026-08-15'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.4.8T'; /* == VERSION == */
+var APP_VERSION = '2.4.9T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -4498,6 +4524,56 @@ function faktGezeigt(text) {
   e.n++;
   state.fakten[id] = e;
 }
+// ── Gemerkte Erklärungen ────────────────────────────────────
+// **Was für einen Fakt gilt, gilt für eine Regel auch** (ADR 0067). Ein Fakt
+// ließ sich seit jeher mit einem Stern merken; eine Grammatik- oder
+// Schreibregel — die man viel eher zweimal lesen will — nicht.
+//
+// Gespeichert wird eine flache Menge von Kennungen mit Präfix: `g:` für einen
+// Grammatikbaustein, `o:` für eine Schreibregel. Das Präfix hält die beiden
+// Töpfe auseinander, ohne zwei Felder zu brauchen — und eine Regel, die es
+// nicht mehr gibt, fällt beim Zeichnen einfach weg.
+function merkId(art, id) { return art + ':' + id; }
+function istGemerkt(art, id) { return !!state.merk[merkId(art, id)]; }
+function merkUmschalten(art, id) {
+  var k = merkId(art, id);
+  if (state.merk[k]) delete state.merk[k];
+  else state.merk[k] = 1;
+  save();
+  return !!state.merk[k];
+}
+// Alles Gemerkte, in der Reihenfolge der Inhalte — nicht in der des Merkens:
+// Eine Liste, die sich beim Lesen umsortiert, findet man nicht wieder.
+function gemerkteRegeln() {
+  var raus = [];
+  GRAMMATIK.forEach(function (b) {
+    if (istGemerkt('g', b.id)) raus.push({ art: 'g', id: b.id, name: b.name, was: b.regel });
+  });
+  ORTHO.forEach(function (r) {
+    if (istGemerkt('o', r.id)) raus.push({ art: 'o', id: r.id, name: r.name, was: r.regel });
+  });
+  return raus;
+}
+// Der Stern an einer Regelkarte. Dieselbe Gestalt wie am Fakt — er steht rechts
+// oben in der Kopfzeile der Karte, damit er den Text nicht anschiebt.
+function merkSternHtml(art, id) {
+  var an = istGemerkt(art, id);
+  return '<button class="sternbtn regelstern' + (an ? ' an' : '') +
+    '" data-merk="' + art + ':' + esc(id) + '" aria-pressed="' + (an ? 'true' : 'false') +
+    '" aria-label="Regel merken">' + (an ? ICON.sternVoll : ICON.stern) + '</button>';
+}
+// Ein Zuhörer für alle Sterne einer Ansicht — angehängt nach dem Zeichnen, wie
+// überall (ADR 0001).
+function merkBinden(neuZeichnen) {
+  document.querySelectorAll('[data-merk]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var t = b.dataset.merk.split(':');
+      merkUmschalten(t[0], t.slice(1).join(':'));
+      if (neuZeichnen) neuZeichnen();
+    });
+  });
+}
+
 function faktFavorit(text) {
   var id = faktId(text);
   var e = state.fakten[id] || { n: 0, f: false };
@@ -4817,6 +4893,9 @@ function defaultState() {
     transStats: { correct: 0, wrong: 0 },
     satzBox: {},               // Leitner-Stufe je Satz, Kennung ist der russische Satz
     satzSeen: {},              // Zeitstempel je Satz, Grundlage der Fälligkeit
+    // Gemerkte Erklärungen (ADR 0067): «g:artikel», «o:akanje». Eine flache
+    // Menge — was drinsteht, ist gemerkt.
+    merk: {},
     abcBox: {},                // Leitner-Stufe je Buchstabe — freiwillig, eigener Topf
     abcSeen: {},               // Zeitstempel je Buchstabe
     // Grammatik: die Karteikarte ist die **Regel**, nicht das Wort. Gemeistert
@@ -5194,11 +5273,24 @@ function swHinweisBinden() {
   });
 }
 
-// Ein Satz statt eines Häkchens: «ja» allein sagt nicht, welcher Stand liegt.
+// **Die Zahl sagt es schon** (ADR 0067). Vorher stand dort «ja · 2.4.6T» — das
+// «ja» war die Antwort auf die Überschrift daneben, also stand die Antwort
+// zweimal da. Jetzt steht die abgelegte Fassung allein, und dass sie abgelegt
+// **ist**, sagt ihre Farbe.
+//
+// Wo es keine Zahl gibt, bleibt ein Wort: Eine Farbe allein trägt in dieser App
+// nie eine Aussage, und «nichts zu sehen» wäre keine Auskunft.
 function swAuskunft() {
   if (!navigator.serviceWorker) return 'nicht unterstützt';
   if (!swStand.bereit) return 'noch nicht';
-  return swStand.version ? 'ja · ' + swStand.version : 'ja';
+  return swStand.version || 'abgelegt';
+}
+// Und was ein Vorleser hört: Die Farbe gibt es dort nicht, also steht der Satz
+// aus. Ohne das trüge Grün die Aussage allein.
+function swAuskunftGelesen() {
+  if (!navigator.serviceWorker) return 'Offline bereit: nicht unterstützt';
+  if (!swStand.bereit) return 'Offline bereit: noch nicht';
+  return 'Offline bereit: ja' + (swStand.version ? ', Fassung ' + swStand.version : '');
 }
 // Der Notausgang fragt einmal nach. Ein Fehlgriff wäre kein Drama — der
 // Lernstand liegt im localStorage —, aber ein Neuladen ohne Netz schon.
@@ -5279,7 +5371,11 @@ function swKnopfTippen() {
       var feld = document.getElementById('swBereit');
       // «Offline bereit» bleibt auch im Funkloch richtig — die Auskunft liest
       // nur, was auf dem Gerät liegt, und braucht dafür kein Netz.
-      if (feld) feld.textContent = swAuskunft();
+      if (feld) {
+        feld.textContent = swAuskunft();
+        feld.classList.toggle('bereit', !!swStand.bereit);
+        feld.setAttribute('aria-label', swAuskunftGelesen());
+      }
       swKnopfLage = 'ruhe';
       // Wartet eine Fassung, sagt das der Knopf selbst — dann braucht es keine
       // Meldung daneben.
@@ -5772,9 +5868,10 @@ function tutLochSetzen(ziel) {
   }
   hof.classList.remove('ohne-ziel');
   var r = el.getBoundingClientRect();
-  // Reichlich Luft: Der weiche Rand läuft nach innen aus, und ohne Abstand
-  // legte er sich auf das, was er zeigen soll.
-  var luft = 22;
+  // Knapp: Gerade so viel, dass die Kante der Kachel und ihr Schatten nicht
+  // angeschnitten werden. Mehr wäre ein leuchtender Rahmen um sie herum
+  // (ADR 0067) — und der zöge den Blick stärker an als die Kachel selbst.
+  var luft = 4;
   loch.style.top = (r.top - luft) + 'px';
   loch.style.left = (r.left - luft) + 'px';
   loch.style.width = (r.width + luft * 2) + 'px';
@@ -6361,7 +6458,7 @@ var UEBUNG_NAME = { home: 'Übersicht' };
 UEBUNGEN.forEach(function (u) { UEBUNG_NAME[u.id] = u.name; });
 var ANSICHT_NAME = {
   bilanz: 'Bilanz', sicherung: 'Sicherung', einstellungen: 'Einstellungen',
-  fakten: 'Sprachfakten', tickets: 'Tickets'
+  fakten: 'Sprachfakten', merkzettel: 'Gemerkt', tickets: 'Tickets'
 };
 var DETAIL_NAME = {
   woerter: 'Wörter', saetze: 'Sätze', antworten: 'Antworten', serie: 'Serie'
@@ -7398,6 +7495,7 @@ function render() {
   else if (currentTab === 'power') renderPower();
   else if (currentTab === 'einstellungen') renderEinstellungen();
   else if (currentTab === 'fakten') renderFakten();
+  else if (currentTab === 'merkzettel') renderMerkzettel();
   else if (currentTab === 'tickets') renderTickets();
   else if (currentTab === 'sicherung') renderSicherung();
   else renderBilanz();
@@ -7741,7 +7839,7 @@ function ansichtenZuruecksetzen() {
   meldeBearbeitet = null;
   meisterMeldung = null;
   patzerMeldung = null;
-  einstReiter = 'lernweg';
+  einstReiter = EINST_REITER[0].id;
   // Die Übersicht klappt wieder zu: Nach dem Einspielen einer Sicherung steht
   // dort ein anderer Lernstand, und «Alle Übungen» offen zu lassen hieße, den
   // schlanken Weg zu überspringen (ADR 0017).
@@ -10342,7 +10440,8 @@ function gramEntdeckenHtml(b) {
 
 // ── Die Regelkarte ──────────────────────────────────────────
 function gramRegelHtml(b, mitKnopf) {
-  var html = '<div class="card gram-regel"><p class="task-label">' + esc(b.name) +
+  var html = '<div class="card gram-regel">' + merkSternHtml('g', b.id) +
+    '<p class="task-label">' + esc(b.name) +
     ' · ' + esc(b.kurz) + '</p>' +
     '<p class="fact-text">' + esc(b.regel) + '</p><div class="gram-tabelle">';
   b.tabelle.forEach(function (z) {
@@ -10703,6 +10802,7 @@ function renderGrammatik() {
     renderGrammatik();
   });
 
+  merkBinden(renderGrammatik);
   main.querySelectorAll('[data-gramopt]').forEach(function (el) {
     el.addEventListener('click', function () {
       if (gramPhase !== 'ask') return;
@@ -10986,7 +11086,8 @@ function orthoEntdeckenHtml(r) {
 // Schreibregel dasselbe wie eine Tabelle, nur ehrlicher.
 function orthoRegelHtml(r, mitKnopf) {
   var hoerbar = r.hoerbar !== false;
-  var html = '<div class="card gram-regel"><p class="task-label">' + esc(r.name) +
+  var html = '<div class="card gram-regel">' + merkSternHtml('o', r.id) +
+    '<p class="task-label">' + esc(r.name) +
     ' · ' + esc(r.kurz) + '</p>' +
     '<p class="fact-text">' + esc(r.regel) + '</p><div class="gram-tabelle">';
   r.aufgaben.slice(0, 5).forEach(function (a) {
@@ -11196,6 +11297,7 @@ function renderSchreibung() {
       if (c) c.disabled = !orthoAbgabeBereit();
     });
   });
+  merkBinden(renderSchreibung);
   var warum = document.getElementById('orthoWarum');
   if (warum) warum.addEventListener('click', function () {
     // Nicht neu zeichnen — dieselbe Bewegung wie in «Grammatik»: Die Karte
@@ -11909,7 +12011,11 @@ var EINST_REITER = [
   { id: 'antworten', name: 'Antworten' },
   { id: 'tastatur', name: 'Tastatur' }
 ];
-var einstReiter = 'lernweg';
+// Geöffnet wird beim **ersten** Reiter, nicht bei einem ausgesuchten: «App»
+// steht vorn, weil man dort zuerst nachsieht, wenn etwas mit der App selbst
+// ist. Bis 2.4.8 stand hier «Lernweg» — das war eine zweite Meinung über die
+// Reihenfolge, und zwei Meinungen sind eine zu viel (ADR 0067).
+var einstReiter = EINST_REITER[0].id;
 
 // Wischen wechselt den Reiter — dieselbe Geste wie im Kopf, nur waagerecht
 // begrenzt aufs Blatt. Der Randwisch für «zurück» hat Vorrang: Er beginnt am
@@ -12244,7 +12350,8 @@ function renderEinstellungen() {
     '<span class="setting-note">Ist die App auf diesem Gerät abgelegt? Dann läuft sie ' +
     'auch ohne Netz — nicht nur, solange der Browser sie zufällig noch im Zwischenspeicher ' +
     'hat.</span></span>' +
-    '<span class="app-wert" id="swBereit">' + esc(swAuskunft()) + '</span></div>' +
+    '<span class="app-wert' + (swStand.bereit ? ' bereit' : '') + '" id="swBereit"' +
+    ' aria-label="' + esc(swAuskunftGelesen()) + '">' + esc(swAuskunft()) + '</span></div>' +
     '<div class="setting"><span class="setting-text">' +
     '<span class="setting-title">Nach Aktualisierung suchen</span>' +
     '<span class="setting-note">Sieht nach, ob eine neue Fassung bereitliegt. ' +
@@ -12387,6 +12494,33 @@ function renderEinstellungen() {
 
 // ── SPRACHFAKTEN ────────────────────────────────────────────
 var faktenFilter = 'gesehen'; // 'gesehen' · 'favoriten' · 'alle'
+
+// ── Gemerktes ───────────────────────────────────────────────
+// Die Regeln, die man sich aufgehoben hat, ganz — nicht als Anriss. Wer eine
+// Erklärung noch einmal lesen will, will sie **lesen**, nicht suchen, wo sie
+// weitergeht. Ein Tipp auf den Stern nimmt sie wieder heraus.
+function renderMerkzettel() {
+  var liste = gemerkteRegeln();
+  var html = '<section>';
+  if (!liste.length) {
+    html += '<div class="leer">' + maskottchen('gross') + '<h3>Noch nichts gemerkt</h3>' +
+      '<p>In «Grammatik» und «Schreibung» sitzt oben rechts an jeder Regelkarte ein ' +
+      'Stern. Was du damit markierst, findest du hier wieder.</p></div>';
+  } else {
+    liste.forEach(function (e) {
+      var b = e.art === 'g' ? gramFinde(e.id) : orthoFinde(e.id);
+      if (!b) return;
+      html += e.art === 'g' ? gramRegelHtml(b, false) : orthoRegelHtml(b, false);
+    });
+  }
+  html += '<div class="btn-row"><button class="btn ghost" id="merkBack">Zurück</button></div>' +
+    '</section>';
+  main.innerHTML = html;
+  // Der Stern nimmt hier wieder heraus — dann ist die Karte weg, und die Liste
+  // muss neu stehen.
+  merkBinden(renderMerkzettel);
+  document.getElementById('merkBack').addEventListener('click', zurueckGehen);
+}
 
 function renderFakten() {
   var gesehen = FACTS.filter(function (f) { return faktStand(f).n > 0; });
@@ -12882,8 +13016,16 @@ function encodeBackup() {
   // Zehntes Feld: die Schreibregeln. Auch sie führen Regeln, nicht Wörter.
   var schreib = bkStaendeAus(state.orthoBox, state.orthoSeen, bkKennung);
 
+  // Elftes Feld: was man sich gemerkt hat (ADR 0067). Ein Fakt-Favorit steckt
+  // seit jeher im Code — eine gemerkte Regel gehört genauso hinein. Die
+  // Kennungen sind kurze Wörter aus [a-z0-9_-] mit einem Präfix; sie können
+  // darum roh mit Punkten aneinandergereiht werden. **Angehängt, nicht
+  // eingeschoben:** Ein älterer Code hat das Feld nicht, und ein älterer Leser
+  // überliest es — beides geht nur, solange es hinten steht.
+  var gemerkt = Object.keys(state.merk).sort().join('.');
+
   var rumpf = [BK_KOPF, woerter, saetze, fakten.join(''), zahlen, einst, abc, regeln,
-    schreib].join('~');
+    schreib, gemerkt].join('~');
   return rumpf + '~' + bkPruefsumme(rumpf);
 }
 
@@ -12929,6 +13071,16 @@ function decodeBackup(code) {
   if (teile.length > 8) bkStaendeNach(teile[7], t.regeln, d.gramBox, d.gramSeen);
   // Und wer noch kein zehntes Feld kennt, hat schlicht keine Schreibregeln gelernt.
   if (teile.length > 9) bkStaendeNach(teile[8], t.schreibung, d.orthoBox, d.orthoSeen);
+  // Elftes Feld: gemerkte Erklärungen (ADR 0067). Eine Regel, die es nicht mehr
+  // gibt, fällt weg — dieselbe Regel wie bei den Inhalten oben.
+  if (teile.length > 10 && teile[9]) {
+    teile[9].split('.').forEach(function (k) {
+      var t2 = k.split(':');
+      if (t2.length !== 2) return;
+      var da = t2[0] === 'g' ? gramFinde(t2[1]) : t2[0] === 'o' ? orthoFinde(t2[1]) : null;
+      if (da) d.merk[k] = 1;
+    });
+  }
 
   var f = teile[3];
   for (var i = 0; i + BK_KENNUNG + 3 <= f.length; i += BK_KENNUNG + 3) {
@@ -13218,6 +13370,20 @@ function renderBilanz() {
     favoriten + ' als Favorit gemerkt.</p>' +
     '<div class="btn-row"><button class="btn ghost" id="zuFakten">Fakten durchgehen</button></div>';
 
+  // **Gemerkte Erklärungen** (ADR 0067) — dieselbe Frage wie beim Fakt: Was
+  // habe ich mir aufgehoben? Der Abschnitt steht auch leer da, denn sonst
+  // erführe niemand, dass es den Stern gibt.
+  var gemerkt = gemerkteRegeln();
+  html += '<h2>Gemerkte Regeln</h2>' +
+    '<p class="backup-note">' + (gemerkt.length
+      ? gemerkt.length + (gemerkt.length === 1 ? ' Erklärung' : ' Erklärungen') +
+        ' hast du dir aufgehoben.'
+      : 'Noch keine. In «Grammatik» und «Schreibung» sitzt ein Stern an jeder Regelkarte.') +
+    '</p>' +
+    (gemerkt.length
+      ? '<div class="btn-row"><button class="btn ghost" id="zuMerk">Regeln nachlesen</button></div>'
+      : '');
+
   html += '<h2>Sicherung</h2>' +
     '<p class="backup-note">Dein Fortschritt als kopierbarer Code steht im Men\u00fc unter \u00abSicherung\u00bb \u2014 dort wird er erzeugt und dort auch wieder eingespielt.</p>' +
     '<div class="btn-row"><button class="btn ghost" id="zuSicherung">Zur Sicherung</button></div>';
@@ -13236,6 +13402,8 @@ function renderBilanz() {
     });
   });
   document.getElementById('zuFakten').addEventListener('click', function () { setTab('fakten'); });
+  var zuMerk = document.getElementById('zuMerk');
+  if (zuMerk) zuMerk.addEventListener('click', function () { setTab('merkzettel'); });
   var mehr = document.getElementById('themenMehr');
   if (mehr) mehr.addEventListener('click', function () { themenOffen = !themenOffen; renderBilanz(); });
 }

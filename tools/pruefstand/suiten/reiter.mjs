@@ -68,12 +68,15 @@ try {
     String(alle('[data-reiter]').length));
   pruefe('A2 und vier Blätter auf einer Bahn',
     alle('#einstBahn > [data-reiterblatt]').length === EINST_REITER.length);
-  // Geöffnet wird bei «Lernweg» — dort steht, was man am ehesten sucht. Das
-  // ist nicht der erste Reiter; die Bahn beginnt also verschoben.
-  pruefe('A3 der Anfang ist «Lernweg»', einstReiter === 'lernweg' &&
-    q('[data-reiter="lernweg"]').classList.contains('active'));
+  // **Geöffnet wird beim ersten Reiter** (ADR 0067): «App» steht vorn, weil
+  // man dort zuerst nachsieht, wenn etwas mit der App selbst ist. Gefragt wird
+  // die Stelle, nicht der Name — die Reihenfolge darf sich ändern.
+  var ERSTER = EINST_REITER[0].id;
+  var ZWEITER = EINST_REITER[1].id;
+  pruefe('A3 der Anfang ist der erste Reiter', einstReiter === ERSTER &&
+    q('[data-reiter="' + ERSTER + '"]').classList.contains('active'), einstReiter);
   pruefe('A4 die Bahn steht auf seinem Blatt',
-    bahnProzent() === sollProzent('lernweg') && bahnPixel() === 0, versatz());
+    bahnProzent() === sollProzent(ERSTER) && bahnPixel() === 0, versatz());
   pruefe('A5 das Fenster schneidet ab',
     getComputedStyle(q('#einstRahmen')).overflow === 'hidden');
   pruefe('A6 jedes Blatt ist so breit wie das Fenster',
@@ -84,15 +87,16 @@ try {
 
   // ── B · Nur das aktive Blatt ist erreichbar ───────────────
   pruefe('B1 das aktive Blatt ist nicht versteckt',
-    q('[data-reiterblatt="lernweg"]').getAttribute('aria-hidden') === 'false');
+    q('[data-reiterblatt="' + ERSTER + '"]').getAttribute('aria-hidden') === 'false');
   pruefe('B2 die anderen schon',
     alle('[data-reiterblatt]').filter(function (b) {
-      return b.dataset.reiterblatt !== 'lernweg';
+      return b.dataset.reiterblatt !== ERSTER;
     }).every(function (b) { return b.getAttribute('aria-hidden') === 'true'; }));
   pruefe('B3 und der Fokus springt nicht hinein',
     alle('[data-reiterblatt="antworten"] button').every(function (b) { return b.tabIndex === -1; }));
+  // «App» hat nichts einzustellen — dort gibt es Knöpfe, aber keine Schalter.
   pruefe('B4 im aktiven Blatt dagegen schon',
-    alle('[data-reiterblatt="lernweg"] button').every(function (b) { return b.tabIndex === 0; }));
+    alle('[data-reiterblatt="' + ERSTER + '"] button').every(function (b) { return b.tabIndex === 0; }));
 
   // ── C · Der Finger nimmt die Bahn mit ─────────────────────
   var rahmen = q('#einstRahmen');
@@ -106,24 +110,24 @@ try {
   pruefe('C4 ohne Übergang, damit es am Finger klebt',
     q('#einstBahn').style.transition === 'none', q('#einstBahn').style.transition);
   touch(rahmen, 'touchend', 220, 302);
-  pruefe('C5 ein kurzer Zug rastet zurück', einstReiter === 'lernweg', einstReiter);
+  pruefe('C5 ein kurzer Zug rastet zurück', einstReiter === ERSTER, einstReiter);
   pruefe('C6 und tut das weich', q('#einstBahn').style.transition.indexOf('transform') === 0,
     q('#einstBahn').style.transition);
 
   // ── D · Weit genug gezogen wechselt das Blatt ─────────────
   wische(360, 60);
-  pruefe('D1 nach links kommt der nächste Reiter', einstReiter === 'antworten', einstReiter);
+  pruefe('D1 nach links kommt der nächste Reiter', einstReiter === ZWEITER, einstReiter);
   pruefe('D2 die Leiste zieht mit',
-    q('[data-reiter="antworten"]').classList.contains('active') &&
-    !q('[data-reiter="lernweg"]').classList.contains('active'));
+    q('[data-reiter="' + ZWEITER + '"]').classList.contains('active') &&
+    !q('[data-reiter="' + ERSTER + '"]').classList.contains('active'));
   pruefe('D3 die Bahn steht auf dessen Blatt',
-    bahnProzent() === sollProzent('antworten') && bahnPixel() === 0, versatz());
+    bahnProzent() === sollProzent(ZWEITER) && bahnPixel() === 0, versatz());
   pruefe('D4 und der Fokus wandert mit',
-    alle('[data-reiterblatt="antworten"] button').every(function (b) { return b.tabIndex === 0; }) &&
-    alle('[data-reiterblatt="lernweg"] button').every(function (b) { return b.tabIndex === -1; }));
+    alle('[data-reiterblatt="' + ZWEITER + '"] button').every(function (b) { return b.tabIndex === 0; }) &&
+    alle('[data-reiterblatt="' + ERSTER + '"] button').every(function (b) { return b.tabIndex === -1; }));
 
   wische(60, 360);
-  pruefe('D5 nach rechts wieder zurück', einstReiter === 'lernweg', einstReiter);
+  pruefe('D5 nach rechts wieder zurück', einstReiter === ERSTER, einstReiter);
 
   // Am Rand gibt es nichts mehr — und es wird nicht umgebrochen.
   einstReiter = EINST_REITER[0].id;
@@ -138,7 +142,7 @@ try {
   wische(360, 60);
   pruefe('D7 nach dem letzten auch',
     einstReiter === EINST_REITER[EINST_REITER.length - 1].id, einstReiter);
-  einstReiter = 'lernweg';
+  einstReiter = ERSTER;
   einstBahnSetzen(0, false);
   einstReiterKopf();
 
@@ -146,10 +150,11 @@ try {
   // Der Zug vom linken Rand darf nicht blättern — er führt zurück, und genau
   // das soll er weiterhin tun.
   wische(10, 300);
-  pruefe('E1 ein Zug vom linken Rand blättert nicht', einstReiter === 'lernweg', einstReiter);
+  pruefe('E1 ein Zug vom linken Rand blättert nicht', einstReiter === ERSTER, einstReiter);
   pruefe('E2 sondern führt zurück', currentTab !== 'einstellungen', currentTab);
   setTab('einstellungen');
-  pruefe('E3 und die Reiter stehen wieder da', !!q('#einstBahn') && einstReiter === 'lernweg');
+  pruefe('E3 und die Reiter stehen wieder da', !!q('#einstBahn') && einstReiter === ERSTER,
+    einstReiter);
 
   // ── F · Senkrecht ist Scrollen, nicht Blättern ────────────
   rahmen = q('#einstRahmen');
@@ -160,7 +165,7 @@ try {
   pruefe('F2 und bleibt Scrollen, auch wenn er später quer wird',
     bahnPixel() === 0, versatz());
   touch(rahmen, 'touchend', 200, 320);
-  pruefe('F3 kein Reiterwechsel daraus', einstReiter === 'lernweg', einstReiter);
+  pruefe('F3 kein Reiterwechsel daraus', einstReiter === ERSTER, einstReiter);
 
   // ── G · Tippen geht weiterhin ─────────────────────────────
   tippe(q('[data-reiter="darstellung"]'));
@@ -190,7 +195,8 @@ try {
   // ── I · Ansichtszustand ───────────────────────────────────
   einstReiter = 'tastatur';
   ansichtenZuruecksetzen();
-  pruefe('I1 zurückgesetzt steht wieder «Lernweg»', einstReiter === 'lernweg', einstReiter);
+  pruefe('I1 zurückgesetzt steht wieder der erste Reiter', einstReiter === EINST_REITER[0].id,
+    einstReiter);
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);
 }

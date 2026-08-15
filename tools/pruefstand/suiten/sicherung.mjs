@@ -35,7 +35,7 @@ try {
   // A · Aufbau des Codes
   var code = encodeBackup();
   pruefe('A1 trägt Kopf und Version', code.indexOf('CHG2~') === 0, code.slice(0, 12));
-  pruefe('A2 zehn Felder', code.split('~').length === 10, String(code.split('~').length));
+  pruefe('A2 elf Felder', code.split('~').length === 11, String(code.split('~').length));
   pruefe('A3 eine einzige Zeile', code.indexOf('\n') === -1 && code.indexOf(' ') === -1);
   // Der Bindestrich hält die Stellen frei, an denen bis ADR 0039 Darstellung
   // und Farbton standen — sonst rutschte das Schema dorthin, wo ein älterer

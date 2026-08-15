@@ -183,7 +183,7 @@ try {
 
   // I · Sicherungscode nimmt die Buchstaben mit
   var code = encodeBackup();
-  pruefe('I1 zehn Felder', code.split('~').length === 10, String(code.split('~').length));
+  pruefe('I1 elf Felder', code.split('~').length === 11, String(code.split('~').length));
   var zurueck = mergeState(decodeBackup(code));
   pruefe('I2 Buchstabenstände erhalten',
     ALPHABET.every(function (b) { return zurueck.abcBox[b[1]] === BOX_MAX; }));

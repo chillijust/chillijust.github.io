@@ -432,7 +432,7 @@ try {
   state.gramBox[GRAMMATIK[0].id] = 3;
   state.gramSeen[GRAMMATIK[0].id] = Date.now();
   var code = encodeBackup();
-  pruefe('J1 zehn Felder', code.split('~').length === 10, String(code.split('~').length));
+  pruefe('J1 elf Felder', code.split('~').length === 11, String(code.split('~').length));
   var zurueck = mergeState(decodeBackup(code));
   pruefe('J2 der Regelstand kommt zurück', zurueck.gramBox[GRAMMATIK[0].id] === 3);
   pruefe('J3 der Überblick nennt ihn', bkUeberblick(state).indexOf('1 Regel') !== -1,
@@ -450,6 +450,62 @@ try {
   ansichtenZuruecksetzen();
   pruefe('K1 alles zurück', gramBaustein === null && gramQ === null &&
     gramRegelOffen === false && gramEingabe === '');
+
+  // ── M · Gemerkte Erklärungen (ADR 0067) ──────────────────
+  // Ein Fakt ließ sich seit jeher mit einem Stern merken; eine Regel — die man
+  // viel eher zweimal lesen will — nicht.
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  GRAMMATIK.forEach(function (x) { state.gramSeen[x.id] = 1; });
+  gramBaustein = GRAMMATIK[0].id;
+  gramAnsicht = 'regel';
+  setTab('grammatik');
+  var stern = q('.gram-regel [data-merk]');
+  pruefe('M1 an der Regelkarte sitzt ein Stern', !!stern,
+    stern ? stern.dataset.merk : (q('.gram-regel') ? 'Karte ohne Stern' : 'keine Karte'));
+  if (stern) {
+    pruefe('M2 er steht auf «nicht gemerkt»', stern.getAttribute('aria-pressed') === 'false');
+    stern.click();
+    pruefe('M3 ein Tipp merkt sie', istGemerkt('g', GRAMMATIK[0].id) === true);
+    pruefe('M4 und der Stern sagt es',
+      q('.gram-regel [data-merk]').getAttribute('aria-pressed') === 'true');
+  }
+  state.merk = {};
+  merkUmschalten('o', ORTHO[1].id);
+  merkUmschalten('g', GRAMMATIK[2].id);
+  var mliste = gemerkteRegeln();
+  pruefe('M5 die Sammlung führt beide Arten', mliste.length === 2,
+    mliste.map(function (e) { return e.art + ':' + e.id; }).join());
+  pruefe('M6 Grammatik vor Schreibung, wie die Inhalte stehen',
+    mliste[0].art === 'g' && mliste[1].art === 'o');
+  state.merk['g:gibtsnicht'] = 1;
+  pruefe('M7 Unbekanntes fällt weg', gemerkteRegeln().length === 2);
+  setTab('merkzettel');
+  pruefe('M8 die Ansicht heißt «Gemerkt»', ANSICHT_NAME.merkzettel === 'Gemerkt' &&
+    q('#kopfTitel').textContent === 'Gemerkt', q('#kopfTitel').textContent);
+  pruefe('M9 sie zeigt beide Karten ganz', alle('.gram-regel').length === 2 &&
+    alle('.gram-tabelle').length === 2, String(alle('.gram-regel').length));
+  q('.gram-regel [data-merk]').click();
+  pruefe('M10 der Stern nimmt sie wieder heraus', alle('.gram-regel').length === 1,
+    String(alle('.gram-regel').length));
+  state.merk = {};
+  renderMerkzettel();
+  pruefe('M11 leer erklärt sie sich', !!q('.leer') &&
+    q('.leer').textContent.indexOf('Stern') !== -1);
+  merkUmschalten('g', GRAMMATIK[0].id);
+  merkUmschalten('o', ORTHO[0].id);
+  var zurueck = decodeBackup(encodeBackup());
+  pruefe('M12 gemerkt bleibt gemerkt', Object.keys(zurueck.merk).length === 2,
+    JSON.stringify(zurueck.merk));
+  var mcode = encodeBackup().split('~');
+  var altRumpf = mcode.slice(0, 9).join('~');
+  pruefe('M13 ein Code ohne das Feld bleibt lesbar', (function () {
+    try { return Object.keys(decodeBackup(altRumpf + '~' + bkPruefsumme(altRumpf)).merk).length === 0; }
+    catch (e) { return 'wirft: ' + e.message; }
+  })() === true);
+  state = defaultState();
+  ansichtenZuruecksetzen();
+
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);
 }

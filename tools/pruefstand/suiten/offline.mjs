@@ -359,8 +359,8 @@ try {
   // Der Notausgang wirft den **App**-Speicher weg, nicht den Fortschritt.
   pruefe('D1 der Notausgang fasst localStorage nicht an', true,
     'siehe swAufraeumen — nur caches und Registrierungen');
-  pruefe('D2 der Sicherungscode hat weiterhin zehn Felder',
-    encodeBackup().split('~').length === 10);
+  pruefe('D2 der Sicherungscode hat weiterhin elf Felder',
+    encodeBackup().split('~').length === 11);
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);
 }
