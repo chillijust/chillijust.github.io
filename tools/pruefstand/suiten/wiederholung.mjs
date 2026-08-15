@@ -223,14 +223,95 @@ try {
   // Bis 1.4.1 gab es nur 7/14/21/30 — jeder andere Wert fiel auf 21 zurück.
   pruefe('I7 zu große Frist wird gekappt',
     mergeState({ settings: { auffrischen: 9999 } }).settings.auffrischen === AUFFRISCH_MAX);
+  // **Null ist seit ADR 0074 ein gültiger Wert** und heißt «gar nicht mehr».
+  // Bis 2.4.15 galt sie als Unsinn und fiel auf 21 zurück.
   pruefe('I7b Unsinn fällt auf die Vorgabe',
-    mergeState({ settings: { auffrischen: 0 } }).settings.auffrischen === 21 &&
-    mergeState({ settings: { auffrischen: -3 } }).settings.auffrischen === 21);
+    mergeState({ settings: { auffrischen: -3 } }).settings.auffrischen === 21,
+    String(mergeState({ settings: { auffrischen: -3 } }).settings.auffrischen));
+  pruefe('I7b2 die Null überlebt',
+    mergeState({ settings: { auffrischen: 0 } }).settings.auffrischen === 0,
+    String(mergeState({ settings: { auffrischen: 0 } }).settings.auffrischen));
   pruefe('I7c ein alter Wert überlebt',
     mergeState({ settings: { auffrischen: 14 } }).settings.auffrischen === 14);
   pruefe('I7d ein krummer auch',
     mergeState({ settings: { auffrischen: 18 } }).settings.auffrischen === 18);
   state.settings.auffrischen = 21;
+
+  // ── J · Null heißt gar nicht (ADR 0074) ───────────────────
+  // Die Frist steht an genau einer Stelle: intervallFuer(). Alles andere —
+  // Wörter, Sätze, Buchstaben, Regeln — fragt sie. Eine Frist, die nie
+  // abläuft, ist unendlich, nicht null.
+  state.settings.auffrischen = 0;
+  pruefe('J1 abgeschaltet ist die Frist unendlich',
+    intervallFuer(BOX_MAX) === Infinity, String(intervallFuer(BOX_MAX)));
+  pruefe('J2 die Leiter darunter bleibt, wie sie war',
+    intervallFuer(0) === INTERVALL[0] && intervallFuer(1) === INTERVALL[1],
+    intervallFuer(1) + ' / ' + INTERVALL[1]);
+
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  state.settings.auffrischen = 0;
+  var lang = ALL_VOCAB[0];
+  state.boxes[lang.id] = BOX_MAX;
+  state.lastSeen[lang.id] = 1;   // vor Ewigkeiten gesehen
+  pruefe('J3 ein fertiges Wort wird nie wieder fällig',
+    faellig(lang, Date.now()) === false);
+  var s0 = SENTENCES[0];
+  state.satzBox[s0.ru] = BOX_MAX;
+  state.satzSeen[s0.ru] = 1;
+  pruefe('J4 ein fertiger Satz auch', satzFaellig(s0, Date.now()) === false);
+  // Und mit einer Frist kommt es zurück — sonst hätte die Null nichts bewiesen.
+  state.settings.auffrischen = 21;
+  pruefe('J5 mit Frist kommt es sehr wohl zurück',
+    faellig(lang, Date.now()) === true && satzFaellig(s0, Date.now()) === true);
+
+  // Was im Zählerfeld steht: «0 Tage» hieße «sofort wieder fällig».
+  state.settings.auffrischen = 0;
+  einstReiter = 'lernweg';
+  setTab('einstellungen');
+  var feld = q('[data-zaehler="auffrischen"]').parentNode.querySelector('.zaehler-wert');
+  pruefe('J6 null steht als «gar nicht» da, nicht als «0 Tage»',
+    feld.textContent.indexOf('gar nicht') !== -1 &&
+    feld.textContent.indexOf('0') === -1, feld.textContent);
+  pruefe('J7 und die Minustaste ist am Anschlag zu',
+    alle('[data-zaehler="auffrischen"]').filter(function (t) {
+      return t.dataset.schritt === '-1';
+    })[0].disabled === true);
+
+  // Der Leerzustand darf kein Wiedersehen versprechen, das es nicht gibt.
+  ALL_VOCAB.forEach(function (v) {
+    state.boxes[v.id] = BOX_MAX;
+    state.lastSeen[v.id] = 1;
+  });
+  // **Vier Leerzustände versprechen ein Wiedersehen** — zwei in «Tippen», zwei
+  // in «Übersetzen». Bei abgeschalteter Frist gibt es keins. Geprüft werden
+  // alle vier: Die erste Fassung dieser Reparatur fasste zwei an, und die
+  // dritte hinterließ «Die nächste Auffrischung kommt .»
+  var stellen = [
+    ['tippen', 'wiederholung'], ['tippen', 'lernen'],
+    ['uebersetzen', 'wiederholung'], ['uebersetzen', 'lernen']
+  ];
+  var schlecht = [];
+  stellen.forEach(function (p) {
+    if (p[0] === 'tippen') tippenModus = p[1]; else trModus = p[1];
+    setTab(p[0]);
+    var t = main.textContent;
+    if (/Infinity|NaN|kommt \.|kommt \s*\./.test(t)) schlecht.push(p.join('/') + ': ' + t.slice(0, 90));
+  });
+  pruefe('J8 kein Leerzustand verspricht ein Wiedersehen, das es nicht gibt',
+    schlecht.length === 0, schlecht.join(' | '));
+  tippenModus = 'lernen'; trModus = 'lernen';
+
+  // Und die Null überlebt den Sicherungscode: Ein Oder-Rückfall auf 21 hätte
+  // sie still verschluckt, weil eine Null in JavaScript falsch ist.
+  state.settings.auffrischen = 0;
+  pruefe('J9 die Null übersteht Sichern und Einspielen',
+    mergeState(decodeBackup(encodeBackup())).settings.auffrischen === 0,
+    String(mergeState(decodeBackup(encodeBackup())).settings.auffrischen));
+  state.settings.auffrischen = 21;
+  pruefe('J10 und eine echte Frist auch',
+    mergeState(decodeBackup(encodeBackup())).settings.auffrischen === 21,
+    String(mergeState(decodeBackup(encodeBackup())).settings.auffrischen));
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);
 }

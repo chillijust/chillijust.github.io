@@ -1542,10 +1542,42 @@ body.unterwegs .reiter { top: 62px; }
   display: block; font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
   color: var(--dim); margin-bottom: 8px;
 }
-/* Vierzehn Seiten passen nicht in eine Zeile und sollen das Blatt auch nicht
-   füllen: Die Reihe bricht um und rollt, wenn es mehr wird. */
-.bezug-chips { margin-top: 0; max-height: 112px; overflow-y: auto; }
-.bezug-chips .chip { padding: 7px 12px; font-size: 12px; min-height: 34px; }
+/* **Ein Klappfeld, kein Rädchen** (ADR 0074). Vierzehn Seiten als offene Reihe
+   füllten das halbe Blatt; als Liste hinter einem Knopf stehen sie da, wenn man
+   sie braucht, und sonst nicht. Dieselbe Gestalt wie «Alle Übungen» auf der
+   Übersicht — die App hat für das Aufklappen genau eine Form. Ein natives
+   Auswahlfeld bleibt verboten: Das ist auf iOS ein Rad über der halben Seite,
+   und die Suite bricht darüber ab. */
+.bezug-knopf {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  width: 100%; min-height: 44px; padding: 10px 14px;
+  background: var(--card-2); border: 1px solid var(--line); border-radius: 12px;
+  color: var(--text); font: inherit; font-size: 14px; text-align: left; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.bezug-knopf::after {
+  content: ''; flex: none; width: 8px; height: 8px; margin-right: 2px;
+  border-right: 2px solid var(--dim); border-bottom: 2px solid var(--dim);
+  transform: translateY(-2px) rotate(45deg); transition: transform .2s;
+}
+.bezug-knopf[aria-expanded="true"]::after { transform: translateY(2px) rotate(-135deg); }
+.bezug-liste[hidden] { display: none; }
+.bezug-liste {
+  margin-top: 6px; max-height: 176px; overflow-y: auto;
+  border: 1px solid var(--line); border-radius: 12px; background: var(--card-2);
+}
+.bezug-zeile {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  width: 100%; min-height: 44px; padding: 10px 14px;
+  background: none; border: 0; border-bottom: 1px solid var(--line);
+  color: var(--text); font: inherit; font-size: 14px; text-align: left; cursor: pointer;
+}
+.bezug-zeile:last-child { border-bottom: none; }
+.bezug-zeile.an { color: var(--akzent); }
+.bezug-zeile .icon { width: 16px; height: 16px; flex: none; }
+@media (prefers-reduced-motion: reduce) {
+  .bezug-knopf::after { transition: none; }
+}
 
 .mehr {
   display: block; margin: 12px auto 0; background: none; border: none; color: var(--ice);
@@ -1966,9 +1998,13 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
          aktuelle Seite; «Keine» steht ganz oben, weil das die Antwort auf
          dieselbe Frage ist, die der Haken beantwortete. -->
     <div class="bezug-wahl">
-      <span class="bezug-text">Betrifft</span>
-      <div class="chipwrap bezug-chips" id="meldeBezug" role="group"
-        aria-label="Welche Seite betrifft es?"></div>
+      <span class="bezug-text" id="meldeBezugText">Betrifft</span>
+      <button class="bezug-knopf" id="meldeBezugKnopf" type="button"
+        aria-expanded="false" aria-controls="meldeBezug"
+        aria-labelledby="meldeBezugText meldeBezugName">
+        <span id="meldeBezugName"></span></button>
+      <div class="bezug-liste" id="meldeBezug" role="radiogroup"
+        aria-label="Welche Seite betrifft es?" hidden></div>
     </div>
     <button class="blatt-link" id="meldeAlle">Alle Tickets →</button>
     <div class="btn-row">
@@ -3996,7 +4032,9 @@ var SATZ_STUFE = 2;
 // Die Auffrischfrist ist frei wählbar, aber nicht grenzenlos: Unter einem Tag
 // wäre «fertig» kein Zustand mehr, über einem Jahr keine Frist. Dazwischen
 // entscheidet der Nutzer, nicht eine Liste von vier Meinungen.
-var AUFFRISCH_MIN = 1;
+// Null ist ein gültiger Wert und heißt «gar nicht mehr» (ADR 0074) — nicht
+// «sofort». Wer sein Fertiges nie wiedersehen will, soll das sagen dürfen.
+var AUFFRISCH_MIN = 0;
 var AUFFRISCH_MAX = 365;
 // Das Tagesmaß für **neues** Material. Ohne Grenze lernt man an einem guten
 // Abend vierzig Wörter — und bekommt sie drei Wochen später alle am selben Tag
@@ -4026,7 +4064,7 @@ var APP_STAND = '2026-08-15'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.4.15T'; /* == VERSION == */
+var APP_VERSION = '2.4.16T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -5833,9 +5871,27 @@ function updateKopf() {
   var gemeistert = woerterGemeistert();
   var anteil = ALL_VOCAB.length ? gemeistert / ALL_VOCAB.length * 100 : 0;
   document.getElementById('kopfFill').style.width = anteil + '%';
-  var text = gemeistert + ' von ' + ALL_VOCAB.length + ' gemeistert';
-  if (state.streak >= 3) text += ' · <span class="kopf-serie">Serie ' + state.streak + '</span>';
+  var text = prozentText(anteil, gemeistert, ALL_VOCAB.length) + ' gemeistert';
+  // **«Serie 3» sagt nicht, was es zählt** (ADR 0074). Die Zahl allein ist
+  // eine Behauptung ohne Gegenstand; erst «richtig in Folge» macht sie zu
+  // einer Auskunft. Weggelassen wird sie nicht — sie ist das Einzige an
+  // dieser Zeile, das sich von Antwort zu Antwort bewegt.
+  if (state.streak >= 3) {
+    text += ' · <span class="kopf-serie">' + state.streak + ' richtig in Folge</span>';
+  }
   document.getElementById('kopfLabel').innerHTML = text;
+}
+// **Ein Anteil darf nicht runden, bis er lügt** (ADR 0074). Bei 395 Wörtern
+// ist eines 0,25 % — «0 % gemeistert» wäre für den, der gerade eines
+// geschafft hat, entmutigend und falsch. Und 100 % gehört dem, der wirklich
+// alle hat, nicht dem bei 394 von 395.
+function prozentText(anteil, teil, ganzes) {
+  if (!ganzes) return '0 %';
+  if (teil >= ganzes) return '100 %';
+  if (teil > 0 && anteil < 1) return 'unter 1 %';
+  var p = Math.round(anteil);
+  if (p >= 100) p = 99;
+  return p + ' %';
 }
 // Wurde mit dieser Antwort die Endstufe **erreicht**? Nur der Übergang zählt:
 // Wer ein schon gemeistertes Wort auffrischt, hat es nicht noch einmal
@@ -6654,9 +6710,42 @@ function verwechslungsPool() {
 }
 // Auf der Endstufe entscheidet die Einstellung, sonst die Leitner-Leiter.
 function intervallFuer(box) {
-  if (box >= BOX_MAX) return (state.settings.auffrischen || 21) * TAG;
+  if (box >= BOX_MAX) {
+    var tage = state.settings.auffrischen;
+    // **Null heißt: gar nicht mehr** (ADR 0074). `|| 21` stand hier und an
+    // drei weiteren Stellen — und hätte die Null still in die Vorgabe
+    // verwandelt, weil sie in JavaScript falsch ist. Eine Frist, die nie
+    // abläuft, ist unendlich, nicht null: `jetzt - seit >= Infinity` ist
+    // immer falsch, und damit wird nichts je wieder fällig.
+    if (tage === 0) return Infinity;
+    return (tage || 21) * TAG;
+  }
   return INTERVALL[Math.min(box, INTERVALL.length - 1)];
 }
+// Was die Leerzustände über die Auffrischung sagen — an **einer** Stelle, denn
+// bei abgeschalteter Frist wäre «nach 0 Tagen einmal zur Sicherheit» Unsinn.
+// **Vier Stellen versprechen ein Wiedersehen** — zwei in «Tippen», zwei in
+// «Übersetzen». Alle vier fragen jetzt hier nach, denn bei abgeschalteter
+// Frist gibt es keins, und ein leerer Zeitpunkt hinterließe «Die nächste
+// Auffrischung kommt .» (ADR 0074).
+function auffrischKommt(wann) {
+  if (!wann) return 'Das Auffrischen ist abgeschaltet.';
+  return 'Die n\u00e4chste Auffrischung kommt ' + esc(wann) + '.';
+}
+
+// Der Nachsatz hinter «… sitzt und ruht»: Ohne Frist gibt es kein Wiedersehen,
+// und ein Versprechen darauf wäre falsch.
+function ruhtWeiter(wann) {
+  if (!wann) return ' Das Auffrischen ist abgeschaltet — hier bleibt es leer.';
+  return ' Das N\u00e4chste kommt ' + esc(wann) + ' zur Sicherheit noch einmal.';
+}
+
+function auffrischSatz() {
+  var tage = state.settings.auffrischen;
+  if (!tage) return 'du hast das Auffrischen abgeschaltet, hier bleibt es darum leer.';
+  return 'nach ' + tage + ' Tagen einmal zur Sicherheit.';
+}
+
 function faellig(v, jetzt) {
   var seit = state.lastSeen[v.id];
   if (!seit) return true;
@@ -7310,7 +7399,13 @@ document.getElementById('meldeBezug').addEventListener('click', function (e) {
   var b = e.target.closest ? e.target.closest('[data-bezug]') : null;
   if (!b) return;
   meldeBezugWahl = b.dataset.bezug;
-  document.getElementById('meldeBezug').innerHTML = meldeBezugHtml();
+  // Gewählt heißt zu: Ein Klappfeld, das offen bleibt, hat nichts beantwortet.
+  meldeBezugOffen = false;
+  meldeBezugZeichnen();
+});
+document.getElementById('meldeBezugKnopf').addEventListener('click', function () {
+  meldeBezugOffen = !meldeBezugOffen;
+  meldeBezugZeichnen();
 });
 // Vom Blatt in die Liste. Nur zuklappen, nicht leeren: Ein Entwurf überlebt
 // das Zuklappen, und ihn beim Nachsehen wegzuwerfen wäre die böseste Falle
@@ -8137,6 +8232,7 @@ function ansichtenZuruecksetzen() {
   tkImportOffen = false;
   tkImportMeldung = '';
   meldeBearbeitet = null;
+  meldeBezugOffen = false;
   meisterMeldung = null;
   patzerMeldung = null;
   einstReiter = EINST_REITER[0].id;
@@ -8799,6 +8895,9 @@ function trPool() {
 function trNaechsteAuffrischung() {
   var jetzt = Date.now();
   var frist = intervallFuer(BOX_MAX);
+  // Abgeschaltet gibt es kein «nächstes Mal» — und «in Infinity Tagen» wäre
+  // die Art von Satz, die man einmal auf dem Gerät sieht und nie vergisst.
+  if (!isFinite(frist)) return '';
   var beste = null;
   trRuhend(trLevel).forEach(function (s) {
     var wann = (state.satzSeen[s.ru] || 0) + frist;
@@ -9071,9 +9170,9 @@ function renderUebersetzenLeer() {
     html += '<h3>' + (ruhend ? 'Gerade nichts f\u00e4llig' : 'Noch nichts zum Auffrischen') + '</h3>' +
       '<p>' + (ruhend
         ? ruhend + (ruhend === 1 ? ' Satz sitzt und ruht.' : ' S\u00e4tze sitzen und ruhen.') +
-          ' Der n\u00e4chste kommt ' + esc(trNaechsteAuffrischung()) + ' zur Sicherheit noch einmal.'
-        : 'Hier erscheinen S\u00e4tze, die du ' + BOX_MAX + '\u00d7 richtig \u00fcbersetzt haben \u2014 nach ' +
-          (state.settings.auffrischen || 21) + ' Tagen einmal zur Sicherheit.') + '</p>';
+          ruhtWeiter(trNaechsteAuffrischung())
+        : 'Hier erscheinen S\u00e4tze, die du ' + BOX_MAX + '\u00d7 richtig \u00fcbersetzt hast \u2014 ' +
+          auffrischSatz()) + '</p>';
     if (offen || andereKnopf) {
       html += '<div class="btn-row">' +
         (offen ? '<button class="btn primary" id="trZuLernen">' +
@@ -9086,7 +9185,7 @@ function renderUebersetzenLeer() {
       '\u00d7 richtig \u00fcbersetzt. ' +
       (frisch
         ? frisch + (frisch === 1 ? ' wartet' : ' warten') + ' zum Auffrischen.'
-        : 'Die n\u00e4chste Auffrischung kommt ' + esc(trNaechsteAuffrischung()) + '.') + '</p>' +
+        : auffrischKommt(trNaechsteAuffrischung())) + '</p>' +
       '<div class="btn-row">' +
       (frisch ? '<button class="btn primary" id="trZuFrisch">Wiederholen</button>' : '') +
       andereKnopf +
@@ -12089,6 +12188,7 @@ function tippenRuhend() {
 function naechsteAuffrischung() {
   var jetzt = Date.now();
   var frist = intervallFuer(BOX_MAX);
+  if (!isFinite(frist)) return '';
   var beste = null;
   tippenRuhend().forEach(function (v) {
     var wann = (state.lastSeen[v.id] || 0) + frist;
@@ -12133,10 +12233,9 @@ function renderTippenLeer() {
   } else if (tippenModus === 'wiederholung') {
     html += '<h3>' + (ruhend ? 'Gerade nichts fällig' : 'Noch nichts zum Auffrischen') + '</h3>' +
       '<p>' + (ruhend
-        ? ruhend + (ruhend === 1 ? ' Wort sitzt' : ' Wörter sitzen') + ' und ruhen. Das nächste kommt ' +
-          esc(naechsteAuffrischung()) + ' zur Sicherheit noch einmal.'
-        : 'Hier erscheinen Wörter, die du fertig gelernt hast — nach ' +
-          (state.settings.auffrischen || 21) + ' Tagen einmal zur Sicherheit.') + '</p>';
+        ? ruhend + (ruhend === 1 ? ' Wort sitzt' : ' Wörter sitzen') + ' und ruhen.' +
+          ruhtWeiter(naechsteAuffrischung())
+        : 'Hier erscheinen Wörter, die du fertig gelernt hast — ' + auffrischSatz()) + '</p>';
     html += '<div class="btn-row">' +
       (offen ? '<button class="btn primary" id="tZuLernen">' +
         offen + (offen === 1 ? ' Wort offen' : ' Wörter offen') + '</button>' : '') +
@@ -12148,7 +12247,7 @@ function renderTippenLeer() {
       (ruhend ? ruhend + (ruhend === 1 ? ' Wort sitzt und ruht. ' : ' Wörter sitzen und ruhen. ') : '') +
       (frisch
         ? frisch + (frisch === 1 ? ' ist' : ' sind') + ' zum Auffrischen bereit.'
-        : 'Die nächste Auffrischung kommt ' + esc(naechsteAuffrischung()) + '.') +
+        : auffrischKommt(naechsteAuffrischung())) +
       '</p>';
     // Der Ausweg, den es lange nicht gab: Gelerntes noch einmal schreiben,
     // ohne auf die Frist zu warten.
@@ -12501,6 +12600,8 @@ function zaehlerSchritt(key, schritt) {
 // tauschen beide Hälften den Text.
 function zaehlerAnzeige(key, wert, einheit) {
   if (key === 'tagesmass' && !wert) return { zahl: '\u2014', einheit: 'ohne Grenze' };
+  // «0 Tage» hieße «sofort wieder fällig» — das Gegenteil des Gemeinten.
+  if (key === 'auffrischen' && !wert) return { zahl: '\u2014', einheit: 'gar nicht' };
   return { zahl: String(wert), einheit: einheit };
 }
 
@@ -12646,7 +12747,7 @@ function renderEinstellungen() {
       [{ wert: 'lernen', text: 'Beim Lernen' }, { wert: 'immer', text: 'Immer' },
        { wert: 'nie', text: 'Nie' }]) +
     zaehler('auffrischen', 'Auffrischen nach',
-      'Fertig Gelerntes verschwindet aus «Tippen» und «Übersetzen». Nach dieser Frist kommt es einmal zur Sicherheit zurück — richtig beantwortet, und es ist wieder draußen.',
+      'Fertig Gelerntes verschwindet aus «Tippen» und «Übersetzen». Nach dieser Frist kommt es einmal zur Sicherheit zurück — richtig beantwortet, und es ist wieder draußen. Auf null gestellt kommt gar nichts mehr zurück.',
       'Tage') +
     zaehler('tagesmass', 'Neue Wörter am Tag',
       'Wie viele Wörter an einem Tag neu anfangen dürfen. Ohne Grenze lernst du an einem ' +
@@ -12975,21 +13076,38 @@ function meldeBezugText() {
   return meldeBezugWahl ? ansichtName(meldeBezugWahl) : '';
 }
 
-// **Chips, kein Klappmenü.** Die App führt keine Klappmenüs — auf iOS wären das
-// Rädchen, die die halbe Seite verdecken, und überall sonst steht die Auswahl
-// offen da. Die Suite `filter` liest den Quelltext danach ab; sie darf das
-// Wort also nicht einmal in einem Kommentar finden. Hier ist es dieselbe Reihe
-// wie bei den Kacheln, nur mit einer Wahl statt vieler.
+// **Ein Klappfeld mit einer Liste darin** (ADR 0074). Vierzehn Seiten als
+// offene Chip-Reihe füllten das halbe Blatt; eingeklappt zeigt der Knopf die
+// Wahl, aufgeklappt die Liste. Ein natives Auswahlfeld bleibt draußen — auf
+// iOS ist das ein Rad über der halben Seite, und die Suite liest den Quelltext
+// danach ab. Gebaut ist es darum aus Knöpfen, wie alles hier.
+var meldeBezugOffen = false;
+
 function meldeBezugHtml() {
-  var html = '<button class="chip' + (meldeBezugWahl ? '' : ' active') +
-    '" role="radio" aria-checked="' + (meldeBezugWahl ? 'false' : 'true') +
-    '" data-bezug="">Keine</button>';
-  meldeSeiten().forEach(function (s) {
-    var an = s.id === meldeBezugWahl;
-    html += '<button class="chip' + (an ? ' active' : '') + '" role="radio" aria-checked="' +
-      (an ? 'true' : 'false') + '" data-bezug="' + esc(s.id) + '">' + esc(s.name) + '</button>';
-  });
+  var html = bezugZeile('', 'Keine');
+  meldeSeiten().forEach(function (s) { html += bezugZeile(s.id, s.name); });
   return html;
+}
+function bezugZeile(id, name) {
+  var an = id === meldeBezugWahl;
+  return '<button class="bezug-zeile' + (an ? ' an' : '') + '" type="button" role="radio"' +
+    ' aria-checked="' + (an ? 'true' : 'false') + '" data-bezug="' + esc(id) + '">' +
+    '<span>' + esc(name) + '</span>' + (an ? ICON.haken : '') + '</button>';
+}
+// Was auf dem Knopf steht, wenn die Liste zu ist.
+function meldeBezugName() {
+  return meldeBezugWahl ? ansichtName(meldeBezugWahl) : 'Keine';
+}
+// Knopf und Liste in einem Zug — beide hängen an derselben Wahl, und sie
+// getrennt nachzuziehen wäre eine Quelle für zwei Wahrheiten.
+function meldeBezugZeichnen() {
+  var knopf = document.getElementById('meldeBezugKnopf');
+  var liste = document.getElementById('meldeBezug');
+  if (!knopf || !liste) return;
+  document.getElementById('meldeBezugName').textContent = meldeBezugName();
+  knopf.setAttribute('aria-expanded', meldeBezugOffen ? 'true' : 'false');
+  liste.hidden = !meldeBezugOffen;
+  liste.innerHTML = meldeBezugHtml();
 }
 
 function meldeArtHtml() {
@@ -13010,7 +13128,7 @@ function meldeFuellen() {
       meldeFuellen();
     });
   });
-  document.getElementById('meldeBezug').innerHTML = meldeBezugHtml();
+  meldeBezugZeichnen();
   document.getElementById('meldeSichern').textContent = meldeBearbeitet ? 'Ändern' : 'Sichern';
   document.getElementById('meldeAbbruch').textContent = meldeBearbeitet ? 'Verwerfen' : 'Abbrechen';
   // In der Liste selbst führt der Weg nirgendwohin — und beim Bearbeiten käme
@@ -13561,7 +13679,10 @@ function decodeBackup(code) {
     if (k && n < schalter.length) d.settings[k] = schalter.charAt(n) === '1';
   });
   d.settings.tippenStufe = parseInt(e[1], 10) || 3;
-  d.settings.auffrischen = parseInt(e[2], 10) || 21;
+  // Nicht `|| 21`: Eine gesicherte Null ist eine Entscheidung, keine Lücke
+  // (ADR 0074). Die Grenzen zieht danach `mergeState()`.
+  var frist = parseInt(e[2], 10);
+  d.settings.auffrischen = isNaN(frist) ? 21 : frist;
   // An Stelle 4 und 5 standen bis ADR 0039 Darstellung und Farbton; heute steht
   // dort ein «-». Ein Code von damals wird über dieselben Regeln übersetzt wie
   // ein alter Lernstand, ein Code ohne Angabe bleibt bei der Vorgabe.

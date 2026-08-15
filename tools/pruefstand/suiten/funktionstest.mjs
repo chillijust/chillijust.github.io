@@ -145,12 +145,24 @@ try {
     state.streak = 5;
     updateKopf();
     var label = q('#kopfLabel').textContent;
-    pruefe('K1 Kopf zählt gemeisterte Wörter', label.indexOf('30 von ' + ALL_VOCAB.length) === 0, label);
-    pruefe('K2 Serie ab 3 sichtbar', label.indexOf('Serie 5') !== -1 && !!q('.kopf-serie'));
+    // Seit ADR 0074 steht dort ein Anteil, keine Absolutzahl — und die Serie
+    // sagt, was sie zählt.
+    pruefe('K1 Kopf nennt den Anteil in Prozent',
+      label.indexOf(Math.round(30 / ALL_VOCAB.length * 100) + ' % gemeistert') === 0, label);
+    pruefe('K2 Serie ab 3 sichtbar',
+      label.indexOf('5 richtig in Folge') !== -1 && !!q('.kopf-serie'), label);
+    // **Ein Anteil darf nicht runden, bis er lügt.**
+    pruefe('K2b ein einzelnes Wort ist nicht «0 %»',
+      prozentText(1 / 395 * 100, 1, 395) === 'unter 1 %', prozentText(1 / 395 * 100, 1, 395));
+    pruefe('K2c und 100 % gehört dem, der wirklich alle hat',
+      prozentText(99.9, 394, 395) === '99 %' && prozentText(100, 395, 395) === '100 %',
+      prozentText(99.9, 394, 395) + ' / ' + prozentText(100, 395, 395));
     var breite = parseFloat(q('#kopfFill').style.width);
     pruefe('K3 Fortschrittsleiste gefüllt', breite > 0 && breite < 100, q('#kopfFill').style.width);
     state.streak = 2; updateKopf();
-    pruefe('K4 Serie unter 3 ausgeblendet', q('#kopfLabel').textContent.indexOf('Serie') === -1);
+    pruefe('K4 Serie unter 3 ausgeblendet',
+      q('#kopfLabel').textContent.indexOf('in Folge') === -1 && !q('.kopf-serie'),
+      q('#kopfLabel').textContent);
 
     // L · Statuszeile
     zeigeStatus('ok', 'gespeichert');

@@ -142,6 +142,11 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   `jubelNachtragen()` nach `load()` **und** nach dem Einspielen einer Sicherung. Der
   leere Topf im Power-Training bleibt wiederholbar — er ist eine Aufgabe, keine
   Auszeichnung.
+- **Ein Anteil darf nicht runden, bis er lügt** (ADR 0074). Der Kopf nennt den
+  Fortschritt in Prozent (`prozentText()`): unter einem Prozent steht «unter 1 %», und
+  100 % gehört dem, der wirklich alle hat — bei 394 von 395 steht 99 %. Die Serie daneben
+  sagt, was sie zählt («3 richtig in Folge»), denn eine Zahl ohne Gegenstand ist keine
+  Auskunft.
 - **Die Fortschrittsreihe brennt** (ADR 0046) — ein Zeichen je Wort, gebaut von
   `ppHtml(stufe)` und sonst nirgends: Stufe 0 bleibt ein Strich, ab Stufe 1 wächst eine
   Flamme mit. **Nur Gold flackert**; die Animation hängt an `.punkt` und `.pp.s4`, nicht
@@ -296,7 +301,13 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   Grenzen und Vorgabe je Schlüssel in `ZAEHLER`/`zaehlerGrenzen()`, Gedrückthalten zählt
   weiter, und er zeichnet **an Ort und Stelle** nach — ein Renderlauf würde die gehaltene
   Taste wegwerfen. Was im Feld steht, sagt `zaehlerAnzeige()`: Beim Tagesmaß heißt Null
-  «ohne Grenze», nicht «null neue Wörter». Soll eine geänderte Vorgabe auch bestehende Geräte
+  «ohne Grenze», beim Auffrischen «gar nicht» — **nie «0 Tage»**, das hieße «sofort
+  wieder fällig». **Was ein Nullwert bedeutet, weiß nur der Zähler, dem er gehört**
+  (ADR 0074): `|| vorgabe` liest ihn als «nicht gesetzt» und ist überall dort falsch, wo
+  Null etwas heißt — auch in `decodeBackup()`. Die Auffrischfrist steht an **einer** Stelle
+  (`intervallFuer()`), und abgeschaltet ist sie `Infinity`, nicht 0; Wörter, Sätze,
+  Buchstaben und beide Regelübungen fragen dort nach. **Vier Leerzustände versprechen ein
+  Wiedersehen** — wer die Frist anfasst, prüft alle vier. Soll eine geänderte Vorgabe auch bestehende Geräte
   erreichen, den Schlüssel umbenennen — der alte Wert fällt in `mergeState()` weg.
 - **Vorlesen nur über `hoerknopf(text, sprache)`** — der Text hängt als `data-say` am
   Knopf, ein einziger Zuhörer auf `#main` bedient alle. Nie einen eigenen Zuhörer je
@@ -335,9 +346,12 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   einem Text zum Kopieren (ADR 0016), und `ticketsLesen()` liest **genau diese Form**
   wieder ein (ADR 0069) — was nicht passt, wird übersprungen, nicht geraten, und Bekanntes
   nicht verdoppelt. Der Bezug heißt **Ort**, nicht «Übung» — er kann auch die Übersicht
-  oder eine Menüansicht sein, und er ist eine **Chip-Reihe**: **Die App führt keine
-  Klappmenüs**, die Suite `filter` liest den Quelltext danach ab und springt auch auf ein
-  Vorkommen im Kommentar an. Vom Blatt führt eine Zeile in die Liste;
+  oder eine Menüansicht sein, und er steht seit ADR 0074 in einem **Klappfeld** aus
+  Knöpfen: zugeklappt trägt der Knopf die Wahl, eine Wahl schließt ihn wieder. Dieselbe
+  Gestalt wie «Alle Übungen» — **die App hat für das Aufklappen genau eine Form**. Ein
+  **natives Auswahlfeld** bleibt verboten (auf iOS ein Rad über der halben Seite); die
+  Suite `filter` liest den Quelltext danach ab und springt auch auf ein Vorkommen im
+  Kommentar an. Vom Blatt führt eine Zeile in die Liste;
   sie klappt nur zu, sie leert nicht.
 - **Die Kachel liegt in jedem Schema über dem Grund**, die Kopfzeile nimmt überall den
   Grund. In «Dark» ist der Grund beinahe schwarz und warmneutral, die Kachel deutlich

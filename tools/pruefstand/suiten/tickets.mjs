@@ -135,12 +135,12 @@ try {
   pruefe('F3 Textfeld zoomt nicht heran',
     parseFloat(getComputedStyle(q('#meldeText')).fontSize) >= 16);
   // **Der Bezug ist eine Wahl** (ADR 0069), kein Haken: vorbelegt mit der
-  // Ansicht, über der das Blatt steht, aber änderbar.
-  // **Der Bezug ist eine Wahl** (ADR 0069), kein Haken: vorbelegt mit der
-  // Ansicht, über der das Blatt steht, aber änderbar. Und **kein Klappmenü** —
-  // die App führt keine; es ist dieselbe Chip-Reihe wie überall.
+  // Ansicht, über der das Blatt steht, aber änderbar. Seit ADR 0074 steht sie
+  // in einem **Klappfeld** — aus Knöpfen gebaut, nicht als natives
+  // Auswahlfeld: Das wäre auf iOS ein Rad über der halben Seite, und die
+  // Prüfung ganz oben in dieser Suite bricht darüber ab.
   pruefe('F3b der Bezug steht auf der Ansicht darunter',
-    q('#meldeBezug [data-bezug="lernsets"]').classList.contains('active') &&
+    q('#meldeBezug [data-bezug="lernsets"]').classList.contains('an') &&
     meldeBezugWahl === 'lernsets', meldeBezugWahl);
   pruefe('F3c und bietet jede Seite an', (function () {
     var werte = alle('#meldeBezug [data-bezug]').map(function (o) { return o.dataset.bezug; });
@@ -148,8 +148,27 @@ try {
       werte.indexOf('bilanz') !== -1 && werte.length === meldeSeiten().length + 1;
   })(), alle('#meldeBezug [data-bezug]').length + ' Einträge');
   pruefe('F3d genau eine ist gewählt',
-    alle('#meldeBezug .chip.active').length === 1,
-    String(alle('#meldeBezug .chip.active').length));
+    alle('#meldeBezug .bezug-zeile.an').length === 1,
+    String(alle('#meldeBezug .bezug-zeile.an').length));
+  // Zugeklappt sagt der Knopf, was gewählt ist — sonst müsste man aufklappen,
+  // um zu sehen, was man gerade meldet.
+  pruefe('F3e zugeklappt steht die Wahl auf dem Knopf',
+    q('#meldeBezug').hidden === true &&
+    q('#meldeBezugKnopf').getAttribute('aria-expanded') === 'false' &&
+    q('#meldeBezugName').textContent === 'Lernsets',
+    q('#meldeBezugName').textContent);
+  q('#meldeBezugKnopf').click();
+  pruefe('F3f ein Tipp klappt die Liste auf',
+    q('#meldeBezug').hidden === false &&
+    q('#meldeBezugKnopf').getAttribute('aria-expanded') === 'true' &&
+    q('#meldeBezug [data-bezug="bilanz"]').getClientRects().length > 0);
+  q('#meldeBezug [data-bezug="bilanz"]').click();
+  pruefe('F3g eine Wahl schließt sie wieder',
+    meldeBezugWahl === 'bilanz' && q('#meldeBezug').hidden === true &&
+    q('#meldeBezugName').textContent === 'Bilanz',
+    meldeBezugWahl + ' / ' + q('#meldeBezugName').textContent);
+  q('#meldeBezugKnopf').click();
+  q('#meldeBezug [data-bezug="lernsets"]').click();
   var vorher2 = tickets.length;
   q('#meldeSichern').click();
   pruefe('F4 ohne Titel wird nichts gespeichert', tickets.length === vorher2 && meldeOffen);

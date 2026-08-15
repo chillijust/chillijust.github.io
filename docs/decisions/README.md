@@ -97,6 +97,7 @@ Wer neu dazukommt und nur fünf lesen will:
 | [0071](0071-nichts-huepft-nichts-schiebt.md) | Der Hüpfer nur nach einem Flug, kein Schatten, nichts schiebt | löst 0064 §1 ab |
 | [0072](0072-der-vordereingang.md) | Der Weg durchs Menü beginnt am Anfang der Ansicht | ergänzt 0036 |
 | [0073](0073-auch-saetze-heisst-alle-stufen.md) | «Auch Sätze» wirkt auf allen Stufen, gelegt wie getippt | ergänzt 0056, 0070 |
+| [0074](0074-null-anteil-klappfeld.md) | Null heißt «gar nicht», der Anteil in Prozent, der Bezug ein Klappfeld | ergänzt 0015, 0069 |
 
 ## Einen neuen anlegen
 
