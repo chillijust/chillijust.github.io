@@ -170,7 +170,50 @@ try {
   q('#meldeBezugKnopf').click();
   q('#meldeBezug [data-bezug="lernsets"]').click();
 
+  // ── F3g2 ff · Die Optionen klappen (ADR 0082) ────────────
+  // Zugeklappt reicht Überschrift und Text: Das Blatt war so hoch, dass der
+  // eigene Satz oben aus dem Bild rutschte.
+  pruefe('F3g2 die Optionen sind zugeklappt',
+    meldeOptOffen === false &&
+    q('#meldeOptKnopf').getAttribute('aria-expanded') === 'false' &&
+    !q('#meldeOpt').classList.contains('auf'));
+  pruefe('F3g3 Überschrift und Textfeld bleiben sichtbar',
+    q('#meldeTitel').getClientRects().length > 0 &&
+    q('#meldeText').getClientRects().length > 0);
+  // Zugeklappt nimmt der Inhalt keine Höhe — das ist der Zweck.
+  pruefe('F3g4 und die Optionen keine Höhe',
+    q('#meldeOpt').getBoundingClientRect().height < 2,
+    q('#meldeOpt').getBoundingClientRect().height.toFixed(1));
+  pruefe('F3g5 der Knopf steht links neben «Alle Tickets»',
+    !!q('.melde-fuss') &&
+    q('#meldeOptKnopf').getBoundingClientRect().right <=
+      q('#meldeAlle').getBoundingClientRect().left + 1);
+  q('#meldeOptKnopf').click();
+  pruefe('F3g6 ein Tipp klappt sie auf',
+    meldeOptOffen === true && q('#meldeOpt').classList.contains('auf') &&
+    q('#meldeOptKnopf').getAttribute('aria-expanded') === 'true');
+  pruefe('F3g7 und der Text im Knopf wandert dabei nach oben', (function () {
+    var sp = q('.opt-stapel > span');
+    return getComputedStyle(sp).transform !== 'none';
+  })(), getComputedStyle(q('.opt-stapel > span')).transform);
+
+  // **Das Textfeld wächst mit, aber höchstens um drei Zeilen.**
+  var feld = q('#meldeText');
+  var klein = feld.getBoundingClientRect().height;
+  feld.value = 'Zeile\n'.replace('Zeile', 'x').repeat ? '' : '';
+  feld.value = Array(20).join('eine Zeile Text\n');
+  meldeTextWachsen();
+  var gross = feld.getBoundingClientRect().height;
+  var zeile = parseFloat(getComputedStyle(feld).lineHeight) || 21;
+  pruefe('F3g8 das Feld wächst, aber nicht endlos',
+    gross > klein && gross - klein <= zeile * 3 + 2,
+    klein.toFixed(0) + ' -> ' + gross.toFixed(0) + ' bei ' + zeile.toFixed(0) + ' px Zeile');
+  feld.value = '';
+  meldeTextWachsen();
+
   // ── F3h ff · Ort und Art sind zwei Fragen (ADR 0078) ─────
+  q('#meldeOptKnopf').click();
+  q('#meldeOptKnopf').click();
   // Eine Liste für beides wäre auf dreißig Einträge gewachsen, und man hätte
   // nur eines von beidem sagen können.
   pruefe('F3h beim Fehler steht ein zweites Feld für die Art',
@@ -219,6 +262,16 @@ try {
     var namen = alle('#meldeGrund [data-grund]').map(function (b) { return b.dataset.grund; });
     return namen.indexOf('haengt') !== -1 && namen.indexOf('neu') === -1;
   })());
+  // **Gesetzt heißt gefüllt** (ADR 0082): Auch zugeklappt soll man sehen, dass
+  // etwas dasteht.
+  q('#meldeGrundKnopf').click();
+  q('#meldeGrund [data-grund="haengt"]').click();
+  pruefe('F3m2 eine gesetzte Option färbt den Knopf',
+    q('#meldeOptKnopf').classList.contains('gesetzt'));
+  q('#meldeGrundKnopf').click();
+  q('#meldeGrund [data-grund=""]').click();
+  pruefe('F3m3 ohne Option bleibt er hohl',
+    !q('#meldeOptKnopf').classList.contains('gesetzt'));
 
   // ── F3n ff · Der dritte Reiter (ADR 0078) ────────────────
   q('#meldeTitel').value = 'Ein Entwurf';

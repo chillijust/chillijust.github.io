@@ -498,55 +498,65 @@ try {
   // Und im Trichter steht seit ADR 0080 nichts mehr dazu.
   pruefe('L4 der Trichter trägt keine Hilfezeile mehr', !q('[data-fw="tutspur"]'));
 
-  // ── M · Die Leiste über dem Inhalt (ADR 0081) ─────────────
+  // ── M · Zwei Plätze für eine Leiste (ADR 0082) ────────────
+  // In einer Übung steht sie rechts **über der Aufgabenkachel**, mit Abstand
+  // dazu, und ihre Knöpfe sind kleiner. Überall sonst hängt sie in der
+  // Kopfzeile und gibt sie in alter Größe dorthin weiter.
   stand('uebersetzen');
   tutEnde();
   state.tutorialFertig = true;
   renderKopf();
   var leiste = q('#uebLeiste');
-  pruefe('M1 die Leiste steht zwischen Kopf und Inhalt',
-    !!leiste && !q('#main').contains(leiste) &&
-    (leiste.compareDocumentPosition(q('#main')) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0);
-  pruefe('M1b und sie ist sichtbar, sobald ein Knopf etwas zu sagen hat',
-    leiste.hidden === false && q('#tutRund').hidden === false);
-  pruefe('M2 der Knopf sitzt rechts',
+  var karte = q('#main .card');
+  pruefe('M1 in der Übung steht sie im Inhalt, bei der Kachel',
+    !!leiste && q('#main').contains(leiste) &&
+    leiste.classList.contains('bei-kachel'),
+    leiste ? leiste.className : 'keine');
+  pruefe('M1b und der Knopf ist sichtbar', q('#tutRund').hidden === false);
+  pruefe('M2 sie sitzt rechts',
     Math.abs(q('#tutRund').getBoundingClientRect().right -
-      leiste.getBoundingClientRect().right) < 20,
+      karte.getBoundingClientRect().right) < 20,
     q('#tutRund').getBoundingClientRect().right.toFixed(0) + ' / ' +
-    leiste.getBoundingClientRect().right.toFixed(0));
-  pruefe('M2b und über dem Inhalt',
-    q('#tutRund').getBoundingClientRect().bottom <=
-      q('#main').getBoundingClientRect().top + 1);
+    karte.getBoundingClientRect().right.toFixed(0));
+  pruefe('M2b über der Kachel, mit etwas Abstand', (function () {
+    var luft = karte.getBoundingClientRect().top -
+      q('#tutRund').getBoundingClientRect().bottom;
+    return luft >= 4 && luft <= 24;
+  })(), (karte.getBoundingClientRect().top -
+    q('#tutRund').getBoundingClientRect().bottom).toFixed(0) + ' px');
 
-  // **Kleiner sehen, gleich gut treffen.** Der Kreis misst 36 px, die
-  // antippbare Fläche bleibt bei 44 — Touch-Ziele unter 44 px sind eine harte
-  // Regel, und ein Knopf, der kleiner aussieht, muss nicht kleiner sein.
+  // Dort ist der Kreis kleiner, die Fläche bleibt bei 44.
   var r = q('#tutRund').getBoundingClientRect();
-  pruefe('M3 der Kreis ist kleiner als die anderen',
-    Math.round(r.width) === 36 && Math.round(r.height) === 36,
-    r.width.toFixed(0) + 'x' + r.height.toFixed(0));
-  pruefe('M3b das Zeichen darin bleibt gleich groß', (function () {
-    var svg = q('#tutRund svg');
-    return !!svg && Math.round(svg.getBoundingClientRect().width) === 20;
-  })(), q('#tutRund svg') ? q('#tutRund svg').getBoundingClientRect().width.toFixed(0) : 'keins');
+  pruefe('M3 bei der Kachel ist der Kreis kleiner',
+    Math.round(r.width) === 36, r.width.toFixed(0));
+  pruefe('M3b das Zeichen darin bleibt gleich groß',
+    Math.round(q('#tutRund svg').getBoundingClientRect().width) === 20,
+    q('#tutRund svg').getBoundingClientRect().width.toFixed(0));
   pruefe('M3c aber die Fläche misst weiterhin 44 px', (function () {
     var mx = r.left + r.width / 2;
     var my = r.top + r.height / 2;
-    // Vier Punkte knapp innerhalb der 44er-Fläche, außerhalb des Kreises.
     return [[mx - 21, my], [mx + 21, my], [mx, my - 21], [mx, my + 21]].every(function (pt) {
       var el = document.elementFromPoint(pt[0], pt[1]);
       return !!el && (el === q('#tutRund') || q('#tutRund').contains(el));
     });
   })());
-  pruefe('M3d der Wissensknopf ist genauso groß',
-    q('#wissenKnopf').classList.contains('klein'));
 
-  // Wo es nichts zu sagen gibt, steht auch keine Leiste — ein leerer Streifen
-  // wäre nur Luft.
-  state.tutorialFertig = true;
+  // ── M4 · Überall sonst: zurück in die Kopfzeile ───────────
+  setTab('home');
+  pruefe('M4 auf der Übersicht hängt sie im Kopf',
+    q('.kopf-rechts').contains(q('#uebLeiste')) &&
+    !q('#uebLeiste').classList.contains('bei-kachel'));
+  pruefe('M4b und der Knopf hat dort seine alte Größe',
+    Math.round(q('#tutRund').getBoundingClientRect().width) === 44,
+    q('#tutRund').getBoundingClientRect().width.toFixed(0));
+  pruefe('M4c er steht in einer Reihe mit dem Menüknopf',
+    Math.abs(q('#tutRund').getBoundingClientRect().top -
+      q('#menuKnopf').getBoundingClientRect().top) < 2);
+
+  // In einer Übung ohne eigene Spur bleibt der Knopf weg — und mit ihm die
+  // Leiste, sonst stünde ein Streifen Luft über der Aufgabe.
   setTab('buchstaben');
-  pruefe('M4 ohne Knöpfe ist die Leiste weg',
-    q('#uebLeiste').hidden === true && q('#tutRund').hidden === true);
+  pruefe('M5 ohne Spur ist der Knopf weg', q('#tutRund').hidden === true);
 
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);

@@ -196,13 +196,21 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   Durchlaufen; **die Heimspur wird nie angeboten** — sie hat ihre eigenen zwei Merker,
   und ohne diese Ausnahme fragte die Übersicht bei jedem Betreten (ADR 0080).
   Zurückholen führt `#tutRund`, ein kleiner runder Knopf mit Fragezeichen in der
-  **Leiste `#uebLeiste`** über dem Inhalt (ADR 0081) — rechtsbündig, neben dem
-  Wissensknopf, und **außerhalb von `#main`**: Ein Renderlauf ersetzt dessen Inhalt und
-  nähme die Wissenshülle mit. Beide tragen `.klein`: Kreis 36 px, Zeichen 20 px,
-  antippbare Fläche über `::after` weiterhin **44 px** — dafür braucht `.klein`
-  `overflow: visible`, sonst schneidet `.rundbtn` die Fläche ab und sie ist eine
-  Behauptung. Auf der Übersicht steht er erst, wenn das große Tutorial **einmal
-  ganz** lief — davor trägt der goldene Riegel im Inhalt die Einladung, und **nie beides**. Die Ziele sind **je Spur** eindeutig, und
+  **Leiste `#uebLeiste`** (ADR 0081), rechtsbündig neben dem Wissensknopf. **Die Leiste
+  hat zwei Plätze** (ADR 0082): in einer Übung mit Aufgabenkachel **im Inhalt, rechts
+  über der Kachel** (10 px Abstand, Knöpfe 36 px), überall sonst **in der Kopfzeile**
+  (44 px). Umgehängt wird sie wie der Wissensknopf — `leisteHeimschicken()` **vor jedem**
+  `main.innerHTML`, `leisteUmhaengen()` danach; wer eine dritte Übung mit Kachel
+  hinzufügt und das Heimschicken vergisst, wirft die Leiste samt Blatt und Zuhörern weg
+  (23 Suiten fielen daran). **Leiste und Heimat tragen `display: contents`** — ein leerer
+  Kasten ist nicht nichts, er zählt als Flex-Kind und bekommt seinen eigenen `gap`. Beide
+  Knöpfe tragen bei der Kachel `.klein`: Kreis 36 px, Zeichen 20 px, antippbare Fläche
+  über `::after` weiterhin **44 px** — dafür braucht `.klein` `overflow: visible`, sonst
+  schneidet `.rundbtn` die Fläche ab und sie ist eine Behauptung. Der Wissensknopf zieht
+  damit **nicht mehr einzeln** in die Übersetzen-Kachel (ändert ADR 0044); er fährt in
+  der Leiste mit. **Eine Prüfung zählt die runden Knöpfe nicht auf**, sie fragt nach
+  allen sichtbaren — eine Liste misst über jede neue Lücke hinweg. Auf der Übersicht
+  steht das Fragezeichen erst, wenn das große Tutorial **einmal ganz** lief — davor trägt der goldene Riegel im Inhalt die Einladung, und **nie beides**. Die Ziele sind **je Spur** eindeutig, und
   jeder Schritt einer Übungsspur trägt ihren eigenen Ort. **Wer eine Suite schreibt, die
   eine Übung betritt, stellt die Spuren still** — sonst steht die Chili in der
   Tutorial-Blase statt in der Ansicht.
@@ -405,7 +413,15 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   Chip **«Bearbeiten»** zeigt die Ticketliste im Blatt; im Zustand bleiben `meldeArt`
   (was für ein Ticket) und `meldeModus` (was das Blatt zeigt) **getrennt**, und der
   Schreibteil wird dabei nur verborgen, nicht ausgeräumt. Vom Blatt führt eine Zeile in die Liste;
-  sie klappt nur zu, sie leert nicht.
+  sie klappt nur zu, sie leert nicht. **Ort und Art liegen hinter «Optionen»**
+  (ADR 0082): Zugeklappt sieht man Überschrift und Textfeld — das ist, was man beim
+  Schreiben ansieht. Geklappt wird mit der Mechanik des Menüs (Rasterzeile `0fr` → `1fr`),
+  die zwei Beschriftungen wandern dabei nach oben, **eine Bewegung mit derselben Kurve und
+  Dauer wie das Blatt**. **Gefüllt heißt gesetzt** — «Betrifft» ist vorbelegt und zählt
+  nur, wenn etwas **anderes** gewählt wurde als die Seite, über der man steht; sonst wäre
+  der Knopf immer bunt und sagte nichts. Wer ein vorhandenes Ticket ändert, bekommt die
+  Optionen **offen**. Das Textfeld hat drei Zeilen und wächst um **höchstens drei** — was
+  länger wird, rollt, sonst schöbe ein langer Text die Knöpfe aus dem Bild.
 - **Die Kachel liegt in jedem Schema über dem Grund**, die Kopfzeile nimmt überall den
   Grund. In «Dark» ist der Grund beinahe schwarz und warmneutral, die Kachel deutlich
   abgesetzt (ADR 0041). `--card-2` ist die Bedienfläche für Chips, Schalter und Tasten —

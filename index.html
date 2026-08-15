@@ -376,28 +376,27 @@ body.unterwegs .netz-stand { font-size: 21px; }
    schrumpft auf 36 px, das Zeichen darin bleibt 20 px — die antippbare Fläche
    bleibt über `::after` bei 44 × 44 px. Touch-Ziele ≥ 44 px sind eine harte
    Regel; ein Knopf, der nur halb so groß aussieht, muss deshalb nicht halb so
-   groß sein. */
-.rundbtn.klein {
-  width: 36px; height: 36px;
-  /* **`overflow: visible`, sonst ist die Fläche eine Behauptung.** `.rundbtn`
-     beschneidet ihren Inhalt, damit die Striche des Menüknopfes den Kreis nie
-     verlassen — dabei fiele auch die 44-px-Fläche unten weg, und der Knopf
-     wäre genau so klein, wie er aussieht. Die Chili braucht es ohnehin: Sie
-     landet in diesen Knöpfen. */
-  overflow: visible;
+   groß sein. **`overflow: visible` gehört dazu**, sonst beschneidet `.rundbtn`
+   die Fläche und sie ist eine Behauptung. Die Regeln dafür stehen bei der
+   Leiste — nur dort gilt die kleine Gestalt. */
+/* **Zu Hause ist die Leiste durchsichtig** (ADR 0082): `display: contents`
+   reicht ihre Knöpfe an die Kopfzeile durch, als stünden sie selbst dort.
+   Erst bei der Kachel wird sie ein eigener Kasten. */
+/* **Auch die Heimat ist durchsichtig.** Ein leerer Behälter ist zwar null
+   Pixel breit, zählt aber als Flex-Kind — und bekam damit seinen eigenen
+   Abstand: Zwischen zwei Knöpfen standen plötzlich zwölf statt sechs Pixel. */
+#leisteHeim, #uebLeiste { display: contents; }
+#uebLeiste.bei-kachel {
+  display: flex; justify-content: flex-end; align-items: center; gap: 8px;
+  /* Etwas Abstand zur Kachel darunter — sie soll darüberstehen, nicht darauf. */
+  margin: 0 0 10px; overflow: visible;
 }
-.rundbtn.klein::after {
+#uebLeiste.bei-kachel[hidden] { display: none; }
+/* Nur dort sind die Knöpfe kleiner. Im Kopf behalten sie ihre alte Größe. */
+#uebLeiste.bei-kachel .rundbtn { width: 36px; height: 36px; overflow: visible; }
+#uebLeiste.bei-kachel .rundbtn::after {
   content: ''; position: absolute; top: 50%; left: 50%;
   width: 44px; height: 44px; transform: translate(-50%, -50%);
-}
-/* Die Leiste über dem Inhalt: rechtsbündig, dicht am Kopf. */
-#uebLeiste[hidden] { display: none; }
-#uebLeiste {
-  display: flex; justify-content: flex-end; align-items: center; gap: 8px;
-  padding: 6px max(16px, env(safe-area-inset-right)) 0 16px;
-  /* `overflow: visible` — die 44-px-Fläche der Knöpfe ragt über den Kreis
-     hinaus, und die Chili landet in ihnen. */
-  overflow: visible;
 }
 .rundbtn[hidden] { display: none; }
 #zurueck::before {
@@ -1681,6 +1680,39 @@ body.unterwegs .reiter { top: 62px; }
 .bezug-zeile.an { color: var(--akzent); }
 .bezug-zeile .icon { width: 16px; height: 16px; flex: none; }
 /* Eine Ticketzeile im Blatt: Titel oben, Auskunft klein darunter. */
+/* **Das Klappfeld für die Optionen** (ADR 0082). Dieselbe Mechanik wie beim
+   Menü: eine Rasterzeile, die von 0fr auf 1fr wächst. Der Inhalt wird dabei
+   nicht gestaucht — er wird abgeschnitten und wieder freigegeben. */
+.opt-klapp {
+  display: grid; grid-template-rows: 0fr; transition: grid-template-rows .32s cubic-bezier(.3, .8, .3, 1);
+}
+.opt-klapp > .opt-wrap { min-height: 0; overflow: hidden; }
+.opt-klapp.auf { grid-template-rows: 1fr; }
+.melde-fuss { display: flex; align-items: center; gap: 16px; margin-top: 12px; }
+.melde-fuss .blatt-link { margin: 0; }
+/* Der Knopf: zwei Beschriftungen übereinander, sichtbar ist immer eine. Beim
+   Aufklappen wandert der Stapel nach oben — dieselbe Bewegung wie die Striche
+   des Menüknopfes, und sie läuft mit dem Blatt zugleich. */
+.opt-knopf {
+  flex: none; min-height: 44px; padding: 0 16px; border-radius: 12px;
+  background: none; border: 1px solid var(--line); color: var(--dim);
+  font: inherit; font-size: 14px; cursor: pointer; overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+.opt-stapel {
+  display: block; height: 20px; line-height: 20px; overflow: hidden;
+}
+.opt-stapel > span { display: block; transition: transform .32s cubic-bezier(.3, .8, .3, 1); }
+.opt-knopf[aria-expanded="true"] .opt-stapel > span { transform: translateY(-20px); }
+/* Ist eine Option gesetzt, trägt der Knopf Farbe — dann steht dort etwas, das
+   man auch zugeklappt wissen will. */
+.opt-knopf.gesetzt {
+  background: var(--akzent); border-color: var(--akzent); color: var(--akzent-ink);
+}
+@media (prefers-reduced-motion: reduce) {
+  .opt-klapp, .opt-stapel > span { transition: none; }
+}
+
 .melde-zeile { display: flex; flex-direction: column; gap: 2px; min-width: 0; text-align: left; }
 .melde-titel { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .melde-note { font-size: 11px; color: var(--dim); }
@@ -1993,11 +2025,30 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
     <div id="chiliPlatz" class="chili-platz"><div id="chiliBuehne" aria-hidden="true"><img id="chiliFigur" alt="" src="data:image/png;base64,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"></div></div>
     <!-- Nur in «Buchstaben»: der Weg zur Tafel. Geübt wird ohne Umweg. -->
     <button id="tafelKnopf" class="rundbtn" aria-label="Alphabet-Tafel" aria-pressed="false" hidden></button>
-    <!-- **Der Tutorial-Knopf im Kopf** (ADR 0080). Klein und rund wie die
-         anderen, überall dort, wo es eine Spur gibt. Die Ausnahme ist die
-         Übersicht, solange das große Tutorial noch nie ganz lief: Dort steht
-         weiter das goldene Angebot im Inhalt, und zwei Knöpfe für dieselbe
-         Sache wären einer zu viel. -->
+    <!-- **Zwei Plätze, eine Leiste** (ADR 0082). In einer Übung steht sie
+         rechts über der Aufgabenkachel und ihre Knöpfe sind kleiner; überall
+         sonst hängt sie hier und gibt sie über `display: contents` an die
+         Kopfzeile weiter — dort haben sie ihre alte Größe und ihren alten
+         Platz. Der Tutorial-Knopf zeigt sich nur, wo es eine Spur gibt, und
+         auf der Übersicht erst, wenn das große Tutorial einmal ganz lief
+         (ADR 0080). -->
+    <span id="leisteHeim"><div id="uebLeiste">
+      <!-- Nur in «Übersetzen»: woher die Wortformen im Satz kommen. Knopf und
+           Blatt stecken in einer Hülle, weil sie zusammen umziehen — in die
+           Kachel, sobald eine da ist. Sie stehen genau einmal im Dokument: Ein
+           zweites Paar hätte zwei Zustände und zwei Zuhörer. -->
+      <span id="wissenHeim"><div id="wissenHuelle">
+        <button id="wissenKnopf" class="rundbtn" aria-label="Wissen zum Satz" aria-expanded="false" aria-controls="wissenPanel" hidden>
+          <span class="knopfzeichen" id="wissenZeichen" aria-hidden="true"></span>
+          <span class="punkt" aria-hidden="true" data-flamme></span>
+          <span id="chiliWissen" class="chili-platz" data-chili-knopf></span>
+        </button>
+        <div id="wissenPanel" class="menupanel filterpanel" role="group" aria-label="Wissen" aria-hidden="true">
+          <div class="menuwrap"><div class="menuinhalt" id="wissenInhalt"></div></div>
+        </div>
+      </div></span>
+      <button id="tutRund" class="rundbtn" aria-label="Tutorial zu dieser Ansicht" hidden></button>
+    </div></span>
     <button id="filterKnopf" class="rundbtn" aria-label="Auswahl" aria-expanded="false" aria-controls="filterPanel" hidden>
       <span class="knopfzeichen" id="filterZeichen" aria-hidden="true"></span>
       <span class="punkt" aria-hidden="true" data-flamme></span>
@@ -2054,28 +2105,6 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
   </div>
 </header>
 
-<!-- **Die Übungsleiste** (ADR 0081). Zwei kleine runde Knöpfe rechts über dem
-     Inhalt: das Fragezeichen für die Tutorial-Spur, links daneben das Wissen,
-     wo es eins gibt. Sie steht **außerhalb** von `#main` — ein Renderlauf
-     ersetzt dessen Inhalt, und die Hülle des Wissensknopfes mit ihrem Blatt
-     und ihren Zuhörern wäre jedes Mal fort. -->
-<div id="uebLeiste" hidden>
-  <!-- Nur in «Übersetzen»: woher die Wortformen im Satz kommen. Knopf und
-       Blatt stecken in einer Hülle, weil sie zusammen umziehen — in die
-       Kachel, sobald eine da ist. Sie stehen genau einmal im Dokument: Ein
-       zweites Paar hätte zwei Zustände und zwei Zuhörer. -->
-  <span id="wissenHeim"><div id="wissenHuelle">
-    <button id="wissenKnopf" class="rundbtn klein" aria-label="Wissen zum Satz" aria-expanded="false" aria-controls="wissenPanel" hidden>
-      <span class="knopfzeichen" id="wissenZeichen" aria-hidden="true"></span>
-      <span class="punkt" aria-hidden="true" data-flamme></span>
-      <span id="chiliWissen" class="chili-platz" data-chili-knopf></span>
-    </button>
-    <div id="wissenPanel" class="menupanel filterpanel" role="group" aria-label="Wissen" aria-hidden="true">
-      <div class="menuwrap"><div class="menuinhalt" id="wissenInhalt"></div></div>
-    </div>
-  </div></span>
-  <button id="tutRund" class="rundbtn klein" aria-label="Tutorial zu dieser Ansicht" hidden></button>
-</div>
 
 <main id="main"></main>
 
@@ -2125,7 +2154,12 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
     <div id="meldeNeu">
     <input type="text" class="zeile" id="meldeTitel" maxlength="120"
       placeholder="Worum geht es? Kurz und knapp." autocapitalize="sentences" spellcheck="false">
-    <textarea class="fliess" id="meldeText" rows="4" placeholder="Was ist passiert, was hattest du erwartet?"></textarea>
+    <textarea class="fliess wachsend" id="meldeText" rows="3" placeholder="Was ist passiert, was hattest du erwartet?"></textarea>
+    <!-- **Zugeklappt reicht Überschrift und Text** (ADR 0082). Ort und Art sind
+         Beiwerk: Wer meldet, will schreiben — und das Blatt war so hoch, dass
+         der eigene Satz oben aus dem Bild rutschte. -->
+    <div class="opt-klapp" id="meldeOpt">
+    <div class="opt-wrap">
     <!-- **Der Bezug ist eine Wahl, kein Haken** (ADR 0069). Der Haken konnte nur
          die Seite bestätigen, über der man gerade stand — wer erst später
          merkt, dass es eigentlich um eine andere ging, musste dorthin
@@ -2155,8 +2189,19 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
         aria-label="Was für ein Fehler ist es?" hidden></div>
     </div>
     </div>
+    </div>
+    </div>
     <div id="meldeListe" hidden></div>
-    <button class="blatt-link" id="meldeAlle">Alle Tickets →</button>
+    <div class="melde-fuss">
+      <!-- Der Text wandert beim Aufklappen nach oben, wie die Striche aus dem
+           Menüknopf wandern — zwei Beschriftungen übereinander in einem Kasten,
+           der nur eine zeigt. -->
+      <button class="opt-knopf" id="meldeOptKnopf" type="button"
+        aria-expanded="false" aria-controls="meldeOpt">
+        <span class="opt-stapel"><span>Optionen</span><span>Weniger</span></span>
+      </button>
+      <button class="blatt-link" id="meldeAlle">Alle Tickets →</button>
+    </div>
     <div class="btn-row" id="meldeAktionen">
       <button class="btn ghost" id="meldeAbbruch">Abbrechen</button>
       <button class="btn primary" id="meldeSichern">Sichern</button>
@@ -4237,7 +4282,7 @@ var APP_STAND = '2026-08-15'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.4.23T'; /* == VERSION == */
+var APP_VERSION = '2.5.0T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -7461,17 +7506,22 @@ function wissenInhaltHtml() {
 // Umgehängt wird erst, wenn die Ansicht steht: `renderKopf()` läuft **vor**
 // dem Zeichnen, und ein Platzhalter der alten Ansicht wäre gleich darauf mit
 // samt der Hülle fort.
-function wissenHeimschicken() {
-  var huelle = document.getElementById('wissenHuelle');
-  var heim = document.getElementById('wissenHeim');
-  if (huelle && heim && huelle.parentElement !== heim) heim.appendChild(huelle);
+// **Die Leiste zieht zur Kachel und wieder zurück** (ADR 0082). Dasselbe
+// Verfahren, das den Wissensknopf schon bewegt hat, nur für den ganzen Kasten:
+// Vor einem Renderlauf kommt sie nach Hause — `main.innerHTML` würde sie sonst
+// mitsamt Blatt und Zuhörern wegwerfen —, danach zieht sie wieder hinaus.
+function leisteHeimschicken() {
+  var leiste = document.getElementById('uebLeiste');
+  var heim = document.getElementById('leisteHeim');
+  if (leiste && heim && leiste.parentElement !== heim) heim.appendChild(leiste);
 }
 
-function wissenUmhaengen() {
-  var huelle = document.getElementById('wissenHuelle');
-  var platz = main.querySelector('[data-wissenplatz]');
-  var ziel = platz || document.getElementById('wissenHeim');
-  if (ziel && huelle.parentElement !== ziel) ziel.appendChild(huelle);
+function leisteUmhaengen() {
+  var leiste = document.getElementById('uebLeiste');
+  var platz = main.querySelector('[data-leiste]');
+  var ziel = platz || document.getElementById('leisteHeim');
+  if (ziel && leiste.parentElement !== ziel) ziel.appendChild(leiste);
+  leiste.classList.toggle('bei-kachel', !!platz);
   leisteZeigen();
 }
 
@@ -7543,6 +7593,7 @@ function renderKopf() {
 // soll man nicht übersehen können.
 function renderTutRund() {
   var knopf = document.getElementById('tutRund');
+  if (!knopf) return;
   var da = !!TUTORIALS[currentTab] &&
     !(currentTab === 'home' && !state.tutorialFertig);
   knopf.hidden = !da;
@@ -7558,8 +7609,11 @@ function leisteZeigen() {
   if (!leiste) return;
   var tut = document.getElementById('tutRund');
   var wissen = document.getElementById('wissenKnopf');
-  var wissenHier = leiste.contains(wissen) && !wissen.hidden;
-  leiste.hidden = (!tut || tut.hidden) && !wissenHier;
+  // Zu Hause ist sie durchsichtig und darf immer stehen — die Knöpfe verbergen
+  // sich selbst. Bei der Kachel wäre sie sonst ein Streifen Luft über der
+  // Aufgabe.
+  leiste.hidden = leiste.classList.contains('bei-kachel') &&
+    (!tut || tut.hidden) && (!wissen || wissen.hidden);
 }
 
 // Der Tafelknopf gehört nur zu «Buchstaben» und zeigt, wo man gerade steht:
@@ -7708,6 +7762,7 @@ document.getElementById('meldeBezug').addEventListener('click', function (e) {
   // Gewählt heißt zu: Ein Klappfeld, das offen bleibt, hat nichts beantwortet.
   meldeBezugOffen = false;
   meldeBezugZeichnen();
+  meldeOptZeichnen();
 });
 document.getElementById('meldeBezugKnopf').addEventListener('click', function () {
   meldeBezugOffen = !meldeBezugOffen;
@@ -7719,11 +7774,17 @@ document.getElementById('meldeGrund').addEventListener('click', function (e) {
   meldeGrundWahl = b.dataset.grund;
   meldeGrundOffen = false;
   meldeGrundZeichnen();
+  meldeOptZeichnen();
 });
 document.getElementById('meldeGrundKnopf').addEventListener('click', function () {
   meldeGrundOffen = !meldeGrundOffen;
   meldeGrundZeichnen();
 });
+document.getElementById('meldeOptKnopf').addEventListener('click', function () {
+  meldeOptOffen = !meldeOptOffen;
+  meldeOptZeichnen();
+});
+document.getElementById('meldeText').addEventListener('input', meldeTextWachsen);
 // Vom Blatt in die Liste. Nur zuklappen, nicht leeren: Ein Entwurf überlebt
 // das Zuklappen, und ihn beim Nachsehen wegzuwerfen wäre die böseste Falle
 // von allen (ADR 0025).
@@ -8250,7 +8311,7 @@ function render() {
   // Erst nach Hause, dann zeichnen: Steckt die Wissenshülle noch in der alten
   // Kachel, wirft `main.innerHTML` sie mit weg — Knopf, Blatt und Zuhörer
   // wären fort. `renderWissen()` holt sie danach wieder in die neue.
-  wissenHeimschicken();
+  leisteHeimschicken();
   renderKopf();
   if (currentTab === 'home') renderHome();
   else if (currentTab === 'lernsets' || currentTab === 'freestyle') {
@@ -8271,7 +8332,7 @@ function render() {
   else if (currentTab === 'sicherung') renderSicherung();
   else if (currentTab === 'einrichten') renderEinrichten();
   else renderBilanz();
-  wissenUmhaengen();
+  leisteUmhaengen();
   updateKopf();
 }
 
@@ -8615,6 +8676,7 @@ function ansichtenZuruecksetzen() {
   meldeModus = 'neu';
   meldeGrundWahl = '';
   meldeGrundOffen = false;
+  meldeOptOffen = false;
   meisterMeldung = null;
   patzerMeldung = null;
   einstReiter = EINST_REITER[0].id;
@@ -8888,6 +8950,9 @@ function leseBinden() {
 }
 
 function renderUeben() {
+  // **Erst heim, dann zeichnen** (ADR 0082): `main.innerHTML` wirft alles weg,
+  // was darin steht — die Leiste mitsamt Blatt und Zuhörern.
+  leisteHeimschicken();
   if (uebPhase === 'fact' && faktKarte) {
     main.innerHTML = faktKarteHtml();
     faktKarteBinden(function () { uebNext(true); });
@@ -8966,6 +9031,7 @@ function renderUeben() {
   var html = '<section>' + uebKopfHtml();
 
   html += '<p class="kachel-ort">' + esc(q.word.theme) + '</p>' +
+    '<div data-leiste></div>' +
     '<div class="card">' +
     '<div class="card-meta"><span class="boxdots">' + dots + '</span>' +
     '<span class="mitte">' + (q.mode === 'luecke' ? 'im Satz'
@@ -9618,7 +9684,7 @@ function satzMitWissen(text) {
 // Stufenwahl mit Angabe, wie viele S\u00e4tze je Stufe schon offen sind.
 function renderUebersetzen() {
   // Auch hier: Die Übung zeichnet sich oft ohne den Umweg über `render()`.
-  wissenHeimschicken();
+  leisteHeimschicken();
   if (faktKarte) {
     main.innerHTML = faktKarteHtml();
     faktKarteBinden(function () { buildTransTask(); renderUebersetzen(); });
@@ -9638,7 +9704,8 @@ function renderUebersetzen() {
   // wohin übersetzt wird, mittig wie. Rechts bleibt der Platz für «Wissen».
   html += '<p class="kachel-ort">Stufe ' + trLevel +
     (trModus === 'wiederholung' ? ' · zur Sicherheit' : '') + '</p>' +
-    '<div class="card mit-knopf"><span class="kachel-knopf" data-wissenplatz></span>' +
+    '<div data-leiste></div>' +
+    '<div class="card">' +
     '<div class="card-meta"><span>' + (promptIsRu ? 'RU → DE' : 'DE → RU') + '</span>' +
     '<span class="mitte">' + (getippt ? 'selbst schreiben' : 'legen') + '</span>' +
     '<span></span></div>' +
@@ -9829,7 +9896,7 @@ function renderUebersetzen() {
   });
   // Jetzt steht die Kachel — erst jetzt darf die Wissenshülle einziehen.
   renderWissen();
-  wissenUmhaengen();
+  leisteUmhaengen();
 }
 
 // ── BUCHSTABEN ──────────────────────────────────────────────
@@ -12700,6 +12767,9 @@ function tippenWeiter() {
 }
 
 function renderTippen() {
+  // **Erst heim, dann zeichnen** (ADR 0082): `main.innerHTML` wirft alles weg,
+  // was darin steht — die Leiste mitsamt Blatt und Zuhörern.
+  leisteHeimschicken();
   if (faktKarte) {
     main.innerHTML = faktKarteHtml();
     faktKarteBinden(function () { tippenWeiter(); });
@@ -12725,7 +12795,7 @@ function renderTippen() {
   var stats = state.typingStats;
   var total = stats.correct + stats.wrong;
 
-  var html = '<section><div class="card">' +
+  var html = '<section><div data-leiste></div><div class="card">' +
     '<p class="task-label">' + (tippenModus === 'wiederholung'
       ? 'Zur Sicherheit noch einmal'
       : tippenModus === 'alle' ? 'Noch einmal, zum Festigen'
@@ -13441,6 +13511,8 @@ var MELDE_GRUENDE = {
 function meldeGruende() { return MELDE_GRUENDE[meldeArt] || MELDE_GRUENDE.bug; }
 var meldeGrundWahl = '';
 var meldeGrundOffen = false;
+// Stehen die Optionen offen? Zugeklappt reicht Überschrift und Text (ADR 0082).
+var meldeOptOffen = false;
 // **Die gewählte Seite** (ADR 0069) — leer heißt «keine». Vorbelegt wird sie
 // beim Öffnen des Blattes mit der Ansicht, über der man steht; ab dann gilt,
 // was der Nutzer gewählt hat.
@@ -13615,11 +13687,46 @@ function meldeFuellen() {
 
   meldeBezugZeichnen();
   meldeGrundZeichnen();
+  meldeOptZeichnen();
+  meldeTextWachsen();
   document.getElementById('meldeSichern').textContent = meldeBearbeitet ? 'Ändern' : 'Sichern';
   document.getElementById('meldeAbbruch').textContent = meldeBearbeitet ? 'Verwerfen' : 'Abbrechen';
   // In der Liste selbst führt der Weg nirgendwohin — und beim Bearbeiten käme
   // man aus der Liste, in der man ohnehin schon steht.
   document.getElementById('meldeAlle').hidden = currentTab === 'tickets';
+}
+
+// Knopf und Klappfeld hängen an derselben Frage; getrennt nachgezogen wären
+// sie zwei Wahrheiten über einen Zustand.
+function meldeOptZeichnen() {
+  var knopf = document.getElementById('meldeOptKnopf');
+  var feld = document.getElementById('meldeOpt');
+  if (!knopf || !feld) return;
+  knopf.setAttribute('aria-expanded', meldeOptOffen ? 'true' : 'false');
+  feld.classList.toggle('auf', meldeOptOffen);
+  // Gefüllt, sobald eine Option gesetzt ist — auch zugeklappt soll man sehen,
+  // dass da etwas steht. «Betrifft» ist vorbelegt und zählt darum nur, wenn
+  // der Nutzer etwas anderes gewählt hat als die Seite, über der er steht.
+  var gesetzt = !!meldeGrundWahl ||
+    (meldeBezugWahl !== meldeBezugQuelle() && meldeBezugWahl !== '');
+  knopf.classList.toggle('gesetzt', gesetzt);
+}
+
+// **Das Textfeld wächst mit, aber nicht endlos** (ADR 0082): drei Zeilen als
+// Grundmaß, höchstens drei dazu. Was länger wird, rollt — sonst schöbe ein
+// langer Text die Knöpfe aus dem Bild.
+var MELDE_ZEILEN = 3;
+var MELDE_ZEILEN_MAX = 6;
+function meldeTextWachsen() {
+  var feld = document.getElementById('meldeText');
+  if (!feld) return;
+  var zeile = parseFloat(getComputedStyle(feld).lineHeight) || 21;
+  var rand = feld.offsetHeight - feld.clientHeight +
+    parseFloat(getComputedStyle(feld).paddingTop) +
+    parseFloat(getComputedStyle(feld).paddingBottom);
+  feld.style.height = 'auto';
+  var hoehe = Math.min(feld.scrollHeight, Math.round(zeile * MELDE_ZEILEN_MAX + rand));
+  feld.style.height = Math.max(hoehe, Math.round(zeile * MELDE_ZEILEN + rand)) + 'px';
 }
 
 // Ein vorhandenes Ticket zum Bearbeiten ins Blatt holen.
@@ -13638,6 +13745,9 @@ function meldeBearbeiten(id) {
   // Aus der Liste heraus gewählt: zurück in den Schreibteil, sonst stünde man
   // vor der Liste, aus der man gerade etwas geholt hat.
   meldeModus = 'neu';
+  // Wer ein vorhandenes Ticket öffnet, sieht seine Angaben — sonst müsste er
+  // raten, was schon dasteht.
+  meldeOptOffen = !!(meldeBezugWahl || meldeGrundWahl);
   document.getElementById('meldeTitel').value = t.titel;
   document.getElementById('meldeText').value = t.text;
   if (meldeOffen) meldeFuellen(); else meldeSetzen(true);
@@ -13695,6 +13805,7 @@ function meldeLeeren() {
   meldeModus = 'neu';
   meldeGrundWahl = '';
   meldeGrundOffen = false;
+  meldeOptOffen = false;
   // Zurück auf die Seite, über der man steht — die ist beim nächsten Ticket
   // wieder die wahrscheinlichste.
   meldeBezugWahl = meldeBezugQuelle();

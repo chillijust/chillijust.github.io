@@ -629,10 +629,15 @@ try {
     q('#zurueck').getBoundingClientRect().right <= 8,
     (q('#heimKnopf').getBoundingClientRect().left -
      q('#zurueck').getBoundingClientRect().right).toFixed(0) + ' px');
+  // **Alle sichtbaren, nicht drei ausgesuchte** (ADR 0082): Seit die Leiste
+  // ihre Knöpfe durchsichtig an die Kopfzeile durchreicht, steht
+  // dort mal einer mehr. Eine Prüfung, die drei Kennungen aufzählt, misst dann
+  // über eine Lücke hinweg, die gar keine ist.
   pruefe('Q3 die runden Knöpfe stehen dicht beieinander', (function () {
-    var kn = ['tafelKnopf', 'filterKnopf', 'menuKnopf'].map(function (id) {
-      return q('#' + id).getBoundingClientRect();
-    });
+    var kn = alle('.kopf-rechts .rundbtn').filter(function (b) {
+      return b.getClientRects().length > 0;
+    }).map(function (b) { return b.getBoundingClientRect(); })
+      .sort(function (a, b) { return a.left - b.left; });
     for (var i = 1; i < kn.length; i++) {
       if (kn[i].left - kn[i - 1].right > 8) return (kn[i].left - kn[i - 1].right).toFixed(0);
     }
