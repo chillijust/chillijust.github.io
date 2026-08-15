@@ -125,8 +125,16 @@ zweite Flug bricht den ersten ab. Ein runder Knopf, in den sie springt, braucht
   Flamme mit. **Nur Gold flackert**; die Animation hängt an `.punkt` und `.pp.s4`, nicht
   an `.flamme-aussen` allein. Die Farben der Stufen sind unverändert — die Gestalt trägt
   die Aussage, die Farbe bestätigt sie.
-- **Die Übersicht ordnet in drei Gruppen** (ADR 0045): Wörter · Sätze · Freiwillig. Eine
-  neue Übung braucht einen Eintrag in `UEBUNG_GRUPPEN` **und** in `UEBUNGEN`.
+- **Die Übersicht zeigt einen Weg, nicht das Angebot** (ADR 0065). Drei Zonen: die
+  Empfehlung, darunter **höchstens drei** fällige Kacheln (`homeFaellig()` — ohne
+  `gesperrt`, ohne `leer`, ohne das Empfohlene selbst), darunter «Alle Übungen» mit den
+  drei Gruppen Wörter · Sätze · Freiwillig (ADR 0045). **Alle acht stehen immer im Baum**,
+  nur zugeklappt: Acht Tutorial-Schritte zeigen auf je eine Kachel, und der Scheinwerfer
+  klappt selbst auf, wenn sein Ziel nicht **sichtbar** ist (`getClientRects()`, nicht
+  `querySelector` — ein `[hidden]` findet der sehr wohl). `kachelHtml()` steht einmal für
+  beide Listen. Eine neue Übung braucht einen Eintrag in `UEBUNG_GRUPPEN` **und** in
+  `UEBUNGEN`. **Eine Prüfung fragt eine Kachel nach Namen**, nie nach Platz — dieselbe
+  Übung steht jetzt zweimal im Baum.
 - **Das Tutorial ist ein Scheinwerfer** (ADR 0051) — ein durchsichtiges `#tutLoch` mit
   `box-shadow: 0 0 0 9999px`, das die echte Oberfläche anleuchtet. Die zwölf Schritte
   sind **Inhalt** und stehen in `data/tutorial.json` (`[Ort, Ziel, Text]`); ein Schritt
@@ -195,7 +203,11 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
 - **Alle Ausgaben durch `esc()`**, Ereignisbehandler nach dem Setzen von `innerHTML`
   anhängen, nie als `onclick`-Attribut.
 - **Die Betonung ist eine Zahl** (ADR 0054), keine zweite Schreibweise: `data/betonung.json`
-  sagt, der wievielte Vokal sie trägt. **Nie ins Wort schreiben** — die Kennung im
+  sagt, der wievielte Vokal sie trägt. **Der Strich wird gezeichnet, nicht geschrieben**
+  (ADR 0065): Angezeigt wird über `ruAnzeigeHtml()`/`betontesWortHtml()` — sie hüllen den
+  betonten Vokal in `<span class="bet">`, der Balken kommt aus dem Stil, und im Text steht
+  genau das Wort. **Ohne `esc()` darum**, das steckt schon drin. `betontesWort()` mit
+  U+0301 bleibt die Textfassung für den Prüfstand. **Nie ins Wort schreiben** — die Kennung im
   Lernstand *ist* das russische Wort, und ein Tippfehler darin löscht einen Lernstand.
   Angezeigt **nur** über `ruAnzeige()`/`betontesWort()`; verglichen wird nie mit ihr
   (`normalize()` wirft U+0301 weg), gesprochen auch nicht. Die Einstellung `betonung`

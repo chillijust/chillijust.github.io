@@ -13,7 +13,9 @@ function stufe(woerter, s) { woerter.forEach(function (v) { state.boxes[v.id] = 
 try {
   // A · Reihenfolge der Übungen
   setTab('home');
-  var kacheln = alle('[data-uebung]').map(function (b) { return b.dataset.uebung; }).join(',');
+  // Die Reihenfolge steht im aufklappbaren Teil — oben steht nur, was fällig
+  // ist, und das wechselt mit dem Lernstand (ADR 0065).
+  var kacheln = alle('#homeAlle [data-uebung]').map(function (b) { return b.dataset.uebung; }).join(',');
   pruefe('A1 Reihenfolge der Übungen',
     kacheln === 'lernsets,freestyle,tippen,schreibung,uebersetzen,buchstaben,grammatik,power', kacheln);
 

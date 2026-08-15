@@ -82,9 +82,11 @@ try {
     alle('.pruefzeile .z-ok').length + '/' + alle('.pruefzeile .z-weg').length);
   pruefe('B9 die Lösung steht weiter darunter',
     ohneBetonung(main.textContent).indexOf(wort) !== -1);
+  // **Der Strich ist gezeichnet, nicht geschrieben** (ADR 0065): Im Text steht
+  // die Schreibweise, die Betonung hängt an einer Hülle um den Vokal.
   pruefe('B9b und trägt die Betonung, wenn das Wort eine hat',
-    !BETONUNG[wort] || main.textContent.indexOf('\u0301') !== -1,
-    wort + '/' + String(BETONUNG[wort]));
+    !BETONUNG[wort] || !!main.querySelector('.feedback .bet'),
+    wort + '/' + String(BETONUNG[wort]) + '/' + (main.querySelector('.feedback') || {}).innerHTML);
 
   // Weiter: neues Wort, leeres Feld.
   tippe(q('#tNext'));

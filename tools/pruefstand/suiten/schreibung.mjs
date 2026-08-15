@@ -283,13 +283,13 @@ try {
   ansichtenZuruecksetzen();
   setTab('home');
   pruefe('G1 die Kachel steht bei den Wörtern, hinter «Tippen»',
-    alle('[data-uebung]').map(function (b) { return b.dataset.uebung; }).slice(0, 4).join() ===
+    alle('#homeAlle [data-uebung]').map(function (b) { return b.dataset.uebung; }).slice(0, 4).join() ===
     'lernsets,freestyle,tippen,schreibung',
-    alle('[data-uebung]').map(function (b) { return b.dataset.uebung; }).join());
+    alle('#homeAlle [data-uebung]').map(function (b) { return b.dataset.uebung; }).join());
   pruefe('G2 sie nennt die neue Regel beim Namen',
-    alle('.kachel-stand')[3].textContent.indexOf(ORTHO[0].name) !== -1,
-    alle('.kachel-stand')[3].textContent);
-  q('[data-uebung="schreibung"]').click();
+    q('#homeAlle [data-uebung="schreibung"] .kachel-stand').textContent.indexOf(ORTHO[0].name) !== -1,
+    q('#homeAlle [data-uebung="schreibung"] .kachel-stand').textContent);
+  q('#homeAlle [data-uebung="schreibung"]').click();
   pruefe('G3 die Kachel führt hin', currentTab === 'schreibung');
   pruefe('G4 der Regelfall färbt den Filter nicht',
     !q('#filterKnopf').classList.contains('aktiv'));
@@ -312,8 +312,8 @@ try {
   pruefe('G8 alles gemeistert gibt einen Leerzustand', !!q('.leer') && !q('[data-orthoopt]'));
   setTab('home');
   pruefe('G9 die Kachel sagt es auch',
-    alle('.kachel-stand')[3].textContent === 'alle Regeln sitzen',
-    alle('.kachel-stand')[3].textContent);
+    q('#homeAlle [data-uebung="schreibung"] .kachel-stand').textContent === 'alle Regeln sitzen',
+    q('#homeAlle [data-uebung="schreibung"] .kachel-stand').textContent);
 
   orthoRegel = 'akanje'; orthoRegelOffen = true; orthoEingabe = 'xy'; orthoWahl = 'ogo';
   ansichtenZuruecksetzen();

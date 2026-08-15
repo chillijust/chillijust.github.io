@@ -127,13 +127,16 @@ try {
   // G · Home und Filter
   setTab('home');
   pruefe('G1 sechste Kachel auf Home ist «Buchstaben»',
-    alle('[data-uebung]').map(function (b) { return b.dataset.uebung; }).join(',') ===
+    alle('#homeAlle [data-uebung]').map(function (b) { return b.dataset.uebung; }).join(',') ===
     'lernsets,freestyle,tippen,schreibung,uebersetzen,buchstaben,grammatik,power',
-    alle('[data-uebung]').map(function (b) { return b.dataset.uebung; }).join(','));
+    alle('#homeAlle [data-uebung]').map(function (b) { return b.dataset.uebung; }).join(','));
+  // **Nach Namen fragen, nicht nach Platz**: Die sechste Kachel war eine
+  // Position, keine Aussage — seit die Übersicht oben eine Auswahl trägt,
+  // zählt sie anders (ADR 0065).
   pruefe('G2 sie nennt ihren Stand',
-    alle('.kachel-stand')[5].textContent.indexOf('von 33') !== -1,
-    alle('.kachel-stand')[5].textContent);
-  q('[data-uebung="buchstaben"]').click();
+    q('#homeAlle [data-uebung="buchstaben"] .kachel-stand').textContent.indexOf('von 33') !== -1,
+    q('#homeAlle [data-uebung="buchstaben"] .kachel-stand').textContent);
+  q('#homeAlle [data-uebung="buchstaben"]').click();
   pruefe('G3 die Kachel führt hin', currentTab === 'buchstaben');
   abcAnsicht = 'ueben'; abcRichtung = 'gemischt'; renderKopf();
   pruefe('G4 Regelfall färbt den Filter nicht', !q('#filterKnopf').classList.contains('aktiv'));
@@ -155,8 +158,9 @@ try {
   pruefe('H2 er führt zur Tafel', !!q('#abcZurTafel'));
   pruefe('H3 auch der Leerzustand trägt den Kopf', alle('.paket-punkte .pp').length === 33);
   setTab('home');
-  pruefe('H4 die Kachel sagt es', alle('.kachel-stand')[5].textContent === 'alles gemeistert',
-    alle('.kachel-stand')[5].textContent);
+  pruefe('H4 die Kachel sagt es',
+    q('#homeAlle [data-uebung="buchstaben"] .kachel-stand').textContent === 'alles gemeistert',
+    q('#homeAlle [data-uebung="buchstaben"] .kachel-stand').textContent);
 
   // I · Sicherungscode nimmt die Buchstaben mit
   var code = encodeBackup();

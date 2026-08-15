@@ -169,6 +169,18 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 .cyr { font-family: Georgia, "Times New Roman", serif; }
+/* **Die Betonung wird gezeichnet, nicht geschrieben** (ADR 0065). Der Strich
+   sitzt mittig über dem Vokal und gehört keinem Zeichen an — im Text steht nur
+   das Wort. Alle Maße in `em`: Dieselbe Regel trägt die Frage in 32 px und die
+   Antwortkachel in 16 px. */
+.bet { position: relative; }
+.bet::after {
+  content: ''; position: absolute; left: 50%; bottom: .76em;
+  width: .26em; height: .075em; border-radius: .04em;
+  background: currentColor; opacity: .85;
+  transform: translateX(-50%) rotate(-22deg);
+  pointer-events: none;
+}
 button { font-family: inherit; }
 
 .masthead { position: relative; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
@@ -1198,6 +1210,28 @@ body.tut-offen { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   #tutLoch, .tut-punkte i { transition: none; }
   #tutSprech.klappt { animation: none; }
+}
+
+/* **Alle Übungen** — der eine Tipp zwischen dem Weg und dem ganzen Angebot.
+   Er sieht aus wie eine Gruppenüberschrift mit Knopfcharakter: eine Zeile über
+   die volle Breite, ruhig, aber offensichtlich anzutippen. Der Winkel dreht
+   sich beim Öffnen; das Blatt darunter ist nicht animiert, sonst spränge die
+   Seitenlänge bei jedem Tipp. */
+.alle-knopf {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; margin: 22px 0 0; padding: 13px 16px; min-height: 44px;
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+  color: var(--text); font: inherit; font-size: 15px; cursor: pointer;
+  box-shadow: inset 0 1px 0 var(--lip), 0 6px 18px -12px var(--shade);
+}
+.alle-knopf .icon { color: var(--akzent); transition: transform .2s; }
+.alle-knopf[aria-expanded="true"] .icon { transform: rotate(180deg); }
+.alle-klapp[hidden] { display: none; }
+/* Die erste Überschrift im aufgeklappten Bereich rückt nicht so weit ab wie
+   sonst — sie steht schon unter einer Trennlinie. */
+.alle-klapp > .gruppe-titel:first-child { margin-top: 14px; }
+@media (prefers-reduced-motion: reduce) {
+  .alle-knopf .icon { transition: none; }
 }
 
 /* Der Knopf am Ende der Übersicht. Er nimmt zwei Fünftel der Breite und steht
@@ -3889,7 +3923,7 @@ var APP_STAND = '2026-08-15'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.4.6T'; /* == VERSION == */
+var APP_VERSION = '2.4.7T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -4431,6 +4465,10 @@ var ICON = {
   // Weiter im Tutorial. Ein Pfeil, kein Wort: Die Sprechblase soll klein
   // bleiben, und was er tut, sagt schon die Punktreihe daneben.
   pfeilRechts: svg('<path d="M4.5 12h14M13 6.5l5.5 5.5-5.5 5.5"/>'),
+  // Der Winkel am Klappknopf: Er zeigt nach unten, solange zu ist, und dreht
+  // sich beim Öffnen. Ein Pfeil mit Schaft wäre hier zu viel — gefragt ist die
+  // Richtung, nicht eine Bewegung.
+  winkelRunter: svg('<path d="M6 9.5l6 6 6-6"/>'),
   minus: svg('<path d="M6 12h12"/>'),
   plus: svg('<path d="M6 12h12M12 6v12"/>')
 };
@@ -4492,9 +4530,19 @@ function normalize(s) {
 // das Zeichen weg, bevor irgendetwas geprüft wird.
 var VOKALE = 'аеёиоуыэюяАЕЁИОУЫЭЮЯ';
 
-// Setzt das Zeichen U+0301 hinter den betonten Vokal. Ohne Angabe, bei einem
-// einsilbigen Wort oder wo ё steht, bleibt das Wort, wie es ist — dort ist die
-// Betonung ohnehin eindeutig.
+// **Der Strich steht über dem Wort, nicht darin** (ADR 0065). Bis 2.4.6 hängte
+// die App das Zeichen U+0301 hinter den betonten Vokal. Das ist die Schreibweise
+// der Wörterbücher, hat aber zwei Haken: Der Strich landet je nach Schrift
+// rechts **neben** dem Buchstaben statt darüber und liest sich dann wie ein
+// Apostroph — als gehörte er zum Wort. Und er *steht* im Text: Wer die Zeile
+// kopiert oder vorlesen lässt, bekommt eine Schreibweise, die es nicht gibt.
+//
+// Darum zwei Wege. `betontesWort()` bleibt die **Textfassung** mit U+0301 —
+// der Prüfstand misst daran, welcher Vokal die Betonung trägt, und sie ist die
+// Fassung, die man vorzeigen kann, wo kein HTML geht. **Gezeigt wird in der App
+// aber ausschließlich `betontesWortHtml()`:** Es umschließt den betonten Vokal
+// mit einem `<span class="bet">`, und der Strich wird per CSS mittig darüber
+// gezeichnet. Der Text darunter ist dann genau das Wort.
 function betontesWort(ru) {
   var wo = BETONUNG[ru];
   if (!wo) return ru;
@@ -4518,6 +4566,36 @@ function betonungZeigen(ru) {
   if (wahl === 'nie') return false;
   if (wahl === 'immer') return true;
   return (state.boxes[ru] || 0) < BOX_MAX - 1;
+}
+
+// Dasselbe Wort als **HTML**: fertig maskiert, mit dem betonten Vokal in einer
+// Hülle. Wer das ausgibt, setzt kein `esc()` mehr darum — es ist schon drin.
+// Der zurückgegebene Text enthält **kein** U+0301: Was dort steht, ist die
+// richtige Schreibweise, und der Strich ist Farbe auf dem Papier.
+function betontesWortHtml(ru) {
+  var wo = BETONUNG[ru];
+  if (!wo) return esc(ru);
+  var liste = typeof wo === 'number' ? [wo] : wo;
+  var n = 0;
+  var raus = '';
+  for (var i = 0; i < ru.length; i++) {
+    var z = ru.charAt(i);
+    if (VOKALE.indexOf(z) !== -1) {
+      n++;
+      if (liste.indexOf(n) !== -1) {
+        raus += '<span class="bet">' + esc(z) + '</span>';
+        continue;
+      }
+    }
+    raus += esc(z);
+  }
+  return raus;
+}
+
+// Und die Anzeigefassung als HTML — dieselbe Frage wie bei `ruAnzeige()`, nur
+// dass hier schon maskiert zurückkommt.
+function ruAnzeigeHtml(ru) {
+  return betonungZeigen(ru) ? betontesWortHtml(ru) : esc(ru);
 }
 
 // Ein russisches Wort, wie es angezeigt gehört. **Immer durch diese Funktion**,
@@ -5781,6 +5859,20 @@ function tutZeichnen() {
   tutKnoepfe(null);
   tutFussSetzen(true);
 
+  // **Ein zugeklapptes Ziel klappt sich auf** (ADR 0065). Acht der dreizehn
+  // Schritte zeigen auf je eine Kachel, und die meisten liegen seit 2.4.7
+  // hinter «Alle Übungen». Der Scheinwerfer öffnet den Bereich, statt ins Leere
+  // zu zeigen — nebenbei sieht man dabei, dass es dort etwas aufzuklappen gibt.
+  // Gefragt ist, ob das Ziel **zu sehen** ist, nicht ob es im Baum steht: Ein
+  // zugeklapptes `[hidden]` findet `querySelector` sehr wohl — der Scheinwerfer
+  // leuchtete dann auf ein Rechteck der Breite null.
+  if (!homeOffen && currentTab === 'home') {
+    var ziel = document.querySelector(sch[1]);
+    if (!ziel || !ziel.getClientRects().length) {
+      homeOffen = true;
+      renderHome();
+    }
+  }
   // Erst ins Bild holen, dann messen: Ein Ziel, das unter dem Rand liegt,
   // bekäme sonst ein Loch, das niemand sieht.
   var el = document.querySelector(sch[1]);
@@ -6218,6 +6310,9 @@ var currentTab = 'home';
 var main = document.getElementById('main');
 
 var letzterTab = 'home'; // die zuletzt offene Übung — Bezug eines Tickets
+// Steht «Alle Übungen» auf der Übersicht offen? Ansichtszustand — er gehört
+// nach ADR 0017 in `ansichtenZuruecksetzen()`.
+var homeOffen = false;
 
 // Die fünf Übungen. «Bilanz», «Einstellungen» und «Tickets» sind keine
 // Übungen — sie stehen im Menü, nicht auf Home.
@@ -7073,20 +7168,28 @@ function renderHome() {
     '<span class="empf-titel">' + esc(e.titel) + '</span>' +
     '<span class="empf-note">' + esc(e.note) + '</span></span></button>';
 
+  // **Außerdem fällig**: höchstens drei, und nur, wo wirklich Arbeit wartet.
+  // Was empfohlen ist, steht schon oben und wird hier nicht wiederholt.
+  var offen = homeFaellig(e.ziel);
+  if (offen.length) {
+    html += '<p class="gruppe-titel">Außerdem fällig</p>' +
+      '<div class="kachelfeld">' + offen.map(kachelHtml).join('') + '</div>';
+  }
+
+  // Und darunter das ganze Angebot hinter **einem** Tipp. Es steht immer im
+  // Baum, nur zugeklappt: Das Tutorial zeigt auf einzelne Kacheln, und ein
+  // Ziel, das es gar nicht gibt, wäre ein stiller Fehler (ADR 0051).
+  html += '<button class="alle-knopf" id="homeAlleKnopf" aria-expanded="' +
+    (homeOffen ? 'true' : 'false') + '" aria-controls="homeAlle">' +
+    '<span>Alle Übungen</span>' + ICON.winkelRunter + '</button>' +
+    '<div class="alle-klapp" id="homeAlle"' + (homeOffen ? '' : ' hidden') + '>';
   UEBUNG_GRUPPEN.forEach(function (g) {
     html += '<p class="gruppe-titel">' + esc(g.titel) + '</p>' +
-      '<div class="kachelfeld' + (g.ids.length === 1 ? ' breit' : '') + '">';
-    g.ids.forEach(function (id) {
-      var u = uebungVon(id);
-      if (!u) return;
-      var st = uebungsStand(id);
-      html += '<button class="kachel' + (st.gesperrt ? ' gesperrt' : '') + '" data-uebung="' + id + '">' +
-        '<span class="kachel-name">' + esc(u.name) + '</span>' +
-        '<span class="kachel-note">' + esc(u.note) + '</span>' +
-        '<span class="kachel-stand' + (st.warm ? ' faellig' : '') + '">' + esc(st.text) + '</span></button>';
-    });
-    html += '</div>';
+      '<div class="kachelfeld' + (g.ids.length === 1 ? ' breit' : '') + '">' +
+      g.ids.map(kachelHtml).join('') + '</div>';
   });
+  html += '</div>';
+
   // Ruhig und ganz unten — aber nur, wenn er nicht schon oben steht: Ihn
   // zweimal zu zeichnen hieße, zwei Knöpfe mit derselben Kennung zu haben, und
   // das Tutorial leuchtete dann den falschen an.
@@ -7096,9 +7199,48 @@ function renderHome() {
 
   document.getElementById('homeEmpf').addEventListener('click', function () { setTab(e.ziel); });
   document.getElementById('tutKnopf').addEventListener('click', tutStarten);
+  document.getElementById('homeAlleKnopf').addEventListener('click', function () {
+    homeOffen = !homeOffen;
+    renderHome();
+  });
   main.querySelectorAll('[data-uebung]').forEach(function (b) {
     b.addEventListener('click', function () { setTab(b.dataset.uebung); });
   });
+}
+
+// Eine Kachel — dieselbe Gestalt oben wie unten. Sie steht genau einmal im
+// Code: Eine Übung, die in beiden Listen anders aussähe, wäre zwei Übungen.
+function kachelHtml(id) {
+  var u = uebungVon(id);
+  if (!u) return '';
+  var st = uebungsStand(id);
+  return '<button class="kachel' + (st.gesperrt ? ' gesperrt' : '') + '" data-uebung="' + id + '">' +
+    '<span class="kachel-name">' + esc(u.name) + '</span>' +
+    '<span class="kachel-note">' + esc(u.note) + '</span>' +
+    '<span class="kachel-stand' + (st.warm ? ' faellig' : '') + '">' + esc(st.text) + '</span></button>';
+}
+
+// **Was heute noch wartet.** Eine Übung zählt, wenn dort wirklich etwas zu tun
+// ist — `gesperrt` («geht noch nicht») und `leer` («gerade nichts») fallen
+// weg, dieselbe Frage wie bei der Empfehlung. Das Empfohlene selbst bleibt
+// draußen: Es steht schon darüber, und zweimal dasselbe anzubieten hilft
+// niemandem beim Anfangen.
+//
+// Sortiert: Was drängt (`warm`), zuerst. Gekappt bei drei — die Übersicht soll
+// einen Weg zeigen, keine zweite Liste sein. Der Rest liegt einen Tipp weiter.
+var HOME_FAELLIG_MAX = 3;
+function homeFaellig(ausser) {
+  var warm = [];
+  var rest = [];
+  UEBUNG_GRUPPEN.forEach(function (g) {
+    g.ids.forEach(function (id) {
+      if (id === ausser) return;
+      var st = uebungsStand(id);
+      if (st.gesperrt || st.leer) return;
+      (st.warm ? warm : rest).push(id);
+    });
+  });
+  return warm.concat(rest).slice(0, HOME_FAELLIG_MAX);
 }
 
 function render() {
@@ -7465,6 +7607,10 @@ function ansichtenZuruecksetzen() {
   meisterMeldung = null;
   patzerMeldung = null;
   einstReiter = 'lernweg';
+  // Die Übersicht klappt wieder zu: Nach dem Einspielen einer Sicherung steht
+  // dort ein anderer Lernstand, und «Alle Übungen» offen zu lassen hieße, den
+  // schlanken Weg zu überspringen (ADR 0017).
+  homeOffen = false;
   swLeerenSicher = false;
   // Der Knopf «Suchen / Update» kehrt in die Ruhe zurück. Ein Ring, der nach
   // dem Einspielen einer Sicherung weiterdreht, wartete auf einen Rückruf, den
@@ -7784,11 +7930,18 @@ function renderUeben() {
   var q = uebQ;
   var box = state.boxes[q.word.id] || 0;
   var promptRu = q.mode === 'mc-de';
-  var prompt = (q.mode === 'tiles' || q.mode === 'mc-ru') ? q.word.de : ruAnzeige(q.word.ru);
+  // Zwei Fassungen derselben Frage: `prompt` ist der blanke Text — er geht an
+  // den Hörknopf, und der soll kein Zeichen zu deuten haben. `promptHtml` trägt
+  // die Hülle um den betonten Vokal (ADR 0065).
+  var promptWort = (q.mode === 'tiles' || q.mode === 'mc-ru') ? q.word.de : q.word.ru;
+  var prompt = promptWort;
+  var promptHtml = (q.mode === 'tiles' || q.mode === 'mc-ru')
+    ? esc(q.word.de) : ruAnzeigeHtml(q.word.ru);
   var taskLabel = q.mode === 'mc-de' ? 'Was bedeutet …' : q.mode === 'mc-ru' ? 'Welches Wort passt?' : 'Setz das Wort zusammen';
   if (q.mode === 'luecke') {
     promptRu = true;
     prompt = q.luecke;
+    promptHtml = esc(q.luecke);
     taskLabel = 'Welche Form fehlt?';
   }
 
@@ -7805,7 +7958,7 @@ function renderUeben() {
     '<span></span></div>' +
     '<p class="task-label">' + taskLabel + '</p>' +
     '<p class="word' + (promptRu ? ' cyr' : '') +
-      (q.mode === 'luecke' ? ' luecke-satzfrage' : '') + '">' + esc(prompt) +
+      (q.mode === 'luecke' ? ' luecke-satzfrage' : '') + '">' + promptHtml +
     // Bei der Lücke schweigt der Knopf: Vorgelesen würde der Satz **mit** dem
     // fehlenden Wort — die Antwort also. Nach der Auflösung steht er wieder da.
     (q.mode === 'luecke' ? '' : hoerknopf(prompt, promptRu ? 'ru' : 'de')) + '</p>';
@@ -7848,7 +8001,7 @@ function renderUeben() {
       }
       html += '<button class="option' + (q.mode !== 'mc-de' ? ' cyr' : '') + cls + '" data-opt="' + oi + '"' +
         (uebPhase !== 'ask' ? ' disabled' : '') + '>' +
-        esc(q.mode === 'mc-de' ? opt.de : ruAnzeige(opt.ru)) + '</button>';
+        (q.mode === 'mc-de' ? esc(opt.de) : ruAnzeigeHtml(opt.ru)) + '</button>';
     });
     html += '</div>';
   }
@@ -7861,7 +8014,7 @@ function renderUeben() {
         '<strong class="cyr">' + esc(q.form) + '</strong> — von ' +
         '<span class="cyr">' + esc(q.word.ru) + '</span>, ' + esc(q.word.de) + '</p>';
     } else html += '<p>' + ICON.kreuz + (uebRevealed ? 'Lösung: ' : 'Richtig wäre: ') +
-      '<strong class="cyr">' + esc(betontesWort(q.word.ru)) + '</strong> — ' + esc(q.word.de) +
+      '<strong class="cyr">' + betontesWortHtml(q.word.ru) + '</strong> — ' + esc(q.word.de) +
       ' <span class="translit">[' + esc(q.word.tr) + ']</span></p>';
     // Nach der Auflösung steht der ganze Satz da — das ist der Zweck der
     // Übung: das Wort an seinem Platz zu sehen, nicht die Endung allein.
@@ -11147,7 +11300,7 @@ function renderPower() {
   if (ptPhase === 'feedback') {
     html += '<div class="feedback ' + (ptCorrect ? 'good' : 'bad') + '"><p>' +
       (ptCorrect ? ICON.haken + 'Правильно — richtig!'
-        : ICON.kreuz + 'Richtig wäre <strong class="cyr">' + esc(betontesWort(q.wort.ru)) + '</strong>') +
+        : ICON.kreuz + 'Richtig wäre <strong class="cyr">' + betontesWortHtml(q.wort.ru) + '</strong>') +
       '</p></div>' + hoerzeile(q.wort.ru, q.wort.de) + meisterHtml();
   }
 
@@ -11502,7 +11655,7 @@ function renderTippen() {
         ' placeholder="кириллица \u2026" lang="ru" autocapitalize="off"' +
         ' autocorrect="off" spellcheck="false" enterkeyhint="go">');
 
-  if (tResult === 'wrong') html += '<p class="feedback bad">' + ICON.kreuz + 'Richtig: <strong class="cyr">' + esc(betontesWort(w.ru)) + '</strong></p>';
+  if (tResult === 'wrong') html += '<p class="feedback bad">' + ICON.kreuz + 'Richtig: <strong class="cyr">' + betontesWortHtml(w.ru) + '</strong></p>';
   if (tResult === 'right') html += '<p class="feedback good">' + ICON.haken + 'Правильно — richtig!</p>';
   // Erst nach der Abgabe zu hören: vorher wäre die Aussprache die halbe Antwort.
   if (tResult) html += hoerzeile(w.ru, w.de) + meisterHtml();

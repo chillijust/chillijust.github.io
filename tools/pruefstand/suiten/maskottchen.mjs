@@ -402,13 +402,17 @@ try {
 
   // L · Home als Lagebild
   setTab('home');
-  pruefe('L1 acht Kacheln', alle('[data-uebung]').length === 8, String(alle('[data-uebung]').length));
+  // Seit 2.4.7 steht oben eine kurze Auswahl des Fälligen; dieselbe Übung kann
+  // darum zweimal im Baum stehen. Das volle Angebot liegt in «#homeAlle»
+  // (ADR 0065).
+  pruefe('L1 acht Kacheln', alle('#homeAlle [data-uebung]').length === 8,
+    String(alle('#homeAlle [data-uebung]').length));
   pruefe('L2 jede nennt ihren Stand',
     alle('.kachel-stand').every(function (x) { return x.textContent.length > 0; }));
   pruefe('L3 Empfehlung führt irgendwohin', !!q('#homeEmpf'));
   pruefe('L4 Bilanz steht nicht mehr bei den Übungen',
-    alle('[data-uebung]').every(function (b) { return b.dataset.uebung !== 'bilanz'; }));
-  q('[data-uebung="tippen"]').click();
+    alle('#homeAlle [data-uebung]').every(function (b) { return b.dataset.uebung !== 'bilanz'; }));
+  q('#homeAlle [data-uebung="tippen"]').click();
   pruefe('L5 Kachel führt in die Übung', currentTab === 'tippen');
   setTab('home');
   q('#homeEmpf').click();

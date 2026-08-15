@@ -88,6 +88,7 @@ Wer neu dazukommt und nur fünf lesen will:
 | [0062](0062-der-knopf-sucht-und-laedt.md) | Der Knopf sucht und lädt — er meldet nicht nur | Ladeanzeige geändert durch 0063 |
 | [0063](0063-sechs-tickets-vom-geraet.md) | Sechs Tickets vom Gerät — Farbe, Ordnung und ein stehengebliebener Satz | |
 | [0064](0064-der-akzent-gehoert-zum-schema.md) | Der Akzent gehört zum Schema, der Schatten auch | |
+| [0065](0065-ein-weg-statt-einer-wand.md) | Ein Weg statt einer Wand — und ein Strich, der nicht mitgeschrieben wird | |
 
 ## Einen neuen anlegen
 

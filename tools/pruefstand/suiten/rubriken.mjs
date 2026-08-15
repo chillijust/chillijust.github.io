@@ -15,7 +15,11 @@ function lerne(liste, stufe) {
 try {
   // A · Navigation und Name
   setTab('home');
-  var kacheln = alle('[data-uebung]').map(function (b) { return b.dataset.uebung; }).join(',');
+  // **Gefragt ist das volle Angebot**, nicht der schlanke Weg darüber: Seit
+  // 2.4.7 steht oben eine kurze Auswahl des Fälligen, und dieselbe Übung kann
+  // darum zweimal im Baum stehen (ADR 0065). Der vollständige Satz liegt in
+  // «#homeAlle».
+  var kacheln = alle('#homeAlle [data-uebung]').map(function (b) { return b.dataset.uebung; }).join(',');
   pruefe('A1 sieben Übungen auf Home',
     kacheln === 'lernsets,freestyle,tippen,schreibung,uebersetzen,buchstaben,grammatik,power', kacheln);
   pruefe('A2 App heißt Chillingo', q('h1').textContent.indexOf('Chillingo') === 0 &&
@@ -163,6 +167,75 @@ try {
   pruefe('I5 in Listen bleibt der Fluss normal',
     getComputedStyle(document.getElementById('main')).display === 'block');
 
+
+
+  // ── Z · Die Übersicht zeigt einen Weg (ADR 0065) ─────────
+  // Acht gleichrangige Kacheln auf einmal überfordern: Man sieht ein Angebot,
+  // aber keinen Anfang. Jetzt stehen oben die Empfehlung und höchstens drei
+  // fällige Kacheln, alles Übrige liegt hinter einem Tipp.
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  setTab('home');
+  pruefe('Z1 die Empfehlung steht oben', !!q('#homeEmpf'));
+  var oben = alle('#main [data-uebung]').filter(function (b) {
+    return !q('#homeAlle').contains(b);
+  });
+  pruefe('Z2 darunter höchstens drei Kacheln', oben.length <= 3, String(oben.length));
+  // Was empfohlen ist, steht schon oben — zweimal dasselbe hilft niemandem.
+  pruefe('Z3 das Empfohlene wird nicht wiederholt',
+    oben.every(function (b) { return b.dataset.uebung !== empfehlung().ziel; }),
+    empfehlung().ziel + ' / ' + oben.map(function (b) { return b.dataset.uebung; }).join());
+  // Und nur, wo wirklich etwas zu tun ist — dieselbe Frage wie bei der
+  // Empfehlung: «gesperrt» und «leer» fallen weg.
+  pruefe('Z4 nur, wo Arbeit wartet', oben.every(function (b) {
+    var st = uebungsStand(b.dataset.uebung);
+    return !st.gesperrt && !st.leer;
+  }), oben.map(function (b) { return b.dataset.uebung; }).join());
+
+  // Das ganze Angebot liegt zugeklappt im Baum — nicht weggelassen: Das
+  // Tutorial zeigt auf einzelne Kacheln, und ein Ziel, das es nicht gibt, wäre
+  // ein stiller Fehler.
+  pruefe('Z5 alle acht stehen im Baum', alle('#homeAlle [data-uebung]').length === 8,
+    String(alle('#homeAlle [data-uebung]').length));
+  pruefe('Z6 zugeklappt sind sie nicht zu sehen',
+    getComputedStyle(q('#homeAlle')).display === 'none');
+  pruefe('Z7 der Knopf sagt, dass er zu ist',
+    q('#homeAlleKnopf').getAttribute('aria-expanded') === 'false');
+  pruefe('Z8 und er ist ein Touch-Ziel',
+    q('#homeAlleKnopf').getBoundingClientRect().height >= 44,
+    q('#homeAlleKnopf').getBoundingClientRect().height.toFixed(0));
+  q('#homeAlleKnopf').click();
+  pruefe('Z9 ein Tipp klappt auf',
+    homeOffen === true && getComputedStyle(q('#homeAlle')).display !== 'none' &&
+    q('#homeAlleKnopf').getAttribute('aria-expanded') === 'true');
+  q('#homeAlleKnopf').click();
+  pruefe('Z10 und der nächste wieder zu', homeOffen === false);
+  // Ansichtszustand (ADR 0017): Nach dem Einspielen einer Sicherung steht dort
+  // ein anderer Lernstand.
+  homeOffen = true;
+  ansichtenZuruecksetzen();
+  pruefe('Z11 Zurücksetzen klappt sie zu', homeOffen === false);
+
+  // **Der Scheinwerfer klappt selbst auf.** Acht der dreizehn Schritte zeigen
+  // auf je eine Kachel; ohne diese Regel zeigten sie ins Leere.
+  setTab('home');
+  tutStarten(false);
+  // Gewählt wird ein Schritt, dessen Ziel **sicher** unten liegt:
+  // «Power-Training» ist am Anfang gesperrt und steht darum nie in der kurzen
+  // Auswahl oben. Beim ersten Schritt wäre der Beweis wertlos — «Buchstaben»
+  // ist frisch fällig und steht ohnehin oben.
+  for (var ts = 0; ts < TUTORIAL.length; ts++) {
+    if (TUTORIAL[ts][1].indexOf('power') !== -1) tutSchritt = ts;
+  }
+  pruefe('Z12a das Ziel liegt wirklich im zugeklappten Teil',
+    homeOffen === false && !q('#main [data-uebung="power"]:not(#homeAlle *)'));
+  tutZeichnen();
+  pruefe('Z12 das Tutorial öffnet den Bereich für sein Ziel', homeOffen === true);
+  pruefe('Z13 und leuchtet die Kachel an, nicht das Nichts',
+    q('#tutLoch').getBoundingClientRect().width > 20,
+    q('#tutLoch').getBoundingClientRect().width.toFixed(0));
+  tutEnde();
+  ansichtenZuruecksetzen();
 
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\\n')[1]);

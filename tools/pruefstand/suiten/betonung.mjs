@@ -148,11 +148,61 @@ try {
   pruefe('E1 eine russische Frage ist zu bekommen', !!gefunden);
   if (gefunden) {
     renderUeben();
+    // **Nicht mehr am Zeichen** (ADR 0065): Der Strich ist gezeichnet, im Text
+    // steht die Schreibweise. Gefragt ist also die Hülle, nicht U+0301.
     pruefe('E2 die Frage zeigt die Betonung',
-      q('.word').textContent.indexOf(MARKE) !== -1, q('.word').textContent);
+      !!q('.word .bet') && q('.word').textContent.indexOf(MARKE) === -1,
+      q('.word').innerHTML);
     pruefe('E3 der Hörknopf daneben nicht',
       !q('.word [data-say]') || q('.word [data-say]').dataset.say.indexOf(MARKE) === -1);
   }
+
+  // ── F · Der Strich steht über dem Wort, nicht darin (ADR 0065) ──
+  // Bis 2.4.6 hing U+0301 im Text. Es sah je nach Schrift wie ein Apostroph
+  // aus — als gehörte es zur Schreibweise —, und wer die Zeile kopierte,
+  // bekam ein Wort, das es nicht gibt.
+  state.settings.betonung = 'immer';
+  var h = betontesWortHtml('молоко');
+  pruefe('F1 die HTML-Fassung trägt kein U+0301', h.indexOf(MARKE) === -1, h);
+  pruefe('F2 sie hüllt genau den betonten Vokal ein',
+    h === 'молок<span class="bet">о</span>', h);
+  pruefe('F3 zwei Betonungen, zwei Hüllen',
+    (betontesWortHtml('добрый день').match(/class="bet"/g) || []).length === 2,
+    betontesWortHtml('добрый день'));
+  // Ein Wort ohne Angabe bleibt, was es ist — und wird trotzdem maskiert.
+  pruefe('F4 ohne Angabe bleibt das Wort blank',
+    betontesWortHtml('дом') === 'дом', betontesWortHtml('дом'));
+  pruefe('F5 und maskiert wird trotzdem', betontesWortHtml('<b>') === esc('<b>'));
+  // Der Strich wird **gezeichnet**: ein Pseudoelement, kein Zeichen. Damit
+  // steht er nicht im Text und wird nicht mitkopiert.
+  var probe = document.createElement('p');
+  probe.className = 'cyr';
+  probe.style.fontSize = '32px';
+  probe.innerHTML = betontesWortHtml('молоко');
+  document.body.appendChild(probe);
+  pruefe('F6 im Text steht genau das Wort', probe.textContent === 'молоко', probe.textContent);
+  var span = probe.querySelector('.bet');
+  var strich = getComputedStyle(span, '::after');
+  pruefe('F7 der Strich ist gezeichnet, kein Zeichen',
+    strich.content === '""' || strich.content === 'none' || strich.content === 'normal',
+    strich.content);
+  pruefe('F8 er hat eine Breite', parseFloat(strich.width) > 2, strich.width);
+  // Über dem Vokal, nicht daneben: Der Strich muss oberhalb der Oberkante des
+  // Buchstabens liegen und waagerecht in dessen Mitte.
+  var vr = span.getBoundingClientRect();
+  var sr = { hoehe: parseFloat(strich.height), unten: parseFloat(strich.bottom) };
+  pruefe('F9 er sitzt über der Grundlinie, nicht daneben', sr.unten > 0, strich.bottom);
+  probe.remove();
+
+  // Und in der Übung: Was auf dem Bildschirm steht, ist die Schreibweise.
+  ALL_VOCAB.forEach(function (v) { state.boxes[v.id] = 0; });
+  uebAuswahl = 0;
+  setTab('lernsets');
+  uebNext(true);
+  var frage = q('.card .word');
+  pruefe('F10 auch in der Aufgabe steht kein Zeichen im Text',
+    !frage || frage.textContent.indexOf(MARKE) === -1, frage ? frage.textContent : '—');
+
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);
 }
