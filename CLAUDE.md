@@ -193,7 +193,11 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   Spur in `TUT_FRAGE`. **Angeboten wird beim ersten Betreten** — aber nur, wenn das Ziel
   des ersten Schritts sichtbar ist (**ein Scheinwerfer ohne Bühne wartet**) und das große
   Tutorial schon lief. Der Merker `state.tutUebung` fällt beim **Fragen**, nicht beim
-  Durchlaufen; zurückholen führt der Trichter. Die Ziele sind **je Spur** eindeutig, und
+  Durchlaufen; **die Heimspur wird nie angeboten** — sie hat ihre eigenen zwei Merker,
+  und ohne diese Ausnahme fragte die Übersicht bei jedem Betreten (ADR 0080).
+  Zurückholen führt `#tutRund`, ein runder Knopf mit Fragezeichen im **Kopf**, überall wo
+  es eine Spur gibt. Auf der Übersicht steht er erst, wenn das große Tutorial **einmal
+  ganz** lief — davor trägt der goldene Riegel im Inhalt die Einladung, und **nie beides**. Die Ziele sind **je Spur** eindeutig, und
   jeder Schritt einer Übungsspur trägt ihren eigenen Ort. **Wer eine Suite schreibt, die
   eine Übung betritt, stellt die Spuren still** — sonst steht die Chili in der
   Tutorial-Blase statt in der Ansicht.
@@ -212,9 +216,9 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   blass stehen. *(Seit ADR 0067 gegenstandslos: Es gibt keinen weichen Rand mehr. **Das
   Loch liegt genau auf dem Ziel** — keine Luft, harte Kante, und der Radius wird am Ziel
   **gemessen**: Jeder Streifen unverdunkelten Grundes daneben ist ein leuchtender Rahmen,
-  und ein fester Radius schnitte einem runden Knopf die Ecken auf.)* **Der Einstiegsknopf wandert**: goldenes Angebot ganz oben,
-  bis das Tutorial **einmal ganz** lief, danach ruhig ganz unten — aber immer nur
-  **einmal** im Dokument. Zwei Merker: `tutorialGesehen` (fällt beim Öffnen, steuert das
+  und ein fester Radius schnitte einem runden Knopf die Ecken auf.)* **Der Einstiegsknopf wechselt die Gestalt** (ADR 0080): goldenes
+  Angebot ganz oben, bis das Tutorial **einmal ganz** lief, danach das Fragezeichen im
+  Kopf — aber immer nur **eines** von beiden. Zwei Merker: `tutorialGesehen` (fällt beim Öffnen, steuert das
   automatische Angebot) und `tutorialFertig` (fällt nach dem letzten Schritt, steuert den
   Platz). Ein Abbruch setzt nur den ersten.
 - **Die Einstellungen haben Reiter** (ADR 0045). Reihenfolge: **App · Darstellung ·

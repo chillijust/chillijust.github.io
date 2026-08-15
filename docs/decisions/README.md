@@ -103,6 +103,7 @@ Wer neu dazukommt und nur fünf lesen will:
 | [0077](0077-ein-stern-zeichnet-nichts-neu.md) | Ein Stern schaltet an Ort und Stelle, ohne Renderlauf | ergänzt 0071 |
 | [0078](0078-ort-und-art-und-ein-dritter-reiter.md) | Ort und Art sind zwei Felder, «Bearbeiten» ein dritter Reiter | ergänzt 0069, 0025 |
 | [0079](0079-eine-spur-je-uebung.md) | Eine Tutorial-Spur je Übung, angeboten beim ersten Betreten | ergänzt 0051 |
+| [0080](0080-der-tutorialknopf-wird-klein.md) | Der Tutorial-Knopf wird klein und rund und zieht in den Kopf | ändert 0079 |
 
 ## Einen neuen anlegen
 

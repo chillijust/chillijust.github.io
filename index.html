@@ -1551,7 +1551,6 @@ body.unterwegs .reiter { top: 62px; }
 /* Die Defizite in der Bilanz: je eine Karte, Zahl rechts, darunter der Grund
    und ein Weg dorthin (ADR 0075). */
 /* Das Einrichte-Fenster: drei Kästen, in die man Zeilen zieht (ADR 0075). */
-.tut-chip { width: 100%; text-align: center; }
 .einr-note { margin: 4px 0 8px; }
 .einr-liste {
   min-height: 56px; padding: 6px; border-radius: 14px;
@@ -1965,6 +1964,12 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
         <div class="menuwrap"><div class="menuinhalt" id="wissenInhalt"></div></div>
       </div>
     </div></span>
+    <!-- **Der Tutorial-Knopf im Kopf** (ADR 0080). Klein und rund wie die
+         anderen, überall dort, wo es eine Spur gibt. Die Ausnahme ist die
+         Übersicht, solange das große Tutorial noch nie ganz lief: Dort steht
+         weiter das goldene Angebot im Inhalt, und zwei Knöpfe für dieselbe
+         Sache wären einer zu viel. -->
+    <button id="tutRund" class="rundbtn" aria-label="Tutorial zu dieser Ansicht" hidden></button>
     <button id="filterKnopf" class="rundbtn" aria-label="Auswahl" aria-expanded="false" aria-controls="filterPanel" hidden>
       <span class="knopfzeichen" id="filterZeichen" aria-hidden="true"></span>
       <span class="punkt" aria-hidden="true" data-flamme></span>
@@ -3288,7 +3293,7 @@ var TUTORIALS = {
     ['home', '.kopf-rail', 'Der Balken zeigt, wie viele Wörter endgültig sitzen. Ein Wort braucht dafür vier richtige Antworten an verschiedenen Tagen. Darunter läuft deine Serie mit.'],
     ['lernsets', '#filterKnopf', 'In jeder Übung sitzt oben dieser Trichter. Dahinter wählst du, woraus geübt wird: der Reihe nach, nur Wiederholungen, oder alles auf einmal.'],
     ['home', '#menuKnopf', 'Hinter den drei Strichen liegen Bilanz, Sicherung, Einstellungen und Tickets. Die Sicherung ist wichtig — dein Fortschritt liegt nur auf diesem Gerät.'],
-    ['home', '#tutKnopf', 'Diesen Knopf findest du immer auf der Übersicht — ab jetzt ganz unten. Er zeigt dir alles noch einmal, sooft du willst. Los geht es: Die Buchstaben warten.']
+    ['home', '#tutKnopf', 'Diesen Knopf brauchst du gleich nicht mehr: Sobald du einmal durch bist, wandert er als kleines Fragezeichen nach oben in die Kopfzeile — und steht dort auch in den Übungen, jeweils für ihre eigene Erklärung.']
   ],
   lernsets: [
     ['lernsets', '.boxdots', 'Diese fünf Punkte sind der Lernstand des Wortes. Jede richtige Antwort rückt es eine Stufe vor, jede falsche zwei zurück — und die letzte Stufe gibt es erst nach vier Treffern an verschiedenen Tagen.'],
@@ -4181,7 +4186,7 @@ var APP_STAND = '2026-08-15'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.4.21T'; /* == VERSION == */
+var APP_VERSION = '2.4.22T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -4832,6 +4837,12 @@ var ICON = {
     '<path d="M3.5 9.5h17M9 9.5v10M14.5 9.5v10"/>'),
   wissen: svg('<circle cx="12" cy="12" r="8.6"/><path d="M12 11v5.4"/>' +
     '<circle cx="12" cy="7.9" r="0.2" fill="currentColor"/>'),
+  // Das Fragezeichen für den Tutorial-Knopf. Dieselbe Bauform wie «wissen» —
+  // ein Kreis mit Zeichen darin —, damit er neben ihm nicht wie ein Fremdkörper
+  // steht, aber klar unterscheidbar.
+  frage: svg('<circle cx="12" cy="12" r="8.6"/>' +
+    '<path d="M9.6 9.4a2.4 2.4 0 1 1 3.2 2.3c-.5.2-.8.7-.8 1.3v.6"/>' +
+    '<circle cx="12" cy="16.4" r="0.2" fill="currentColor"/>'),
   // Die Flamme steht dort, wo die Chili gerade nicht hin kann. Zwei Zungen:
   // die äußere trägt die Form, die innere den hellen Kern.
   // Ein Haus, kein Pfeil: «Zurück» ist relativ, «Home» ist ein Ort.
@@ -6310,7 +6321,11 @@ function tutStarten(spur, ruhig) {
 // Leerzustand, und ein Scheinwerfer auf nichts erklärt nichts. Dann wartet das
 // Angebot bis zum nächsten Mal.
 function tutUebungAnbieten(id) {
-  if (tutOffen || !TUTORIALS[id]) return;
+  // **Die Heimspur nicht.** Sie hat ihre eigenen zwei Merker (ADR 0051), und
+  // `tutUebung` führt sie nicht — ohne diese Zeile fragte die Übersicht bei
+  // *jedem* Betreten, weil nie etwas gesetzt wurde, das sie zum Schweigen
+  // gebracht hätte.
+  if (id === 'home' || tutOffen || !TUTORIALS[id]) return;
   if (state.tutUebung[id]) return;
   // Das große Tutorial zuerst: Zwei Angebote übereinander sind eines zu viel.
   if (!state.tutorialGesehen) return;
@@ -7087,17 +7102,6 @@ function filterChip(gruppe, wert, text, gesetzt, gesperrt) {
     esc(text) + '</button>';
 }
 
-// **Der Weg zurück zur Spur** (ADR 0079). Der Trichter ist die Stelle, an der
-// alles Übungseigene liegt — dort gehört auch «zeig es mir noch einmal» hin.
-// Auf der Übersicht steht der Knopf unten auf der Seite; in einer Übung wäre
-// dafür kein Platz, ohne die Aufgabe zu verdrängen.
-function tutFilterZeile() {
-  if (!TUTORIALS[currentTab]) return '';
-  return '<p class="filter-titel">Hilfe</p>' +
-    '<button class="chip tut-chip" data-fw="tutspur" data-fv="' + esc(currentTab) +
-    '">Tutorial zu dieser Übung</button>';
-}
-
 function filterInhaltHtml() {
   if (currentTab === 'lernsets') {
     var aktuell = aktuellesSet();
@@ -7192,13 +7196,6 @@ function filterInhaltHtml() {
 // Eine Auswahl wirkt sofort: Panel zu, Übung neu aufsetzen, Knopf nachziehen.
 function filterWaehlen(gruppe, wert) {
   filterSetzen(false);
-  if (gruppe === 'tutspur') {
-    // Erst schließen, dann anleuchten: Der Scheinwerfer soll die Übung
-    // beleuchten, nicht das Blatt, das eben noch darüber lag.
-    chiliZusammen(function () { filterSetzen(false); });
-    tutStarten(wert);
-    return;
-  }
   if (gruppe === 'set') {
     uebAuswahl = (wert === 'aktuell' || wert === 'alle') ? wert : parseInt(wert, 10);
     uebNext(true);
@@ -7272,7 +7269,7 @@ function renderFilter() {
   var panel = document.getElementById('filterInhalt');
   // Angehängt statt in jedem Zweig eingebaut: Es gilt für jede Übung mit
   // eigener Spur, und in acht Zweigen dieselbe Zeile wäre sieben zu viel.
-  panel.innerHTML = filterInhaltHtml() + tutFilterZeile();
+  panel.innerHTML = filterInhaltHtml();
   panel.querySelectorAll('[data-fw]').forEach(function (b) {
     b.addEventListener('click', function () { filterWaehlen(b.dataset.fw, b.dataset.fv); });
     b.tabIndex = filterOffen ? 0 : -1;
@@ -7468,8 +7465,22 @@ function renderKopf() {
     b.classList.toggle('active', b.dataset.ziel === currentTab);
   });
   renderTafelKnopf();
+  renderTutRund();
   renderWissen();
   renderFilter();
+}
+
+// **Wo der kleine Tutorial-Knopf steht** (ADR 0080): überall, wo es eine Spur
+// gibt — außer auf der Übersicht, solange das große Tutorial noch nie ganz
+// gelaufen ist. Dort trägt das goldene Angebot im Inhalt die Einladung, und die
+// soll man nicht übersehen können.
+function renderTutRund() {
+  var knopf = document.getElementById('tutRund');
+  var da = !!TUTORIALS[currentTab] &&
+    !(currentTab === 'home' && !state.tutorialFertig);
+  knopf.hidden = !da;
+  if (!da) return;
+  knopf.innerHTML = ICON.frage;
 }
 
 // Der Tafelknopf gehört nur zu «Buchstaben» und zeigt, wo man gerade steht:
@@ -7679,6 +7690,9 @@ document.getElementById('filterKnopf').addEventListener('click', function (e) {
     filterSetzen(!filterOffen);
     renderFilter();   // die Einträge sind nur im offenen Panel erreichbar
   });
+});
+document.getElementById('tutRund').addEventListener('click', function () {
+  tutStarten(currentTab);
 });
 document.getElementById('heimKnopf').innerHTML = ICON.heim;
 document.getElementById('heimKnopf').addEventListener('click', function () { setTab('home'); });
@@ -8035,10 +8049,10 @@ function renderHome() {
   }
   html += '</div>';
 
-  // Ruhig und ganz unten — aber nur, wenn er nicht schon oben steht: Ihn
-  // zweimal zu zeichnen hieße, zwei Knöpfe mit derselben Kennung zu haben, und
-  // das Tutorial leuchtete dann den falschen an.
-  if (!neu) html += tutHtml;
+  // **Nur solange es noch nie ganz lief** (ADR 0080). Danach sitzt der Knopf
+  // klein und rund im Kopf, wie in jeder anderen Ansicht mit eigener Spur — ein
+  // ruhiger Riegel am Seitenende war für etwas, das man selten braucht, immer
+  // noch zu viel Platz.
   html += '</section>';
   main.innerHTML = html;
 
@@ -8048,9 +8062,10 @@ function renderHome() {
   // war damit ein «ohne Sprung», und die Figur stand im Tutorial plötzlich da,
   // statt hinzufliegen. Nur der automatische Start beim allerersten Öffnen ist
   // wirklich ruhig; dort steht das `true` ausgeschrieben.
-  document.getElementById('tutKnopf').addEventListener('click', function () {
-    tutStarten('home');
-  });
+  // Den goldenen Riegel gibt es nur, solange das Tutorial noch nie ganz lief —
+  // danach trägt der runde Knopf im Kopf die Einladung (ADR 0080).
+  var tutK = document.getElementById('tutKnopf');
+  if (tutK) tutK.addEventListener('click', function () { tutStarten('home'); });
   document.getElementById('homeAlleKnopf').addEventListener('click', function () {
     homeOffen = !homeOffen;
     renderHome();

@@ -124,14 +124,12 @@ try {
   trLevel = 1; trDir = 'gemischt'; trModus = 'lernen'; trTask = null;
   setTab('uebersetzen');
   q('#filterKnopf').click();
-  // Drei Gruppen — und seit ADR 0079 die Zeile «Hilfe» darunter, die in jeder
-  // Übung mit eigener Tutorial-Spur steht. Sie ist keine Filtergruppe.
   pruefe('G1 drei Gruppen', alle('.filtergruppe').length === 3 &&
     alle('.filtergruppe .filter-titel').map(function (x) { return x.textContent; }).join(',') === 'Stufe,Richtung,Stapel',
     alle('.filtergruppe .filter-titel').map(function (x) { return x.textContent; }).join(','));
-  pruefe('G1b und darunter der Weg zur Tutorial-Spur',
-    !!q('[data-fw="tutspur"]') && q('[data-fw="tutspur"]').dataset.fv === 'uebersetzen',
-    q('[data-fw="tutspur"]') ? q('[data-fw="tutspur"]').dataset.fv : 'keiner');
+  // Der Weg zur Tutorial-Spur lag hier kurzzeitig als vierte Zeile — seit
+  // ADR 0080 sitzt er als runder Knopf im Kopf. Eine Sache, ein Ort.
+  pruefe('G1b und keine Hilfezeile mehr im Trichter', !q('[data-fw="tutspur"]'));
   // Die Zahl steht in den Daten, nicht hier: Mit jeder Etappe kommen Sätze
   // dazu, und eine festgeschriebene Zahl wäre nur ein Wartungsposten.
   var wieviele = SENTENCES.filter(function (x) { return x.stufe === 1; }).length;

@@ -73,35 +73,49 @@ try {
     return !/\bSie\b|\bIhnen\b|\bIhre\b/.test(s[2]);
   }));
 
-  // ── B · Der Knopf auf Home wandert ────────────────────────
-  // Wer die App noch nicht kennt, findet ihn zuerst; wer sie kennt, zuletzt.
-  function nachDenKacheln() {
-    var kacheln = alle('#main .kachel');
-    var letzte = kacheln[kacheln.length - 1];
-    return !!letzte &&
-      (letzte.compareDocumentPosition(q('#tutKnopf')) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
+  // ── B · Der Knopf auf Home wechselt die Gestalt (ADR 0080) ─
+  // Wer die App noch nicht kennt, bekommt das goldene Angebot im Inhalt; wer
+  // sie kennt, findet ein kleines Fragezeichen im Kopf. **Nie beides.**
+  function sichtbar(w) {
+    var el = q(w);
+    return !!el && getComputedStyle(el).display !== 'none' && el.getClientRects().length > 0;
   }
-  pruefe('B1 es gibt ihn genau einmal', alle('#tutKnopf').length === 1,
+  pruefe('B1 es gibt das Angebot genau einmal', alle('#tutKnopf').length === 1,
     String(alle('#tutKnopf').length));
-  pruefe('B2 ungespielt steht er ganz oben',
-    q('#main section').firstElementChild === q('#tutKnopf') && !nachDenKacheln(),
+  pruefe('B2 ungespielt steht es ganz oben im Inhalt',
+    q('#main section').firstElementChild === q('#tutKnopf'),
     q('#main section').firstElementChild.className);
   pruefe('B2b und ist als Angebot ausgezeichnet', q('#tutKnopf').classList.contains('oben'));
-  // Nur **fertig** schickt ihn nach unten. Dass die App einmal gefragt hat,
+  pruefe('B2b2 der runde Knopf im Kopf bleibt dann weg', !sichtbar('#tutRund'));
+  // Nur **fertig** tauscht die Gestalt. Dass die App einmal gefragt hat,
   // reicht nicht: Wer abbricht, hat das Tutorial nicht gesehen.
   state.tutorialGesehen = true;
   renderHome();
-  pruefe('B2c gefragt allein bewegt ihn nicht',
-    q('#main section').firstElementChild === q('#tutKnopf'));
+  renderKopf();
+  pruefe('B2c gefragt allein ändert nichts',
+    q('#main section').firstElementChild === q('#tutKnopf') && !sichtbar('#tutRund'));
   state.tutorialFertig = true;
   renderHome();
-  pruefe('B2d durchgespielt wandert er ans Ende', nachDenKacheln() &&
-    !q('#tutKnopf').classList.contains('oben'));
-  pruefe('B2e und auch dann gibt es ihn nur einmal', alle('#tutKnopf').length === 1,
+  renderKopf();
+  pruefe('B2d durchgespielt wandert er als Fragezeichen in den Kopf',
+    sichtbar('#tutRund') && !!q('#tutRund svg'));
+  pruefe('B2e und der goldene Riegel ist verschwunden', alle('#tutKnopf').length === 0,
     String(alle('#tutKnopf').length));
+  // **Auch in den Übungen** — das war der zweite Teil des Befunds.
+  setTab('lernsets');
+  pruefe('B2f in einer Übung mit eigener Spur steht er auch', sichtbar('#tutRund'));
+  setTab('buchstaben');
+  pruefe('B2g in einer ohne Spur nicht', !sichtbar('#tutRund'));
+  setTab('home');
+  q('#tutRund').click();
+  pruefe('B2h und er startet die Spur der Ansicht',
+    tutOffen && tutSpur === 'home', tutSpur);
+  tutEnde();
   state.tutorialGesehen = false;
   state.tutorialFertig = false;
+  setTab('home');
   renderHome();
+  renderKopf();
   pruefe('B3 vor dem Start ist nichts offen',
     q('#tutHof').hidden && q('#tutGespann').getAttribute('aria-hidden') === 'true');
 
@@ -119,7 +133,7 @@ try {
     q('#tutGespann').getAttribute('aria-hidden') === 'true');
   pruefe('C6 und merkt sich, dass gefragt wurde', state.tutorialGesehen === true);
   pruefe('C6b aber nicht, dass es gelaufen wäre', state.tutorialFertig === false);
-  pruefe('C6c der Knopf bleibt oben stehen',
+  pruefe('C6c das Angebot bleibt oben stehen',
     q('#main section').firstElementChild === q('#tutKnopf') &&
     q('#tutKnopf').classList.contains('oben'),
     q('#main section').firstElementChild.className);
@@ -134,7 +148,7 @@ try {
   pruefe('C8 mitten im Tutorial', tutSchritt === 2, String(tutSchritt));
   q('#tutZu').click();
   pruefe('C8b ein Abbruch mitten drin zählt nicht', state.tutorialFertig === false);
-  pruefe('C8c der Knopf steht weiter oben',
+  pruefe('C8c das Angebot steht weiter oben',
     q('#main section').firstElementChild === q('#tutKnopf'),
     q('#main section').firstElementChild.className);
 
@@ -242,7 +256,13 @@ try {
   q('#tutVor').click();
   pruefe('F1 fertig schließt', !tutOffen && q('#tutHof').hidden);
   pruefe('F2 und steht wieder auf Home', currentTab === 'home', currentTab);
-  pruefe('F3 die Übersicht ist da', !!q('#tutKnopf'));
+  // Durchgelaufen heißt: Der goldene Riegel ist weg, das Fragezeichen im Kopf
+  // ist da (ADR 0080). Genau dieser Übergang war der Zweck des Umbaus.
+  pruefe('F3 die Übersicht ist da und trägt jetzt das Fragezeichen',
+    !!q('#main .kachelfeld') && !q('#tutKnopf') &&
+    q('#tutRund').hidden === false,
+    (q('#tutKnopf') ? 'Riegel noch da' : 'Riegel weg') + ' / ' +
+    (q('#tutRund').hidden ? 'kein Knopf' : 'Knopf da'));
   // Bleibt sie in der zugeklappten Blase stehen, ist sie weg — die Ansicht
   // hätte dann gar keine Figur mehr.
   pruefe('F4 die Chili ist zurück in der Ansicht',
@@ -445,21 +465,23 @@ try {
   pruefe('K4 vor dem großen Tutorial schweigt sie',
     !tutOffen && !state.tutUebung.lernsets);
 
-  // ── L · Der Weg zurück zur Spur ────────────────────────────
+  // ── L · Der Weg zurück zur Spur (ADR 0080) ─────────────────
+  // Er liegt im Kopf, nicht im Trichter: eine Sache, ein Ort.
   stand('lernsets');
   tutEnde();
-  q('#filterKnopf').click();
-  var zeile = q('[data-fw="tutspur"]');
-  pruefe('L1 im Trichter steht der Weg zur Spur',
-    !!zeile && zeile.dataset.fv === 'lernsets', zeile ? zeile.dataset.fv : 'keiner');
-  zeile.click();
-  pruefe('L2 ein Tipp startet sie', tutOffen && tutSpur === 'lernsets');
-  pruefe('L3 und das Blatt ist dabei zu', filterOffen === false);
+  state.tutorialFertig = true;
+  renderKopf();
+  pruefe('L1 im Kopf steht der runde Knopf',
+    q('#tutRund').hidden === false && !!q('#tutRund svg'));
+  q('#tutRund').click();
+  pruefe('L2 ein Tipp startet die Spur dieser Übung',
+    tutOffen && tutSpur === 'lernsets', tutSpur);
   tutEnde();
-  // In einer Übung ohne eigene Spur gibt es die Zeile nicht.
+  // In einer Übung ohne eigene Spur gibt es ihn nicht.
   setTab('buchstaben');
-  renderFilter();
-  pruefe('L4 ohne eigene Spur steht dort nichts', !q('[data-fw="tutspur"]'));
+  pruefe('L3 ohne eigene Spur ist er weg', q('#tutRund').hidden === true);
+  // Und im Trichter steht seit ADR 0080 nichts mehr dazu.
+  pruefe('L4 der Trichter trägt keine Hilfezeile mehr', !q('[data-fw="tutspur"]'));
 
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);

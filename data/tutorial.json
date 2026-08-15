@@ -12,7 +12,7 @@
     ["home", ".kopf-rail", "Der Balken zeigt, wie viele Wörter endgültig sitzen. Ein Wort braucht dafür vier richtige Antworten an verschiedenen Tagen. Darunter läuft deine Serie mit."],
     ["lernsets", "#filterKnopf", "In jeder Übung sitzt oben dieser Trichter. Dahinter wählst du, woraus geübt wird: der Reihe nach, nur Wiederholungen, oder alles auf einmal."],
     ["home", "#menuKnopf", "Hinter den drei Strichen liegen Bilanz, Sicherung, Einstellungen und Tickets. Die Sicherung ist wichtig — dein Fortschritt liegt nur auf diesem Gerät."],
-    ["home", "#tutKnopf", "Diesen Knopf findest du immer auf der Übersicht — ab jetzt ganz unten. Er zeigt dir alles noch einmal, sooft du willst. Los geht es: Die Buchstaben warten."]
+    ["home", "#tutKnopf", "Diesen Knopf brauchst du gleich nicht mehr: Sobald du einmal durch bist, wandert er als kleines Fragezeichen nach oben in die Kopfzeile — und steht dort auch in den Übungen, jeweils für ihre eigene Erklärung."]
   ],
   "lernsets": [
     ["lernsets", ".boxdots", "Diese fünf Punkte sind der Lernstand des Wortes. Jede richtige Antwort rückt es eine Stufe vor, jede falsche zwei zurück — und die letzte Stufe gibt es erst nach vier Treffern an verschiedenen Tagen."],

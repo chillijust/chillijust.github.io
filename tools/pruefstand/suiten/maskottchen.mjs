@@ -791,26 +791,40 @@ try {
   // Der Tutorialknopf dagegen **soll** sie holen. Bis 2.4.12 tat er es nicht:
   // Der Zuhörer hing unmittelbar an tutStarten, bekam das Ereignis als erstes
   // Argument — und das landete im Ruhig-Merker.
+  // Seit ADR 0080 gibt es den goldenen Riegel nur, solange das Tutorial noch
+  // nie ganz lief — danach trägt der runde Knopf im Kopf die Einladung. Beide
+  // Wege müssen sie holen.
   tutEnde();
-  state.tutorialFertig = true;
+  state.tutorialFertig = false;
   setTab('home');
   chiliAktualisieren();
   ruhe();
   q('#tutKnopf').click();
-  pruefe('R3 der Tutorialknopf holt sie mit einem Flug',
+  pruefe('R3 der goldene Riegel holt sie mit einem Flug',
     tutOffen && chiliBuehne.getAnimations().length === 1,
     (tutOffen ? 'offen' : 'zu') + ' · ' + chiliBuehne.getAnimations().length + ' Flüge');
   pruefe('R3b und sie steht in der Tutorial-Blase', wo() === 'tutChili', wo());
   tutEnde();
 
-  // Der Rand des Knopfes ist durchgezogen — gestrichelt las sich wie ein
-  // Platzhalter statt wie ein Angebot.
   state.tutorialFertig = true;
+  setTab('home');
+  chiliAktualisieren();
+  ruhe();
+  q('#tutRund').click();
+  pruefe('R3c und der runde Knopf im Kopf ebenso',
+    tutOffen && chiliBuehne.getAnimations().length === 1 && wo() === 'tutChili',
+    (tutOffen ? 'offen' : 'zu') + ' · ' + wo());
+  tutEnde();
+
+  // Der Rand des Angebots ist durchgezogen — gestrichelt las sich wie ein
+  // Platzhalter statt wie ein Angebot.
+  state.tutorialFertig = false;
   setTab('home');
   chiliAktualisieren();
   pruefe('R4 der Tutorialknopf hat einen durchgezogenen Rand',
     getComputedStyle(q('#tutKnopf')).borderTopStyle === 'solid',
     getComputedStyle(q('#tutKnopf')).borderTopStyle);
+  state.tutorialFertig = true;
 
   // Und die Figur wirft keinen Schatten mehr: Ein Weichzeichner, den Safari am
   // Elementkasten beschneidet, hinterlässt genau eine gerade Kante.
