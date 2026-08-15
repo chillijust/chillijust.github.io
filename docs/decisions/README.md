@@ -104,6 +104,7 @@ Wer neu dazukommt und nur fünf lesen will:
 | [0078](0078-ort-und-art-und-ein-dritter-reiter.md) | Ort und Art sind zwei Felder, «Bearbeiten» ein dritter Reiter | ergänzt 0069, 0025 |
 | [0079](0079-eine-spur-je-uebung.md) | Eine Tutorial-Spur je Übung, angeboten beim ersten Betreten | ergänzt 0051 |
 | [0080](0080-der-tutorialknopf-wird-klein.md) | Der Tutorial-Knopf wird klein und rund und zieht in den Kopf | ändert 0079 |
+| [0081](0081-fuenf-tickets-vom-geraet.md) | Fünf Tickets — Auskunft, Puls, Liste, Gestalt, Leiste | ändert 0078, 0080 |
 
 ## Einen neuen anlegen
 

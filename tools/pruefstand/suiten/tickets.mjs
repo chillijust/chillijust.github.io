@@ -182,18 +182,43 @@ try {
   q('#meldeGrundKnopf').click();
   pruefe('F3j es klappt auf und bietet sechs Gründe plus «keine»',
     q('#meldeGrund').hidden === false &&
-    alle('#meldeGrund [data-grund]').length === MELDE_GRUENDE.length + 1,
+    alle('#meldeGrund [data-grund]').length === meldeGruende().length + 1,
     String(alle('#meldeGrund [data-grund]').length));
   q('#meldeGrund [data-grund="anzeige"]').click();
   pruefe('F3k eine Wahl schließt es und steht auf dem Knopf',
     meldeGrundWahl === 'anzeige' && q('#meldeGrund').hidden === true &&
     q('#meldeGrundName').textContent.indexOf('Anzeige') === 0,
     q('#meldeGrundName').textContent);
-  // **Ein Wunsch hat keinen Grund, er hat einen Zweck.**
+  // **Der Wunsch sieht aus wie der Fehler** (ADR 0081) — dasselbe Feld an
+  // derselben Stelle, aber mit eigener Liste: «Stürzt ab oder hängt» wäre bei
+  // einem Wunsch Unsinn.
+  // Ein Grund, den es nur beim Fehler gibt — daran zeigt sich, was beim
+  // Umschalten passiert. «anzeige» steht in beiden Listen und überlebt darum
+  // zu Recht; «haengt» nicht.
+  q('#meldeGrundKnopf').click();
+  q('#meldeGrund [data-grund="haengt"]').click();
   q('[data-melde-art="feature"]').click();
-  pruefe('F3l beim Wunsch ist das Feld weg', q('#meldeGrundZeile').hidden === true);
+  pruefe('F3l beim Wunsch steht dasselbe Feld', q('#meldeGrundZeile').hidden === false);
+  pruefe('F3l2 aber mit anderen Einträgen', (function () {
+    var namen = alle('#meldeGrund [data-grund]').map(function (b) { return b.dataset.grund; });
+    return namen.indexOf('neu') !== -1 && namen.indexOf('haengt') === -1;
+  })(), alle('#meldeGrund [data-grund]').map(function (b) { return b.dataset.grund; }).join());
+  // Eine Wahl, die es in der neuen Liste nicht gibt, fällt weg — sonst wanderte
+  // sie unsichtbar ins Ticket.
+  pruefe('F3l3 eine Wahl, die es hier nicht gibt, ist gefallen',
+    meldeGrundWahl === '', meldeGrundWahl);
+  // Was in beiden Listen steht, überlebt dagegen — die Absicht bleibt dieselbe.
+  q('#meldeGrundKnopf').click();
+  q('#meldeGrund [data-grund="anzeige"]').click();
   q('[data-melde-art="bug"]').click();
-  pruefe('F3m und beim Fehler wieder da', q('#meldeGrundZeile').hidden === false);
+  pruefe('F3l4 eine Wahl, die es in beiden gibt, bleibt',
+    meldeGrundWahl === 'anzeige', meldeGrundWahl);
+  q('[data-melde-art="feature"]').click();
+  q('[data-melde-art="bug"]').click();
+  pruefe('F3m und beim Fehler wieder die eigene Liste', (function () {
+    var namen = alle('#meldeGrund [data-grund]').map(function (b) { return b.dataset.grund; });
+    return namen.indexOf('haengt') !== -1 && namen.indexOf('neu') === -1;
+  })());
 
   // ── F3n ff · Der dritte Reiter (ADR 0078) ────────────────
   q('#meldeTitel').value = 'Ein Entwurf';
@@ -435,15 +460,29 @@ try {
     q('#meldeNeu').hidden === false);
   q('[data-melde-art="liste"]').click();
   pruefe('Z2 die Liste führt das vorhandene Ticket',
-    alle('#meldeListe [data-tkwahl]').length === 1 &&
+    alle('#meldeListe [data-tkedit]').length === 1 &&
     q('#meldeListe').textContent.indexOf('Zu bearbeiten') !== -1,
     q('#meldeListe').textContent.slice(0, 60));
-  // Sie nennt auch, worum es ging — sonst müsste man raten, welches man meint.
-  pruefe('Z2b und sagt Art und Ort dazu',
-    q('#meldeListe').textContent.indexOf('Fehler') !== -1 &&
-    q('#meldeListe').textContent.indexOf('Tippen') !== -1,
+  // **Dieselbe Gestalt wie im Menü** (ADR 0081): Art, Ort, Datum und ob es
+  // schon übergeben wurde. Zwei Fassungen wären zwei Wahrheiten.
+  pruefe('Z2b und sagt Art, Ort und Stand dazu',
+    !!q('#meldeListe .tkliste') && !!q('#meldeListe .tkart') &&
+    q('#meldeListe').textContent.indexOf('Tippen') !== -1 &&
+    q('#meldeListe').textContent.indexOf('offen') !== -1,
     q('#meldeListe').textContent.slice(0, 90));
-  q('#meldeListe [data-tkwahl]').click();
+  // **Übergebene stehen mit da** — sie sind der Grund für das Ticket gewesen.
+  tickets[0].uebergeben = Date.now();
+  meldeFuellen();
+  pruefe('Z2c auch schon kopierte',
+    alle('#meldeListe [data-tkedit]').length === 1 &&
+    !!q('#meldeListe .tkzeile.gesendet') &&
+    q('#meldeListe').textContent.indexOf('übergeben') !== -1,
+    q('#meldeListe').textContent.slice(0, 90));
+  tickets[0].uebergeben = null;
+  meldeFuellen();
+  // Und gelöscht wird hier auch — dasselbe System, nur ohne Kopieren.
+  pruefe('Z2d jede Zeile lässt sich löschen', !!q('#meldeListe [data-tkweg]'));
+  q('#meldeListe [data-tkedit]').click();
   pruefe('Z3 ein Tipp holt es in den Schreibteil',
     meldeModus === 'neu' && !!meldeBearbeitet &&
     q('#meldeTitel').value === 'Zu bearbeiten' &&

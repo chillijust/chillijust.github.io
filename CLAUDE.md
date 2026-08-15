@@ -195,8 +195,13 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   Tutorial schon lief. Der Merker `state.tutUebung` fällt beim **Fragen**, nicht beim
   Durchlaufen; **die Heimspur wird nie angeboten** — sie hat ihre eigenen zwei Merker,
   und ohne diese Ausnahme fragte die Übersicht bei jedem Betreten (ADR 0080).
-  Zurückholen führt `#tutRund`, ein runder Knopf mit Fragezeichen im **Kopf**, überall wo
-  es eine Spur gibt. Auf der Übersicht steht er erst, wenn das große Tutorial **einmal
+  Zurückholen führt `#tutRund`, ein kleiner runder Knopf mit Fragezeichen in der
+  **Leiste `#uebLeiste`** über dem Inhalt (ADR 0081) — rechtsbündig, neben dem
+  Wissensknopf, und **außerhalb von `#main`**: Ein Renderlauf ersetzt dessen Inhalt und
+  nähme die Wissenshülle mit. Beide tragen `.klein`: Kreis 36 px, Zeichen 20 px,
+  antippbare Fläche über `::after` weiterhin **44 px** — dafür braucht `.klein`
+  `overflow: visible`, sonst schneidet `.rundbtn` die Fläche ab und sie ist eine
+  Behauptung. Auf der Übersicht steht er erst, wenn das große Tutorial **einmal
   ganz** lief — davor trägt der goldene Riegel im Inhalt die Einladung, und **nie beides**. Die Ziele sind **je Spur** eindeutig, und
   jeder Schritt einer Übungsspur trägt ihren eigenen Ort. **Wer eine Suite schreibt, die
   eine Übung betritt, stellt die Spuren still** — sonst steht die Chili in der
@@ -393,8 +398,10 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   **natives Auswahlfeld** bleibt verboten (auf iOS ein Rad über der halben Seite); die
   Suite `filter` liest den Quelltext danach ab und springt auch auf ein Vorkommen im
   Kommentar an. **Ort und Art sind zwei Felder** (ADR 0078): «Betrifft» sagt *wo*,
-  «Art» *was* (sechs grobe Gründe, nur beim Fehler — ein Wunsch hat keinen Grund,
-  sondern einen Zweck). Beides fährt durch den gebündelten Text und zurück. Der dritte
+  «Art» *was* — je sechs grobe Gründe, **eine eigene Liste je Ticketart** (ADR 0081);
+  beim Umschalten fällt eine Wahl weg, die es in der neuen Liste nicht gibt. Die
+  Ticketzeile steht einmal (`tkZeileHtml()`) und wird von der Ticketansicht **und** dem
+  Reiter «Bearbeiten» benutzt. Beides fährt durch den gebündelten Text und zurück. Der dritte
   Chip **«Bearbeiten»** zeigt die Ticketliste im Blatt; im Zustand bleiben `meldeArt`
   (was für ein Ticket) und `meldeModus` (was das Blatt zeigt) **getrennt**, und der
   Schreibteil wird dabei nur verborgen, nicht ausgeräumt. Vom Blatt führt eine Zeile in die Liste;

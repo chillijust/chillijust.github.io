@@ -119,6 +119,21 @@ try {
   pruefe('B3 vor dem Start ist nichts offen',
     q('#tutHof').hidden && q('#tutGespann').getAttribute('aria-hidden') === 'true');
 
+  // ── B9 · Der Scheinwerfer leuchtet auf (ADR 0081) ─────────
+  // Ein Ring, der alle vier Sekunden kurz auftaucht: Er sagt «hier», solange
+  // man hinsieht, und ist danach wieder fort. Ein stehender Rand täte das
+  // nicht — er zöge den Blick dauerhaft von dem ab, was er umrahmt (ADR 0067).
+  pruefe('B9 das Loch trägt einen wiederkehrenden Puls', (function () {
+    var st = getComputedStyle(q('#tutLoch'));
+    return st.animationName === 'tutPuls' &&
+      st.animationIterationCount === 'infinite' &&
+      parseFloat(st.animationDuration) === 4;
+  })(), getComputedStyle(q('#tutLoch')).animationName + ' / ' +
+    getComputedStyle(q('#tutLoch')).animationDuration);
+  pruefe('B9b und der große Schatten bleibt dabei stehen',
+    getComputedStyle(q('#tutLoch')).boxShadow.indexOf('9999px') !== -1,
+    getComputedStyle(q('#tutLoch')).boxShadow.slice(0, 60));
+
   // ── C · Erst die Frage, dann der Scheinwerfer ─────────────
   q('#tutKnopf').click();
   pruefe('C1 das Overlay ist offen', tutOffen && !q('#tutHof').hidden);
@@ -482,6 +497,56 @@ try {
   pruefe('L3 ohne eigene Spur ist er weg', q('#tutRund').hidden === true);
   // Und im Trichter steht seit ADR 0080 nichts mehr dazu.
   pruefe('L4 der Trichter trägt keine Hilfezeile mehr', !q('[data-fw="tutspur"]'));
+
+  // ── M · Die Leiste über dem Inhalt (ADR 0081) ─────────────
+  stand('uebersetzen');
+  tutEnde();
+  state.tutorialFertig = true;
+  renderKopf();
+  var leiste = q('#uebLeiste');
+  pruefe('M1 die Leiste steht zwischen Kopf und Inhalt',
+    !!leiste && !q('#main').contains(leiste) &&
+    (leiste.compareDocumentPosition(q('#main')) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0);
+  pruefe('M1b und sie ist sichtbar, sobald ein Knopf etwas zu sagen hat',
+    leiste.hidden === false && q('#tutRund').hidden === false);
+  pruefe('M2 der Knopf sitzt rechts',
+    Math.abs(q('#tutRund').getBoundingClientRect().right -
+      leiste.getBoundingClientRect().right) < 20,
+    q('#tutRund').getBoundingClientRect().right.toFixed(0) + ' / ' +
+    leiste.getBoundingClientRect().right.toFixed(0));
+  pruefe('M2b und über dem Inhalt',
+    q('#tutRund').getBoundingClientRect().bottom <=
+      q('#main').getBoundingClientRect().top + 1);
+
+  // **Kleiner sehen, gleich gut treffen.** Der Kreis misst 36 px, die
+  // antippbare Fläche bleibt bei 44 — Touch-Ziele unter 44 px sind eine harte
+  // Regel, und ein Knopf, der kleiner aussieht, muss nicht kleiner sein.
+  var r = q('#tutRund').getBoundingClientRect();
+  pruefe('M3 der Kreis ist kleiner als die anderen',
+    Math.round(r.width) === 36 && Math.round(r.height) === 36,
+    r.width.toFixed(0) + 'x' + r.height.toFixed(0));
+  pruefe('M3b das Zeichen darin bleibt gleich groß', (function () {
+    var svg = q('#tutRund svg');
+    return !!svg && Math.round(svg.getBoundingClientRect().width) === 20;
+  })(), q('#tutRund svg') ? q('#tutRund svg').getBoundingClientRect().width.toFixed(0) : 'keins');
+  pruefe('M3c aber die Fläche misst weiterhin 44 px', (function () {
+    var mx = r.left + r.width / 2;
+    var my = r.top + r.height / 2;
+    // Vier Punkte knapp innerhalb der 44er-Fläche, außerhalb des Kreises.
+    return [[mx - 21, my], [mx + 21, my], [mx, my - 21], [mx, my + 21]].every(function (pt) {
+      var el = document.elementFromPoint(pt[0], pt[1]);
+      return !!el && (el === q('#tutRund') || q('#tutRund').contains(el));
+    });
+  })());
+  pruefe('M3d der Wissensknopf ist genauso groß',
+    q('#wissenKnopf').classList.contains('klein'));
+
+  // Wo es nichts zu sagen gibt, steht auch keine Leiste — ein leerer Streifen
+  // wäre nur Luft.
+  state.tutorialFertig = true;
+  setTab('buchstaben');
+  pruefe('M4 ohne Knöpfe ist die Leiste weg',
+    q('#uebLeiste').hidden === true && q('#tutRund').hidden === true);
 
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);

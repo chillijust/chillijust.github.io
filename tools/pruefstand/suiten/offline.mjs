@@ -133,6 +133,34 @@ try {
     swAuskunft());
   pruefe('A7 ohne Worker steht der Stand auf «nicht bereit»', swStand.bereit === false);
 
+  // ── A9 · «Offline bereit» zeichnet sich nach (ADR 0081) ───
+  // Der Worker wird nach seiner Fassung **gefragt**; die Antwort kommt
+  // asynchron. Beim Start lief die Frage ohne Rückruf — die Antwort kam an und
+  // blieb liegen, während die Ansicht längst gezeichnet war. Nach einem Update
+  // stand darum der alte Stand da, bis man «Suchen» noch einmal drückte.
+  pruefe('A9 die Auskunft steht in einer eigenen Funktion',
+    typeof swBereitZeichnen === 'function');
+  einstReiter = 'app';
+  setTab('einstellungen');
+  pruefe('A9b das Feld gibt es', !!q('#swBereit'));
+  // Die Antwort trifft ein, nachdem gezeichnet wurde — genau der Fall aus dem
+  // Ticket.
+  swStand.bereit = true;
+  swStand.version = '9.9.9';
+  swBereitZeichnen();
+  pruefe('A9c ein Nachzeichnen bringt die Fassung ins Feld',
+    q('#swBereit').textContent.indexOf('9.9.9') !== -1,
+    q('#swBereit').textContent);
+  pruefe('A9d und färbt es als bereit', q('#swBereit').classList.contains('bereit'));
+  swStand.bereit = false;
+  swStand.version = '';
+  swBereitZeichnen();
+  pruefe('A9e ohne Worker sagt es das auch',
+    q('#swBereit').textContent.indexOf('noch nicht') !== -1 &&
+    !q('#swBereit').classList.contains('bereit'),
+    q('#swBereit').textContent);
+  setTab('home');
+
   // ── B · Der Hinweis ───────────────────────────────────────
   var leiste = q('#swNeu');
   pruefe('B1 die Leiste steht im Baum', !!leiste);
