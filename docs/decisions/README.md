@@ -100,6 +100,7 @@ Wer neu dazukommt und nur fünf lesen will:
 | [0074](0074-null-anteil-klappfeld.md) | Null heißt «gar nicht», der Anteil in Prozent, der Bezug ein Klappfeld | ergänzt 0015, 0069 |
 | [0075](0075-defizite-und-drei-rubriken.md) | Die Bilanz zeigt Defizite, die Übersicht wird eingerichtet | ergänzt 0066 |
 | [0076](0076-das-menue-misst-seinen-inhalt.md) | Das Menü ist so breit wie sein längster Eintrag | ergänzt 0019 |
+| [0077](0077-ein-stern-zeichnet-nichts-neu.md) | Ein Stern schaltet an Ort und Stelle, ohne Renderlauf | ergänzt 0071 |
 
 ## Einen neuen anlegen
 

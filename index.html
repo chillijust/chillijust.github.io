@@ -4126,7 +4126,7 @@ var APP_STAND = '2026-08-15'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.4.18T'; /* == VERSION == */
+var APP_VERSION = '2.4.19T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -4818,6 +4818,23 @@ function faktGezeigt(text) {
 // Grammatikbaustein, `o:` für eine Schreibregel. Das Präfix hält die beiden
 // Töpfe auseinander, ohne zwei Felder zu brauchen — und eine Regel, die es
 // nicht mehr gibt, fällt beim Zeichnen einfach weg.
+// **Einen Stern umschalten, ohne die Ansicht neu zu zeichnen** (ADR 0077).
+// Ein Renderlauf für ein einzelnes Zeichen ist zu grobes Werkzeug: Er baut
+// alles darunter neu auf, und was eine Einblendanimation trägt, fängt dabei
+// von vorn an. Auf der Faktkarte war das sichtbar — die Sprechblase hält
+// wegen `both` während ihrer Verzögerung den Anfangszustand, also opacity 0,
+// und verschwand bei jedem Stern für eine Viertelsekunde.
+function sternSetzen(el, an) {
+  if (!el) return;
+  // Das Aufblitzen gehört zum Setzen, nicht zum Stern: Bleibt die Klasse
+  // stehen, feiert der Knopf beim nächsten Blick noch das letzte Mal. Vorher
+  // räumte der Renderlauf das mit weg — ohne ihn muss es hier stehen.
+  el.classList.remove('blinkt');
+  el.classList.toggle('an', an);
+  el.setAttribute('aria-pressed', an ? 'true' : 'false');
+  el.innerHTML = an ? ICON.sternVoll : ICON.stern;
+}
+
 // Ein Stern, der eben gesetzt wurde, blinkt einmal auf. Gesucht wird **nach dem
 // Neuzeichnen**: Der Knopf, auf den getippt wurde, ist dann längst ein anderer
 // Knoten — die Kennung überlebt den Renderlauf, das Element nicht.
@@ -4866,8 +4883,11 @@ function merkBinden(neuZeichnen) {
       var schluessel = b.dataset.merk;
       var t = schluessel.split(':');
       var an = merkUmschalten(t[0], t.slice(1).join(':'));
-      if (neuZeichnen) neuZeichnen();
-      if (an) sternBlinken('[data-merk="' + schluessel.replace(/"/g, '\\"') + '"]');
+      // Neu gezeichnet wird nur, wo sich mehr ändert als der Stern: Auf dem
+      // Merkzettel verschwindet mit ihm die ganze Zeile. An einer Regelkarte
+      // ändert er nur sich selbst (ADR 0077).
+      if (neuZeichnen) { neuZeichnen(); if (an) sternBlinken('[data-merk="' + schluessel + '"]'); }
+      else { sternSetzen(b, an); if (an) sternBlinken('[data-merk="' + schluessel + '"]'); }
     });
   });
 }
@@ -6148,7 +6168,7 @@ function faktKarteHtml() {
 
 // `weiter` räumt die Karte weg und setzt die Übung fort, `neu` zeichnet die
 // Karte selbst noch einmal (der Stern soll sofort umschlagen).
-function faktKarteBinden(weiter, neu) {
+function faktKarteBinden(weiter) {
   document.getElementById('factNext').addEventListener('click', function () {
     faktKarte = '';
     weiter();
@@ -6159,7 +6179,8 @@ function faktKarteBinden(weiter, neu) {
   });
   document.getElementById('factFav').addEventListener('click', function () {
     var an = faktFavorit(faktKarte);
-    neu();
+    // **Kein `neu()`**: Der Stern ist das Einzige, was sich ändert (ADR 0077).
+    sternSetzen(document.getElementById('factFav'), an);
     if (an) sternBlinken('#factFav');
   });
 }
@@ -8631,7 +8652,7 @@ function leseBinden() {
 function renderUeben() {
   if (uebPhase === 'fact' && faktKarte) {
     main.innerHTML = faktKarteHtml();
-    faktKarteBinden(function () { uebNext(true); }, renderUeben);
+    faktKarteBinden(function () { uebNext(true); });
     return;
   }
   if (!uebQ) uebQ = buildQuestion();
@@ -9362,7 +9383,7 @@ function renderUebersetzen() {
   wissenHeimschicken();
   if (faktKarte) {
     main.innerHTML = faktKarteHtml();
-    faktKarteBinden(function () { buildTransTask(); renderUebersetzen(); }, renderUebersetzen);
+    faktKarteBinden(function () { buildTransTask(); renderUebersetzen(); });
     chiliAktualisieren();
     return;
   }
@@ -11375,7 +11396,7 @@ function renderGrammatik() {
     renderGrammatik();
   });
 
-  merkBinden(renderGrammatik);
+  merkBinden(null);
   main.querySelectorAll('[data-gramopt]').forEach(function (el) {
     el.addEventListener('click', function () {
       if (gramPhase !== 'ask') return;
@@ -11784,7 +11805,7 @@ function orthoKopfHtml(r) {
 function renderSchreibung() {
   if (faktKarte) {
     main.innerHTML = faktKarteHtml();
-    faktKarteBinden(function () { renderSchreibung(); }, renderSchreibung);
+    faktKarteBinden(function () { renderSchreibung(); });
     chiliAktualisieren();
     return;
   }
@@ -11870,7 +11891,7 @@ function renderSchreibung() {
       if (c) c.disabled = !orthoAbgabeBereit();
     });
   });
-  merkBinden(renderSchreibung);
+  merkBinden(null);
   var warum = document.getElementById('orthoWarum');
   if (warum) warum.addEventListener('click', function () {
     // Nicht neu zeichnen — dieselbe Bewegung wie in «Grammatik»: Die Karte
@@ -12071,7 +12092,7 @@ function ptKopfHtml() {
 function renderPower() {
   if (faktKarte) {
     main.innerHTML = faktKarteHtml();
-    faktKarteBinden(function () { ptFrageBauen(); renderPower(); }, renderPower);
+    faktKarteBinden(function () { ptFrageBauen(); renderPower(); });
     chiliAktualisieren();
     return;
   }
@@ -12443,7 +12464,7 @@ function tippenWeiter() {
 function renderTippen() {
   if (faktKarte) {
     main.innerHTML = faktKarteHtml();
-    faktKarteBinden(function () { tippenWeiter(); }, renderTippen);
+    faktKarteBinden(function () { tippenWeiter(); });
     chiliAktualisieren();
     return;
   }

@@ -736,6 +736,46 @@ try {
       !q(waehler).classList.contains('blinkt'));
   }
 
+  // **Ein Stern zeichnet nichts neu** (ADR 0077). Auf der Faktkarte war das
+  // sichtbar: Die Sprechblase trägt eine Einblendanimation mit Verzögerung
+  // und Füllmodus both — während der Verzögerung hält sie den Anfangszustand, also
+  // opacity 0. Jeder Renderlauf ließ sie eine Viertelsekunde verschwinden.
+  setTab('tippen');
+  faktKarte = FACTS[0];
+  renderTippen();
+  chiliAktualisieren();
+  var blase = q('.sprechblase');
+  // Die laufende Einblendung festhalten: Wird neu gezeichnet, ist sie fort und
+  // eine andere beginnt bei null. Genau das sah man als Verschwinden.
+  var einblendung = blase && blase.getAnimations ? blase.getAnimations()[0] : null;
+  pruefe('R2e die Faktkarte hat eine Sprechblase mit Einblendung',
+    !!blase && !!q('#factFav') && !!einblendung);
+  if (blase && q('#factFav')) {
+    ruhe();
+    q('#factFav').click();
+    pruefe('R2f der Stern setzt sich', faktStand(faktKarte).f === true &&
+      q('#factFav').getAttribute('aria-pressed') === 'true');
+    // **Dieselbe Blase, nicht eine neue.** Ein neuer Knoten hieße: neu
+    // gezeichnet, und dann fängt die Animation von vorn an.
+    pruefe('R2g und die Sprechblase bleibt dieselbe',
+      q('.sprechblase') === blase && document.contains(blase));
+    // **Und ihre Einblendung fängt nicht von vorn an.** Das ist der Kern des
+    // Befunds: Nicht die Blase fehlte, ihre Animation begann noch einmal.
+    pruefe('R2h ihre Einblendung fängt nicht von vorn an',
+      blase.getAnimations && blase.getAnimations()[0] === einblendung,
+      blase.getAnimations ? String(blase.getAnimations().length) : 'keine');
+    pruefe('R2h2 und sie steht noch da',
+      blase.getBoundingClientRect().height > 10,
+      blase.getBoundingClientRect().height.toFixed(0));
+    pruefe('R2i und die Figur springt nicht', !huepft());
+    q('#factFav').click();
+    pruefe('R2j der Stern lässt sich wieder abwählen',
+      faktStand(faktKarte).f === false &&
+      q('#factFav').getAttribute('aria-pressed') === 'false' &&
+      !q('#factFav').classList.contains('blinkt'));
+  }
+  faktKarte = '';
+
   // Der Tutorialknopf dagegen **soll** sie holen. Bis 2.4.12 tat er es nicht:
   // Der Zuhörer hing unmittelbar an tutStarten, bekam das Ereignis als erstes
   // Argument — und das landete im Ruhig-Merker.

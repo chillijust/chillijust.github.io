@@ -354,6 +354,13 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
 - **Ein Entwurf im Meldeblatt überlebt das Zuklappen.** Nur «Abbrechen» wirft ihn weg;
   Ziehen und Danebentippen schließen bloß. Wer das ändert, nimmt dem Blatt seinen Sinn
   (ADR 0025).
+- **Ein Renderlauf ist kein Ereignis** (ADR 0077). Wer für die Änderung an einem
+  einzelnen Zeichen die ganze Ansicht neu baut, setzt alles zurück, was darunter einen
+  Zustand über die Zeit trägt — Animationen, Schreibmarken, Scrollstellen. Ein Stern
+  schaltet darum über `sternSetzen()` **an Ort und Stelle** um; neu gezeichnet wird nur,
+  wo sich mehr ändert als der Stern (auf dem Merkzettel verschwindet die ganze Zeile).
+  Und **wer einen Renderlauf entfernt, erbt, was der nebenbei aufgeräumt hat**: `.blinkt`
+  verschwand bisher mit dem alten Knoten.
 - **Was sich merken lässt, merkt sich gleich** (ADR 0067). Ein Sprachfakt trug seit jeher
   einen Stern; seit 2.4.9 auch jede Regelkarte in «Grammatik» und «Schreibung»
   (`merkSternHtml()`, gebunden über `merkBinden()`). Gespeichert wird eine flache Menge mit
