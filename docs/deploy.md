@@ -107,7 +107,11 @@ Branch `main`, Ordner `/ (root)`.
 ## Version
 
 Drei Zahlen in der Datei `VERSION` im Wurzelverzeichnis — die **einzige** Stelle, an der
-sie von Hand steht. `tools/build.mjs` stempelt sie als `APP_VERSION` nach `index.html`,
+sie von Hand steht. **Dahinter darf ein `T` stehen** (`2.4.6T`): Die Fassung ist
+ausgeliefert, damit sie am Gerät angesehen werden kann, aber noch nicht abgenommen. Ist
+sie es, fällt das T weg und die Zahl bleibt. Das T gehört **in** die Version, nicht
+daneben — der Cache des Workers heißt nach ihr, und «2.4.6T» und «2.4.6» müssen zwei
+Stände sein, sonst käme die abgenommene Fassung nie beim Gerät an. `tools/build.mjs` stempelt sie als `APP_VERSION` nach `index.html`,
 wie es den Stand als `APP_STAND` stempelt. Von dort geht sie in jedes Ticket und steht
 unten in den Einstellungen.
 

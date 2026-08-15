@@ -264,6 +264,11 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
 - **Die Version steht in `VERSION`**, sonst nirgends von Hand (siehe `docs/deploy.md`):
   erste Ziffer = der Lernstand wird anders gelesen, zweite = etwas kommt dazu, dritte =
   alles Übrige (Oberfläche und Fehler). `tools/build.mjs` stempelt sie als `APP_VERSION`.
+  **Ein angehängtes `T` heißt «noch nicht abgenommen»** (`2.4.6T`) — die Fassung wird
+  ausgeliefert, damit sie am Gerät angesehen werden kann. Fällt das T weg, ist sie
+  freigegeben. Es gehört **in** die Zahl: Der Cache des Workers heißt nach der Version,
+  und «2.4.6T» und «2.4.6» müssen zwei Stände sein, sonst käme die freigegebene Fassung
+  nie an.
 - **`APP_STAND` setzt `tools/build.mjs`**, nicht die Hand. Der Wert geht in jedes Ticket
   ein. `--check` vergleicht ohne ihn, sonst wäre die Datei jeden Tag «nicht auf Stand».
 - **Ein Entwurf im Meldeblatt überlebt das Zuklappen.** Nur «Abbrechen» wirft ihn weg;
@@ -291,8 +296,15 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   in der Leuchtdichte die dunkelste. Maßstab: «dim» hält überall AA (4,5), die
   Signalfarben 3,0. Auf der **Kachel** stehen alle Schemata gleich da (10 % Spielraum),
   auf dem **Grund** nicht — zwei Farben gleicher HSL-Helligkeit haben nicht dieselbe
-  Leuchtdichte. Schrift, Gold und die Signalfarben stehen einmal für alle hellen
-  Schemata, sonst hieße «richtig» auf Rosa etwas anderes als auf Grün. Neue Werte rechnet
+  Leuchtdichte. Schrift und **Signal**farben stehen einmal für alle hellen Schemata,
+  sonst hieße «richtig» auf Rosa etwas anderes als auf Grün.
+- **Der Akzent gehört zum Schema** (ADR 0064) — `--akzent`, nicht mehr `--gold`: ein
+  tiefer Ton derselben Farbe wie der Grund, weil ein einziges Braun auf Mint und Rosa
+  eine Fremdfarbe war. Seine Helligkeit wird **gesucht, nicht gesetzt** (`palette.py`):
+  der hellste Ton, der auf allen drei Flächen 4,5 hält. Er ist keine Aussage, sondern
+  Zierde — darum darf er wandern, «richtig» und «falsch» dürfen es nicht. Ebenso
+  `--figur-schatten`: In Dark kräftig und schwarz, in den hellen kurz und im Ton der
+  Schrift — reines Schwarz entsättigt eine satte Fläche und wird zum Fleck. Neue Werte rechnet
   `tools/palette.py`: Alle hellen Schemata teilen dieselbe Staffelung der Helligkeit, nur
   Farbton und Sättigung wandern. Ein Stand von vor ADR 0039 wird über `schemaAusAchsen()`
   übersetzt — in `mergeState()` **und** in `decodeBackup()`.

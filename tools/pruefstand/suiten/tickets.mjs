@@ -267,7 +267,11 @@ try {
   pruefe('Z1 das neue Ticket tr\u00e4gt die Version', tickets[0].version === APP_VERSION,
     String(tickets[0].version));
   pruefe('Z2 und weiterhin den Stand', tickets[0].stand === APP_STAND);
-  pruefe('Z3 die Version ist dreiteilig', /^\d+\.\d+\.\d+$/.test(APP_VERSION), APP_VERSION);
+  // Drei Zahlen — und dahinter darf ein «T» für eine noch nicht abgenommene
+  // Fassung stehen (ADR 0064). Ein Ticket vom Gerät soll genau sagen, welcher
+  // Stand gemeint war; gerade bei einer Fassung zur Ansicht ist das wichtig.
+  pruefe('Z3 die Version ist dreiteilig, mit oder ohne T',
+    /^\d+\.\d+\.\d+T?$/.test(APP_VERSION), APP_VERSION);
   var txt = ticketsAlsText(tickets);
   pruefe('Z4 der Fu\u00df nennt beide',
     txt.indexOf('App-Stand: ' + APP_VERSION + ' \u00b7 ' + APP_STAND) !== -1,

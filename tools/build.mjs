@@ -1364,8 +1364,17 @@ if (von === -1 || bis === -1 || bis < von) {
 // an der die Zahl von Hand steht.
 const heute = new Date().toISOString().slice(0, 10);
 const version = readFileSync(join(ROOT, 'VERSION'), 'utf8').trim();
-if (!/^\d+\.\d+\.\d+$/.test(version)) {
-  meckern('VERSION: erwartet drei Zahlen, etwa «1.0.0» — steht dort «' + version + '»');
+// **Das T steht für «noch nicht abgenommen».** Eine Fassung, die ausgeliefert
+// wird, damit sie auf dem Gerät angesehen werden kann, trägt es; fällt es weg,
+// ist sie freigegeben. Es gehört mit in die Zahl, nicht daneben: Der Cache des
+// Workers heißt nach der Version, und «2.4.6T» und «2.4.6» sollen zwei
+// verschiedene Stände sein, sonst käme die freigegebene Fassung nie an.
+if (!/^\d+\.\d+\.\d+T?$/.test(version)) {
+  meckern('VERSION: erwartet drei Zahlen, etwa «1.0.0» — dahinter darf ein «T» ' +
+    'für eine noch nicht abgenommene Fassung stehen. Dort steht «' + version + '»');
+}
+if (/T$/.test(version)) {
+  console.log('Hinweis: «' + version + '» ist eine Fassung zur Ansicht — das T fällt bei der Abnahme weg.');
 }
 const stempeln = (t) => t
   .replace(/var APP_STAND = '[^']*';/, "var APP_STAND = '" + heute + "';")
@@ -1377,7 +1386,7 @@ if (!/var APP_STAND = '\d{4}-\d{2}-\d{2}';/.test(neu)) {
   console.error('index.html: APP_STAND nicht gefunden — der Stand kann nicht gestempelt werden.');
   process.exit(1);
 }
-if (!/var APP_VERSION = '\d+\.\d+\.\d+';/.test(neu)) {
+if (!/var APP_VERSION = '\d+\.\d+\.\d+T?';/.test(neu)) {
   console.error('index.html: APP_VERSION nicht gefunden — die Version kann nicht gestempelt werden.');
   process.exit(1);
 }
