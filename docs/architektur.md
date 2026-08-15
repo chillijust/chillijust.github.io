@@ -477,9 +477,18 @@ unsichtbares Panel springt.
 
 ### Die Einstellungen: Reiter auf einer Bahn
 
-Vier Fragen, vier Reiter — Lernweg, Abgabe, Eingabe, Darstellung. **Alle vier Blätter
-stehen gleichzeitig im Dokument**, nebeneinander auf einer Bahn (`#einstBahn`) hinter
-einem Fenster (`#einstRahmen`, `overflow: hidden`). Gezeigt wird über `translateX`.
+Fünf Fragen, fünf Reiter — in dieser Reihenfolge: **App · Darstellung · Lernweg ·
+Antworten · Tastatur**. Die Reihenfolge ist eine Aussage darüber, was man am ehesten
+sucht: erst was die App über sich selbst sagt und wie sie aussieht, dann der Lernweg,
+zuletzt die feinen Schrauben. Die letzten beiden hießen bis 2.4.3 «Abgabe» und
+«Eingabe» — zwei Wörter, die sich reimen und nichts sagen (ADR 0063).
+
+Geöffnet wird bei **Lernweg**, nicht beim ersten Reiter: «App» hat nichts einzustellen,
+und der Lernweg ist das, weswegen man kommt. Die Bahn beginnt also verschoben.
+
+**Alle fünf Blätter stehen gleichzeitig im Dokument**, nebeneinander auf einer Bahn
+(`#einstBahn`) hinter einem Fenster (`#einstRahmen`, `overflow: hidden`). Gezeigt wird
+über `translateX`.
 
 Nur so kann der Finger sie **mitnehmen**: `touchmove` schiebt die Bahn ohne Übergang mit,
 `touchend` rastet sie weich ein. Ein Wechsel erst beim Loslassen wäre ein Sprung, kein

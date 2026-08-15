@@ -25,21 +25,21 @@ def hsl2hex(h, s, l):
 # Sättigung des Schemas: Die hellen Flächen tragen nur einen Hauch davon,
 # sonst wirkten sie schmutzig statt cremig.
 FLAECHEN = [
-    ('bg',     87.5, 1.00),
-    ('card',   95.2, 0.70),
-    ('card-2', 82.5, 1.00),
-    ('line',   74.5, 0.90),
-    ('glow',   95.2, 0.70),
+    ('bg',     77.0, 1.00),
+    ('card',   96.5, 0.42),
+    ('card-2', 88.0, 0.72),
+    ('line',   68.0, 0.85),
+    ('glow',   96.5, 0.42),
 ]
 
 # Farbton und Sättigung je Schema. «classic» ist der warme Cremeton, den die
 # App von Anfang an hatte — nur der Grund rückt etwas tiefer, damit die Kachel
 # darüber steht.
 SCHEMATA = {
-    'classic': {'h': 43, 's': 24},
-    'gruen':   {'h': 150, 's': 32},
-    'blau':    {'h': 208, 's': 38},
-    'rosa':    {'h': 344, 's': 38},
+    'classic': {'h': 43, 's': 42},
+    'gruen':   {'h': 152, 's': 52},
+    'blau':    {'h': 205, 's': 50},
+    'rosa':    {'h': 318, 's': 50},
 }
 
 if __name__ == '__main__':

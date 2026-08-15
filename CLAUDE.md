@@ -144,9 +144,13 @@ zweite Flug bricht den ersten ab. Ein runder Knopf, in den sie springt, braucht
   **einmal** im Dokument. Zwei Merker: `tutorialGesehen` (fällt beim Öffnen, steuert das
   automatische Angebot) und `tutorialFertig` (fällt nach dem letzten Schritt, steuert den
   Platz). Ein Abbruch setzt nur den ersten.
-- **Die Einstellungen haben Reiter** (ADR 0045). Was nur auf einem Reiter steht, ist beim
-  Binden nicht immer da — vor `addEventListener` prüfen. `einstReiter` gehört in
-  `ansichtenZuruecksetzen()`.
+- **Die Einstellungen haben Reiter** (ADR 0045). Reihenfolge: **App · Darstellung ·
+  Lernweg · Antworten · Tastatur**; geöffnet wird bei «Lernweg», nicht beim ersten — «App»
+  hat nichts einzustellen (ADR 0063). Was nur auf einem Reiter steht, ist beim Binden nicht
+  immer da — vor `addEventListener` prüfen. `einstReiter` gehört in
+  `ansichtenZuruecksetzen()`. **Eine Prüfung rechnet ihre Sollwerte aus der Stelle in
+  `EINST_REITER`**, nie aus einer festen Zahl — die Reihenfolge ist eine Entscheidung und
+  darf sich ändern.
 - **Ein Farbschema, keine zwei Achsen** (ADR 0039): die Einstellung `schema` mit den
   Werten Dark (Vorgabe), Classic, Grün, Blau, Rosa — `data-schema` am `<html>`-Element,
   «dark» trägt keines. Vier davon sind hell; die Farben gibt es nicht in einer dunklen
@@ -210,8 +214,12 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   sagt es sein `aria-label`, denn **die Farbe trägt nie allein**. Gefragt wird
   `navigator.onLine`; ein Knopf zum Nachmessen wäre nicht bloß unnötig, sondern
   unmöglich — die Datei baut keine Verbindung auf. Grün heißt darum «Netz da», nicht
-  «Internet erreichbar». Die Augenbraue ist auf Home leer und hält über `.eyebrow:empty`
-  nur noch ihre Zeilenhöhe.
+  «Internet erreichbar». Punkt und Wort teilen sich **eine** Farbe, gesetzt an der Hülle.
+  **Das Wort ist eine Nachricht, kein Etikett** (ADR 0063): Es klappt nach `NETZ_FRIST`
+  zum Punkt hin ein und wird nur bei etwas Neuem wieder aufgeklappt — Netzwechsel oder
+  Rückkehr auf Home. Ein Renderlauf allein ist kein Anlass, sonst liefe die Frist nie ab.
+  Die Augenbraue ist auf Home leer und hält über `.eyebrow:empty` nur noch ihre
+  Zeilenhöhe.
 - **Ein Knopf, der ein Ergebnis meldet, muss es auch ausführen können** (ADR 0062). Der
   Knopf unter «App» sucht **und** lädt: `swKnopfTippen()` schaut auf `swStand.wartet` und
   entscheidet danach. Dass «Update» darauf steht, ist **keine Lage**, sondern eine
@@ -220,11 +228,15 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   `ansichtenZuruecksetzen()`. **Ein Ergebnis ist keine Beschriftung** — «Aktuell» und
   «Kein Netz» treten nach zwei Sekunden ab. **Die Größe wechselt nie**, und
   `swUebernehmen()` wird nur auf einen Tipp gerufen: Ein Update lädt nie von selbst.
+  **Beide Wege warten gleich** (ADR 0063) — derselbe Ring am Knopf und in der
+  Hinweiszeile, unterschieden allein durch die Farbe des Knopfs darunter.
 - **Die App sagt, was sie über sich weiß** (ADR 0052): Statuslampe im Kopf (ADR 0061),
   `storage.persist()` beim Start in `try/catch`, Erinnerung an die Sicherung nach 30 Tagen
-  (erst ab 60 Antworten), Tempo je Übung in der Bilanz. **Die Uhr (`uhrStellen()`) steht
-  in den Aufgabenbauern, nicht im Renderlauf** — sonst misst sie das Tippen statt das
-  Denken —, und `ansichtenZuruecksetzen()` hält sie an. `state.tempo` und
+  (erst ab 60 Antworten), Tempo je Übung in der Bilanz. **`aufgabeBeginnt()` steht in den
+  Aufgabenbauern, nicht im Renderlauf** — es stellt die Uhr (sonst misst sie das Tippen
+  statt das Denken) **und löscht den Kommentar der Chili**: Der gehört zur Auflösung, nicht
+  zur nächsten Frage, und blieb bis 2.4.3 nach «Weiter» stehen (ADR 0063).
+  `ansichtenZuruecksetzen()` hält die Uhr an. `state.tempo` und
   `state.gesichertAm` gehören zum Gerät und stehen **nicht** im Sicherungscode.
   `min-height` steht dreifach: `100vh` als Rückfall, dann `svh`, dann `dvh`.
 - **Neue Einstellung:** Vorgabe in `defaultSettings()`, Zeile in `renderEinstellungen()`,
@@ -271,7 +283,13 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   hellen Schemata die Kachel. Wer die helle Leiter verschiebt, prüft `--dim`, `--gold`
   und `--good` mit: Sie hängen daran, und unter der Leiter liegt keine Grenze mehr.
 - **Ein Schema tönt nur die Flächen** (ADR 0039) — `--bg`, `--card`, `--card-2`,
-  `--line`, `--glow`. Schrift, Gold und die Signalfarben stehen einmal für alle hellen
+  `--line`, `--glow`. Seit ADR 0063 sind die hellen Gründe **satte Farben** (77 %
+  Helligkeit) und die Kachel fast weiß (96,5 %). **Wer die Leiter verschiebt, rechnet die
+  Schrift nach** — gegen *jede* der vier Paletten, nicht gegen die freundlichste; Rosa ist
+  in der Leuchtdichte die dunkelste. Maßstab: «dim» hält überall AA (4,5), die
+  Signalfarben 3,0. Auf der **Kachel** stehen alle Schemata gleich da (10 % Spielraum),
+  auf dem **Grund** nicht — zwei Farben gleicher HSL-Helligkeit haben nicht dieselbe
+  Leuchtdichte. Schrift, Gold und die Signalfarben stehen einmal für alle hellen
   Schemata, sonst hieße «richtig» auf Rosa etwas anderes als auf Grün. Neue Werte rechnet
   `tools/palette.py`: Alle hellen Schemata teilen dieselbe Staffelung der Helligkeit, nur
   Farbton und Sättigung wandern. Ein Stand von vor ADR 0039 wird über `schemaAusAchsen()`

@@ -85,7 +85,8 @@ Wer neu dazukommt und nur fünf lesen will:
 | [0059](0059-der-service-worker.md) | Der Service Worker — die zweite Datei | |
 | [0060](0060-die-chili-sagt-es-selbst.md) | Die Chili sagt es selbst | |
 | [0061](0061-der-punkt-ist-die-lampe.md) | Der Punkt hinter dem Namen ist die Statuslampe | |
-| [0062](0062-der-knopf-sucht-und-laedt.md) | Der Knopf sucht und lädt — er meldet nicht nur | |
+| [0062](0062-der-knopf-sucht-und-laedt.md) | Der Knopf sucht und lädt — er meldet nicht nur | Ladeanzeige geändert durch 0063 |
+| [0063](0063-sechs-tickets-vom-geraet.md) | Sechs Tickets vom Gerät — Farbe, Ordnung und ein stehengebliebener Satz | |
 
 ## Einen neuen anlegen
 

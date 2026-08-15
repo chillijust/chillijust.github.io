@@ -195,7 +195,7 @@ try {
 
   // ── D · Die Einstellung ───────────────────────────────────
   setTab('einstellungen');
-  einstReiter = 'eingabe';
+  einstReiter = 'tastatur';
   renderEinstellungen();
   pruefe('D1 der Schalter heißt neu', !!q('[data-set="tastaturAuto"]'));
   pruefe('D2 der alte ist weg', !q('[data-set="tastaturAn"]'));

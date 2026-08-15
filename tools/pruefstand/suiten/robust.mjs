@@ -136,6 +136,47 @@ try {
   setzeOnline(true);
   netzZeigen();
   pruefe('B13 und der Weg zurück geht auch', punktFarbe() === gruen);
+
+  // **Das Wort ist eine Nachricht, kein Etikett** (ADR 0063). Es klappt nach
+  // einer Frist zum Punkt hin ein — der trägt die Auskunft danach allein.
+  setTab('home');
+  netzZeigen();
+  pruefe('B13a frisch gezeigt steht es offen',
+    !n.classList.contains('eingeklappt') && wort.getBoundingClientRect().width > 20,
+    wort.getBoundingClientRect().width.toFixed(0) + ' px');
+  var offen = wort.getBoundingClientRect().width;
+  // Die Bewegung dauert eine halbe Sekunde; für die Messung wird sie
+  // abgeschaltet, sonst misst die Prüfung einen Zwischenstand.
+  wort.style.transition = 'none';
+  n.classList.add('eingeklappt');
+  pruefe('B13b eingeklappt ist es weg',
+    wort.getBoundingClientRect().width < 1 &&
+    getComputedStyle(wort).maxWidth === '0px',
+    wort.getBoundingClientRect().width.toFixed(1) + ' px');
+  // Der Punkt ist die Grenze: Er bleibt stehen, wo er stand.
+  pruefe('B13c der Punkt bleibt, wo er war',
+    Math.abs(punkt.getBoundingClientRect().left -
+      q('#kopfTitel').getBoundingClientRect().right) < 2);
+  // Ein Wechsel des Netzes ist etwas Neues — dann klappt es wieder auf.
+  setzeOnline(false);
+  netzZeigen();
+  pruefe('B13d ein Wechsel klappt es wieder auf',
+    !n.classList.contains('eingeklappt') && wort.textContent === 'Offline');
+  // Ein Renderlauf allein ist **kein** Anlass: Sonst stünde das Wort nach
+  // jedem Blattwechsel wieder da und die Frist liefe nie ab.
+  n.classList.add('eingeklappt');
+  netzZeigen();
+  pruefe('B13e ein bloßer Renderlauf nicht', n.classList.contains('eingeklappt'));
+  // Die Rückkehr auf Home schon — dort sieht man es zum ersten Mal wieder.
+  setTab('tippen');
+  setTab('home');
+  pruefe('B13f die Rückkehr auf Home schon', !n.classList.contains('eingeklappt'));
+  wort.style.transition = '';
+  pruefe('B13g und es ist wieder so breit wie zuvor',
+    Math.abs(wort.getBoundingClientRect().width - offen) < 12,
+    wort.getBoundingClientRect().width.toFixed(0) + ' / ' + offen.toFixed(0));
+  setzeOnline(true);
+  netzZeigen();
   try {
     if (echtOnline) Object.defineProperty(navigator, 'onLine', echtOnline);
   } catch (e) {}

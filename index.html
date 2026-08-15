@@ -81,13 +81,19 @@
   /* Eine Stufe tiefer als zuvor: Die Flächen sind gesunken (siehe unten), und
      die alten Werte fielen damit unter die Lesbarkeitsgrenze — «dim» auf einem
      Chip lag bei 2,8 : 1. Gemessen an jeder der vier Paletten steht jetzt
-     alles besser da als vor der Abdunklung (ADR 0042). */
-  --dim: #4C525C;
-  --ice: #2F5FA8;
-  --gold: #87621D;
+     alles besser da als vor der Abdunklung (ADR 0042).
+
+     **Und noch eine Stufe tiefer seit 2.4.4** (ADR 0063): Die Gründe sind von
+     87,5 auf 77 Prozent Helligkeit gesunken und deutlich satter geworden. Der
+     Maßstab ist derselbe geblieben — «dim» hält überall AA (4,5), die
+     Signalfarben die Grenze für große Schrift. Gerechnet gegen **jede** der
+     vier Paletten, nicht gegen die freundlichste. */
+  --dim: #434851;
+  --ice: #2D5AA0;
+  --gold: #765619;
   --gold-ink: #FFFFFF;
-  --good: #2B7654;
-  --bad: #B4443C;
+  --good: #266749;
+  --bad: #9D3B34;
   --lip: rgba(255, 255, 255, .7);
   /* Etwas kräftiger als im dunklen Schema: Die Kachel soll sich abheben, und
      dazu trägt der Schatten bei, nicht nur die Helligkeit. */
@@ -100,32 +106,32 @@
    Grund und Kachel ist bewusst reichlich — die Kachel ist eine eigene Fläche,
    kein heller Hauch auf dem Grund. */
 :root[data-schema="classic"] {
-  --bg: #E7E2D7;
-  --card: #F5F4F1;
-  --card-2: #DDD7C8;
-  --line: #CCC4B0;
-  --glow: #F5F4F1;
+  --bg: #DDCFAC;
+  --card: #F8F7F5;
+  --card-2: #EAE4D7;
+  --line: #CBBA90;
+  --glow: #F8F7F5;
 }
 :root[data-schema="gruen"] {
-  --bg: #D5E9DF;
-  --card: #F0F6F3;
-  --card-2: #C4E1D2;
-  --line: #ABD1BE;
-  --glow: #F0F6F3;
+  --bg: #A6E3C6;
+  --card: #F4F8F6;
+  --card-2: #D5ECE1;
+  --line: #89D1B0;
+  --glow: #F4F8F6;
 }
 :root[data-schema="blau"] {
-  --bg: #D3E0EB;
-  --card: #F0F3F6;
-  --card-2: #C1D4E3;
-  --line: #A8BFD4;
-  --glow: #F0F3F6;
+  --bg: #A7C9E2;
+  --card: #F4F6F8;
+  --card-2: #D5E2EB;
+  --line: #8BB3D0;
+  --glow: #F4F6F8;
 }
 :root[data-schema="rosa"] {
-  --bg: #EBD3D9;
-  --card: #F6F0F1;
-  --card-2: #E3C1CA;
-  --line: #D4A8B4;
-  --glow: #F6F0F1;
+  --bg: #E2A7D0;
+  --card: #F8F4F7;
+  --card-2: #EBD5E5;
+  --line: #D08BBB;
+  --glow: #F8F4F7;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 /* Doppeltipp vergrößert nicht mehr; Aufziehen mit zwei Fingern bleibt möglich. */
@@ -201,8 +207,21 @@ h1 { font-family: Georgia, "Times New Roman", serif; font-size: 28px; margin: 0;
   font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
   white-space: nowrap;
+  /* Es klappt nach ein paar Sekunden zum Punkt hin ein: Der Zustand ist nach
+     dem Lesen gesagt, der Punkt trägt ihn danach allein. Eingeklappt wird über
+     `max-width` statt `width` — so muss die Breite nirgends gerechnet werden,
+     und der Punkt ist die Grenze, weil das Wort rechts von ihm steht und
+     rechts abgeschnitten wird. */
+  display: inline-block; overflow: hidden; max-width: 8em; opacity: 1;
+  transition: max-width .5s ease, opacity .4s ease, margin-left .5s ease;
 }
+.netz-stand.eingeklappt .netz-wort { max-width: 0; opacity: 0; margin-left: 0; }
+/* Unterwegs gibt es das Wort gar nicht — kein Einklappen, kein Platz. */
 .netz-stand.nur-punkt .netz-wort { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .netz-wort { transition: opacity .4s ease; }
+  .netz-stand.eingeklappt .netz-wort { max-width: 0; margin-left: 0; }
+}
 
 .iconbtn {
   flex: none; width: 44px; height: 44px; border-radius: 50%; padding: 0;
@@ -842,32 +861,23 @@ button.built-word:active { transform: scale(.95); }
 .sw-knopf.sw-bereit, .sw-knopf.sw-laedt {
   background: var(--gold); border-color: var(--gold); color: var(--gold-ink);
 }
-/* Zwei Anzeigen, zwei Gestalten — sonst wüsste man nicht, was gerade läuft.
-   Der Ring dreht sich, solange gefragt wird; der Balken wandert, solange
-   geladen wird. */
+/* **Eine Anzeige, zwei Farben.** Erst waren es zwei Gestalten — Ring beim
+   Suchen, Balken beim Laden. Das war ein Unterschied zu viel: Beide Male
+   wartet man auf dieselbe Sache, und der Knopf sagt über seine Farbe schon,
+   worauf. Der Ring nimmt darum auf Gold die Farbe der Schrift darauf. */
 .sw-ring {
   width: 17px; height: 17px; border-radius: 50%;
   border: 2px solid var(--line); border-top-color: var(--gold);
   animation: swDreht .8s linear infinite;
 }
+.sw-knopf.sw-laedt .sw-ring {
+  border-color: rgba(255, 255, 255, .35); border-top-color: var(--gold-ink);
+}
 @keyframes swDreht { to { transform: rotate(360deg); } }
-.sw-balken {
-  position: relative; width: 62px; height: 4px; border-radius: 999px;
-  background: rgba(0, 0, 0, .2); overflow: hidden;
-}
-.sw-balken::after {
-  content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 40%;
-  border-radius: 999px; background: var(--gold-ink);
-  animation: swWandert 1.1s ease-in-out infinite;
-}
-@keyframes swWandert {
-  0% { transform: translateX(-110%); }
-  100% { transform: translateX(260%); }
-}
 /* Wer keine Bewegung will, bekommt trotzdem eine Anzeige — sie steht dann
    still. Nichts zu zeigen wäre schlimmer als sich nicht zu drehen. */
 @media (prefers-reduced-motion: reduce) {
-  .sw-ring, .sw-balken::after { animation: none; }
+  .sw-ring { animation: none; }
 }
 
 /* Die Leiste «neue Fassung bereit». Sie sitzt unter dem Kopf, nicht darüber:
@@ -885,7 +895,10 @@ button.built-word:active { transform: scale(.95); }
   font-size: 14px; color: var(--text);
 }
 #swNeu span { flex: 1; }
-#swNeu .btn { padding: 8px 14px; font-size: 14px; min-height: 40px; }
+#swNeu .btn {
+  padding: 8px 14px; font-size: 14px; min-height: 40px;
+  display: inline-flex; align-items: center; justify-content: center;
+}
 .sw-zu {
   flex: none; width: 36px; height: 36px; padding: 0;
   display: grid; place-items: center;
@@ -1173,18 +1186,22 @@ body.tut-offen { overflow: hidden; }
   #tutSprech.klappt { animation: none; }
 }
 
-/* Der Knopf am Ende der Übersicht. Ruhig: Wer die App kennt, soll ihn
-   übersehen dürfen. */
+/* Der Knopf am Ende der Übersicht. Er nimmt zwei Fünftel der Breite und steht
+   rechts: Ein Angebot, das man annehmen kann, muss nicht die ganze Zeile
+   beanspruchen — und rechts liegt es unter dem Daumen. Golden, aber gestrichelt:
+   Wer die App kennt, soll ihn übersehen dürfen, ohne ihn suchen zu müssen. */
 .tut-knopf {
-  display: block; width: 100%; margin: 22px 0 4px; padding: 13px 16px;
-  background: none; border: 1px dashed var(--line); border-radius: 14px;
-  color: var(--dim); font: inherit; font-size: 14px; cursor: pointer;
+  display: block; width: 40%; margin: 22px 0 4px auto; padding: 13px 10px;
+  background: none; border: 1px dashed var(--gold); border-radius: 14px;
+  color: var(--gold); font: inherit; font-size: 14px; cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-/* Oben ist er ein Angebot, unten eine Auskunft. Dieselbe Form, aber in Gold:
-   Wer die App zum ersten Mal öffnet, soll ihn nicht überlesen. */
+/* Oben ist er ein Angebot, unten eine Auskunft. Dieselbe Farbe, aber
+   durchgezogen und auf einer Fläche: Wer die App zum ersten Mal öffnet, soll
+   ihn nicht überlesen. */
 .tut-knopf.oben {
-  margin: 0 0 16px; border-color: var(--gold); color: var(--gold);
+  margin: 0 0 16px auto; border-style: solid;
+  background: var(--gold); color: var(--gold-ink);
 }
 
 /* Was die Chili nach einer Auflösung sagt — jetzt sagt sie es selbst (ADR
@@ -3854,11 +3871,11 @@ function auffrischGrenzen(tage) { return zaehlerGrenzen('auffrischen', tage); }
 var STORAGE_KEY = 'russisch_trainer_v1';
 // Stand der ausgelieferten Datei. Wird von tools/build.mjs gesetzt und geht in
 // jedes Ticket ein, damit ein Bericht sagt, welcher Stand gemeint war.
-var APP_STAND = '2026-08-14'; /* == STAND == */
+var APP_STAND = '2026-08-15'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.4.3'; /* == VERSION == */
+var APP_VERSION = '2.4.4'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -4975,19 +4992,47 @@ function zeigeStatus(art, text) {
 function netzWeg() {
   return typeof navigator.onLine === 'boolean' && !navigator.onLine;
 }
+// **Das Wort ist eine Nachricht, kein Etikett** (ADR 0063). Es steht ein paar
+// Sekunden da und klappt dann zum Punkt hin ein — der trägt die Auskunft
+// danach allein. Aufgeklappt wird nur, wenn es etwas Neues zu sagen gibt: bei
+// einem Wechsel des Netzes und bei der Rückkehr auf Home. Ein Renderlauf
+// allein ist kein Anlass, sonst stünde das Wort nach jedem Blattwechsel wieder
+// da und die Frist liefe nie ab.
+var NETZ_FRIST = 4200;
+var netzZuletzt = '';
+var netzWarDaheim = false;
+var netzUhr = null;
+
+function netzAufklappen() {
+  var n = document.getElementById('netzStand');
+  if (!n) return;
+  n.classList.remove('eingeklappt');
+  if (netzUhr) clearTimeout(netzUhr);
+  netzUhr = setTimeout(function () {
+    netzUhr = null;
+    var s = document.getElementById('netzStand');
+    if (s) s.classList.add('eingeklappt');
+  }, NETZ_FRIST);
+}
+
 function netzZeigen() {
   var n = document.getElementById('netzStand');
   if (!n) return;
   var weg = netzWeg();
   var wort = weg ? 'Offline' : 'Online';
+  var daheim = currentTab === 'home';
   n.classList.toggle('aus', weg);
   // Unterwegs trägt der Kopf den Namen der Übung — dort bleibt der Punkt
   // allein, das Wort daneben wäre eine zweite Angabe in einer knappen Zeile.
-  n.classList.toggle('nur-punkt', currentTab !== 'home');
+  n.classList.toggle('nur-punkt', !daheim);
   var punkt = document.getElementById('netzPunkt');
   var text = document.getElementById('netzWort');
   if (punkt) punkt.setAttribute('aria-label', wort);
   if (text) text.textContent = wort;
+  var neu = wort !== netzZuletzt || (daheim && !netzWarDaheim);
+  netzZuletzt = wort;
+  netzWarDaheim = daheim;
+  if (neu) netzAufklappen();
 }
 window.addEventListener('online', netzZeigen);
 window.addEventListener('offline', netzZeigen);
@@ -5030,7 +5075,18 @@ function swHinweisBinden() {
     });
   }
   var laden = document.getElementById('swLaden');
-  if (laden) laden.addEventListener('click', swUebernehmen);
+  if (laden) laden.addEventListener('click', function () {
+    // Derselbe Ring wie in den Einstellungen: Beide Knöpfe tun dasselbe, also
+    // warten sie auch gleich (ADR 0063). Die Breite wird vorher festgehalten —
+    // ein Knopf, der beim Tippen schmaler wird, sähe aus wie ein Fehler.
+    if (laden.dataset.laedt) return;
+    laden.style.width = laden.offsetWidth + 'px';
+    laden.dataset.laedt = '1';
+    laden.innerHTML = '<span class="sw-ring" aria-hidden="true"></span>';
+    laden.setAttribute('aria-busy', 'true');
+    laden.setAttribute('aria-label', 'Lädt die neue Fassung');
+    swUebernehmen();
+  });
 }
 
 // Ein Satz statt eines Häkchens: «ja» allein sagt nicht, welcher Stand liegt.
@@ -5088,7 +5144,9 @@ function swKnopfZeichnen() {
     return;
   }
   if (swKnopfLage === 'laedt') {
-    k.innerHTML = '<span class="sw-balken" aria-hidden="true"></span>';
+    // Derselbe Ring wie beim Suchen — nur in den Farben des goldenen Knopfs.
+    // Zwei Gestalten waren ein Unterschied zu viel (ADR 0063).
+    k.innerHTML = '<span class="sw-ring" aria-hidden="true"></span>';
     k.setAttribute('aria-label', 'Lädt die neue Fassung');
     return;
   }
@@ -5267,10 +5325,10 @@ function sicherungFaellig() {
 // die Statusleiste ihn als Zahl braucht und keine Medienabfrage kennt.
 var SCHEMATA = [
   { wert: 'dark', text: 'Dark', grund: '#1A1A18' },
-  { wert: 'classic', text: 'Classic', grund: '#E7E2D7' },
-  { wert: 'gruen', text: 'Grün', grund: '#D5E9DF' },
-  { wert: 'blau', text: 'Blau', grund: '#D3E0EB' },
-  { wert: 'rosa', text: 'Rosa', grund: '#EBD3D9' }
+  { wert: 'classic', text: 'Classic', grund: '#DDCFAC' },
+  { wert: 'gruen', text: 'Grün', grund: '#A6E3C6' },
+  { wert: 'blau', text: 'Blau', grund: '#A7C9E2' },
+  { wert: 'rosa', text: 'Rosa', grund: '#E2A7D0' }
 ];
 
 function schemaVon(wert) {
@@ -5947,7 +6005,16 @@ function meisterTon(richtig) {
 // wird auch neu gezeichnet, wenn nur die Tastatur aufklappt; die Uhr dort zu
 // stellen hieße, jede Nachdenkpause zu verschenken.
 var aufgabeSeit = 0;
-function uhrStellen() { aufgabeSeit = Date.now(); }
+// **Eine neue Aufgabe steht.** Zwei Dinge gehören dazu, und beide gehören
+// hierher, weil sie denselben Augenblick meinen: Die Uhr läuft (sie misst das
+// Denken, nicht das Tippen — darum nicht im Renderlauf), und was die Chili zur
+// vorigen Aufgabe gesagt hat, ist gesagt. Bis 2.4.3 fehlte das Zweite: Der
+// Kommentar wurde nur beim Antworten neu gesetzt und nie gelöscht, also stand
+// er nach «Weiter» weiter über der nächsten Aufgabe (ADR 0063).
+function aufgabeBeginnt() {
+  aufgabeSeit = Date.now();
+  kommentar = '';
+}
 
 function tempoNotieren() {
   if (!aufgabeSeit) return;
@@ -6985,7 +7052,7 @@ function renderHome() {
   // zu tun ist.
   var neu = !state.tutorialFertig;
   var tutHtml = '<button class="tut-knopf' + (neu ? ' oben' : '') +
-    '" id="tutKnopf">Wie funktioniert das hier?</button>';
+    '" id="tutKnopf">Tutorial</button>';
   var html = '<section>' + (neu ? tutHtml : '') +
     '<button class="empfehlung" id="homeEmpf">' + maskottchen('klein') +
     '<span class="empf-text"><span class="empf-label">Als Nächstes</span>' +
@@ -7418,7 +7485,7 @@ function uebNext(skipFact) {
     return;
   }
   uebQ = buildQuestion();
-  uhrStellen();
+  aufgabeBeginnt();
   uebPhase = 'ask';
   uebBuilt = [];
   meisterMeldung = null;
@@ -8096,7 +8163,7 @@ function buildTransTask(vorgabe) {
   trBuilt = [];
   trEingabe = '';
   trPhase = 'ask';
-  uhrStellen();
+  aufgabeBeginnt();
   trCorrect = null;
   trRevealed = false;
   meisterMeldung = null;
@@ -8862,7 +8929,7 @@ function abcFrageBauen() {
     ? 'kacheln' : basis;
 
   abcPhase = 'ask';
-  uhrStellen();
+  aufgabeBeginnt();
   abcPicked = null;
   abcCorrect = null;
   abcBuilt = [];
@@ -9612,7 +9679,7 @@ function gramAblenkerGenus(bauen, richtig) {
 function gramFrageBauen() {
   var b = gramAktuell();
   gramPhase = 'ask';
-  uhrStellen();
+  aufgabeBeginnt();
   gramPicked = null;
   gramCorrect = null;
   gramEingabe = '';
@@ -10487,7 +10554,7 @@ function orthoStelle(a) {
 function orthoFrageBauen() {
   var r = orthoAktuell();
   orthoPhase = 'ask';
-  uhrStellen();
+  aufgabeBeginnt();
   orthoPicked = null;
   orthoCorrect = null;
   orthoEingabe = '';
@@ -10924,7 +10991,7 @@ function ptStufe(treffer) {
 function ptFrageBauen() {
   var eintrag = ptNaechstes();
   ptPhase = 'ask';
-  uhrStellen();
+  aufgabeBeginnt();
   ptEingabe = '';
   ptBuilt = [];
   meisterMeldung = null;
@@ -11377,7 +11444,7 @@ function tippenWeiter() {
   tEingabe = '';
   meisterMeldung = null;
   tWord = waehleWort(tippenPool());
-  uhrStellen();
+  aufgabeBeginnt();
   renderTippen();
 }
 
@@ -11401,7 +11468,7 @@ function renderTippen() {
   var pool = tippenPool();
   // Während der Rückmeldung bleibt das Wort stehen, auch wenn es nach einem
   // Fehler unter die Schwelle gerutscht ist — sonst verschwände die Auflösung.
-  if (!tResult && (!tWord || pool.indexOf(tWord) === -1)) { tWord = waehleWort(pool); uhrStellen(); }
+  if (!tResult && (!tWord || pool.indexOf(tWord) === -1)) { tWord = waehleWort(pool); aufgabeBeginnt(); }
   if (!tWord) { renderTippenLeer(); return; }
   var w = tWord;
   var stats = state.typingStats;
@@ -11514,14 +11581,19 @@ function renderTippen() {
 // ── EINSTELLUNGEN ───────────────────────────────────────────
 // Die Reiter der Einstellungen. Die Reihenfolge ist dieselbe wie zuvor die der
 // Überschriften — was zuerst gefragt wird, steht zuerst.
+// Die Reihenfolge ist eine Aussage darüber, was man am ehesten sucht: erst
+// was die App über sich selbst sagt und wie sie aussieht, dann der Lernweg,
+// zuletzt die beiden feinen Schrauben am Antworten und am Tippen. «App» ist
+// ein eigener Reiter, keine Zeile bei «Darstellung» — was die App über sich
+// weiß, hat mit Farben nichts zu tun (ADR 0059).
 var EINST_REITER = [
-  { id: 'lernweg', name: 'Lernweg' },
-  { id: 'abgabe', name: 'Abgabe' },
-  { id: 'eingabe', name: 'Eingabe' },
+  { id: 'app', name: 'App' },
   { id: 'darstellung', name: 'Darstellung' },
-  // Fünfter Reiter statt einer Zeile bei «Darstellung»: Was die App über sich
-  // selbst weiß, hat mit Farben nichts zu tun (ADR 0059).
-  { id: 'app', name: 'App' }
+  { id: 'lernweg', name: 'Lernweg' },
+  // Hieß bis 2.4.3 «Abgabe» und «Eingabe» — zwei Wörter, die sich reimen und
+  // nichts sagen. Jetzt steht dran, was drin ist.
+  { id: 'antworten', name: 'Antworten' },
+  { id: 'tastatur', name: 'Tastatur' }
 ];
 var einstReiter = 'lernweg';
 
@@ -11787,7 +11859,7 @@ function renderEinstellungen() {
       'Die App merkt sich, womit du ein Wort verwechselt hast, und stellt genau diese ' +
       'Wörter wieder nebeneinander. Aus: Die Ablenker kommen aus dem Zufall.') +
     '';
-  teile.abgabe =
+  teile.antworten =
     schalter('confirmUeben', 'Bestätigen beim Vokabeltraining',
       'Antwort erst auswählen, dann mit «Bestätigen» abgeben. Aus: Der erste Tipp zählt sofort.') +
     schalter('confirmUebersetzen', 'Bestätigen in «Übersetzen»',
@@ -11801,7 +11873,7 @@ function renderEinstellungen() {
       'wird dabei nichts mehr. «Auch Sätze» nimmt ganze Sätze dazu.',
       [{ wert: 'woerter', text: 'Wörter' }, { wert: 'immer', text: 'Auch Sätze' },
        { wert: 'nie', text: 'Nie' }]) + '';
-  teile.eingabe =
+  teile.tastatur =
     schalter('tastaturAuto', 'Kyrillische Tastatur von selbst',
       'Verlangt eine Aufgabe Kyrillisch, klappt die eingebaute Tastatur gleich auf. ' +
       'Aus: Du holst sie bei Bedarf. Wo Deutsch gefragt ist, kommt sie nie — dort ' +

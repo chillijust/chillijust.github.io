@@ -299,6 +299,43 @@ try {
     var wieder = decodeBackup(encodeBackup());
     return wieder.settings.kommentare === false;
   })());
+
+  // ── M · Gesagt ist gesagt (ADR 0063) ─────────────────────
+  // Der Kommentar gehört zur **Auflösung**, nicht zur nächsten Aufgabe. Bis
+  // 2.4.3 wurde er nur beim Antworten neu gesetzt und nie gelöscht — nach
+  // «Weiter» stand der Satz zur vorigen Aufgabe weiter über der neuen.
+  // Die Blase hängt am Beobachter von #main, und der meldet sich erst im
+  // nächsten Zug. Für eine Prüfung wird darum von Hand nachgezogen.
+  function blaseDa() { chiliAktualisieren(); return q('#chiliBlase').hidden === false; }
+  state = defaultState(); ansichtenZuruecksetzen();
+  ALL_VOCAB.forEach(function (v) { state.boxes[v.id] = BOX_MAX; });
+  setTab('lernsets');
+  uebNext(true);
+  pruefe('M1 vor der Antwort schweigt sie', !blaseDa());
+  uebPicked = uebQ.word.id;
+  if (uebQ.mode === 'tiles') uebQ.mode = 'choice';
+  uebPruefen();
+  pruefe('M2 nach der Antwort sagt sie etwas', blaseDa() && !!kommentar);
+  var vorher = kommentar;
+  q('#uebNext').click();
+  pruefe('M3 nach «Weiter» ist sie still', !blaseDa() && kommentar === '',
+    'war «' + vorher + '», ist «' + kommentar + '»');
+
+  // Dasselbe in den anderen Übungen: Wer eine neue Aufgabe baut, löscht den
+  // Satz zur alten — das steht in aufgabeBeginnt() und sonst nirgends.
+  kommentar = 'Steht noch da.';
+  tippenModus = 'alle'; tWord = null; setTab('tippen'); renderTippen();
+  pruefe('M4 «Tippen» räumt beim Aufbauen auf', kommentar === '', kommentar);
+  kommentar = 'Steht noch da.';
+  setTab('uebersetzen'); trTask = null; buildTransTask();
+  pruefe('M5 «Übersetzen» auch', kommentar === '', kommentar);
+  kommentar = 'Steht noch da.';
+  GRAMMATIK.forEach(function (x) { state.gramSeen[x.id] = 0; });
+  gramBaustein = GRAMMATIK[0].id; gramQ = null; setTab('grammatik'); renderGrammatik();
+  pruefe('M6 «Grammatik» auch', kommentar === '', kommentar);
+  // Und die Uhr läuft weiterhin mit — beides gehört zum Beginn einer Aufgabe.
+  pruefe('M7 die Uhr wird dabei gestellt', aufgabeSeit > 0, String(aufgabeSeit));
+
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);
 }

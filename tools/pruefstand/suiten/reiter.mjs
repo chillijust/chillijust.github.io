@@ -44,6 +44,15 @@ function bahnProzent() {
   var m = /(-?\d+)%/.exec(versatz());
   return m ? parseInt(m[1], 10) : null;
 }
+// Der Sollwert der Bahn ergibt sich aus der **Stelle** des Reiters in der
+// Liste, nicht aus einer festen Zahl: Die Reihenfolge ist eine Entscheidung
+// und darf sich ändern, ohne dass die Prüfung eine Meinung dazu hat.
+function sollProzent(id) {
+  for (var i = 0; i < EINST_REITER.length; i++) {
+    if (EINST_REITER[i].id === id) return -100 * i;
+  }
+  return null;
+}
 function bahnPixel() {
   var m = /([-+]) (\d+(?:\.\d+)?)px/.exec(versatz());
   return m ? (m[1] === '-' ? -1 : 1) * parseFloat(m[2]) : null;
@@ -59,9 +68,12 @@ try {
     String(alle('[data-reiter]').length));
   pruefe('A2 und vier Blätter auf einer Bahn',
     alle('#einstBahn > [data-reiterblatt]').length === EINST_REITER.length);
+  // Geöffnet wird bei «Lernweg» — dort steht, was man am ehesten sucht. Das
+  // ist nicht der erste Reiter; die Bahn beginnt also verschoben.
   pruefe('A3 der Anfang ist «Lernweg»', einstReiter === 'lernweg' &&
     q('[data-reiter="lernweg"]').classList.contains('active'));
-  pruefe('A4 die Bahn steht bei null', bahnProzent() === 0 && bahnPixel() === 0, versatz());
+  pruefe('A4 die Bahn steht auf seinem Blatt',
+    bahnProzent() === sollProzent('lernweg') && bahnPixel() === 0, versatz());
   pruefe('A5 das Fenster schneidet ab',
     getComputedStyle(q('#einstRahmen')).overflow === 'hidden');
   pruefe('A6 jedes Blatt ist so breit wie das Fenster',
@@ -78,7 +90,7 @@ try {
       return b.dataset.reiterblatt !== 'lernweg';
     }).every(function (b) { return b.getAttribute('aria-hidden') === 'true'; }));
   pruefe('B3 und der Fokus springt nicht hinein',
-    alle('[data-reiterblatt="abgabe"] button').every(function (b) { return b.tabIndex === -1; }));
+    alle('[data-reiterblatt="antworten"] button').every(function (b) { return b.tabIndex === -1; }));
   pruefe('B4 im aktiven Blatt dagegen schon',
     alle('[data-reiterblatt="lernweg"] button').every(function (b) { return b.tabIndex === 0; }));
 
@@ -100,22 +112,26 @@ try {
 
   // ── D · Weit genug gezogen wechselt das Blatt ─────────────
   wische(360, 60);
-  pruefe('D1 nach links kommt der nächste Reiter', einstReiter === 'abgabe', einstReiter);
+  pruefe('D1 nach links kommt der nächste Reiter', einstReiter === 'antworten', einstReiter);
   pruefe('D2 die Leiste zieht mit',
-    q('[data-reiter="abgabe"]').classList.contains('active') &&
+    q('[data-reiter="antworten"]').classList.contains('active') &&
     !q('[data-reiter="lernweg"]').classList.contains('active'));
-  pruefe('D3 die Bahn steht auf dem zweiten Blatt',
-    bahnProzent() === -100 && bahnPixel() === 0, versatz());
+  pruefe('D3 die Bahn steht auf dessen Blatt',
+    bahnProzent() === sollProzent('antworten') && bahnPixel() === 0, versatz());
   pruefe('D4 und der Fokus wandert mit',
-    alle('[data-reiterblatt="abgabe"] button').every(function (b) { return b.tabIndex === 0; }) &&
+    alle('[data-reiterblatt="antworten"] button').every(function (b) { return b.tabIndex === 0; }) &&
     alle('[data-reiterblatt="lernweg"] button').every(function (b) { return b.tabIndex === -1; }));
 
   wische(60, 360);
   pruefe('D5 nach rechts wieder zurück', einstReiter === 'lernweg', einstReiter);
 
   // Am Rand gibt es nichts mehr — und es wird nicht umgebrochen.
+  einstReiter = EINST_REITER[0].id;
+  einstBahnSetzen(0, false);
+  einstReiterKopf();
   wische(60, 360);
-  pruefe('D6 vor dem ersten Blatt bleibt es stehen', einstReiter === 'lernweg', einstReiter);
+  pruefe('D6 vor dem ersten Blatt bleibt es stehen',
+    einstReiter === EINST_REITER[0].id, einstReiter);
   einstReiter = EINST_REITER[EINST_REITER.length - 1].id;
   einstBahnSetzen(0, false);
   einstReiterKopf();
@@ -149,7 +165,8 @@ try {
   // ── G · Tippen geht weiterhin ─────────────────────────────
   tippe(q('[data-reiter="darstellung"]'));
   pruefe('G1 ein Tipp auf den Reiter wechselt', einstReiter === 'darstellung');
-  pruefe('G2 und schiebt die Bahn dorthin', bahnProzent() === -300, versatz());
+  pruefe('G2 und schiebt die Bahn dorthin',
+    bahnProzent() === sollProzent('darstellung'), versatz());
   pruefe('G3 das Farbschema steht dort', !!q('[data-reiterblatt="darstellung"] [data-wahltext="schema"]'));
   pruefe('G4 der Tonknopf auch', !!q('#tonTest'));
 
@@ -171,7 +188,7 @@ try {
     getComputedStyle(q('.blattkarte')).backgroundColor);
 
   // ── I · Ansichtszustand ───────────────────────────────────
-  einstReiter = 'eingabe';
+  einstReiter = 'tastatur';
   ansichtenZuruecksetzen();
   pruefe('I1 zurückgesetzt steht wieder «Lernweg»', einstReiter === 'lernweg', einstReiter);
 } catch (e) {

@@ -82,12 +82,20 @@ pruefeDatei('S18 und nicht ewig — der Ring dreht sich nicht für immer',
 // **Ein Update lädt nie von selbst.** `swUebernehmen()` steht genau zweimal:
 // am Knopf des Hinweises und im Knopf der Einstellungen. Beides ist ein Tipp
 // des Nutzers, nichts läuft im Hintergrund an.
-// Gezählt werden die **Aufrufe**, nicht die Erwähnungen: die Deklaration
-// zählt nicht mit, ein `setTimeout(swUebernehmen)` wäre einer zu viel.
+// Gezählt werden die **Aufrufe**, nicht die Erwähnungen: die Deklaration zählt
+// nicht mit. Zwei sind es, und beide hängen an einem Tipp — der Zeile oben und
+// dem Knopf in den Einstellungen. Ein dritter wäre ein Weg, der von selbst
+// lädt, und ein `setTimeout(swUebernehmen…)` wäre einer zu viel.
 pruefeDatei('S19 übernommen wird nur auf Ansage',
-  (html.match(/swUebernehmen\(\);/g) || []).length === 1 &&
-  (html.match(/'click', swUebernehmen\)/g) || []).length === 1 &&
+  (html.match(/swUebernehmen\(\);/g) || []).length === 2 &&
+  !/setTimeout\([^)]*swUebernehmen/.test(html) &&
   /if \(swStand\.wartet\) \{\s*\n\s*swKnopfLage = 'laedt';/.test(html));
+// Dieselbe Anzeige an beiden Knöpfen (ADR 0063): Beide warten auf dieselbe
+// Sache, also sieht das Warten gleich aus. Den Balken von 2.4.3 gibt es nicht
+// mehr — er stand nur an einem der beiden.
+pruefeDatei('S20 beide Wege warten gleich',
+  (html.match(/class="sw-ring"/g) || []).length === 3 &&
+  !/sw-balken/.test(html));
 console.log(ausser.join('\n'));
 if (ausser.some((z) => z.indexOf('FAIL') === 0)) {
   throw new Error('sw.js entspricht nicht der Absprache');
@@ -166,8 +174,10 @@ try {
     var bar = q('.reiter');
     return bar.scrollWidth <= bar.clientWidth + 1;
   })(), q('.reiter').scrollWidth + '/' + q('.reiter').clientWidth);
-  pruefe('C2 der letzte heißt «App»',
-    EINST_REITER[EINST_REITER.length - 1].id === 'app');
+  // Seit 2.4.4 steht er **vorn**: Was die App über sich selbst sagt, sucht man
+  // zuerst. Ein eigener Reiter bleibt er in jedem Fall — mit Farben hat er
+  // nichts zu tun (ADR 0059).
+  pruefe('C2 «App» ist ein eigener Reiter', EINST_REITER[0].id === 'app');
   pruefe('C3 er sagt, ob die App offline bereit ist', !!q('#swBereit'));
   pruefe('C4 er hat einen Knopf zum Nachsehen', !!q('#swSuchen'));
   pruefe('C5 und den Notausgang', !!q('#swLeeren'));
@@ -251,8 +261,20 @@ try {
   knopf.click();
   pruefe('E5 ein Tipp lädt sie', uebernommen === 1 && swKnopfLage === 'laedt',
     'übernommen ' + uebernommen + ' · Lage ' + swKnopfLage);
-  pruefe('E6 und zeigt einen Balken, keinen Text',
-    !!knopf.querySelector('.sw-balken') && !knopf.querySelector('.sw-ring'));
+  // **Dieselbe Anzeige wie beim Suchen, nur in den Farben des Knopfs**
+  // (ADR 0063). Zwei Gestalten waren ein Unterschied zu viel.
+  pruefe('E6 und zeigt den Ring, keinen Text',
+    !!knopf.querySelector('.sw-ring') && knopf.textContent === '');
+  pruefe('E6b der Ring nimmt dabei die Schriftfarbe des Knopfs', (function () {
+    var farbe = getComputedStyle(knopf.querySelector('.sw-ring')).borderTopColor;
+    var d = document.createElement('span');
+    d.style.color = getComputedStyle(document.documentElement)
+      .getPropertyValue('--gold-ink').trim();
+    document.body.appendChild(d);
+    var soll = getComputedStyle(d).color;
+    d.remove();
+    return farbe === soll;
+  })(), getComputedStyle(knopf.querySelector('.sw-ring')).borderTopColor);
   pruefe('E7 er sagt auch, was er tut',
     knopf.getAttribute('aria-busy') === 'true' &&
     (knopf.getAttribute('aria-label') || '').indexOf('Lädt') === 0,

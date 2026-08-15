@@ -318,7 +318,7 @@ try {
       return t.dataset.schritt === '-1';
     })[0].disabled === true);
 
-  einstReiter = 'abgabe';
+  einstReiter = 'antworten';
   renderEinstellungen();
   pruefe('G6 die Nachschrift steht bei der Abgabe',
     alle('[data-wahltext="rekonstruktion"]').length === 3,

@@ -72,9 +72,17 @@ try {
   updateDarstellung();
   pruefe('E1 ein helles Schema setzt data-schema',
     document.documentElement.getAttribute('data-schema') === 'classic');
-  pruefe('E2 helle Farben greifen',
-    getComputedStyle(document.body).backgroundColor === 'rgb(231, 226, 215)',
-    getComputedStyle(document.body).backgroundColor);
+  // Gefragt wird gegen die Liste, nicht gegen eine abgeschriebene Zahl: Die
+  // Paletten werden gerechnet (tools/palette.py) und dürfen sich ändern —
+  // dass der Grund des gewählten Schemas wirklich greift, bleibt die Frage.
+  pruefe('E2 helle Farben greifen', (function () {
+    var d = document.createElement('span');
+    d.style.color = schemaVon('classic').grund;
+    document.body.appendChild(d);
+    var soll = getComputedStyle(d).color;
+    d.remove();
+    return getComputedStyle(document.body).backgroundColor === soll;
+  })(), getComputedStyle(document.body).backgroundColor + ' / ' + schemaVon('classic').grund);
   state.settings.schema = 'dark';
   updateDarstellung();
   pruefe('E3 «dark» trägt kein Attribut',

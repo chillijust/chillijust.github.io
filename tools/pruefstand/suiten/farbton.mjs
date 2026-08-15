@@ -102,10 +102,14 @@ try {
   setze('dark');
   pruefe('C2 «dark» ist dunkel',
     (function () { var k = kanaele(gruende.dark); return (k[0] + k[1] + k[2]) / 3 < 60; })());
+  // Die Grenze lag bei 200, solange die Gründe fast weiß waren. Seit 2.4.4
+  // sind sie satte Flächen um 77 Prozent Helligkeit (ADR 0063) — hell bleiben
+  // sie, aber nicht mehr blass. Gefragt ist der Unterschied zu «dark» (unter
+  // 60), nicht die alte Zahl.
   pruefe('C3 die vier übrigen sind hell',
     HELL.every(function (f) {
       var k = kanaele(gruende[f]);
-      return (k[0] + k[1] + k[2]) / 3 > 200;
+      return (k[0] + k[1] + k[2]) / 3 > 150;
     }), HELL.map(function (f) {
       var k = kanaele(gruende[f]);
       return f + ':' + Math.round((k[0] + k[1] + k[2]) / 3);
@@ -160,6 +164,16 @@ try {
   // stehen heute über denen von vorher.
   var PAARE = [['--text', '--bg'], ['--text', '--card'], ['--dim', '--bg'],
     ['--gold', '--card'], ['--good', '--card'], ['--bad', '--card'], ['--ice', '--card']];
+  // **Wo die Gleichheit zählt, ist die Kachel.** Dort steht der Lehrstoff, und
+  // dort darf «richtig» auf Rosa nicht anders aussehen als auf Grün — die
+  // Kachel ist in jedem Schema fast weiß, der Vergleich also fair.
+  //
+  // Auf dem **Grund** geht das seit 2.4.4 nicht mehr (ADR 0063): Er ist eine
+  // satte Fläche, und zwei Farben gleicher HSL-Helligkeit haben nicht dieselbe
+  // Leuchtdichte — ein Gelb ist heller als ein Blau. Ein Abstand zwischen den
+  // Schemata ist dort keine Nachlässigkeit, sondern die Folge davon, dass es
+  // Farben sind. Was dort gilt, sind die absoluten Grenzen weiter unten.
+  var AUF_KACHEL = PAARE.filter(function (p) { return p[1] === '--card'; });
 
   function messe(f) {
     setze(f);
@@ -168,21 +182,42 @@ try {
 
   // Gemessen wird der **anteilige** Verlust: 0,7 weniger bei einem Kontrast von
   // 13 ist belanglos, 0,3 weniger bei 3,5 wäre es nicht.
-  var grund = messe('classic');
+  function messeKachel(f) {
+    setze(f);
+    return AUF_KACHEL.map(function (paar) { return kontrast(stil(paar[0]), stil(paar[1])); });
+  }
+  var grund = messeKachel('classic');
   var schlimmster = 0, woV = '';
   ['gruen', 'blau', 'rosa'].forEach(function (f) {
-    messe(f).forEach(function (k, i) {
+    messeKachel(f).forEach(function (k, i) {
       var verlust = (grund[i] - k) / grund[i];
       if (verlust > schlimmster) {
         schlimmster = verlust;
-        woV = f + ' ' + PAARE[i].join(' auf ') + ': ' +
+        woV = f + ' ' + AUF_KACHEL[i].join(' auf ') + ': ' +
           grund[i].toFixed(2) + ' → ' + k.toFixed(2);
       }
     });
   });
-  pruefe('F1 keine Farbe verschlechtert den Kontrast merklich',
+  pruefe('F1 auf der Kachel steht jedes Schema gleich da',
     schlimmster < 0.1, 'größter Verlust ' + (schlimmster * 100).toFixed(1) + ' %' +
     (woV ? ' bei ' + woV : ''));
+  // Auf dem Grund ist ein Abstand erlaubt — aber kein beliebiger. Über einem
+  // Drittel wäre nicht mehr dieselbe App.
+  var aufGrund = 0, woG = '';
+  var grundBasis = messe('classic');
+  ['gruen', 'blau', 'rosa'].forEach(function (f) {
+    messe(f).forEach(function (k, i) {
+      if (PAARE[i][1] !== '--bg') return;
+      var verlust = (grundBasis[i] - k) / grundBasis[i];
+      if (verlust > aufGrund) {
+        aufGrund = verlust;
+        woG = f + ' ' + PAARE[i].join(' auf ') + ': ' +
+          grundBasis[i].toFixed(2) + ' → ' + k.toFixed(2);
+      }
+    });
+  });
+  pruefe('F1a und auf dem Grund bleibt der Abstand im Rahmen',
+    aufGrund < 0.3, (aufGrund * 100).toFixed(1) + ' %' + (woG ? ' bei ' + woG : ''));
 
   // Die Bedienfläche trägt kleine Schrift — Chips, Schalter, Tastenkappen.
   // Vor dem Abdunkeln stand «dim» dort bei 2,8 und Gold bei 2,6.

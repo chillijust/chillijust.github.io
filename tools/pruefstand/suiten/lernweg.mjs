@@ -97,7 +97,7 @@ try {
   pruefe('G3 unsinnige Stufe wird verworfen', g.settings.tippenStufe === 3, String(g.settings.tippenStufe));
   state.settings.tippenStufe = 4;
   // Die Tastaturvorgabe steht seit den Reitern auf «Eingabe».
-  einstReiter = 'eingabe';
+  einstReiter = 'tastatur';
   renderEinstellungen();
   q('[data-set="tastaturAuto"]').click();
   pruefe('G4 Tastaturvorgabe umschaltbar', state.settings.tastaturAuto === false);
