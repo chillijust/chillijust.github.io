@@ -347,6 +347,18 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   (`tastaturVorgabe()`, Einstellung `tastaturAuto`). Die Sprache der *Geräte*tastatur
   kann eine Seite nicht wählen — iOS entscheidet das, `lang` ist kein Hebel. Nichts
   vortäuschen, was das Betriebssystem nicht hergibt.
+- **Die Schreibmarke gehört ins Feld** (ADR 0068). Eine Taste der eingebauten Tastatur
+  schreibt über `feldSchreiben(id, text)` — Wert **und** Fokus **und** Marke ans Ende;
+  ohne Fokus blinkt nichts, und man schreibt in etwas hinein, das nur aussieht wie ein
+  Feld. Damit der Fokus nicht die **Geräte**tastatur aufklappt, trägt das Feld
+  `inputmode="none"` (`kbFeldAttr()`) — **nur solange die eingebaute offen ist**, sonst
+  käme man ohne sie gar nicht mehr zum Schreiben. `preventScroll` beim Fokussieren, sonst
+  springt die Seite bei jedem Tastendruck.
+- **Ein Update lädt neu, aber verliert den Ort nicht** (ADR 0068). `swNeustart()` ist der
+  einzige Weg zum `reload()` — es wartet `SW_LADEN_MIN` ab (ein Ring, der aufblitzt, sieht
+  aus wie ein Fehlgriff) und `swOrtMerken()`/`swOrtHolen()` bringen Ansicht und Reiter
+  wieder. Der Merker wird **immer** weggeräumt, gilt nur eine Minute und nur für eine
+  Ansicht, die es noch gibt; der `ansichtStapel` bekommt `home` als Boden.
 - **Die Tastatur steht genau einmal im Code** (`tastaturHtml(attr)`, alle vier
   Schreibaufgaben). Ihr Aufbau folgt der gewohnten: drei Buchstabenreihen, Rücktaste
   rechts am Ende der dritten, Leerzeichen breit und mittig in einer vierten.

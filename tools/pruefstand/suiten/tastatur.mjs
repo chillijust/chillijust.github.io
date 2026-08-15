@@ -146,6 +146,45 @@ try {
   ok = zaehle('power') && ok;
 
   pruefe('D1 alle vier Übungen zeigen denselben Aufbau', ok, stellen.join(' · '));
+
+  // ── Z · Die Schreibmarke gehört ins Feld (ADR 0068) ──────
+  // Wer über die eingebaute Tastatur schreibt, sah bis 2.4.9 nicht, wo er im
+  // Text steht: Das Feld bekam seinen Wert gesetzt, aber nie den Fokus — und
+  // ohne Fokus blinkt nichts.
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  ALL_VOCAB.forEach(function (v) { state.boxes[v.id] = BOX_MAX; state.lastSeen[v.id] = 0; });
+  tippenModus = 'alle';
+  tKb = true;
+  tWord = null;
+  setTab('tippen');
+  var feld = q('#tInput');
+  pruefe('Z1 das Feld steht da und die Tastatur auch', !!feld && !!q('[data-key]'));
+  // **inputmode=none**: Fokussieren allein wäre die Falle — auf iOS klappte
+  // damit die Gerätetastatur auf, und genau die soll die eingebaute ersetzen.
+  pruefe('Z2 es bittet um keine Gerätetastatur',
+    feld.getAttribute('inputmode') === 'none', feld.getAttribute('inputmode'));
+  q('[data-key]').click();
+  pruefe('Z3 ein Tastendruck schreibt ins Feld', q('#tInput').value.length === 1,
+    q('#tInput').value);
+  pruefe('Z4 und das Feld hat den Fokus', document.activeElement === q('#tInput'),
+    document.activeElement ? document.activeElement.id || document.activeElement.tagName : '—');
+  pruefe('Z5 die Marke steht am Ende',
+    q('#tInput').selectionStart === q('#tInput').value.length,
+    q('#tInput').selectionStart + '/' + q('#tInput').value.length);
+  // **Ist die eingebaute Tastatur zu, muss die Gerätetastatur aufgehen dürfen.**
+  tKb = false;
+  renderTippen();
+  pruefe('Z6 ohne eingebaute Tastatur steht das Attribut nicht da',
+    !q('#tInput').getAttribute('inputmode'), q('#tInput').getAttribute('inputmode'));
+  // Und der Helfer verträgt ein Feld, das es nicht gibt.
+  pruefe('Z7 ein fehlendes Feld wirft nicht', (function () {
+    try { feldSchreiben('gibtsnicht', 'x'); return true; } catch (e) { return false; }
+  })());
+  tKb = null;
+  state = defaultState();
+  ansichtenZuruecksetzen();
+
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);
 }

@@ -361,6 +361,47 @@ try {
     'siehe swAufraeumen — nur caches und Registrierungen');
   pruefe('D2 der Sicherungscode hat weiterhin elf Felder',
     encodeBackup().split('~').length === 11);
+
+  // ── F · Nach dem Update bleibt man, wo man war (ADR 0068) ──
+  // Das Neuladen ist unvermeidlich — eine neue Fassung ist neuer Programmtext.
+  // Vermeidbar ist der Eindruck, dass dabei etwas verlorengeht.
+  einstReiter = 'app';
+  setTab('einstellungen');
+  swStand.wartet = null;
+  var echtesNeu = swNeustart;
+  var neugestartet = 0;
+  swNeustart = function () { neugestartet++; };
+  swUebernehmen();
+  pruefe('F1 der Ort wird vor dem Neustart gemerkt', (function () {
+    try { return !!localStorage.getItem(SW_ORT_KEY); } catch (e) { return 'kein Speicher'; }
+  })() === true);
+  pruefe('F2 und die Uhr für die Frist läuft', swStand.ladenSeit > 0);
+  var geholt = swOrtHolen();
+  pruefe('F3 er nennt Ansicht und Reiter',
+    !!geholt && geholt.tab === 'einstellungen' && geholt.reiter === 'app',
+    JSON.stringify(geholt));
+  // **Der Schlüssel wird immer weggeräumt** — sonst führte er beim übernächsten
+  // Start noch einmal irgendwohin.
+  pruefe('F4 und ist danach weg', swOrtHolen() === null);
+  // Ein alter Merker gilt nicht mehr: Er meinte einen anderen Neustart.
+  try {
+    localStorage.setItem(SW_ORT_KEY, JSON.stringify({
+      tab: 'einstellungen', reiter: 'app', zeit: Date.now() - SW_ORT_FRIST - 1000
+    }));
+  } catch (e) {}
+  pruefe('F5 ein alter Merker gilt nicht mehr', swOrtHolen() === null);
+  // Eine Ansicht, die es nicht mehr gibt, führt nirgendwohin.
+  try {
+    localStorage.setItem(SW_ORT_KEY, JSON.stringify({
+      tab: 'gibtsnicht', reiter: 'app', zeit: Date.now()
+    }));
+  } catch (e) {}
+  pruefe('F6 eine unbekannte Ansicht auch nicht', swOrtHolen() === null);
+  swNeustart = echtesNeu;
+  try { localStorage.removeItem(SW_ORT_KEY); } catch (e) {}
+  state = defaultState();
+  ansichtenZuruecksetzen();
+
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);
 }

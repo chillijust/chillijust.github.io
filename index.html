@@ -1285,10 +1285,11 @@ body.tut-offen { overflow: hidden; }
   min-width: calc(var(--zipfel, 100px) + 46px);
   /* **Der Rand trägt die Akzentfarbe** (ADR 0067): Die Blase steht über der
      Titelzeile des Kopfes, und mit der Linie des Schemas verschwamm sie dort
-     mit allem anderen. Zwei Pixel, damit sie auch neben der Kachelkante noch
-     als eigene Fläche zu lesen ist. */
-  background: var(--card-2); border: 2px solid var(--akzent); border-radius: 14px;
-  padding: 8px 12px;
+     mit allem anderen. **Ein Pixel wie an jedem Knopf** — zwei sahen aus, als
+     wollte sie etwas sein, was sie nicht ist. Die Farbe trägt die Sichtbarkeit,
+     nicht die Dicke. */
+  background: var(--card-2); border: 1px solid var(--akzent); border-radius: 14px;
+  padding: 9px 13px;
   box-shadow: 0 8px 20px var(--shade);
   animation: blaseAuf .34s .06s both ease-out;
 }
@@ -1305,15 +1306,15 @@ body.tut-offen { overflow: hidden; }
 #chiliBlase::before, #chiliBlase::after {
   content: ''; position: absolute; bottom: 100%;
   right: var(--zipfel, 100px);
-  border: 9px solid transparent; border-top: 0;
+  border: 8px solid transparent; border-top: 0;
 }
 #chiliBlase::before { border-bottom-color: var(--akzent); }
-/* Zwei Pixel schmaler und zwei tiefer: So bleibt vom unteren Dreieck genau die
+/* Ein Pixel schmaler und einen tiefer: So bleibt vom unteren Dreieck genau die
    Randstärke der Blase stehen — sonst hätte der Zipfel keinen Rand oder einen
    doppelt so dicken. */
 #chiliBlase::after {
-  border-bottom-color: var(--card-2); margin-bottom: -2px;
-  border-width: 0 7px 7px; right: calc(var(--zipfel, 100px) + 2px);
+  border-bottom-color: var(--card-2); margin-bottom: -1px;
+  border-width: 0 7px 7px; right: calc(var(--zipfel, 100px) + 1px);
 }
 @keyframes blaseAuf {
   from { opacity: 0; transform: translateY(-4px); }
@@ -3958,7 +3959,7 @@ var APP_STAND = '2026-08-15'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.4.9'; /* == VERSION == */
+var APP_VERSION = '2.4.10T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -5405,7 +5406,7 @@ function swAnmelden() {
     // Übernimmt ein neuer Worker, ist die alte Seite veraltet — einmal neu
     // laden, und zwar nur einmal.
     navigator.serviceWorker.addEventListener('controllerchange', function () {
-      if (swStand.neuladen) window.location.reload();
+      if (swStand.neuladen) swNeustart();
     });
     swVersionHolen();
   } catch (e) { /* siehe oben */ }
@@ -5478,12 +5479,61 @@ function swNachsehen(fertig) {
 }
 
 // Übernehmen: den wartenden Worker vorlassen und danach einmal neu laden.
-function swUebernehmen() {
+//
+// **Das Neuladen ist unvermeidlich** (ADR 0068). Eine neue Fassung ist neuer
+// Programmtext; solange die alte Seite läuft, läuft die alte Fassung. Was sich
+// vermeiden lässt, ist der *Eindruck*, dass dabei etwas verlorengeht: Der
+// Nutzer soll sehen, dass geladen wird, und danach dort stehen, wo er war.
+//
+// Zwei Dinge also. Erstens die Frist: Der Tausch dauert oft nur Millisekunden,
+// und ein Ring, der aufblitzt und weg ist, sieht aus wie ein Fehlgriff. Der
+// Neustart wartet darum, bis `SW_LADEN_MIN` um ist.
+var SW_LADEN_MIN = 2000;
+// Zweitens der Ort. Er überlebt den Neustart in einem eigenen Schlüssel — kurz
+// gültig, denn er meint **diesen** Neustart und keinen späteren.
+var SW_ORT_KEY = 'chillingo_nach_update';
+var SW_ORT_FRIST = 60000;
+
+function swOrtMerken() {
   try {
-    if (!swStand.wartet) { window.location.reload(); return; }
+    localStorage.setItem(SW_ORT_KEY, JSON.stringify({
+      tab: currentTab, reiter: einstReiter, zeit: Date.now()
+    }));
+  } catch (e) { /* ohne Merker landet man auf Home — kein Beinbruch */ }
+}
+// Nach dem Neustart: dorthin zurück, wo getippt wurde. Der Schlüssel wird
+// **immer** weggeräumt, auch wenn er nicht mehr gilt — sonst führte er beim
+// übernächsten Start noch einmal irgendwohin.
+function swOrtHolen() {
+  var roh = null;
+  try {
+    roh = localStorage.getItem(SW_ORT_KEY);
+    localStorage.removeItem(SW_ORT_KEY);
+  } catch (e) { return null; }
+  if (!roh) return null;
+  try {
+    var o = JSON.parse(roh);
+    if (!o || Date.now() - o.zeit > SW_ORT_FRIST) return null;
+    if (!UEBUNG_NAME[o.tab] && !ANSICHT_NAME[o.tab]) return null;
+    return o;
+  } catch (e) { return null; }
+}
+
+function swUebernehmen() {
+  swStand.ladenSeit = Date.now();
+  swOrtMerken();
+  try {
+    if (!swStand.wartet) { swNeustart(); return; }
     swStand.neuladen = true;
     swStand.wartet.postMessage({ art: 'uebernehmen' });
-  } catch (e) { window.location.reload(); }
+  } catch (e) { swNeustart(); }
+}
+
+// Neu laden — aber nicht, bevor man den Ring gesehen hat.
+function swNeustart() {
+  var offen = Date.now() - (swStand.ladenSeit || 0);
+  var rest = Math.max(0, SW_LADEN_MIN - offen);
+  setTimeout(function () { window.location.reload(); }, rest);
 }
 
 // **Der Notausgang.** Ein Worker, der sich verschluckt, ist auf einem Telefon
@@ -8864,7 +8914,7 @@ function renderUebersetzen() {
     } else {
       html += '<textarea id="trInput" rows="2" class="fliess' + (t.loesungRu ? ' cyr' : '') +
         '" lang="' + (t.loesungRu ? 'ru' : 'de') + '" autocapitalize="sentences"' +
-        ' autocorrect="off" spellcheck="false" enterkeyhint="go"' +
+        ' autocorrect="off" spellcheck="false" enterkeyhint="go"' + kbFeldAttr(trKb) +
         ' placeholder="' + (t.loesungRu ? 'Den Satz auf Russisch schreiben …'
           : 'Den Satz auf Deutsch schreiben …') + '">' + esc(trEingabe) + '</textarea>';
       if (!t.loesungRu) {
@@ -8982,7 +9032,7 @@ function renderUebersetzen() {
       var k = b.dataset.trkey;
       trEingabe = k === 'BS' ? trEingabe.slice(0, -1) : trEingabe + k;
       var feld = document.getElementById('trInput');
-      if (feld) feld.value = trEingabe;
+      feldSchreiben('trInput', trEingabe);
       var knopf = document.getElementById('trConfirm');
       if (knopf) knopf.disabled = !trAbgabeBereit();
     });
@@ -9755,6 +9805,34 @@ function tastaturVorgabe(kyrillisch) {
   return !!kyrillisch && state.settings.tastaturAuto;
 }
 
+// **Die Schreibmarke gehört ins Feld** (ADR 0068). Wer über die eingebaute
+// Tastatur schreibt, sah bis 2.4.9 nicht, wo er im Text steht: Das Feld bekam
+// bei jedem Tastendruck seinen Wert gesetzt, aber nie den Fokus — und ohne
+// Fokus blinkt nichts.
+//
+// Fokussieren allein wäre die Falle gewesen: Auf iOS klappt damit die
+// **Geräte**tastatur auf, und genau die soll die eingebaute ersetzen.
+// `inputmode="none"` sagt dem Browser, dass er keine aufklappen soll; das Feld
+// bleibt trotzdem ein Feld, mit Marke und allem. Das Attribut steht darum nur
+// dort, wo die eingebaute Tastatur wirklich offen ist — siehe `kbFeldAttr()`.
+function feldSchreiben(id, text) {
+  var f = document.getElementById(id);
+  if (!f) return;
+  f.value = text;
+  try {
+    // Ohne `preventScroll` springt die Seite auf einem Handy zum Feld, sobald
+    // es den Fokus bekommt — bei jedem Tastendruck.
+    f.focus({ preventScroll: true });
+    f.setSelectionRange(text.length, text.length);
+  } catch (e) { /* ein Browser, der das nicht kann, hat den Text trotzdem */ }
+}
+// Was ein Schreibfeld zusätzlich trägt, solange die eingebaute Tastatur offen
+// ist. Ist sie zu, muss die Gerätetastatur aufgehen dürfen — dann darf hier
+// nichts stehen.
+function kbFeldAttr(kbOffen) {
+  return kbOffen ? ' inputmode="none"' : '';
+}
+
 // Der Aufbau folgt der gewohnten Tastatur: die Rücktaste rechts am Ende der
 // dritten Reihe, das Leerzeichen allein in einer vierten — breit und mittig.
 // Vorher hingen beide hinten an der dritten Reihe; die brach dadurch um, und
@@ -9814,7 +9892,7 @@ function rekoHtml() {
     ? pruefzeileHtml(reko.eingabe, reko.loesung, true, 'form')
     : '<textarea id="rekoInput" rows="1" class="fliess cyr"' +
       ' lang="ru" autocapitalize="off" autocorrect="off" spellcheck="false"' +
-      ' placeholder="nachschreiben …">' + esc(reko.eingabe) + '</textarea>';
+      kbFeldAttr(reko.kb) + ' placeholder="nachschreiben …">' + esc(reko.eingabe) + '</textarea>';
   html += '</div>';
   if (!fertig) {
     if (reko.kb === null) reko.kb = tastaturVorgabe(true);
@@ -9840,7 +9918,7 @@ function rekoBinden(neu) {
       var k = el.dataset.rekokey;
       reko.eingabe = k === 'BS' ? reko.eingabe.slice(0, -1) : reko.eingabe + k;
       var f = document.getElementById('rekoInput');
-      if (f) f.value = reko.eingabe;
+      feldSchreiben('rekoInput', reko.eingabe);
       if (rekoFertig()) { ton(true); neu(); }
     });
   });
@@ -10544,7 +10622,7 @@ function gramUebenHtml(b) {
         ? pruefzeileHtml(gramEingabe, q.loesung, true, 'form')
         : '<textarea id="gramInput" rows="1" class="fliess cyr"' +
           ' lang="ru" autocapitalize="off" autocorrect="off" spellcheck="false"' +
-          ' enterkeyhint="go" placeholder="Die Form schreiben …">' + esc(gramEingabe) + '</textarea>';
+          kbFeldAttr(gramKb) + ' enterkeyhint="go" placeholder="Die Form schreiben …">' + esc(gramEingabe) + '</textarea>';
     } else {
       html += '<div class="options abc-optionen">';
       q.optionen.forEach(function (f, i) {
@@ -10833,7 +10911,7 @@ function renderGrammatik() {
       var k = el.dataset.gramkey;
       gramEingabe = k === 'BS' ? gramEingabe.slice(0, -1) : gramEingabe + k;
       var f = document.getElementById('gramInput');
-      if (f) f.value = gramEingabe;
+      feldSchreiben('gramInput', gramEingabe);
       var c = document.getElementById('gramConfirm');
       if (c) c.disabled = !gramAbgabeBereit();
     });
@@ -11143,7 +11221,7 @@ function orthoUebenHtml(r) {
       ? pruefzeileHtml(orthoEingabe, a.ist, true, 'form')
       : '<textarea id="orthoInput" rows="1" class="fliess cyr"' +
         ' lang="ru" autocapitalize="off" autocorrect="off" spellcheck="false"' +
-        ' enterkeyhint="go" placeholder="Das ganze Wort schreiben …">' +
+        kbFeldAttr(orthoKb) + ' enterkeyhint="go" placeholder="Das ganze Wort schreiben …">' +
         esc(orthoEingabe) + '</textarea>';
   } else {
     html += '<div class="options abc-optionen">';
@@ -11299,7 +11377,7 @@ function renderSchreibung() {
       var k = el.dataset.orthokey;
       orthoEingabe = k === 'BS' ? orthoEingabe.slice(0, -1) : orthoEingabe + k;
       var f = document.getElementById('orthoInput');
-      if (f) f.value = orthoEingabe;
+      feldSchreiben('orthoInput', orthoEingabe);
       var c = document.getElementById('orthoConfirm');
       if (c) c.disabled = !orthoAbgabeBereit();
     });
@@ -11550,7 +11628,7 @@ function renderPower() {
       ? pruefzeileHtml(ptEingabe, q.wort.ru, true, 'form')
       : '<textarea id="ptInput" rows="1" class="fliess cyr"' +
         ' lang="ru" autocapitalize="off" autocorrect="off" spellcheck="false"' +
-        ' enterkeyhint="go" placeholder="кириллица …">' + esc(ptEingabe) + '</textarea>';
+        kbFeldAttr(ptKb) + ' enterkeyhint="go" placeholder="кириллица …">' + esc(ptEingabe) + '</textarea>';
   }
 
   if (ptPhase === 'feedback') {
@@ -11609,7 +11687,7 @@ function ptBinden() {
       var k = b.dataset.ptkey;
       ptEingabe = k === 'BS' ? ptEingabe.slice(0, -1) : ptEingabe + k;
       var f = document.getElementById('ptInput');
-      if (f) f.value = ptEingabe;
+      feldSchreiben('ptInput', ptEingabe);
       var knopf = document.getElementById('ptConfirm');
       if (knopf) knopf.disabled = !ptAbgabeBereit();
     });
@@ -11909,7 +11987,7 @@ function renderTippen() {
       ? pruefzeileHtml(tEingabe, w.ru, true, 'wort')
       : '<input type="text" id="tInput" class="cyr" value="' + esc(tEingabe) + '"' +
         ' placeholder="кириллица \u2026" lang="ru" autocapitalize="off"' +
-        ' autocorrect="off" spellcheck="false" enterkeyhint="go">');
+        ' autocorrect="off" spellcheck="false" enterkeyhint="go"' + kbFeldAttr(tKb) + '>');
 
   if (tResult === 'wrong') html += '<p class="feedback bad">' + ICON.kreuz + 'Richtig: <strong class="cyr">' + betontesWortHtml(w.ru) + '</strong></p>';
   if (tResult === 'right') html += '<p class="feedback good">' + ICON.haken + 'Правильно — richtig!</p>';
@@ -11996,7 +12074,7 @@ function renderTippen() {
       var k = b.dataset.key;
       tEingabe = k === 'BS' ? tEingabe.slice(0, -1) : tEingabe + k;
       var inp = document.getElementById('tInput');
-      if (inp) inp.value = tEingabe;
+      feldSchreiben('tInput', tEingabe);
     });
   });
 }
@@ -13560,6 +13638,17 @@ if (window.MutationObserver) {
 // Erst zeichnen, dann die Chili das erste Mal setzen: sonst stünde sie kurz im
 // Kopf (main ist noch leer) und spränge danach sichtbar auf ihren Platz in der
 // Empfehlung — beim Neuladen sah das aus wie ein Fehler.
+// **Nach einem Update dorthin zurück, wo getippt wurde** (ADR 0068). Vor dem
+// ersten Zeichnen, damit die Übersicht gar nicht erst aufblitzt.
+var swOrt = swOrtHolen();
+if (swOrt) {
+  currentTab = swOrt.tab;
+  if (swOrt.reiter) einstReiter = swOrt.reiter;
+  // Der Rückweg führt von dort nach Hause — der Stapel ist nach einem Neustart
+  // leer, und ein «Zurück» ins Nichts wäre eine Sackgasse (ADR 0036).
+  if (currentTab !== 'home') ansichtStapel = ['home'];
+}
+
 render();
 menuSetzen(false);
 chiliAktualisieren();
