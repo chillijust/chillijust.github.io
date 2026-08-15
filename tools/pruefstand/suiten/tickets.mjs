@@ -169,6 +169,54 @@ try {
     meldeBezugWahl + ' / ' + q('#meldeBezugName').textContent);
   q('#meldeBezugKnopf').click();
   q('#meldeBezug [data-bezug="lernsets"]').click();
+
+  // ── F3h ff · Ort und Art sind zwei Fragen (ADR 0078) ─────
+  // Eine Liste für beides wäre auf dreißig Einträge gewachsen, und man hätte
+  // nur eines von beidem sagen können.
+  pruefe('F3h beim Fehler steht ein zweites Feld für die Art',
+    q('#meldeGrundZeile').hidden === false && !!q('#meldeGrundKnopf'));
+  pruefe('F3i es ist zugeklappt und sagt, dass nichts gewählt ist',
+    q('#meldeGrund').hidden === true &&
+    q('#meldeGrundName').textContent === 'Keine Angabe',
+    q('#meldeGrundName').textContent);
+  q('#meldeGrundKnopf').click();
+  pruefe('F3j es klappt auf und bietet sechs Gründe plus «keine»',
+    q('#meldeGrund').hidden === false &&
+    alle('#meldeGrund [data-grund]').length === MELDE_GRUENDE.length + 1,
+    String(alle('#meldeGrund [data-grund]').length));
+  q('#meldeGrund [data-grund="anzeige"]').click();
+  pruefe('F3k eine Wahl schließt es und steht auf dem Knopf',
+    meldeGrundWahl === 'anzeige' && q('#meldeGrund').hidden === true &&
+    q('#meldeGrundName').textContent.indexOf('Anzeige') === 0,
+    q('#meldeGrundName').textContent);
+  // **Ein Wunsch hat keinen Grund, er hat einen Zweck.**
+  q('[data-melde-art="feature"]').click();
+  pruefe('F3l beim Wunsch ist das Feld weg', q('#meldeGrundZeile').hidden === true);
+  q('[data-melde-art="bug"]').click();
+  pruefe('F3m und beim Fehler wieder da', q('#meldeGrundZeile').hidden === false);
+
+  // ── F3n ff · Der dritte Reiter (ADR 0078) ────────────────
+  q('#meldeTitel').value = 'Ein Entwurf';
+  q('[data-melde-art="liste"]').click();
+  // **Gefragt ist, was man sieht, nicht was im Baum steht.** Ein gesetztes
+  // display sticht [hidden] — die Knopfzeile ist ein Flex-Kasten und stand
+  // darum trotz Attribut noch da.
+  function sichtbar(w) { return getComputedStyle(q(w)).display !== 'none'; }
+  pruefe('F3n «Bearbeiten» zeigt die Liste statt der Felder',
+    meldeModus === 'liste' && sichtbar('#meldeListe') &&
+    !sichtbar('#meldeNeu') && !sichtbar('#meldeAktionen'),
+    'Liste ' + getComputedStyle(q('#meldeListe')).display +
+    ' · Neu ' + getComputedStyle(q('#meldeNeu')).display +
+    ' · Knöpfe ' + getComputedStyle(q('#meldeAktionen')).display);
+  // **Der Entwurf überlebt den Abstecher** (ADR 0025) — verborgen ist nicht
+  // ausgeräumt.
+  pruefe('F3o und der Entwurf steht noch da',
+    q('#meldeTitel').value === 'Ein Entwurf', q('#meldeTitel').value);
+  q('[data-melde-art="bug"]').click();
+  pruefe('F3p zurück im Schreibteil',
+    meldeModus === 'neu' && sichtbar('#meldeNeu') && sichtbar('#meldeAktionen') &&
+    !sichtbar('#meldeListe') && q('#meldeTitel').value === 'Ein Entwurf');
+  q('#meldeTitel').value = '';
   var vorher2 = tickets.length;
   q('#meldeSichern').click();
   pruefe('F4 ohne Titel wird nichts gespeichert', tickets.length === vorher2 && meldeOffen);
@@ -332,7 +380,7 @@ try {
   // Gelesen wird genau die Form, die ticketsAlsText() schreibt.
   tickets = [];
   ticketsSichern();
-  ticketAnlegen('bug', 'Ein Fehler', 'Zwei Zeilen\nText dazu', 'lernsets');
+  ticketAnlegen('bug', 'Ein Fehler', 'Zwei Zeilen\nText dazu', 'lernsets', 'Anzeige oder Darstellung');
   ticketAnlegen('feature', 'Ein Wunsch', 'Kurz.', null);
   var text = ticketsAlsText(tickets);
   var gelesen = ticketsLesen(text);
@@ -347,6 +395,15 @@ try {
     var w = gelesen.filter(function (t) { return t.titel === 'Ein Wunsch'; })[0];
     return w && w.art === 'feature' && w.reiter === '';
   })());
+  // **Die Art fährt mit** (ADR 0078). Ein Feld, das den Weg nach draußen und
+  // zurück nicht überlebt, ist auf dem zweiten Gerät verloren.
+  pruefe('Y3b die Art des Fehlers steht im Text und kommt zurück',
+    text.indexOf('- Art: Anzeige oder Darstellung') !== -1 &&
+    gelesen.filter(function (t) { return t.titel === 'Ein Fehler'; })[0].grund ===
+      'Anzeige oder Darstellung',
+    gelesen.filter(function (t) { return t.titel === 'Ein Fehler'; })[0].grund);
+  pruefe('Y3c und ein Wunsch trägt keine',
+    text.split('Ein Wunsch')[1].indexOf('- Art:') === -1);
   // **Was schon da ist, bleibt** — dasselbe zweimal einzufügen verdoppelt nichts.
   var e1 = ticketsUebernehmen(gelesen);
   pruefe('Y4 Bekanntes wird nicht verdoppelt',
@@ -363,6 +420,57 @@ try {
   })(), tickets.map(function (t) { return t.titel; }).join());
   // **Nichts verstanden heißt nichts getan.**
   pruefe('Y7 Unsinn ergibt kein Ticket', ticketsLesen('Hallo Welt').length === 0);
+
+  // ── Z · Bearbeiten aus dem Blatt heraus (ADR 0078) ───────
+  // Bisher führte der einzige Weg über das Menü in die Ticketansicht. Der
+  // dritte Reiter bringt die Liste dorthin, wo man ohnehin schreibt.
+  tickets = [];
+  ticketsSichern();
+  ticketAnlegen('bug', 'Zu bearbeiten', 'Alter Text', 'tippen', 'Bedienung');
+  setTab('home');
+  meldeSetzen(false);
+  meldeLeeren();
+  q('#meldeKnopf').click();
+  pruefe('Z1 das Blatt öffnet im Schreibteil', meldeModus === 'neu' &&
+    q('#meldeNeu').hidden === false);
+  q('[data-melde-art="liste"]').click();
+  pruefe('Z2 die Liste führt das vorhandene Ticket',
+    alle('#meldeListe [data-tkwahl]').length === 1 &&
+    q('#meldeListe').textContent.indexOf('Zu bearbeiten') !== -1,
+    q('#meldeListe').textContent.slice(0, 60));
+  // Sie nennt auch, worum es ging — sonst müsste man raten, welches man meint.
+  pruefe('Z2b und sagt Art und Ort dazu',
+    q('#meldeListe').textContent.indexOf('Fehler') !== -1 &&
+    q('#meldeListe').textContent.indexOf('Tippen') !== -1,
+    q('#meldeListe').textContent.slice(0, 90));
+  q('#meldeListe [data-tkwahl]').click();
+  pruefe('Z3 ein Tipp holt es in den Schreibteil',
+    meldeModus === 'neu' && !!meldeBearbeitet &&
+    q('#meldeTitel').value === 'Zu bearbeiten' &&
+    q('#meldeText').value === 'Alter Text',
+    q('#meldeTitel').value);
+  pruefe('Z3b samt Ort und Art', meldeBezugWahl === 'tippen' &&
+    meldeGrundWahl === 'bedienung',
+    meldeBezugWahl + ' / ' + meldeGrundWahl);
+  pruefe('Z3c und der Knopf heißt jetzt «Ändern»',
+    q('#meldeSichern').textContent === 'Ändern', q('#meldeSichern').textContent);
+  q('#meldeTitel').value = 'Geändert';
+  q('#meldeSichern').click();
+  pruefe('Z4 gespeichert wird dasselbe Ticket, nicht ein zweites',
+    tickets.length === 1 && tickets[0].titel === 'Geändert' &&
+    tickets[0].grund === 'Bedienung',
+    tickets.length + ' / ' + tickets[0].titel + ' / ' + tickets[0].grund);
+  // Leer heißt leer: Ohne Tickets steht dort ein Satz, keine leere Fläche.
+  tickets = [];
+  ticketsSichern();
+  q('#meldeKnopf').click();
+  q('[data-melde-art="liste"]').click();
+  pruefe('Z5 ohne Tickets steht ein Satz da',
+    alle('#meldeListe [data-tkwahl]').length === 0 &&
+    q('#meldeListe').textContent.indexOf('Noch keine Tickets') !== -1,
+    q('#meldeListe').textContent.slice(0, 50));
+  meldeSetzen(false);
+  meldeLeeren();
   pruefe('Y8 auch leerer Text nicht', ticketsLesen('').length === 0);
   // Ein Kopf ohne Ticketabschnitt ebenfalls nicht.
   pruefe('Y9 ein Kopf allein auch nicht',

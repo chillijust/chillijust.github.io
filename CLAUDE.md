@@ -378,7 +378,12 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   Gestalt wie «Alle Übungen» — **die App hat für das Aufklappen genau eine Form**. Ein
   **natives Auswahlfeld** bleibt verboten (auf iOS ein Rad über der halben Seite); die
   Suite `filter` liest den Quelltext danach ab und springt auch auf ein Vorkommen im
-  Kommentar an. Vom Blatt führt eine Zeile in die Liste;
+  Kommentar an. **Ort und Art sind zwei Felder** (ADR 0078): «Betrifft» sagt *wo*,
+  «Art» *was* (sechs grobe Gründe, nur beim Fehler — ein Wunsch hat keinen Grund,
+  sondern einen Zweck). Beides fährt durch den gebündelten Text und zurück. Der dritte
+  Chip **«Bearbeiten»** zeigt die Ticketliste im Blatt; im Zustand bleiben `meldeArt`
+  (was für ein Ticket) und `meldeModus` (was das Blatt zeigt) **getrennt**, und der
+  Schreibteil wird dabei nur verborgen, nicht ausgeräumt. Vom Blatt führt eine Zeile in die Liste;
   sie klappt nur zu, sie leert nicht.
 - **Die Kachel liegt in jedem Schema über dem Grund**, die Kopfzeile nimmt überall den
   Grund. In «Dark» ist der Grund beinahe schwarz und warmneutral, die Kachel deutlich

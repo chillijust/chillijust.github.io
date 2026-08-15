@@ -1637,6 +1637,18 @@ body.unterwegs .reiter { top: 62px; }
 .bezug-zeile:last-child { border-bottom: none; }
 .bezug-zeile.an { color: var(--akzent); }
 .bezug-zeile .icon { width: 16px; height: 16px; flex: none; }
+/* Eine Ticketzeile im Blatt: Titel oben, Auskunft klein darunter. */
+.melde-zeile { display: flex; flex-direction: column; gap: 2px; min-width: 0; text-align: left; }
+.melde-titel { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.melde-note { font-size: 11px; color: var(--dim); }
+/* **`display` sticht `[hidden]`.** Die Knopfzeile ist ein Flex-Kasten; ohne
+   diese Zeile stünde sie auch im Reiter «Bearbeiten» da, wo es nichts zu
+   sichern gibt. Im Bildschirmfoto war das sofort zu sehen — die Prüfung
+   fragte das Attribut und war grün. */
+#meldeAktionen[hidden], #meldeNeu[hidden], #meldeListe[hidden] { display: none; }
+#meldeListe { max-height: 38vh; overflow-y: auto; margin-top: 4px; }
+#meldeListe .bezug-zeile { border-bottom: 1px solid var(--line); border-radius: 0; }
+#meldeListe .bezug-zeile:last-child { border-bottom: none; }
 @media (prefers-reduced-motion: reduce) {
   .bezug-knopf::after { transition: none; }
 }
@@ -2050,6 +2062,10 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
   <div class="blatt-griff" aria-hidden="true"></div>
   <div class="blatt-inhalt">
     <div class="controls" id="meldeArt"></div>
+    <!-- **Der Entwurf überlebt den Reiterwechsel** (ADR 0025). Der Neu-Teil
+         wird darum nur verborgen, nicht ausgeräumt: Wer in die Liste schaut
+         und zurückkommt, findet seinen halben Satz wieder. -->
+    <div id="meldeNeu">
     <input type="text" class="zeile" id="meldeTitel" maxlength="120"
       placeholder="Worum geht es? Kurz und knapp." autocapitalize="sentences" spellcheck="false">
     <textarea class="fliess" id="meldeText" rows="4" placeholder="Was ist passiert, was hattest du erwartet?"></textarea>
@@ -2068,8 +2084,23 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
       <div class="bezug-liste" id="meldeBezug" role="radiogroup"
         aria-label="Welche Seite betrifft es?" hidden></div>
     </div>
+    <!-- **Ort und Art sind zwei Fragen** (ADR 0078). Zusammengelegt hätte man
+         nur eines von beidem sagen können, und die Liste wäre auf dreißig
+         Einträge gewachsen. Die Art gibt es nur beim Fehler: Ein Wunsch hat
+         keinen Grund, er hat einen Zweck. -->
+    <div class="bezug-wahl" id="meldeGrundZeile">
+      <span class="bezug-text" id="meldeGrundText">Art</span>
+      <button class="bezug-knopf" id="meldeGrundKnopf" type="button"
+        aria-expanded="false" aria-controls="meldeGrund"
+        aria-labelledby="meldeGrundText meldeGrundName">
+        <span id="meldeGrundName"></span></button>
+      <div class="bezug-liste" id="meldeGrund" role="radiogroup"
+        aria-label="Was für ein Fehler ist es?" hidden></div>
+    </div>
+    </div>
+    <div id="meldeListe" hidden></div>
     <button class="blatt-link" id="meldeAlle">Alle Tickets →</button>
-    <div class="btn-row">
+    <div class="btn-row" id="meldeAktionen">
       <button class="btn ghost" id="meldeAbbruch">Abbrechen</button>
       <button class="btn primary" id="meldeSichern">Sichern</button>
     </div>
@@ -4126,7 +4157,7 @@ var APP_STAND = '2026-08-15'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.4.19T'; /* == VERSION == */
+var APP_VERSION = '2.4.20T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -4533,6 +4564,7 @@ function ticketAbschnitt(t, nr, standZeigen) {
   return '## ' + nr + ' · ' + (t.art === 'bug' ? 'Fehler' : 'Wunsch') + ': ' + t.titel + '\n\n' +
     (t.text ? t.text + '\n\n' : '') +
     (t.reiter ? '- Ort: ' + t.reiter + '\n' : '') +
+    (t.grund ? '- Art: ' + t.grund + '\n' : '') +
     (standZeigen ? '- App-Stand: ' + ticketStand(t) + '\n' : '') +
     '- Erstellt: ' + datumLang(t.erstellt) + '\n' +
     (t.geaendert ? '- Geändert: ' + datumLang(t.geaendert) + '\n' : '');
@@ -4587,14 +4619,15 @@ function ticketsLesen(text) {
     if (kopf) {
       fertig();
       akt = { art: kopf[1] === 'Fehler' ? 'bug' : 'feature', titel: kopf[2].replace(/\s+$/, ''),
-        text: '', reiter: '', stand: '', erstellt: 0, geaendert: 0 };
+        text: '', reiter: '', grund: '', stand: '', erstellt: 0, geaendert: 0 };
       return;
     }
     // Die Angaben unter einem Ticket. Sie stehen als Aufzählung und sind das
     // Einzige, was am Zeilenanfang mit «- » beginnt.
-    var feld = /^-\s+(Ort|App-Stand|Erstellt|Geändert)\s*:\s*(.+)$/.exec(z);
+    var feld = /^-\s+(Ort|Art|App-Stand|Erstellt|Geändert)\s*:\s*(.+)$/.exec(z);
     if (feld && akt) {
       if (feld[1] === 'Ort') akt.reiter = feld[2].replace(/\s+$/, '');
+      else if (feld[1] === 'Art') akt.grund = feld[2].replace(/\s+$/, '');
       else if (feld[1] === 'App-Stand') akt.stand = feld[2].split('·')[0].replace(/\s+$/, '');
       else if (feld[1] === 'Erstellt') akt.erstellt = datumLesen(feld[2]);
       else akt.geaendert = datumLesen(feld[2]);
@@ -4648,7 +4681,8 @@ function ticketsUebernehmen(neue) {
     tickets.unshift({
       id: Date.now().toString(36) + Math.floor(Math.random() * 1296).toString(36),
       art: n.art, titel: n.titel.slice(0, 120), text: n.text.slice(0, 4000),
-      reiter: n.reiter, stand: n.stand || APP_STAND, version: n.stand || APP_VERSION,
+      reiter: n.reiter, grund: n.grund || '',
+      stand: n.stand || APP_STAND, version: n.stand || APP_VERSION,
       geraet: n.geraet || '', erstellt: jetzt,
       geaendert: n.geaendert || 0, uebergeben: null
     });
@@ -4664,13 +4698,14 @@ function ticketsOffen() {
 
 // Ein vorhandenes Ticket ändern. Erstellt bleibt erstellt — die Reihenfolge
 // soll sich beim Nachbessern nicht verschieben.
-function ticketAendern(id, art, titel, text, reiter) {
+function ticketAendern(id, art, titel, text, reiter, grund) {
   var t = tickets.filter(function (x) { return x.id === id; })[0];
   if (!t) return null;
   t.art = art === 'bug' ? 'bug' : 'feature';
   t.titel = String(titel).replace(/^\s+|\s+$/g, '').slice(0, 120);
   t.text = String(text).replace(/\s+$/, '').slice(0, 4000);
   t.reiter = reiter || '';
+  t.grund = grund || '';
   t.geaendert = Date.now();
   // Ein geändertes Ticket ist wieder offen: Was übergeben wurde, stimmt so
   // nicht mehr, und die neue Fassung soll beim nächsten Bündeln mitgehen.
@@ -4679,7 +4714,7 @@ function ticketAendern(id, art, titel, text, reiter) {
   return t;
 }
 
-function ticketAnlegen(art, titel, text, reiter) {
+function ticketAnlegen(art, titel, text, reiter, grund) {
   var geraet = '';
   try { geraet = String(navigator.userAgent).slice(0, 180); } catch (e) {}
   // Zwei Tickets in derselben Millisekunde wären in der Reihenfolge nicht mehr
@@ -4697,6 +4732,10 @@ function ticketAnlegen(art, titel, text, reiter) {
     // Ohne Bezug bleibt das Feld leer — der gebündelte Text lässt die Zeile
     // dann weg, statt «null» zu behaupten.
     reiter: reiter ? ansichtName(reiter) : '',
+    // **Ort und Art sind zwei Fragen** (ADR 0078): *wo* war es und *was* war
+    // es. In einer Liste zusammengelegt hätte man nur eines von beidem sagen
+    // können, und die Liste wäre auf dreißig Einträge gewachsen.
+    grund: grund || '',
     stand: APP_STAND,
     version: APP_VERSION,
     geraet: geraet,
@@ -7496,6 +7535,17 @@ document.getElementById('meldeBezugKnopf').addEventListener('click', function ()
   meldeBezugOffen = !meldeBezugOffen;
   meldeBezugZeichnen();
 });
+document.getElementById('meldeGrund').addEventListener('click', function (e) {
+  var b = e.target.closest ? e.target.closest('[data-grund]') : null;
+  if (!b) return;
+  meldeGrundWahl = b.dataset.grund;
+  meldeGrundOffen = false;
+  meldeGrundZeichnen();
+});
+document.getElementById('meldeGrundKnopf').addEventListener('click', function () {
+  meldeGrundOffen = !meldeGrundOffen;
+  meldeGrundZeichnen();
+});
 // Vom Blatt in die Liste. Nur zuklappen, nicht leeren: Ein Entwurf überlebt
 // das Zuklappen, und ihn beim Nachsehen wegzuwerfen wäre die böseste Falle
 // von allen (ADR 0025).
@@ -7514,10 +7564,13 @@ document.getElementById('meldeSichern').addEventListener('click', function () {
   var text = document.getElementById('meldeText').value;
   // Beim Ändern bleibt der schon vergebene Bezug stehen; wird der Haken erst
   // jetzt gesetzt, trägt er die Ansicht ein, über der das Blatt steht.
+  // Der Grund gehört zum Fehler; ein Wunsch trägt keinen, auch wenn vorher
+  // einer gewählt war und dann umgeschaltet wurde.
+  var grund = meldeArt === 'bug' ? meldeGrundText() : '';
   if (meldeBearbeitet) {
-    ticketAendern(meldeBearbeitet, meldeArt, titel.value, text, meldeBezugText());
+    ticketAendern(meldeBearbeitet, meldeArt, titel.value, text, meldeBezugText(), grund);
   }
-  else ticketAnlegen(meldeArt, titel.value, text, meldeBezugWahl || null);
+  else ticketAnlegen(meldeArt, titel.value, text, meldeBezugWahl || null, grund);
   meldeSetzen(false);
   meldeLeeren();
   if (currentTab === 'tickets') renderTickets();
@@ -8377,6 +8430,9 @@ function ansichtenZuruecksetzen() {
   tkImportMeldung = '';
   meldeBearbeitet = null;
   meldeBezugOffen = false;
+  meldeModus = 'neu';
+  meldeGrundWahl = '';
+  meldeGrundOffen = false;
   meisterMeldung = null;
   patzerMeldung = null;
   einstReiter = EINST_REITER[0].id;
@@ -13168,6 +13224,25 @@ function renderFakten() {
 // deckt nur den unteren Teil ab, damit man weiter sieht, worum es geht.
 var meldeOffen = false;
 var meldeArt = 'bug';
+// **Der dritte Reiter ist eine Tätigkeit, kein Ticket-Typ** (ADR 0078). Er
+// steht trotzdem in derselben Reihe: Der Nutzer sieht dort «was jetzt», und
+// «ein vorhandenes ändern» ist für ihn die dritte Antwort darauf. Im Zustand
+// bleiben beide getrennt — `meldeArt` sagt, was für ein Ticket es wird,
+// `meldeModus`, was das Blatt gerade zeigt.
+var meldeModus = 'neu';   // 'neu' · 'liste'
+// Die Art des Fehlers. Sechs Gründe, absichtlich grob: Feiner geschnitten
+// müsste man raten, welche Schublade gemeint ist, und das ist mehr Arbeit als
+// ein Satz im Text.
+var MELDE_GRUENDE = [
+  { id: 'anzeige', name: 'Anzeige oder Darstellung' },
+  { id: 'bedienung', name: 'Bedienung' },
+  { id: 'inhalt', name: 'Falscher Inhalt' },
+  { id: 'haengt', name: 'Stürzt ab oder hängt' },
+  { id: 'ton', name: 'Ton oder Vorlesen' },
+  { id: 'sonst', name: 'Sonstiges' }
+];
+var meldeGrundWahl = '';
+var meldeGrundOffen = false;
 // **Die gewählte Seite** (ADR 0069) — leer heißt «keine». Vorbelegt wird sie
 // beim Öffnen des Blattes mit der Ansicht, über der man steht; ab dann gilt,
 // was der Nutzer gewählt hat.
@@ -13237,9 +13312,64 @@ function meldeBezugZeichnen() {
 }
 
 function meldeArtHtml() {
-  return [['bug', 'Fehler'], ['feature', 'Wunsch']].map(function (a) {
-    return '<button class="chip' + (meldeArt === a[0] ? ' active' : '') +
+  var html = [['bug', 'Fehler'], ['feature', 'Wunsch']].map(function (a) {
+    var an = meldeModus === 'neu' && meldeArt === a[0];
+    return '<button class="chip' + (an ? ' active' : '') +
+      '" aria-pressed="' + (an ? 'true' : 'false') +
       '" data-melde-art="' + a[0] + '">' + a[1] + '</button>';
+  }).join('');
+  var liste = meldeModus === 'liste';
+  return html + '<button class="chip' + (liste ? ' active' : '') +
+    '" aria-pressed="' + (liste ? 'true' : 'false') +
+    '" data-melde-art="liste">Bearbeiten</button>';
+}
+
+// Die Art des Fehlers — dasselbe Klappfeld wie beim Ort, nur mit anderer Liste.
+function meldeGrundName() {
+  var t = '';
+  MELDE_GRUENDE.forEach(function (g) { if (g.id === meldeGrundWahl) t = g.name; });
+  return t || 'Keine Angabe';
+}
+function meldeGrundZeichnen() {
+  var zeile = document.getElementById('meldeGrundZeile');
+  var knopf = document.getElementById('meldeGrundKnopf');
+  var liste = document.getElementById('meldeGrund');
+  if (!zeile || !knopf || !liste) return;
+  // Nur beim Fehler. Ein Wunsch hat keinen Grund, er hat einen Zweck — und der
+  // steht im Text.
+  zeile.hidden = meldeArt !== 'bug';
+  document.getElementById('meldeGrundName').textContent = meldeGrundName();
+  knopf.setAttribute('aria-expanded', meldeGrundOffen ? 'true' : 'false');
+  liste.hidden = !meldeGrundOffen;
+  var html = grundZeile('', 'Keine Angabe');
+  MELDE_GRUENDE.forEach(function (g) { html += grundZeile(g.id, g.name); });
+  liste.innerHTML = html;
+}
+function grundZeile(id, name) {
+  var an = id === meldeGrundWahl;
+  return '<button class="bezug-zeile' + (an ? ' an' : '') + '" type="button" role="radio"' +
+    ' aria-checked="' + (an ? 'true' : 'false') + '" data-grund="' + esc(id) + '">' +
+    '<span>' + esc(name) + '</span>' + (an ? ICON.haken : '') + '</button>';
+}
+// Was im Ticket landet: der Name, nicht die Kennung — wie beim Ort.
+function meldeGrundText() {
+  return meldeGrundWahl ? meldeGrundName() : '';
+}
+
+// **Die Liste im Blatt** (ADR 0078). Dieselbe Auskunft wie in der Ticketansicht,
+// nur knapper: Titel, Ort und wann. Ein Tipp holt das Ticket ins Blatt — von
+// dort ist der Weg derselbe wie aus der Liste im Menü.
+function meldeListeHtml() {
+  if (!tickets.length) {
+    return '<p class="einr-leer">Noch keine Tickets. Was du hier schreibst, ' +
+      'bleibt auf dem Gerät.</p>';
+  }
+  return tickets.map(function (t) {
+    return '<button class="bezug-zeile" type="button" data-tkwahl="' + esc(t.id) + '">' +
+      '<span class="melde-zeile"><span class="melde-titel">' + esc(t.titel) + '</span>' +
+      '<span class="melde-note">' + (t.art === 'bug' ? 'Fehler' : 'Wunsch') +
+      (t.reiter ? ' · ' + esc(t.reiter) : '') + ' · ' + esc(datumKurz(t.erstellt)) +
+      '</span></span></button>';
   }).join('');
 }
 
@@ -13247,14 +13377,35 @@ function meldeFuellen() {
   document.getElementById('meldeArt').innerHTML = meldeArtHtml();
   document.querySelectorAll('[data-melde-art]').forEach(function (b) {
     b.addEventListener('click', function () {
-      meldeArt = b.dataset.meldeArt;
-      document.getElementById('meldeText').placeholder = meldeArt === 'bug'
-        ? 'Was ist passiert, was hattest du erwartet?'
-        : 'Was soll die App können?';
+      if (b.dataset.meldeArt === 'liste') {
+        meldeModus = 'liste';
+      } else {
+        meldeModus = 'neu';
+        meldeArt = b.dataset.meldeArt;
+        document.getElementById('meldeText').placeholder = meldeArt === 'bug'
+          ? 'Was ist passiert, was hattest du erwartet?'
+          : 'Was soll die App können?';
+      }
       meldeFuellen();
     });
   });
+
+  // **Nur verbergen, nicht ausräumen** (ADR 0025): Der Entwurf steht in den
+  // Feldern und soll den Blick in die Liste überleben.
+  var liste = meldeModus === 'liste';
+  document.getElementById('meldeNeu').hidden = liste;
+  document.getElementById('meldeAktionen').hidden = liste;
+  var kasten = document.getElementById('meldeListe');
+  kasten.hidden = !liste;
+  if (liste) {
+    kasten.innerHTML = meldeListeHtml();
+    kasten.querySelectorAll('[data-tkwahl]').forEach(function (b) {
+      b.addEventListener('click', function () { meldeBearbeiten(b.dataset.tkwahl); });
+    });
+  }
+
   meldeBezugZeichnen();
+  meldeGrundZeichnen();
   document.getElementById('meldeSichern').textContent = meldeBearbeitet ? 'Ändern' : 'Sichern';
   document.getElementById('meldeAbbruch').textContent = meldeBearbeitet ? 'Verwerfen' : 'Abbrechen';
   // In der Liste selbst führt der Weg nirgendwohin — und beim Bearbeiten käme
@@ -13273,9 +13424,14 @@ function meldeBearbeiten(id) {
   // besser als eine Auswahl, die auf etwas zeigt, das fehlt.
   meldeBezugWahl = '';
   meldeSeiten().forEach(function (x) { if (x.name === t.reiter) meldeBezugWahl = x.id; });
+  meldeGrundWahl = '';
+  MELDE_GRUENDE.forEach(function (g) { if (g.name === t.grund) meldeGrundWahl = g.id; });
+  // Aus der Liste heraus gewählt: zurück in den Schreibteil, sonst stünde man
+  // vor der Liste, aus der man gerade etwas geholt hat.
+  meldeModus = 'neu';
   document.getElementById('meldeTitel').value = t.titel;
   document.getElementById('meldeText').value = t.text;
-  meldeSetzen(true);
+  if (meldeOffen) meldeFuellen(); else meldeSetzen(true);
 }
 
 // Ist ein angefangenes Ticket im Blatt? Dann bleibt es dort liegen, auch wenn
@@ -13308,6 +13464,10 @@ function meldeSetzen(auf) {
     // bei einem frischen Entwurf. Ein angefangenes Ticket behält seine Wahl,
     // sonst spränge sie beim Zuklappen und Wiederöffnen zurück.
     if (!meldeBearbeitet && !meldeBezugWahl) meldeBezugWahl = meldeBezugQuelle();
+    // Das Blatt öffnet immer bereit zum Schreiben — die Liste ist ein Abstecher,
+    // kein Zustand, in dem man es verlässt (ADR 0072, derselbe Gedanke).
+    meldeModus = 'neu';
+    meldeGrundOffen = false;
     meldeFuellen();
   } else {
     blatt.style.transform = '';
@@ -13323,6 +13483,9 @@ function meldeLeeren() {
   document.getElementById('meldeTitel').value = '';
   document.getElementById('meldeText').value = '';
   meldeArt = 'bug';
+  meldeModus = 'neu';
+  meldeGrundWahl = '';
+  meldeGrundOffen = false;
   // Zurück auf die Seite, über der man steht — die ist beim nächsten Ticket
   // wieder die wahrscheinlichste.
   meldeBezugWahl = meldeBezugQuelle();
