@@ -197,6 +197,58 @@ try {
   ansichtenZuruecksetzen();
   pruefe('I1 zurückgesetzt steht wieder der erste Reiter', einstReiter === EINST_REITER[0].id,
     einstReiter);
+
+  // ── J · Der Vordereingang beginnt am Anfang (ADR 0072) ────
+  // Der Reiter überlebte den Ansichtswechsel: Wer die Einstellungen bei
+  // «Tastatur» verließ, stand beim nächsten Mal wieder dort. Für den Rückweg
+  // ist das richtig, für den Weg durchs Menü nicht.
+  function menuZu(ziel) {
+    alle('.menueintrag').filter(function (b) { return b.dataset.ziel === ziel; })[0].click();
+  }
+  setTab('home');
+  menuZu('einstellungen');
+  pruefe('J1 das Menü öffnet beim ersten Reiter', einstReiter === EINST_REITER[0].id,
+    einstReiter);
+  einstReiter = 'tastatur';
+  renderEinstellungen();
+  setTab('lernsets');
+  menuZu('einstellungen');
+  pruefe('J2 auch nach einem Abstecher', einstReiter === EINST_REITER[0].id, einstReiter);
+  // Ein **gezielter** Sprung ist kein Anfang: «Maß ändern» führt auf den
+  // Lernweg, und dorthin soll es auch führen.
+  einstReiter = 'lernweg';
+  setTab('einstellungen');
+  pruefe('J3 ein gezielter Sprung behält sein Ziel', einstReiter === 'lernweg', einstReiter);
+
+  // Dieselbe Regel für die Bilanz — dort war der Befund gemeldet.
+  setTab('bilanz');
+  bilanzDetail = 'woerter';
+  renderBilanz();
+  pruefe('J4 die Bilanz kennt eine Detailseite', bilanzDetail === 'woerter');
+  menuZu('einstellungen');
+  menuZu('bilanz');
+  pruefe('J5 über das Menü öffnet sie ihre Übersicht', bilanzDetail === null,
+    String(bilanzDetail));
+  // Der Rückweg dagegen führt dorthin zurück, wo man war. Sauber aufgesetzt:
+  // Hin und her zwischen zwei Ansichten nimmt Schritte vom Stapel statt sie
+  // aufzuhäufen (ADR 0036) — eine Kehre taugt nicht als Aufbau.
+  setTab('home');
+  menuZu('bilanz');
+  bilanzDetail = 'saetze';
+  renderBilanz();
+  setTab('tippen');
+  zurueckGehen();
+  pruefe('J6 der Rückweg behält die Detailseite',
+    currentTab === 'bilanz' && bilanzDetail === 'saetze',
+    currentTab + ' / ' + String(bilanzDetail));
+
+  // ── K · Die Reihenfolge im Menü ───────────────────────────
+  // Vier Einträge, und ihre Reihenfolge ist eine Entscheidung: Einstellungen
+  // zuerst, weil man dort am häufigsten hin will.
+  pruefe('K1 das Menü führt vier Einträge in der verabredeten Reihenfolge',
+    alle('.menueintrag').map(function (b) { return b.dataset.ziel; }).join(',') ===
+      'einstellungen,bilanz,sicherung,tickets',
+    alle('.menueintrag').map(function (b) { return b.dataset.ziel; }).join(','));
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);
 }

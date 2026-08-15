@@ -95,6 +95,7 @@ Wer neu dazukommt und nur fünf lesen will:
 | [0069](0069-der-rueckweg-und-die-wahl.md) | Der Rückweg für Tickets, und der Bezug wird eine Wahl | |
 | [0070](0070-gelegt-ist-auch-geschrieben.md) | Die Nachschrift kommt auch nach falsch gelegten Kacheln | ändert 0056 |
 | [0071](0071-nichts-huepft-nichts-schiebt.md) | Der Hüpfer nur nach einem Flug, kein Schatten, nichts schiebt | löst 0064 §1 ab |
+| [0072](0072-der-vordereingang.md) | Der Weg durchs Menü beginnt am Anfang der Ansicht | ergänzt 0036 |
 
 ## Einen neuen anlegen
 

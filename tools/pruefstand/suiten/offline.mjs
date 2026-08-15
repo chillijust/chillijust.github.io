@@ -153,6 +153,46 @@ try {
     return st.position !== 'fixed' && st.position !== 'absolute';
   })(), getComputedStyle(leiste).position);
 
+  // **Der Ring bleibt ein Kreis** (ADR 0072). Die Regel für den Meldungstext
+  // war auf jedes span in der Leiste gemünzt und traf damit auch den Ring:
+  // Wachstum im Flex-Kasten dehnte die 17 Pixel auf Knopfbreite, sichtbar war
+  // ein riesiger dünner Bogen quer über den Kopf.
+  swStand.gemeldet = false;
+  swHinweisZeigen();
+  var ladeKnopf = q('#swLaden');
+  var breiteVorher = ladeKnopf.getBoundingClientRect().width;
+  ladeKnopf.style.width = breiteVorher + 'px';
+  ladeKnopf.classList.add('sw-laedt');
+  ladeKnopf.innerHTML = '<span class="sw-ring" aria-hidden="true"></span>';
+  var ring = ladeKnopf.querySelector('.sw-ring');
+  var rk = ring.getBoundingClientRect();
+  pruefe('B5a der Ladering ist rund, nicht gedehnt',
+    Math.abs(rk.width - rk.height) < 1 && rk.width < 24,
+    rk.width.toFixed(1) + ' x ' + rk.height.toFixed(1));
+  pruefe('B5b und der Knopf behält seine Größe',
+    Math.abs(ladeKnopf.getBoundingClientRect().width - breiteVorher) < 1,
+    breiteVorher.toFixed(1) + ' -> ' + ladeKnopf.getBoundingClientRect().width.toFixed(1));
+  // Und er sieht aus wie der in den Einstellungen: goldene Fläche, heller Ring.
+  einstReiter = 'app';
+  setTab('einstellungen');
+  swKnopfLage = 'laedt';
+  swKnopfZeichnen();
+  var einstKnopf = q('#swSuchen');
+  pruefe('B5c beide Wege warten in derselben Farbe',
+    getComputedStyle(ladeKnopf).backgroundColor ===
+      getComputedStyle(einstKnopf).backgroundColor &&
+    getComputedStyle(ring).borderTopColor ===
+      getComputedStyle(einstKnopf.querySelector('.sw-ring')).borderTopColor,
+    getComputedStyle(ladeKnopf).backgroundColor + ' / ' +
+    getComputedStyle(einstKnopf).backgroundColor);
+  swKnopfLage = 'ruhe';
+  swKnopfZeichnen();
+  setTab('home');
+  ladeKnopf.classList.remove('sw-laedt');
+  ladeKnopf.style.width = '';
+  ladeKnopf.textContent = 'Jetzt laden';
+  q('#swSpaeter').click();
+
   swStand.gemeldet = false;
   swHinweisZeigen();
   pruefe('B6 gezeigt wird sie auf Ansage', leiste.hidden === false);

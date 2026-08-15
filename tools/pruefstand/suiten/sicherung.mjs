@@ -168,9 +168,16 @@ try {
   q('#menuKnopf').click();
   var eintrag = q('.menueintrag[data-ziel="sicherung"]');
   pruefe('I1 die Sicherung steht im Menü', !!eintrag && !!eintrag.querySelector('svg'));
-  pruefe('I2 zwischen Bilanz und Einstellungen',
-    alle('.menueintrag').map(function (b) { return b.dataset.ziel; }).join(',') ===
-    'bilanz,sicherung,einstellungen,tickets',
+  // Die Reihenfolge ist eine Entscheidung und hat sich mit ADR 0072 geändert:
+  // Einstellungen zuerst. Geprüft wird sie an **einer** Stelle — in der Suite
+  // reiter, Prüfung K1. Hier steht nur, was die Sicherung angeht: Sie steht hinter
+  // der Bilanz und vor den Tickets.
+  pruefe('I2 die Sicherung steht hinter der Bilanz und vor den Tickets',
+    (function () {
+      var z = alle('.menueintrag').map(function (b) { return b.dataset.ziel; });
+      return z.indexOf('sicherung') === z.indexOf('bilanz') + 1 &&
+        z.indexOf('sicherung') < z.indexOf('tickets');
+    })(),
     alle('.menueintrag').map(function (b) { return b.dataset.ziel; }).join(','));
   eintrag.click();
   pruefe('I3 sie führt hin', currentTab === 'sicherung' && !!q('#bkMake') && !!q('#bkIn'));

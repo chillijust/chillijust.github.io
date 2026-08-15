@@ -30,8 +30,8 @@ zählt mit),
 **Grammatik** (warum ein Wort so dasteht — freiwillig, entdecken statt belehren),
 **Power-Training** (die zurückgefallenen Wörter zurückholen — drei auf einmal, ab drei
 gefallenen offen).
-Keine Übungen, sondern **im Menü** (runder Knopf, drei Striche): **Bilanz**,
-**Sicherung**, **Einstellungen**, **Tickets**. Dazu **Sprachfakten** aus der Faktenkarte oder der
+Keine Übungen, sondern **im Menü** (runder Knopf, drei Striche), in dieser
+Reihenfolge: **Einstellungen**, **Bilanz**, **Sicherung**, **Tickets**. Dazu **Sprachfakten** aus der Faktenkarte oder der
 Bilanz. Eine Reiterleiste gibt es nicht — der Kopf trägt unterwegs den Rückweg.
 
 Maskottchen ist die Chili — freigestellt aus `docs/IMG_2942.png` mit
@@ -271,7 +271,9 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   «Kein Netz» treten nach zwei Sekunden ab. **Die Größe wechselt nie**, und
   `swUebernehmen()` wird nur auf einen Tipp gerufen: Ein Update lädt nie von selbst.
   **Beide Wege warten gleich** (ADR 0063) — derselbe Ring am Knopf und in der
-  Hinweiszeile, unterschieden allein durch die Farbe des Knopfs darunter.
+  Hinweiszeile, seit ADR 0072 auch in derselben Farbe: golden mit hellem Ring. Der Ring
+  trägt `flex: none` und die Knöpfe eine feste Breite — **wo eine Regel Kindern Wachstum
+  gibt, wird aus dem Kreis eine Ellipse**, und `#swNeu span { flex: 1 }` traf ihn mit.
 - **Die App sagt, was sie über sich weiß** (ADR 0052): Statuslampe im Kopf (ADR 0061),
   `storage.persist()` beim Start in `try/catch`, Erinnerung an die Sicherung nach 30 Tagen
   (erst ab 60 Antworten), Tempo je Übung in der Bilanz. **`aufgabeBeginnt()` steht in den
@@ -398,6 +400,14 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   Übungen die Klasse `aufgabe`, zwei Streben in `#main` teilen den freien Raum 2:1. Das
   bringt «Prüfen» und «Weiter» in Daumenreichweite. Beide Streben haben Basis 0 und
   schrumpfen nicht — bei hohem Inhalt fallen sie weg, statt oben abzuschneiden.
+- **Drei Türen, eine setzt zurück** (ADR 0072). Das **Menü** ist der Vordereingang:
+  Es ruft `ansichtAnfang(ziel)`, und eine Ansicht mit Einstiegszustand beginnt dort an
+  ihrem Anfang — die Bilanz bei der Übersicht, die Einstellungen bei «App». Der
+  **Rückpfeil** ist die Rückseite und behält, wo man war (`setTab(…, true)`, ADR 0036).
+  Ein **gezielter Knopf** ist die Seitentür und behält sein Ziel: «Maß ändern» setzt
+  `einstReiter` und springt danach — deshalb steht das Zurücksetzen **nicht** in
+  `setTab()`. Wer eine Ansicht mit Einstiegszustand hinzufügt, trägt sie in
+  `ansichtAnfang()` nach.
 - **Der Rückweg steht in `zurueckGehen()`** — Pfeil, Randwischgeste und die
   «Zurück»-Knöpfe der Menüansichten teilen ihn sich. Die Geste schweigt, solange ein
   Blatt offen ist. Zurück heißt **dorthin, wo man herkam** (`ansichtStapel`), nicht nach

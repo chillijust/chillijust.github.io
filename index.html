@@ -921,11 +921,13 @@ button.built-word:active { transform: scale(.95); }
    wartet man auf dieselbe Sache, und der Knopf sagt über seine Farbe schon,
    worauf. Der Ring nimmt darum auf Gold die Farbe der Schrift darauf. */
 .sw-ring {
-  width: 17px; height: 17px; border-radius: 50%;
+  /* `flex: none` ist keine Zierde: Der Ring steht in einem Flex-Knopf, und wo
+     eine Regel Kindern Wachstum gibt, wird aus dem Kreis eine Ellipse. */
+  flex: none; width: 17px; height: 17px; border-radius: 50%;
   border: 2px solid var(--line); border-top-color: var(--akzent);
   animation: swDreht .8s linear infinite;
 }
-.sw-knopf.sw-laedt .sw-ring {
+.sw-laedt .sw-ring {
   border-color: rgba(255, 255, 255, .35); border-top-color: var(--akzent-ink);
 }
 @keyframes swDreht { to { transform: rotate(360deg); } }
@@ -949,10 +951,24 @@ button.built-word:active { transform: scale(.95); }
   background: var(--card); border-bottom: 1px solid var(--line);
   font-size: 14px; color: var(--text);
 }
-#swNeu span { flex: 1; }
+/* **Nur der Meldungstext, nicht jedes span** (ADR 0072). Ohne den Kindwähler
+   traf die Regel auch den Ladering — der ist ein span, steckt im Knopf
+   daneben, und `flex: 1` dehnte den 17-px-Kreis auf Knopfbreite. Sichtbar war
+   davon ein riesiger dünner Bogen quer über den Kopf. */
+#swNeu > span { flex: 1; }
 #swNeu .btn {
+  /* Die Größe wechselt nie (ADR 0062): Ein Knopf, der beim Tippen schmaler
+     wird, sieht aus wie ein Fehlgriff. Darum `flex: none` — mit `flex: 1` hätte
+     die festgehaltene Breite ohnehin nichts genützt. */
+  flex: none; min-width: 132px;
   padding: 8px 14px; font-size: 14px; min-height: 40px;
   display: inline-flex; align-items: center; justify-content: center;
+}
+/* Und beim Laden sieht die Zeile aus wie der Knopf in den Einstellungen: Beide
+   tun dasselbe, also warten sie auch gleich — bis 2.4.13 stand hier ein hohler
+   Knopf mit goldenem Bogen, dort ein goldener mit hellem Ring. */
+#swNeu .btn.sw-laedt {
+  background: var(--akzent); border-color: var(--akzent); color: var(--akzent-ink);
 }
 .sw-zu {
   flex: none; width: 36px; height: 36px; padding: 0;
@@ -1857,9 +1873,9 @@ body.melden-offen #meldeBlatt { transform: translateY(0); }
     </button>
     <div id="menuPanel" class="menupanel" role="menu" aria-label="Menü">
     <div class="menuwrap"><div class="menuinhalt">
+      <button class="menueintrag" data-ziel="einstellungen" data-symbol="regler" role="menuitem">Einstellungen</button>
       <button class="menueintrag" data-ziel="bilanz" data-symbol="bilanz" role="menuitem">Bilanz</button>
       <button class="menueintrag" data-ziel="sicherung" data-symbol="schluessel" role="menuitem">Sicherung</button>
-      <button class="menueintrag" data-ziel="einstellungen" data-symbol="regler" role="menuitem">Einstellungen</button>
       <button class="menueintrag" data-ziel="tickets" data-symbol="liste" role="menuitem">Tickets</button>
     </div></div>
     </div>
@@ -4010,7 +4026,7 @@ var APP_STAND = '2026-08-15'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.4.13T'; /* == VERSION == */
+var APP_VERSION = '2.4.14T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -5456,6 +5472,9 @@ function swHinweisBinden() {
     if (laden.dataset.laedt) return;
     laden.style.width = laden.offsetWidth + 'px';
     laden.dataset.laedt = '1';
+    // Dieselbe Gestalt **und** dieselbe Farbe wie in den Einstellungen
+    // (ADR 0072): goldener Knopf, heller Ring darauf.
+    laden.classList.add('sw-laedt');
     laden.innerHTML = '<span class="sw-ring" aria-hidden="true"></span>';
     laden.setAttribute('aria-busy', 'true');
     laden.setAttribute('aria-label', 'Lädt die neue Fassung');
@@ -7200,6 +7219,22 @@ function setTab(name, zurueck) {
   });
 }
 
+// **Der Weg durchs Menü ist der Vordereingang** (ADR 0072). Zwei Ansichten
+// merken sich, wo man zuletzt war — die Bilanz ihre Detailseite, die
+// Einstellungen ihren Reiter. Für den **Rückweg** ist das richtig: Wer aus
+// «Wörter» heraus etwas nachschlägt und umkehrt, will nach «Wörter» zurück.
+// Für den Weg durchs Menü ist es falsch: Dort fängt man an, nicht weiter. Bis
+// 2.4.13 steckte man nach einem Abstecher in «Wörter» fest, bis man den
+// Rückpfeil fand — und die Einstellungen öffneten beim zuletzt gelesenen
+// Reiter statt bei «App».
+//
+// Deshalb hier und **nicht** in `setTab()`: Ein gezielter Sprung
+// («Maß ändern» führt auf den Lernweg) ist kein Anfang, sondern ein Ziel.
+function ansichtAnfang(name) {
+  if (name === 'bilanz') { bilanzDetail = null; themenOffen = false; }
+  if (name === 'einstellungen') einstReiter = EINST_REITER[0].id;
+}
+
 function zurueckGehen() {
   if (currentTab === 'home') return;
   // Aus einer Detailansicht der Bilanz führt der Weg zunächst dorthin zurück.
@@ -7344,7 +7379,10 @@ document.getElementById('tafelKnopf').addEventListener('click', function (e) {
   renderKopf();
 });
 document.querySelectorAll('.menueintrag').forEach(function (b) {
-  b.addEventListener('click', function () { setTab(b.dataset.ziel); });
+  b.addEventListener('click', function () {
+    ansichtAnfang(b.dataset.ziel);
+    setTab(b.dataset.ziel);
+  });
 });
 // Daneben tippen schließt — aber nur, wenn offen; sonst kostet jeder Tipp auf
 // der Seite unnötig Arbeit.
