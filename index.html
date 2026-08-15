@@ -1460,6 +1460,12 @@ body.unterwegs .reiter { top: 62px; }
   display: block; margin: 12px auto 0; background: none; border: none; color: var(--ice);
   font-size: 12px; min-height: 44px; cursor: pointer; text-decoration: underline;
 }
+/* Die Kachelauswahl braucht die ganze Zeilenbreite: acht Namen passen nicht
+   neben einen Erklärtext. Also untereinander statt nebeneinander. */
+.setting.setting-breit { display: block; }
+.setting-breit .setting-text { display: block; }
+.chipwrap { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.chipwrap .chip { flex: none; padding: 9px 14px; font-size: 13px; }
 .seg { flex: none; display: flex; gap: 4px; }
 .seg .chip { min-width: 44px; padding: 10px 0; text-align: center; }
 /* Der Zähler: zwei Tasten und der Wert dazwischen. Der Wert bekommt eine feste
@@ -3923,7 +3929,7 @@ var APP_STAND = '2026-08-15'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.4.7T'; /* == VERSION == */
+var APP_VERSION = '2.4.8T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -4788,6 +4794,13 @@ function defaultSettings() {
     // selbst — dafür ist sie da. Neuer Schlüssel, weil die alte Vorgabe «aus»
     // war und die neue auch bestehende Geräte erreichen soll.
     tastaturAuto: true,
+    // **Welche Kacheln die Übersicht zeigt** (ADR 0066). Gespeichert wird, was
+    // **weg** ist, nicht was da ist: Eine neue Übung soll bei einem bestehenden
+    // Gerät von selbst auftauchen, statt still zu fehlen, weil sie in einer
+    // alten Liste nicht vorkam. Die Vorgabe ist darum die leere Liste — alles
+    // sichtbar. Steht **nicht** im Sicherungscode: Was einer auf seinem Gerät
+    // sehen will, ist kein Lernstand.
+    homeAus: [],
     // Ein Schema, nicht zwei Achsen: «Dark» ist die Vorgabe, «Classic» das
     // helle Cremeweiß, die drei Farben sind Cremetöne (ADR 0039). Neuer
     // Schlüssel, damit bestehende Geräte die Umstellung mitbekommen.
@@ -6316,14 +6329,19 @@ var homeOffen = false;
 
 // Die fünf Übungen. «Bilanz», «Einstellungen» und «Tickets» sind keine
 // Übungen — sie stehen im Menü, nicht auf Home.
-// Drei Gruppen statt sieben Kacheln in einer Reihe. Die Reihenfolge ist der
-// Lernweg: erst die Wörter, dann der Satz, dann das Freiwillige. Sieben
-// gleichrangige Kacheln sahen aus wie eine Schublade — mit Überschriften sieht
-// man, wozu jede gehört, und die Zahl der Kacheln erschreckt nicht mehr.
+// Drei Gruppen, und ihre Reihenfolge **ist** der Lernweg: erst die Zeichen,
+// dann die Wörter, dann der Satz (ADR 0066). Vorher standen «Buchstaben» und
+// «Grammatik» zusammen unter «Freiwillig» — sortiert nach *Pflicht*, nicht nach
+// *Weg*. Das widersprach dem Tutorial, das seit jeher sagt: «Buchstaben, dann
+// Lernsets, dann Tippen und Übersetzen.» Solange Zeichen unten stehen, ist
+// jedes Wort darüber nur ein Bild.
+//
+// Dass etwas freiwillig ist, sagt jetzt die Kachel selbst — dafür braucht es
+// keine eigene Schublade.
 var UEBUNG_GRUPPEN = [
-  { titel: 'Wörter', ids: ['lernsets', 'freestyle', 'tippen', 'schreibung'] },
-  { titel: 'Sätze', ids: ['uebersetzen'] },
-  { titel: 'Freiwillig', ids: ['buchstaben', 'grammatik', 'power'] }
+  { titel: 'Zeichen', ids: ['buchstaben'] },
+  { titel: 'Wörter', ids: ['lernsets', 'freestyle', 'tippen', 'schreibung', 'power'] },
+  { titel: 'Sätze', ids: ['grammatik', 'uebersetzen'] }
 ];
 var UEBUNGEN = [
   { id: 'lernsets', name: 'Lernsets', note: 'Die Wörter der nächsten Sätze, Päckchen für Päckchen.' },
@@ -6332,7 +6350,7 @@ var UEBUNGEN = [
   { id: 'schreibung', name: 'Schreibung', note: 'Warum man nicht schreibt, was man hört.' },
   { id: 'uebersetzen', name: 'Übersetzen', note: 'Ganze Sätze aus Wortkacheln bauen.' },
   { id: 'buchstaben', name: 'Buchstaben', note: 'Das kyrillische Alphabet — freiwillig.' },
-  { id: 'grammatik', name: 'Grammatik', note: 'Warum ein Wort so dasteht — Regeln statt auswendig.' },
+  { id: 'grammatik', name: 'Grammatik', note: 'Warum ein Wort so dasteht — freiwillig, Regeln statt auswendig.' },
   { id: 'power', name: 'Power-Training', note: 'Die Wörter, die zurückgefallen sind — drei auf einmal.' }
 ];
 function uebungVon(id) {
@@ -7107,49 +7125,151 @@ function zuletztGeuebt(id) {
 // aus dem Gedächtnis.
 var FORTSETZEN_FRIST = 2 * 60 * 60 * 1000;
 
+// Drei Zahlen, an denen die Leiter hängt. Sie stehen hier und nicht in den
+// Einstellungen: Das ist Didaktik, keine Vorliebe.
+//
+// `ABC_ZUERST_BIS` — bis zu so vielen gemeisterten Wörtern gehen die Zeichen
+// vor. Danach hat man den Beweis erbracht, dass man liest, und eine Ermahnung
+// wäre Bevormundung.
+var ABC_ZUERST_BIS = 40;
+// Ab so vielen überfälligen Dingen lohnt eine eigene Runde. Darunter nimmt man
+// sie nebenbei mit.
+var AUFFRISCHEN_AB = 5;
+// Vor dem zweiten Lernset erklärt Grammatik nichts, was man schon gesehen
+// hätte — dieselbe Schwelle, die das Tutorial nennt.
+var GRAMMATIK_AB_SET = 1;
+
+// **Was fehlt, geht vor** (ADR 0066). Bis 2.4.7 fragte die Empfehlung als
+// Erstes, wo man zuletzt war — und blieb dort, solange dort irgendetwas zu tun
+// war. Das war eine Auskunft über die Vergangenheit, kein Vorschlag: Wer eine
+// Stunde Freestyle gespielt hatte, bekam Freestyle, auch wenn zwölf Wörter
+// zurückgefallen waren und die Buchstaben noch nicht saßen.
+//
+// Jetzt läuft eine Leiter von oben nach unten, und **die ersten beiden Sprossen
+// sind Defizite** — etwas ist kaputtgegangen oder fehlt an der Wurzel. Sie
+// stechen die Fortsetzung. Alles darunter sind Angebote; dort gewinnt die
+// Fortsetzung, wenn man gerade dort war, denn eine Sitzung mittendrin
+// abzubrechen hilft niemandem.
+//
+// Jede Sprosse nennt ihren **Grund**. Die Karte sagt damit nicht nur, wohin,
+// sondern warum — das ist der ganze Unterschied zwischen einem Vorschlag und
+// einer Ansage.
+function empfLeiter() {
+  var stufen = [];
+
+  // 1 · Zurückgefallenes. Drei Fehlschreibungen hintereinander werfen ein Wort
+  //     zurück und schließen seinen Satz wieder (ADR 0033). Das ist der einzige
+  //     Weg, auf dem Gelerntes verlorengeht — er hat Vorrang vor allem.
+  var gefallen = ptPool().length;
+  if (gefallen >= PT_MINDEST) {
+    stufen.push({
+      ziel: 'power', dringend: true, titel: 'Zurückgeholt werden',
+      note: gefallen + ' Wörter sind zurückgefallen und blockieren ihre Sätze.'
+    });
+  }
+
+  // 2 · Die Zeichen. Solange sie nicht sitzen, ist jedes Wort nur ein Bild —
+  //     und der ganze Weg darüber wackelt. Gefragt wird aber nur, solange man
+  //     am Anfang steht: Wer längst Sätze baut, braucht keine Ermahnung mehr.
+  var abcOffen = ALPHABET.filter(function (b) { return !abcSitzt(b); }).length;
+  if (abcOffen && woerterGemeistert() < ABC_ZUERST_BIS) {
+    stufen.push({
+      ziel: 'buchstaben', dringend: true, titel: 'Erst die Zeichen',
+      note: abcOffen + ' von 33 Buchstaben sitzen noch nicht.'
+    });
+  }
+
+  // 3 · Überfälliges. Was die Auffrischfrist überschritten hat, verblasst.
+  var frisch = tippenWiederholung().length;
+  var trFrisch = trWiederholung(1).length + trWiederholung(2).length + trWiederholung(3).length;
+  if (frisch + trFrisch >= AUFFRISCHEN_AB) {
+    stufen.push({
+      ziel: frisch >= trFrisch ? 'tippen' : 'uebersetzen', titel: 'Erst auffrischen',
+      note: (frisch + trFrisch) + ' Dinge warten auf die Sicherheitsrunde.'
+    });
+  }
+
+  // 4 · Der Hauptweg: die Wörter des laufenden Sets.
+  var set = LERNSETS[aktuellesSet()];
+  var offen = set.woerter.filter(function (v) { return (state.boxes[v.id] || 0) < SATZ_STUFE; }).length;
+  if (offen) {
+    stufen.push({
+      ziel: 'lernsets', titel: 'Weiter mit Set ' + (aktuellesSet() + 1),
+      note: offen + (offen === 1 ? ' Wort' : ' Wörter') + ' bis zu ' +
+        set.saetze.length + (set.saetze.length === 1 ? ' neuen Satz' : ' neuen Sätzen') + '.'
+    });
+  }
+
+  // 5 · Die Regel vor dem Satz. Wer Sätze offen hat und noch keinen einzigen
+  //     Baustein entdeckt, versteht die Endungen nicht, die dort auf ihn
+  //     warten — dann lohnt die Grammatik zuerst.
+  var offeneSaetze = trLernen(1).length + trLernen(2).length + trLernen(3).length;
+  var regelnGesehen = Object.keys(state.gramSeen || {}).length;
+  if (offeneSaetze && !regelnGesehen && aktuellesSet() >= GRAMMATIK_AB_SET) {
+    stufen.push({
+      ziel: 'grammatik', titel: 'Warum sich Wörter ändern',
+      note: 'Deine Sätze beugen Wörter — hier steht, nach welcher Regel.'
+    });
+  }
+
+  // 6 · Die Sätze selbst.
+  if (offeneSaetze) {
+    stufen.push({
+      ziel: 'uebersetzen', titel: 'Sätze bauen',
+      note: offeneSaetze + (offeneSaetze === 1 ? ' Satz wartet' : ' Sätze warten') + ' auf dich.'
+    });
+  }
+
+  // 7 · Schreiben, wo Wörter fast sitzen.
+  if (tippenLernen().length) {
+    stufen.push({
+      ziel: 'tippen', titel: 'Schreiben üben',
+      note: tippenLernen().length + ' Wörter sitzen fast.'
+    });
+  }
+
+  // 8 · Und wenn alles erledigt ist, die Kür.
+  stufen.push({
+    ziel: 'freestyle', titel: 'Freies Training',
+    note: 'Alles Fällige ist erledigt — Zeit für eine Kür.'
+  });
+  return stufen;
+}
+
 function empfehlung() {
+  var stufen = empfLeiter().filter(function (st) {
+    // Eine Übung, die nichts hergibt, wird nie empfohlen — und eine, die der
+    // Nutzer auf der Übersicht ausgeblendet hat, auch nicht: Ihm etwas
+    // vorzuschlagen, das er weggeräumt hat, wäre Widerspruch statt Rat.
+    var stand = uebungsStand(st.ziel);
+    return !stand.gesperrt && !stand.leer && kachelSichtbar(st.ziel);
+  });
+  if (!stufen.length) {
+    return { ziel: 'freestyle', titel: 'Freies Training',
+      note: 'Alles Fällige ist erledigt — Zeit für eine Kür.' };
+  }
+  var oben = stufen[0];
+
+  // **Die Fortsetzung sticht nur die Angebote, nicht die Defizite.** Wer vor
+  // fünf Minuten mitten in einer Übung war, soll dorthin zurück — aber nicht,
+  // wenn inzwischen etwas zurückgefallen ist.
   var z = state.zuletzt;
-  if (z && Date.now() - z.zeit < FORTSETZEN_FRIST && UEBUNG_NAME[z.uebung]) {
+  if (!oben.dringend && z && Date.now() - z.zeit < FORTSETZEN_FRIST && UEBUNG_NAME[z.uebung]) {
     var stand = uebungsStand(z.uebung);
-    // «Weiter mit …» nur, wenn dort auch etwas wartet. Wer die Buchstaben
-    // gerade fertig gemeistert hat, wurde sonst dorthin zurückgeschickt — in
-    // einen Leerzustand, der ihn wieder nach Home schickt.
-    if (!stand.gesperrt && !stand.leer) {
+    // Gefragt wird die Übung selbst, nicht die Leiter: Auch was dort nicht
+    // vorkommt — «Buchstaben» für den, der längst Sätze baut — darf man
+    // fortsetzen. Nur leer oder gesperrt darf es nicht sein.
+    if (!stand.gesperrt && !stand.leer && kachelSichtbar(z.uebung)) {
+      var aufLeiter = null;
+      stufen.forEach(function (st) { if (st.ziel === z.uebung && !aufLeiter) aufLeiter = st; });
       return {
         ziel: z.uebung,
         titel: 'Weiter mit «' + UEBUNG_NAME[z.uebung] + '»',
-        note: stand.text + ' · Du warst gerade dort.'
+        note: aufLeiter ? aufLeiter.note : stand.text + ' · Du warst gerade dort.'
       };
     }
   }
-  var set = LERNSETS[aktuellesSet()];
-  var offen = set.woerter.filter(function (v) { return (state.boxes[v.id] || 0) < SATZ_STUFE; }).length;
-  var frisch = tippenWiederholung().length;
-  var trFrisch = trWiederholung(1).length + trWiederholung(2).length + trWiederholung(3).length;
-
-  if (frisch + trFrisch >= 5) {
-    return {
-      ziel: frisch >= trFrisch ? 'tippen' : 'uebersetzen',
-      titel: 'Erst auffrischen',
-      note: (frisch + trFrisch) + ' Dinge warten auf die Sicherheitsrunde.'
-    };
-  }
-  if (offen) {
-    return {
-      ziel: 'lernsets',
-      titel: 'Weiter mit Set ' + (aktuellesSet() + 1),
-      note: offen + (offen === 1 ? ' Wort' : ' Wörter') + ' bis zu ' +
-        set.saetze.length + (set.saetze.length === 1 ? ' neuen Satz' : ' neuen Sätzen') + '.'
-    };
-  }
-  var offeneSaetze = trLernen(1).length + trLernen(2).length + trLernen(3).length;
-  if (offeneSaetze) {
-    return { ziel: 'uebersetzen', titel: 'Sätze bauen', note: offeneSaetze + ' Sätze warten auf dich.' };
-  }
-  if (tippenLernen().length) {
-    return { ziel: 'tippen', titel: 'Schreiben üben', note: tippenLernen().length + ' Wörter sitzen fast.' };
-  }
-  return { ziel: 'freestyle', titel: 'Freies Training', note: 'Alles Fällige ist erledigt — Zeit für eine Kür.' };
+  return oben;
 }
 
 function renderHome() {
@@ -7184,9 +7304,13 @@ function renderHome() {
     '<span>Alle Übungen</span>' + ICON.winkelRunter + '</button>' +
     '<div class="alle-klapp" id="homeAlle"' + (homeOffen ? '' : ' hidden') + '>';
   UEBUNG_GRUPPEN.forEach(function (g) {
+    var sichtbar = g.ids.filter(kachelSichtbar);
+    // Eine Gruppe, aus der alles ausgeräumt ist, hat auch keine Überschrift
+    // verdient — sonst stünde dort ein Titel über nichts.
+    if (!sichtbar.length) return;
     html += '<p class="gruppe-titel">' + esc(g.titel) + '</p>' +
-      '<div class="kachelfeld' + (g.ids.length === 1 ? ' breit' : '') + '">' +
-      g.ids.map(kachelHtml).join('') + '</div>';
+      '<div class="kachelfeld' + (sichtbar.length === 1 ? ' breit' : '') + '">' +
+      sichtbar.map(kachelHtml).join('') + '</div>';
   });
   html += '</div>';
 
@@ -7206,6 +7330,17 @@ function renderHome() {
   main.querySelectorAll('[data-uebung]').forEach(function (b) {
     b.addEventListener('click', function () { setTab(b.dataset.uebung); });
   });
+}
+
+// **Zeigt die Übersicht diese Kachel?** Der Nutzer darf ausräumen, was er nicht
+// braucht (ADR 0066) — aber **nicht vor dem Scheinwerfer**: Solange das Tutorial
+// läuft, stehen alle acht da. Acht seiner dreizehn Schritte zeigen auf je eine
+// Kachel, und ein Wähler, der ins Leere zeigt, ist ein stiller Fehler
+// (ADR 0051).
+function kachelSichtbar(id) {
+  if (tutOffen) return true;
+  var aus = state.settings.homeAus;
+  return !(aus && aus.indexOf(id) !== -1);
 }
 
 // Eine Kachel — dieselbe Gestalt oben wie unten. Sie steht genau einmal im
@@ -7234,7 +7369,7 @@ function homeFaellig(ausser) {
   var rest = [];
   UEBUNG_GRUPPEN.forEach(function (g) {
     g.ids.forEach(function (id) {
-      if (id === ausser) return;
+      if (id === ausser || !kachelSichtbar(id)) return;
       var st = uebungsStand(id);
       if (st.gesperrt || st.leer) return;
       (st.warm ? warm : rest).push(id);
@@ -9145,8 +9280,20 @@ function abcFrageBauen() {
   if (kandidaten.length < 3) {
     kandidaten = ALPHABET.filter(function (x) { return x[1] !== b[1] && x[2] !== b[2]; });
   }
-  var optionen = shuffle(kandidaten).slice(0, 3).concat([b]);
-  abcQ = { b: b, modus: modus, options: shuffle(optionen) };
+  // **Kein Laut zweimal unter den Antworten.** Die Kandidaten sind schon gegen
+  // die *richtige* Antwort abgeglichen, aber nicht untereinander — und vier
+  // Buchstaben teilen sich zwei Laute: ж und ш beide «sch», з und с beide «s».
+  // Standen zwei davon nebeneinander, gab es zwei gleich beschriftete Antworten,
+  // und die Frage war nicht mehr zu beantworten. Passierte selten, darum fiel
+  // es nur ab und zu auf (ADR 0066).
+  var genommen = [b[2]];
+  var ablenker = [];
+  shuffle(kandidaten).forEach(function (x) {
+    if (ablenker.length >= 3 || genommen.indexOf(x[2]) !== -1) return;
+    genommen.push(x[2]);
+    ablenker.push(x);
+  });
+  abcQ = { b: b, modus: modus, options: shuffle(ablenker.concat([b])) };
 }
 
 // Ist genug gewählt oder gelegt, um abgeben zu dürfen?
@@ -11945,6 +12092,30 @@ function renderEinstellungen() {
       '><span class="knob"></span></button></div>';
   }
 
+  // **Welche Kacheln die Übersicht zeigt** (ADR 0066). Acht Chips, jeder ein
+  // Schalter. Gespeichert wird das Ausgeräumte (`homeAus`), nicht das
+  // Behaltene — so taucht eine neue Übung bei einem bestehenden Gerät von
+  // selbst auf, statt still zu fehlen.
+  function kachelWahl() {
+    var chips = '';
+    UEBUNG_GRUPPEN.forEach(function (g) {
+      g.ids.forEach(function (id) {
+        var u = uebungVon(id);
+        if (!u) return;
+        var an = kachelSichtbar(id);
+        chips += '<button class="chip' + (an ? ' active' : '') +
+          '" role="switch" aria-checked="' + (an ? 'true' : 'false') +
+          '" data-kachel="' + id + '">' + esc(u.name) + '</button>';
+      });
+    });
+    return '<div class="setting setting-breit"><span class="setting-text">' +
+      '<span class="setting-title">Kacheln auf der Übersicht</span>' +
+      '<span class="setting-note">Was du hier abwählst, verschwindet aus der Übersicht ' +
+      'und wird auch nicht mehr vorgeschlagen. Die Übung bleibt, sie steht nur nicht ' +
+      'mehr im Weg. Während des Tutorials sind alle zu sehen.</span></span>' +
+      '<div class="chipwrap kachelwahl">' + chips + '</div></div>';
+  }
+
   // Auswahl aus mehreren Werten (Leitner-Stufe) als Chip-Reihe.
   function wahl(key, titel, hinweis, werte) {
     var html = '<div class="setting"><span class="setting-text">' +
@@ -12046,6 +12217,7 @@ function renderEinstellungen() {
       'Aus: Du holst sie bei Bedarf. Wo Deutsch gefragt ist, kommt sie nie — dort ' +
       'schreibt die Gerätetastatur.') + '';
   teile.darstellung =
+    kachelWahl() +
     wahlText('schema', 'Farbschema',
       '«Dark» ist die Vorgabe, «Classic» das helle Cremeweiß. Grün, Blau und Rosa ' +
       'sind helle Cremetöne. Schrift und Signalfarben bleiben in jedem Schema gleich.',
@@ -12129,6 +12301,17 @@ function renderEinstellungen() {
     b.addEventListener('click', function () {
       var key = b.dataset.set;
       state.settings[key] = !state.settings[key];
+      save();
+      renderEinstellungen();
+    });
+  });
+  main.querySelectorAll('[data-kachel]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var id = b.dataset.kachel;
+      var aus = state.settings.homeAus.slice();
+      var i = aus.indexOf(id);
+      if (i === -1) aus.push(id); else aus.splice(i, 1);
+      state.settings.homeAus = aus;
       save();
       renderEinstellungen();
     });

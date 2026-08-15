@@ -77,8 +77,24 @@ try {
   pruefe('C2 vier Antworten', alle('[data-abcopt]').length === 4);
   pruefe('C3 die richtige ist dabei',
     abcQ.options.some(function (o) { return o[1] === abcQ.b[1]; }));
+  // **Und zwar bei jeder Frage, nicht bei dieser einen.** Vier Buchstaben teilen
+  // sich zwei Laute (ж/ш «sch», з/с «s»); standen zwei davon nebeneinander, gab
+  // es zwei gleich beschriftete Antworten. Das passierte selten genug, dass die
+  // Prüfung darüber nur ab und zu rot wurde — eine flatterhafte Prüfung ist eine
+  // schlechte, also fragt sie jetzt hundert Fragen statt einer.
   pruefe('C4 keine doppelten Laute in den Antworten',
     new Set(abcQ.options.map(function (o) { return o[2]; })).size === 4);
+  var doppelt = null;
+  for (var dv = 0; dv < 100 && !doppelt; dv++) {
+    abcQ = null;
+    renderBuchstaben();
+    if (!abcQ || !abcQ.options) continue;
+    var laute = abcQ.options.map(function (o) { return o[2]; });
+    if (new Set(laute).size !== laute.length) doppelt = abcQ.b[1] + ': ' + laute.join();
+  }
+  pruefe('C4b auch in hundert weiteren Fragen nicht', !doppelt, doppelt || '');
+  abcQ = null;
+  renderBuchstaben();
   pruefe('C5 gefragt wird das Zeichen', q('.word').textContent.indexOf(abcQ.b[0]) === 0,
     q('.word').textContent);
   var richtig = abcQ.options.map(function (o) { return o[1]; }).indexOf(abcQ.b[1]);
@@ -126,9 +142,12 @@ try {
 
   // G · Home und Filter
   setTab('home');
-  pruefe('G1 sechste Kachel auf Home ist «Buchstaben»',
+  // **Die Reihenfolge ist der Lernweg** (ADR 0066): Zeichen, Wörter, Sätze.
+  // «Buchstaben» steht darum vorn, nicht hinten unter «Freiwillig» — das
+  // widersprach dem Tutorial, das seit jeher mit ihnen anfängt.
+  pruefe('G1 «Buchstaben» steht ganz vorn',
     alle('#homeAlle [data-uebung]').map(function (b) { return b.dataset.uebung; }).join(',') ===
-    'lernsets,freestyle,tippen,schreibung,uebersetzen,buchstaben,grammatik,power',
+    'buchstaben,lernsets,freestyle,tippen,schreibung,power,grammatik,uebersetzen',
     alle('#homeAlle [data-uebung]').map(function (b) { return b.dataset.uebung; }).join(','));
   // **Nach Namen fragen, nicht nach Platz**: Die sechste Kachel war eine
   // Position, keine Aussage — seit die Übersicht oben eine Auswahl trägt,

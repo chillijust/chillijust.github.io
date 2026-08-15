@@ -17,7 +17,7 @@ try {
   // ist, und das wechselt mit dem Lernstand (ADR 0065).
   var kacheln = alle('#homeAlle [data-uebung]').map(function (b) { return b.dataset.uebung; }).join(',');
   pruefe('A1 Reihenfolge der Übungen',
-    kacheln === 'lernsets,freestyle,tippen,schreibung,uebersetzen,buchstaben,grammatik,power', kacheln);
+    kacheln === 'buchstaben,lernsets,freestyle,tippen,schreibung,power,grammatik,uebersetzen', kacheln);
 
   // B · Lernsets statt Päckchen
   state.boxes = {}; state.lastSeen = {};

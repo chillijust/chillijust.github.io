@@ -21,7 +21,7 @@ try {
   // «#homeAlle».
   var kacheln = alle('#homeAlle [data-uebung]').map(function (b) { return b.dataset.uebung; }).join(',');
   pruefe('A1 sieben Übungen auf Home',
-    kacheln === 'lernsets,freestyle,tippen,schreibung,uebersetzen,buchstaben,grammatik,power', kacheln);
+    kacheln === 'buchstaben,lernsets,freestyle,tippen,schreibung,power,grammatik,uebersetzen', kacheln);
   pruefe('A2 App heißt Chillingo', q('h1').textContent.indexOf('Chillingo') === 0 &&
     document.title.indexOf('Chillingo') === 0);
   pruefe('A3 Doppeltipp-Zoom aus',
@@ -235,6 +235,105 @@ try {
     q('#tutLoch').getBoundingClientRect().width > 20,
     q('#tutLoch').getBoundingClientRect().width.toFixed(0));
   tutEnde();
+  ansichtenZuruecksetzen();
+
+
+  // ── Y · Die Empfehlung ist eine Leiter (ADR 0066) ────────
+  // Sie fragte als Erstes, wo man zuletzt war — eine Auskunft über die
+  // Vergangenheit, kein Vorschlag. Jetzt stehen oben die Defizite.
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  // **Ein Defizit sticht die Fortsetzung.** Drei zurückgefallene Wörter
+  // blockieren ihre Sätze — dorthin, auch wenn man gerade woanders war.
+  ALL_VOCAB.forEach(function (v) { state.boxes[v.id] = BOX_MAX; });
+  ALPHABET.forEach(function (b) { state.abcBox[b[1]] = BOX_MAX; });
+  var drei = ALL_VOCAB.slice(0, PT_MINDEST);
+  drei.forEach(function (v) {
+    state.boxes[v.id] = SATZ_STUFE - 1;
+    state.patzer[v.id] = Date.now();
+  });
+  zuletztGeuebt('freestyle');
+  var e = empfehlung();
+  pruefe('Y1 Zurückgefallenes sticht die Fortsetzung', e.ziel === 'power',
+    e.ziel + ' — ' + e.titel);
+  pruefe('Y2 und sagt, warum', e.note.indexOf('zurückgefallen') !== -1, e.note);
+
+  // **Die Zeichen gehen vor, solange man am Anfang steht.**
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  zuletztGeuebt('freestyle');
+  pruefe('Y3 am Anfang zuerst die Zeichen', empfehlung().ziel === 'buchstaben',
+    empfehlung().ziel + ' — ' + empfehlung().titel);
+  // Wer längst liest, bekommt keine Ermahnung mehr: Dieselbe Lage, aber mit
+  // Wortschatz im Rücken.
+  ALL_VOCAB.slice(0, ABC_ZUERST_BIS + 5).forEach(function (v) { state.boxes[v.id] = BOX_MAX; });
+  pruefe('Y4 mit Wortschatz im Rücken nicht mehr',
+    empfehlung().ziel !== 'buchstaben', empfehlung().ziel);
+
+  // **Unterhalb der Defizite gewinnt die Fortsetzung.**
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  ALPHABET.forEach(function (b) { state.abcBox[b[1]] = BOX_MAX; });
+  zuletztGeuebt('freestyle');
+  var f = empfehlung();
+  pruefe('Y5 ohne Defizit führt sie zurück, wo man war', f.ziel === 'freestyle',
+    f.ziel + ' — ' + f.titel);
+  pruefe('Y6 und sagt es auch', f.titel.indexOf('Weiter mit') === 0, f.titel);
+  // Jede Sprosse nennt einen Grund — eine leere Zeile wäre eine Ansage.
+  pruefe('Y7 jede Empfehlung nennt einen Grund',
+    empfLeiter().every(function (st) { return st.note && st.note.length > 8 && st.titel; }),
+    empfLeiter().map(function (st) { return st.titel; }).join(' · '));
+
+  // ── X · Die Kacheln sind wählbar (ADR 0066) ──────────────
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  setTab('home');
+  pruefe('X1 die Vorgabe zeigt alles', state.settings.homeAus.length === 0 &&
+    alle('#homeAlle [data-uebung]').length === 8);
+  state.settings.homeAus = ['freestyle', 'grammatik'];
+  renderHome();
+  pruefe('X2 Abgewähltes verschwindet', alle('#homeAlle [data-uebung]').length === 6 &&
+    !q('#homeAlle [data-uebung="freestyle"]'));
+  pruefe('X3 auch aus dem Fälligen',
+    !q('#main [data-uebung="grammatik"]'));
+  // Eine Gruppe, aus der alles weg ist, bekommt keine Überschrift über nichts.
+  state.settings.homeAus = ['buchstaben'];
+  renderHome();
+  pruefe('X4 eine leere Gruppe hat keine Überschrift',
+    alle('#homeAlle .gruppe-titel').map(function (p) { return p.textContent; }).indexOf('Zeichen') === -1,
+    alle('#homeAlle .gruppe-titel').map(function (p) { return p.textContent; }).join());
+  // **Und nichts Ausgeräumtes wird vorgeschlagen** — das wäre Widerspruch
+  // statt Rat.
+  pruefe('X5 Ausgeräumtes wird nicht empfohlen', empfehlung().ziel !== 'buchstaben',
+    empfehlung().ziel);
+  // **Vor dem Scheinwerfer gilt das nicht:** Acht Schritte zeigen auf je eine
+  // Kachel, und ein Wähler ins Leere ist ein stiller Fehler.
+  tutStarten(false);
+  renderHome();
+  pruefe('X6 im Tutorial stehen alle acht da',
+    alle('#homeAlle [data-uebung]').length === 8 && !!q('[data-uebung="buchstaben"]'));
+  tutEnde();
+  // Der Schalter steht in den Einstellungen und schaltet wirklich.
+  state.settings.homeAus = [];
+  einstReiter = 'darstellung';
+  setTab('einstellungen');
+  pruefe('X7 es gibt acht Schalter', alle('[data-kachel]').length === 8,
+    String(alle('[data-kachel]').length));
+  pruefe('X8 alle stehen auf an',
+    alle('[data-kachel]').every(function (b) { return b.getAttribute('aria-checked') === 'true'; }));
+  q('[data-kachel="tippen"]').click();
+  pruefe('X9 ein Tipp räumt sie weg', state.settings.homeAus.indexOf('tippen') !== -1,
+    state.settings.homeAus.join());
+  pruefe('X10 und der Schalter sagt es',
+    q('[data-kachel="tippen"]').getAttribute('aria-checked') === 'false');
+  q('[data-kachel="tippen"]').click();
+  pruefe('X11 der nächste holt sie zurück', state.settings.homeAus.length === 0);
+  // Sie gehört zum Gerät, nicht zum Lernstand.
+  state.settings.homeAus = ['tippen'];
+  pruefe('X12 sie steht nicht im Sicherungscode',
+    (decodeBackup(encodeBackup()).settings.homeAus || []).length === 0,
+    JSON.stringify((decodeBackup(encodeBackup()).settings || {}).homeAus));
+  state = defaultState();
   ansichtenZuruecksetzen();
 
 } catch (e) {

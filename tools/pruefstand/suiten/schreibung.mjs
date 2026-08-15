@@ -282,9 +282,11 @@ try {
   state = defaultState();
   ansichtenZuruecksetzen();
   setTab('home');
+  // Sie steht weiter bei den Wörtern und hinter «Tippen» — die Gruppe beginnt
+  // seit ADR 0066 nur eine Stelle später, weil «Zeichen» davor steht.
   pruefe('G1 die Kachel steht bei den Wörtern, hinter «Tippen»',
-    alle('#homeAlle [data-uebung]').map(function (b) { return b.dataset.uebung; }).slice(0, 4).join() ===
-    'lernsets,freestyle,tippen,schreibung',
+    alle('#homeAlle [data-uebung]').map(function (b) { return b.dataset.uebung; }).slice(0, 5).join() ===
+    'buchstaben,lernsets,freestyle,tippen,schreibung',
     alle('#homeAlle [data-uebung]').map(function (b) { return b.dataset.uebung; }).join());
   pruefe('G2 sie nennt die neue Regel beim Namen',
     q('#homeAlle [data-uebung="schreibung"] .kachel-stand').textContent.indexOf(ORTHO[0].name) !== -1,

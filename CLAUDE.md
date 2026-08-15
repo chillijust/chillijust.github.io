@@ -16,14 +16,15 @@ https://chillijust.github.io/. Zielgerät: iPhone 15 Pro Max (iOS 26.5.2), insta
 „Zum Home-Bildschirm" als PWA im Vollbild.
 
 Einstieg ist **Home**: Empfehlung plus eine Kachel je Übung. Der Begriff ist **Übung**,
-nicht «Rubrik». In dieser Reihenfolge:
+nicht «Rubrik». Die Reihenfolge **ist der Lernweg** — Zeichen, Wörter, Sätze (ADR 0066).
+**Buchstaben** steht darum vorn (das kyrillische Alphabet — freiwillig, eigener
+Lernstand, zählt nicht in Serie und Fortschritt; Einstieg ist das Üben, die Tafel liegt
+hinter einem eigenen Knopf), dann folgen:
 **Lernsets** (zielgerichtet: die Wörter der nächsten Sätze, schaltet «Übersetzen» frei),
 **Freestyle** (freies Vokabeltraining nach Thema, ohne Sperren),
 **Tippen** (Eingabequiz mit kyrillischer Tastatur, ab Leitner-Stufe 3),
 **Übersetzen** (nur Sätze, deren Wörter sitzen; Form und Richtung steigern sich mit der
 Stufe — Kacheln vor Tippen, RU→DE vor DE→RU),
-**Buchstaben** (das kyrillische Alphabet — freiwillig, eigener Lernstand, zählt nicht in
-Serie und Fortschritt; Einstieg ist das Üben, die Tafel liegt hinter einem eigenen Knopf),
 **Schreibung** (warum man nicht schreibt, was man hört — eine Regel je Karteikarte,
 zählt mit),
 **Grammatik** (warum ein Wort so dasteht — freiwillig, entdecken statt belehren),
@@ -128,7 +129,12 @@ zweite Flug bricht den ersten ab. Ein runder Knopf, in den sie springt, braucht
 - **Die Übersicht zeigt einen Weg, nicht das Angebot** (ADR 0065). Drei Zonen: die
   Empfehlung, darunter **höchstens drei** fällige Kacheln (`homeFaellig()` — ohne
   `gesperrt`, ohne `leer`, ohne das Empfohlene selbst), darunter «Alle Übungen» mit den
-  drei Gruppen Wörter · Sätze · Freiwillig (ADR 0045). **Alle acht stehen immer im Baum**,
+  drei Gruppen **Zeichen · Wörter · Sätze** — und ihre Reihenfolge **ist** der Lernweg
+  (ADR 0066); «Freiwillig» als Gruppe gibt es nicht mehr, das sagt die Kachel selbst.
+  **Der Nutzer räumt aus, was er nicht braucht** (`settings.homeAus`, Einstellungen →
+  Darstellung): gespeichert wird das **Weggeräumte**, damit eine neue Übung von selbst
+  auftaucht; sie steht **nicht** im Sicherungscode. `kachelSichtbar()` fragt zuerst
+  `tutOffen` — vor dem Scheinwerfer stehen immer alle acht. **Alle acht stehen immer im Baum**,
   nur zugeklappt: Acht Tutorial-Schritte zeigen auf je eine Kachel, und der Scheinwerfer
   klappt selbst auf, wenn sein Ziel nicht **sichtbar** ist (`getClientRects()`, nicht
   `querySelector` — ein `[hidden]` findet der sehr wohl). `kachelHtml()` steht einmal für
@@ -499,6 +505,9 @@ gibt es den Skill `ticket`.
 - **Wort umbenennen** setzt dessen Leitner-Stand zurück — die Kennung ist das russische
   Wort. Themen umzubenennen ist dagegen folgenlos. **Einen Satz umzuformulieren** setzt
   genauso seinen Stand in `satzBox`/`satzSeen` zurück; die Kennung ist der russische Satz.
+- **Kein Laut steht zweimal unter den Antworten** (ADR 0066). Vier Buchstaben teilen
+  sich zwei Laute — ж/ш «sch», з/с «s». Die Ablenker werden gegen die richtige Antwort
+  **und untereinander** abgeglichen; sonst stehen zwei gleich beschriftete Antworten da.
 - **Erkennen ist nicht unterscheiden** (ADR 0058). «Buchstaben» hat drei schärfende
   Formen: **Minimalpaar** (aus `data/paare.json`, zwei Möglichkeiten, gefragt wird mit dem
   **ersten Satz** der Merkhilfe), **Silbenleiter** (hart/weich, die richtige Silbe trägt
@@ -517,7 +526,11 @@ gibt es den Skill `ticket`.
   auch beim Auffrischen auslösen lässt, macht aus der Meldung Rauschen.
 - **Eine Übung ohne Arbeit wird nie empfohlen.** `uebungsStand()` gibt `gesperrt` («geht
   noch nicht») und `leer` («gerade nichts zu tun») zurück; `empfehlung()` überspringt
-  beide. Sonst schickt «Weiter mit …» genau im Augenblick des Erfolgs in eine Schleife.
+  beide. **Die Empfehlung ist eine Leiter** (ADR 0066, `empfLeiter()`): Die ersten beiden
+  Sprossen sind **Defizite** (Zurückgefallenes, dann die Zeichen) und tragen `dringend` —
+  sie stechen die Fortsetzung. Darunter gewinnt «Weiter mit …», wenn man vor weniger als
+  `FORTSETZEN_FRIST` dort war; gefragt wird dabei **die Übung**, nicht die Leiter. **Jede
+  Sprosse nennt ihren Grund** — sonst ist es eine Ansage, kein Vorschlag. Sonst schickt «Weiter mit …» genau im Augenblick des Erfolgs in eine Schleife.
 - **Home zählt über alle Satzstufen, «Übersetzen» zeigt eine.** Wer seine Stufe fertig
   hat, muss von dort zur nächsten finden (`trStufeMitArbeit()`) — sonst widersprechen
   sich Kachel und Übung. Angeboten, nicht genommen: Die Stufe ist eine Wahl des Nutzers.

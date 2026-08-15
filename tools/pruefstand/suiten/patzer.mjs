@@ -158,14 +158,26 @@ try {
   // I · Fortsetzen
   state = defaultState();
   ansichtenZuruecksetzen();
-  pruefe('I1 ohne Vorgeschichte die alte Empfehlung', empfehlung().ziel === 'lernsets');
+  // **Wer ganz frisch anfängt, wird zu den Zeichen geschickt** (ADR 0066):
+  // Solange keiner der 33 Buchstaben sitzt, ist jedes Wort darüber nur ein
+  // Bild. Bis 2.4.7 stand hier «Lernsets» — das war der Hauptweg, aber nicht
+  // der Anfang, und es widersprach dem Tutorial.
+  pruefe('I1 ohne Vorgeschichte zuerst die Zeichen', empfehlung().ziel === 'buchstaben',
+    empfehlung().ziel + ' — ' + empfehlung().titel);
+  // Und sobald die Zeichen sitzen, führt sie auf den Hauptweg.
+  ALPHABET.forEach(function (b) { state.abcBox[b[1]] = SATZ_STUFE; });
+  pruefe('I1b sitzen die Zeichen, geht es zu den Wörtern',
+    empfehlung().ziel === 'lernsets', empfehlung().ziel);
   ALL_VOCAB.forEach(function (v) { state.boxes[v.id] = BOX_MAX; });
   zuletztGeuebt('uebersetzen');
   var e = empfehlung();
   pruefe('I2 danach führt sie dorthin zurück', e.ziel === 'uebersetzen', e.ziel);
   pruefe('I3 und sagt das auch', e.titel.indexOf('Weiter mit') === 0 &&
     e.titel.indexOf('Übersetzen') !== -1, e.titel);
-  pruefe('I4 mit dem Stand der Übung', e.note.indexOf('Du warst gerade dort') !== -1, e.note);
+  // Der Untertitel sagt jetzt, **was dort wartet**, statt zu wiederholen, was
+  // die Überschrift schon sagt: «Weiter mit …» trägt die Fortsetzung, die
+  // Zeile darunter den Grund (ADR 0066).
+  pruefe('I4 mit dem Stand der Übung', /\d/.test(e.note) && e.note.length > 8, e.note);
   state.zuletzt.zeit = Date.now() - FORTSETZEN_FRIST - 1000;
   pruefe('I5 nach der Frist wieder der Lernstand', empfehlung().ziel !== 'uebersetzen',
     empfehlung().ziel);
