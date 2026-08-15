@@ -224,8 +224,8 @@ try {
   // «Power-Training» ist am Anfang gesperrt und steht darum nie in der kurzen
   // Auswahl oben. Beim ersten Schritt wäre der Beweis wertlos — «Buchstaben»
   // ist frisch fällig und steht ohnehin oben.
-  for (var ts = 0; ts < TUTORIAL.length; ts++) {
-    if (TUTORIAL[ts][1].indexOf('power') !== -1) tutSchritt = ts;
+  for (var ts = 0; ts < TUTORIALS.home.length; ts++) {
+    if (TUTORIALS.home[ts][1].indexOf('power') !== -1) tutSchritt = ts;
   }
   pruefe('Z12a das Ziel liegt wirklich im zugeklappten Teil',
     homeOffen === false && !q('#main [data-uebung="power"]:not(#homeAlle *)'));

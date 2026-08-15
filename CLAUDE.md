@@ -187,6 +187,16 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   beide Listen. Eine neue Übung braucht einen Eintrag in `UEBUNG_GRUPPEN` **und** in
   `UEBUNGEN`. **Eine Prüfung fragt eine Kachel nach Namen**, nie nach Platz — dieselbe
   Übung steht jetzt zweimal im Baum.
+- **Vier Tutorial-Spuren, ein Mechanismus** (ADR 0079). `data/tutorial.json` ist eine
+  Sammlung: `home` (13 Schritte) plus `lernsets`, `tippen`, `uebersetzen` (je 5). Alles
+  liest `tutSchritte()`, gestartet wird mit `tutStarten(spur)`. Die Frage davor steht je
+  Spur in `TUT_FRAGE`. **Angeboten wird beim ersten Betreten** — aber nur, wenn das Ziel
+  des ersten Schritts sichtbar ist (**ein Scheinwerfer ohne Bühne wartet**) und das große
+  Tutorial schon lief. Der Merker `state.tutUebung` fällt beim **Fragen**, nicht beim
+  Durchlaufen; zurückholen führt der Trichter. Die Ziele sind **je Spur** eindeutig, und
+  jeder Schritt einer Übungsspur trägt ihren eigenen Ort. **Wer eine Suite schreibt, die
+  eine Übung betritt, stellt die Spuren still** — sonst steht die Chili in der
+  Tutorial-Blase statt in der Ansicht.
 - **Das Tutorial ist ein Scheinwerfer** (ADR 0051) — ein durchsichtiges `#tutLoch` mit
   `box-shadow: 0 0 0 9999px`, das die echte Oberfläche anleuchtet. Die zwölf Schritte
   sind **Inhalt** und stehen in `data/tutorial.json` (`[Ort, Ziel, Text]`); ein Schritt

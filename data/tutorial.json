@@ -1,15 +1,38 @@
-[
-  ["home", "[data-uebung=\"buchstaben\"]", "Fang hier an. Russisch schreibt mit anderen Zeichen — solange du sie nicht lesen kannst, ist jedes Wort nur ein Bild. Es sind 33, und viele kennst du fast schon: Р ist ein R, С ein S."],
-  ["home", "[data-uebung=\"lernsets\"]", "Dann hierher. Lernsets geben dir zwölf Wörter auf einmal — nicht wahllose, sondern genau die, die du für die nächsten Sätze brauchst. Das ist dein Hauptweg durch die App."],
-  ["home", "[data-uebung=\"tippen\"]", "Sobald ein Wort halbwegs sitzt, taucht es hier auf. Tippen ist die ehrlichste Übung: keine Auswahl, du schreibst selbst. Die kyrillische Tastatur kommt von allein."],
-  ["home", "[data-uebung=\"uebersetzen\"]", "Sitzen alle Wörter eines Satzes, geht er hier auf. Erst legst du ihn aus Kacheln, später schreibst du ihn — und erst Russisch verstehen, dann Russisch bauen."],
-  ["home", "[data-uebung=\"grammatik\"]", "Wenn dir auffällt, dass sich Wörter verändern: книга wird zu книгу, sobald man sie liest. Hier steht, warum. Freiwillig — aber ab dem zweiten Lernset lohnt es sich."],
-  ["home", "[data-uebung=\"schreibung\"]", "Russisch schreibt nicht, was es spricht: молоко klingt «malakó» und steht doch mit zwei о da. Hier lernst du die acht Regeln, an denen das liegt — mit der Probe, die sie auflöst."],
-  ["home", "[data-uebung=\"freestyle\"]", "Zwischendurch, wenn du einfach üben willst: der ganze Wortschatz nach Thema, ohne Sperren und ohne Reihenfolge."],
-  ["home", "[data-uebung=\"power\"]", "Schreibst du ein Wort dreimal hintereinander falsch, rutscht es zurück und schließt seinen Satz wieder. Hier holst du es heraus — drei auf einmal."],
-  ["home", "#homeEmpf", "Kurz gesagt: Buchstaben, dann Lernsets, dann Tippen und Übersetzen. Merken musst du dir das nicht — hier oben steht immer, was als Nächstes dran ist."],
-  ["home", ".kopf-rail", "Der Balken zeigt, wie viele Wörter endgültig sitzen. Ein Wort braucht dafür vier richtige Antworten an verschiedenen Tagen. Darunter läuft deine Serie mit."],
-  ["lernsets", "#filterKnopf", "In jeder Übung sitzt oben dieser Trichter. Dahinter wählst du, woraus geübt wird: der Reihe nach, nur Wiederholungen, oder alles auf einmal."],
-  ["home", "#menuKnopf", "Hinter den drei Strichen liegen Bilanz, Sicherung, Einstellungen und Tickets. Die Sicherung ist wichtig — dein Fortschritt liegt nur auf diesem Gerät."],
-  ["home", "#tutKnopf", "Diesen Knopf findest du immer auf der Übersicht — ab jetzt ganz unten. Er zeigt dir alles noch einmal, sooft du willst. Los geht es: Die Buchstaben warten."]
-]
+{
+  "home": [
+    ["home", "[data-uebung=\"buchstaben\"]", "Fang hier an. Russisch schreibt mit anderen Zeichen — solange du sie nicht lesen kannst, ist jedes Wort nur ein Bild. Es sind 33, und viele kennst du fast schon: Р ist ein R, С ein S."],
+    ["home", "[data-uebung=\"lernsets\"]", "Dann hierher. Lernsets geben dir zwölf Wörter auf einmal — nicht wahllose, sondern genau die, die du für die nächsten Sätze brauchst. Das ist dein Hauptweg durch die App."],
+    ["home", "[data-uebung=\"tippen\"]", "Sobald ein Wort halbwegs sitzt, taucht es hier auf. Tippen ist die ehrlichste Übung: keine Auswahl, du schreibst selbst. Die kyrillische Tastatur kommt von allein."],
+    ["home", "[data-uebung=\"uebersetzen\"]", "Sitzen alle Wörter eines Satzes, geht er hier auf. Erst legst du ihn aus Kacheln, später schreibst du ihn — und erst Russisch verstehen, dann Russisch bauen."],
+    ["home", "[data-uebung=\"grammatik\"]", "Wenn dir auffällt, dass sich Wörter verändern: книга wird zu книгу, sobald man sie liest. Hier steht, warum. Freiwillig — aber ab dem zweiten Lernset lohnt es sich."],
+    ["home", "[data-uebung=\"schreibung\"]", "Russisch schreibt nicht, was es spricht: молоко klingt «malakó» und steht doch mit zwei о da. Hier lernst du die acht Regeln, an denen das liegt — mit der Probe, die sie auflöst."],
+    ["home", "[data-uebung=\"freestyle\"]", "Zwischendurch, wenn du einfach üben willst: der ganze Wortschatz nach Thema, ohne Sperren und ohne Reihenfolge."],
+    ["home", "[data-uebung=\"power\"]", "Schreibst du ein Wort dreimal hintereinander falsch, rutscht es zurück und schließt seinen Satz wieder. Hier holst du es heraus — drei auf einmal."],
+    ["home", "#homeEmpf", "Kurz gesagt: Buchstaben, dann Lernsets, dann Tippen und Übersetzen. Merken musst du dir das nicht — hier oben steht immer, was als Nächstes dran ist."],
+    ["home", ".kopf-rail", "Der Balken zeigt, wie viele Wörter endgültig sitzen. Ein Wort braucht dafür vier richtige Antworten an verschiedenen Tagen. Darunter läuft deine Serie mit."],
+    ["lernsets", "#filterKnopf", "In jeder Übung sitzt oben dieser Trichter. Dahinter wählst du, woraus geübt wird: der Reihe nach, nur Wiederholungen, oder alles auf einmal."],
+    ["home", "#menuKnopf", "Hinter den drei Strichen liegen Bilanz, Sicherung, Einstellungen und Tickets. Die Sicherung ist wichtig — dein Fortschritt liegt nur auf diesem Gerät."],
+    ["home", "#tutKnopf", "Diesen Knopf findest du immer auf der Übersicht — ab jetzt ganz unten. Er zeigt dir alles noch einmal, sooft du willst. Los geht es: Die Buchstaben warten."]
+  ],
+  "lernsets": [
+    ["lernsets", ".boxdots", "Diese fünf Punkte sind der Lernstand des Wortes. Jede richtige Antwort rückt es eine Stufe vor, jede falsche zwei zurück — und die letzte Stufe gibt es erst nach vier Treffern an verschiedenen Tagen."],
+    ["lernsets", ".card-meta .mitte", "Hier steht, was gerade verlangt ist: wählen, legen oder im Satz. Die Form steigt mit der Stufe — erst erkennst du das Wort, dann setzt du es aus Buchstaben zusammen, zuletzt findest du es in einem Satz wieder."],
+    ["lernsets", ".task-label", "Die Frage wechselt die Richtung. Mal steht das deutsche Wort da und du suchst das russische, mal umgekehrt. Beides muss sitzen: Verstehen ist leichter als selbst darauf zu kommen."],
+    ["lernsets", "#uebReveal", "Wenn du nicht weiterweißt: aufdecken. Das zählt als Fehler, und das soll es auch — geraten hättest du nichts gelernt. Besser ehrlich zurück als zufällig vorwärts."],
+    ["lernsets", "#filterKnopf", "Hinter dem Trichter wählst du, woraus geübt wird: das laufende Set, alles Freigeschaltete oder ein bestimmtes. Der Reihe nach ist der kürzeste Weg zu neuen Sätzen."]
+  ],
+  "tippen": [
+    ["tippen", ".card", "Hier gibt es nichts zu wählen. Du siehst die Bedeutung und schreibst das russische Wort selbst — das ist die ehrlichste Übung der App und die einzige, die zeigt, ob es wirklich sitzt."],
+    ["tippen", "#tInput", "In dieses Feld wird geschrieben. Die eingebaute kyrillische Tastatur kommt von allein, denn welche Sprache die Gerätetastatur hat, kann eine Webseite nicht bestimmen."],
+    ["tippen", "#tKbToggle", "Damit blendest du sie aus, wenn du lieber mit der Tastatur des Geräts schreibst. Die Wahl merkt sich die App für das nächste Mal."],
+    ["tippen", "#tCheck", "Nach dem Prüfen färbt sich das Getippte Zeichen für Zeichen. Satzzeichen, Groß- und Kleinschreibung und ё gegen е kosten dich nichts — es geht um das Wort, nicht um Pedanterie."],
+    ["tippen", "#filterKnopf", "Hier wählst du zwischen Lernen und Wiederholung. Fertig Gelerntes verlässt den Stapel und kommt erst nach der Auffrischfrist einmal zur Sicherheit zurück."]
+  ],
+  "uebersetzen": [
+    ["uebersetzen", ".card", "Ein Satz geht erst auf, wenn jedes seiner Wörter sitzt. Darum steht diese Übung am Ende des Wegs — sie prüft nicht einzelne Vokabeln, sondern ob du sie zusammensetzen kannst."],
+    ["uebersetzen", ".tiles", "Auf den unteren Stufen legst du den Satz aus fertigen Wörtern. Die Reihenfolge ist die Aufgabe: Russisch ordnet freier als Deutsch, aber nicht beliebig."],
+    ["uebersetzen", "#trReveal", "Aufdecken zeigt die Lösung und zählt als Fehler. Wer aufgibt, hat aber nichts falsch geschrieben — nachschreiben musst du hier nichts."],
+    ["uebersetzen", "#wissenKnopf", "Nach der Auflösung kannst du jedes Wort des Satzes antippen. Dann steht da, warum es genau so dasteht — welche Form das ist und welche Regel dahintersteckt."],
+    ["uebersetzen", "#filterKnopf", "Hier wählst du die Satzstufe. Mit ihr steigen Form und Richtung: erst legen und verstehen, dann schreiben, zuletzt vom Deutschen ins Russische."]
+  ]
+}

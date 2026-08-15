@@ -565,12 +565,27 @@ if (!Array.isArray(kommentare) || kommentare.length === 0) {
 // Browser feststellen lässt.
 const TUT_ORTE = ['home', 'lernsets', 'freestyle', 'tippen', 'uebersetzen',
   'buchstaben', 'grammatik', 'schreibung', 'power'];
-if (!Array.isArray(tutorial) || tutorial.length < 5) {
-  meckern('tutorial.json: erwartet eine Liste mit mindestens fünf Schritten');
-} else {
+//
+// **Seit ADR 0079 ist es eine Sammlung von Spuren**, nicht eine Liste: `home`
+// erklärt den Weg durch die App, `lernsets`/`tippen`/`uebersetzen` je ihre
+// Übung. Die Ziele müssen **je Spur** eindeutig sein, nicht über alle — der
+// Trichter kommt in jeder Übung vor, und das ist kein Fehler, sondern der Sinn.
+const TUT_SPUREN = ['home', 'lernsets', 'tippen', 'uebersetzen'];
+if (!tutorial || typeof tutorial !== 'object' || Array.isArray(tutorial)) {
+  meckern('tutorial.json: erwartet eine Sammlung von Spuren, je eine Liste');
+} else if (TUT_SPUREN.some((s) => !Array.isArray(tutorial[s]))) {
+  meckern('tutorial.json: es fehlt eine Spur — erwartet: ' + TUT_SPUREN.join(' '));
+} else Object.keys(tutorial).forEach((spur) => {
+  if (TUT_SPUREN.indexOf(spur) === -1) {
+    return meckern('tutorial.json: unbekannte Spur «' + spur + '»');
+  }
+  const schritte = tutorial[spur];
+  if (schritte.length < 3) {
+    return meckern('tutorial.json, Spur ' + spur + ': unter drei Schritten lohnt kein Scheinwerfer');
+  }
   const ziele = new Set();
-  tutorial.forEach((schritt, i) => {
-    const wo = 'tutorial.json Schritt ' + (i + 1);
+  schritte.forEach((schritt, i) => {
+    const wo = 'tutorial.json ' + spur + ', Schritt ' + (i + 1);
     if (!Array.isArray(schritt) || schritt.length !== 3) {
       return meckern(wo + ': erwartet [Ort, Ziel, Text]');
     }
@@ -592,7 +607,12 @@ if (!Array.isArray(tutorial) || tutorial.length < 5) {
     // sie würde höher als das, was sie erklärt.
     if (text.length > 230) meckern(wo + ': der Text ist zu lang für ein Overlay');
   });
-}
+  // Eine Übungsspur, die woandershin führt, wäre keine: Wer «Tippen» erklärt
+  // bekommt, soll nicht plötzlich in der Übersicht stehen.
+  if (spur !== 'home' && schritte.some((sch) => sch[0] !== spur)) {
+    meckern('tutorial.json, Spur ' + spur + ': jeder Schritt gehört in seine eigene Übung');
+  }
+});
 
 // Betonung: Welcher Vokal trägt sie — gezählt vom ersten, 1-basiert.
 //
@@ -668,6 +688,37 @@ const listenBlock = (name, liste, alsTupel) => {
 
 // Grammatik-Bausteine: je Baustein ein Objekt über mehrere Zeilen — sie tragen
 // zu viel Text für eine Zeile.
+// Die Tutorial-Spuren: eine Sammlung von Listen aus Dreiergruppen.
+const tutorialBlock = (name, spuren) => {
+  const namen = Object.keys(spuren);
+  const zeilen = ['var ' + name + ' = {'];
+  namen.forEach((spur, k) => {
+    zeilen.push('  ' + spur + ': [');
+    spuren[spur].forEach((e, i) => {
+      zeilen.push('    [' + e.map(jsStr).join(', ') + ']' +
+        (i < spuren[spur].length - 1 ? ',' : ''));
+    });
+    zeilen.push('  ]' + (k < namen.length - 1 ? ',' : ''));
+  });
+  zeilen.push('};');
+  return zeilen.join('\n');
+};
+
+const jsonSpuren = (spuren) => {
+  const namen = Object.keys(spuren);
+  const zeilen = ['{'];
+  namen.forEach((spur, k) => {
+    zeilen.push('  ' + JSON.stringify(spur) + ': [');
+    spuren[spur].forEach((e, i) => {
+      zeilen.push('    [' + e.map(jsonStr).join(', ') + ']' +
+        (i < spuren[spur].length - 1 ? ',' : ''));
+    });
+    zeilen.push('  ]' + (k < namen.length - 1 ? ',' : ''));
+  });
+  zeilen.push('}');
+  return zeilen.join('\n') + '\n';
+};
+
 const grammatikBlock = (name, liste) => {
   const zeilen = ['var ' + name + ' = ['];
   liste.forEach((b, i) => {
@@ -804,7 +855,7 @@ const block = [
   '',
   listenBlock('KOMMENTARE', kommentare, true),
   '',
-  listenBlock('TUTORIAL', tutorial, true),
+  tutorialBlock('TUTORIALS', tutorial),
   '',
   betonungBlock('BETONUNG', betonung),
   '',
@@ -949,7 +1000,7 @@ const dateien = [
   ['data/verben.json', jsonVerben(verben)],
   ['data/nomen.json', jsonNomen(nomen)],
   ['data/kommentare.json', jsonListe(kommentare, true)],
-  ['data/tutorial.json', jsonListe(tutorial, true)]
+  ['data/tutorial.json', jsonSpuren(tutorial)]
 ];
 
 // ── Eigenwillige Verben ─────────────────────────────────────

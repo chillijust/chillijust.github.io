@@ -1551,6 +1551,7 @@ body.unterwegs .reiter { top: 62px; }
 /* Die Defizite in der Bilanz: je eine Karte, Zahl rechts, darunter der Grund
    und ein Weg dorthin (ADR 0075). */
 /* Das Einrichte-Fenster: drei Kästen, in die man Zeilen zieht (ADR 0075). */
+.tut-chip { width: 100%; text-align: center; }
 .einr-note { margin: 4px 0 8px; }
 .einr-liste {
   min-height: 56px; padding: 6px; border-radius: 14px;
@@ -3273,21 +3274,44 @@ var KOMMENTARE = [
   ['eins', 'Ein Zeichen. Sieh noch einmal hin, dann hast du es.']
 ];
 
-var TUTORIAL = [
-  ['home', '[data-uebung="buchstaben"]', 'Fang hier an. Russisch schreibt mit anderen Zeichen — solange du sie nicht lesen kannst, ist jedes Wort nur ein Bild. Es sind 33, und viele kennst du fast schon: Р ist ein R, С ein S.'],
-  ['home', '[data-uebung="lernsets"]', 'Dann hierher. Lernsets geben dir zwölf Wörter auf einmal — nicht wahllose, sondern genau die, die du für die nächsten Sätze brauchst. Das ist dein Hauptweg durch die App.'],
-  ['home', '[data-uebung="tippen"]', 'Sobald ein Wort halbwegs sitzt, taucht es hier auf. Tippen ist die ehrlichste Übung: keine Auswahl, du schreibst selbst. Die kyrillische Tastatur kommt von allein.'],
-  ['home', '[data-uebung="uebersetzen"]', 'Sitzen alle Wörter eines Satzes, geht er hier auf. Erst legst du ihn aus Kacheln, später schreibst du ihn — und erst Russisch verstehen, dann Russisch bauen.'],
-  ['home', '[data-uebung="grammatik"]', 'Wenn dir auffällt, dass sich Wörter verändern: книга wird zu книгу, sobald man sie liest. Hier steht, warum. Freiwillig — aber ab dem zweiten Lernset lohnt es sich.'],
-  ['home', '[data-uebung="schreibung"]', 'Russisch schreibt nicht, was es spricht: молоко klingt «malakó» und steht doch mit zwei о da. Hier lernst du die acht Regeln, an denen das liegt — mit der Probe, die sie auflöst.'],
-  ['home', '[data-uebung="freestyle"]', 'Zwischendurch, wenn du einfach üben willst: der ganze Wortschatz nach Thema, ohne Sperren und ohne Reihenfolge.'],
-  ['home', '[data-uebung="power"]', 'Schreibst du ein Wort dreimal hintereinander falsch, rutscht es zurück und schließt seinen Satz wieder. Hier holst du es heraus — drei auf einmal.'],
-  ['home', '#homeEmpf', 'Kurz gesagt: Buchstaben, dann Lernsets, dann Tippen und Übersetzen. Merken musst du dir das nicht — hier oben steht immer, was als Nächstes dran ist.'],
-  ['home', '.kopf-rail', 'Der Balken zeigt, wie viele Wörter endgültig sitzen. Ein Wort braucht dafür vier richtige Antworten an verschiedenen Tagen. Darunter läuft deine Serie mit.'],
-  ['lernsets', '#filterKnopf', 'In jeder Übung sitzt oben dieser Trichter. Dahinter wählst du, woraus geübt wird: der Reihe nach, nur Wiederholungen, oder alles auf einmal.'],
-  ['home', '#menuKnopf', 'Hinter den drei Strichen liegen Bilanz, Sicherung, Einstellungen und Tickets. Die Sicherung ist wichtig — dein Fortschritt liegt nur auf diesem Gerät.'],
-  ['home', '#tutKnopf', 'Diesen Knopf findest du immer auf der Übersicht — ab jetzt ganz unten. Er zeigt dir alles noch einmal, sooft du willst. Los geht es: Die Buchstaben warten.']
-];
+var TUTORIALS = {
+  home: [
+    ['home', '[data-uebung="buchstaben"]', 'Fang hier an. Russisch schreibt mit anderen Zeichen — solange du sie nicht lesen kannst, ist jedes Wort nur ein Bild. Es sind 33, und viele kennst du fast schon: Р ist ein R, С ein S.'],
+    ['home', '[data-uebung="lernsets"]', 'Dann hierher. Lernsets geben dir zwölf Wörter auf einmal — nicht wahllose, sondern genau die, die du für die nächsten Sätze brauchst. Das ist dein Hauptweg durch die App.'],
+    ['home', '[data-uebung="tippen"]', 'Sobald ein Wort halbwegs sitzt, taucht es hier auf. Tippen ist die ehrlichste Übung: keine Auswahl, du schreibst selbst. Die kyrillische Tastatur kommt von allein.'],
+    ['home', '[data-uebung="uebersetzen"]', 'Sitzen alle Wörter eines Satzes, geht er hier auf. Erst legst du ihn aus Kacheln, später schreibst du ihn — und erst Russisch verstehen, dann Russisch bauen.'],
+    ['home', '[data-uebung="grammatik"]', 'Wenn dir auffällt, dass sich Wörter verändern: книга wird zu книгу, sobald man sie liest. Hier steht, warum. Freiwillig — aber ab dem zweiten Lernset lohnt es sich.'],
+    ['home', '[data-uebung="schreibung"]', 'Russisch schreibt nicht, was es spricht: молоко klingt «malakó» und steht doch mit zwei о da. Hier lernst du die acht Regeln, an denen das liegt — mit der Probe, die sie auflöst.'],
+    ['home', '[data-uebung="freestyle"]', 'Zwischendurch, wenn du einfach üben willst: der ganze Wortschatz nach Thema, ohne Sperren und ohne Reihenfolge.'],
+    ['home', '[data-uebung="power"]', 'Schreibst du ein Wort dreimal hintereinander falsch, rutscht es zurück und schließt seinen Satz wieder. Hier holst du es heraus — drei auf einmal.'],
+    ['home', '#homeEmpf', 'Kurz gesagt: Buchstaben, dann Lernsets, dann Tippen und Übersetzen. Merken musst du dir das nicht — hier oben steht immer, was als Nächstes dran ist.'],
+    ['home', '.kopf-rail', 'Der Balken zeigt, wie viele Wörter endgültig sitzen. Ein Wort braucht dafür vier richtige Antworten an verschiedenen Tagen. Darunter läuft deine Serie mit.'],
+    ['lernsets', '#filterKnopf', 'In jeder Übung sitzt oben dieser Trichter. Dahinter wählst du, woraus geübt wird: der Reihe nach, nur Wiederholungen, oder alles auf einmal.'],
+    ['home', '#menuKnopf', 'Hinter den drei Strichen liegen Bilanz, Sicherung, Einstellungen und Tickets. Die Sicherung ist wichtig — dein Fortschritt liegt nur auf diesem Gerät.'],
+    ['home', '#tutKnopf', 'Diesen Knopf findest du immer auf der Übersicht — ab jetzt ganz unten. Er zeigt dir alles noch einmal, sooft du willst. Los geht es: Die Buchstaben warten.']
+  ],
+  lernsets: [
+    ['lernsets', '.boxdots', 'Diese fünf Punkte sind der Lernstand des Wortes. Jede richtige Antwort rückt es eine Stufe vor, jede falsche zwei zurück — und die letzte Stufe gibt es erst nach vier Treffern an verschiedenen Tagen.'],
+    ['lernsets', '.card-meta .mitte', 'Hier steht, was gerade verlangt ist: wählen, legen oder im Satz. Die Form steigt mit der Stufe — erst erkennst du das Wort, dann setzt du es aus Buchstaben zusammen, zuletzt findest du es in einem Satz wieder.'],
+    ['lernsets', '.task-label', 'Die Frage wechselt die Richtung. Mal steht das deutsche Wort da und du suchst das russische, mal umgekehrt. Beides muss sitzen: Verstehen ist leichter als selbst darauf zu kommen.'],
+    ['lernsets', '#uebReveal', 'Wenn du nicht weiterweißt: aufdecken. Das zählt als Fehler, und das soll es auch — geraten hättest du nichts gelernt. Besser ehrlich zurück als zufällig vorwärts.'],
+    ['lernsets', '#filterKnopf', 'Hinter dem Trichter wählst du, woraus geübt wird: das laufende Set, alles Freigeschaltete oder ein bestimmtes. Der Reihe nach ist der kürzeste Weg zu neuen Sätzen.']
+  ],
+  tippen: [
+    ['tippen', '.card', 'Hier gibt es nichts zu wählen. Du siehst die Bedeutung und schreibst das russische Wort selbst — das ist die ehrlichste Übung der App und die einzige, die zeigt, ob es wirklich sitzt.'],
+    ['tippen', '#tInput', 'In dieses Feld wird geschrieben. Die eingebaute kyrillische Tastatur kommt von allein, denn welche Sprache die Gerätetastatur hat, kann eine Webseite nicht bestimmen.'],
+    ['tippen', '#tKbToggle', 'Damit blendest du sie aus, wenn du lieber mit der Tastatur des Geräts schreibst. Die Wahl merkt sich die App für das nächste Mal.'],
+    ['tippen', '#tCheck', 'Nach dem Prüfen färbt sich das Getippte Zeichen für Zeichen. Satzzeichen, Groß- und Kleinschreibung und ё gegen е kosten dich nichts — es geht um das Wort, nicht um Pedanterie.'],
+    ['tippen', '#filterKnopf', 'Hier wählst du zwischen Lernen und Wiederholung. Fertig Gelerntes verlässt den Stapel und kommt erst nach der Auffrischfrist einmal zur Sicherheit zurück.']
+  ],
+  uebersetzen: [
+    ['uebersetzen', '.card', 'Ein Satz geht erst auf, wenn jedes seiner Wörter sitzt. Darum steht diese Übung am Ende des Wegs — sie prüft nicht einzelne Vokabeln, sondern ob du sie zusammensetzen kannst.'],
+    ['uebersetzen', '.tiles', 'Auf den unteren Stufen legst du den Satz aus fertigen Wörtern. Die Reihenfolge ist die Aufgabe: Russisch ordnet freier als Deutsch, aber nicht beliebig.'],
+    ['uebersetzen', '#trReveal', 'Aufdecken zeigt die Lösung und zählt als Fehler. Wer aufgibt, hat aber nichts falsch geschrieben — nachschreiben musst du hier nichts.'],
+    ['uebersetzen', '#wissenKnopf', 'Nach der Auflösung kannst du jedes Wort des Satzes antippen. Dann steht da, warum es genau so dasteht — welche Form das ist und welche Regel dahintersteckt.'],
+    ['uebersetzen', '#filterKnopf', 'Hier wählst du die Satzstufe. Mit ihr steigen Form und Richtung: erst legen und verstehen, dann schreiben, zuletzt vom Deutschen ins Russische.']
+  ]
+};
 
 var BETONUNG = {
   'она': 2,
@@ -4157,7 +4181,7 @@ var APP_STAND = '2026-08-15'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.4.20T'; /* == VERSION == */
+var APP_VERSION = '2.4.21T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -5311,6 +5335,11 @@ function defaultState() {
     // Angebot, das nach einem Abbruch verschwindet, wäre keins.
     tutorialGesehen: false,
     tutorialFertig: false,
+    // **Je Übung ein eigener Merker** (ADR 0079) — eine flache Menge wie
+    // `merk`. Gesetzt wird er beim *Anbieten*, nicht beim Durchlaufen: Wer die
+    // Frage wegtippt, hat geantwortet, und sie soll nicht bei jedem Betreten
+    // wiederkommen. Zurückholen kann man die Spur über den Trichter.
+    tutUebung: {},
     // Wann zuletzt ein Sicherungscode erzeugt wurde. 0 heißt: noch nie.
     gesichertAm: 0,
     // Wie lange eine Antwort im Schnitt braucht, je Übung: { n, ms }. Kein
@@ -6236,12 +6265,31 @@ var tutSchritt = -1;      // -1 = die Frage · 0..n = die Schritte
 var tutOffen = false;
 var tutHeimTab = 'home';  // wohin nach dem Ende zurück
 var tutLochStand = false; // lag zuletzt ein Ziel unter dem Loch?
+// **Welche Spur läuft** (ADR 0079). «home» erklärt den Weg durch die App, die
+// anderen je eine Übung. Ein Mechanismus für alle: derselbe Scheinwerfer,
+// dieselbe Frage davor, dieselbe Fußzeile.
+var tutSpur = 'home';
+function tutSchritte() { return TUTORIALS[tutSpur] || TUTORIALS.home; }
+
+// Was vor dem ersten Schritt gefragt wird. Je Spur ein eigener Satz — «wie
+// diese App funktioniert» wäre in «Tippen» eine Lüge über den Umfang.
+var TUT_FRAGE = {
+  home: 'Ich zeige dir in einer Minute, wie diese App funktioniert — wo du anfängst, ' +
+    'was die Übungen voneinander wollen und wo was zu finden ist.',
+  lernsets: 'Soll ich dir kurz zeigen, wie Lernsets funktionieren? Fünf Schritte, ' +
+    'dann weißt du, was die Punkte bedeuten und woher die Wörter kommen.',
+  tippen: 'Soll ich dir kurz zeigen, wie «Tippen» funktioniert? Fünf Schritte, ' +
+    'dann weißt du, wozu die eingebaute Tastatur da ist und was die Farben sagen.',
+  uebersetzen: 'Soll ich dir kurz zeigen, wie «Übersetzen» funktioniert? Fünf ' +
+    'Schritte, dann weißt du, warum ein Satz erst spät aufgeht und was sich mit der Stufe ändert.'
+};
 
 // «ruhig» heißt: ohne Flug der Chili. Beim allerersten Start liegt das Tutorial
 // schon über dem ersten Bild — sie flöge dann im Augenblick des Ladens quer
 // über den Schirm, und das sähe nach Fehler aus, nicht nach Auftritt.
-function tutStarten(ruhig) {
-  tutHeimTab = 'home';
+function tutStarten(spur, ruhig) {
+  tutSpur = TUTORIALS[spur] ? spur : 'home';
+  tutHeimTab = tutSpur === 'home' ? 'home' : tutSpur;
   tutSchritt = -1;
   tutOffen = true;
   tutLochStand = false;
@@ -6249,10 +6297,27 @@ function tutStarten(ruhig) {
   // Gefragt ist gefragt: Das automatische Angebot beim allerersten Start kommt
   // nicht wieder. Über den **Platz** des Knopfes sagt das nichts — dafür ist
   // «fertig» zuständig, und das fällt erst am Ende.
-  state.tutorialGesehen = true;
+  if (tutSpur === 'home') state.tutorialGesehen = true;
+  else state.tutUebung[tutSpur] = 1;
   save();
   tutZeichnen();
   chiliAktualisieren(ruhig);
+}
+
+// **Der Scheinwerfer braucht eine Bühne** (ADR 0079). Angeboten wird die Spur
+// einer Übung beim ersten Betreten — aber nur, wenn dort auch etwas steht:
+// Wer «Tippen» öffnet, bevor ein Wort freigeschaltet ist, sieht einen
+// Leerzustand, und ein Scheinwerfer auf nichts erklärt nichts. Dann wartet das
+// Angebot bis zum nächsten Mal.
+function tutUebungAnbieten(id) {
+  if (tutOffen || !TUTORIALS[id]) return;
+  if (state.tutUebung[id]) return;
+  // Das große Tutorial zuerst: Zwei Angebote übereinander sind eines zu viel.
+  if (!state.tutorialGesehen) return;
+  var erstes = TUTORIALS[id][0][1];
+  var el = erstes ? document.querySelector(erstes) : null;
+  if (!el || !el.getClientRects().length) return;
+  tutStarten(id);
 }
 
 function tutEnde() {
@@ -6273,11 +6338,12 @@ function tutEnde() {
 
 function tutWeiter() {
   tutSchritt++;
-  if (tutSchritt >= TUTORIAL.length) {
+  if (tutSchritt >= tutSchritte().length) {
     // **Erst hier.** Wer abbricht — an der Frage oder mitten drin —, hat das
     // Tutorial nicht gesehen; sein Knopf bleibt oben stehen und bietet es
     // weiter an. Ein Angebot, das schon eine Absage beendet, wäre keins.
-    state.tutorialFertig = true;
+    if (tutSpur === 'home') state.tutorialFertig = true;
+    save();
     tutEnde();
     return;
   }
@@ -6397,15 +6463,14 @@ function tutZeichnen() {
   if (tutSchritt < 0) {
     tutLochSetzen('');
     document.getElementById('tutText').textContent =
-      'Ich zeige dir in einer Minute, wie diese App funktioniert — wo du anfängst, ' +
-      'was die Übungen voneinander wollen und wo was zu finden ist.';
+      TUT_FRAGE[tutSpur] || TUT_FRAGE.home;
     tutKnoepfe([['Abbrechen', 'ghost', tutEnde], ['Loslegen', 'primary', tutWeiter]]);
     tutFussSetzen(false);
     tutGespannSetzen(null);
     return;
   }
 
-  var sch = TUTORIAL[tutSchritt];
+  var sch = tutSchritte()[tutSchritt];
   // Wo stand die Figur, bevor sich etwas rührt? In **Bildkoordinaten**: Der
   // Behälter liegt fest, und zwischen zwei Schritten wird gescrollt — in
   // Dokumentkoordinaten flöge sie um die Scrollstrecke daneben.
@@ -6482,14 +6547,14 @@ function tutFussSetzen(an) {
   zu.hidden = !an;
   if (!an) return;
   var punkte = '';
-  for (var i = 0; i < TUTORIAL.length; i++) {
+  for (var i = 0; i < tutSchritte().length; i++) {
     punkte += '<i class="' + (i === tutSchritt ? 'hier' : (i < tutSchritt ? 'war' : '')) + '"></i>';
   }
   document.getElementById('tutPunkte').innerHTML = punkte;
   document.getElementById('tutZaehler').textContent =
-    'Schritt ' + (tutSchritt + 1) + ' von ' + TUTORIAL.length;
+    'Schritt ' + (tutSchritt + 1) + ' von ' + tutSchritte().length;
   var vor = document.getElementById('tutVor');
-  var letzter = tutSchritt === TUTORIAL.length - 1;
+  var letzter = tutSchritt === tutSchritte().length - 1;
   vor.innerHTML = letzter ? ICON.haken : ICON.pfeilRechts;
   vor.setAttribute('aria-label', letzter ? 'Fertig' : 'Weiter');
 }
@@ -6514,7 +6579,7 @@ document.getElementById('tutZu').setAttribute('aria-label', 'Tutorial beenden');
 // nicht mehr. Neu messen, nicht neu zeichnen.
 function tutNachmessen() {
   if (!tutOffen || tutSchritt < 0) return;
-  tutGespannSetzen(tutLochSetzen(TUTORIAL[tutSchritt][1]));
+  tutGespannSetzen(tutLochSetzen(tutSchritte()[tutSchritt][1]));
 }
 window.addEventListener('resize', tutNachmessen);
 window.addEventListener('orientationchange', tutNachmessen);
@@ -7022,6 +7087,17 @@ function filterChip(gruppe, wert, text, gesetzt, gesperrt) {
     esc(text) + '</button>';
 }
 
+// **Der Weg zurück zur Spur** (ADR 0079). Der Trichter ist die Stelle, an der
+// alles Übungseigene liegt — dort gehört auch «zeig es mir noch einmal» hin.
+// Auf der Übersicht steht der Knopf unten auf der Seite; in einer Übung wäre
+// dafür kein Platz, ohne die Aufgabe zu verdrängen.
+function tutFilterZeile() {
+  if (!TUTORIALS[currentTab]) return '';
+  return '<p class="filter-titel">Hilfe</p>' +
+    '<button class="chip tut-chip" data-fw="tutspur" data-fv="' + esc(currentTab) +
+    '">Tutorial zu dieser Übung</button>';
+}
+
 function filterInhaltHtml() {
   if (currentTab === 'lernsets') {
     var aktuell = aktuellesSet();
@@ -7116,6 +7192,13 @@ function filterInhaltHtml() {
 // Eine Auswahl wirkt sofort: Panel zu, Übung neu aufsetzen, Knopf nachziehen.
 function filterWaehlen(gruppe, wert) {
   filterSetzen(false);
+  if (gruppe === 'tutspur') {
+    // Erst schließen, dann anleuchten: Der Scheinwerfer soll die Übung
+    // beleuchten, nicht das Blatt, das eben noch darüber lag.
+    chiliZusammen(function () { filterSetzen(false); });
+    tutStarten(wert);
+    return;
+  }
   if (gruppe === 'set') {
     uebAuswahl = (wert === 'aktuell' || wert === 'alle') ? wert : parseInt(wert, 10);
     uebNext(true);
@@ -7187,7 +7270,9 @@ function renderFilter() {
   if (!hat) { filterSetzen(false); return; }
   knopf.classList.toggle('aktiv', filterAktiv());
   var panel = document.getElementById('filterInhalt');
-  panel.innerHTML = filterInhaltHtml();
+  // Angehängt statt in jedem Zweig eingebaut: Es gilt für jede Übung mit
+  // eigener Spur, und in acht Zweigen dieselbe Zeile wäre sieben zu viel.
+  panel.innerHTML = filterInhaltHtml() + tutFilterZeile();
   panel.querySelectorAll('[data-fw]').forEach(function (b) {
     b.addEventListener('click', function () { filterWaehlen(b.dataset.fw, b.dataset.fv); });
     b.tabIndex = filterOffen ? 0 : -1;
@@ -7434,6 +7519,9 @@ function setTab(name, zurueck) {
     wissenSetzen(false);
     menuSetzen(false);
   });
+  // **Zuletzt, und nur beim ersten Mal** (ADR 0079): Die Übung steht dann
+  // schon da, und der Scheinwerfer findet, worauf er zeigen soll.
+  tutUebungAnbieten(name);
 }
 
 // **Der Weg durchs Menü ist der Vordereingang** (ADR 0072). Zwei Ansichten
@@ -7961,7 +8049,7 @@ function renderHome() {
   // statt hinzufliegen. Nur der automatische Start beim allerersten Öffnen ist
   // wirklich ruhig; dort steht das `true` ausgeschrieben.
   document.getElementById('tutKnopf').addEventListener('click', function () {
-    tutStarten();
+    tutStarten('home');
   });
   document.getElementById('homeAlleKnopf').addEventListener('click', function () {
     homeOffen = !homeOffen;
@@ -14766,7 +14854,7 @@ swAnmelden();
 // Antwort gegeben hat, hat die App noch nicht gesehen; wer abbricht, bekommt
 // die Frage nicht wieder.
 if (!state.tutorialGesehen && state.answered === 0 && currentTab === 'home') {
-  tutStarten(true);
+  tutStarten('home', true);
 }
 </script>
 </body>

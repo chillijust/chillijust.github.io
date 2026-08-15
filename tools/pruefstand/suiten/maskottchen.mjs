@@ -27,7 +27,16 @@ function schneidet(a, b) {
     a.top < b.bottom - 1 && a.bottom > b.top + 1;
 }
 
+// **Die Übungsspuren stillstellen** (ADR 0079). Seit sie beim ersten Betreten
+// von selbst fragen, stünde die Figur in der Tutorial-Blase statt in der
+// Ansicht, und diese Suite misst dann etwas anderes, als sie meint. Die
+// Heimspur bleibt an — A0b prüft sie ausdrücklich.
+function spurenStill() {
+  ['lernsets', 'tippen', 'uebersetzen'].forEach(function (k) { state.tutUebung[k] = 1; });
+}
+
 try {
+  spurenStill();
   // A0 · Beim Laden steht sie sofort richtig — kein Sprung von der Kopfzeile
   // auf die Empfehlung (das sah beim Neuladen wie ein Fehler aus).
   pruefe('A0 Startansicht ist Home', currentTab === 'home', currentTab);
@@ -478,6 +487,7 @@ try {
   // Er ist kein «burger», erbte also weder das Überstehen noch die Ebene —
   // dieselben zwei Fehler, die beim Menüknopf schon einmal dastanden.
   state = defaultState();
+  spurenStill();
   ansichtenZuruecksetzen();
   ALL_VOCAB.slice(0, 40).forEach(function (v) { state.boxes[v.id] = 2; });
   setTab('freestyle');
@@ -543,6 +553,7 @@ try {
 
   // ── P · Der Kopf: zwei Wege hinaus, eine Flamme ───────────
   state = defaultState();
+  spurenStill();
   ansichtenZuruecksetzen();
   setTab('home');
   pruefe('P1 auf Home gibt es weder Zurück noch Home',
@@ -606,6 +617,7 @@ try {
 
   // ── Q · Der Kopf ist kompakt ──────────────────────────────
   state = defaultState();
+  spurenStill();
   ansichtenZuruecksetzen();
   ALL_VOCAB.slice(0, 60).forEach(function (v) { state.boxes[v.id] = 2; });
   setTab('buchstaben');

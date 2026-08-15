@@ -55,21 +55,21 @@ try {
 
   // ── A · Die Schritte selbst ───────────────────────────────
   reicherStand();
-  pruefe('A1 dreizehn Schritte', TUTORIAL.length === 13, String(TUTORIAL.length));
+  pruefe('A1 dreizehn Schritte', TUTORIALS.home.length === 13, String(TUTORIALS.home.length));
   pruefe('A2 jeder hat Ort, Ziel und Text',
-    TUTORIAL.every(function (s) { return s.length === 3; }));
+    TUTORIALS.home.every(function (s) { return s.length === 3; }));
   pruefe('A3 jeder Text ist kurz genug fürs Overlay',
-    TUTORIAL.every(function (s) { return s[2].length <= 230; }),
-    String(Math.max.apply(null, TUTORIAL.map(function (s) { return s[2].length; }))));
+    TUTORIALS.home.every(function (s) { return s[2].length <= 230; }),
+    String(Math.max.apply(null, TUTORIALS.home.map(function (s) { return s[2].length; }))));
   pruefe('A4 und keiner ist eine Überschrift',
-    TUTORIAL.every(function (s) { return s[2].length >= 40; }),
-    String(Math.min.apply(null, TUTORIAL.map(function (s) { return s[2].length; }))));
+    TUTORIALS.home.every(function (s) { return s[2].length >= 40; }),
+    String(Math.min.apply(null, TUTORIALS.home.map(function (s) { return s[2].length; }))));
   pruefe('A5 kein Ziel kommt zweimal vor', (function () {
     var z = {};
-    TUTORIAL.forEach(function (s) { z[s[1]] = 1; });
-    return Object.keys(z).length === TUTORIAL.length;
+    TUTORIALS.home.forEach(function (s) { z[s[1]] = 1; });
+    return Object.keys(z).length === TUTORIALS.home.length;
   })());
-  pruefe('A6 die App duzt auch hier', TUTORIAL.every(function (s) {
+  pruefe('A6 die App duzt auch hier', TUTORIALS.home.every(function (s) {
     return !/\bSie\b|\bIhnen\b|\bIhre\b/.test(s[2]);
   }));
 
@@ -147,8 +147,8 @@ try {
   var ohneLoch = [];
   var ohneZipfel = [];
   var verdeckt = [];
-  for (var i = 0; i < TUTORIAL.length; i++) {
-    var sch = TUTORIAL[i];
+  for (var i = 0; i < TUTORIALS.home.length; i++) {
+    var sch = TUTORIALS.home[i];
     pruefe('D' + (i + 1) + ' Schritt ' + (i + 1) + ' · ' + sch[2].slice(0, 28),
       tutSchritt === i && q('#tutText').textContent === sch[2],
       tutSchritt + '/' + q('#tutText').textContent.slice(0, 28));
@@ -202,7 +202,7 @@ try {
           ' statt ' + Math.round(lMitte));
       }
     }
-    if (i < TUTORIAL.length - 1) q('#tutVor').click();
+    if (i < TUTORIALS.home.length - 1) q('#tutVor').click();
   }
   pruefe('E1 jedes Ziel gibt es wirklich', fehlt.length === 0, fehlt.join(' | '));
   pruefe('E2 und das Loch liegt darüber', ohneLoch.length === 0, ohneLoch.join(' | '));
@@ -221,12 +221,12 @@ try {
   // Sie ersetzt die Zeile «Schritt 3 von 12». Ein Zeichen je Schritt, genau
   // eines markiert, alles davor abgehakt — sonst zeigt sie nicht, wo man ist.
   var p = alle('#tutPunkte i');
-  pruefe('E5 ein Punkt je Schritt', p.length === TUTORIAL.length, String(p.length));
+  pruefe('E5 ein Punkt je Schritt', p.length === TUTORIALS.home.length, String(p.length));
   pruefe('E6 genau einer ist der jetzige',
     alle('#tutPunkte i.hier').length === 1 &&
     p[p.length - 1].classList.contains('hier'));
   pruefe('E7 alle davor sind abgehakt',
-    alle('#tutPunkte i.war').length === TUTORIAL.length - 1,
+    alle('#tutPunkte i.war').length === TUTORIALS.home.length - 1,
     String(alle('#tutPunkte i.war').length));
   pruefe('E8 der Ausgang steht bereit', !q('#tutZu').hidden);
 
@@ -251,7 +251,7 @@ try {
 
   // ── G · Der Schritt in einer Übung ────────────────────────
   // Einer der zwölf führt woandershin. Danach muss der Weg zurückführen.
-  var fremd = TUTORIAL.filter(function (s) { return s[0] !== 'home'; });
+  var fremd = TUTORIALS.home.filter(function (s) { return s[0] !== 'home'; });
   pruefe('G1 genau ein Schritt liegt außerhalb von Home', fremd.length === 1,
     String(fremd.length));
   pruefe('G2 und zeigt auf die Auswahl', fremd[0][1] === '#filterKnopf', fremd[0][1]);
@@ -312,11 +312,11 @@ try {
   ansichtenZuruecksetzen();
   setTab('home');
   tutStarten(false);
-  for (var zs = 0; zs < TUTORIAL.length; zs++) {
-    if (TUTORIAL[zs][1].indexOf('lernsets') !== -1) tutSchritt = zs;
+  for (var zs = 0; zs < TUTORIALS.home.length; zs++) {
+    if (TUTORIALS.home[zs][1].indexOf('lernsets') !== -1) tutSchritt = zs;
   }
   tutZeichnen();
-  var ziel = q(TUTORIAL[tutSchritt][1]);
+  var ziel = q(TUTORIALS.home[tutSchritt][1]);
   var loch = q('#tutLoch');
   var zr = ziel.getBoundingClientRect();
   var lr = loch.getBoundingClientRect();
@@ -330,8 +330,8 @@ try {
     getComputedStyle(loch).borderRadius === getComputedStyle(ziel).borderRadius,
     getComputedStyle(loch).borderRadius + ' / ' + getComputedStyle(ziel).borderRadius);
   // Ein runder Knopf bleibt rund — ein fester Wert schnitte ihm die Ecken auf.
-  for (var zk = 0; zk < TUTORIAL.length; zk++) {
-    if (TUTORIAL[zk][1] === '#menuKnopf') tutSchritt = zk;
+  for (var zk = 0; zk < TUTORIALS.home.length; zk++) {
+    if (TUTORIALS.home[zk][1] === '#menuKnopf') tutSchritt = zk;
   }
   tutZeichnen();
   pruefe('Z3 ein runder Knopf bleibt rund',
@@ -345,6 +345,121 @@ try {
     getComputedStyle(q('#tutLoch')).boxShadow);
   tutEnde();
   ansichtenZuruecksetzen();
+
+  // ── J · Die Übungsspuren (ADR 0079) ───────────────────────
+  // Dieselbe Frage wie in Abschnitt D, nur für die drei eigenen Spuren: Findet
+  // jeder Schritt sein Ziel? Ein Wähler, der ins Leere zeigt, ist ein stiller
+  // Fehler — er verdunkelt den Schirm und leuchtet nichts an.
+  function stand(spur) {
+    state = defaultState();
+    ansichtenZuruecksetzen();
+    state.tutorialGesehen = true;
+    state.tutorialFertig = true;
+    if (spur === 'tippen') {
+      ALL_VOCAB.forEach(function (v) {
+        state.boxes[v.id] = state.settings.tippenStufe;
+        state.lastSeen[v.id] = Date.now();
+      });
+    } else if (spur === 'uebersetzen') {
+      ALL_VOCAB.forEach(function (v) { state.boxes[v.id] = BOX_MAX; state.lastSeen[v.id] = Date.now(); });
+      trLevel = 1; trDir = 'gemischt'; trModus = 'lernen'; trTask = null;
+    }
+    setTab(spur);
+  }
+
+  ['lernsets', 'tippen', 'uebersetzen'].forEach(function (spur) {
+    stand(spur);
+    tutEnde();
+    tutStarten(spur);
+    pruefe('J-' + spur + '-1 die Frage steht davor',
+      tutOffen && tutSpur === spur && tutSchritt === -1 &&
+      q('#tutText').textContent === TUT_FRAGE[spur],
+      q('#tutText').textContent.slice(0, 40));
+    pruefe('J-' + spur + '-2 sie nennt die Übung, nicht die App',
+      q('#tutText').textContent.indexOf('diese App funktioniert') === -1);
+    knopf('Loslegen').click();
+    var schritte = TUTORIALS[spur];
+    var kaputt = [];
+    for (var i = 0; i < schritte.length; i++) {
+      var sch = schritte[i];
+      if (currentTab !== spur) kaputt.push(sch[1] + ': Ort ' + currentTab);
+      var ziel = q(sch[1]);
+      if (!ziel || !ziel.getClientRects().length) {
+        kaputt.push(sch[1] + ': gibt es nicht');
+      } else {
+        var l = q('#tutLoch').getBoundingClientRect();
+        var z = ziel.getBoundingClientRect();
+        if (!(l.width >= z.width - 1 && l.height >= z.height - 1 &&
+              l.left <= z.left + 1 && l.top <= z.top + 1)) {
+          kaputt.push(sch[1] + ': Loch deckt es nicht');
+        }
+      }
+      if (i < schritte.length - 1) q('#tutVor').click();
+    }
+    pruefe('J-' + spur + '-3 jeder Schritt findet sein Ziel', kaputt.length === 0,
+      kaputt.join(' | '));
+    pruefe('J-' + spur + '-4 der Zähler nennt die Länge der Spur',
+      q('#tutZaehler').textContent === 'Schritt ' + schritte.length + ' von ' + schritte.length,
+      q('#tutZaehler').textContent);
+    q('#tutVor').click();
+    pruefe('J-' + spur + '-5 am Ende ist es zu und man steht in der Übung',
+      !tutOffen && currentTab === spur, currentTab);
+    // **Die Heimspur bleibt unberührt**: Wer «Tippen» erklärt bekommt, hat
+    // damit nicht das große Tutorial durchlaufen.
+    pruefe('J-' + spur + '-6 der Merker gilt nur für diese Spur',
+      state.tutUebung[spur] === 1 &&
+      ['lernsets', 'tippen', 'uebersetzen'].filter(function (a) {
+        return a !== spur && state.tutUebung[a];
+      }).length === 0,
+      JSON.stringify(state.tutUebung));
+  });
+
+  // ── K · Angeboten wird einmal, und nur mit Bühne ───────────
+  stand('lernsets');
+  tutEnde();
+  state.tutUebung = {};
+  setTab('home');
+  setTab('lernsets');
+  pruefe('K1 beim ersten Betreten wird gefragt',
+    tutOffen && tutSpur === 'lernsets' && tutSchritt === -1);
+  tutEnde();
+  setTab('home');
+  setTab('lernsets');
+  pruefe('K2 beim zweiten Mal nicht mehr', !tutOffen, String(tutSpur));
+  // **Ein Scheinwerfer ohne Bühne wartet.** In «Tippen» steht vor der ersten
+  // Freischaltung ein Leerzustand — dort gäbe es nichts anzuleuchten.
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  state.tutorialGesehen = true;
+  setTab('home');
+  setTab('tippen');
+  pruefe('K3 im Leerzustand wird nicht gefragt',
+    !tutOffen && !state.tutUebung.tippen,
+    (q(TUTORIALS.tippen[0][1]) ? 'Ziel da' : 'kein Ziel') + ' / ' + String(tutOffen));
+  // Und vor dem großen Tutorial auch nicht: zwei Angebote übereinander sind
+  // eines zu viel.
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  setTab('home');
+  setTab('lernsets');
+  pruefe('K4 vor dem großen Tutorial schweigt sie',
+    !tutOffen && !state.tutUebung.lernsets);
+
+  // ── L · Der Weg zurück zur Spur ────────────────────────────
+  stand('lernsets');
+  tutEnde();
+  q('#filterKnopf').click();
+  var zeile = q('[data-fw="tutspur"]');
+  pruefe('L1 im Trichter steht der Weg zur Spur',
+    !!zeile && zeile.dataset.fv === 'lernsets', zeile ? zeile.dataset.fv : 'keiner');
+  zeile.click();
+  pruefe('L2 ein Tipp startet sie', tutOffen && tutSpur === 'lernsets');
+  pruefe('L3 und das Blatt ist dabei zu', filterOffen === false);
+  tutEnde();
+  // In einer Übung ohne eigene Spur gibt es die Zeile nicht.
+  setTab('buchstaben');
+  renderFilter();
+  pruefe('L4 ohne eigene Spur steht dort nichts', !q('[data-fw="tutspur"]'));
 
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);
