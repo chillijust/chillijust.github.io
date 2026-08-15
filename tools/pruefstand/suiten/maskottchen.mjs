@@ -638,6 +638,95 @@ try {
     q('#kopfEyebrow').getBoundingClientRect().bottom.toFixed(0) + ' / ' +
     q('#kopfTitel').getBoundingClientRect().bottom.toFixed(0));
 
+  // ── R · Sie hüpft nur, wenn sie geflogen ist (ADR 0071) ────
+  // Der Hüpfer stand bis 2.4.12 unbedingt hinter dem Flug. Weil ein Renderlauf
+  // den Platzhalter als *neuen Knoten* liefert, sprang die Figur auch dann,
+  // wenn sie exakt stehen blieb — bei jedem Chip, jedem Stern, jedem
+  // Aufklappen. Der Flug misst die Strecke ohnehin; also entscheidet er.
+  //
+  // Ein bloßes renderHome() hängt die Figur nicht selbst um: Das tut der
+  // MutationObserver auf #main, und der läuft als Mikroaufgabe. Die Prüfung
+  // ist synchron und ruft deshalb an derselben Stelle nach, wo er es täte.
+  tutEnde();
+  state.tutorialFertig = true;
+  setTab('home');
+  chiliAktualisieren();
+
+  function huepft() { return chiliFigur.classList.contains('springt'); }
+  function ruhe() {
+    chiliFigur.classList.remove('springt');
+    chiliBuehne.getAnimations().forEach(function (a) { a.cancel(); });
+  }
+
+  var vorOrt = wo();
+  ruhe();
+  q('#homeAlleKnopf').click();
+  chiliAktualisieren();
+  pruefe('R1 «Alle Übungen» aufklappen lässt sie stehen',
+    !huepft() && chiliBuehne.getAnimations().length === 0,
+    (huepft() ? 'gehüpft' : 'still') + ' · ' + chiliBuehne.getAnimations().length + ' Flüge');
+  pruefe('R1b und sie steht danach, wo sie stand', wo() === vorOrt, vorOrt + ' -> ' + wo());
+  ruhe();
+  q('#homeAlleKnopf').click();
+  chiliAktualisieren();
+  pruefe('R1c zuklappen ebenso', !huepft() && chiliBuehne.getAnimations().length === 0,
+    (huepft() ? 'gehüpft' : 'still'));
+
+  // Ein Stern ist ein Renderlauf — und war damit ein Sprung.
+  GRAMMATIK.forEach(function (x) { state.gramSeen[x.id] = 1; });
+  gramBaustein = GRAMMATIK[0].id;
+  gramAnsicht = 'regel';
+  setTab('grammatik');
+  chiliAktualisieren();
+  var stern = q('.gram-regel [data-merk]');
+  pruefe('R2 an einer Regelkarte steht ein Stern', !!stern);
+  if (stern) {
+    var schluessel = stern.dataset.merk;
+    var waehler = '[data-merk=\"' + schluessel + '\"]';
+    ruhe();
+    stern.click();
+    chiliAktualisieren();
+    pruefe('R2b ihn zu setzen lässt die Figur stehen',
+      !huepft() && chiliBuehne.getAnimations().length === 0,
+      huepft() ? 'gehüpft' : 'still');
+    // Stattdessen meldet sich der Stern selbst — und nur beim Setzen.
+    pruefe('R2c dafür blinkt der Stern auf',
+      !!q(waehler) && q(waehler).classList.contains('blinkt'));
+    q(waehler).click();
+    pruefe('R2d das Wegnehmen wird nicht gefeiert',
+      !q(waehler).classList.contains('blinkt'));
+  }
+
+  // Der Tutorialknopf dagegen **soll** sie holen. Bis 2.4.12 tat er es nicht:
+  // Der Zuhörer hing unmittelbar an tutStarten, bekam das Ereignis als erstes
+  // Argument — und das landete im Ruhig-Merker.
+  tutEnde();
+  state.tutorialFertig = true;
+  setTab('home');
+  chiliAktualisieren();
+  ruhe();
+  q('#tutKnopf').click();
+  pruefe('R3 der Tutorialknopf holt sie mit einem Flug',
+    tutOffen && chiliBuehne.getAnimations().length === 1,
+    (tutOffen ? 'offen' : 'zu') + ' · ' + chiliBuehne.getAnimations().length + ' Flüge');
+  pruefe('R3b und sie steht in der Tutorial-Blase', wo() === 'tutChili', wo());
+  tutEnde();
+
+  // Der Rand des Knopfes ist durchgezogen — gestrichelt las sich wie ein
+  // Platzhalter statt wie ein Angebot.
+  state.tutorialFertig = true;
+  setTab('home');
+  chiliAktualisieren();
+  pruefe('R4 der Tutorialknopf hat einen durchgezogenen Rand',
+    getComputedStyle(q('#tutKnopf')).borderTopStyle === 'solid',
+    getComputedStyle(q('#tutKnopf')).borderTopStyle);
+
+  // Und die Figur wirft keinen Schatten mehr: Ein Weichzeichner, den Safari am
+  // Elementkasten beschneidet, hinterlässt genau eine gerade Kante.
+  pruefe('R5 die Figur trägt keinen Filter',
+    getComputedStyle(chiliFigur).filter === 'none',
+    getComputedStyle(chiliFigur).filter);
+
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\\n')[1]);
 }

@@ -120,9 +120,22 @@ try {
     (wort.getBoundingClientRect().left - punkt.getBoundingClientRect().right).toFixed(1) + ' px');
   // Unterwegs bleibt der Punkt, das Wort geht — der Kopf trägt dort den Namen
   // der Übung und den Rückweg.
+  // Ohne Überblendung gemessen: Geprüft wird der **Zustand**, nicht die
+  // Bewegung dorthin. Seit ADR 0071 wird das Wort eingeklappt statt
+  // ausgeblendet — display: none ließ sich nicht überblenden, und beim Wechsel
+  // zurück auf Home fiel es in einem Bild auf volle Breite.
+  wort.style.transition = 'none';
   setTab('tippen');
   pruefe('B8 unterwegs steht der Punkt allein',
-    n.classList.contains('nur-punkt') && getComputedStyle(wort).display === 'none');
+    n.classList.contains('nur-punkt') &&
+    wort.getBoundingClientRect().width < 1 &&
+    getComputedStyle(wort).opacity === '0',
+    wort.getBoundingClientRect().width.toFixed(1) + ' px · ' +
+    getComputedStyle(wort).opacity);
+  // Und es ist **da** — nur schmal. Ein display: none könnte nicht aufklappen.
+  pruefe('B8b es bleibt im Fluss, damit es sich aufklappen lässt',
+    getComputedStyle(wort).display !== 'none', getComputedStyle(wort).display);
+  wort.style.transition = '';
   pruefe('B9 die Farbe bleibt trotzdem richtig', punktFarbe() === rot);
   // Er ist keine Zierde: Wer nicht sieht, muss ihn hören können.
   pruefe('B10 und wird vorgelesen',
@@ -139,15 +152,18 @@ try {
 
   // **Das Wort ist eine Nachricht, kein Etikett** (ADR 0063). Es klappt nach
   // einer Frist zum Punkt hin ein — der trägt die Auskunft danach allein.
+  //
+  // Für den ganzen Abschnitt ist die Überblendung abgeschaltet: Geprüft werden
+  // die **Zustände**, nicht der Weg dazwischen. Seit ADR 0071 klappt das Wort
+  // auch beim Erscheinen auf, statt zu springen — gemessen ohne Abschalten
+  // stünde hier durchweg ein Zwischenstand.
+  wort.style.transition = 'none';
   setTab('home');
   netzZeigen();
   pruefe('B13a frisch gezeigt steht es offen',
     !n.classList.contains('eingeklappt') && wort.getBoundingClientRect().width > 20,
     wort.getBoundingClientRect().width.toFixed(0) + ' px');
   var offen = wort.getBoundingClientRect().width;
-  // Die Bewegung dauert eine halbe Sekunde; für die Messung wird sie
-  // abgeschaltet, sonst misst die Prüfung einen Zwischenstand.
-  wort.style.transition = 'none';
   n.classList.add('eingeklappt');
   pruefe('B13b eingeklappt ist es weg',
     wort.getBoundingClientRect().width < 1 &&
@@ -171,10 +187,18 @@ try {
   setTab('tippen');
   setTab('home');
   pruefe('B13f die Rückkehr auf Home schon', !n.classList.contains('eingeklappt'));
-  wort.style.transition = '';
   pruefe('B13g und es ist wieder so breit wie zuvor',
     Math.abs(wort.getBoundingClientRect().width - offen) < 12,
     wort.getBoundingClientRect().width.toFixed(0) + ' / ' + offen.toFixed(0));
+  wort.style.transition = '';
+  // **Auf- und Zuklappen sind derselbe Weg** (ADR 0071): dieselbe Dauer, nur
+  // rückwärts. Bis 2.4.12 fiel das Wort in einem Bild auf volle Breite, weil
+  // «unterwegs» über display: none lief — und was nicht da ist, klappt nicht
+  // auf. Gefragt ist die Überblendung selbst, darum ohne Abschalten.
+  var uebergang = getComputedStyle(wort).transitionDuration;
+  pruefe('B13h beide Wege dauern gleich lang',
+    uebergang.split(',').length >= 2 &&
+    uebergang.split(',')[0].trim() === '2s', uebergang);
   setzeOnline(true);
   netzZeigen();
   try {
@@ -182,6 +206,43 @@ try {
   } catch (e) {}
   setTab('home');
   netzZeigen();
+
+  // ── B14 · «Gespeichert» schiebt nichts (ADR 0071) ─────────
+  // Die Meldung stand als vollwertiges Feld in der Zeile: Sobald sie erschien,
+  // nahm sie Breite, und das Etikett links davon rückte zusammen — die
+  // Kopfzeile zuckte bei jeder Antwort. Jetzt klappt sie auf wie der
+  // Online-Status, nur vom rechten Rand her.
+  setTab('home');
+  var note = q('#saveNote');
+  var etikett = q('#kopfLabel');
+  note.style.transition = 'none';
+  note.className = '';
+  note.innerHTML = '';
+  var zeileVorher = etikett.getBoundingClientRect().width;
+  var hoeheVorher = q('.kopf-meta').getBoundingClientRect().height;
+  zeigeStatus('ok', 'gespeichert');
+  pruefe('B14 die Meldung steht da', note.classList.contains('show') &&
+    note.textContent.indexOf('gespeichert') !== -1, note.textContent);
+  pruefe('B14b und schiebt das Etikett daneben nicht',
+    Math.abs(etikett.getBoundingClientRect().width - zeileVorher) < 1,
+    zeileVorher.toFixed(1) + ' -> ' + etikett.getBoundingClientRect().width.toFixed(1));
+  pruefe('B14c und macht die Zeile nicht höher',
+    Math.abs(q('.kopf-meta').getBoundingClientRect().height - hoeheVorher) < 1,
+    hoeheVorher.toFixed(1) + ' -> ' + q('.kopf-meta').getBoundingClientRect().height.toFixed(1));
+  // Sie wächst nach links: rechts steht sie am Rand der Zeile.
+  pruefe('B14d sie sitzt am rechten Rand',
+    Math.abs(note.getBoundingClientRect().right -
+      q('.kopf-meta').getBoundingClientRect().right) < 2,
+    note.getBoundingClientRect().right.toFixed(0) + ' / ' +
+    q('.kopf-meta').getBoundingClientRect().right.toFixed(0));
+  // Zugeklappt nimmt sie keinen Platz — genau wie das Wort am Punkt.
+  note.className = 'ok';
+  pruefe('B14e zugeklappt ist sie weg',
+    note.getBoundingClientRect().width < 1,
+    note.getBoundingClientRect().width.toFixed(1) + ' px');
+  note.style.transition = '';
+  note.className = '';
+  note.innerHTML = '';
 
   // ── B2 · Die Augenbraue auf Home ──────────────────────────
   // «Русский · Тренажёр» ist weg, ihr Platz nicht: Ohne Zeilenbox rückte

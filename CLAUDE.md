@@ -43,6 +43,14 @@ zweites Mal einbetten, und nie über Scroll-Rechnung positionieren — sie steht
 wickelt das in `chiliZusammen()` — sonst fliegt sie über einen Zwischenhalt, und der
 zweite Flug bricht den ersten ab. Ein runder Knopf, in den sie springt, braucht
 `overflow: visible` und `z-index: 40`; geblendet wird in einer Hülle darin.
+**Eine Bewegung ist eine Aussage** (ADR 0071): Der Hüpfer hängt am Rückgabewert von
+`chiliFlug()` und läuft nur, wenn wirklich ein Weg zurückgelegt wurde — ein Renderlauf
+liefert den Platzhalter als *neuen Knoten*, und ohne diese Bedingung sprang sie bei
+jedem Chip auf der Stelle. Die Abfrage auf `prefers-reduced-motion` steht darum **hinter**
+der Messung. Die Figur wirft **keinen Schatten** — jeder Filter wird in Safari an ihrem
+Kasten beschnitten und hinterlässt genau die gerade Kante, die dreimal gemeldet wurde.
+**Ein Zuhörer, dessen Funktion Argumente hat, wird eingepackt**: `addEventListener('click',
+tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
 
 ## Harte Rahmenbedingungen — nicht verhandelbar
 
@@ -249,7 +257,11 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   zum Punkt hin ein und wird nur bei etwas Neuem wieder aufgeklappt — Netzwechsel oder
   Rückkehr auf Home. Ein Renderlauf allein ist kein Anlass, sonst liefe die Frist nie ab.
   Die Augenbraue ist auf Home leer und hält über `.eyebrow:empty` nur noch ihre
-  Zeilenhöhe.
+  Zeilenhöhe. **Was im Kopf erscheint, klappt auf — es schiebt nicht** (ADR 0071):
+  Netzwort *und* `#saveNote` wachsen über `max-width` aus null, in beide Richtungen
+  gleich lang. `display: none` ist dafür untauglich, es lässt sich nicht überblenden.
+  Und **ein Symbol aus `ICON` ist 20 px groß** — in einer 10-px-Zeile macht es sie um
+  neun Pixel höher; wer eines dort einsetzt, gibt ihm die Höhe der Schrift.
 - **Ein Knopf, der ein Ergebnis meldet, muss es auch ausführen können** (ADR 0062). Der
   Knopf unter «App» sucht **und** lädt: `swKnopfTippen()` schaut auf `swStand.wartet` und
   entscheidet danach. Dass «Update» darauf steht, ist **keine Lage**, sondern eine

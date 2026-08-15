@@ -1,6 +1,8 @@
 # 0064 · Der Akzent gehört zum Schema, der Schatten auch
 
 **Stand:** angenommen · 2026-08-15 · aus zwei Tickets
+**§1 abgelöst von ADR 0071:** Der Schatten der Figur wurde ganz entfernt —
+kürzer hieß schwächer, nicht weg. §2 (der Akzent) gilt unverändert.
 **Ergänzt:** ADR 0038/0039 (ein Farbschema statt zweier Achsen), ADR 0063 (die hellen
 Schemata werden Farben), ADR 0012 (die Chili steht im Fluss)
 

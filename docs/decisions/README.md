@@ -87,13 +87,14 @@ Wer neu dazukommt und nur fünf lesen will:
 | [0061](0061-der-punkt-ist-die-lampe.md) | Der Punkt hinter dem Namen ist die Statuslampe | |
 | [0062](0062-der-knopf-sucht-und-laedt.md) | Der Knopf sucht und lädt — er meldet nicht nur | Ladeanzeige geändert durch 0063 |
 | [0063](0063-sechs-tickets-vom-geraet.md) | Sechs Tickets vom Gerät — Farbe, Ordnung und ein stehengebliebener Satz | |
-| [0064](0064-der-akzent-gehoert-zum-schema.md) | Der Akzent gehört zum Schema, der Schatten auch | |
+| [0064](0064-der-akzent-gehoert-zum-schema.md) | Der Akzent gehört zum Schema, der Schatten auch | ⚠︎ Schattenteil abgelöst durch 0071 |
 | [0065](0065-ein-weg-statt-einer-wand.md) | Ein Weg statt einer Wand — und ein Strich, der nicht mitgeschrieben wird | |
 | [0066](0066-der-weg-und-die-wahl.md) | Die Reihenfolge ist der Weg, die Empfehlung eine Leiter | |
 | [0067](0067-fuenf-tickets-und-ein-merkzettel.md) | Fünf Tickets — und ein Merkzettel für Erklärungen | |
 | [0068](0068-die-marke-und-der-ort.md) | Die Schreibmarke gehört ins Feld, der Ort überlebt das Update | |
 | [0069](0069-der-rueckweg-und-die-wahl.md) | Der Rückweg für Tickets, und der Bezug wird eine Wahl | |
 | [0070](0070-gelegt-ist-auch-geschrieben.md) | Die Nachschrift kommt auch nach falsch gelegten Kacheln | ändert 0056 |
+| [0071](0071-nichts-huepft-nichts-schiebt.md) | Der Hüpfer nur nach einem Flug, kein Schatten, nichts schiebt | löst 0064 §1 ab |
 
 ## Einen neuen anlegen
 

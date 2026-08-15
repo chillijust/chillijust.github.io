@@ -58,11 +58,11 @@
   --glow: #1F1E1B;
   --lip: rgba(255, 255, 255, .035);
   --shade: rgba(0, 0, 0, .28);
-  /* Der Schatten der Figur steht als eigener Wert, nicht fest im Filter: Auf
-     dem fast schwarzen Grund darf er kräftig sein, auf einer satten Farbe wird
-     aus demselben Schwarz ein grauer Schleier — die Farbe wird entsättigt, und
-     das sieht nicht nach Schatten aus, sondern nach einem Fleck (ADR 0064). */
-  --figur-schatten: 0 6px 12px rgba(0, 0, 0, .4);
+  /* Die Figur wirft keinen Schatten mehr (ADR 0071). Der Wert stand hier zwei
+     Fassungen lang, erst kräftig, dann kurz — der viereckige Rand blieb in
+     Safari beides Mal sichtbar. Ein Weichzeichner, den der Browser in eine
+     eigene Ebene rastert und am Elementkasten beschneidet, hinterlässt genau
+     eine gerade Kante. Kein Filter, keine Kante. */
 }
 /* Ein Farbschema ist eine Palette, nicht zwei Achsen. «Dark» ist das :root
    darüber — es trägt kein Attribut, wie zuvor die Vorgabe keines trug. Die vier
@@ -105,9 +105,6 @@
   /* Etwas kräftiger als im dunklen Schema: Die Kachel soll sich abheben, und
      dazu trägt der Schatten bei, nicht nur die Helligkeit. */
   --shade: rgba(35, 39, 46, .10);
-  /* Kürzer, näher an der Figur und im Ton des Textes statt in reinem Schwarz.
-     Was nicht weit streut, kann auch nicht als Kasten stehenbleiben. */
-  --figur-schatten: 0 3px 5px rgba(35, 39, 46, .18);
   --blatt: var(--card);
 }
 
@@ -239,14 +236,19 @@ h1 { font-family: Georgia, "Times New Roman", serif; font-size: 28px; margin: 0;
      und der Punkt ist die Grenze, weil das Wort rechts von ihm steht und
      rechts abgeschnitten wird. */
   display: inline-block; overflow: hidden; max-width: 8em; opacity: 1;
-  transition: max-width 1s ease, opacity .8s ease, margin-left 1s ease;
+  transition: max-width 2s ease, opacity 1.6s ease, margin-left 2s ease;
 }
 .netz-stand.eingeklappt .netz-wort { max-width: 0; opacity: 0; margin-left: 0; }
-/* Unterwegs gibt es das Wort gar nicht — kein Einklappen, kein Platz. */
-.netz-stand.nur-punkt .netz-wort { display: none; }
+/* Unterwegs steht das Wort nicht da — aber es wird **eingeklappt**, nicht
+   ausgeblendet. `display: none` lässt sich nicht überblenden: Beim Wechsel
+   zurück auf Home fiel das Wort in einem Bild auf volle Breite, während es
+   umgekehrt gemächlich zuging. Auf- und Zuklappen sind jetzt derselbe Weg,
+   einmal vorwärts und einmal rückwärts (ADR 0071). */
+.netz-stand.nur-punkt .netz-wort { max-width: 0; opacity: 0; margin-left: 0; }
 @media (prefers-reduced-motion: reduce) {
-  .netz-wort { transition: opacity .8s ease; }
+  .netz-wort { transition: opacity 1.6s ease; }
   .netz-stand.eingeklappt .netz-wort { max-width: 0; margin-left: 0; }
+  .netz-stand.nur-punkt .netz-wort { max-width: 0; margin-left: 0; }
 }
 
 .iconbtn {
@@ -269,14 +271,34 @@ h1 { font-family: Georgia, "Times New Roman", serif; font-size: 28px; margin: 0;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .kopf-serie { color: var(--akzent); }
+/* **Die Meldung schiebt nichts** (ADR 0071). Sie stand als vollwertiges Feld
+   in der Zeile: Sobald «gespeichert» erschien, nahm es Breite, und das Etikett
+   links davon rückte zusammen — die Kopfzeile zuckte bei jeder Antwort. Jetzt
+   klappt sie auf wie der Online-Status, nur andersherum: Sie sitzt am rechten
+   Rand und wächst von dort nach links. `max-width` statt `width`, damit
+   nirgends eine Breite gerechnet werden muss — und der Inhalt hängt am
+   **linken** Rand des wachsenden Kastens, nicht am rechten: Sonst käme das
+   Wort von hinten herein und stünde zwei Sekunden lang als «PEICHERT» da. */
 #saveNote {
   flex: none; font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
-  color: var(--dim); display: inline-flex; align-items: center; gap: 4px;
-  opacity: 0; transition: opacity .35s;
+  color: var(--dim); display: inline-flex; align-items: center;
+  justify-content: flex-start; gap: 4px; white-space: nowrap;
+  overflow: hidden; max-width: 0; opacity: 0;
+  transition: max-width 2s ease, opacity 1.6s ease;
 }
-#saveNote.show { opacity: 1; }
+#saveNote.show { max-width: 14em; opacity: 1; }
+/* Der Haken kommt aus `ICON` und ist damit 20 px groß — in einer Zeile aus
+   10-px-Versalien machte er sie um neun Pixel höher, und genau das war das
+   zweite Schieben. Er nimmt hier die Höhe der Schrift. */
+#saveNote .icon { width: 11px; height: 11px; }
 #saveNote.ok { color: var(--good); }
-#saveNote.err { color: var(--bad); text-transform: none; letter-spacing: 0; opacity: 1; text-align: right; white-space: normal; }
+#saveNote.err {
+  color: var(--bad); text-transform: none; letter-spacing: 0;
+  max-width: 14em; opacity: 1; text-align: right; white-space: normal;
+}
+@media (prefers-reduced-motion: reduce) {
+  #saveNote { transition: opacity 1.6s ease; }
+}
 
 .icon { width: 20px; height: 20px; display: block; pointer-events: none; flex: none; }
 
@@ -1032,7 +1054,7 @@ button.built-word:active { transform: scale(.95); }
 .lf-zeichen { display: block; font-size: 20px; margin-top: 4px; }
 .lf-note { display: block; font-size: 12px; color: var(--dim); margin-top: 5px; }
 
-.chili { display: block; filter: drop-shadow(var(--figur-schatten)); }
+.chili { display: block; }
 .chili.gross { width: 104px; height: 104px; margin: 0 auto 16px; }
 .chili.klein { width: 76px; height: 76px; flex: none; margin: 0; }
 .chili.winzig { width: 30px; height: 30px; flex: none; }
@@ -1046,7 +1068,6 @@ button.built-word:active { transform: scale(.95); }
 body.chili-steht #chiliBuehne { visibility: visible; }
 #chiliFigur {
   width: 100%; height: 100%; display: block;
-  filter: drop-shadow(var(--figur-schatten));
 }
 /* Der Sprung: ducken, Bogen, federn — kurz und schnell. */
 #chiliFigur.springt { animation: chiliSprung .23s cubic-bezier(.3, .85, .4, 1); }
@@ -1251,11 +1272,14 @@ body.tut-offen { overflow: hidden; }
 
 /* Der Knopf am Ende der Übersicht. Er nimmt zwei Fünftel der Breite und steht
    rechts: Ein Angebot, das man annehmen kann, muss nicht die ganze Zeile
-   beanspruchen — und rechts liegt es unter dem Daumen. Golden, aber gestrichelt:
-   Wer die App kennt, soll ihn übersehen dürfen, ohne ihn suchen zu müssen. */
+   beanspruchen — und rechts liegt es unter dem Daumen. Er trägt den Akzent,
+   aber keine Fläche: Wer die App kennt, soll ihn übersehen dürfen, ohne ihn
+   suchen zu müssen. **Durchgezogen** seit ADR 0071 — gestrichelt las sich wie
+   ein Platzhalter, nicht wie ein Angebot; zurückhaltend ist er schon dadurch,
+   dass er hohl ist. */
 .tut-knopf {
   display: block; width: 40%; margin: 22px 0 4px auto; padding: 13px 10px;
-  background: none; border: 1px dashed var(--akzent); border-radius: 14px;
+  background: none; border: 1px solid var(--akzent); border-radius: 14px;
   color: var(--akzent); font: inherit; font-size: 14px; cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
@@ -1263,7 +1287,7 @@ body.tut-offen { overflow: hidden; }
    durchgezogen und auf einer Fläche: Wer die App zum ersten Mal öffnet, soll
    ihn nicht überlesen. */
 .tut-knopf.oben {
-  margin: 0 0 16px auto; border-style: solid;
+  margin: 0 0 16px auto;
   background: var(--akzent); color: var(--akzent-ink);
 }
 
@@ -1332,6 +1356,20 @@ body.tut-offen { overflow: hidden; }
 }
 .sternbtn.an { color: var(--akzent); }
 .sternbtn:active { transform: scale(.92); }
+/* **Der Stern meldet sich selbst** (ADR 0071). Bis 2.4.12 sprang die Chili,
+   wenn man einen Fakt oder eine Regel merkte — sie sprang bei *jedem*
+   Renderlauf, und Merken ist einer. Die Rückmeldung gehört aber dorthin, wo
+   getippt wurde. Nur beim Setzen, nicht beim Wegnehmen: Etwas wegzunehmen
+   braucht keine Feier. */
+.sternbtn.blinkt { animation: sternBlink .5s ease-out; }
+@keyframes sternBlink {
+  0%   { transform: scale(1);    filter: none; }
+  35%  { transform: scale(1.35); filter: brightness(1.7); }
+  100% { transform: scale(1);    filter: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sternbtn.blinkt { animation: none; }
+}
 
 .faktenliste { display: flex; flex-direction: column; gap: 10px; }
 .faktzeile {
@@ -3972,7 +4010,7 @@ var APP_STAND = '2026-08-15'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.4.12T'; /* == VERSION == */
+var APP_VERSION = '2.4.13T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -4014,19 +4052,27 @@ function chiliLage(el) {
 // einem Bogen zum neuen Platz. Waagerecht gleichförmig, senkrecht eine Parabel
 // darüber — das ist ein Wurf. Das Ducken und Federn steuert weiterhin die
 // Keyframe-Animation auf der Figur; hier bewegt sich nur die Hülle.
+// Gibt zurück, ob wirklich ein Weg zurückgelegt wurde. Der Hüpfer hängt daran
+// (ADR 0071): Er ist die Landung, und ohne Flug gibt es nichts zu landen.
 function chiliFlug(vorher, jetzt) {
-  if (!vorher || !jetzt || !chiliBuehne.animate) return;
+  if (!vorher || !jetzt || !chiliBuehne.animate) return false;
   try {
     // Ein noch laufender Flug würde sich mit dem neuen überlagern — und weil
     // beide «backwards» füllen, stünde die Figur irgendwo dazwischen.
     chiliBuehne.getAnimations().forEach(function (a) { a.cancel(); });
-    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     var dx = vorher.x - jetzt.x;
     var dy = vorher.y - jetzt.y;
     var ds = vorher.b / jetzt.b;
     var weite = Math.sqrt(dx * dx + dy * dy);
     // Zu kurz lohnt nicht, zu weit heißt: die alte Lage ist veraltet.
-    if (weite < 8 || weite > 900) return;
+    if (weite < 8 || weite > 900) return false;
+    // Wer keine Bewegung will, bekommt keine — aber der Weg war einer, und das
+    // Urteil darüber gehört nicht dem Betriebssystem. Es steht **nach** der
+    // Messung, sonst hieße «keine Animation» auch «nicht bewegt», und der
+    // Hüpfer käme ausgerechnet dort, wo alles still sein soll.
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return false;
+    }
     var bogen = Math.min(46, 14 + weite * 0.12);
     var bilder = [];
     for (var i = 0; i <= 8; i++) {
@@ -4043,7 +4089,9 @@ function chiliFlug(vorher, jetzt) {
     chiliBuehne.animate(bilder, {
       duration: 190, delay: 30, easing: 'linear', fill: 'backwards'
     });
-  } catch (e) { /* ohne Flug bleibt der Hüpfer */ }
+    return true;
+  } catch (e) { /* ohne Flug bleibt auch der Hüpfer aus */ }
+  return false;
 }
 
 // Wo steht die Figur? Vier Regeln, in dieser Reihenfolge:
@@ -4110,8 +4158,13 @@ function chiliAktualisieren(ohneSprung) {
   if (jetzt) chiliSpur = jetzt;
   if (ersterAuftritt || ohneSprung) return;
 
-  chiliFlug(vorher, jetzt);
-  chiliHuepfen();
+  // **Der Hüpfer ist die Landung, nicht die Begrüßung** (ADR 0071). Bis 2.4.12
+  // stand er hier unbedingt — und weil ein Renderlauf den Platzhalter als
+  // *neuen Knoten* zurückgibt, sprang die Figur auch dann, wenn sie exakt
+  // stehen blieb: beim Aufklappen von «Alle Übungen», beim Setzen eines
+  // Sterns, bei jedem Chip. Der Flug hat die Stelle längst geprüft; also
+  // fragen wir ihn.
+  if (chiliFlug(vorher, jetzt)) chiliHuepfen();
 }
 
 // Nur der Hüpfer, ohne Umzug. Das Tutorial braucht ihn: Dort bleibt die Figur
@@ -4649,6 +4702,17 @@ function faktGezeigt(text) {
 // Grammatikbaustein, `o:` für eine Schreibregel. Das Präfix hält die beiden
 // Töpfe auseinander, ohne zwei Felder zu brauchen — und eine Regel, die es
 // nicht mehr gibt, fällt beim Zeichnen einfach weg.
+// Ein Stern, der eben gesetzt wurde, blinkt einmal auf. Gesucht wird **nach dem
+// Neuzeichnen**: Der Knopf, auf den getippt wurde, ist dann längst ein anderer
+// Knoten — die Kennung überlebt den Renderlauf, das Element nicht.
+function sternBlinken(waehler) {
+  var el = document.querySelector(waehler);
+  if (!el) return;
+  el.classList.remove('blinkt');
+  void el.offsetWidth;   // Neustart der Animation erzwingen
+  el.classList.add('blinkt');
+}
+
 function merkId(art, id) { return art + ':' + id; }
 function istGemerkt(art, id) { return !!state.merk[merkId(art, id)]; }
 function merkUmschalten(art, id) {
@@ -4683,9 +4747,11 @@ function merkSternHtml(art, id) {
 function merkBinden(neuZeichnen) {
   document.querySelectorAll('[data-merk]').forEach(function (b) {
     b.addEventListener('click', function () {
-      var t = b.dataset.merk.split(':');
-      merkUmschalten(t[0], t.slice(1).join(':'));
+      var schluessel = b.dataset.merk;
+      var t = schluessel.split(':');
+      var an = merkUmschalten(t[0], t.slice(1).join(':'));
       if (neuZeichnen) neuZeichnen();
+      if (an) sternBlinken('[data-merk="' + schluessel.replace(/"/g, '\\"') + '"]');
     });
   });
 }
@@ -5273,7 +5339,10 @@ function zeigeStatus(art, text) {
   if (art === 'ok') {
     statusTimer = setTimeout(function () {
       n.className = art;
-      statusTimer = setTimeout(function () { n.innerHTML = ''; }, 400);
+      // Erst leeren, wenn die Zeile ganz zugeklappt ist — vorher risse der
+      // Text mitten in der Bewegung ab (ADR 0071). Die Zahl ist die Dauer des
+      // Zuklappens aus dem Stil.
+      statusTimer = setTimeout(function () { n.innerHTML = ''; }, 2000);
     }, 2000);
   }
 }
@@ -5298,10 +5367,12 @@ function netzWeg() {
 // einem Wechsel des Netzes und bei der Rückkehr auf Home. Ein Renderlauf
 // allein ist kein Anlass, sonst stünde das Wort nach jedem Blattwechsel wieder
 // da und die Frist liefe nie ab.
-// Doppelt so lange wie in 2.4.4, und das Einklappen selbst dauert doppelt so
-// lange: «halb so schnell verschwinden» meint beides — später anfangen und
-// gemächlicher zugehen.
-var NETZ_FRIST = 8400;
+// **Die Frist und die Bewegung sind zwei Dinge** (ADR 0071). 2.4.11 hat beide
+// verdoppelt und damit das Falsche getroffen: Das Wort stand doppelt so lange,
+// verschwand aber immer noch zügig. Gemeint war nur das Zweite. Die Frist steht
+// darum wieder bei gut vier Sekunden, und das Zuklappen dauert zwei — halb so
+// schnell wie zuvor, und genauso langsam kommt es auch wieder.
+var NETZ_FRIST = 4200;
 var netzZuletzt = '';
 var netzWarDaheim = false;
 var netzUhr = null;
@@ -5945,8 +6016,9 @@ function faktKarteBinden(weiter, neu) {
     setTab('fakten');
   });
   document.getElementById('factFav').addEventListener('click', function () {
-    faktFavorit(faktKarte);
+    var an = faktFavorit(faktKarte);
     neu();
+    if (an) sternBlinken('#factFav');
   });
 }
 
@@ -7600,7 +7672,14 @@ function renderHome() {
   main.innerHTML = html;
 
   document.getElementById('homeEmpf').addEventListener('click', function () { setTab(e.ziel); });
-  document.getElementById('tutKnopf').addEventListener('click', tutStarten);
+  // **Nicht `tutStarten` unmittelbar hängen** (ADR 0071): Der Zuhörer bekommt
+  // das Ereignis als erstes Argument, und das landete in `ruhig` — jeder Klick
+  // war damit ein «ohne Sprung», und die Figur stand im Tutorial plötzlich da,
+  // statt hinzufliegen. Nur der automatische Start beim allerersten Öffnen ist
+  // wirklich ruhig; dort steht das `true` ausgeschrieben.
+  document.getElementById('tutKnopf').addEventListener('click', function () {
+    tutStarten();
+  });
   document.getElementById('homeAlleKnopf').addEventListener('click', function () {
     homeOffen = !homeOffen;
     renderHome();
@@ -12799,8 +12878,12 @@ function renderFakten() {
   });
   main.querySelectorAll('[data-fav]').forEach(function (b) {
     b.addEventListener('click', function () {
-      faktFavorit(liste[parseInt(b.dataset.fav, 10)]);
+      var nr = b.dataset.fav;
+      var an = faktFavorit(liste[parseInt(nr, 10)]);
       renderFakten();
+      // Nach dem Neuzeichnen steht an derselben Stelle derselbe Fakt: Die
+      // Liste sortiert sich beim Merken nicht um (ADR 0067).
+      if (an) sternBlinken('[data-fav="' + nr + '"]');
     });
   });
   document.getElementById('faktenBack').addEventListener('click', zurueckGehen);
