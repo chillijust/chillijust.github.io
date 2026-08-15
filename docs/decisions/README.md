@@ -93,6 +93,7 @@ Wer neu dazukommt und nur fünf lesen will:
 | [0067](0067-fuenf-tickets-und-ein-merkzettel.md) | Fünf Tickets — und ein Merkzettel für Erklärungen | |
 | [0068](0068-die-marke-und-der-ort.md) | Die Schreibmarke gehört ins Feld, der Ort überlebt das Update | |
 | [0069](0069-der-rueckweg-und-die-wahl.md) | Der Rückweg für Tickets, und der Bezug wird eine Wahl | |
+| [0070](0070-gelegt-ist-auch-geschrieben.md) | Die Nachschrift kommt auch nach falsch gelegten Kacheln | ändert 0056 |
 
 ## Einen neuen anlegen
 

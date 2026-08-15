@@ -96,10 +96,18 @@ zweite Flug bricht den ersten ab. Ein runder Knopf, in den sie springt, braucht
   nirgends. Wer sie in einer Suite prüft, schließt vorher das Tutorial (`tutEnde()`) —
   dort steht die Figur in *seiner* Blase.
 - **Drei Strengen, drei Schalter** (ADR 0056). **Die Nachschrift** (`reko`,
-  `rekoVerlangen/Html/Fertig/Binden`, geteilt von allen fünf Schreibaufgaben) hält nach
+  `rekoVerlangen/Html/Fertig/Binden`, geteilt von sechs Übungen) hält nach
   einem Schreibfehler den «Weiter»-Knopf zu, **bewertet aber nichts** — sonst tippte man
-  sich aus dem Fehler heraus. Nur bei Getipptem, nur bei Kyrillisch, Sätze nur auf
-  ausdrückliche Ansage. **Das Tagesmaß** bremst an genau einer Stelle (`uebVorrat()` in
+  sich aus dem Fehler heraus. Nur bei Kyrillisch, Sätze nur auf ausdrückliche Ansage —
+  aber **getippt oder gelegt** (ADR 0070): Die Grenze verläuft zwischen *Herstellen* und
+  *Wählen*, nicht zwischen Tastatur und Kachel. Wer ein Wort falsch legt, weiß seine
+  Schreibweise so wenig wie der, der es falsch tippt; wer unter fertigen Wörtern wählt,
+  behauptet keine. Kyrillisch gelegt wird nur in «Lernsets/Freestyle» und im
+  Power-Training — die Kacheln in «Buchstaben» tragen die Umschrift, die in «Übersetzen»
+  ganze Wörter eines Satzes. **`reko = null` steht in `aufgabeBeginnt()`**, nicht nur in
+  `rekoVerlangen()`: «Aufdecken» führt an jeder Prüfung vorbei, und die Nachschrift der
+  vorigen Aufgabe stünde sonst über der nächsten — derselbe Fehler wie beim Kommentar der
+  Chili. **Das Tagesmaß** bremst an genau einer Stelle (`uebVorrat()` in
   `waehleWort()`) und **nur Neues** — Wiederholen bleibt unbegrenzt (ADR 0048); der Tag
   kommt aus `heuteNr()`, dem Kalender des Geräts. **Das Fehlerprofil** (`state.verwechselt`)
   liefert höchstens **zwei** der drei Ablenker; drei wären eine Wiedervorlage.
@@ -346,7 +354,9 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   ё/е kosten nichts — sonst stünde eine als richtig gewertete Antwort rot da. Die Farbe
   trägt nie allein: Falsches ist zusätzlich unterstrichen, und eine Zeile zählt es in
   Worten. Sie steht in **allen vier Schreibaufgaben** (`pruefzeileHtml()`, drei Gestalten
-  je nach Feld); die Kachelmodi bleiben draußen — gelegt ist nicht geschrieben.
+  je nach Feld); die Kachelmodi bleiben draußen — gelegt ist nicht geschrieben. **Für Lob
+  und Prüfzeile gilt der Satz unverändert**, für die Nachschrift seit ADR 0070 nicht mehr:
+  Sie fragt nicht, wie die Antwort zustande kam, sondern ob die Schreibweise sitzt.
 - **Die eingebaute Tastatur kommt von selbst, wo Kyrillisch verlangt ist**
   (`tastaturVorgabe()`, Einstellung `tastaturAuto`). Die Sprache der *Geräte*tastatur
   kann eine Seite nicht wählen — iOS entscheidet das, `lang` ist kein Hebel. Nichts

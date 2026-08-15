@@ -151,10 +151,10 @@ try {
     pruefe('D2 «auch Sätze» verlangt sie doch', true, 'kein Tippsatz');
   }
 
-  // Gelegt ist nicht geschrieben: Kachelaufgaben bleiben immer draußen.
+  // Wer unter fertigen Wörtern wählt, behauptet keine Schreibweise (ADR 0070).
   state.settings.rekonstruktion = 'immer';
   rekoVerlangen('книга', false, false, false);
-  pruefe('D3 gelegt ist nicht geschrieben', reko === null);
+  pruefe('D3 eine Wahl verlangt keine Nachschrift', reko === null);
   rekoVerlangen('книга', true, true, false);
   pruefe('D4 richtig verlangt nie etwas', reko === null);
   state.settings.rekonstruktion = 'woerter';
@@ -358,6 +358,145 @@ try {
   ansichtenZuruecksetzen();
   pruefe('I1 die Nachschrift ist weg', reko === null);
   pruefe('I2 und ohne sie steht der Weg offen', rekoFertig() === true);
+
+  // ── J · Gelegt zählt jetzt mit (ADR 0070) ─────────────────
+  // Wer ein Wort aus Kacheln falsch zusammensetzt, weiß seine Schreibweise so
+  // wenig wie der, der es falsch tippt. Die Wahl unter fertigen Wörtern bleibt
+  // draußen — dort behauptet niemand etwas über Buchstaben.
+
+  // Die Schlüssel, die das Wort richtig legen würden.
+  function legeSchluessel(frage, wort) {
+    var frei = frage.tiles.slice();
+    var keys = [];
+    for (var i = 0; i < wort.length; i++) {
+      for (var j = 0; j < frei.length; j++) {
+        if (frei[j].ch === wort.charAt(i)) { keys.push(frei[j].key); frei.splice(j, 1); break; }
+      }
+    }
+    return keys;
+  }
+  // Zwei Kacheln vertauschen, sodass wirklich etwas anderes dasteht.
+  function falschGelegt(frage, wort) {
+    var keys = legeSchluessel(frage, wort);
+    if (keys.length !== wort.length) return null;
+    for (var i = 1; i < keys.length; i++) {
+      if (wort.charAt(i) !== wort.charAt(0)) {
+        var k = keys.slice();
+        k[0] = keys[i]; k[i] = keys[0];
+        return k;
+      }
+    }
+    return null;   // ein Wort aus lauter gleichen Buchstaben — gibt es nicht
+  }
+
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  ALL_VOCAB.forEach(function (v) {
+    state.boxes[v.id] = SATZ_STUFE;
+    state.lastSeen[v.id] = Date.now();
+  });
+  uebModus = 'freestyle'; uebThema = 'Alle'; uebLesen = false;
+  setTab('freestyle');
+  var kachelFrage = null, kachelKeys = null;
+  for (var t = 0; t < 400 && !kachelKeys; t++) {
+    uebZuruecksetzen();
+    uebQ = buildQuestion();
+    if (uebQ && uebQ.mode === 'tiles') {
+      kachelKeys = falschGelegt(uebQ, uebQ.word.ru);
+      if (kachelKeys) kachelFrage = uebQ;
+    }
+  }
+  pruefe('J1 eine Kachelaufgabe ist zu bekommen', !!kachelFrage);
+  if (kachelFrage) {
+    var kachelWort = kachelFrage.word.ru;
+    uebBuilt = kachelKeys;
+    uebPruefen();
+    pruefe('J2 falsch gelegt ist falsch', uebCorrect === false);
+    pruefe('J3 die Nachschrift steht auch in «Freestyle» da',
+      !!reko && reko.loesung === kachelWort && !!q('.reko') && !!q('#rekoInput'),
+      reko ? reko.loesung : 'keine');
+    pruefe('J4 «Weiter» ist zu', q('#uebNext').disabled === true);
+    var kachelStufe = state.boxes[kachelFrage.word.id];
+    schreibe(q('#rekoInput'), kachelWort);
+    pruefe('J5 richtig nachgeschrieben öffnet den Weg', q('#uebNext').disabled === false);
+    pruefe('J6 und bewertet dabei nichts',
+      state.boxes[kachelFrage.word.id] === kachelStufe,
+      String(state.boxes[kachelFrage.word.id]));
+    q('#uebNext').click();
+    pruefe('J7 danach ist sie weg', reko === null && !q('.reko'));
+  }
+
+  // Die Wahl bleibt draußen — auch die Lücke, dort stehen fertige Formen.
+  var wahlFrage = null;
+  for (var w = 0; w < 400 && !wahlFrage; w++) {
+    uebZuruecksetzen();
+    uebQ = buildQuestion();
+    if (uebQ && uebQ.mode !== 'tiles') wahlFrage = uebQ;
+  }
+  pruefe('J8 eine Auswahlaufgabe ist zu bekommen', !!wahlFrage);
+  if (wahlFrage) {
+    var richtigeId = wahlFrage.mode === 'luecke' ? wahlFrage.form : wahlFrage.word.id;
+    uebPicked = wahlFrage.options.filter(function (o) { return o.id !== richtigeId; })[0].id;
+    uebPruefen();
+    pruefe('J9 falsch gewählt', uebCorrect === false);
+    pruefe('J10 eine Wahl verlangt nichts nachzuschreiben',
+      reko === null && !q('.reko') && q('#uebNext').disabled === false);
+    q('#uebNext').click();
+  }
+
+  // «Aufdecken» führt an jeder Prüfung vorbei — vorher blieb die Nachschrift
+  // der letzten Aufgabe stehen. Darum räumt sie jetzt aufgabeBeginnt weg.
+  reko = { loesung: 'квак', eingabe: 'квак', kb: null };
+  uebNext(true);
+  pruefe('J11 eine neue Aufgabe räumt die Nachschrift weg', reko === null);
+  renderUeben();
+  var aufdecken = q('#uebReveal');
+  if (aufdecken) {
+    aufdecken.click();
+    pruefe('J12 wer aufdeckt, schreibt nichts nach',
+      reko === null && !q('.reko') && q('#uebNext').disabled === false);
+  } else {
+    pruefe('J12 wer aufdeckt, schreibt nichts nach', false, 'kein Aufdecken-Knopf');
+  }
+
+  // Und im Power-Training, wo die erste Stufe immer eine Kachelaufgabe ist.
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  ALL_VOCAB.forEach(function (v) { state.lastSeen[v.id] = Date.now(); });
+  var gefallen = ALL_VOCAB.filter(function (v) {
+    return v.ru.length >= 4 && v.ru.indexOf(' ') === -1;
+  }).slice(0, PT_WOERTER);
+  gefallen.forEach(function (v, i) {
+    state.boxes[v.id] = SATZ_STUFE - 1;
+    state.patzer[v.id] = Date.now() - i;
+  });
+  setTab('power');
+  ptRundeStarten();
+  renderPower();
+  pruefe('J13 die erste Stufe ist eine Kachelaufgabe',
+    !!ptQ && ptQ.stufe === 'kacheln', ptQ ? ptQ.stufe : 'keine Frage');
+  if (ptQ && ptQ.stufe === 'kacheln') {
+    var ptWort = ptQ.wort.ru;
+    var ptKeys = falschGelegt(ptQ, ptWort);
+    pruefe('J14 es lässt sich falsch legen', !!ptKeys);
+    if (ptKeys) {
+      ptBuilt = ptKeys;
+      ptPruefen();
+      pruefe('J15 falsch gelegt verlangt auch hier die Nachschrift',
+        ptCorrect === false && !!reko && reko.loesung === ptWort && !!q('#rekoInput'),
+        reko ? reko.loesung : 'keine');
+      pruefe('J16 «Weiter» ist zu', q('#ptNext').disabled === true);
+      schreibe(q('#rekoInput'), ptWort);
+      pruefe('J17 richtig nachgeschrieben öffnet den Weg', q('#ptNext').disabled === false);
+    }
+  }
+
+  // «Nie» schaltet auch das Gelegte ab — eine Strenge ohne Ausschalter wäre
+  // eine Zumutung.
+  state.settings.rekonstruktion = 'nie';
+  rekoVerlangen('книга', true, false, false);
+  pruefe('J18 «nie» gilt auch für Gelegtes', reko === null);
+  state.settings.rekonstruktion = 'woerter';
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);
 }

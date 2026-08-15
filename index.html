@@ -3972,7 +3972,7 @@ var APP_STAND = '2026-08-15'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.4.11T'; /* == VERSION == */
+var APP_VERSION = '2.4.12T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -6393,15 +6393,20 @@ function meisterTon(richtig) {
 // wird auch neu gezeichnet, wenn nur die Tastatur aufklappt; die Uhr dort zu
 // stellen hieße, jede Nachdenkpause zu verschenken.
 var aufgabeSeit = 0;
-// **Eine neue Aufgabe steht.** Zwei Dinge gehören dazu, und beide gehören
+// **Eine neue Aufgabe steht.** Drei Dinge gehören dazu, und alle drei gehören
 // hierher, weil sie denselben Augenblick meinen: Die Uhr läuft (sie misst das
-// Denken, nicht das Tippen — darum nicht im Renderlauf), und was die Chili zur
-// vorigen Aufgabe gesagt hat, ist gesagt. Bis 2.4.3 fehlte das Zweite: Der
-// Kommentar wurde nur beim Antworten neu gesetzt und nie gelöscht, also stand
-// er nach «Weiter» weiter über der nächsten Aufgabe (ADR 0063).
+// Denken, nicht das Tippen — darum nicht im Renderlauf), was die Chili zur
+// vorigen Aufgabe gesagt hat, ist gesagt, und die Nachschrift der vorigen
+// Aufgabe ist erledigt. Bis 2.4.3 fehlte das Zweite: Der Kommentar wurde nur
+// beim Antworten neu gesetzt und nie gelöscht, also stand er nach «Weiter»
+// weiter über der nächsten Aufgabe (ADR 0063). Das Dritte kam mit ADR 0070
+// dazu: Bis dahin setzte jedes `rekoPruefen` seine Nachschrift selbst zurück —
+// das trägt nur, solange **jeder** Weg in die Auflösung über eine Prüfung
+// führt. «Aufdecken» tut das nicht.
 function aufgabeBeginnt() {
   aufgabeSeit = Date.now();
   kommentar = '';
+  reko = null;
 }
 
 function tempoNotieren() {
@@ -8242,6 +8247,10 @@ function uebPruefen() {
     daneben: q.mode === 'tiles' ? danebenZeichen(attempt, q.word.ru) : (uebCorrect ? 0 : 99)
   });
   if (q.mode === 'tiles' && !uebRevealed) leseWerten(q.word.ru, attempt, uebCorrect);
+  // Die Nachschrift nur nach gelegten Kacheln (ADR 0070): Dort hat der Nutzer
+  // eine Schreibweise behauptet. Bei «Was bedeutet …» und in der Lücke hat er
+  // unter fertigen Wörtern gewählt — da gibt es nichts nachzuschreiben.
+  rekoVerlangen(q.word.ru, q.mode === 'tiles', uebCorrect, false);
   var vorher = state.boxes[q.word.id] || 0;
   updateBox(q.word.id, uebCorrect);
   meisterMeldung = null;
@@ -8437,7 +8446,7 @@ function renderUeben() {
       meisterHtml() + leseFallHtml();
   }
 
-  html += '</div><div class="btn-row">';
+  html += '</div>' + rekoHtml() + '<div class="btn-row">';
   if (uebPhase === 'ask') {
     html += '<button class="btn ghost" id="uebReveal">Aufdecken</button>';
     if (state.settings.confirmUeben) {
@@ -8445,7 +8454,8 @@ function renderUeben() {
         '>Best\u00e4tigen</button>';
     }
   } else {
-    html += '<button class="btn primary" id="uebNext">Weiter \u2192</button>';
+    html += '<button class="btn primary" id="uebNext"' + (rekoFertig() ? '' : ' disabled') +
+      '>Weiter \u2192</button>';
   }
   html += '</div>';
   html += '<p class="session-info">' + state.answered + ' beantwortet · Beste Serie: ' + state.bestStreak + '</p></section>';
@@ -8487,7 +8497,11 @@ function renderUeben() {
       renderUeben();
     });
   } else {
-    document.getElementById('uebNext').addEventListener('click', function () { uebNext(false); });
+    rekoBinden(renderUeben);
+    document.getElementById('uebNext').addEventListener('click', function () {
+      if (!rekoFertig()) return;
+      uebNext(false);
+    });
   }
 }
 
@@ -9985,11 +9999,18 @@ function tastaturHtml(attr) {
 // gefallen; die Nachschrift hält nur den «Weiter»-Knopf zu. Wäre sie eine
 // zweite Bewertung, könnte man sich aus einem Fehler heraustippen.
 //
-// **Nur bei getippten Aufgaben und nur bei Kyrillisch** — gelegt ist nicht
-// geschrieben, und einen deutschen Satz nachzuschreiben lehrt kein Russisch.
-// Ganze Sätze bleiben in der Vorgabe draußen: Sechs Wörter auf einer
+// **Nur bei Kyrillisch** — einen deutschen Satz nachzuschreiben lehrt kein
+// Russisch. Ganze Sätze bleiben in der Vorgabe draußen: Sechs Wörter auf einer
 // Bildschirmtastatur sind keine Übung mehr, sondern eine Strafe. Wer sie will,
 // stellt «immer» ein.
+//
+// **Getippt oder gelegt** (ADR 0070). Bis 2.4.11 hieß die Bedingung «nur bei
+// Getipptem» — gelegt ist nicht geschrieben. Für Lob und Prüfzeile stimmt das
+// weiter: Wer aus vorgelegten Kacheln wählt, hat nicht buchstabiert. Für die
+// Nachschrift stimmt es nicht, denn sie fragt nicht, *wie* die Antwort zustande
+// kam, sondern ob die Schreibweise sitzt — und wer ein Wort falsch **legt**,
+// weiß sie so wenig wie der, der es falsch tippt. Was draußen bleibt, ist die
+// **Wahl** unter fertigen Wörtern: Dort behauptet niemand eine Schreibweise.
 var reko = null;   // { loesung, eingabe, kb } — die verlangte Nachschrift
 
 function rekoVerlangen(loesung, getippt, richtig, satz) {
@@ -10038,7 +10059,6 @@ function rekoBinden(neu) {
     el.addEventListener('click', function () {
       var k = el.dataset.rekokey;
       reko.eingabe = k === 'BS' ? reko.eingabe.slice(0, -1) : reko.eingabe + k;
-      var f = document.getElementById('rekoInput');
       feldSchreiben('rekoInput', reko.eingabe);
       if (rekoFertig()) { ton(true); neu(); }
     });
@@ -11668,7 +11688,10 @@ function ptPruefen() {
   meisterMeldung = null;
   meisterPruefen(vorher, state.boxes[q.wort.id], 'Wort', q.wort.ru + ' — ' + q.wort.de,
     woerterGemeistert() + ' von ' + ALL_VOCAB.length + ' Wörtern');
-  rekoVerlangen(q.wort.ru, q.stufe !== 'kacheln', richtig, false);
+  // Auch nach falsch gelegten Kacheln (ADR 0070) — hier zumal: Das
+  // Power-Training holt zurückgefallene Wörter zurück, und ein Wort, das man
+  // eben noch falsch buchstabiert hat, ist nicht zurückgeholt.
+  rekoVerlangen(q.wort.ru, true, richtig, false);
   meisterTon(richtig);
   if (richtig) q.eintrag.treffer++;
   else q.eintrag.treffer = Math.max(0, q.eintrag.treffer - 1);
