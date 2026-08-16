@@ -4419,7 +4419,7 @@ var APP_STAND = '2026-08-16'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.7.0T'; /* == VERSION == */
+var APP_VERSION = '2.7.1T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -9631,8 +9631,11 @@ function uebInhaltZeichnen() {
     });
     main.querySelectorAll('[data-uebkey]').forEach(function (b) {
       b.addEventListener('click', function () {
+        // **Die Rücktaste heißt «BS»** — so schreibt `tastaturHtml()` sie, und
+        // so liest «Tippen» sie seit jeher. Ein anderes Zeichen zu erwarten
+        // hieß, genau diese zwei Buchstaben ins Feld zu schreiben.
         var t = b.dataset.uebkey;
-        uebEingabe = t === '<' ? uebEingabe.slice(0, -1) : uebEingabe + t;
+        uebEingabe = kbAnwenden(uebEingabe, t);
         feldSchreiben('uebInput', uebEingabe);
         var kn = document.getElementById('uebConfirm');
         if (kn) kn.disabled = !uebAbgabeBereit();
@@ -10325,7 +10328,7 @@ function trInhaltZeichnen() {
     b.addEventListener('click', function () {
       if (trPhase !== 'ask') return;
       var k = b.dataset.trkey;
-      trEingabe = k === 'BS' ? trEingabe.slice(0, -1) : trEingabe + k;
+      trEingabe = kbAnwenden(trEingabe, k);
       var feld = document.getElementById('trInput');
       feldSchreiben('trInput', trEingabe);
       var knopf = document.getElementById('trConfirm');
@@ -11134,6 +11137,15 @@ function kbFeldAttr(kbOffen) {
 // dritten Reihe, das Leerzeichen allein in einer vierten — breit und mittig.
 // Vorher hingen beide hinten an der dritten Reihe; die brach dadurch um, und
 // die Rücktaste landete allein und mittig auf einer eigenen Zeile.
+// **Was eine Taste mit dem Text macht, steht an einer Stelle** (ADR 0089).
+// Sechs Ansichten binden dieselbe Tastatur, und jede schrieb ihre eigene Zeile
+// dafür — fünfmal richtig, einmal mit «<» statt «BS», und dann standen genau
+// diese zwei Buchstaben im Feld. Ein Wert, den sechs Stellen kennen müssen,
+// gehört keiner davon.
+function kbAnwenden(text, taste) {
+  return taste === 'BS' ? String(text).slice(0, -1) : String(text) + taste;
+}
+
 function tastaturHtml(attr) {
   var html = '<div>';
   KB_ROWS.forEach(function (row, ri) {
@@ -11220,7 +11232,7 @@ function rekoBinden(neu) {
   main.querySelectorAll('[data-rekokey]').forEach(function (el) {
     el.addEventListener('click', function () {
       var k = el.dataset.rekokey;
-      reko.eingabe = k === 'BS' ? reko.eingabe.slice(0, -1) : reko.eingabe + k;
+      reko.eingabe = kbAnwenden(reko.eingabe, k);
       feldSchreiben('rekoInput', reko.eingabe);
       if (rekoFertig()) { ton(true); neu(); }
     });
@@ -12215,7 +12227,7 @@ function grammInhaltZeichnen() {
     el.addEventListener('click', function () {
       if (gramPhase !== 'ask') return;
       var k = el.dataset.gramkey;
-      gramEingabe = k === 'BS' ? gramEingabe.slice(0, -1) : gramEingabe + k;
+      gramEingabe = kbAnwenden(gramEingabe, k);
       var f = document.getElementById('gramInput');
       feldSchreiben('gramInput', gramEingabe);
       var c = document.getElementById('gramConfirm');
@@ -12684,7 +12696,7 @@ function schreibInhaltZeichnen() {
     el.addEventListener('click', function () {
       if (orthoPhase !== 'ask') return;
       var k = el.dataset.orthokey;
-      orthoEingabe = k === 'BS' ? orthoEingabe.slice(0, -1) : orthoEingabe + k;
+      orthoEingabe = kbAnwenden(orthoEingabe, k);
       var f = document.getElementById('orthoInput');
       feldSchreiben('orthoInput', orthoEingabe);
       var c = document.getElementById('orthoConfirm');
@@ -13000,7 +13012,7 @@ function ptBinden() {
   main.querySelectorAll('[data-ptkey]').forEach(function (b) {
     b.addEventListener('click', function () {
       var k = b.dataset.ptkey;
-      ptEingabe = k === 'BS' ? ptEingabe.slice(0, -1) : ptEingabe + k;
+      ptEingabe = kbAnwenden(ptEingabe, k);
       var f = document.getElementById('ptInput');
       feldSchreiben('ptInput', ptEingabe);
       var knopf = document.getElementById('ptConfirm');
@@ -13394,7 +13406,7 @@ function tippenInhaltZeichnen() {
     b.addEventListener('click', function () {
       if (tResult) return;
       var k = b.dataset.key;
-      tEingabe = k === 'BS' ? tEingabe.slice(0, -1) : tEingabe + k;
+      tEingabe = kbAnwenden(tEingabe, k);
       var inp = document.getElementById('tInput');
       feldSchreiben('tInput', tEingabe);
     });

@@ -185,6 +185,80 @@ try {
   state = defaultState();
   ansichtenZuruecksetzen();
 
+  // ── AA · Die Tastatur in «Lernsets» (ADR 0088) ────────────
+  // **Die Rücktaste heißt «BS», nicht «<».** Wer sie anders liest, fügt genau
+  // diese zwei Buchstaben ins Feld ein — so wurde es gemeldet.
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  ['lernsets', 'tippen', 'uebersetzen'].forEach(function (k) { state.tutUebung[k] = 1; });
+  tutEnde();
+  ALL_VOCAB.forEach(function (v) {
+    state.boxes[v.id] = state.settings.tippenStufe;
+    state.lastSeen[v.id] = Date.now();
+  });
+  uebModus = 'lernsets'; uebAuswahl = 'aktuell';
+  uebKb = true;
+  setTab('lernsets');
+  pruefe('AA1 ab der Tippstufe wird geschrieben', !!uebQ && uebQ.mode === 'tippen',
+    uebQ && uebQ.mode);
+  pruefe('AA2 mit Feld und Tastatur', !!q('#uebInput') && !!q('[data-uebkey]'));
+  var aaTasten = alle('[data-uebkey]');
+  var aaBuchstabe = aaTasten.filter(function (b) { return b.dataset.uebkey === 'а'; })[0];
+  var aaRueck = aaTasten.filter(function (b) { return b.dataset.uebkey === 'BS'; })[0];
+  pruefe('AA3 es gibt eine Rücktaste', !!aaRueck);
+  aaBuchstabe.click();
+  aaBuchstabe.click();
+  pruefe('AA4 Buchstaben landen im Feld',
+    uebEingabe === 'аа' && q('#uebInput').value === 'аа', uebEingabe);
+  aaRueck.click();
+  pruefe('AA5 die Rücktaste nimmt genau ein Zeichen weg',
+    uebEingabe === 'а' && q('#uebInput').value === 'а', uebEingabe);
+  aaRueck.click();
+  aaRueck.click();
+  pruefe('AA6 und über den Anfang hinaus passiert nichts',
+    uebEingabe === '' && q('#uebInput').value === '', uebEingabe);
+  var aaSpace = aaTasten.filter(function (b) { return b.dataset.uebkey === ' '; })[0];
+  pruefe('AA7 das Leerzeichen schreibt ein Leerzeichen', (function () {
+    if (!aaSpace) return false;
+    aaSpace.click();
+    var ok = uebEingabe === ' ';
+    aaRueck.click();
+    return ok;
+  })(), JSON.stringify(uebEingabe));
+  // **Der Abgabeknopf folgt der Eingabe** — sonst bliebe er gesperrt, obwohl
+  // etwas dasteht, und die eingebaute Tastatur führte ins Nichts.
+  aaBuchstabe.click();
+  pruefe('AA8 der Knopf öffnet sich mit dem ersten Zeichen',
+    !!q('#uebConfirm') && q('#uebConfirm').disabled === false,
+    q('#uebConfirm') ? String(q('#uebConfirm').disabled) : 'kein Knopf');
+  aaRueck.click();
+  pruefe('AA9 und schließt sich wieder, wenn nichts mehr dasteht',
+    q('#uebConfirm').disabled === true, String(q('#uebConfirm').disabled));
+  uebKb = null;
+
+  // ── AB · Alle Tastaturen gehen durch dieselbe Hand ────────
+  // **Eine Prüfung, die sechs Binder aufzählt, mißt über den siebten hinweg.**
+  // Gefragt wird darum am Quelltext: Wer eine Taste liest, wendet sie über
+  // kbAnwenden() an — dort und nur dort steht, daß «BS» löscht.
+  // **Nur der App-Teil**, nicht die angehängte Suite: Diese Prüfung enthält
+  // ihren eigenen Wähler als Text und fände sonst sich selbst.
+  var quelle = document.documentElement.innerHTML.split('var log = [];')[0];
+  pruefe('AB1 die Regel steht genau einmal', (function () {
+    // Zwei Vorkommen von 'BS' im Anwenden: die Funktion selbst und ihr
+    // Kommentar. Kein Binder darf die Taste noch selbst deuten.
+    var binder = quelle.match(/dataset\.\w*key/g) || [];
+    return binder.length >= 6;
+  })(), String((quelle.match(/dataset\.\w*key/g) || []).length) + ' Binder');
+  var abFehlt = (function () {
+    var re = /dataset\.\w*key;([\s\S]{0,200})/g;
+    var m, raus = [];
+    while ((m = re.exec(quelle))) {
+      if (m[1].indexOf('kbAnwenden') === -1) raus.push(m[0].slice(0, 60).replace(/\s+/g, ' '));
+    }
+    return raus;
+  })();
+  pruefe('AB2 und jeder Binder ruft sie', abFehlt.length === 0, abFehlt.join(' || '));
+
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);
 }

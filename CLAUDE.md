@@ -549,8 +549,11 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   aus wie ein Fehlgriff) und `swOrtMerken()`/`swOrtHolen()` bringen Ansicht und Reiter
   wieder. Der Merker wird **immer** weggeräumt, gilt nur eine Minute und nur für eine
   Ansicht, die es noch gibt; der `ansichtStapel` bekommt `home` als Boden.
-- **Die Tastatur steht genau einmal im Code** (`tastaturHtml(attr)`, alle vier
-  Schreibaufgaben). Ihr Aufbau folgt der gewohnten: drei Buchstabenreihen, Rücktaste
+- **Die Tastatur steht genau einmal im Code** (`tastaturHtml(attr)`), und **was eine
+  Taste mit dem Text macht, ebenso**: `kbAnwenden(text, taste)` (ADR 0089). Sieben
+  Ansichten binden sie; daß «BS» löscht, steht nur dort. Eine Prüfung fragt den
+  Quelltext, ob jeder `dataset.…key`-Binder sie ruft — eine, die sechs Binder aufzählt,
+  mißt über den siebten hinweg (und genau der war übersehen). Ihr Aufbau folgt der gewohnten: drei Buchstabenreihen, Rücktaste
   rechts am Ende der dritten, Leerzeichen breit und mittig in einer vierten.
 - **Die Schalter im Sicherungscode stehen an festen Stellen** (`BK_SETTINGS`). Eine
   Einstellung, die es nicht mehr gibt, hinterlässt ein `null` als Platzhalter; was ein
