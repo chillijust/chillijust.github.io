@@ -286,6 +286,13 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   Kopf — aber immer nur **eines** von beiden. Zwei Merker: `tutorialGesehen` (fällt beim Öffnen, steuert das
   automatische Angebot) und `tutorialFertig` (fällt nach dem letzten Schritt, steuert den
   Platz). Ein Abbruch setzt nur den ersten.
+- **Unter dem Bildschirm liegt noch Seite** (ADR 0087). Ein Hof mit
+  `position: fixed; inset: 0` deckt den **Layout-Viewport** — in der Zone des
+  Home-Indicators und hinter der einklappbaren Leiste zeigt iOS weiterhin den Grund des
+  Dokuments. Darum verdunkeln `body.tut-offen` und `body.jubel-offen` den Grund um
+  dasselbe Maß wie ihr Hof; sichtbar ist davon nur der Streifen, den es sonst gäbe. Der
+  kopflose Browser kennt weder Safe-Area noch Leiste — **kein Bildschirmfoto findet
+  das**, nur das Gerät.
 - **Die Einstellungen haben Reiter** (ADR 0045). Reihenfolge: **App · Darstellung ·
   Lernweg · Antworten · Tastatur**; geöffnet wird beim **ersten** Reiter
   (`EINST_REITER[0].id`, ADR 0067) — eine zweite Meinung über die Reihenfolge wäre eine zu

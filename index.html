@@ -1339,6 +1339,23 @@ body.chili-steht #chiliBuehne { visibility: visible; }
 /* Nur wo er wirklich steht, macht ihm die erste Zeile Platz. */
 #tutZu:not([hidden]) ~ .tut-text { padding-right: 26px; }
 body.tut-offen { overflow: hidden; }
+/* **Unter dem Bildschirm liegt noch Seite** (ADR 0087). Der Hof ist
+   `position: fixed; inset: 0` und deckt damit genau den Layout-Viewport —
+   darunter, in der Zone des Home-Indicators und hinter der einklappbaren
+   Leiste, zeigt Safari den **Grund der Seite**. Solange alles hell ist, fällt
+   das nicht auf; unter einem verdunkelten Tutorial stand dort ein leuchtender
+   Streifen über die volle Breite.
+
+   Also wird der Grund selbst mitverdunkelt, und zwar um genau dasselbe Maß
+   wie der Hof — sonst wäre der Streifen nicht weg, nur dunkler. Sichtbar ist
+   davon **nichts** außer eben dort: Der Hof liegt lückenlos darüber.
+
+   Die erste Zeile ist der Rückfall für Browser ohne `color-mix`. Schwarz ist
+   dort nicht exakt, aber unauffällig — ein heller Streifen ist es nie. */
+body.tut-offen, body.jubel-offen {
+  background-color: #000;
+  background-color: color-mix(in srgb, #000 82%, var(--bg));
+}
 @media (prefers-reduced-motion: reduce) {
   #tutLoch, .tut-punkte i { transition: none; }
   /* Wer keine Bewegung will, bekommt den Schein **stehend** statt atmend —
@@ -4336,7 +4353,7 @@ var APP_STAND = '2026-08-16'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.6.0T'; /* == VERSION == */
+var APP_VERSION = '2.6.0T2'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten

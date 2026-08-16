@@ -151,6 +151,42 @@ try {
     return s.indexOf('9999px') !== -1 && s.split('rgb').length === 2;
   })(), getComputedStyle(q('#tutLoch')).boxShadow.slice(0, 60));
 
+  // ── B10 · Kein heller Streifen unter dem Bild (ADR 0087) ──
+  // Der Hof deckt den Layout-Viewport. Was darunter liegt — die Zone des
+  // Home-Indicators — zeigt den Grund der Seite, und der war hell.
+  var grundVorher = getComputedStyle(document.body).backgroundColor;
+  tutStarten('home', true);
+  var grundOffen = getComputedStyle(document.body).backgroundColor;
+  pruefe('B10 der Grund verdunkelt sich mit', grundOffen !== grundVorher,
+    grundVorher + ' -> ' + grundOffen);
+  pruefe('B10b und zwar deutlich', (function () {
+    var zahlen = grundOffen.match(/[\d.]+/g) || [];
+    // Nach 82 % Schwarz liegt jeder Kanal unter einem Fünftel seines Werts.
+    return zahlen.length >= 3 && parseFloat(zahlen[0]) < 60 &&
+      parseFloat(zahlen[1]) < 60 && parseFloat(zahlen[2]) < 60;
+  })(), grundOffen);
+  tutEnde();
+  pruefe('B10c und danach ist er wieder da',
+    getComputedStyle(document.body).backgroundColor === grundVorher,
+    getComputedStyle(document.body).backgroundColor);
+  // **Gemeldet wurde es in einem hellen Schema** — dort ist der Streifen ein
+  // leuchtendes Band, im dunklen fiele er kaum auf. Hier wird darum gemessen,
+  // wo es weh tut.
+  var schemaVorher = state.settings.schema;
+  state.settings.schema = 'rosa';
+  updateDarstellung();
+  var hellZu = getComputedStyle(document.body).backgroundColor;
+  tutStarten('home', true);
+  var hellOffen = getComputedStyle(document.body).backgroundColor;
+  pruefe('B10d auch ein helles Schema wird dunkel', (function () {
+    var z = (hellOffen.match(/[\d.]+/g) || []).map(parseFloat);
+    return hellOffen !== hellZu && z.length >= 3 &&
+      z[0] < 70 && z[1] < 70 && z[2] < 70;
+  })(), hellZu + ' -> ' + hellOffen);
+  tutEnde();
+  state.settings.schema = schemaVorher;
+  updateDarstellung();
+
   // ── C · Erst die Frage, dann der Scheinwerfer ─────────────
   q('#tutKnopf').click();
   pruefe('C1 das Overlay ist offen', tutOffen && !q('#tutHof').hidden);

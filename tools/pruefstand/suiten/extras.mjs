@@ -65,6 +65,12 @@ try {
   pruefe('D4 «Alle Fakten» führt in die Sammlung', currentTab === 'fakten');
   setTab('lernsets');
 
+  // **Erst das Tutorial schließen.** Die Testseite lädt mit leerem Speicher,
+  // und dann fragt die App von selbst — diese Suite hat das nie bemerkt, weil
+  // sie nur über JS zugreift. Seit der Grund der Seite sich mit verdunkelt
+  // (ADR 0087), misst man hier sonst den abgedunkelten Wert.
+  tutEnde();
+
   // E · Darstellung — eine Liste statt zweier Achsen (ADR 0039).
   // Ausführlich geprüft wird sie in farbton.mjs; hier steht nur, dass die
   // Wahl da ist und sofort greift.
