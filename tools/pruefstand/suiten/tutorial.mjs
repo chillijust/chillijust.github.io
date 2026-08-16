@@ -578,6 +578,75 @@ try {
   setTab('buchstaben');
   pruefe('M5 ohne Spur ist der Knopf weg', q('#tutRund').hidden === true);
 
+  // ── N · Die Leiste bleibt, wo sie hingehört ───────────────
+  // **Eine Übung zeichnet sich oft ohne den Umweg über render().** Wer dabei
+  // heimschickt und nicht wieder umhängt, verliert die Leiste in die
+  // Kopfzeile — beim Prüfen, beim Weitergehen, bei jedem Leerzustand. Genau so
+  // wurde es gemeldet: vor der Abgabe richtig, danach oben.
+  stand('tippen');
+  tutEnde();
+  pruefe('N1 vor der Abgabe steht sie bei der Kachel',
+    q('#main').contains(q('#uebLeiste')) &&
+    q('#uebLeiste').classList.contains('bei-kachel'),
+    q('#uebLeiste').parentElement.id || q('#uebLeiste').parentElement.tagName);
+  q('#tInput').value = 'ошибка';
+  tEingabe = 'ошибка';
+  q('#tCheck').click();
+  pruefe('N2 und nach dem Prüfen immer noch',
+    q('#main').contains(q('#uebLeiste')) &&
+    q('#uebLeiste').classList.contains('bei-kachel'),
+    q('#uebLeiste').parentElement.id || q('#uebLeiste').parentElement.tagName);
+
+  // Dasselbe in «Lernsets»: dieselbe Bauform, derselbe Ausgang.
+  stand('lernsets');
+  tutEnde();
+  uebPruefen();
+  renderUeben();
+  pruefe('N3 auch in «Lernsets» bleibt sie unten',
+    q('#main').contains(q('#uebLeiste')) &&
+    q('#uebLeiste').classList.contains('bei-kachel'),
+    q('#uebLeiste').parentElement.id || q('#uebLeiste').parentElement.tagName);
+
+  // **Auf einer Faktkarte hat sie nichts zu suchen.** Dort gibt es weder eine
+  // Aufgabe zu erklären noch ein Wissen dazu — und in die Kopfzeile zu
+  // rutschen ist keine Antwort, sondern das gemeldete Zucken.
+  stand('tippen');
+  tutEnde();
+  faktKarte = FACTS[0];
+  renderTippen();
+  pruefe('N4 auf der Faktkarte ist die Leiste ganz weg',
+    getComputedStyle(q('#uebLeiste')).display === 'none',
+    getComputedStyle(q('#uebLeiste')).display + ' / ' +
+    (q('#uebLeiste').parentElement.id || '—'));
+  pruefe('N4b und mit ihr beide Knöpfe', (function () {
+    return ['#tutRund', '#wissenKnopf'].every(function (s) {
+      var el = q(s);
+      return !el || el.getClientRects().length === 0;
+    });
+  })());
+  faktKarte = null;
+
+  // **Die Faktkarte steht in fünf Übungen**, nicht in dreien: «Schreibung» und
+  // «Power-Training» zeigen sie auch, ohne selbst eine Leiste bei der Kachel
+  // zu haben. Wer nur die gemeldete Stelle repariert, bekommt die nächste
+  // Meldung — darum fahren alle sieben durch denselben Rahmen.
+  var faktOrte = [['schreibung', renderSchreibung], ['power', renderPower],
+    ['lernsets', renderUeben], ['uebersetzen', renderUebersetzen]];
+  var faktLuecken = [];
+  faktOrte.forEach(function (o) {
+    stand(o[0] === 'schreibung' || o[0] === 'power' ? 'lernsets' : o[0]);
+    tutEnde();
+    setTab(o[0]);
+    faktKarte = FACTS[0];
+    if (o[0] === 'lernsets') uebPhase = 'fact';
+    o[1]();
+    if (getComputedStyle(q('#uebLeiste')).display !== 'none') faktLuecken.push(o[0]);
+    faktKarte = null;
+    uebPhase = 'ask';
+  });
+  pruefe('N5 in jeder Übung mit Faktkarte ist sie weg',
+    faktLuecken.length === 0, faktLuecken.join(', ') || 'keine');
+
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);
 }

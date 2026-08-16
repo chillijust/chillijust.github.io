@@ -400,7 +400,11 @@ body.unterwegs .netz-stand { font-size: 21px; }
   /* Etwas Abstand zur Kachel darunter — sie soll darüberstehen, nicht darauf. */
   margin: 0 0 10px; overflow: visible;
 }
-#uebLeiste.bei-kachel[hidden] { display: none; }
+/* **`display` sticht `[hidden]`.** Beide Fassungen setzen eines — die
+   durchsichtige zu Hause wie der Kasten bei der Kachel —, also braucht das
+   Attribut hier seine eigene Regel. Ohne sie stünde die Leiste auf der
+   Faktkarte weiter im Kopf, obwohl sie als verborgen gilt. */
+#uebLeiste[hidden] { display: none; }
 /* Nur dort sind die Knöpfe kleiner. Im Kopf behalten sie ihre alte Größe. */
 #uebLeiste.bei-kachel .rundbtn { width: 36px; height: 36px; overflow: visible; }
 #uebLeiste.bei-kachel .rundbtn::after {
@@ -4298,11 +4302,11 @@ function auffrischGrenzen(tage) { return zaehlerGrenzen('auffrischen', tage); }
 var STORAGE_KEY = 'russisch_trainer_v1';
 // Stand der ausgelieferten Datei. Wird von tools/build.mjs gesetzt und geht in
 // jedes Ticket ein, damit ein Bericht sagt, welcher Stand gemeint war.
-var APP_STAND = '2026-08-15'; /* == STAND == */
+var APP_STAND = '2026-08-16'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.5.0T2'; /* == VERSION == */
+var APP_VERSION = '2.5.0T3'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -6362,7 +6366,9 @@ function faktFaellig() {
 
 function faktKarteHtml() {
   var st = faktStand(faktKarte);
-  return '<section>' +
+  // «Ohne Leiste» steht am Inhalt, nicht in einer Abfrage nebenan: Die Karte
+  // weiß selbst, dass hier nichts zu erklären ist (ADR 0084).
+  return '<section data-ohne-leiste>' +
     '<div class="sprechblase">' +
     '<span class="fact-label">Wusstest du?</span>' +
     '<p class="fact-text">' + esc(faktKarte) + '</p></div>' +
@@ -7533,7 +7539,29 @@ function wissenInhaltHtml() {
 function leisteHeimschicken() {
   var leiste = document.getElementById('uebLeiste');
   var heim = document.getElementById('leisteHeim');
-  if (leiste && heim && leiste.parentElement !== heim) heim.appendChild(leiste);
+  if (!leiste || !heim) return;
+  if (leiste.parentElement !== heim) heim.appendChild(leiste);
+  // **Zu Hause ist sie durchsichtig, sofort.** Die Klasse erst beim Umhängen
+  // abzunehmen hieß: Bleibt der Rückweg einmal aus, steht in der Kopfzeile ein
+  // Flex-Kasten mit eigenem Abstand — genau das sah man, als die Knöpfe nach
+  // dem Prüfen nach oben sprangen.
+  leiste.classList.remove('bei-kachel');
+}
+
+// **Eine Übung zeichnet sich oft ohne den Umweg über `render()`** — beim
+// Prüfen, beim Weitergehen, beim Umschalten der Tastatur. Jeder dieser Läufe
+// schickt die Leiste heim und muss sie zurückholen, und zwar an **jedem**
+// Ausgang: Fakt, Leerzustand, Tagesmaß, fertige Kachel. An jeden einzeln zu
+// denken war genau die Disziplin, die schon zweimal versagt hat (ADR 0082).
+// Darum eine Hülle: Der Kern zeichnet, die Hülle bewegt.
+//
+// **Alle sieben Übungen fahren hindurch**, auch die ohne Leiste bei der
+// Kachel: «Schreibung» und «Power-Training» zeigen ebenfalls Faktkarten, und
+// dort muss die Leiste genauso verschwinden. Eine Regel für alle ist eine, die
+// man sich merken kann — drei Ausnahmen sind drei Gelegenheiten zum Vergessen.
+function leisteRahmen(zeichnen) {
+  leisteHeimschicken();
+  try { zeichnen(); } finally { leisteUmhaengen(); }
 }
 
 function leisteUmhaengen() {
@@ -7629,6 +7657,11 @@ function leisteZeigen() {
   if (!leiste) return;
   var tut = document.getElementById('tutRund');
   var wissen = document.getElementById('wissenKnopf');
+  // **Wo nichts zu erklären ist, steht auch keine Leiste.** Eine Faktkarte hat
+  // weder eine Aufgabe noch ein Wissen dazu; in die Kopfzeile zu rutschen wäre
+  // keine Antwort, sondern das Zucken, das gemeldet wurde. Die Ansicht sagt es
+  // selbst — über ein Merkmal im Inhalt, nicht über eine Liste im Code.
+  if (main.querySelector('[data-ohne-leiste]')) { leiste.hidden = true; return; }
   // Zu Hause ist sie durchsichtig und darf immer stehen — die Knöpfe verbergen
   // sich selbst. Bei der Kachel wäre sie sonst ein Streifen Luft über der
   // Aufgabe.
@@ -8969,10 +9002,9 @@ function leseBinden() {
   if (zuAbc) zuAbc.addEventListener('click', function () { setTab('buchstaben'); });
 }
 
-function renderUeben() {
-  // **Erst heim, dann zeichnen** (ADR 0082): `main.innerHTML` wirft alles weg,
-  // was darin steht — die Leiste mitsamt Blatt und Zuhörern.
-  leisteHeimschicken();
+function renderUeben() { leisteRahmen(uebInhaltZeichnen); }
+
+function uebInhaltZeichnen() {
   if (uebPhase === 'fact' && faktKarte) {
     main.innerHTML = faktKarteHtml();
     faktKarteBinden(function () { uebNext(true); });
@@ -9702,9 +9734,9 @@ function satzMitWissen(text) {
 }
 
 // Stufenwahl mit Angabe, wie viele S\u00e4tze je Stufe schon offen sind.
-function renderUebersetzen() {
-  // Auch hier: Die Übung zeichnet sich oft ohne den Umweg über `render()`.
-  leisteHeimschicken();
+function renderUebersetzen() { leisteRahmen(trInhaltZeichnen); }
+
+function trInhaltZeichnen() {
   if (faktKarte) {
     main.innerHTML = faktKarteHtml();
     faktKarteBinden(function () { buildTransTask(); renderUebersetzen(); });
@@ -9916,7 +9948,6 @@ function renderUebersetzen() {
   });
   // Jetzt steht die Kachel — erst jetzt darf die Wissenshülle einziehen.
   renderWissen();
-  leisteUmhaengen();
 }
 
 // ── BUCHSTABEN ──────────────────────────────────────────────
@@ -10516,7 +10547,9 @@ function leseWinkHtml() {
     '<button class="btn ghost lw-los" id="leseLos">Wörter lesen \u2192</button></div>';
 }
 
-function renderBuchstaben() {
+function renderBuchstaben() { leisteRahmen(abcInhaltZeichnen); }
+
+function abcInhaltZeichnen() {
   main.innerHTML = '<section>' +
     (abcAnsicht === 'tafel' ? abcTafelHtml() : abcUebenHtml()) + '</section>';
 
@@ -11666,7 +11699,9 @@ function gramKopfHtml(b) {
   return html;
 }
 
-function renderGrammatik() {
+function renderGrammatik() { leisteRahmen(grammInhaltZeichnen); }
+
+function grammInhaltZeichnen() {
   var b = gramAktuell();
   if (!b) {
     var jetzt = Date.now();
@@ -12127,7 +12162,9 @@ function orthoKopfHtml(r) {
   return html;
 }
 
-function renderSchreibung() {
+function renderSchreibung() { leisteRahmen(schreibInhaltZeichnen); }
+
+function schreibInhaltZeichnen() {
   if (faktKarte) {
     main.innerHTML = faktKarteHtml();
     faktKarteBinden(function () { renderSchreibung(); });
@@ -12414,7 +12451,9 @@ function ptKopfHtml() {
   return html;
 }
 
-function renderPower() {
+function renderPower() { leisteRahmen(ptInhaltZeichnen); }
+
+function ptInhaltZeichnen() {
   if (faktKarte) {
     main.innerHTML = faktKarteHtml();
     faktKarteBinden(function () { ptFrageBauen(); renderPower(); });
@@ -12786,10 +12825,9 @@ function tippenWeiter() {
   renderTippen();
 }
 
-function renderTippen() {
-  // **Erst heim, dann zeichnen** (ADR 0082): `main.innerHTML` wirft alles weg,
-  // was darin steht — die Leiste mitsamt Blatt und Zuhörern.
-  leisteHeimschicken();
+function renderTippen() { leisteRahmen(tippenInhaltZeichnen); }
+
+function tippenInhaltZeichnen() {
   if (faktKarte) {
     main.innerHTML = faktKarteHtml();
     faktKarteBinden(function () { tippenWeiter(); });

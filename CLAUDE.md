@@ -202,7 +202,14 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   (44 px). Umgehängt wird sie wie der Wissensknopf — `leisteHeimschicken()` **vor jedem**
   `main.innerHTML`, `leisteUmhaengen()` danach; wer eine dritte Übung mit Kachel
   hinzufügt und das Heimschicken vergisst, wirft die Leiste samt Blatt und Zuhörern weg
-  (23 Suiten fielen daran). **Leiste und Heimat tragen `display: contents`** — ein leerer
+  (23 Suiten fielen daran). **Umgehängt wird in einer Hülle** (ADR 0084):
+  `leisteRahmen(zeichnen)` schickt heim, zeichnet und holt zurück — alle **sieben**
+  Übungen fahren hindurch, ihre Rümpfe heißen innen `…InhaltZeichnen`. Eine Ansicht hat
+  viele Ausgänge (Fakt, Leerzustand, Tagesmaß), und an jeden einzeln zu denken hat
+  zweimal versagt. **Auf einer Faktkarte steht die Leiste gar nicht**: `faktKarteHtml()`
+  setzt `data-ohne-leiste`, `leisteZeigen()` fragt danach — kein Verzeichnis im Code,
+  das Ansichten aufzählt. Dazu `#uebLeiste[hidden] { display: none }`, denn beide
+  Fassungen setzen ein `display`. **Leiste und Heimat tragen `display: contents`** — ein leerer
   Kasten ist nicht nichts, er zählt als Flex-Kind und bekommt seinen eigenen `gap`. Beide
   Knöpfe tragen bei der Kachel `.klein`: Kreis 36 px, Zeichen 20 px, antippbare Fläche
   über `::after` weiterhin **44 px** — dafür braucht `.klein` `overflow: visible`, sonst
