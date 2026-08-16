@@ -102,7 +102,8 @@ try {
   setTab('tippen');
   var vorherD = state.boxes[letztes.id];
   var setVorherD = aktuellesSet();
-  updateBox(letztes.id, true, true);
+  // Dreimal hintereinander richtig geschrieben — erst dann gemeistert (ADR 0088).
+  for (var dt = 0; dt < TIPP_FOLGE; dt++) updateBox(letztes.id, true, true);
   meisterFolgen(letztes, vorherD, setVorherD);
   pruefe('D1 Jubel wartet auf «Weiter»', setFenster && setFenster.nr === 0,
     JSON.stringify(setFenster));
@@ -143,7 +144,7 @@ try {
   setTab('tippen');
   var vorherE = state.boxes[w2.id];
   var setVorherE = aktuellesSet();
-  updateBox(w2.id, true, true);
+  for (var et = 0; et < TIPP_FOLGE; et++) updateBox(w2.id, true, true);
   meisterFolgen(w2, vorherE, setVorherE);
   setTab('lernsets');
   uebNext(false);

@@ -87,7 +87,9 @@ try {
   // F · Zusatzkacheln
   state.boxes = {}; state.lastSeen = {};
   var wort = ALL_VOCAB.filter(function (v) { return v.ru.length >= 5 && v.ru.indexOf(' ') === -1; })[0];
-  state.boxes[wort.id] = 3;
+  // **Unterhalb der Tippstufe** (ADR 0088): Darüber wird in «Lernsets» und
+  // «Freestyle» nur noch geschrieben, Kacheln kommen dort nicht mehr vor.
+  state.boxes[wort.id] = SATZ_STUFE;
   uebModus = 'freestyle'; uebThema = wort.theme;
   var versuche = 0, gefunden = null;
   while (versuche < 60 && !gefunden) {

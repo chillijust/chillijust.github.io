@@ -64,6 +64,11 @@
      hellen Kachel wäre davon nichts zu sehen. Darum steht der Wert zweimal.
      Beide sind seit 2.5.1T um ein Fünftel gestiegen, auf Ansage. */
   --tut-atem: rgba(255, 255, 255, .144);
+  /* **Eine richtige Flamme ist außen rot und innen hell** (ADR 0088). Die
+     bisherige war durchgehend golden — als Zeichen brauchbar, als Flamme eine
+     Behauptung. Der Kern bleibt der Akzent des Schemas, außen kommt Glut dazu. */
+  --flamme: #E2542B;
+  --flamme-kern: #F5C963;
   /* Die Figur wirft keinen Schatten mehr (ADR 0071). Der Wert stand hier zwei
      Fassungen lang, erst kräftig, dann kurz — der viereckige Rand blieb in
      Safari beides Mal sichtbar. Ein Weichzeichner, den der Browser in eine
@@ -116,6 +121,9 @@
      wäre kein Atmen, sondern nichts. Viel weiter hinauf geht es aber nicht:
      Der Schein liegt **über** der Schrift und nimmt ihr den Kontrast. */
   --tut-atem: rgba(255, 255, 255, .42);
+  /* Auf hellem Grund muss die Glut dunkler stehen, sonst leuchtet sie weg. */
+  --flamme: #C33C16;
+  --flamme-kern: #E8A32F;
 }
 
 /* Die Flächen. Gerechnet von tools/palette.py: eine Staffelung der Helligkeit
@@ -671,6 +679,29 @@ body.filter-offen .kachel-knopf { opacity: 0; pointer-events: none; }
 .chip.active { border-color: var(--akzent); color: var(--akzent); }
 
 .paket { margin: -4px 0 14px; }
+/* **Der Sprung ins nächste Set steht neben der Reihe** (ADR 0088). Die Reihe
+   nimmt den Platz, der Knopf so wenig wie möglich — ein Pfeil, kein Wort.
+   Sichtbar 30 px, antippbar 44 über ein `::after`; dafür braucht er
+   `overflow: visible`, sonst schneidet der Kreis die Fläche ab. */
+.paket-reihe { display: flex; align-items: flex-end; gap: 10px; }
+.paket-reihe .paket-punkte { flex: 1; min-width: 0; }
+.paket-weiter {
+  position: relative; flex: none; width: 30px; height: 30px; margin-bottom: 3px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; border: 1px solid var(--akzent); background: none;
+  color: var(--akzent); cursor: pointer; overflow: visible; padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+/* Die Fläche greift über die letzte Flamme hinaus — die ist `aria-hidden` und
+   nichts zum Antippen, also nimmt ihr das nichts. Ohne `z-index` gewönne sie
+   trotzdem: Die Flammen tragen selbst eine Position. */
+.paket-weiter { z-index: 2; }
+.paket-weiter::after {
+  content: ''; position: absolute; top: 50%; left: 50%;
+  width: 44px; height: 44px; transform: translate(-50%, -50%);
+}
+.paket-weiter .icon { width: 17px; height: 17px; }
+.paket-weiter:active { background: var(--card-2); }
 /* Der Fortschritt einer Sammlung: ein Zeichen je Wort. Was noch nicht
    angefangen ist, bleibt ein Strich; ab der ersten Stufe brennt eine Flamme,
    die mit jeder Stufe wächst. Alle stehen auf einer Linie — eine Flamme wächst
@@ -685,7 +716,10 @@ body.filter-offen .kachel-knopf { opacity: 0; pointer-events: none; }
   gap: 4px; align-items: end; justify-items: center; margin-bottom: 7px;
 }
 .pp {
-  width: 100%; max-width: 22px; height: 15px;
+  /* 19 px, seit die Endstufe eine größere Flamme trägt (ADR 0088) — sonst
+     schnitte der Kasten ihr die Spitze ab. Die Reihe richtet sich unten aus,
+     die kleineren Stufen bleiben also, wo sie waren. */
+  width: 100%; max-width: 22px; height: 19px;
   display: flex; align-items: flex-end; justify-content: center;
 }
 .pp.s0 { height: 4px; border-radius: 999px; background: var(--line); }
@@ -694,6 +728,21 @@ body.filter-offen .kachel-knopf { opacity: 0; pointer-events: none; }
 .pp.s2 svg { width: 7.5px; height: 10px; opacity: .6; }
 .pp.s3 svg { width: 9px;   height: 12px; }
 .pp.s4 svg { width: 11px;  height: 15px; color: var(--akzent); }
+/* **Die neue Flamme** (ADR 0088): größer und zweifarbig. Sie gehört zu «Dark»
+   und steht dort immer; in den hellen Schemata schaltet sie ein Schalter dazu
+   (`data-flamme="neu"` am Wurzelelement).
+
+   Die innere Zunge trägt jetzt eine eigene Farbe statt einer Deckung auf der
+   äußeren — ein heller Kern in einem roten Mantel ist das, was eine Flamme
+   ausmacht. */
+:root:not([data-schema]) .pp.s4 svg,
+:root[data-flamme="neu"] .pp.s4 svg {
+  width: 14px; height: 19px; color: var(--flamme);
+}
+:root:not([data-schema]) .pp.s4 .flamme-innen,
+:root[data-flamme="neu"] .pp.s4 .flamme-innen {
+  color: var(--flamme-kern); opacity: 1;
+}
 /* Vier Takte, damit eine Reihe goldener Flammen lebt statt im Gleichschritt zu
    pulsen. Negative Verzögerung: Sie brennen von Anfang an, nur versetzt. */
 .pp:nth-child(4n+1) .flamme-aussen { animation-delay: -.4s; }
@@ -702,6 +751,23 @@ body.filter-offen .kachel-knopf { opacity: 0; pointer-events: none; }
 .pp:nth-child(4n+1) .flamme-innen { animation-delay: -.5s; }
 .pp:nth-child(4n+2) .flamme-innen { animation-delay: -.8s; }
 .pp:nth-child(4n+3) .flamme-innen { animation-delay: -.1s; }
+/* Die Vorschau im Schalter: eine kurze Reihe, die zeigt, worüber entschieden
+   wird (ADR 0088). Die Klassen `alt`/`neu` stechen die Wurzelregel — sonst
+   sähen beide Kacheln gleich aus, je nachdem was gerade gilt. */
+.flammseg { gap: 8px; }
+.flammchip {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  padding: 9px 12px; height: auto; line-height: 1.2;
+}
+.flammprobe { display: flex; align-items: flex-end; gap: 5px; }
+.flammprobe .pp { width: 16px; max-width: 16px; }
+.flammprobe.alt .pp.s4 svg {
+  width: 11px; height: 15px; color: var(--akzent);
+}
+.flammprobe.alt .pp.s4 .flamme-innen { color: var(--akzent-ink); opacity: .55; }
+.flammprobe.neu .pp.s4 svg { width: 14px; height: 19px; color: var(--flamme); }
+.flammprobe.neu .pp.s4 .flamme-innen { color: var(--flamme-kern); opacity: 1; }
+
 .paket-text { font-size: 11px; color: var(--dim); margin: 0; }
 .paket-frei { color: var(--akzent); }
 
@@ -4353,7 +4419,7 @@ var APP_STAND = '2026-08-16'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.6.0T2'; /* == VERSION == */
+var APP_VERSION = '2.7.0T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -5419,6 +5485,9 @@ function defaultSettings() {
     confirmUebersetzen: true,  // in «Übersetzen» erst legen, dann bestätigen
     requireComplete: false,    // Bestätigen erst bei vollständiger Lösung
     tippenStufe: 3,            // ab welcher Leitner-Stufe ein Wort im Tippen erscheint
+    // **Die neue Flamme gehört zu «Dark»** (ADR 0088) und steht dort immer.
+    // In den hellen Schemata schaltet sie dieser Schalter dazu.
+    flammeHell: false,
     auffrischen: 21,           // Tage, bis Fertiges zur Sicherheit noch einmal drankommt
     // Wie viele **neue** Wörter an einem Tag anfangen dürfen. 0 heißt: keine
     // Grenze. Wiederholungen bleiben immer unbegrenzt (ADR 0056).
@@ -5515,6 +5584,10 @@ function defaultState() {
     // Die 80-%-Schwelle öffnet, sie schiebt nicht: Wer «bleiben» wählt, steht
     // hier drin, bis sein Set voll ist. `null` heißt: der Reihe nach.
     setBleib: null,
+    // **Wie oft ein Wort hintereinander richtig geschrieben wurde** (ADR 0088).
+    // Eine Momentaufnahme wie `wortFehler`: Ein Fehler setzt sie auf null, und
+    // im Sicherungscode steht sie darum nicht.
+    tippFolge: {},
     // **Die Fehlerquote wird gezählt, nicht gerechnet** (ADR 0086): je Übung
     // und je Thema { r: richtig, f: falsch }. Beide fahren im Sicherungscode
     // mit — eine Quote, die beim Gerätewechsel bei null anfängt, wäre keine.
@@ -5557,6 +5630,7 @@ function mergeState(parsed) {
   d.orthoBox = nurSchreibregeln(d.orthoBox);
   d.orthoSeen = nurSchreibregeln(d.orthoSeen);
   d.wortFehler = migriereIds(d.wortFehler);
+  d.tippFolge = migriereIds(d.tippFolge);
   d.patzer = migriereIds(d.patzer);
   d.leseFehler = nurBuchstaben(d.leseFehler);
   d.verwechselt = nurVerwechslungen(d.verwechselt);
@@ -6215,6 +6289,12 @@ function updateDarstellung() {
   var wurzel = document.documentElement;
   if (schema.wert === 'dark') wurzel.removeAttribute('data-schema');
   else wurzel.setAttribute('data-schema', schema.wert);
+  // **Die neue Flamme steht in «Dark» immer** (ADR 0088); in den hellen
+  // Schemata entscheidet der Schalter. Ein Attribut statt einer Klasse, weil
+  // das Schema daneben genauso geführt wird — eine Sprache für dieselbe Sache.
+  if (schema.wert === 'dark' || state.settings.flammeHell) {
+    wurzel.setAttribute('data-flamme', 'neu');
+  } else wurzel.removeAttribute('data-flamme');
   // Safari färbt die Statusleiste nach diesem Wert.
   var meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute('content', schema.grund);
@@ -6277,10 +6357,11 @@ function meisterPruefen(vorher, nachher, was, text, hinweis, kyrillisch) {
 // wie die Meistermeldung — es ist dieselbe Auskunft, nur die andere Hälfte.
 function tippHinweisHtml() {
   if (!tippDeckel) return '';
+  var n = Math.max(1, tippRest);
   return '<div class="meister fast">' + ICON.tastatur +
-    '<span><strong>Fast — der letzte Schritt fehlt</strong>' +
-    '<span class="meister-note">Gemeistert wird ein Wort, wenn du es selbst ' +
-    'geschrieben hast. In «Tippen» wartet es auf dich.</span></span></div>';
+    '<span><strong>Fast — noch ' + n + '× richtig schreiben</strong>' +
+    '<span class="meister-note">Gemeistert wird ein Wort, wenn du es ' +
+    TIPP_FOLGE + '× hintereinander selbst geschrieben hast.</span></span></div>';
 }
 
 function meisterHtml() {
@@ -6821,12 +6902,6 @@ window.addEventListener('orientationchange', tutNachmessen);
 // «Glückwunsch!» wäre nach dem zweiten Set kein Glückwunsch mehr, sondern eine
 // Quittung. Ausgelost wird bei jedem Anlass neu.
 var JUBEL = {
-  // **Eine Frage, kein Jubel** (ADR 0086): eine Tonlage, keine drei. Wer
-  // gefragt wird, ob er weitergehen will, wird nicht zugleich gefeiert.
-  setWahl: [
-    ['Set {n} steht offen genug.', '{f} von {s} Wörtern sitzen endgültig. ' +
-      'Das nächste Set wartet — die übrigen kommen im Stapel weiter vorbei.']
-  ],
   set: [
     ['Set {n}. Erledigt.', 'Die Wörter wissen jetzt, wer hier lernt. {m} {s} freigeschaltet.'],
     ['SET {n} GEMEISTERT!!', 'Ich habe vor Freude eine Paprika geküsst. {m} neue {s} warten, ' +
@@ -6949,7 +7024,7 @@ function jubelNachtragen() {
 }
 
 var JUBEL_ANLASS = {
-  set: 'Lernset', setWahl: 'Lernset', thema: 'Thema', abc: 'Alphabet', regel: 'Grammatik',
+  set: 'Lernset', thema: 'Thema', abc: 'Alphabet', regel: 'Grammatik',
   schreibung: 'Schreibung', power: 'Power-Training'
 };
 
@@ -7070,6 +7145,13 @@ function verwechseltMit(id) {
 // Wiederholung per Kachel ist kein Rückschritt. Und der Deckel greift nur nach
 // oben; falsch bleibt falsch, egal wie geantwortet wurde.
 var tippDeckel = false; // hat die letzte Antwort den letzten Schritt verhindert?
+var tippRest = 0;       // wie viele getippte Treffer noch fehlen
+
+// **Dreimal hintereinander richtig geschrieben** (ADR 0088). Einmal war zu
+// wenig: Ein Treffer kann ein Zufall sein, und «gemeistert» soll heißen, daß
+// die Schreibweise sitzt. Ein Fehler dazwischen setzt den Zähler auf null —
+// die Leitner-Stufe fällt davon unabhängig, wie eh und je.
+var TIPP_FOLGE = 3;
 
 // ── Lernbedarf: die Fehlerquote wird gezählt ────────────────
 // **Eine Quote muß gezählt werden, sie läßt sich nicht ableiten** (ADR 0086).
@@ -7105,10 +7187,25 @@ function updateBox(id, correct, getippt) {
   if (!state.lastSeen[id]) neuGezaehlt();
   var neu = correct ? Math.min(BOX_MAX, cur + 1) : Math.max(0, cur - 1);
   tippDeckel = false;
-  if (neu >= BOX_MAX && !getippt && cur < BOX_MAX) {
-    neu = BOX_MAX - 1;
-    tippDeckel = true;
+  tippRest = 0;
+  if (neu >= BOX_MAX && cur < BOX_MAX) {
+    if (!getippt) {
+      neu = BOX_MAX - 1;
+      tippDeckel = true;
+      tippRest = TIPP_FOLGE - (state.tippFolge[id] || 0);
+    } else {
+      var folge = (state.tippFolge[id] || 0) + 1;
+      state.tippFolge[id] = folge;
+      if (folge < TIPP_FOLGE) {
+        neu = BOX_MAX - 1;
+        tippDeckel = true;
+        tippRest = TIPP_FOLGE - folge;
+      }
+    }
   }
+  // Falsch reißt die Folge ab, gleich auf welcher Stufe — sonst zählte ein
+  // Treffer von vorgestern noch mit.
+  if (!correct) state.tippFolge[id] = 0;
   state.boxes[id] = neu;
   state.lastSeen[id] = Date.now();
   state.streak = correct ? state.streak + 1 : 0;
@@ -8571,6 +8668,8 @@ var uebThema = 'Alle';       // nur im Freestyle
 var uebLesen = false;        // nur im Freestyle: nur Wörter aus gemeisterten Buchstaben
 var uebQ = null;
 var uebPhase = 'ask'; // ask | feedback | fact
+var uebEingabe = '';  // was in der Tippaufgabe steht (ADR 0088)
+var uebKb = null;     // eingebaute Tastatur offen?
 var uebBuilt = [];
 var uebPicked = null;
 var uebCorrect = null;
@@ -8747,10 +8846,16 @@ function buildQuestion() {
   if (box < kachelAb) mode = Math.random() < 0.5 ? 'mc-de' : 'mc-ru';
   else mode = canTile ? 'tiles' : 'mc-ru';
 
+
   // Sitzt das Wort und steht es in einem lesbaren Satz, wird daraus eine
   // Lücke — jedes zweite Mal, damit die Kachelaufgabe nicht verschwindet.
   // Im Lesemodus nicht: Dort geht es um Buchstaben, nicht um Formen.
-  if (box >= SATZ_STUFE && !uebLesen && Math.random() < 0.5) {
+  //
+  // **Unterhalb der Tippstufe** (ADR 0088): Darüber wird nur noch geschrieben,
+  // und eine Lücke, die nicht meistern kann, hielte das Wort nur auf. Die
+  // Lücke lebt damit auf Stufe 2 — dort, wo sie seit ADR 0053 beginnt.
+  if (box >= SATZ_STUFE && box < state.settings.tippenStufe &&
+    !uebLesen && Math.random() < 0.5) {
     var stellen = lueckeStellen(word);
     if (stellen.length) {
       var stelle = stellen[Math.floor(Math.random() * stellen.length)];
@@ -8766,6 +8871,14 @@ function buildQuestion() {
         };
       }
     }
+  }
+
+  // **Ab der Tippstufe wird geschrieben, nicht mehr gewählt** (ADR 0088).
+  // Vorher mußte man für den letzten Schritt in die Übung «Tippen» wechseln —
+  // ein Umweg für etwas, das zum Lernweg gehört. Im Lesemodus nicht: Dort geht
+  // es um Buchstaben, und die Tastatur nähme der Übung ihren Gegenstand.
+  if (box >= state.settings.tippenStufe && !uebLesen) {
+    return { word: word, mode: 'tippen' };
   }
 
   if (mode === 'tiles') {
@@ -8805,6 +8918,7 @@ function uebZuruecksetzen() {
   setFenster = null;
   uebQ = null;
   uebPhase = 'ask';
+  uebEingabe = '';
   uebBuilt = [];
   uebPicked = null;
   uebCorrect = null;
@@ -8944,12 +9058,12 @@ function meisterFolgen(wort, vorher, setVorher) {
 function setUebergangPruefen(setVorher) {
   if (setVorher === null || setVorher === undefined || !LERNSETS[setVorher]) return;
   if (!setGeschafft(setVorher)) return;
+  // **Einmal fragen, nicht immer wieder** (ADR 0088). Bis 2.6.0 kam die Frage
+  // nach jedem weiteren gemeisterten Wort zurück, wenn man «bleiben» gewählt
+  // hatte — gut gemeint und in der Hand lästig. Wer bleiben will, hat es
+  // gesagt; der Weg nach vorn steht danach als Knopf neben der Flammenreihe.
   if (aktuellesSet() !== setVorher && !jubelSchon('set:' + setVorher)) {
     setFenster = { nr: setVorher, jubel: true };
-  } else if (state.setBleib === setVorher && !setKomplett(setVorher)) {
-    // Wer «bleiben» gewählt hat, wird beim nächsten gemeisterten Wort noch
-    // einmal gefragt — sonst säße er in einem Set fest, das er hinter sich hat.
-    setFenster = { nr: setVorher, jubel: false };
   }
 }
 
@@ -8958,17 +9072,9 @@ function setFensterZeigen() {
   if (!setFenster) return false;
   var f = setFenster;
   setFenster = null;
-  if (f.jubel) {
-    var offen = LERNSETS[f.nr].saetze.filter(satzFrei).length;
-    jubelEinmal('set:' + f.nr, 'set',
-      { n: f.nr + 1, m: offen, s: offen === 1 ? 'Satz' : 'Sätze' }, setWege(f.nr));
-  } else {
-    // Dieselbe Frage ohne Feier: Die Auszeichnung gehört dem ersten Mal
-    // (ADR 0047), die Entscheidung nicht.
-    jubelZeigen('setWahl',
-      { n: f.nr + 1, f: setMeister(f.nr), s: LERNSETS[f.nr].woerter.length },
-      setWege(f.nr));
-  }
+  var offen = LERNSETS[f.nr].saetze.filter(satzFrei).length;
+  jubelEinmal('set:' + f.nr, 'set',
+    { n: f.nr + 1, m: offen, s: offen === 1 ? 'Satz' : 'Sätze' }, setWege(f.nr));
   return true;
 }
 
@@ -8976,12 +9082,18 @@ function setFensterZeigen() {
 // gehen muß niemand. «Bleiben» schreibt die Nummer fest, «weiter» löscht sie;
 // beides ist eine Wahl des Nutzers und keine Rechnung der App.
 function setWege(nr) {
+  // **Gezeichnet wird die Ansicht, in der man steht** (ADR 0088). Das Fenster
+  // geht in «Lernsets» *und* in «Tippen» auf — ein festes `renderUeben()`
+  // schrieb darum die Lernsets-Aufgabe in eine Kopfzeile, die «Tippen» sagte.
+  // `render()` fragt `currentTab` und zeichnet den Kopf gleich mit.
+  var weiter = function () {
+    uebZuruecksetzen();
+    render();
+  };
   var wege = [{ text: 'Bei Set ' + (nr + 1) + ' bleiben', tun: function () {
     state.setBleib = nr;
     save();
-    uebZuruecksetzen();
-    renderUeben();
-    renderKopf();
+    weiter();
   } }];
   if (LERNSETS[nr + 1]) {
     wege.push({ text: 'Weiter mit Set ' + (nr + 2), tun: function () {
@@ -8990,9 +9102,7 @@ function setWege(nr) {
       // «aktuell» heißt: das laufende Set — nicht null, das wäre kein Set,
       // sondern ein Loch in LERNSETS.
       uebAuswahl = 'aktuell';
-      uebZuruecksetzen();
-      renderUeben();
-      renderKopf();
+      weiter();
     } });
   } else {
     // Das letzte Set hat kein nächstes — dort führt der Weg zu den Sätzen.
@@ -9019,6 +9129,7 @@ function uebNext(skipFact) {
   aufgabeBeginnt();
   uebPhase = 'ask';
   uebBuilt = [];
+  uebEingabe = '';
   meisterMeldung = null;
   leseMeldung = null;
   uebPicked = null;
@@ -9044,11 +9155,26 @@ function setKopfHtml() {
   var reif = woerter.filter(function (v) { return (state.boxes[v.id] || 0) >= SATZ_STUFE; }).length;
   var offen = faelligeAnzahl(woerter);
 
-  html += '<div class="paket"><div class="paket-punkte" aria-hidden="true">';
+  var punkte = '<div class="paket-punkte" aria-hidden="true">';
   woerter.slice(0, 40).forEach(function (v) {
-    html += ppHtml(state.boxes[v.id] || 0);
+    punkte += ppHtml(state.boxes[v.id] || 0);
   });
-  html += '</div><p class="paket-text">' + reif + ' von ' + woerter.length + ' auf Stufe ' + SATZ_STUFE;
+  punkte += '</div>';
+
+  // **Der Weg nach vorn steht neben der Reihe** (ADR 0088). Sobald das nächste
+  // Set offensteht, führt hier ein Pfeil hinüber. Vorher tat das ein Fenster,
+  // das nach jedem gemeisterten Wort wiederkam — ein Knopf fragt nicht, er
+  // wartet. Er steht nur beim laufenden Set: In «Alles Freigeschaltete» oder
+  // in einem alten Set gibt es kein «nächstes».
+  var sprung = '';
+  if (uebAuswahl !== 'alle' && nr === aktuellesSet() &&
+    LERNSETS[nr + 1] && setFrei(nr + 1)) {
+    sprung = '<button class="paket-weiter" id="setWeiter" ' +
+      'aria-label="Weiter mit Set ' + (nr + 2) + '">' + ICON.pfeilRechts + '</button>';
+  }
+  html += '<div class="paket">' +
+    (sprung ? '<div class="paket-reihe">' + punkte + sprung + '</div>' : punkte);
+  html += '<p class="paket-text">' + reif + ' von ' + woerter.length + ' auf Stufe ' + SATZ_STUFE;
   if (uebAuswahl !== 'alle') {
     var saetze = LERNSETS[nr].saetze.length;
     html += reif === woerter.length
@@ -9090,6 +9216,7 @@ function themaKopfHtml() {
 // Ist genug gewählt oder gelegt, um abgeben zu dürfen?
 function uebAbgabeBereit() {
   if (!uebQ) return false;
+  if (uebQ.mode === 'tippen') return uebEingabe.trim().length > 0;
   if (uebQ.mode === 'tiles') {
     return state.settings.requireComplete
       ? uebBuilt.length === uebQ.laenge
@@ -9181,7 +9308,10 @@ function uebPruefen() {
   var q = uebQ;
   var setVorher = aktuellesSet();
   var attempt = '';
-  if (q.mode === 'tiles') {
+  if (q.mode === 'tippen') {
+    attempt = uebEingabe;
+    uebCorrect = normalize(attempt) === normalize(q.word.ru);
+  } else if (q.mode === 'tiles') {
     attempt = uebBuilt.map(function (k) {
       return q.tiles.filter(function (t) { return t.key === k; })[0].ch;
     }).join('');
@@ -9225,7 +9355,22 @@ function uebPruefen() {
 
 // Der Lesemodus lässt sich aus zwei Zuständen heraus umlegen — aus der Aufgabe
 // und aus dem Leerzustand. Beide hängen dieselben Zuhörer an.
+// Der Sprung ins nächste Set, gebunden überall dort, wo der Kopf steht — auch
+// in den Leerzuständen: **Gerade dort ist er die Antwort** (ADR 0088).
+function setWeiterBinden() {
+  var k = document.getElementById('setWeiter');
+  if (!k) return;
+  k.addEventListener('click', function () {
+    state.setBleib = null;
+    uebAuswahl = 'aktuell';
+    save();
+    uebZuruecksetzen();
+    render();
+  });
+}
+
 function leseBinden() {
+  setWeiterBinden();
   var schalter = document.getElementById('leseSchalter');
   if (schalter) schalter.addEventListener('click', function () {
     uebLesen = !uebLesen;
@@ -9305,11 +9450,13 @@ function uebInhaltZeichnen() {
   // Zwei Fassungen derselben Frage: `prompt` ist der blanke Text — er geht an
   // den Hörknopf, und der soll kein Zeichen zu deuten haben. `promptHtml` trägt
   // die Hülle um den betonten Vokal (ADR 0065).
-  var promptWort = (q.mode === 'tiles' || q.mode === 'mc-ru') ? q.word.de : q.word.ru;
+  var deutschGefragt = q.mode === 'tiles' || q.mode === 'mc-ru' || q.mode === 'tippen';
+  var promptWort = deutschGefragt ? q.word.de : q.word.ru;
   var prompt = promptWort;
-  var promptHtml = (q.mode === 'tiles' || q.mode === 'mc-ru')
-    ? esc(q.word.de) : ruAnzeigeHtml(q.word.ru);
-  var taskLabel = q.mode === 'mc-de' ? 'Was bedeutet …' : q.mode === 'mc-ru' ? 'Welches Wort passt?' : 'Setz das Wort zusammen';
+  var promptHtml = deutschGefragt ? esc(q.word.de) : ruAnzeigeHtml(q.word.ru);
+  var taskLabel = q.mode === 'mc-de' ? 'Was bedeutet …'
+    : q.mode === 'mc-ru' ? 'Welches Wort passt?'
+      : q.mode === 'tippen' ? 'Schreib auf Russisch' : 'Setz das Wort zusammen';
   if (q.mode === 'luecke') {
     promptRu = true;
     prompt = q.luecke;
@@ -9327,7 +9474,8 @@ function uebInhaltZeichnen() {
     '<div class="card">' +
     '<div class="card-meta"><span class="boxdots">' + dots + '</span>' +
     '<span class="mitte">' + (q.mode === 'luecke' ? 'im Satz'
-      : q.mode === 'tiles' ? 'legen' : 'wählen') + '</span>' +
+      : q.mode === 'tiles' ? 'legen'
+        : q.mode === 'tippen' ? 'selbst schreiben' : 'wählen') + '</span>' +
     '<span></span></div>' +
     '<p class="task-label">' + taskLabel + '</p>' +
     '<p class="word' + (promptRu ? ' cyr' : '') +
@@ -9335,6 +9483,18 @@ function uebInhaltZeichnen() {
     // Bei der Lücke schweigt der Knopf: Vorgelesen würde der Satz **mit** dem
     // fehlenden Wort — die Antwort also. Nach der Auflösung steht er wieder da.
     (q.mode === 'luecke' ? '' : hoerknopf(prompt, promptRu ? 'ru' : 'de')) + '</p>';
+
+  // **Dieselbe Gestalt wie in «Tippen»** (ADR 0088): Feld, Prüfzeile nach der
+  // Abgabe, eingebaute Tastatur. Zwei Fassungen derselben Aufgabe wären zwei
+  // Wahrheiten darüber, was «schreiben» heißt.
+  if (q.mode === 'tippen') {
+    if (uebKb === null) uebKb = tastaturVorgabe(true);
+    html += uebPhase === 'feedback'
+      ? pruefzeileHtml(uebEingabe, q.word.ru, true, 'wort')
+      : '<input type="text" id="uebInput" class="cyr" value="' + esc(uebEingabe) + '"' +
+        ' placeholder="кириллица \u2026" lang="ru" autocapitalize="off"' +
+        ' autocorrect="off" spellcheck="false" enterkeyhint="go"' + kbFeldAttr(uebKb) + '>';
+  }
 
   if (q.mode === 'tiles') {
     html += '<div class="slots cyr">';
@@ -9399,12 +9559,20 @@ function uebInhaltZeichnen() {
       meisterHtml() + leseFallHtml();
   }
 
-  html += '</div>' + rekoHtml() + '<div class="btn-row">';
+  html += '</div>';
+  if (q.mode === 'tippen' && uebPhase === 'ask') {
+    html += '<button class="kb-toggle" id="uebKbToggle">' +
+      (uebKb ? 'Tastatur ausblenden' : 'Tastatur einblenden') + '</button>';
+    if (uebKb) html += tastaturHtml('uebkey');
+  }
+  html += rekoHtml() + '<div class="btn-row">';
   if (uebPhase === 'ask') {
     html += '<button class="btn ghost" id="uebReveal">Aufdecken</button>';
-    if (state.settings.confirmUeben) {
+    // **Geschriebenes braucht immer eine Abgabe** — es gibt keinen Augenblick,
+    // in dem die App wüßte, daß das Wort fertig getippt ist.
+    if (state.settings.confirmUeben || q.mode === 'tippen') {
       html += '<button class="btn primary" id="uebConfirm"' + (uebAbgabeBereit() ? '' : ' disabled') +
-        '>Best\u00e4tigen</button>';
+        '>' + (q.mode === 'tippen' ? 'Pr\u00fcfen' : 'Best\u00e4tigen') + '</button>';
     }
   } else {
     html += '<button class="btn primary" id="uebNext"' + (rekoFertig() ? '' : ' disabled') +
@@ -9443,6 +9611,32 @@ function uebInhaltZeichnen() {
     var confirmBtn = document.getElementById('uebConfirm');
     if (confirmBtn) confirmBtn.addEventListener('click', function () {
       if (uebAbgabeBereit()) uebPruefen();
+    });
+    // **Die Tippaufgabe braucht dieselben Zuhörer wie «Tippen»** (ADR 0088):
+    // Feld, Enter, eingebaute Tastatur, Umschalter. Die Schreibmarke gehört
+    // dabei ins Feld — `feldSchreiben()` setzt Wert, Fokus und Marke (ADR 0068).
+    var uebFeld = document.getElementById('uebInput');
+    if (uebFeld) {
+      uebFeld.addEventListener('input', function () {
+        uebEingabe = uebFeld.value;
+        var kn = document.getElementById('uebConfirm');
+        if (kn) kn.disabled = !uebAbgabeBereit();
+      });
+      enterGibtAb(uebFeld, 'uebConfirm');
+    }
+    var uebKbKnopf = document.getElementById('uebKbToggle');
+    if (uebKbKnopf) uebKbKnopf.addEventListener('click', function () {
+      uebKb = !uebKb;
+      renderUeben();
+    });
+    main.querySelectorAll('[data-uebkey]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var t = b.dataset.uebkey;
+        uebEingabe = t === '<' ? uebEingabe.slice(0, -1) : uebEingabe + t;
+        feldSchreiben('uebInput', uebEingabe);
+        var kn = document.getElementById('uebConfirm');
+        if (kn) kn.disabled = !uebAbgabeBereit();
+      });
     });
     var undo = document.getElementById('tileUndo');
     if (undo) undo.addEventListener('click', function () {
@@ -13416,6 +13610,36 @@ function renderEinstellungen() {
   // **Ein Weg statt einer Schalterreihe** (ADR 0075). Acht Chips konnten nur
   // «zeigen» und «wegräumen»; das Einrichten ist jetzt ein eigenes Fenster,
   // weil es drei Rubriken und eine Reihenfolge kennt.
+  // **Ein Schalter, der zeigt, worüber er entscheidet** (ADR 0088). Zwei
+  // Reihen aus je fünf Zeichen — links die ruhige Flamme, rechts die neue mit
+  // Glut. Beide stehen auf dem Grund, den man gerade sieht; eine Vorschau in
+  // einer anderen Farbe wäre keine.
+  //
+  // In «Dark» gehört die neue Flamme dazu und der Schalter ist wirkungslos —
+  // dann sagt er das, statt still nichts zu tun.
+  function flammenWahl() {
+    var reihe = function (klasse) {
+      var h = '<span class="flammprobe ' + klasse + '">';
+      [1, 2, 3, 4, 4].forEach(function (st) { h += ppHtml(st); });
+      return h + '</span>';
+    };
+    var dark = s.schema === 'dark';
+    var an = dark || s.flammeHell;
+    return '<div class="setting breit"><span class="setting-text">' +
+      '<span class="setting-title">Flammen</span>' +
+      '<span class="setting-note">' + (dark
+        ? 'In «Dark» brennt die neue Flamme immer — sie gehört zu dieser Palette. ' +
+          'Der Schalter greift in den hellen Schemata.'
+        : 'Die neue Flamme ist größer und trägt Glut. Sie gehört zu «Dark»; ' +
+          'hier kannst du sie dazuschalten.') + '</span></span>' +
+      '<span class="seg flammseg" role="group" aria-label="Flammen">' +
+      '<button class="chip flammchip' + (an ? '' : ' active') + '" data-flammwahl="alt"' +
+      (dark ? ' disabled' : '') + '>' + reihe('alt') + '<span>Ruhig</span></button>' +
+      '<button class="chip flammchip' + (an ? ' active' : '') + '" data-flammwahl="neu"' +
+      (dark ? ' disabled' : '') + '>' + reihe('neu') + '<span>Mit Glut</span></button>' +
+      '</span></div>';
+  }
+
   function kachelWahl() {
     var oben = state.settings.homeOben;
     var weg = (state.settings.homeAus || []).length;
@@ -13534,6 +13758,7 @@ function renderEinstellungen() {
       '«Dark» ist die Vorgabe, «Classic» das helle Cremeweiß. Grün, Blau und Rosa ' +
       'sind helle Cremetöne. Schrift und Signalfarben bleiben in jedem Schema gleich.',
       SCHEMATA) +
+    flammenWahl() +
     schalter('kommentare', 'Kommentare der Chili',
       'Nach jeder Auflösung ein Satz — mal Lob, mal eine trockene Bemerkung. ' +
       'Aus: Die Zeile bleibt leer, alles Übrige bleibt, wie es ist.') +
@@ -13620,6 +13845,14 @@ function renderEinstellungen() {
   });
   var zuEinr = document.getElementById('zuEinrichten');
   if (zuEinr) zuEinr.addEventListener('click', function () { setTab('einrichten'); });
+  main.querySelectorAll('[data-flammwahl]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      state.settings.flammeHell = b.dataset.flammwahl === 'neu';
+      save();
+      updateDarstellung();
+      renderEinstellungen();
+    });
+  });
   main.querySelectorAll('[data-wahltext]').forEach(function (b) {
     b.addEventListener('click', function () {
       state.settings[b.dataset.wahltext] = b.dataset.wert;

@@ -28,10 +28,13 @@ function antworte(wort, richtig, bisOben) {
   return true;
 }
 // Der Weg über die Tastatur, für alles, was wirklich meistern soll.
+// **Dreimal hintereinander** (ADR 0088): Ein Treffer meistert nicht mehr.
 function tippe(wort, richtig) {
   var vorher = state.boxes[wort.id] || 0;
   var setVorher = aktuellesSet();
-  updateBox(wort.id, richtig, true);
+  if (richtig) {
+    for (var t = 0; t < TIPP_FOLGE; t++) updateBox(wort.id, true, true);
+  } else updateBox(wort.id, false, true);
   meisterMeldung = null;
   meisterPruefen(vorher, state.boxes[wort.id], 'Wort', wort.ru + ' — ' + wort.de, '');
   meisterFolgen(wort, vorher, setVorher);

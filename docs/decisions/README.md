@@ -111,6 +111,7 @@ Wer neu dazukommt und nur fünf lesen will:
 | [0085](0085-begruessung-atem-vorlage.md) | Drei Tickets — Begrüßung, Atem, Vorlage | ändert 0051, 0083, 0016 |
 | [0086](0086-getippt-gemeistert-lernbedarf.md) | Gemeistert wird getippt, der Lernbedarf wird gezählt | ändert 0006, 0075 |
 | [0087](0087-unter-dem-bildschirm-liegt-seite.md) | Unter dem Bildschirm liegt noch Seite — der Grund verdunkelt mit | ergänzt 0051, 0044 |
+| [0088](0088-tippen-in-lernsets-und-eine-echte-flamme.md) | Tippen in «Lernsets», ein Knopf statt einer Frage, eine echte Flamme | ändert 0086, 0053, 0046 |
 
 ## Einen neuen anlegen
 

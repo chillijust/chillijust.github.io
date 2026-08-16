@@ -10,7 +10,15 @@ function q(s) { return document.querySelector(s); }
 function alle(s) { return Array.prototype.slice.call(document.querySelectorAll(s)); }
 function stufe(woerter, s) { woerter.forEach(function (v) { state.boxes[v.id] = s; state.lastSeen[v.id] = Date.now(); }); }
 
+// **Wer eine Übung betritt, stellt die Spuren still** (CLAUDE.md). Sonst
+// öffnet sich beim ersten Betreten das Angebot der Übungsspur, sein Hof liegt
+// über allem, und jede Messung mit elementFromPoint trifft ihn statt das Ziel.
+function spurenStill() {
+  ['lernsets', 'tippen', 'uebersetzen'].forEach(function (k) { state.tutUebung[k] = 1; });
+}
+
 try {
+
   // A · Reihenfolge der Übungen
   setTab('home');
   // Die Reihenfolge steht im aufklappbaren Teil — oben steht nur, was fällig
@@ -140,10 +148,34 @@ try {
   pruefe('K1 gelegt bringt bis vor die Endstufe, nicht darüber',
     state.boxes[kw.id] === BOX_MAX - 1, String(state.boxes[kw.id]));
   pruefe('K1b und die App merkt sich, daß sie gedeckelt hat', tippDeckel === true);
+  // **Dreimal hintereinander** (ADR 0088): Ein Treffer kann ein Zufall sein.
   updateBox(kw.id, true, true);
-  pruefe('K2 getippt geht es hinauf', state.boxes[kw.id] === BOX_MAX,
+  pruefe('K2 ein getippter Treffer reicht noch nicht',
+    state.boxes[kw.id] === BOX_MAX - 1 && tippDeckel === true,
+    state.boxes[kw.id] + ' · noch ' + tippRest);
+  pruefe('K2b und die Zeile sagt, wie viele fehlen', tippRest === TIPP_FOLGE - 1,
+    String(tippRest));
+  updateBox(kw.id, true, true);
+  pruefe('K2c der zweite auch nicht', state.boxes[kw.id] === BOX_MAX - 1,
     String(state.boxes[kw.id]));
-  pruefe('K2b und ohne Deckel', tippDeckel === false);
+  updateBox(kw.id, true, true);
+  pruefe('K2d der dritte meistert', state.boxes[kw.id] === BOX_MAX &&
+    tippDeckel === false, String(state.boxes[kw.id]));
+  // **Ein Fehler reißt die Folge ab** — sonst zählte ein Treffer von vorgestern
+  // noch mit.
+  state.boxes[kw.id] = BOX_MAX - 1;
+  state.tippFolge[kw.id] = 0;
+  updateBox(kw.id, true, true);
+  updateBox(kw.id, true, true);
+  updateBox(kw.id, false, true);
+  pruefe('K2e ein Fehler setzt die Folge zurück', state.tippFolge[kw.id] === 0,
+    String(state.tippFolge[kw.id]));
+  state.boxes[kw.id] = BOX_MAX - 1;
+  updateBox(kw.id, true, true);
+  pruefe('K2f und danach fängt sie von vorn an',
+    state.boxes[kw.id] === BOX_MAX - 1 && tippRest === TIPP_FOLGE - 1,
+    state.boxes[kw.id] + ' · noch ' + tippRest);
+  state.boxes[kw.id] = BOX_MAX;
   // **Wer oben steht, bleibt oben.** Eine Wiederholung per Kachel ist kein
   // Rückschritt — ohne diese Grenze stufte jede richtige Kachelantwort ein
   // fertiges Wort wieder herunter.
@@ -176,6 +208,71 @@ try {
   state.setBleib = 999;
   pruefe('L5 ein unbekanntes Set wird übergangen', aktuellesSet() === 1,
     String(aktuellesSet()));
+  state.setBleib = null;
+
+  // ── M · Der Knopf statt der wiederkehrenden Frage (ADR 0088) ─
+  // Die Meldung kommt genau einmal je Set. Danach wartet der Weg nach vorn
+  // als Pfeil neben der Flammenreihe — ein Knopf fragt nicht.
+  state = defaultState(); ansichtenZuruecksetzen();
+  spurenStill(); tutEnde();
+  uebModus = 'lernsets'; uebAuswahl = 'aktuell';
+  setTab('lernsets');
+  pruefe('M1 solange nichts offensteht, gibt es keinen Pfeil', !q('#setWeiter'));
+  var mw = LERNSETS[0].woerter;
+  mw.forEach(function (v) { state.boxes[v.id] = BOX_MAX - 1; });
+  for (var mi = 0; mi < setSchwelle(0); mi++) state.boxes[mw[mi].id] = BOX_MAX;
+  state.setBleib = 0;
+  renderUeben();
+  pruefe('M2 sobald das nächste Set offen ist, steht er da', !!q('#setWeiter'));
+  pruefe('M2b und ist groß genug zum Antippen', (function () {
+    var r = q('#setWeiter').getBoundingClientRect();
+    var mx = r.left + r.width / 2, my = r.top + r.height / 2;
+    return [[mx - 21, my], [mx + 21, my]].every(function (pt) {
+      var el = document.elementFromPoint(pt[0], pt[1]);
+      return !!el && (el === q('#setWeiter') || q('#setWeiter').contains(el));
+    });
+  })(), (function () {
+    // Beim Fehlschlag steht hier, **was** die Fläche abfängt — eine Zahl allein
+    // sagt nicht, ob der Knopf zu klein ist oder etwas darüberliegt.
+    var r = q('#setWeiter').getBoundingClientRect();
+    var mx = r.left + r.width / 2, my = r.top + r.height / 2;
+    return [[mx - 21, my], [mx + 21, my], [mx, my - 21], [mx, my + 21]].map(function (pt) {
+      var el = document.elementFromPoint(pt[0], pt[1]);
+      return el ? (el.id || el.className || el.tagName) : 'null';
+    }).join(' | ');
+  })());
+  q('#setWeiter').click();
+  pruefe('M3 er springt ins nächste Set',
+    state.setBleib === null && aktuellesSet() === 1, String(aktuellesSet()));
+  pruefe('M3b und bleibt in «Lernsets»', currentTab === 'lernsets', currentTab);
+  pruefe('M4 dort steht er nicht mehr', !q('#setWeiter'));
+
+  // ── N · Die Meldung kommt einmal, nicht immer wieder ───────
+  state = defaultState(); ansichtenZuruecksetzen();
+  var nw = LERNSETS[0].woerter;
+  nw.forEach(function (v) { state.boxes[v.id] = BOX_MAX - 1; });
+  for (var ni = 0; ni < setSchwelle(0) - 1; ni++) state.boxes[nw[ni].id] = BOX_MAX;
+  setFenster = null;
+  var nLetztes = nw[setSchwelle(0) - 1];
+  // Dreimal hintereinander richtig geschrieben — erst dann ist es gemeistert.
+  var nSetVorher = aktuellesSet();
+  var nVorher = state.boxes[nLetztes.id];
+  for (var nk = 0; nk < TIPP_FOLGE; nk++) updateBox(nLetztes.id, true, true);
+  meisterFolgen(nLetztes, nVorher, nSetVorher);
+  pruefe('N1 die Schwelle meldet sich', !!setFenster && setFenster.nr === 0,
+    JSON.stringify(setFenster));
+  setFensterZeigen();
+  alle('[data-jubel]')[0].click();   // «bleiben»
+  pruefe('N2 «bleiben» hält das Set', state.setBleib === 0, String(state.setBleib));
+  // Ein weiteres gemeistertes Wort fragt **nicht** noch einmal.
+  setFenster = null;
+  var nZweites = nw[setSchwelle(0)];
+  var nSetVorher2 = aktuellesSet();
+  var nVorher2 = state.boxes[nZweites.id];
+  for (var nk2 = 0; nk2 < TIPP_FOLGE; nk2++) updateBox(nZweites.id, true, true);
+  meisterFolgen(nZweites, nVorher2, nSetVorher2);
+  pruefe('N3 und danach kommt sie nicht wieder', setFenster === null,
+    JSON.stringify(setFenster));
   state.setBleib = null;
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + e.stack.split('\\n')[1]);

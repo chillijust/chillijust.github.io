@@ -154,8 +154,10 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
 - **Die Fortschrittsreihe brennt** (ADR 0046) — ein Zeichen je Wort, gebaut von
   `ppHtml(stufe)` und sonst nirgends: Stufe 0 bleibt ein Strich, ab Stufe 1 wächst eine
   Flamme mit. **Nur Gold flackert**; die Animation hängt an `.punkt` und `.pp.s4`, nicht
-  an `.flamme-aussen` allein. Die Farben der Stufen sind unverändert — die Gestalt trägt
-  die Aussage, die Farbe bestätigt sie.
+  an `.flamme-aussen` allein. **Die Endstufe trägt Glut** (ADR 0088): außen `--flamme`,
+  innen `--flamme-kern`, 14 × 19 px. Sie gehört zu «Dark» und steht dort immer; in den
+  hellen Schemata schaltet `settings.flammeHell` sie dazu, geführt über `data-flamme`
+  am Wurzelelement. Der Schalter **zeigt beide Reihen** auf dem Grund, den man sieht.
 - **Die Übersicht zeigt einen Weg, nicht das Angebot** (ADR 0065). Drei Zonen: die
   Empfehlung, darunter **«Meine Auswahl»** (`homeOben()`), darunter **«Weitere Übungen»**
   (`homeWeitere()`) mit den drei Gruppen **Zeichen · Wörter · Sätze** — und ihre
@@ -175,9 +177,14 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   **Kästen** gemessen, nicht über `elementFromPoint` (die gezogene Zeile läge selbst
   darunter). Zwei Pfeile je Zeile bleiben als zweiter Weg — eine Einrichtung, die sich nur
   ziehen lässt, ist für den, bei dem das hakt, keine.
-- **Der letzte Schritt gehört der Tastatur** (ADR 0086). `updateBox(id, correct, getippt)`
-  deckelt bei `BOX_MAX - 1`, solange nicht geschrieben wurde — von vier Aufrufern tippt
-  nur «Tippen». **Wer oben steht, bleibt oben** (eine Kachelwiederholung ist kein
+- **Der letzte Schritt gehört der Tastatur** (ADR 0086/0088). `updateBox(id, correct,
+  getippt)` deckelt bei `BOX_MAX - 1`, bis ein Wort **`TIPP_FOLGE`-mal hintereinander**
+  richtig geschrieben wurde (`state.tippFolge`, eine Momentaufnahme wie `wortFehler` und
+  **nicht** im Sicherungscode); ein Fehler setzt die Folge auf null.
+  **Geschrieben wird auch in «Lernsets»**: Ab `settings.tippenStufe` gibt `buildQuestion()`
+  `mode: 'tippen'` zurück — dieselbe Gestalt wie in der Übung «Tippen», Feld und
+  eingebaute Tastatur inbegriffen. Die **Kontext-Lücke lebt darum unterhalb** dieser
+  Stufe (ändert ADR 0053); ohne diese Grenze verschwände sie ganz. **Wer oben steht, bleibt oben** (eine Kachelwiederholung ist kein
   Rückschritt), und der Deckel wirkt **nur nach oben**. Was ein gemeistertes Wort nach
   sich zieht, steht in `meisterFolgen()` und wird von beiden Übungen gerufen — Set- und
   Themenjubel hingen vorher in «Lernsets», wo seither nichts mehr die Endstufe erreicht.
@@ -188,7 +195,10 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   wird beim nächsten gemeisterten Wort erneut gefragt — beim ersten Mal trägt der Jubel
   die Wege, danach kommt dieselbe Frage ohne Feier. **`setFrei(nr)` fragt das Set davor**,
   nicht `aktuellesSet()`: Sonst sperrt sich, wer bleibt, das offene nächste Set zu.
-  `setBleib` steht als **zwölftes Feld** im Sicherungscode.
+  `setBleib` steht als **zwölftes Feld** im Sicherungscode. **Gefragt wird genau einmal
+  je Set** (ADR 0088) — danach steht der Weg als Pfeil `#setWeiter` neben der
+  Flammenreihe, sobald das nächste Set offen ist. Die Wege des Fensters rufen
+  `render()`, nicht `renderUeben()`: Es geht in **beiden** Übungen auf.
 - **Der Lernbedarf wird gezählt, nicht abgeleitet** (ADR 0086). `quoteZaehlen(übung,
   richtig, thema)` steht an allen **sieben** Prüfstellen; Aufgedecktes zählt nicht mit.
   `state.quote` und `state.quoteThema` stehen als **dreizehntes Feld** im Sicherungscode —

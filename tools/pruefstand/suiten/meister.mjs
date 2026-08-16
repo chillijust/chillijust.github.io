@@ -147,12 +147,17 @@ warte(function () {}).then(function () {
     // D · Wort meistern in «Lernsets»
     state = defaultState();
     ansichtenZuruecksetzen();
-    ALL_VOCAB.forEach(function (v) { state.boxes[v.id] = BOX_MAX - 1; });
+    // **Auf der vorletzten Stufe wird geschrieben** (ADR 0088) — die
+    // Kachelmodi enden darunter. Für den Kachelfall wird darum eine Stufe
+    // tiefer angesetzt.
+    ALL_VOCAB.forEach(function (v) { state.boxes[v.id] = SATZ_STUFE; });
     setTab('lernsets');
     uebNext(true);
     pruefe('D1 vor der Antwort keine Meldung', !q('.meister'));
     var wort = uebQ.word;
-    if (uebQ.mode === 'tiles') {
+    if (uebQ.mode === 'tippen') {
+      uebEingabe = wort.ru;
+    } else if (uebQ.mode === 'tiles') {
       uebQ.word.ru.split('').forEach(function (ch) {
         var b = alle('[data-tile]').filter(function (x) { return x.textContent === ch && !x.disabled; })[0];
         if (b) b.click();
@@ -167,24 +172,34 @@ warte(function () {}).then(function () {
         return b.textContent === richtig;
       })[0].click();
     }
-    q('#uebConfirm').click();
+    if (q('#uebConfirm')) q('#uebConfirm').click(); else uebPruefen();
     pruefe('D2 richtig beantwortet', uebCorrect === true, String(uebCorrect));
-    // **Gelegt und gewählt meistern nicht mehr** (ADR 0086). An derselben
-    // Stelle steht jetzt die andere Hälfte der Auskunft: warum es hier endet.
-    pruefe('D3 die Zeile steht da', !!q('.meister'));
-    pruefe('D3b aber als Hinweis, nicht als Meisterschaft',
-      q('.meister').classList.contains('fast') && meisterMeldung === null,
-      q('.meister').className);
-    pruefe('D4 sie nennt die Tastatur',
-      q('.meister').textContent.indexOf('geschrieben') !== -1 &&
-      q('.meister').textContent.indexOf('Tippen') !== -1,
-      q('.meister').textContent);
-    pruefe('D4b und das Wort bleibt eine Stufe darunter',
-      state.boxes[wort.id] === BOX_MAX - 1, String(state.boxes[wort.id]));
-    // Getippt geht es hinauf — und dann steht die Meisterschaft da.
+    // Auf der Satzstufe geht es eine Stufe hinauf — hier meldet noch nichts.
+    pruefe('D3 auf halbem Weg meldet nichts',
+      !q('.meister') && state.boxes[wort.id] === SATZ_STUFE + 1,
+      String(state.boxes[wort.id]));
+
+    // **Gelegt und gewählt meistern nicht** (ADR 0086/0088). An der Stelle,
+    // an der sonst «gemeistert» steht, steht dann die andere Hälfte der
+    // Auskunft: wie viele getippte Treffer noch fehlen.
     state.boxes[wort.id] = BOX_MAX - 1;
+    state.tippFolge[wort.id] = 0;
+    updateBox(wort.id, true, false);
+    renderUeben();
+    pruefe('D3b die Zeile steht da und ist ein Hinweis',
+      !!q('.meister') && q('.meister').classList.contains('fast') &&
+      meisterMeldung === null, q('.meister') ? q('.meister').className : 'keine');
+    pruefe('D4 sie sagt, wie oft noch',
+      q('.meister').textContent.indexOf('schreiben') !== -1 &&
+      q('.meister').textContent.indexOf(String(TIPP_FOLGE)) !== -1,
+      q('.meister').textContent);
+    pruefe('D4b und das Wort bleibt unter der Endstufe',
+      state.boxes[wort.id] < BOX_MAX, String(state.boxes[wort.id]));
+    // Dreimal getippt geht es hinauf — und dann steht die Meisterschaft da.
+    state.boxes[wort.id] = BOX_MAX - 1;
+    state.tippFolge[wort.id] = 0;
     var vorherD = state.boxes[wort.id];
-    updateBox(wort.id, true, true);
+    for (var dtt = 0; dtt < TIPP_FOLGE; dtt++) updateBox(wort.id, true, true);
     meisterMeldung = null;
     meisterPruefen(vorherD, state.boxes[wort.id], 'Wort', wort.ru + ' — ' + wort.de,
       woerterGemeistert() + ' von ' + ALL_VOCAB.length + ' Wörtern');
@@ -202,17 +217,15 @@ warte(function () {}).then(function () {
       state.boxes[v.id] = BOX_MAX;
       state.lastSeen[v.id] = Date.now() - 30 * TAG;
     });
-    // Die Aufgabenform wird ausgelost — also weiterblättern, bis eine Wahlfrage
-    // kommt. Stand die Prüfung in einem «if», fiel sie mal weg und mal nicht,
-    // und die Zahl der Prüfungen schwankte still von Lauf zu Lauf.
-    for (var w = 0; w < 40; w++) { uebNext(true); if (uebQ && uebQ.mode !== 'tiles') break; }
-    pruefe('E0 eine Wahlfrage erreicht', !!uebQ && uebQ.mode !== 'tiles', uebQ && uebQ.mode);
-    var eRichtig = uebQ.mode === 'luecke' ? uebQ.form
-      : uebQ.mode === 'mc-de' ? uebQ.word.de : uebQ.word.ru;
-    alle('[data-opt]').filter(function (b) {
-      return b.textContent === eRichtig;
-    })[0].click();
-    q('#uebConfirm').click();
+    // **Auf der Endstufe wird geschrieben** (ADR 0088) — die Wahlfragen enden
+    // unterhalb der Tippstufe, hier kommt die Tippaufgabe.
+    uebNext(true);
+    pruefe('E0 die Aufgabe ist eine Tippaufgabe', !!uebQ && uebQ.mode === 'tippen',
+      uebQ && uebQ.mode);
+    uebEingabe = uebQ.word.ru;
+    // Der Knopf ist beim Zeichnen noch gesperrt (leeres Feld) — ein Klick auf
+    // einen gesperrten Knopf tut nichts, also wird direkt geprüft.
+    uebPruefen();
     pruefe('E1 Auffrischen meldet nicht', uebCorrect === true && !q('.meister'),
       uebQ.mode + '/' + String(uebCorrect));
 

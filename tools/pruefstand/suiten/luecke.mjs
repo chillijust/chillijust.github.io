@@ -18,12 +18,16 @@ function alle(s) { return Array.prototype.slice.call(document.querySelectorAll(s
 // «waehleWort» die frühen Wörter aus dem Lehrplan — und das sind Pronomen,
 // die gar keine anderen Formen haben. Eine Suite, die darauf wartet, wartet
 // ewig, und das sagt nichts über die Lücke aus.
+// **Die Lücke lebt auf der Satzstufe** (ADR 0088). Darüber wird in «Lernsets»
+// und «Freestyle» nur noch geschrieben — eine Lücke, die nicht meistern kann,
+// hielte das Wort dort nur auf. Der Vorgabewert ist darum SATZ_STUFE und nicht
+// mehr BOX_MAX; auf der Endstufe käme nie wieder eine Lücke.
 function nurDieses(ru, stufe) {
   ALL_VOCAB.forEach(function (v) {
     state.boxes[v.id] = BOX_MAX;
     state.lastSeen[v.id] = Date.now();
   });
-  state.boxes[ru] = stufe === undefined ? BOX_MAX : stufe;
+  state.boxes[ru] = stufe === undefined ? SATZ_STUFE : stufe;
   state.lastSeen[ru] = 0;
 }
 

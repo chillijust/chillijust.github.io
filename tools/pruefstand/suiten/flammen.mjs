@@ -123,7 +123,33 @@ try {
   pruefe('E3 Stufe 2 ist die blassere von beiden',
     parseFloat(getComputedStyle(pp[2].querySelector('svg')).opacity) <
     parseFloat(getComputedStyle(pp[3].querySelector('svg')).opacity));
-  pruefe('E4 Stufe 4 trägt den Akzent', farbe(pp[BOX_MAX]) === tokenFarbe('--akzent'), farbe(pp[BOX_MAX]));
+  // **Die Endstufe trägt seit ADR 0088 Glut, nicht den Akzent** — außen rot,
+  // innen der helle Kern. In «Dark» gehört das zur Palette; in den hellen
+  // Schemata entscheidet der Schalter.
+  pruefe('E4 Stufe 4 trägt die Glut', farbe(pp[BOX_MAX]) === tokenFarbe('--flamme'),
+    farbe(pp[BOX_MAX]) + ' / ' + tokenFarbe('--flamme'));
+  pruefe('E4b und einen helleren Kern darin',
+    getComputedStyle(pp[BOX_MAX].querySelector('.flamme-innen')).color ===
+      tokenFarbe('--flamme-kern'),
+    getComputedStyle(pp[BOX_MAX].querySelector('.flamme-innen')).color);
+  pruefe('E4c sie ist größer als die Stufe darunter',
+    parseFloat(getComputedStyle(pp[BOX_MAX].querySelector('svg')).height) >
+    parseFloat(getComputedStyle(pp[BOX_MAX - 1].querySelector('svg')).height),
+    getComputedStyle(pp[BOX_MAX].querySelector('svg')).height);
+  // **In einem hellen Schema steht sie nur auf Ansage** (ADR 0088).
+  var schemaVorherF = state.settings.schema;
+  state.settings.schema = 'rosa';
+  state.settings.flammeHell = false;
+  updateDarstellung();
+  pruefe('E4d hell und ohne Schalter: der ruhige Akzent',
+    farbe(pp[BOX_MAX]) === tokenFarbe('--akzent'), farbe(pp[BOX_MAX]));
+  state.settings.flammeHell = true;
+  updateDarstellung();
+  pruefe('E4e mit Schalter auch dort die Glut',
+    farbe(pp[BOX_MAX]) === tokenFarbe('--flamme'), farbe(pp[BOX_MAX]));
+  state.settings.schema = schemaVorherF;
+  state.settings.flammeHell = false;
+  updateDarstellung();
   pruefe('E5 der Strich trägt --line',
     getComputedStyle(pp[0]).backgroundColor === tokenFarbe('--line'),
     getComputedStyle(pp[0]).backgroundColor);
