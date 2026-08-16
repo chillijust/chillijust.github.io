@@ -71,12 +71,17 @@ try {
   pruefe('D3 Beschreibung steht drin', txt.indexOf('Sie läuft nach.') !== -1);
   // «Ort», nicht «Übung»: Der Bezug kann auch die Übersicht oder eine
   // Menüansicht sein.
-  pruefe('D4 nennt Ort und Zeit', txt.indexOf('- Ort: Bilanz') !== -1 &&
-    txt.indexOf('- Erstellt: ') !== -1, txt.slice(0, 200));
-  pruefe('D4a Zeit als Ortszeit mit Versatz', /- Erstellt: \d{4}-\d{2}-\d{2} \d{2}:\d{2} \(UTC[+-]\d{2}/.test(txt),
-    (txt.match(/- Erstellt: .*/) || [''])[0]);
-  pruefe('D5 Gerät steht einmal am Ende',
-    txt.split('Gerät: ').length === 2 && txt.indexOf('Gerät: ') > txt.indexOf('---'));
+  pruefe('D4 nennt den Ort', txt.indexOf('- Ort: Bilanz') !== -1, txt.slice(0, 200));
+  // **Was niemand liest, gehört nicht in die Vorlage** (ADR 0085). Wann eine
+  // Meldung getippt wurde, hat noch nie eine Entscheidung geändert, und das
+  // Gerät ist seit jeher dasselbe. In der App bleiben beide stehen.
+  pruefe('D4a kein Datum mehr in der Vorlage',
+    txt.indexOf('- Erstellt:') === -1 && txt.indexOf('- Geändert:') === -1,
+    (txt.match(/- (Erstellt|Geändert):.*/) || ['—'])[0]);
+  pruefe('D5 und kein Gerät', txt.indexOf('Gerät: ') === -1,
+    (txt.match(/Gerät: .*/) || ['—'])[0]);
+  pruefe('D5c in der App steht das Datum weiter',
+    tickets.every(function (t) { return t.erstellt > 0; }));
   // Ein einziger App-Stand gehört in die Fußzeile, nicht an jedes Ticket.
   pruefe('D5a gleicher Stand steht einmal am Ende',
     txt.split('App-Stand: ').length === 2 &&
@@ -393,8 +398,12 @@ try {
     tickets.filter(function (t) { return t.id === bearbeitbar.id; }).length === 1 &&
     bearbeitbar.titel === 'Dann so' && bearbeitbar.art === 'feature');
   pruefe('F26 ein geändertes Ticket ist wieder offen', bearbeitbar.uebergeben === null);
-  pruefe('F27 der Text nennt die Änderung',
-    ticketAbschnitt(bearbeitbar, 1).indexOf('- Geändert:') !== -1);
+  // Der Änderungszeitpunkt bleibt am Ticket — er ordnet die Liste. Nur die
+  // Kopiervorlage trägt ihn nicht mehr (ADR 0085).
+  pruefe('F27 die Änderung wird vermerkt', bearbeitbar.geaendert > 0,
+    String(bearbeitbar.geaendert));
+  pruefe('F27b aber nicht mitkopiert',
+    ticketAbschnitt(bearbeitbar, 1).indexOf('- Geändert:') === -1);
   pruefe('F28 danach ist das Blatt wieder blank',
     meldeBearbeitet === null && q('#meldeTitel').value === '');
 
@@ -496,6 +505,16 @@ try {
     var sortiert = tickets.slice().sort(function (a, b) { return a.erstellt - b.erstellt; });
     return sortiert[0].titel === 'Ein Fehler';
   })(), tickets.map(function (t) { return t.titel; }).join());
+  // **Ältere Vorlagen tragen Datum und Gerät noch** (ADR 0085). Der Leser
+  // versteht sie weiterhin — wer eine alte Kopie einspielt, verliert nichts.
+  var altText = '# Chillingo · 1 Ticket\n\n## 1 · Fehler: Aus alter Zeit\n\n' +
+    'Beschreibung.\n\n- Ort: Tippen\n- Erstellt: 2026-01-02 09:15 (UTC+01)\n' +
+    '---\nApp-Stand: 2.4.0\nGerät: Irgendein iPhone\n';
+  var altGelesen = ticketsLesen(altText);
+  pruefe('Y6b eine alte Vorlage wird weiter verstanden',
+    altGelesen.length === 1 && altGelesen[0].titel === 'Aus alter Zeit' &&
+    altGelesen[0].erstellt > 0 && altGelesen[0].geraet === 'Irgendein iPhone',
+    JSON.stringify(altGelesen[0] || {}).slice(0, 90));
   // **Nichts verstanden heißt nichts getan.**
   pruefe('Y7 Unsinn ergibt kein Ticket', ticketsLesen('Hallo Welt').length === 0);
 

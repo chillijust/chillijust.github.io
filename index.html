@@ -60,9 +60,10 @@
   --shade: rgba(0, 0, 0, .28);
   /* Der Atem des Scheinwerfers (ADR 0083): eine Aufhellung **auf** dem Ziel.
      Wie stark sie sein darf, hängt davon ab, wie hell die Fläche darunter
-     schon ist — auf dem fast schwarzen Grund genügt ein Zehntel, auf einer
-     hellen Kachel wäre davon nichts zu sehen. Darum steht der Wert zweimal. */
-  --tut-atem: rgba(255, 255, 255, .12);
+     schon ist — auf dem fast schwarzen Grund genügt ein Siebtel, auf einer
+     hellen Kachel wäre davon nichts zu sehen. Darum steht der Wert zweimal.
+     Beide sind seit 2.5.1T um ein Fünftel gestiegen, auf Ansage. */
+  --tut-atem: rgba(255, 255, 255, .144);
   /* Die Figur wirft keinen Schatten mehr (ADR 0071). Der Wert stand hier zwei
      Fassungen lang, erst kräftig, dann kurz — der viereckige Rand blieb in
      Safari beides Mal sichtbar. Ein Weichzeichner, den der Browser in eine
@@ -112,9 +113,9 @@
   --shade: rgba(35, 39, 46, .10);
   --blatt: var(--card);
   /* Die hellen Kacheln liegen bei 89 % Helligkeit — ein Zehntel Weiß darauf
-     wäre kein Atmen, sondern nichts. Mehr als ein Drittel wäre dagegen zu
-     viel: Der Schein liegt **über** der Schrift und nimmt ihr den Kontrast. */
-  --tut-atem: rgba(255, 255, 255, .35);
+     wäre kein Atmen, sondern nichts. Viel weiter hinauf geht es aber nicht:
+     Der Schein liegt **über** der Schrift und nimmt ihr den Kontrast. */
+  --tut-atem: rgba(255, 255, 255, .42);
 }
 
 /* Die Flächen. Gerechnet von tools/palette.py: eine Staffelung der Helligkeit
@@ -1220,7 +1221,7 @@ body.chili-steht #chiliBuehne { visibility: visible; }
 #tutLoch::after {
   content: ''; position: absolute; inset: 0;
   border-radius: inherit; background: var(--tut-atem);
-  opacity: 0; animation: tutAtem 5.6s ease-in-out infinite;
+  opacity: 0; animation: tutAtem 3.9s ease-in-out infinite;
 }
 @keyframes tutAtem {
   0%, 100% { opacity: 0; }
@@ -3401,19 +3402,13 @@ var KOMMENTARE = [
 
 var TUTORIALS = {
   home: [
-    ['home', '[data-uebung="buchstaben"]', 'Fang hier an. Russisch schreibt mit anderen Zeichen — solange du sie nicht lesen kannst, ist jedes Wort nur ein Bild. Es sind 33, und viele kennst du fast schon: Р ist ein R, С ein S.'],
-    ['home', '[data-uebung="lernsets"]', 'Dann hierher. Lernsets geben dir zwölf Wörter auf einmal — nicht wahllose, sondern genau die, die du für die nächsten Sätze brauchst. Das ist dein Hauptweg durch die App.'],
-    ['home', '[data-uebung="tippen"]', 'Sobald ein Wort halbwegs sitzt, taucht es hier auf. Tippen ist die ehrlichste Übung: keine Auswahl, du schreibst selbst. Die kyrillische Tastatur kommt von allein.'],
-    ['home', '[data-uebung="uebersetzen"]', 'Sitzen alle Wörter eines Satzes, geht er hier auf. Erst legst du ihn aus Kacheln, später schreibst du ihn — und erst Russisch verstehen, dann Russisch bauen.'],
-    ['home', '[data-uebung="grammatik"]', 'Wenn dir auffällt, dass sich Wörter verändern: книга wird zu книгу, sobald man sie liest. Hier steht, warum. Freiwillig — aber ab dem zweiten Lernset lohnt es sich.'],
-    ['home', '[data-uebung="schreibung"]', 'Russisch schreibt nicht, was es spricht: молоко klingt «malakó» und steht doch mit zwei о da. Hier lernst du die acht Regeln, an denen das liegt — mit der Probe, die sie auflöst.'],
-    ['home', '[data-uebung="freestyle"]', 'Zwischendurch, wenn du einfach üben willst: der ganze Wortschatz nach Thema, ohne Sperren und ohne Reihenfolge.'],
-    ['home', '[data-uebung="power"]', 'Schreibst du ein Wort dreimal hintereinander falsch, rutscht es zurück und schließt seinen Satz wieder. Hier holst du es heraus — drei auf einmal.'],
-    ['home', '#homeEmpf', 'Kurz gesagt: Buchstaben, dann Lernsets, dann Tippen und Übersetzen. Merken musst du dir das nicht — hier oben steht immer, was als Nächstes dran ist.'],
-    ['home', '.kopf-rail', 'Der Balken zeigt, wie viele Wörter endgültig sitzen. Ein Wort braucht dafür vier richtige Antworten an verschiedenen Tagen. Darunter läuft deine Serie mit.'],
-    ['lernsets', '#filterKnopf', 'In jeder Übung sitzt oben dieser Trichter. Dahinter wählst du, woraus geübt wird: der Reihe nach, nur Wiederholungen, oder alles auf einmal.'],
-    ['home', '#menuKnopf', 'Hinter den drei Strichen liegen Bilanz, Sicherung, Einstellungen und Tickets. Die Sicherung ist wichtig — dein Fortschritt liegt nur auf diesem Gerät.'],
-    ['home', '#tutKnopf', 'Diesen Knopf brauchst du gleich nicht mehr: Sobald du einmal durch bist, wandert er als kleines Fragezeichen nach oben in die Kopfzeile — und steht dort auch in den Übungen, jeweils für ihre eigene Erklärung.']
+    ['home', '#homeEmpf', 'Hier oben steht, was gerade dran ist. Du darfst das ignorieren und selbst wählen — beschwer dich nur nicht, wenn du dann Sätze übersetzt, deren Wörter du nie gesehen hast.'],
+    ['home', '#homeAlleKnopf', 'Darunter liegen alle Übungen, geordnet nach Zeichen, Wörtern und Sätzen. Diese Reihenfolge ist kein Vorschlag, sondern der Weg: ohne Buchstaben keine Wörter, ohne Wörter keine Sätze.'],
+    ['home', '.kopf-rail', 'Der Balken zeigt, wie viele Wörter endgültig sitzen. Ein Wort braucht dafür vier richtige Antworten über mehrere Tage — an einem Nachmittag ist hier nichts zu holen.'],
+    ['lernsets', '#filterKnopf', 'In jeder Übung sitzt oben dieser Trichter. Dahinter wählst du, woraus geübt wird. Wer nichts wählt, bekommt das, was fällig ist — meistens die klügere Entscheidung.'],
+    ['home', '#menuKnopf', 'Hinter den drei Strichen liegen Einstellungen, Bilanz, Sicherung und Tickets. Die Sicherung ist der wichtigste Punkt: Dein Lernstand liegt nur auf diesem Gerät, und Geräte gehen kaputt.'],
+    ['home', '#meldeKnopf', 'Stört dich etwas oder fehlt dir etwas, drückst du hier. Das Ticket bleibt auf dem Gerät, bis du es selbst weitergibst — ich telefoniere mit niemandem.'],
+    ['home', '#tutRund', 'Und falls du das hier noch einmal brauchst: dieser Knopf. Er steht auch in den Übungen und erklärt dann jeweils die, in der du gerade stehst. Das war es — viel Spaß mit dem Alphabet.']
   ],
   lernsets: [
     ['lernsets', '.boxdots', 'Diese fünf Punkte sind der Lernstand des Wortes. Jede richtige Antwort rückt es eine Stufe vor, jede falsche zwei zurück — und die letzte Stufe gibt es erst nach vier Treffern an verschiedenen Tagen.'],
@@ -4306,7 +4301,7 @@ var APP_STAND = '2026-08-16'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.5.0T3'; /* == VERSION == */
+var APP_VERSION = '2.5.0T4'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -4714,16 +4709,19 @@ function ticketAbschnitt(t, nr, standZeigen) {
     (t.text ? t.text + '\n\n' : '') +
     (t.reiter ? '- Ort: ' + t.reiter + '\n' : '') +
     (t.grund ? '- Art: ' + t.grund + '\n' : '') +
-    (standZeigen ? '- App-Stand: ' + ticketStand(t) + '\n' : '') +
-    '- Erstellt: ' + datumLang(t.erstellt) + '\n' +
-    (t.geaendert ? '- Geändert: ' + datumLang(t.geaendert) + '\n' : '');
+    (standZeigen ? '- App-Stand: ' + ticketStand(t) + '\n' : '');
 }
 
 // Alles in einem Rutsch: älteste zuerst, damit die Nummern der Reihenfolge
-// folgen, in der die Dinge aufgefallen sind. Gerät und App-Stand stehen einmal
-// am Ende — das Gerät ist ohnehin immer dasselbe, und der Stand meistens auch.
-// Nur wenn sich zwischendurch etwas ausgeliefert hat, gehört er an jedes
-// Ticket: Dann sagt er, gegen welche Fassung sich die Meldung richtet.
+// folgen, in der die Dinge aufgefallen sind. Der App-Stand steht einmal am
+// Ende; nur wenn sich zwischendurch etwas ausgeliefert hat, gehört er an jedes
+// Ticket, denn dann sagt er, gegen welche Fassung sich die Meldung richtet.
+//
+// **Was niemand liest, gehört nicht in die Vorlage** (ADR 0085). Gerät und
+// Datum sind daraus verschwunden: Das Gerät ist seit jeher dasselbe, und wann
+// eine Meldung getippt wurde, hat noch nie eine Entscheidung geändert. In der
+// App bleiben beide stehen — dort ordnen sie die Liste. `ticketsLesen()`
+// **versteht sie weiterhin**, denn ältere kopierte Texte tragen sie noch.
 function ticketsAlsText(liste) {
   if (!liste.length) return '';
   var reihe = liste.slice().sort(function (a, b) { return a.erstellt - b.erstellt; });
@@ -4736,8 +4734,7 @@ function ticketsAlsText(liste) {
   var kopf = '# Chillingo · ' + reihe.length + (reihe.length === 1 ? ' Ticket' : ' Tickets') + '\n\n';
   var koerper = reihe.map(function (t, i) { return ticketAbschnitt(t, i + 1, jeTicket); }).join('\n');
   return kopf + koerper + '\n---\n' +
-    (jeTicket ? '' : 'App-Stand: ' + staende[0] + '\n') +
-    'Gerät: ' + reihe[reihe.length - 1].geraet + '\n';
+    (jeTicket ? '' : 'App-Stand: ' + staende[0] + '\n');
 }
 
 // ── Tickets einlesen ────────────────────────────────────────
@@ -6421,8 +6418,9 @@ function tutSchritte() { return TUTORIALS[tutSpur] || TUTORIALS.home; }
 // Was vor dem ersten Schritt gefragt wird. Je Spur ein eigener Satz — «wie
 // diese App funktioniert» wäre in «Tippen» eine Lüge über den Umfang.
 var TUT_FRAGE = {
-  home: 'Ich zeige dir in einer Minute, wie diese App funktioniert — wo du anfängst, ' +
-    'was die Übungen voneinander wollen und wo was zu finden ist.',
+  home: 'Hallo, ich bin Chilli — dein Trainer für alles, was mit russischem Lesen ' +
+    'und Schreiben zu tun hat. Ja, ich bin eine Schote. Nein, das erkläre ich nicht. ' +
+    'Sieben Schritte, dann weißt du, wo hier was liegt.',
   lernsets: 'Soll ich dir kurz zeigen, wie Lernsets funktionieren? Fünf Schritte, ' +
     'dann weißt du, was die Punkte bedeuten und woher die Wörter kommen.',
   tippen: 'Soll ich dir kurz zeigen, wie «Tippen» funktioniert? Fünf Schritte, ' +
@@ -6631,10 +6629,16 @@ function tutZeichnen() {
   tutKnoepfe(null);
   tutFussSetzen(true);
 
-  // **Ein zugeklapptes Ziel klappt sich auf** (ADR 0065). Acht der dreizehn
-  // Schritte zeigen auf je eine Kachel, und die meisten liegen seit 2.4.7
-  // hinter «Alle Übungen». Der Scheinwerfer öffnet den Bereich, statt ins Leere
-  // zu zeigen — nebenbei sieht man dabei, dass es dort etwas aufzuklappen gibt.
+  // **Der Kopf wird vor dem Messen neu gezeichnet.** Der letzte Schritt zeigt
+  // auf den Fragezeichen-Knopf, und den gibt es nur, solange dieser Schritt
+  // steht (ADR 0085) — wer erst mißt und dann zeichnet, mißt ein Rechteck der
+  // Breite null.
+  renderKopf();
+
+  // **Ein zugeklapptes Ziel klappt sich auf** (ADR 0065). Ein Schritt kann auf
+  // etwas zeigen, das hinter «Alle Übungen» liegt. Der Scheinwerfer öffnet den
+  // Bereich, statt ins Leere zu zeigen — nebenbei sieht man dabei, dass es
+  // dort etwas aufzuklappen gibt.
   // Gefragt ist, ob das Ziel **zu sehen** ist, nicht ob es im Baum steht: Ein
   // zugeklapptes `[hidden]` findet `querySelector` sehr wohl — der Scheinwerfer
   // leuchtete dann auf ein Rechteck der Breite null.
@@ -7642,8 +7646,16 @@ function renderKopf() {
 function renderTutRund() {
   var knopf = document.getElementById('tutRund');
   if (!knopf) return;
+  // **Ein Scheinwerfer braucht eine Bühne** (ADR 0085). Der letzte Schritt der
+  // Heimspur zeigt auf genau diesen Knopf — und den gäbe es zu diesem
+  // Zeitpunkt noch nicht, denn «fertig» wird das Tutorial erst danach. Der
+  // Schritt sagte also etwas, das nirgends zu sehen war. Solange er steht, ist
+  // der Knopf da; dieselbe Ausnahme, die im Tutorial auch alle Kacheln zeigt
+  // (ADR 0051).
+  var zeigtDarauf = tutOffen && tutSpur === 'home' &&
+    TUTORIALS.home[tutSchritt] && TUTORIALS.home[tutSchritt][1] === '#tutRund';
   var da = !!TUTORIALS[currentTab] &&
-    !(currentTab === 'home' && !state.tutorialFertig);
+    (zeigtDarauf || !(currentTab === 'home' && !state.tutorialFertig));
   knopf.hidden = !da;
   if (da) knopf.innerHTML = ICON.frage;
   leisteZeigen();

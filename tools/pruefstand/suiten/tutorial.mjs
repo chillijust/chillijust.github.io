@@ -49,13 +49,19 @@ try {
   // ausgeht.
   pruefe('00 beim allerersten Start fragt die App von selbst',
     tutOffen === true && q('#tutHof').hidden === false, String(tutOffen));
-  pruefe('01 und zwar mit der Frage', q('#tutText').textContent.indexOf('Ich zeige dir') === 0,
+  pruefe('01 und zwar mit der Begrüßung',
+    q('#tutText').textContent.indexOf('Hallo, ich bin Chilli') === 0,
     q('#tutText').textContent.slice(0, 40));
   tutEnde();
 
   // ── A · Die Schritte selbst ───────────────────────────────
   reicherStand();
-  pruefe('A1 dreizehn Schritte', TUTORIALS.home.length === 13, String(TUTORIALS.home.length));
+  // **Sieben, nicht dreizehn** (ADR 0085). Die einzelnen Übungen erklären sich
+  // in ihren eigenen Spuren; die Heimspur sagt nur noch, wo was liegt.
+  pruefe('A1 sieben Schritte', TUTORIALS.home.length === 7, String(TUTORIALS.home.length));
+  pruefe('A1b und keiner zeigt mehr auf eine einzelne Übung',
+    TUTORIALS.home.every(function (s) { return s[1].indexOf('data-uebung') === -1; }),
+    TUTORIALS.home.map(function (s) { return s[1]; }).join(' ')); 
   pruefe('A2 jeder hat Ort, Ziel und Text',
     TUTORIALS.home.every(function (s) { return s.length === 3; }));
   pruefe('A3 jeder Text ist kurz genug fürs Overlay',
@@ -129,7 +135,8 @@ try {
     var st = getComputedStyle(q('#tutLoch'), '::after');
     return st.animationName === 'tutAtem' &&
       st.animationIterationCount === 'infinite' &&
-      parseFloat(st.animationDuration) > 4;
+      parseFloat(st.animationDuration) > 3 &&
+      parseFloat(st.animationDuration) < 5;
   })(), getComputedStyle(q('#tutLoch'), '::after').animationName + ' / ' +
     getComputedStyle(q('#tutLoch'), '::after').animationDuration);
   // Läge die Deckung auf dem Loch selbst, blendete sie den Schatten mit aus —
@@ -147,7 +154,8 @@ try {
   // ── C · Erst die Frage, dann der Scheinwerfer ─────────────
   q('#tutKnopf').click();
   pruefe('C1 das Overlay ist offen', tutOffen && !q('#tutHof').hidden);
-  pruefe('C2 und fragt zuerst', q('#tutText').textContent.indexOf('Ich zeige dir') === 0,
+  pruefe('C2 und stellt sich zuerst vor',
+    q('#tutText').textContent.indexOf('Hallo, ich bin Chilli') === 0,
     q('#tutText').textContent.slice(0, 40));
   pruefe('C3 mit «Abbrechen» und «Loslegen»', !!knopf('Abbrechen') && !!knopf('Loslegen'));
   pruefe('C4 noch leuchtet nichts', q('#tutHof').classList.contains('ohne-ziel'));
@@ -254,7 +262,7 @@ try {
   pruefe('E3b während der Schritte gibt es keine beschrifteten Knöpfe',
     q('#tutKnoepfe').hidden && alle('#tutKnoepfe [data-tut]').length === 0);
   pruefe('E4 der Zähler stimmt — für das Ohr',
-    q('#tutZaehler').textContent === 'Schritt 13 von 13', q('#tutZaehler').textContent);
+    q('#tutZaehler').textContent === 'Schritt 7 von 7', q('#tutZaehler').textContent);
 
   // ── E5 · Die Punktreihe ───────────────────────────────────
   // Sie ersetzt die Zeile «Schritt 3 von 12». Ein Zeichen je Schritt, genau
@@ -310,7 +318,8 @@ try {
   pruefe('H2 die Bedingung greift',
     !state.tutorialGesehen && state.answered === 0 && currentTab === 'home');
   tutStarten();
-  pruefe('H3 die Frage steht da', tutOffen && q('#tutText').textContent.indexOf('Ich zeige dir') === 0);
+  pruefe('H3 die Begrüßung steht da',
+    tutOffen && q('#tutText').textContent.indexOf('Hallo, ich bin Chilli') === 0);
   knopf('Abbrechen').click();
   pruefe('H4 danach greift die Bedingung nicht mehr', state.tutorialGesehen === true);
   pruefe('H5 und der Knopf steht trotzdem noch oben', state.tutorialFertig === false);
@@ -358,7 +367,7 @@ try {
   setTab('home');
   tutStarten(false);
   for (var zs = 0; zs < TUTORIALS.home.length; zs++) {
-    if (TUTORIALS.home[zs][1].indexOf('lernsets') !== -1) tutSchritt = zs;
+    if (TUTORIALS.home[zs][1] === '#homeAlleKnopf') tutSchritt = zs;
   }
   tutZeichnen();
   var ziel = q(TUTORIALS.home[tutSchritt][1]);
@@ -577,6 +586,38 @@ try {
   // Leiste, sonst stünde ein Streifen Luft über der Aufgabe.
   setTab('buchstaben');
   pruefe('M5 ohne Spur ist der Knopf weg', q('#tutRund').hidden === true);
+
+  // ── O · Der letzte Schritt zeigt auf etwas Sichtbares ─────
+  // **Ein Scheinwerfer braucht eine Bühne** (ADR 0085). Der letzte Schritt
+  // sagt, dass der Weg zurück oben als Fragezeichen steht — und genau der
+  // Knopf erscheint sonst erst, wenn das Tutorial durch ist. Er wurde also
+  // angekündigt und nicht gezeigt.
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  setTab('home');
+  tutEnde();
+  tutStarten('home', true);
+  tutSchritt = TUTORIALS.home.length - 1;
+  tutZeichnen();
+  pruefe('O1 der letzte Schritt zeigt auf den runden Knopf',
+    TUTORIALS.home[TUTORIALS.home.length - 1][1] === '#tutRund',
+    TUTORIALS.home[TUTORIALS.home.length - 1][1]);
+  pruefe('O2 und der steht dabei wirklich da',
+    q('#tutRund').hidden === false && q('#tutRund').getClientRects().length > 0,
+    String(q('#tutRund').hidden));
+  pruefe('O3 das Loch liegt auf ihm', (function () {
+    var zr = q('#tutRund').getBoundingClientRect();
+    var lr = q('#tutLoch').getBoundingClientRect();
+    return zr.width > 0 && Math.abs(lr.top - zr.top) < 1 &&
+      Math.abs(lr.width - zr.width) < 1;
+  })(), q('#tutLoch').getBoundingClientRect().width.toFixed(0) + ' / ' +
+    q('#tutRund').getBoundingClientRect().width.toFixed(0));
+  // Und danach ist er wieder weg, solange das Tutorial nicht durchlief —
+  // sonst stünden das goldene Angebot und das Fragezeichen nebeneinander.
+  tutEnde();
+  state.tutorialFertig = false;
+  setTab('home');
+  pruefe('O4 abgebrochen bleibt er verborgen', q('#tutRund').hidden === true);
 
   // ── N · Die Leiste bleibt, wo sie hingehört ───────────────
   // **Eine Übung zeichnet sich oft ohne den Umweg über render().** Wer dabei

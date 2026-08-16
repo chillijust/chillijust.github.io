@@ -188,7 +188,10 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   `UEBUNGEN`. **Eine Prüfung fragt eine Kachel nach Namen**, nie nach Platz — dieselbe
   Übung steht jetzt zweimal im Baum.
 - **Vier Tutorial-Spuren, ein Mechanismus** (ADR 0079). `data/tutorial.json` ist eine
-  Sammlung: `home` (13 Schritte) plus `lernsets`, `tippen`, `uebersetzen` (je 5). Alles
+  Sammlung: `home` (**7** Schritte, ADR 0085) plus `lernsets`, `tippen`, `uebersetzen`
+  (je 5). **Die Heimspur nennt keine einzelne Übung** — sie sagt, wo was liegt; das
+  Übrige erklären die Übungsspuren. Die Begrüßung steht in `TUT_FRAGE.home`, denn eine
+  Vorstellung leuchtet nichts an. Alles
   liest `tutSchritte()`, gestartet wird mit `tutStarten(spur)`. Die Frage davor steht je
   Spur in `TUT_FRAGE`. **Angeboten wird beim ersten Betreten** — aber nur, wenn das Ziel
   des ersten Schritts sichtbar ist (**ein Scheinwerfer ohne Bühne wartet**) und das große
@@ -231,7 +234,11 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   neben dem Angeleuchteten, der Text kommt als Sprechblase aus ihr heraus, und der Zipfel
   zeigt auf **sie**. Keine Karte, in der beides säße. Ihr Platzhalter `#tutChili` steht in
   `chiliPlatzhalter()` **vor** allem anderen; ihr Sprung wird in **Bildkoordinaten**
-  gemessen (`tutChiliLage()`) — die eine benannte Ausnahme zu ADR 0012. **Der weiche Rand
+  gemessen (`tutChiliLage()`) — die eine benannte Ausnahme zu ADR 0012. **Ein
+  Scheinwerfer braucht eine Bühne** (ADR 0085): Der letzte Schritt zeigt auf `#tutRund`,
+  den es sonst erst *nach* dem Tutorial gäbe — solange der Schritt steht, ist er da, und
+  `tutZeichnen()` zeichnet den Kopf **vor** dem Messen. Wer erst mißt und dann zeichnet,
+  mißt die Vergangenheit. **Der weiche Rand
   des Lochs braucht dieselbe Deckung wie der äußere Schatten** — sonst bleibt die Linie
   blass stehen. *(Seit ADR 0067 gegenstandslos: Es gibt keinen weichen Rand mehr. **Das
   Loch liegt genau auf dem Ziel** — keine Luft, harte Kante, und der Radius wird am Ziel
@@ -417,7 +424,9 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
 - **Tickets liegen in `chillingo_tickets_v1`**, nicht im Lernstand — der Sicherungscode
   soll schlank bleiben. Sie verlassen das Gerät nie von selbst: ein Knopf bündelt sie zu
   einem Text zum Kopieren (ADR 0016), und `ticketsLesen()` liest **genau diese Form**
-  wieder ein (ADR 0069) — was nicht passt, wird übersprungen, nicht geraten, und Bekanntes
+  wieder ein (ADR 0069). **Gerät und Datum stehen nicht mehr darin** (ADR 0085) — in der
+  App bleiben sie, dort ordnen sie die Liste; der Leser versteht ältere Vorlagen mit
+  beidem weiterhin, denn *ein Leser darf mehr verstehen, als der Schreiber schreibt* — was nicht passt, wird übersprungen, nicht geraten, und Bekanntes
   nicht verdoppelt. Der Bezug heißt **Ort**, nicht «Übung» — er kann auch die Übersicht
   oder eine Menüansicht sein, und er steht seit ADR 0074 in einem **Klappfeld** aus
   Knöpfen: zugeklappt trägt der Knopf die Wahl, eine Wahl schließt ihn wieder. Dieselbe

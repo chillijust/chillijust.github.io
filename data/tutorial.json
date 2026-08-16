@@ -1,18 +1,12 @@
 {
   "home": [
-    ["home", "[data-uebung=\"buchstaben\"]", "Fang hier an. Russisch schreibt mit anderen Zeichen — solange du sie nicht lesen kannst, ist jedes Wort nur ein Bild. Es sind 33, und viele kennst du fast schon: Р ist ein R, С ein S."],
-    ["home", "[data-uebung=\"lernsets\"]", "Dann hierher. Lernsets geben dir zwölf Wörter auf einmal — nicht wahllose, sondern genau die, die du für die nächsten Sätze brauchst. Das ist dein Hauptweg durch die App."],
-    ["home", "[data-uebung=\"tippen\"]", "Sobald ein Wort halbwegs sitzt, taucht es hier auf. Tippen ist die ehrlichste Übung: keine Auswahl, du schreibst selbst. Die kyrillische Tastatur kommt von allein."],
-    ["home", "[data-uebung=\"uebersetzen\"]", "Sitzen alle Wörter eines Satzes, geht er hier auf. Erst legst du ihn aus Kacheln, später schreibst du ihn — und erst Russisch verstehen, dann Russisch bauen."],
-    ["home", "[data-uebung=\"grammatik\"]", "Wenn dir auffällt, dass sich Wörter verändern: книга wird zu книгу, sobald man sie liest. Hier steht, warum. Freiwillig — aber ab dem zweiten Lernset lohnt es sich."],
-    ["home", "[data-uebung=\"schreibung\"]", "Russisch schreibt nicht, was es spricht: молоко klingt «malakó» und steht doch mit zwei о da. Hier lernst du die acht Regeln, an denen das liegt — mit der Probe, die sie auflöst."],
-    ["home", "[data-uebung=\"freestyle\"]", "Zwischendurch, wenn du einfach üben willst: der ganze Wortschatz nach Thema, ohne Sperren und ohne Reihenfolge."],
-    ["home", "[data-uebung=\"power\"]", "Schreibst du ein Wort dreimal hintereinander falsch, rutscht es zurück und schließt seinen Satz wieder. Hier holst du es heraus — drei auf einmal."],
-    ["home", "#homeEmpf", "Kurz gesagt: Buchstaben, dann Lernsets, dann Tippen und Übersetzen. Merken musst du dir das nicht — hier oben steht immer, was als Nächstes dran ist."],
-    ["home", ".kopf-rail", "Der Balken zeigt, wie viele Wörter endgültig sitzen. Ein Wort braucht dafür vier richtige Antworten an verschiedenen Tagen. Darunter läuft deine Serie mit."],
-    ["lernsets", "#filterKnopf", "In jeder Übung sitzt oben dieser Trichter. Dahinter wählst du, woraus geübt wird: der Reihe nach, nur Wiederholungen, oder alles auf einmal."],
-    ["home", "#menuKnopf", "Hinter den drei Strichen liegen Bilanz, Sicherung, Einstellungen und Tickets. Die Sicherung ist wichtig — dein Fortschritt liegt nur auf diesem Gerät."],
-    ["home", "#tutKnopf", "Diesen Knopf brauchst du gleich nicht mehr: Sobald du einmal durch bist, wandert er als kleines Fragezeichen nach oben in die Kopfzeile — und steht dort auch in den Übungen, jeweils für ihre eigene Erklärung."]
+    ["home", "#homeEmpf", "Hier oben steht, was gerade dran ist. Du darfst das ignorieren und selbst wählen — beschwer dich nur nicht, wenn du dann Sätze übersetzt, deren Wörter du nie gesehen hast."],
+    ["home", "#homeAlleKnopf", "Darunter liegen alle Übungen, geordnet nach Zeichen, Wörtern und Sätzen. Diese Reihenfolge ist kein Vorschlag, sondern der Weg: ohne Buchstaben keine Wörter, ohne Wörter keine Sätze."],
+    ["home", ".kopf-rail", "Der Balken zeigt, wie viele Wörter endgültig sitzen. Ein Wort braucht dafür vier richtige Antworten über mehrere Tage — an einem Nachmittag ist hier nichts zu holen."],
+    ["lernsets", "#filterKnopf", "In jeder Übung sitzt oben dieser Trichter. Dahinter wählst du, woraus geübt wird. Wer nichts wählt, bekommt das, was fällig ist — meistens die klügere Entscheidung."],
+    ["home", "#menuKnopf", "Hinter den drei Strichen liegen Einstellungen, Bilanz, Sicherung und Tickets. Die Sicherung ist der wichtigste Punkt: Dein Lernstand liegt nur auf diesem Gerät, und Geräte gehen kaputt."],
+    ["home", "#meldeKnopf", "Stört dich etwas oder fehlt dir etwas, drückst du hier. Das Ticket bleibt auf dem Gerät, bis du es selbst weitergibst — ich telefoniere mit niemandem."],
+    ["home", "#tutRund", "Und falls du das hier noch einmal brauchst: dieser Knopf. Er steht auch in den Übungen und erklärt dann jeweils die, in der du gerade stehst. Das war es — viel Spaß mit dem Alphabet."]
   ],
   "lernsets": [
     ["lernsets", ".boxdots", "Diese fünf Punkte sind der Lernstand des Wortes. Jede richtige Antwort rückt es eine Stufe vor, jede falsche zwei zurück — und die letzte Stufe gibt es erst nach vier Treffern an verschiedenen Tagen."],

@@ -216,17 +216,20 @@ try {
   ansichtenZuruecksetzen();
   pruefe('Z11 Zurücksetzen klappt sie zu', homeOffen === false);
 
-  // **Der Scheinwerfer klappt selbst auf.** Acht der dreizehn Schritte zeigen
-  // auf je eine Kachel; ohne diese Regel zeigten sie ins Leere.
+  // **Der Scheinwerfer klappt selbst auf**, wenn sein Ziel im zugeklappten
+  // Teil liegt. Seit ADR 0085 zeigt kein Schritt der Heimspur mehr auf eine
+  // einzelne Kachel — geprüft wird darum die **Mechanik**, mit einem eigens
+  // dorthin gesetzten Ziel. Eine Prüfung, die auf einen zufällig passenden
+  // Schritt angewiesen ist, wird still, sobald der Inhalt sich ändert.
   setTab('home');
   tutStarten(false);
-  // Gewählt wird ein Schritt, dessen Ziel **sicher** unten liegt:
+  var gemerkt = TUTORIALS.home.slice();
   // «Power-Training» ist am Anfang gesperrt und steht darum nie in der kurzen
-  // Auswahl oben. Beim ersten Schritt wäre der Beweis wertlos — «Buchstaben»
-  // ist frisch fällig und steht ohnehin oben.
-  for (var ts = 0; ts < TUTORIALS.home.length; ts++) {
-    if (TUTORIALS.home[ts][1].indexOf('power') !== -1) tutSchritt = ts;
-  }
+  // Auswahl oben — sein Platz ist sicher der zugeklappte Teil.
+  TUTORIALS.home = gemerkt.slice();
+  TUTORIALS.home[0] = ['home', '[data-uebung="power"]',
+    'Ein Ziel, das unten liegt — nur für diese Prüfung.'];
+  tutSchritt = 0;
   pruefe('Z12a das Ziel liegt wirklich im zugeklappten Teil',
     homeOffen === false && !q('#main [data-uebung="power"]:not(#homeAlle *)'));
   tutZeichnen();
@@ -234,6 +237,7 @@ try {
   pruefe('Z13 und leuchtet die Kachel an, nicht das Nichts',
     q('#tutLoch').getBoundingClientRect().width > 20,
     q('#tutLoch').getBoundingClientRect().width.toFixed(0));
+  TUTORIALS.home = gemerkt;
   tutEnde();
   ansichtenZuruecksetzen();
 
