@@ -130,12 +130,122 @@ try {
     homeOben(null).length <= HOME_FAELLIG_MAX,
     homeOben(null).join());
 
-  // ── D · Defizite in der Bilanz ────────────────────────────
+  // ── D · Der Lernbedarf in der Bilanz ──────────────────────
+  // «Defizite» heißt seit ADR 0086 «Lernbedarf» und steht als eigener
+  // Abschnitt über den einzelnen Befunden.
   state = defaultState();
   ansichtenZuruecksetzen();
   setTab('bilanz');
   pruefe('D1 ohne Befund steht der Abschnitt trotzdem da',
-    main.textContent.indexOf('Defizite') !== -1);
+    main.textContent.indexOf('Lernbedarf') !== -1 &&
+    main.textContent.indexOf('Woran es gerade hakt') !== -1);
+  pruefe('D1b und der Weg zur ganzen Aufstellung immer',
+    !!q('[data-detail="lernbedarf"]'));
+
+  // ── D2 · Die Fehlerquote wird gezählt (ADR 0086) ──────────
+  // Aus einer Leitner-Stufe geht hervor, wie weit ein Wort ist — nicht, wie
+  // oft man daneben lag, um dorthin zu kommen.
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  pruefe('D2a ein frischer Stand hat keine Quote',
+    Object.keys(state.quote).length === 0 && quoteAnteil(state.quote.tippen) === null);
+  quoteZaehlen('tippen', true, 'Tiere');
+  quoteZaehlen('tippen', false, 'Tiere');
+  quoteZaehlen('tippen', false, 'Tiere');
+  pruefe('D2b gezählt wird je Übung und je Thema',
+    state.quote.tippen.r === 1 && state.quote.tippen.f === 2 &&
+    state.quoteThema.Tiere.f === 2,
+    JSON.stringify(state.quote) + ' ' + JSON.stringify(state.quoteThema));
+  pruefe('D2c der Anteil ist der Fehleranteil',
+    Math.abs(quoteAnteil(state.quote.tippen) - 2 / 3) < 0.001,
+    String(quoteAnteil(state.quote.tippen)));
+  // **Wenig ist keine Quote.** Drei Antworten sagen nichts; unter der
+  // Mindestzahl taucht eine Übung im Lernbedarf nicht auf.
+  pruefe('D2d unter der Mindestzahl steht sie nicht oben',
+    lernbedarf(false).length === 0, String(lernbedarf(false).length));
+  pruefe('D2e in der ganzen Aufstellung aber schon',
+    lernbedarf(true).length === 1, String(lernbedarf(true).length));
+  // Genug Antworten, und die Quote ist hoch: jetzt steht sie oben.
+  state.quote.tippen = { r: 4, f: 8 };
+  pruefe('D2f über der Schwelle erscheint sie',
+    lernbedarf(false).length === 1 && lernbedarf(false)[0].id === 'tippen',
+    JSON.stringify(lernbedarf(false)));
+  // Und eine ruhige Übung bleibt draußen, obwohl sie gezählt ist.
+  state.quote.buchstaben = { r: 30, f: 1 };
+  pruefe('D2g eine ruhige Übung ist kein Lernbedarf',
+    lernbedarf(false).length === 1 && lernbedarf(true).length === 2,
+    lernbedarf(false).map(function (k) { return k.id; }).join());
+  // Sortiert nach Quote, nicht nach Reihenfolge im Code.
+  state.quote.grammatik = { r: 1, f: 20 };
+  pruefe('D2h die schlimmste steht oben',
+    lernbedarf(false)[0].id === 'grammatik',
+    lernbedarf(false).map(function (k) { return k.id; }).join());
+
+  // ── D3 · Die Kategorie führt ins Detail und weiter ────────
+  setTab('bilanz');
+  pruefe('D3a die Kategorien stehen als Knöpfe da',
+    alle('[data-kat]').length === lernbedarf(false).length &&
+    alle('[data-kat]').every(function (b) { return b.tagName === 'BUTTON'; }),
+    String(alle('[data-kat]').length));
+  pruefe('D3b jede zeigt ihre Quote als Ring',
+    alle('.kat .donut').length === alle('[data-kat]').length);
+  // **Ein Ring in einer Zeile ist ein Zeichen, kein Diagramm.** Das Bild hat
+  // gezeigt, was diese Prüfung nicht sah: Er war so groß wie die halbe Seite,
+  // weil die spätere Regel «.donut.klein» die frühere stach. Gemessen wird
+  // darum die Größe, nicht das Vorhandensein.
+  pruefe('D3b2 und der Ring bleibt klein', (function () {
+    var b = alle('.kat .donut')[0].getBoundingClientRect();
+    return b.width > 30 && b.width < 80;
+  })(), alle('.kat .donut')[0].getBoundingClientRect().width.toFixed(0) + ' px');
+  // Und die Zahl darin ist der Fehleranteil, nicht null: prozentText()
+  // rechnet nicht, es formuliert — ein Bruch allein ergäbe dort immer 0 %.
+  pruefe('D3b3 die Zahl im Ring ist der Fehleranteil',
+    q('[data-kat="grammatik"] .donut-wert').textContent === '95 %',
+    q('[data-kat="grammatik"] .donut-wert').textContent);
+  pruefe('D3c und die Trefferfläche reicht',
+    alle('[data-kat]')[0].getBoundingClientRect().height >= 44,
+    alle('[data-kat]')[0].getBoundingClientRect().height.toFixed(0));
+  q('[data-kat="grammatik"]').click();
+  pruefe('D3d ein Tipp führt in die Kategorie', bilanzDetail === 'kat:grammatik',
+    String(bilanzDetail));
+  pruefe('D3e der Kopf nennt die Übung, nicht die Kennung',
+    q('#kopfTitel').textContent === 'Grammatik', q('#kopfTitel').textContent);
+  pruefe('D3f und ein Weg führt in die Übung', !!q('[data-katziel="grammatik"]'));
+  // **Zurück führt in die Aufstellung, nicht ganz hinaus** — sonst verlöre man
+  // bei jedem Blick den Faden.
+  q('#detailBack').click();
+  pruefe('D3g zurück landet in der Aufstellung', bilanzDetail === 'lernbedarf',
+    String(bilanzDetail));
+  pruefe('D3h dort stehen alle, auch die ruhigen',
+    alle('[data-kat]').length === lernbedarf(true).length,
+    String(alle('[data-kat]').length));
+  q('#detailBack').click();
+  pruefe('D3i und von dort ganz hinaus', bilanzDetail === null, String(bilanzDetail));
+
+  // ── D4 · Die Wörter mit Lernbedarf, hinter dem Klappfeld ──
+  state.boxes = {};
+  ALL_VOCAB.slice(0, 5).forEach(function (v) { state.boxes[v.id] = 2; });
+  state.quote.tippen = { r: 4, f: 8 };
+  bilanzDetail = 'kat:tippen';
+  katWoerterOffen = false;
+  renderBilanz();
+  pruefe('D4a das Klappfeld steht da, zugeklappt',
+    !!q('#katWoerterKnopf') && q('#katWoerter').hidden === true);
+  q('#katWoerterKnopf').click();
+  pruefe('D4b und geht auf', q('#katWoerter').hidden === false &&
+    q('#katWoerter').querySelectorAll('.theme-row').length === 5,
+    String(q('#katWoerter').querySelectorAll('.theme-row').length));
+  // **Nichts, was der Nutzer noch nie gesehen hat** — die Bilanz zeigt den
+  // Stand, nicht den Lehrplan.
+  pruefe('D4c nur Begonnenes, nichts Unbekanntes',
+    lernbedarfWoerter('tippen').every(function (w) { return w.stufe > 0; }));
+  pruefe('D4d und nichts Fertiges', lernbedarfWoerter('tippen').every(function (w) {
+    return w.stufe < BOX_MAX;
+  }));
+  bilanzDetail = null;
+  katWoerterOffen = false;
+  state = defaultState();
+  ansichtenZuruecksetzen();
 
   // Vier Quellen, vier Zeilen. Erst alles gemeistert, damit nichts anderes
   // dazwischenfunkt — sonst prüfte man den Zufall.

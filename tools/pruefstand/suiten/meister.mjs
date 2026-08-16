@@ -169,11 +169,30 @@ warte(function () {}).then(function () {
     }
     q('#uebConfirm').click();
     pruefe('D2 richtig beantwortet', uebCorrect === true, String(uebCorrect));
-    pruefe('D3 die Meldung steht da', !!q('.meister'));
-    pruefe('D4 sie nennt das Wort und die Zahl',
-      q('.meister').textContent.indexOf(wort.ru) !== -1 &&
-      q('.meister').textContent.indexOf('von ' + ALL_VOCAB.length) !== -1,
+    // **Gelegt und gewählt meistern nicht mehr** (ADR 0086). An derselben
+    // Stelle steht jetzt die andere Hälfte der Auskunft: warum es hier endet.
+    pruefe('D3 die Zeile steht da', !!q('.meister'));
+    pruefe('D3b aber als Hinweis, nicht als Meisterschaft',
+      q('.meister').classList.contains('fast') && meisterMeldung === null,
+      q('.meister').className);
+    pruefe('D4 sie nennt die Tastatur',
+      q('.meister').textContent.indexOf('geschrieben') !== -1 &&
+      q('.meister').textContent.indexOf('Tippen') !== -1,
       q('.meister').textContent);
+    pruefe('D4b und das Wort bleibt eine Stufe darunter',
+      state.boxes[wort.id] === BOX_MAX - 1, String(state.boxes[wort.id]));
+    // Getippt geht es hinauf — und dann steht die Meisterschaft da.
+    state.boxes[wort.id] = BOX_MAX - 1;
+    var vorherD = state.boxes[wort.id];
+    updateBox(wort.id, true, true);
+    meisterMeldung = null;
+    meisterPruefen(vorherD, state.boxes[wort.id], 'Wort', wort.ru + ' — ' + wort.de,
+      woerterGemeistert() + ' von ' + ALL_VOCAB.length + ' Wörtern');
+    pruefe('D4c über die Tastatur wird es gemeistert',
+      state.boxes[wort.id] === BOX_MAX && !!meisterMeldung &&
+      meisterMeldung.text.indexOf(wort.ru) !== -1,
+      state.boxes[wort.id] + ' / ' + JSON.stringify(meisterMeldung));
+    meisterMeldung = null;
     q('#uebNext').click();
     pruefe('D5 bei der nächsten Frage ist sie weg', !q('.meister') && meisterMeldung === null);
 

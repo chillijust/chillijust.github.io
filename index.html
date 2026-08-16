@@ -1078,6 +1078,12 @@ button.built-word:active { transform: scale(.95); }
   to { opacity: 1; transform: none; }
 }
 
+/* **Fast, aber noch nicht** (ADR 0086): dieselbe Zeile, nur ruhig. Ein Wort,
+   das auf der vorletzten Stufe stehenbleibt, weil es noch nie geschrieben
+   wurde, ist kein Erfolg und kein Fehler — es ist eine Auskunft. */
+.meister.fast { border-color: var(--line); }
+.meister.fast .icon, .meister.fast strong { color: var(--dim); }
+
 /* Gegenstück zur Meisterschaft: derselbe Bau, anderer Ton. Der leichte Patzer
    bleibt grau, das Zurückstufen trägt die Warnfarbe — man soll es sehen. */
 .patzer {
@@ -1654,6 +1660,26 @@ body.unterwegs .reiter { top: 62px; }
 .einr-zeile [data-hoch] .icon { transform: rotate(180deg); }
 .einst-weiter { flex: none; min-width: 96px; }
 
+/* **Die Kategorien des Lernbedarfs** (ADR 0086): eine antippbare Zeile je
+   Übung, links der Ring mit der Quote, rechts Name und Zahl. Ein Knopf, kein
+   Kasten — dahinter liegt etwas, und das soll man sehen. */
+.kat-feld { display: flex; flex-direction: column; gap: 8px; margin: 10px 0 12px; }
+.kat {
+  display: flex; align-items: center; gap: 14px; width: 100%;
+  padding: 10px 14px; border-radius: 14px; text-align: left;
+  background: var(--card-2); border: 1px solid var(--line);
+  color: inherit; font: inherit; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.kat:active { border-color: var(--akzent); }
+.kat .donut { flex: none; }
+/* Ein Anteil, der ein Mangel ist, trägt die Warnfarbe — nicht den Akzent. */
+.theme-fill.rot { background: var(--bad); }
+.kat-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.kat-name { font-size: 15px; font-weight: 600; color: var(--text); }
+.kat-note {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim);
+}
 .defizite { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
 .defizit {
   padding: 13px 15px; border-radius: 14px;
@@ -1839,6 +1865,13 @@ h2 { font-family: Georgia, serif; font-size: 16px; margin: 24px 0 12px; font-wei
 .donut svg { width: 100%; height: auto; display: block; transform: rotate(-90deg); }
 .donut circle { fill: none; stroke-width: 13; }
 .donut.klein circle { stroke-width: 15; }
+/* **In der Zeile ist der Ring ein Zeichen, kein Diagramm.** Er steht hier und
+   nicht oben bei `.kat`: Beide Wähler wiegen gleich schwer, und dann gewinnt
+   der spätere — oben stand er vor `.donut.klein` und blieb wirkungslos. */
+.kat .donut.klein { width: 56px; margin: 0; }
+.kat .donut.klein circle { stroke-width: 17; }
+.kat .donut.klein .donut-wert { font-size: 14px; }
+.kat .donut.klein .donut-text { display: none; }
 .donut-grund { stroke: var(--line); opacity: .45; }
 .donut-mitte {
   position: absolute; inset: 0;
@@ -1850,6 +1883,8 @@ h2 { font-family: Georgia, serif; font-size: 16px; margin: 24px 0 12px; font-wei
   font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim);
   margin-top: 5px; text-align: center; padding: 0 10px;
 }
+/* Ein Fußtext erklärt, was darüber steht — er soll nicht daran kleben. */
+.theme-list + .detail-fuss { margin-top: 10px; }
 .donut-paar { display: flex; gap: 12px; justify-content: center; margin-bottom: 8px; }
 .donut-paar > div { flex: 1; max-width: 160px; }
 
@@ -4301,7 +4336,7 @@ var APP_STAND = '2026-08-16'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.5.0T4'; /* == VERSION == */
+var APP_VERSION = '2.6.0T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -4937,6 +4972,9 @@ var ICON = {
   ruecktaste: svg('<path d="M8.4 5.5h11a1.6 1.6 0 0 1 1.6 1.6v9.8a1.6 1.6 0 0 1-1.6 1.6h-11L2.8 12z"/>' +
     '<path d="M14.6 9.6l-4.4 4.8M10.2 9.6l4.4 4.8"/>'),
   haken: svg('<path d="M4.5 12.8l4.6 4.6L19.5 7"/>'),
+  // Eine Tastatur: der Rahmen, drei angedeutete Reihen, die Leertaste breit.
+  tastatur: svg('<path d="M3 6.5h18v11H3z"/><path d="M6.5 10h.01M10 10h.01M13.5 10h.01M17 10h.01' +
+    'M6.5 13h.01M10 13h.01M13.5 13h.01M17 13h.01M8.5 16h7"/>'),
   stern: svg('<path d="M12 3.6l2.6 5.4 5.9.8-4.3 4.1 1 5.9-5.2-2.8-5.2 2.8 1-5.9-4.3-4.1 5.9-.8z"/>'),
   sternVoll: '<svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" ' +
     'stroke-width="1.6" stroke-linejoin="round" aria-hidden="true" focusable="false">' +
@@ -5456,6 +5494,15 @@ function defaultState() {
     // Unter wie vielen Lernsets die Marken oben entstanden sind. Ändert sich
     // die Zahl, ist der Schnitt ein anderer und die Set-Marken sind wertlos.
     setSchnitt: 0,
+    // **Wo gelernt wird, wenn das nächste Set schon offen steht** (ADR 0086).
+    // Die 80-%-Schwelle öffnet, sie schiebt nicht: Wer «bleiben» wählt, steht
+    // hier drin, bis sein Set voll ist. `null` heißt: der Reihe nach.
+    setBleib: null,
+    // **Die Fehlerquote wird gezählt, nicht gerechnet** (ADR 0086): je Übung
+    // und je Thema { r: richtig, f: falsch }. Beide fahren im Sicherungscode
+    // mit — eine Quote, die beim Gerätewechsel bei null anfängt, wäre keine.
+    quote: {},
+    quoteThema: {},
     // **Zwei Merker, zwei Fragen.** «gesehen» heißt: Die App hat von selbst
     // gefragt — auch wer da abbricht, bekommt die Frage nicht wieder.
     // «fertig» heißt: einmal ganz durch. Nur das schickt den Knopf auf Home
@@ -6207,9 +6254,21 @@ function meisterPruefen(vorher, nachher, was, text, hinweis, kyrillisch) {
 // wäre im Weg — gemeistert wird oft, und jedes Mal wegtippen zu müssen macht
 // aus der Belohnung eine Hürde. Für ein ganzes Lernset gibt es weiter die
 // Jubelkarte; die ist der seltenere, größere Anlass.
+// **Ein Wort, das stehenbleibt, sagt warum** (ADR 0086). Ohne diese Zeile
+// klebte es auf der vorletzten Stufe, und niemand wüßte, woran es liegt: Die
+// Punktreihe zeigt nur, daß nichts weitergeht. Sie steht an derselben Stelle
+// wie die Meistermeldung — es ist dieselbe Auskunft, nur die andere Hälfte.
+function tippHinweisHtml() {
+  if (!tippDeckel) return '';
+  return '<div class="meister fast">' + ICON.tastatur +
+    '<span><strong>Fast — der letzte Schritt fehlt</strong>' +
+    '<span class="meister-note">Gemeistert wird ein Wort, wenn du es selbst ' +
+    'geschrieben hast. In «Tippen» wartet es auf dich.</span></span></div>';
+}
+
 function meisterHtml() {
   var m = meisterMeldung;
-  if (!m) return '';
+  if (!m) return tippHinweisHtml();
   return '<div class="meister">' + ICON.sternVoll +
     '<span><strong>' + esc(m.was) + ' gemeistert</strong>' +
     '<span class="meister-wort' + (m.kyrillisch ? ' cyr' : '') + '">' + esc(m.text) + '</span>' +
@@ -6745,6 +6804,12 @@ window.addEventListener('orientationchange', tutNachmessen);
 // «Glückwunsch!» wäre nach dem zweiten Set kein Glückwunsch mehr, sondern eine
 // Quittung. Ausgelost wird bei jedem Anlass neu.
 var JUBEL = {
+  // **Eine Frage, kein Jubel** (ADR 0086): eine Tonlage, keine drei. Wer
+  // gefragt wird, ob er weitergehen will, wird nicht zugleich gefeiert.
+  setWahl: [
+    ['Set {n} steht offen genug.', '{f} von {s} Wörtern sitzen endgültig. ' +
+      'Das nächste Set wartet — die übrigen kommen im Stapel weiter vorbei.']
+  ],
   set: [
     ['Set {n}. Erledigt.', 'Die Wörter wissen jetzt, wer hier lernt. {m} {s} freigeschaltet.'],
     ['SET {n} GEMEISTERT!!', 'Ich habe vor Freude eine Paprika geküsst. {m} neue {s} warten, ' +
@@ -6867,7 +6932,7 @@ function jubelNachtragen() {
 }
 
 var JUBEL_ANLASS = {
-  set: 'Lernset', thema: 'Thema', abc: 'Alphabet', regel: 'Grammatik',
+  set: 'Lernset', setWahl: 'Lernset', thema: 'Thema', abc: 'Alphabet', regel: 'Grammatik',
   schreibung: 'Schreibung', power: 'Power-Training'
 };
 
@@ -6979,13 +7044,55 @@ function verwechseltMit(id) {
     .filter(function (v) { return !!v; });
 }
 
-function updateBox(id, correct) {
+// **Der letzte Schritt gehört der Tastatur** (ADR 0086). Wer ein Wort unter
+// fertigen Kacheln wiedererkennt, hat es wiedererkannt — mehr nicht. Gemeistert
+// ist es erst, wenn er es selbst geschrieben hat. Gelegt und gewählt bringen
+// darum bis **vor** die Endstufe und nicht darüber.
+//
+// Zwei Grenzen dabei, beide wichtig: Wer schon oben steht, bleibt oben — eine
+// Wiederholung per Kachel ist kein Rückschritt. Und der Deckel greift nur nach
+// oben; falsch bleibt falsch, egal wie geantwortet wurde.
+var tippDeckel = false; // hat die letzte Antwort den letzten Schritt verhindert?
+
+// ── Lernbedarf: die Fehlerquote wird gezählt ────────────────
+// **Eine Quote muß gezählt werden, sie läßt sich nicht ableiten** (ADR 0086).
+// Aus einer Leitner-Stufe geht hervor, wie weit ein Wort ist — nicht, wie oft
+// man daneben lag, um dorthin zu kommen. Gezählt wird darum an jeder
+// Prüfstelle, je Übung und (wo es eine gibt) je Thema.
+//
+// Aufgedecktes zählt **nicht**: Wer aufgibt, hat nichts falsch beantwortet, er
+// hat nicht geantwortet (dieselbe Grenze wie bei der Wortauswertung, ADR 0033).
+function quoteZaehlen(uebung, richtig, thema) {
+  var q = state.quote[uebung] || (state.quote[uebung] = { r: 0, f: 0 });
+  if (richtig) q.r++; else q.f++;
+  if (thema) {
+    var t = state.quoteThema[thema] || (state.quoteThema[thema] = { r: 0, f: 0 });
+    if (richtig) t.r++; else t.f++;
+  }
+  save();
+}
+
+// Anteil der Fehler an allem, was beantwortet wurde. `null` heißt: noch nichts
+// gezählt — und das ist etwas anderes als «null Prozent Fehler».
+function quoteAnteil(z) {
+  if (!z) return null;
+  var n = z.r + z.f;
+  return n ? z.f / n : null;
+}
+
+function updateBox(id, correct, getippt) {
   tempoNotieren();
   var cur = state.boxes[id] || 0;
   // **Neu ist, was noch nie dran war.** Der Zeitstempel fehlt genau dann, und
   // gleich darauf steht er da — also zählt es hier, davor.
   if (!state.lastSeen[id]) neuGezaehlt();
-  state.boxes[id] = correct ? Math.min(BOX_MAX, cur + 1) : Math.max(0, cur - 1);
+  var neu = correct ? Math.min(BOX_MAX, cur + 1) : Math.max(0, cur - 1);
+  tippDeckel = false;
+  if (neu >= BOX_MAX && !getippt && cur < BOX_MAX) {
+    neu = BOX_MAX - 1;
+    tippDeckel = true;
+  }
+  state.boxes[id] = neu;
   state.lastSeen[id] = Date.now();
   state.streak = correct ? state.streak + 1 : 0;
   if (state.streak > state.bestStreak) state.bestStreak = state.streak;
@@ -7033,21 +7140,48 @@ var LERNSETS = (function () {
 function setReif(nr) {
   return LERNSETS[nr].woerter.filter(function (v) { return (state.boxes[v.id] || 0) >= SATZ_STUFE; }).length;
 }
-function setGeschafft(nr) {
-  return setReif(nr) === LERNSETS[nr].woerter.length;
+// **Gemeistert, nicht nur gesehen** (ADR 0086). Bis 2.5.0 galt ein Set als
+// geschafft, sobald jedes Wort auf `SATZ_STUFE` stand — das heißt «sitzt»,
+// nicht «kann ich schreiben». Gezählt wird jetzt die Endstufe.
+function setMeister(nr) {
+  return LERNSETS[nr].woerter.filter(function (v) { return (state.boxes[v.id] || 0) >= BOX_MAX; }).length;
 }
-// Nummer des ersten nicht geschafften Sets — dort wird gelernt.
+// **Vier von fünf reichen.** Auf hundert Prozent zu warten hieß, wegen zweier
+// zäher Wörter den ganzen Lehrplan anzuhalten; die bleiben ohnehin im Stapel
+// und kommen wieder. Aufgerundet, damit «80 %» bei zwölf Wörtern zehn heißt
+// und nicht neuneinhalb.
+function setSchwelle(nr) {
+  return Math.ceil(LERNSETS[nr].woerter.length * 0.8);
+}
+function setGeschafft(nr) {
+  return setMeister(nr) >= setSchwelle(nr);
+}
+function setKomplett(nr) {
+  return setMeister(nr) === LERNSETS[nr].woerter.length;
+}
+// Nummer des Sets, in dem gelernt wird: das erste nicht geschaffte — **es sei
+// denn, der Nutzer wollte bleiben**. Die Schwelle *öffnet* das nächste Set,
+// sie schiebt niemanden hinüber (ADR 0086). Ist das gewählte Set irgendwann
+// ganz voll, gibt es dort nichts mehr zu holen, und der Merker fällt weg.
 function aktuellesSet() {
+  var bleib = state.setBleib;
+  if (bleib !== null && bleib !== undefined && LERNSETS[bleib] && !setKomplett(bleib)) return bleib;
   for (var i = 0; i < LERNSETS.length; i++) if (!setGeschafft(i)) return i;
   return LERNSETS.length - 1;
 }
+// **Frei ist ein Set, wenn das davor geschafft ist** — nicht, wenn man gerade
+// dort steht (ADR 0086). Bis 2.5.0 waren beide Aussagen dasselbe, weil man
+// immer im ersten ungeschafften stand. Seit «bleiben» ist das nicht mehr so:
+// Wer bleibt, hätte sich sonst das offene nächste Set selbst wieder zugesperrt.
 function setFrei(nr) {
-  return nr <= aktuellesSet();
+  if (!LERNSETS[nr]) return false;
+  return nr === 0 || setGeschafft(nr - 1);
 }
-// Alle Wörter bis einschließlich des laufenden Sets.
+// Alle Wörter aus Sets, die offen stehen — nicht nur bis zu dem, in dem gerade
+// gelernt wird.
 function freigeschalteteWoerter() {
   var liste = [];
-  for (var i = 0; i <= aktuellesSet(); i++) liste = liste.concat(LERNSETS[i].woerter);
+  for (var i = 0; i < LERNSETS.length && setFrei(i); i++) liste = liste.concat(LERNSETS[i].woerter);
   return liste;
 }
 // Wörter, mit denen schon gearbeitet wurde — Quelle für Ablenker.
@@ -7166,8 +7300,18 @@ var ANSICHT_NAME = {
   einrichten: 'Übersicht einrichten'
 };
 var DETAIL_NAME = {
-  woerter: 'Wörter', saetze: 'Sätze', antworten: 'Antworten', serie: 'Serie'
+  woerter: 'Wörter', saetze: 'Sätze', antworten: 'Antworten', serie: 'Serie',
+  lernbedarf: 'Lernbedarf'
 };
+// Eine Kategorie trägt den Namen ihrer Übung im Kopf — «kat:tippen» wäre eine
+// Kennung, keine Überschrift.
+function detailName(d) {
+  if (d && d.indexOf('kat:') === 0) {
+    var u = uebungVon(d.slice(4));
+    return u ? u.name : 'Lernbedarf';
+  }
+  return DETAIL_NAME[d] || 'Bilanz';
+}
 function imMenu(id) { return ANSICHT_NAME[id] !== undefined; }
 
 function ansichtName(id) {
@@ -7626,7 +7770,7 @@ function renderKopf() {
     : (detail ? 'Bilanz' : (UEBUNG_NAME[currentTab] ? 'Übung' : 'Menü'));
   document.getElementById('kopfTitel').textContent = daheim
     ? 'Chillingo'
-    : (detail ? (DETAIL_NAME[bilanzDetail] || 'Bilanz') : ansichtName(currentTab));
+    : (detail ? detailName(bilanzDetail) : ansichtName(currentTab));
   // Die Lampe hängt an der Ansicht: Ob das Wort daneben steht, entscheidet
   // sich hier — die Farbe entscheidet das Netz.
   netzZeigen();
@@ -7745,7 +7889,7 @@ function setTab(name, zurueck) {
 // Deshalb hier und **nicht** in `setTab()`: Ein gezielter Sprung
 // («Maß ändern» führt auf den Lernweg) ist kein Anfang, sondern ein Ziel.
 function ansichtAnfang(name) {
-  if (name === 'bilanz') { bilanzDetail = null; themenOffen = false; }
+  if (name === 'bilanz') { bilanzDetail = null; themenOffen = false; katWoerterOffen = false; }
   if (name === 'einstellungen') einstReiter = EINST_REITER[0].id;
 }
 
@@ -8414,7 +8558,9 @@ var uebBuilt = [];
 var uebPicked = null;
 var uebCorrect = null;
 var uebRevealed = false;
-var uebGeschafftesSet = null; // Nummer eines Sets, das gerade fertig wurde
+// Ein Set, das gerade die Schwelle genommen hat: { nr, jubel }. Steht hier und
+// nicht bei den Lernsets, weil es beim Tippen voll wird (ADR 0086).
+var setFenster = null;
 
 // «Lernsets» arbeiten das laufende Set ab, «Freestyle» ein Thema freier Wahl.
 function uebPool() {
@@ -8639,7 +8785,7 @@ function buildQuestion() {
 // Setzt die laufende Frage zurück, ohne zu zeichnen.
 function uebZuruecksetzen() {
   leseMeldung = null;
-  uebGeschafftesSet = null;
+  setFenster = null;
   uebQ = null;
   uebPhase = 'ask';
   uebBuilt = [];
@@ -8729,6 +8875,7 @@ function ansichtenZuruecksetzen() {
   faktenFilter = 'gesehen';
   themenOffen = false;
   bilanzDetail = null;
+  katWoerterOffen = false;
 
   backupOpen = false;
   backupMsg = '';
@@ -8760,23 +8907,92 @@ function ansichtenZuruecksetzen() {
   kommentar = '';
 }
 
+// **Ein Set wird beim Tippen voll** (ADR 0086). Gemeistert wird nur dort, und
+// der Übergang gehört an die Stelle, an der er stattfindet — bis 2.5.0 hing er
+// allein an «Lernsets», wo seit dem Deckel gar kein Wort mehr die Endstufe
+// erreicht. Beide Übungen fragen darum dieselbe Funktion; das Fenster kommt
+// beim Weitergehen, mitten in der Auflösung wäre es im Weg.
+// **Was ein gemeistertes Wort nach sich zieht**, steht an einer Stelle. Bis
+// 2.5.0 hing das alles in `uebPruefen()` — und seit dem Deckel erreicht dort
+// kein Wort mehr die Endstufe. Wer nur den Set-Jubel umgezogen hätte, hätte
+// den Themen-Jubel still verloren.
+function meisterFolgen(wort, vorher, setVorher) {
+  setUebergangPruefen(setVorher);
+  if (vorher < BOX_MAX && (state.boxes[wort.id] || 0) >= BOX_MAX &&
+    themaGemeistert(wort.theme)) {
+    jubelEinmal('thema:' + wort.theme, 'thema', { n: wort.theme });
+  }
+}
+
+function setUebergangPruefen(setVorher) {
+  if (setVorher === null || setVorher === undefined || !LERNSETS[setVorher]) return;
+  if (!setGeschafft(setVorher)) return;
+  if (aktuellesSet() !== setVorher && !jubelSchon('set:' + setVorher)) {
+    setFenster = { nr: setVorher, jubel: true };
+  } else if (state.setBleib === setVorher && !setKomplett(setVorher)) {
+    // Wer «bleiben» gewählt hat, wird beim nächsten gemeisterten Wort noch
+    // einmal gefragt — sonst säße er in einem Set fest, das er hinter sich hat.
+    setFenster = { nr: setVorher, jubel: false };
+  }
+}
+
+// Das Fenster selbst, beim Weitergehen. Gibt zurück, ob eines aufging.
+function setFensterZeigen() {
+  if (!setFenster) return false;
+  var f = setFenster;
+  setFenster = null;
+  if (f.jubel) {
+    var offen = LERNSETS[f.nr].saetze.filter(satzFrei).length;
+    jubelEinmal('set:' + f.nr, 'set',
+      { n: f.nr + 1, m: offen, s: offen === 1 ? 'Satz' : 'Sätze' }, setWege(f.nr));
+  } else {
+    // Dieselbe Frage ohne Feier: Die Auszeichnung gehört dem ersten Mal
+    // (ADR 0047), die Entscheidung nicht.
+    jubelZeigen('setWahl',
+      { n: f.nr + 1, f: setMeister(f.nr), s: LERNSETS[f.nr].woerter.length },
+      setWege(f.nr));
+  }
+  return true;
+}
+
+// **Zwei Wege, eine Entscheidung** (ADR 0086). Das nächste Set steht offen —
+// gehen muß niemand. «Bleiben» schreibt die Nummer fest, «weiter» löscht sie;
+// beides ist eine Wahl des Nutzers und keine Rechnung der App.
+function setWege(nr) {
+  var wege = [{ text: 'Bei Set ' + (nr + 1) + ' bleiben', tun: function () {
+    state.setBleib = nr;
+    save();
+    uebZuruecksetzen();
+    renderUeben();
+    renderKopf();
+  } }];
+  if (LERNSETS[nr + 1]) {
+    wege.push({ text: 'Weiter mit Set ' + (nr + 2), tun: function () {
+      state.setBleib = null;
+      save();
+      // «aktuell» heißt: das laufende Set — nicht null, das wäre kein Set,
+      // sondern ein Loch in LERNSETS.
+      uebAuswahl = 'aktuell';
+      uebZuruecksetzen();
+      renderUeben();
+      renderKopf();
+    } });
+  } else {
+    // Das letzte Set hat kein nächstes — dort führt der Weg zu den Sätzen.
+    wege.push({ text: 'Zu «Übersetzen»', tun: function () {
+      uebZuruecksetzen();
+      trTask = null;
+      buildTransTask();
+      setTab('uebersetzen');
+    } });
+  }
+  return wege;
+}
+
 function uebNext(skipFact) {
   // Der Jubel ist jetzt ein Fenster, kein eigener Bildschirm: Die nächste Frage
   // steht schon dahinter, und wer weiterlernen will, tippt einmal.
-  if (uebGeschafftesSet !== null) {
-    var nr = uebGeschafftesSet;
-    uebGeschafftesSet = null;
-    var offen = LERNSETS[nr].saetze.filter(satzFrei).length;
-    jubelEinmal('set:' + nr, 'set',
-      { n: nr + 1, m: offen, s: offen === 1 ? 'Satz' : 'Sätze' },
-      [{ text: 'Weiter lernen', tun: null },
-       { text: 'Zu «Übersetzen»', tun: function () {
-         uebZuruecksetzen();
-         trTask = null;
-         buildTransTask();
-         setTab('uebersetzen');
-       } }]);
-  }
+  setFensterZeigen();
   if (!skipFact && faktFaellig()) {
     uebPhase = 'fact';
     renderUeben();
@@ -8974,7 +9190,7 @@ function uebPruefen() {
   // unter fertigen Wörtern gewählt — da gibt es nichts nachzuschreiben.
   rekoVerlangen(q.word.ru, q.mode === 'tiles', uebCorrect, false);
   var vorher = state.boxes[q.word.id] || 0;
-  updateBox(q.word.id, uebCorrect);
+  updateBox(q.word.id, uebCorrect, false);
   meisterMeldung = null;
   meisterPruefen(vorher, state.boxes[q.word.id], 'Wort', q.word.ru + ' — ' + q.word.de,
     woerterGemeistert() + ' von ' + ALL_VOCAB.length + ' Wörtern');
@@ -8984,13 +9200,8 @@ function uebPruefen() {
   // auf das nächste «Weiter» — mitten in der Auflösung wäre er im Weg. Nur
   // beim ersten Mal: Ein Set, dem ein zurückgefallenes Wort fehlte, wird
   // repariert, nicht noch einmal geschafft.
-  if (aktuellesSet() !== setVorher && setGeschafft(setVorher) &&
-    !jubelSchon('set:' + setVorher)) uebGeschafftesSet = setVorher;
-  // War das der letzte Fehlende eines ganzen Themas? Nur der Übergang zählt.
-  if (uebCorrect && vorher < BOX_MAX && state.boxes[q.word.id] >= BOX_MAX &&
-    themaGemeistert(q.word.theme)) {
-    jubelEinmal('thema:' + q.word.theme, 'thema', { n: q.word.theme });
-  }
+  meisterFolgen(q.word, vorher, setVorher);
+  if (!uebRevealed) quoteZaehlen(uebModus, uebCorrect, q.word.theme);
   uebPhase = 'feedback';
   renderUeben();
 }
@@ -9192,7 +9403,7 @@ function uebInhaltZeichnen() {
     document.getElementById('uebReveal').addEventListener('click', function () {
       uebRevealed = true;
       uebCorrect = false;
-      updateBox(q.word.id, false);
+      updateBox(q.word.id, false, false);
       uebPhase = 'feedback';
       renderUeben();
     });
@@ -9546,6 +9757,7 @@ function trFinish(ok) {
   });
   patzerPruefen(ok);
   meisterTon(ok);
+  if (!trRevealed) quoteZaehlen('uebersetzen', ok);
   state.transStats.correct += ok ? 1 : 0;
   state.transStats.wrong += ok ? 0 : 1;
   zuletztGeuebt('uebersetzen');
@@ -10353,6 +10565,7 @@ function abcPruefen() {
   meisterPruefen(vorher, abcBox(q.b), 'Buchstabe', q.b[0] + ' ' + q.b[1] + ' — ' + q.b[2],
     abcMeisterschaft() + ' von ' + ALPHABET.length + ' Buchstaben');
   meisterTon(abcCorrect);
+  quoteZaehlen('buchstaben', abcCorrect);
   zuletztGeuebt('buchstaben');
   // Nur der Übergang, und nur beim ersten Mal: War das der dreiunddreißigste?
   if (vorher < BOX_MAX && abcBox(q.b) >= BOX_MAX &&
@@ -11212,6 +11425,7 @@ function gramPruefen() {
   }
   rekoVerlangen(q.loesung, !!q.tippen, gramCorrect, false);
   meisterTon(gramCorrect);
+  quoteZaehlen('grammatik', gramCorrect);
   zuletztGeuebt('grammatik');
   gramPhase = 'feedback';
   renderGrammatik();
@@ -11985,6 +12199,7 @@ function orthoPruefen() {
   }
   rekoVerlangen(q.aufgabe.ist, !!q.tippen, orthoCorrect, false);
   meisterTon(orthoCorrect);
+  quoteZaehlen('schreibung', orthoCorrect);
   zuletztGeuebt('schreibung');
   orthoPhase = 'feedback';
   renderSchreibung();
@@ -12426,7 +12641,7 @@ function ptPruefen() {
   // holt es wirklich zurück — sonst wäre das Power-Training ein Spielplatz
   // ohne Folgen.
   var vorher = state.boxes[q.wort.id] || 0;
-  updateBox(q.wort.id, richtig);
+  updateBox(q.wort.id, richtig, false);
   meisterMeldung = null;
   meisterPruefen(vorher, state.boxes[q.wort.id], 'Wort', q.wort.ru + ' — ' + q.wort.de,
     woerterGemeistert() + ' von ' + ALL_VOCAB.length + ' Wörtern');
@@ -12435,6 +12650,7 @@ function ptPruefen() {
   // eben noch falsch buchstabiert hat, ist nicht zurückgeholt.
   rekoVerlangen(q.wort.ru, true, richtig, false);
   meisterTon(richtig);
+  quoteZaehlen('power', richtig, q.wort.theme);
   if (richtig) q.eintrag.treffer++;
   else q.eintrag.treffer = Math.max(0, q.eintrag.treffer - 1);
   zuletztGeuebt('power');
@@ -12828,6 +13044,8 @@ function renderTippenLeer() {
 // Das nächste Wort. Steht hier und nicht in `renderTippen()`, weil auch die
 // Faktkarte den Weg zurück in die Übung braucht.
 function tippenWeiter() {
+  // Hier wird ein Set voll, also geht hier auch sein Fenster auf.
+  setFensterZeigen();
   tResult = null;
   tHint = false;
   tEingabe = '';
@@ -12922,11 +13140,14 @@ function tippenInhaltZeichnen() {
       daneben: danebenZeichen(tEingabe, w.ru)
     });
     var vorher = state.boxes[w.id] || 0;
-    updateBox(w.id, ok);
+    var setVorher = aktuellesSet();
+    updateBox(w.id, ok, true);
+    meisterFolgen(w, vorher, setVorher);
     meisterMeldung = null;
     meisterPruefen(vorher, state.boxes[w.id], 'Wort', w.ru + ' — ' + w.de,
       woerterGemeistert() + ' von ' + ALL_VOCAB.length + ' Wörtern');
     meisterTon(ok);
+    quoteZaehlen('tippen', ok, w.theme);
     state.typingStats.correct += ok ? 1 : 0;
     state.typingStats.wrong += ok ? 0 : 1;
     zuletztGeuebt('tippen');
@@ -14105,6 +14326,8 @@ function renderTickets() {
 var backupOpen = false, backupCode = '', backupMsg = '', confirmReset = false;
 var themenOffen = false; // «alle Themen anzeigen» in der Bilanz
 var bilanzDetail = null; // null · 'woerter' · 'saetze' · 'antworten' · 'serie'
+                         // · 'lernbedarf' · 'kat:<übung>' (ADR 0086)
+var katWoerterOffen = false; // das Klappfeld in einer Kategorie
 
 // ── Ringdiagramme ───────────────────────────────────────────
 // Ein Segment ist ein Kreis, dessen Strich nur über einen Teil des Umfangs
@@ -14201,7 +14424,12 @@ function bkPruefsumme(text) {
 var bkTabelle = null;
 function bkNachschlagen() {
   if (bkTabelle) return bkTabelle;
-  bkTabelle = { woerter: {}, saetze: {}, fakten: {}, buchstaben: {}, regeln: {}, schreibung: {} };
+  bkTabelle = { woerter: {}, saetze: {}, fakten: {}, buchstaben: {}, regeln: {},
+    schreibung: {}, themen: {} };
+  // Ein Thema heißt in der Datei wie in der Oberfläche — mit Umlauten und
+  // Leerzeichen. Roh in den Code geschrieben zerbräche es die Trennung, also
+  // fährt es wie alles andere über seine Kennung (ADR 0086).
+  Object.keys(VOCAB_THEMES).forEach(function (t) { bkTabelle.themen[bkKennung(t)] = t; });
   ALL_VOCAB.forEach(function (v) { bkTabelle.woerter[bkKennung(v.id)] = v.id; });
   SENTENCES.forEach(function (x) { bkTabelle.saetze[bkKennung(x.ru)] = x.ru; });
   FACTS.forEach(function (f) { bkTabelle.fakten[bkKennung(f)] = faktId(f); });
@@ -14282,8 +14510,40 @@ function encodeBackup() {
   // überliest es — beides geht nur, solange es hinten steht.
   var gemerkt = Object.keys(state.merk).sort().join('.');
 
+  // Zwölftes Feld: bei welchem Set der Nutzer bleiben wollte (ADR 0086). Das
+  // ist keine Momentaufnahme wie `patzer` oder `verwechselt`, sondern eine
+  // Entscheidung über den Lernweg — ohne sie stünde man nach dem Einspielen
+  // still im nächsten Set. Leer heißt: der Reihe nach.
+  var bleib = (state.setBleib === null || state.setBleib === undefined)
+    ? '' : String(state.setBleib | 0);
+
+  // Dreizehntes Feld: die gezählten Quoten (ADR 0086). Übungen tragen ihre
+  // kurze Kennung im Klartext — sie besteht aus Buchstaben und ändert sich
+  // nicht —, Themen ihre sechsstellige Streuung. Zahlen zur Basis 36, die
+  // beiden Abschnitte durch «!» getrennt.
+  //
+  // **Ohne dieses Feld wäre die Quote keine.** Wer das Gerät wechselt, finge
+  // wieder bei null an, und die Bilanz behauptete tagelang, es hake nirgends.
+  var quoteAus = function (schluessel, kennung) {
+    var teile = [];
+    Object.keys(schluessel).forEach(function (k) {
+      var z = schluessel[k];
+      if (!z || (!z.r && !z.f)) return;
+      teile.push(kennung(k) + '.' + (z.r | 0).toString(36) + '.' + (z.f | 0).toString(36));
+    });
+    return teile.join(',');
+  };
+  // **Eine Liste, kein zweiter Abschnitt.** Übungen tragen ihre ID im
+  // Klartext, Themen ihre sechsstellige Streuung; beim Lesen entscheidet, ob
+  // die Kennung eine Übung *ist*. Daß keine Themenkennung auf einen
+  // Übungsnamen fällt, hält die Suite «sicherung» fest — dieselbe Vorsorge wie
+  // bei doppelten Kennungen im Build.
+  var quoten = [quoteAus(state.quote, function (k) { return k; }),
+    quoteAus(state.quoteThema, bkKennung)]
+    .filter(function (x) { return !!x; }).join(',');
+
   var rumpf = [BK_KOPF, woerter, saetze, fakten.join(''), zahlen, einst, abc, regeln,
-    schreib, gemerkt].join('~');
+    schreib, gemerkt, bleib, quoten].join('~');
   return rumpf + '~' + bkPruefsumme(rumpf);
 }
 
@@ -14339,6 +14599,27 @@ function decodeBackup(code) {
       if (da) d.merk[k] = 1;
     });
   }
+  // Zwölftes Feld: das festgehaltene Set (ADR 0086). Leer, unbekannt oder auf
+  // ein Set zeigend, das es nach einem neuen Schnitt nicht mehr gibt — in
+  // allen drei Fällen gilt wieder «der Reihe nach».
+  if (teile.length > 11 && teile[10] !== '') {
+    var nr = parseInt(teile[10], 10);
+    if (!isNaN(nr) && LERNSETS[nr]) d.setBleib = nr;
+  }
+  // Dreizehntes Feld: die Quoten. Was es nicht mehr gibt, fällt weg —
+  // dieselbe Regel wie bei den Inhalten. Ein älterer Code hat das Feld nicht,
+  // und dann beginnt die Zählung eben hier.
+  if (teile.length > 12 && teile[11]) {
+    teile[11].split(',').forEach(function (eintrag) {
+      var p = eintrag.split('.');
+      if (p.length !== 3) return;
+      var r = parseInt(p[1], 36);
+      var f = parseInt(p[2], 36);
+      if (isNaN(r) || isNaN(f)) return;
+      if (uebungVon(p[0])) d.quote[p[0]] = { r: r, f: f };
+      else if (t.themen[p[0]]) d.quoteThema[t.themen[p[0]]] = { r: r, f: f };
+    });
+  }
 
   var f = teile[3];
   for (var i = 0; i + BK_KENNUNG + 3 <= f.length; i += BK_KENNUNG + 3) {
@@ -14385,6 +14666,89 @@ function decodeBackup(code) {
 // den Lehrplan verraten.
 function renderBilanzDetail() {
   var html = '<section>';
+
+  // **Alle Kategorien, auch die ruhigen** (ADR 0086). Die Übersicht zeigt nur,
+  // was auffällt; hier steht der ganze Bestand — sonst wüßte man nie, wovon
+  // die Auswahl oben eine Auswahl ist.
+  if (bilanzDetail === 'lernbedarf') {
+    var alleKat = lernbedarf(true);
+    if (!alleKat.length) {
+      html += '<p class="backup-note">Noch keine Antwort gezählt. Sobald du übst, ' +
+        'steht hier für jede Übung, wie oft du danebenlagst.</p>';
+    } else {
+      html += '<div class="kat-feld">';
+      alleKat.forEach(function (k) {
+        html += '<button class="kat" data-kat="' + esc(k.id) + '">' +
+          quoteRing(k.z) +
+          '<span class="kat-text"><span class="kat-name">' + esc(k.name) + '</span>' +
+          '<span class="kat-note">' + k.falsch + ' von ' + k.n + ' daneben</span></span>' +
+          '</button>';
+      });
+      html += '</div>';
+      html += '<p class="detail-fuss">Gezählt wird jede beantwortete Aufgabe. ' +
+        'Aufgedecktes zählt nicht mit — wer aufgibt, hat nichts falsch beantwortet.</p>';
+    }
+    return bilanzDetailFertig(html);
+  }
+
+  // **Eine einzelne Kategorie.** Die Quote, die Themen darin, die Wörter mit
+  // Lernbedarf hinter einem Klappfeld — und der Weg in die Übung.
+  if (bilanzDetail && bilanzDetail.indexOf('kat:') === 0) {
+    var kid = bilanzDetail.slice(4);
+    var ku = uebungVon(kid);
+    var kz = state.quote[kid];
+    var kanteil = quoteAnteil(kz);
+    if (!ku || kanteil === null) {
+      html += '<p class="backup-note">Zu dieser Übung ist noch nichts gezählt.</p>';
+      return bilanzDetailFertig(html);
+    }
+    html += quoteRing(kz, false) +
+      '<p class="detail-fuss">' + kz.f + ' von ' + (kz.r + kz.f) +
+      ' Antworten lagen daneben.</p>';
+
+    // Themen gibt es nur, wo Wörter geübt werden.
+    if (QUOTE_THEMEN.indexOf(kid) !== -1) {
+      var kt = lernbedarfThemen();
+      if (kt.length) {
+        html += '<h2>Themen</h2><div class="theme-list">';
+        kt.slice(0, 8).forEach(function (t) {
+          // **Ein Anteil ist keine Zählung.** `balkenZeile()` schreibt rechts
+          // «69/100» — hier steht ein Prozentwert, und der sagt sich selbst.
+          html += '<div class="theme-row"><span class="theme-name">' + esc(t.name) +
+            '</span><div class="theme-bar"><div class="theme-fill rot" style="width:' +
+            (t.anteil * 100).toFixed(0) + '%"></div></div>' +
+            '<span class="theme-count">' + prozentText(t.anteil * 100, t.falsch, t.n) +
+            '</span></div>';
+        });
+        html += '</div><p class="detail-fuss">Der Balken zeigt den Anteil der ' +
+          'Fehler — gezählt über alle Wortübungen zusammen.</p>';
+      }
+    }
+
+    // Die Wörter mit Lernbedarf: hinter einem Klappfeld, denn es können viele
+    // sein, und der Überblick steht darüber.
+    var kw = lernbedarfWoerter(kid);
+    if (kw.length) {
+      html += '<button class="alle-knopf" id="katWoerterKnopf" aria-expanded="' +
+        (katWoerterOffen ? 'true' : 'false') + '" aria-controls="katWoerter">' +
+        '<span>' + kw.length + (kw.length === 1 ? ' Wort' : ' Wörter') +
+        ' mit Lernbedarf</span>' + ICON.winkelRunter + '</button>' +
+        '<div class="alle-klapp" id="katWoerter"' + (katWoerterOffen ? '' : ' hidden') + '>' +
+        '<div class="theme-list">';
+      kw.forEach(function (w) {
+        html += '<div class="theme-row"><span class="theme-name cyr">' +
+          ruAnzeigeHtml(w.v.ru) + '</span>' +
+          '<span class="theme-count">' + ppHtml(w.stufe) + '</span></div>';
+      });
+      html += '</div></div>';
+    }
+
+    if (!uebungGesperrt(kid)) {
+      html += '<button class="btn primary breit" data-katziel="' + esc(kid) + '">' +
+        'Zu «' + esc(ku.name) + '»</button>';
+    }
+    return bilanzDetailFertig(html);
+  }
 
   if (bilanzDetail === 'woerter') {
     var counts = [];
@@ -14490,14 +14854,76 @@ function renderBilanzDetail() {
       (best && jetzt === best ? ' Das ist zugleich deine beste Reihe.' : '') + '</p>';
   }
 
+  return bilanzDetailFertig(html);
+}
+
+// **Jede Detailansicht endet gleich** — ein Rückweg, und die Zuhörer daran.
+// Vorher lief das Ende allein durch, weil es nur einen Ausgang gab; die
+// Kategorien haben mehrere (ADR 0086), und an jeden einzeln zu denken war
+// schon einmal die falsche Antwort (ADR 0084).
+function bilanzDetailFertig(html) {
   html += '<div class="btn-row"><button class="btn ghost" id="detailBack">Zurück zur Bilanz</button>' +
     '</div></section>';
   main.innerHTML = html;
   document.getElementById('detailBack').addEventListener('click', function () {
-    bilanzDetail = null;
+    // Aus einer Kategorie führt der Weg zurück in die Aufstellung, nicht
+    // gleich ganz hinaus — sonst verlöre man bei jedem Blick den Faden.
+    bilanzDetail = (bilanzDetail && bilanzDetail.indexOf('kat:') === 0) ? 'lernbedarf' : null;
     renderBilanz();
     renderKopf();
   });
+  main.querySelectorAll('[data-kat]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      bilanzDetail = 'kat:' + b.dataset.kat;
+      katWoerterOffen = false;
+      renderBilanz();
+      renderKopf();
+    });
+  });
+  main.querySelectorAll('[data-detail]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      bilanzDetail = b.dataset.detail;
+      renderBilanz();
+      renderKopf();
+    });
+  });
+  var kwk = document.getElementById('katWoerterKnopf');
+  if (kwk) kwk.addEventListener('click', function () {
+    katWoerterOffen = !katWoerterOffen;
+    renderBilanz();
+  });
+  var kz = main.querySelector('[data-katziel]');
+  if (kz) kz.addEventListener('click', function () {
+    bilanzDetail = null;
+    setTab(kz.dataset.katziel);
+  });
+  return null;
+}
+
+// Welche Übungen Themen führen: die, in denen Vokabeln drankommen.
+var QUOTE_THEMEN = ['lernsets', 'freestyle', 'tippen', 'power'];
+
+// Die Wörter, an denen es in dieser Übung hängt: begonnen, aber noch nicht
+// gemeistert. **Nichts, was der Nutzer noch nie gesehen hat** — die Bilanz
+// zeigt den Stand, nicht den Lehrplan.
+function lernbedarfWoerter(id) {
+  if (QUOTE_THEMEN.indexOf(id) === -1) return [];
+  var quelle = id === 'lernsets' ? LERNSETS[aktuellesSet()].woerter
+    : id === 'power' ? ptPool() : ALL_VOCAB;
+  var raus = [];
+  quelle.forEach(function (v) {
+    var st = state.boxes[v.id] || 0;
+    if (st > 0 && st < BOX_MAX) raus.push({ v: v, stufe: st });
+  });
+  raus.sort(function (a, b) { return a.stufe - b.stufe; });
+  return raus.slice(0, 40);
+}
+
+// Ob der Weg in eine Übung gerade offen ist — ein Knopf, der ins Leere führt,
+// ist schlimmer als keiner (ADR 0075).
+function uebungGesperrt(id) {
+  var st = uebungsStand(id);
+  return !!(st && st.gesperrt);
 }
 
 // ── Defizite ────────────────────────────────────────────────
@@ -14593,9 +15019,86 @@ function defizite() {
   return raus;
 }
 
+// ── Lernbedarf: die Übungen mit ihrer Fehlerquote ───────────
+// **Was hakt, und wie sehr** (ADR 0086). Die Liste darunter nennt einzelne
+// Befunde («zurückgefallen», «verwechselt»); hier steht der Überblick: je
+// Übung, an der etwas hängt, ihre gezählte Fehlerquote als kleiner Ring.
+//
+// Eine Übung ohne Zahlen erscheint nicht — «0 %» wäre eine Behauptung über
+// etwas, das nie stattgefunden hat. Und wer unter der Schwelle liegt, hakt
+// nicht: Nicht jede Übung, die man je angefaßt hat, ist ein Lernbedarf.
+var QUOTE_SCHWELLE = 0.2;
+var QUOTE_MIN = 8; // unter so wenigen Antworten ist eine Quote Zufall
+
+function lernbedarf(alle) {
+  var raus = [];
+  UEBUNGEN.forEach(function (u) {
+    var z = state.quote[u.id];
+    var n = z ? z.r + z.f : 0;
+    var anteil = quoteAnteil(z);
+    if (anteil === null) return;
+    if (!alle && (n < QUOTE_MIN || anteil < QUOTE_SCHWELLE)) return;
+    raus.push({ id: u.id, name: u.name, anteil: anteil, n: n, falsch: z.f, z: z });
+  });
+  raus.sort(function (a, b) { return b.anteil - a.anteil; });
+  return raus;
+}
+
+// Die Themen einer Übung, nach Quote sortiert. Nur die Wortübungen führen
+// welche — «Buchstaben» und die beiden Regelübungen kennen keine Themen.
+function lernbedarfThemen() {
+  var raus = [];
+  Object.keys(state.quoteThema).forEach(function (name) {
+    if (!VOCAB_THEMES[name]) return;
+    var z = state.quoteThema[name];
+    var anteil = quoteAnteil(z);
+    if (anteil === null) return;
+    raus.push({ name: name, anteil: anteil, n: z.r + z.f, falsch: z.f });
+  });
+  raus.sort(function (a, b) { return b.anteil - a.anteil; });
+  return raus;
+}
+
+// Der Ring: rot für die Fehler, ruhig für den Rest. Ein Prozentwert steht
+// darin — `prozentText()` rundet nicht, bis er lügt (ADR 0074).
+// **`prozentText()` rechnet nicht, es formuliert** (ADR 0074): Es bekommt den
+// fertigen Prozentwert **und** die beiden Zahlen dahinter, damit «100 %» nur
+// dem gehört, der wirklich alle hat. Ein Bruch allein ergäbe dort immer 0 %.
+function quoteRing(z, klein) {
+  var n = z.r + z.f;
+  var anteil = n ? z.f / n : 0;
+  return donut([{ wert: z.f, farbe: 'var(--bad)' },
+    { wert: z.r, farbe: 'var(--line)' }],
+    prozentText(anteil * 100, z.f, n), 'Fehler', klein !== false);
+}
+
+function lernbedarfHtml() {
+  var liste = lernbedarf(false);
+  var html = '<h2>Lernbedarf</h2>';
+  if (!liste.length) {
+    html += '<p class="backup-note">Nichts hakt: In keiner Übung liegt die ' +
+      'Fehlerquote auffällig hoch. Sobald sich das ändert, steht es hier.</p>';
+  } else {
+    html += '<div class="kat-feld">';
+    liste.forEach(function (k) {
+      html += '<button class="kat" data-kat="' + esc(k.id) + '">' +
+        quoteRing(k.z) +
+        '<span class="kat-text"><span class="kat-name">' + esc(k.name) + '</span>' +
+        '<span class="kat-note">' + k.falsch + ' von ' + k.n + ' daneben</span></span>' +
+        '</button>';
+    });
+    html += '</div>';
+  }
+  // **Der Weg zur ganzen Aufstellung steht immer da** — auch wenn gerade
+  // nichts hakt. Wer wissen will, wie er dasteht, soll nicht warten müssen,
+  // bis etwas schiefgeht.
+  html += '<button class="blatt-link" data-detail="lernbedarf">Alle Kategorien →</button>';
+  return html;
+}
+
 function defiziteHtml() {
   var liste = defizite();
-  var html = '<h2>Defizite</h2>';
+  var html = '<h2>Woran es gerade hakt</h2>';
   if (!liste.length) {
     return html + '<p class="backup-note">Nichts liegt quer: keine zurückgefallenen ' +
       'Wörter, keine wiederkehrenden Verwechslungen, alle Zeichen sitzen, nichts ' +
@@ -14647,7 +15150,8 @@ function renderBilanz() {
 
   // **Vor dem Lernweg.** Was quer liegt, gehört nach oben — darunter steht,
   // wie weit man ist, und das liest sich anders, wenn man weiß, was klemmt.
-  html += defiziteHtml();
+  // Erst die Quoten (wo hakt es), dann die einzelnen Befunde (was genau).
+  html += lernbedarfHtml() + defiziteHtml();
 
   var aktuell = aktuellesSet();
   var frei = freigeschalteteWoerter();
@@ -14778,6 +15282,17 @@ function renderBilanz() {
   main.querySelectorAll('[data-detail]').forEach(function (b) {
     b.addEventListener('click', function () {
       bilanzDetail = b.dataset.detail;
+      window.scrollTo(0, 0);
+      renderBilanz();
+      renderKopf();
+    });
+  });
+  // Die Kategorien des Lernbedarfs führen ins Detail (ADR 0086). Derselbe
+  // Zuhörer wie in `bilanzDetailFertig()` — dort stehen sie noch einmal.
+  main.querySelectorAll('[data-kat]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      bilanzDetail = 'kat:' + b.dataset.kat;
+      katWoerterOffen = false;
       window.scrollTo(0, 0);
       renderBilanz();
       renderKopf();

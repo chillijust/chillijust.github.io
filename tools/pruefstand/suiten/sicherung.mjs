@@ -35,15 +35,66 @@ try {
   // A · Aufbau des Codes
   var code = encodeBackup();
   pruefe('A1 trägt Kopf und Version', code.indexOf('CHG2~') === 0, code.slice(0, 12));
-  pruefe('A2 elf Felder', code.split('~').length === 11, String(code.split('~').length));
+  // Zehn Felder plus Prüfsumme waren es bis 2.5.0; das festgehaltene Set kam
+  // dazu (ADR 0086). **Angehängt, nicht eingeschoben** — sonst läse ein
+  // älterer Code die falschen Felder.
+  pruefe('A2 dreizehn Felder', code.split('~').length === 13, String(code.split('~').length));
   pruefe('A3 eine einzige Zeile', code.indexOf('\n') === -1 && code.indexOf(' ') === -1);
+  // **Das festgehaltene Set fährt mit** (ADR 0086). Ohne dieses Feld stünde
+  // man nach dem Einspielen still im nächsten Set — die Entscheidung wäre weg.
+  state.setBleib = 0;
+  var mitBleib = decodeBackup(encodeBackup());
+  pruefe('A3b das festgehaltene Set kommt zurück', mitBleib.setBleib === 0,
+    String(mitBleib.setBleib));
+  state.setBleib = null;
+  pruefe('A3c und «der Reihe nach» bleibt leer',
+    decodeBackup(encodeBackup()).setBleib === null,
+    String(decodeBackup(encodeBackup()).setBleib));
+  // Ein Set, das es nach einem neuen Schnitt nicht mehr gibt, führt nicht in
+  // die Irre — dieselbe Regel wie bei den Inhalten.
+  var kaputt = encodeBackup().split('~');
+  kaputt[10] = '999';
+  var rumpf = kaputt.slice(0, 11).join('~');
+  pruefe('A3d ein unbekanntes Set fällt weg',
+    decodeBackup(rumpf + '~' + bkPruefsumme(rumpf)).setBleib === null);
   // Der Bindestrich hält die Stellen frei, an denen bis ADR 0039 Darstellung
   // und Farbton standen — sonst rutschte das Schema dorthin, wo ein älterer
   // Code etwas anderes führt.
-  pruefe('A4 nur unverfängliche Zeichen', /^[A-Za-z0-9.~-]+$/.test(code));
+  // Das Komma kam mit den Quoten dazu (ADR 0086) — es trennt Einträge und ist
+  // in Text, Mail und Adresszeile so harmlos wie der Punkt.
+  pruefe('A4 nur unverfängliche Zeichen', /^[A-Za-z0-9.,~-]+$/.test(code),
+    (code.match(/[^A-Za-z0-9.,~-]/g) || []).join(''));
   var alt = btoa(unescape(encodeURIComponent(JSON.stringify(vorher))));
   pruefe('A5 deutlich kürzer als der alte Klumpen', code.length * 3 < alt.length,
     code.length + ' statt ' + alt.length + ' Zeichen');
+
+  // **Die Quoten fahren mit** (ADR 0086). Eine Quote, die beim Gerätewechsel
+  // bei null anfängt, wäre keine — die Bilanz behauptete tagelang, es hake
+  // nirgends.
+  state.quote = { tippen: { r: 40, f: 12 }, buchstaben: { r: 3, f: 9 } };
+  var einThema = Object.keys(VOCAB_THEMES)[0];
+  state.quoteThema = {};
+  state.quoteThema[einThema] = { r: 5, f: 7 };
+  var mitQ = decodeBackup(encodeBackup());
+  pruefe('A6 die Quoten je Übung kommen zurück',
+    mitQ.quote.tippen && mitQ.quote.tippen.r === 40 && mitQ.quote.tippen.f === 12 &&
+    mitQ.quote.buchstaben.f === 9, JSON.stringify(mitQ.quote));
+  pruefe('A6b und die je Thema auch',
+    mitQ.quoteThema[einThema] && mitQ.quoteThema[einThema].f === 7,
+    JSON.stringify(mitQ.quoteThema));
+  // **Keine Themenkennung darf auf einen Übungsnamen fallen** — beim Lesen
+  // entscheidet die Kennung, welche der beiden Listen gemeint ist.
+  var kollision = Object.keys(VOCAB_THEMES).filter(function (t) {
+    return !!uebungVon(bkKennung(t));
+  });
+  pruefe('A6c keine Themenkennung heißt wie eine Übung',
+    kollision.length === 0, kollision.join(', '));
+  // Eine Übung, die es nicht mehr gibt, fällt weg.
+  state.quote.gibtEsNicht = { r: 9, f: 9 };
+  pruefe('A6d unbekannte Kategorien fallen weg',
+    decodeBackup(encodeBackup()).quote.gibtEsNicht === undefined);
+  delete state.quote.gibtEsNicht;
+  state.quote = {}; state.quoteThema = {};
 
   // B · Hin und zurück
   var zurueck = mergeState(decodeBackup(code));

@@ -29,7 +29,9 @@ try {
   setTab('bilanz');
 
   // A · Kacheln sind Knöpfe
-  var kacheln = alle('[data-detail]');
+  // **Nur die Kacheln oben**, nicht jeder Weg ins Detail: Der Lernbedarf hat
+  // seit ADR 0086 einen eigenen, und der ist eine Zeile, keine Kachel.
+  var kacheln = alle('.stats-grid [data-detail]');
   pruefe('A1 sechs Kacheln führen weiter', kacheln.length === 6, String(kacheln.length));
   pruefe('A2 es sind Knöpfe', kacheln.every(function (b) { return b.tagName === 'BUTTON'; }));
   pruefe('A3 sie zeigen es an', alle('.stat-mehr').length === 6);

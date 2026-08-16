@@ -109,6 +109,7 @@ Wer neu dazukommt und nur fünf lesen will:
 | [0083](0083-der-scheinwerfer-atmet.md) | Der Scheinwerfer atmet innerhalb des Ziels, statt zu blitzen | löst 0081 §2 ab |
 | [0084](0084-die-leiste-gehoert-zum-rahmen.md) | Die Leiste gehört zum Rahmen — eine Hülle statt Disziplin | ergänzt 0082 |
 | [0085](0085-begruessung-atem-vorlage.md) | Drei Tickets — Begrüßung, Atem, Vorlage | ändert 0051, 0083, 0016 |
+| [0086](0086-getippt-gemeistert-lernbedarf.md) | Gemeistert wird getippt, der Lernbedarf wird gezählt | ändert 0006, 0075 |
 
 ## Einen neuen anlegen
 

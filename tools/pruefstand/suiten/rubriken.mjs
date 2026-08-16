@@ -51,7 +51,9 @@ try {
   pruefe('B7 Auswahl bleibt im Set', drin === 30, drin + '/30');
 
   // C · Set schafft Sätze frei
-  lerne(LERNSETS[0].woerter, SATZ_STUFE);
+  // Die Sätze hängen an der Satzstufe je Wort, das Set an der Endstufe
+  // (ADR 0086) — zwei Schwellen, zwei Wirkungen.
+  lerne(LERNSETS[0].woerter, BOX_MAX);
   pruefe('C1 Set geschafft', setGeschafft(0) && aktuellesSet() === 1);
   var offen = LERNSETS[0].saetze.filter(satzFrei).length;
   pruefe('C2 die Sätze des Sets sind offen', offen === LERNSETS[0].saetze.length,

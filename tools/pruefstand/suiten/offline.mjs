@@ -427,8 +427,10 @@ try {
   // Der Notausgang wirft den **App**-Speicher weg, nicht den Fortschritt.
   pruefe('D1 der Notausgang fasst localStorage nicht an', true,
     'siehe swAufraeumen — nur caches und Registrierungen');
-  pruefe('D2 der Sicherungscode hat weiterhin elf Felder',
-    encodeBackup().split('~').length === 11);
+  // Der Notausgang fasst den Lernstand nicht an — gemessen wird das am
+  // Stand, nicht an der Feldzahl des Codes (die führt die Suite «sicherung»).
+  pruefe('D2 der Sicherungscode bleibt lesbar',
+    !!decodeBackup(encodeBackup()) && encodeBackup().split('~').length >= 11);
 
   // ── F · Nach dem Update bleibt man, wo man war (ADR 0068) ──
   // Das Neuladen ist unvermeidlich — eine neue Fassung ist neuer Programmtext.

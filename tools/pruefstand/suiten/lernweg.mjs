@@ -24,10 +24,21 @@ try {
   pruefe('B1 Sets aus den Sätzen gebildet', LERNSETS.length > 0 && LERNSETS[0].woerter.length <= SET_MAX);
   pruefe('B2 Start im ersten Set', aktuellesSet() === 0);
   pruefe('B3 zweites Set gesperrt', !setFrei(1));
-  stufe(LERNSETS[0].woerter, SATZ_STUFE - 1);
-  pruefe('B4 eine Stufe zu wenig reicht nicht', aktuellesSet() === 0 && !setFrei(1));
+  // **Nicht «sitzt», sondern «gemeistert»** — und nicht alle, sondern vier von
+  // fünf (ADR 0086). Ein Set voller Wörter auf Satzstufe schaltet nichts mehr
+  // frei; erst die Endstufe zählt, dafür reichen 80 Prozent.
   stufe(LERNSETS[0].woerter, SATZ_STUFE);
-  pruefe('B5 Stufe 2 schaltet frei', aktuellesSet() === 1 && setFrei(1), 'Set ' + aktuellesSet());
+  pruefe('B4 die Satzstufe allein reicht nicht mehr',
+    aktuellesSet() === 0 && !setFrei(1), 'Set ' + aktuellesSet());
+  var s0 = LERNSETS[0].woerter;
+  for (var bi = 0; bi < setSchwelle(0) - 1; bi++) state.boxes[s0[bi].id] = BOX_MAX;
+  pruefe('B4b einer unter der Schwelle reicht auch nicht',
+    aktuellesSet() === 0 && !setFrei(1),
+    setMeister(0) + '/' + setSchwelle(0) + ' von ' + s0.length);
+  state.boxes[s0[setSchwelle(0) - 1].id] = BOX_MAX;
+  pruefe('B5 vier von fünf schalten frei', aktuellesSet() === 1 && setFrei(1),
+    'Set ' + aktuellesSet() + ' · ' + setMeister(0) + '/' + s0.length);
+  pruefe('B5b und das Set gilt nicht als komplett', !setKomplett(0));
   pruefe('B6 freigeschaltet sind zwei Sets',
     freigeschalteteWoerter().length === LERNSETS[0].woerter.length + LERNSETS[1].woerter.length);
 
@@ -118,6 +129,54 @@ try {
     q('.paket-text').textContent.indexOf('0 von ' + LERNSETS[0].woerter.length + ' auf Stufe 2') === 0,
     q('.paket-text').textContent);
   pruefe('H4 ein Balken je Wort', alle('.pp').length === LERNSETS[0].woerter.length);
+
+  // ── K · Der letzte Schritt gehört der Tastatur (ADR 0086) ─
+  // Wer ein Wort unter fertigen Kacheln wiedererkennt, hat es wiedererkannt.
+  // Gemeistert ist es erst, wenn er es selbst geschrieben hat.
+  state = defaultState(); ansichtenZuruecksetzen();
+  var kw = ALL_VOCAB[0];
+  state.boxes[kw.id] = BOX_MAX - 1;
+  updateBox(kw.id, true, false);
+  pruefe('K1 gelegt bringt bis vor die Endstufe, nicht darüber',
+    state.boxes[kw.id] === BOX_MAX - 1, String(state.boxes[kw.id]));
+  pruefe('K1b und die App merkt sich, daß sie gedeckelt hat', tippDeckel === true);
+  updateBox(kw.id, true, true);
+  pruefe('K2 getippt geht es hinauf', state.boxes[kw.id] === BOX_MAX,
+    String(state.boxes[kw.id]));
+  pruefe('K2b und ohne Deckel', tippDeckel === false);
+  // **Wer oben steht, bleibt oben.** Eine Wiederholung per Kachel ist kein
+  // Rückschritt — ohne diese Grenze stufte jede richtige Kachelantwort ein
+  // fertiges Wort wieder herunter.
+  updateBox(kw.id, true, false);
+  pruefe('K3 ein fertiges Wort fällt durch eine Kachel nicht zurück',
+    state.boxes[kw.id] === BOX_MAX, String(state.boxes[kw.id]));
+  // Und falsch bleibt falsch: Der Deckel wirkt nur nach oben.
+  updateBox(kw.id, false, false);
+  pruefe('K4 falsch stuft weiter zurück', state.boxes[kw.id] === BOX_MAX - 1,
+    String(state.boxes[kw.id]));
+
+  // ── L · Die Schwelle öffnet, sie schiebt nicht (ADR 0086) ─
+  state = defaultState(); ansichtenZuruecksetzen();
+  var lw = LERNSETS[0].woerter;
+  lw.forEach(function (v) { state.boxes[v.id] = BOX_MAX - 1; });
+  for (var li = 0; li < setSchwelle(0); li++) state.boxes[lw[li].id] = BOX_MAX;
+  pruefe('L1 bei 80 Prozent ist das Set geschafft',
+    setGeschafft(0) && !setKomplett(0),
+    setMeister(0) + '/' + lw.length + ' · Schwelle ' + setSchwelle(0));
+  pruefe('L2 und der Weg führt ins nächste', aktuellesSet() === 1);
+  // Wer bleiben will, bleibt — auch wenn das nächste Set offen steht.
+  state.setBleib = 0;
+  pruefe('L3 «bleiben» hält das Set fest', aktuellesSet() === 0 && setFrei(1),
+    String(aktuellesSet()));
+  // Ist dort nichts mehr zu holen, fällt der Merker von selbst weg.
+  lw.forEach(function (v) { state.boxes[v.id] = BOX_MAX; });
+  pruefe('L4 ein volles Set hält niemanden', setKomplett(0) && aktuellesSet() === 1,
+    String(aktuellesSet()));
+  // Ein Merker auf ein Set, das es nicht gibt, darf nicht in die Irre führen.
+  state.setBleib = 999;
+  pruefe('L5 ein unbekanntes Set wird übergangen', aktuellesSet() === 1,
+    String(aktuellesSet()));
+  state.setBleib = null;
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + e.stack.split('\\n')[1]);
 }

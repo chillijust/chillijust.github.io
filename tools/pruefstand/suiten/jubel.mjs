@@ -15,7 +15,10 @@ function zaehlen(an) { gezaehlt = []; jubelZeigen = function (a) { gezaehlt.push
 function zurueck() { jubelZeigen = echterJubel; }
 
 // Eine Antwort in «Lernsets»/«Freestyle» durchs echte uebPruefen() schicken.
-function antworte(wort, richtig) {
+// **Gemeistert wird nur getippt** (ADR 0086), und «Lernsets» tippt nicht. Wo
+// eine Antwort ein Wort auf die Endstufe bringen soll, hebt der Helfer es
+// hinterher selbst dorthin — sonst prüfte die Suite den Deckel statt den Jubel.
+function antworte(wort, richtig, bisOben) {
   uebNext(true);
   if (!uebQ) return false;
   uebQ.word = wort;
@@ -23,6 +26,15 @@ function antworte(wort, richtig) {
   uebPicked = richtig ? wort.id : '—keins—';
   uebPruefen();
   return true;
+}
+// Der Weg über die Tastatur, für alles, was wirklich meistern soll.
+function tippe(wort, richtig) {
+  var vorher = state.boxes[wort.id] || 0;
+  var setVorher = aktuellesSet();
+  updateBox(wort.id, richtig, true);
+  meisterMeldung = null;
+  meisterPruefen(vorher, state.boxes[wort.id], 'Wort', wort.ru + ' — ' + wort.de, '');
+  meisterFolgen(wort, vorher, setVorher);
 }
 function setVoll(nr, stufe) {
   LERNSETS[nr].woerter.forEach(function (v) { state.boxes[v.id] = stufe; });
@@ -60,18 +72,25 @@ try {
   zurueck();
 
   // ── B · Ein Set: einmal feiern, nicht zweimal ─────────────
+  // **Ein Set wird jetzt beim Tippen voll** (ADR 0086): Gemeistert wird nur
+  // dort, und die Schwelle liegt bei 80 % der Endstufe. Der Weg über
+  // «Lernsets» kann ein Set gar nicht mehr über die Schwelle bringen.
   state = defaultState(); ansichtenZuruecksetzen();
   uebModus = 'lernsets'; uebAuswahl = 0; setTab('lernsets');
-  // Elf von zwölf Wörtern sitzen; das letzte macht das Set voll.
   var woerter = LERNSETS[0].woerter;
-  setVoll(0, SATZ_STUFE);
-  var letztes = woerter[woerter.length - 1];
-  state.boxes[letztes.id] = SATZ_STUFE - 1;
-  uebGeschafftesSet = null;
-  antworte(letztes, true);
-  pruefe('B1 das volle Set meldet sich', uebGeschafftesSet === 0, String(uebGeschafftesSet));
+  // Einer unter der Schwelle: Das nächste getippte Wort nimmt sie.
+  setVoll(0, BOX_MAX - 1);
+  var schwelle = setSchwelle(0);
+  for (var bi = 0; bi < schwelle - 1; bi++) state.boxes[woerter[bi].id] = BOX_MAX;
+  var letztes = woerter[schwelle - 1];
+  pruefe('B0 knapp unter der Schwelle', !setGeschafft(0) &&
+    setMeister(0) === schwelle - 1, setMeister(0) + '/' + schwelle);
+  setFenster = null;
+  tippe(letztes, true);
+  pruefe('B1 das volle Set meldet sich', setFenster && setFenster.nr === 0,
+    JSON.stringify(setFenster));
   zaehlen();
-  uebNext(true);
+  setFensterZeigen();
   pruefe('B2 und das Fenster geht auf', gezaehlt.join() === 'set', gezaehlt.join());
   zurueck();
   pruefe('B3 danach ist die Marke gesetzt', jubelSchon('set:0'));
@@ -79,23 +98,27 @@ try {
   // Ein Wort fällt zurück — genau der Fall aus dem Ticket.
   var gefallen = woerter[3];
   state.boxes[gefallen.id] = SATZ_STUFE - 1;
-  pruefe('B4 damit ist das Set wieder offen', !setGeschafft(0) && aktuellesSet() === 0);
-  uebGeschafftesSet = null;
-  antworte(gefallen, true);
+  state.setBleib = null;
+  pruefe('B4 damit ist das Set wieder offen', !setGeschafft(0) && aktuellesSet() === 0,
+    setMeister(0) + '/' + setSchwelle(0));
+  setFenster = null;
+  tippe(gefallen, true);
   pruefe('B5 ein einzelnes repariertes Wort feiert NICHT',
-    uebGeschafftesSet === null, String(uebGeschafftesSet));
+    setFenster === null, JSON.stringify(setFenster));
   zaehlen();
-  uebNext(true);
+  setFensterZeigen();
   pruefe('B6 und öffnet auch kein Fenster', gezaehlt.length === 0, gezaehlt.join());
   zurueck();
 
   // Das nächste Set feiert dagegen sehr wohl.
-  setVoll(0, SATZ_STUFE); setVoll(1, SATZ_STUFE);
-  var l1 = LERNSETS[1].woerter[LERNSETS[1].woerter.length - 1];
-  state.boxes[l1.id] = SATZ_STUFE - 1;
-  uebGeschafftesSet = null;
-  antworte(l1, true);
-  pruefe('B7 ein neues Set feiert weiterhin', uebGeschafftesSet === 1, String(uebGeschafftesSet));
+  setVoll(0, BOX_MAX);
+  setVoll(1, BOX_MAX - 1);
+  var s1 = LERNSETS[1].woerter;
+  for (var ci = 0; ci < setSchwelle(1) - 1; ci++) state.boxes[s1[ci].id] = BOX_MAX;
+  setFenster = null;
+  tippe(s1[setSchwelle(1) - 1], true);
+  pruefe('B7 ein neues Set feiert weiterhin', setFenster && setFenster.nr === 1,
+    JSON.stringify(setFenster));
 
   // ── C · Themen ────────────────────────────────────────────
   state = defaultState(); ansichtenZuruecksetzen();
@@ -106,7 +129,7 @@ try {
   var tw = themaWoerter[0];
   state.boxes[tw.id] = BOX_MAX - 1;
   zaehlen();
-  antworte(tw, true);
+  tippe(tw, true);
   pruefe('C1 das volle Thema feiert', gezaehlt.join() === 'thema', gezaehlt.join());
   zurueck();
   // Ein Wort fällt und kommt zurück.
@@ -171,7 +194,7 @@ try {
   // ── G · Was schon geschafft war, gilt als gefeiert ────────
   // Ein Stand von vor dieser Liste, oder eine eingespielte Sicherung.
   state = defaultState(); ansichtenZuruecksetzen();
-  setVoll(0, SATZ_STUFE);
+  setVoll(0, BOX_MAX);
   ALPHABET.forEach(function (b) { state.abcBox[b[1]] = BOX_MAX; });
   pruefe('G1 vor dem Nachtragen ist nichts vermerkt', !jubelSchon('set:0') && !jubelSchon('abc'));
   jubelNachtragen();

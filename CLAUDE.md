@@ -20,7 +20,8 @@ nicht «Rubrik». Die Reihenfolge **ist der Lernweg** — Zeichen, Wörter, Sät
 **Buchstaben** steht darum vorn (das kyrillische Alphabet — freiwillig, eigener
 Lernstand, zählt nicht in Serie und Fortschritt; Einstieg ist das Üben, die Tafel liegt
 hinter einem eigenen Knopf), dann folgen:
-**Lernsets** (zielgerichtet: die Wörter der nächsten Sätze, schaltet «Übersetzen» frei),
+**Lernsets** (zielgerichtet: die Wörter der nächsten Sätze, schaltet «Übersetzen» frei;
+das nächste Set öffnet bei **80 % gemeistert**, und gemeistert wird nur getippt — ADR 0086),
 **Freestyle** (freies Vokabeltraining nach Thema, ohne Sperren),
 **Tippen** (Eingabequiz mit kyrillischer Tastatur, ab Leitner-Stufe 3),
 **Übersetzen** (nur Sätze, deren Wörter sitzen; Form und Richtung steigern sich mit der
@@ -174,7 +175,35 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   **Kästen** gemessen, nicht über `elementFromPoint` (die gezogene Zeile läge selbst
   darunter). Zwei Pfeile je Zeile bleiben als zweiter Weg — eine Einrichtung, die sich nur
   ziehen lässt, ist für den, bei dem das hakt, keine.
-- **Die Bilanz zeigt Defizite** (ADR 0075), vor dem Lernweg: Zurückgefallenes,
+- **Der letzte Schritt gehört der Tastatur** (ADR 0086). `updateBox(id, correct, getippt)`
+  deckelt bei `BOX_MAX - 1`, solange nicht geschrieben wurde — von vier Aufrufern tippt
+  nur «Tippen». **Wer oben steht, bleibt oben** (eine Kachelwiederholung ist kein
+  Rückschritt), und der Deckel wirkt **nur nach oben**. Was ein gemeistertes Wort nach
+  sich zieht, steht in `meisterFolgen()` und wird von beiden Übungen gerufen — Set- und
+  Themenjubel hingen vorher in «Lernsets», wo seither nichts mehr die Endstufe erreicht.
+  Ein gedeckeltes Wort sagt es (`tippHinweisHtml()`), sonst klebt es unerklärt.
+- **Die Schwelle öffnet, sie schiebt nicht** (ADR 0086). `setGeschafft()` heißt jetzt
+  «vier von fünf Wörtern auf `BOX_MAX`» (`setSchwelle()`), und das Fenster fragt: bleiben
+  oder weiter. `state.setBleib` hält das Set fest, bis es `setKomplett()` ist; wer bleibt,
+  wird beim nächsten gemeisterten Wort erneut gefragt — beim ersten Mal trägt der Jubel
+  die Wege, danach kommt dieselbe Frage ohne Feier. **`setFrei(nr)` fragt das Set davor**,
+  nicht `aktuellesSet()`: Sonst sperrt sich, wer bleibt, das offene nächste Set zu.
+  `setBleib` steht als **zwölftes Feld** im Sicherungscode.
+- **Der Lernbedarf wird gezählt, nicht abgeleitet** (ADR 0086). `quoteZaehlen(übung,
+  richtig, thema)` steht an allen **sieben** Prüfstellen; Aufgedecktes zählt nicht mit.
+  `state.quote` und `state.quoteThema` stehen als **dreizehntes Feld** im Sicherungscode —
+  eine Quote, die beim Gerätewechsel bei null anfängt, wäre keine. Übungen tragen dort
+  ihre ID im Klartext, Themen ihre Kennung, **eine Liste ohne zweiten Abschnitt**; daß
+  keine Themenkennung wie eine Übung heißt, hält die Suite `sicherung` fest. Angezeigt
+  wird in der Bilanz nur, was über `QUOTE_MIN` Antworten und `QUOTE_SCHWELLE` liegt —
+  «0 %» wäre eine Behauptung über etwas, das nie stattfand. Drei Zonen: die auffälligen
+  Übungen, «Alle Kategorien» (`bilanzDetail = 'lernbedarf'`) und die einzelne Kategorie
+  (`kat:<übung>`) mit Themen, Wörtern hinter einem Klappfeld und dem Weg in die Übung.
+  **Zurück aus einer Kategorie führt in die Aufstellung**, nicht ganz hinaus. Jede
+  Detailansicht endet über `bilanzDetailFertig()` — eine Ansicht mit vielen Ausgängen
+  hängt ihre Zuhörer an einer Stelle an.
+- **Die Bilanz zeigt Defizite** (ADR 0075) unter «Woran es gerade hakt», nach dem
+  Lernbedarf und vor dem Lernweg: Zurückgefallenes,
   Verwechslungen (erst ab dem **zweiten** Mal — ein Ausrutscher ist kein Muster), Zeichen
   unter der Schwelle, Überfälliges. **Jede Zeile nennt einen Grund und einen Weg
   dorthin**; wo die Übung gesperrt ist, entfällt der Knopf, statt ins Leere zu führen.

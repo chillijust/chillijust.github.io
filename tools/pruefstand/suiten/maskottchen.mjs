@@ -89,19 +89,24 @@ try {
   uebNext(true);
 
   // D · Jubel nach einem geschafften Set
+  // **Ein Set wird beim Tippen voll** (ADR 0086): Gemeistert wird nur dort,
+  // und die Schwelle liegt bei 80 % der Endstufe.
   state.boxes = {}; state.lastSeen = {}; state.answered = 0;
-  uebGeschafftesSet = null;
+  setFenster = null;
+  state.setBleib = null;
   uebModus = 'lernsets'; uebAuswahl = 'aktuell';
   var woerter = LERNSETS[0].woerter;
-  woerter.slice(0, woerter.length - 1).forEach(function (v) { state.boxes[v.id] = SATZ_STUFE; });
-  var letztes = woerter[woerter.length - 1];
-  state.boxes[letztes.id] = SATZ_STUFE - 1;
+  woerter.forEach(function (v) { state.boxes[v.id] = BOX_MAX - 1; });
+  for (var di = 0; di < setSchwelle(0) - 1; di++) state.boxes[woerter[di].id] = BOX_MAX;
+  var letztes = woerter[setSchwelle(0) - 1];
+  setTab('tippen');
+  var vorherD = state.boxes[letztes.id];
+  var setVorherD = aktuellesSet();
+  updateBox(letztes.id, true, true);
+  meisterFolgen(letztes, vorherD, setVorherD);
+  pruefe('D1 Jubel wartet auf «Weiter»', setFenster && setFenster.nr === 0,
+    JSON.stringify(setFenster));
   setTab('lernsets');
-  uebQ = { word: letztes, mode: 'mc-de', options: [letztes] };
-  uebPicked = letztes.id;
-  uebPruefen();
-  pruefe('D1 Jubel wartet auf «Weiter»', uebPhase === 'feedback' && uebGeschafftesSet === 0,
-    uebPhase + '/' + uebGeschafftesSet);
   uebNext(false);
   // Der Jubel ist ein Fenster, kein eigener Bildschirm mehr.
   pruefe('D2 Jubel erscheint', jubelOffen && !q('#jubelBlatt[aria-hidden="true"]'));
@@ -112,34 +117,45 @@ try {
     q('#jubelText').textContent.indexOf(String(LERNSETS[0].saetze.length)) !== -1,
     q('#jubelText').textContent);
   pruefe('D5b und dahinter steht schon die nächste Frage', !!q('.card'));
-  alle('[data-jubel]').filter(function (b) {
-    return b.textContent.indexOf('Übersetzen') !== -1;
-  })[0].click();
-  pruefe('D6 Knopf führt nach Übersetzen mit fertiger Aufgabe',
-    currentTab === 'uebersetzen' && !!trTask && !q('.leer'), currentTab);
-  pruefe('D7 Jubel ist abgeräumt', uebGeschafftesSet === null && !jubelOffen);
+  // **Zwei Wege, eine Entscheidung** (ADR 0086): Das Fenster fragt jetzt, ob
+  // weitergegangen wird. Der frühere Weg nach «Übersetzen» stünde als dritter
+  // Knopf daneben — die Sätze nennt der Text, dorthin führt die Empfehlung.
+  var wege = alle('[data-jubel]').map(function (b) { return b.textContent; });
+  pruefe('D6 das Fenster bietet bleiben und weitergehen',
+    wege.length === 2 && wege[0].indexOf('Bei Set 1 bleiben') !== -1 &&
+    wege[1].indexOf('Weiter mit Set 2') !== -1, wege.join(' | '));
+  alle('[data-jubel]')[0].click();
+  pruefe('D6b «bleiben» hält das Set fest',
+    state.setBleib === 0 && aktuellesSet() === 0,
+    state.setBleib + ' / ' + aktuellesSet());
+  pruefe('D7 Jubel ist abgeräumt', setFenster === null && !jubelOffen);
   setTab('lernsets');
   pruefe('D8 kein zweiter Jubel', !jubelOffen);
+  state.setBleib = null;
 
-  // E · «Weiter lernen» statt Übersetzen
-  state.boxes = {}; state.lastSeen = {}; uebGeschafftesSet = null;
-  fuelleSet(0, SATZ_STUFE);
-  fuelleSet(1, SATZ_STUFE - 1);
-  var w2 = LERNSETS[1].woerter[0];
-  state.boxes[w2.id] = SATZ_STUFE - 1;
-  LERNSETS[1].woerter.forEach(function (v, i) { if (i > 0) state.boxes[v.id] = SATZ_STUFE; });
+  // E · Auch das zweite Set, und «weiter» springt wirklich
+  state.boxes = {}; state.lastSeen = {}; setFenster = null; state.setBleib = null;
+  fuelleSet(0, BOX_MAX);
+  var s1 = LERNSETS[1].woerter;
+  s1.forEach(function (v) { state.boxes[v.id] = BOX_MAX - 1; });
+  for (var ei = 0; ei < setSchwelle(1) - 1; ei++) state.boxes[s1[ei].id] = BOX_MAX;
+  var w2 = s1[setSchwelle(1) - 1];
+  setTab('tippen');
+  var vorherE = state.boxes[w2.id];
+  var setVorherE = aktuellesSet();
+  updateBox(w2.id, true, true);
+  meisterFolgen(w2, vorherE, setVorherE);
   setTab('lernsets');
-  uebQ = { word: w2, mode: 'mc-de', options: [w2] };
-  uebPicked = w2.id;
-  uebPruefen();
   uebNext(false);
   pruefe('E1 auch das zweite Set jubelt', jubelOffen && q('#jubelAnlass').textContent === 'Lernset');
   pruefe('E1b die Figur ist im Fenster', !!q('#jubelChili #chiliBuehne'));
-  alle('[data-jubel]')[0].click();
-  pruefe('E2 «Weiter lernen» schließt und lässt die Frage stehen',
+  alle('[data-jubel]')[1].click();
+  pruefe('E2 «weiter» schließt und lässt die Frage stehen',
     !jubelOffen && uebPhase === 'ask' && !!q('.card'), uebPhase);
   pruefe('E2b und die Figur kommt zurück', !q('#jubelChili #chiliBuehne'));
-  pruefe('E3 danach im nächsten Set', aktuellesSet() === 2 && uebGeschafftesSet === null);
+  pruefe('E3 danach im nächsten Set',
+    aktuellesSet() === 2 && setFenster === null && state.setBleib === null,
+    String(aktuellesSet()));
   // F · Die Figur steht im Fluss
   pruefe('F0 keine Positionsrechnerei mehr', typeof window.positioniereChili === 'undefined' &&
     typeof window.chiliNachziehen === 'undefined');

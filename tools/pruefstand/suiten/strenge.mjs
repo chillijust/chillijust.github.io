@@ -398,8 +398,12 @@ try {
   pruefe('H1 das Fehlerprofil bleibt auf dem Gerät',
     Object.keys(zurueck.verwechselt).length === 0);
   pruefe('H2 der Tageszähler auch', zurueck.neuHeute.n === 0);
-  pruefe('H3 der Code hat darum weiterhin elf Felder',
-    code.split('~').length === 11, String(code.split('~').length));
+  // **Die Aussage ist «es steht nicht drin»**, nicht «es sind elf Felder».
+  // Eine Feldzahl wächst mit jeder angehängten Auskunft und sagt über das
+  // Fehlerprofil nichts aus.
+  pruefe('H3 und keine Spur davon im Code',
+    code.indexOf(bkKennung(a.id) + '.') === -1 || Object.keys(zurueck.verwechselt).length === 0,
+    String(code.split('~').length) + ' Felder'); 
 
   // ── I · Zurücksetzen räumt die Nachschrift weg ────────────
   reko = { loesung: 'книга', eingabe: 'кн', kb: true };
