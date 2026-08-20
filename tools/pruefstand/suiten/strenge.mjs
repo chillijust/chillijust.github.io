@@ -549,6 +549,59 @@ try {
   rekoVerlangen('книга', true, false, false);
   pruefe('J18 «nie» gilt auch für Gelegtes', reko === null);
   state.settings.rekonstruktion = 'woerter';
+  // ── K · Die Nachschrift beim Tippen in «Lernsets» (ADR 0090) ─
+  // **Getippt zumal.** Die Nachschrift kommt, wo eine Schreibweise behauptet
+  // wurde (ADR 0070) — und seit «Lernsets» tippen läßt, fehlte sie
+  // ausgerechnet dort, wo am meisten geschrieben wird.
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  ['lernsets', 'tippen', 'uebersetzen'].forEach(function (k) { state.tutUebung[k] = 1; });
+  tutEnde();
+  state.settings.rekonstruktion = 'woerter';
+  ALL_VOCAB.forEach(function (v) {
+    state.boxes[v.id] = state.settings.tippenStufe;
+    state.lastSeen[v.id] = Date.now();
+  });
+  uebModus = 'lernsets'; uebAuswahl = 'aktuell';
+  setTab('lernsets');
+  pruefe('K1 in «Lernsets» wird ab der Tippstufe geschrieben',
+    !!uebQ && uebQ.mode === 'tippen', uebQ && uebQ.mode);
+  uebEingabe = 'ошибка';
+  uebPruefen();
+  pruefe('K2 ein Schreibfehler verlangt die Nachschrift', !!reko,
+    reko ? reko.loesung : 'keine');
+  pruefe('K2b und der Weg bleibt zu, bis sie sitzt',
+    !!q('#uebNext') && q('#uebNext').disabled === true);
+  // Richtig geschrieben verlangt nichts nach.
+  uebNext(true);
+  if (uebQ && uebQ.mode !== 'tippen') { uebQ = { word: uebQ.word, mode: 'tippen' }; }
+  uebEingabe = uebQ.word.ru;
+  uebPruefen();
+  pruefe('K3 richtig geschrieben verlangt nichts', !reko);
+  // **«Nie» bleibt «nie»** — der Schalter gilt auch hier.
+  state.settings.rekonstruktion = 'nie';
+  uebNext(true);
+  if (uebQ && uebQ.mode !== 'tippen') { uebQ = { word: uebQ.word, mode: 'tippen' }; }
+  uebEingabe = 'ошибка';
+  uebPruefen();
+  pruefe('K4 abgeschaltet bleibt sie weg', !reko);
+  state.settings.rekonstruktion = 'woerter';
+
+  // ── L · Der Hinweis läuft im Hintergrund (ADR 0090) ────────
+  // Die Rechnung bleibt, die Zeile ist weg: Sie schob die Kachel so weit nach
+  // unten, daß die Übung scrollen mußte.
+  state.boxes[ALL_VOCAB[0].id] = BOX_MAX - 1;
+  state.tippFolge[ALL_VOCAB[0].id] = 0;
+  updateBox(ALL_VOCAB[0].id, true, false);
+  pruefe('L1 der Deckel rechnet weiter', tippDeckel === true && tippRest > 0,
+    tippDeckel + ' / ' + tippRest);
+  uebQ = { word: ALL_VOCAB[0], mode: 'tippen' };
+  uebPhase = 'feedback';
+  uebCorrect = true;
+  renderUeben();
+  pruefe('L2 aber keine Zeile erklärt ihn', !q('.meister'),
+    q('.meister') ? q('.meister').textContent.slice(0, 40) : '—');
+
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);
 }

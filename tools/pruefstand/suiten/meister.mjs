@@ -179,20 +179,18 @@ warte(function () {}).then(function () {
       !q('.meister') && state.boxes[wort.id] === SATZ_STUFE + 1,
       String(state.boxes[wort.id]));
 
-    // **Gelegt und gewählt meistern nicht** (ADR 0086/0088). An der Stelle,
-    // an der sonst «gemeistert» steht, steht dann die andere Hälfte der
-    // Auskunft: wie viele getippte Treffer noch fehlen.
+    // **Gelegt und gewählt meistern nicht** (ADR 0086/0088) — und seit
+    // ADR 0090 sagt das keine Zeile mehr: Sie schob die Kachel so weit nach
+    // unten, daß die Übung scrollen mußte. Der Deckel bleibt, nur die Auskunft
+    // darüber ist weg. Geprüft wird darum die **Rechnung**, nicht die Anzeige.
     state.boxes[wort.id] = BOX_MAX - 1;
     state.tippFolge[wort.id] = 0;
     updateBox(wort.id, true, false);
     renderUeben();
-    pruefe('D3b die Zeile steht da und ist ein Hinweis',
-      !!q('.meister') && q('.meister').classList.contains('fast') &&
-      meisterMeldung === null, q('.meister') ? q('.meister').className : 'keine');
-    pruefe('D4 sie sagt, wie oft noch',
-      q('.meister').textContent.indexOf('schreiben') !== -1 &&
-      q('.meister').textContent.indexOf(String(TIPP_FOLGE)) !== -1,
-      q('.meister').textContent);
+    pruefe('D3b der Deckel greift', tippDeckel === true && meisterMeldung === null,
+      String(tippDeckel));
+    pruefe('D4 und keine Zeile erklärt ihn', !q('.meister'),
+      q('.meister') ? q('.meister').textContent : '—');
     pruefe('D4b und das Wort bleibt unter der Endstufe',
       state.boxes[wort.id] < BOX_MAX, String(state.boxes[wort.id]));
     // Dreimal getippt geht es hinauf — und dann steht die Meisterschaft da.

@@ -314,6 +314,10 @@ try {
   pruefe('M1 vor der Antwort schweigt sie', !blaseDa());
   uebPicked = uebQ.word.id;
   if (uebQ.mode === 'tiles') uebQ.mode = 'choice';
+  // **Richtig antworten, sonst hält die Nachschrift den Weg zu** (ADR 0090):
+  // Seit «Lernsets» tippen läßt, verlangt ein Schreibfehler dort das
+  // Nachschreiben — und «Weiter» bleibt gesperrt, bis es sitzt.
+  if (uebQ.mode === 'tippen') uebEingabe = uebQ.word.ru;
   uebPruefen();
   pruefe('M2 nach der Antwort sagt sie etwas', blaseDa() && !!kommentar);
   var vorher = kommentar;

@@ -575,10 +575,20 @@ body.wissen-offen #wissenPanel { grid-template-rows: 1fr; opacity: 1; pointer-ev
   position: absolute; top: 10px; right: 10px; z-index: 40;
   transition: opacity .18s;
 }
-/* Ist ein anderes Blatt offen, hat der Knopf in der Kachel dort nichts zu
-   suchen: Er liegt über dem Blatt (z-index 40 gegen 30) und stach hindurch. */
+/* Ist ein anderes Blatt offen, hat ein runder Knopf dort nichts zu suchen: Er
+   liegt über dem Blatt (z-index 40 gegen 30) und stach hindurch.
+
+   **Die Regel traf bis 2.7.1 nur `.kachel-knopf`** — und seit ADR 0082 sitzt
+   der Wissensknopf in `#uebLeiste`, nicht mehr dort. Sie zeigte ins Leere, und
+   das Fragezeichen stand über der geöffneten Filterleiste. *Wer einen Knoten
+   umhängt, erbt die Regeln nicht mit; sie zeigen weiter auf den alten Platz.* */
 body.menu-offen .kachel-knopf,
-body.filter-offen .kachel-knopf { opacity: 0; pointer-events: none; }
+body.filter-offen .kachel-knopf,
+body.menu-offen #uebLeiste .rundbtn,
+body.filter-offen #uebLeiste .rundbtn,
+body.menu-offen #wissenHuelle,
+body.filter-offen #wissenHuelle { opacity: 0; pointer-events: none; }
+#uebLeiste .rundbtn, #wissenHuelle { transition: opacity .18s; }
 .filterpanel { width: 284px; max-width: 86vw; }
 .filterpanel .menuinhalt { max-height: 62vh; overflow-y: auto; padding: 12px; gap: 0; }
 .filtergruppe + .filtergruppe { margin-top: 14px; }
@@ -4415,11 +4425,11 @@ function auffrischGrenzen(tage) { return zaehlerGrenzen('auffrischen', tage); }
 var STORAGE_KEY = 'russisch_trainer_v1';
 // Stand der ausgelieferten Datei. Wird von tools/build.mjs gesetzt und geht in
 // jedes Ticket ein, damit ein Bericht sagt, welcher Stand gemeint war.
-var APP_STAND = '2026-08-16'; /* == STAND == */
+var APP_STAND = '2026-08-20'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.7.1T'; /* == VERSION == */
+var APP_VERSION = '2.7.2T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -6351,22 +6361,17 @@ function meisterPruefen(vorher, nachher, was, text, hinweis, kyrillisch) {
 // wäre im Weg — gemeistert wird oft, und jedes Mal wegtippen zu müssen macht
 // aus der Belohnung eine Hürde. Für ein ganzes Lernset gibt es weiter die
 // Jubelkarte; die ist der seltenere, größere Anlass.
-// **Ein Wort, das stehenbleibt, sagt warum** (ADR 0086). Ohne diese Zeile
-// klebte es auf der vorletzten Stufe, und niemand wüßte, woran es liegt: Die
-// Punktreihe zeigt nur, daß nichts weitergeht. Sie steht an derselben Stelle
-// wie die Meistermeldung — es ist dieselbe Auskunft, nur die andere Hälfte.
-function tippHinweisHtml() {
-  if (!tippDeckel) return '';
-  var n = Math.max(1, tippRest);
-  return '<div class="meister fast">' + ICON.tastatur +
-    '<span><strong>Fast — noch ' + n + '× richtig schreiben</strong>' +
-    '<span class="meister-note">Gemeistert wird ein Wort, wenn du es ' +
-    TIPP_FOLGE + '× hintereinander selbst geschrieben hast.</span></span></div>';
-}
+// **Was im Hintergrund läuft, braucht keine Zeile** (ADR 0090). Bis 2.7.1
+// stand hier «Fast — noch 2× richtig schreiben». Die Auskunft war richtig und
+// trotzdem falsch am Platz: Sie schob die Kachel so weit nach unten, daß das
+// Übungsfenster scrollen mußte — und **eine Übung, die scrollt, verliert ihre
+// Knöpfe aus dem Daumenbereich**. Die Fortschrittsreihe sagt ohnehin, daß
+// nichts weitergeht; `tippDeckel` und `tippRest` bleiben als Rechnung stehen,
+// nur zeigt sie niemand mehr an.
 
 function meisterHtml() {
   var m = meisterMeldung;
-  if (!m) return tippHinweisHtml();
+  if (!m) return '';
   return '<div class="meister">' + ICON.sternVoll +
     '<span><strong>' + esc(m.was) + ' gemeistert</strong>' +
     '<span class="meister-wort' + (m.kyrillisch ? ' cyr' : '') + '">' + esc(m.text) + '</span>' +
@@ -7455,6 +7460,19 @@ function menuSetzen(auf) {
 // Regelfall ab, färbt sich der Knopf wie ein gesetzter Chip.
 var filterOffen = false;
 
+// **Nur eines liegt offen** (ADR 0090). Vier runde Knöpfe tragen je ein Blatt,
+// und jeder führte bisher seine eigene Liste der anderen — der Filterknopf
+// vergaß darin das Wissen. Danach standen zwei Blätter zugleich offen, und die
+// Chili sprang beim Schließen des einen in den Knopf des anderen zurück.
+//
+// **Nur der Knopf, in dem die Figur steht, ist offen.** Wer eine Liste führt,
+// vergißt einen Eintrag; wer fragt, nicht.
+function blaetterZu(ausser) {
+  if (ausser !== 'menu') menuSetzen(false);
+  if (ausser !== 'filter') filterSetzen(false);
+  if (ausser !== 'wissen') wissenSetzen(false);
+}
+
 function filterSetzen(auf) {
   var vorher = filterOffen;
   filterOffen = auf && filterHatWahl();
@@ -8142,15 +8160,17 @@ meldeZiehenBinden();
 document.getElementById('menuKnopf').addEventListener('click', function (e) {
   e.stopPropagation();
   chiliZusammen(function () {
-    filterSetzen(false);
-    menuSetzen(!menuOffen);
+    var auf = !menuOffen;
+    blaetterZu('menu');
+    menuSetzen(auf);
   });
 });
 document.getElementById('filterKnopf').addEventListener('click', function (e) {
   e.stopPropagation();
   chiliZusammen(function () {
-    menuSetzen(false);
-    filterSetzen(!filterOffen);
+    var auf = !filterOffen;
+    blaetterZu('filter');
+    filterSetzen(auf);
     renderFilter();   // die Einträge sind nur im offenen Panel erreichbar
   });
 });
@@ -8162,19 +8182,17 @@ document.getElementById('heimKnopf').addEventListener('click', function () { set
 document.getElementById('wissenKnopf').addEventListener('click', function (e) {
   e.stopPropagation();
   chiliZusammen(function () {
-    menuSetzen(false);
-    filterSetzen(false);
+    var auf = !wissenOffen;
+    blaetterZu('wissen');
     wissenWort = null;
-    wissenSetzen(!wissenOffen);
+    wissenSetzen(auf);
   });
   renderWissen();
 });
 document.getElementById('tafelKnopf').addEventListener('click', function (e) {
   e.stopPropagation();
-  chiliZusammen(function () {
-    menuSetzen(false);
-    filterSetzen(false);
-  });
+  // Der Tafelknopf trägt kein Blatt — er räumt nur alle weg.
+  chiliZusammen(function () { blaetterZu(null); });
   abcAnsicht = abcAnsicht === 'tafel' ? 'ueben' : 'tafel';
   abcOffen = null;
   renderBuchstaben();
@@ -9335,7 +9353,11 @@ function uebPruefen() {
   // Die Nachschrift nur nach gelegten Kacheln (ADR 0070): Dort hat der Nutzer
   // eine Schreibweise behauptet. Bei «Was bedeutet …» und in der Lücke hat er
   // unter fertigen Wörtern gewählt — da gibt es nichts nachzuschreiben.
-  rekoVerlangen(q.word.ru, q.mode === 'tiles', uebCorrect, false);
+  // **Getippt zumal** (ADR 0090). Die Nachschrift kommt, wo der Nutzer eine
+  // Schreibweise *behauptet* hat (ADR 0070) — gelegt wie geschrieben. Seit es
+  // in «Lernsets» eine Tippaufgabe gibt (ADR 0088), fehlte sie ausgerechnet
+  // dort, wo am meisten geschrieben wird.
+  rekoVerlangen(q.word.ru, q.mode === 'tiles' || q.mode === 'tippen', uebCorrect, false);
   var vorher = state.boxes[q.word.id] || 0;
   updateBox(q.word.id, uebCorrect, false);
   meisterMeldung = null;

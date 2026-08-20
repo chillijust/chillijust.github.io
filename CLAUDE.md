@@ -80,6 +80,14 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
 - Mobile-first: Touch-Ziele ≥ 44 × 44 px, keine Hover-abhängige Bedienung,
   `-webkit-tap-highlight-color: transparent`, `env(safe-area-inset-*)` für Notch und
   Home-Indicator.
+- **Nur ein Blatt liegt offen** (ADR 0090). Menü, Auswahl und Wissen schließen einander
+  über `blaetterZu(ausser)` — **eine Frage statt vier Listen**; der Filterknopf vergaß in
+  seiner das Wissen, und danach sprang die Chili beim Schließen in den anderen Knopf
+  zurück. **Nur der Knopf, in dem die Figur steht, ist offen.** Solange ein Blatt offen
+  ist, treten die runden Knöpfe daneben zurück (`opacity: 0; pointer-events: none`) —
+  sie liegen mit `z-index: 40` sonst darüber und stechen hindurch. Die Regel dafür gab es
+  seit ADR 0044, sie traf aber nur `.kachel-knopf`: **Wer einen Knoten umhängt, erbt die
+  Regeln nicht mit** — seit ADR 0082 sitzt der Wissensknopf in `#uebLeiste`.
 - **Ein runder Knopf, in dem die Chili landen soll**, steht genau einmal im Dokument und
   wird umgehängt, nicht neu gebaut (ADR 0044). Wer ihn in eine Kachel setzt: erst nach
   Hause schicken, dann zeichnen, dann umhängen — `renderKopf()` läuft vor der Ansicht.
@@ -114,7 +122,9 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   aber **getippt oder gelegt** (ADR 0070): Die Grenze verläuft zwischen *Herstellen* und
   *Wählen*, nicht zwischen Tastatur und Kachel. Wer ein Wort falsch legt, weiß seine
   Schreibweise so wenig wie der, der es falsch tippt; wer unter fertigen Wörtern wählt,
-  behauptet keine. Kyrillisch gelegt wird nur in «Lernsets/Freestyle» und im
+  behauptet keine. Seit «Lernsets» tippen läßt (ADR 0088), gilt sie auch
+  **dort** — die Frage lautet nie «welcher Modus», sondern «wurde eine Schreibweise
+  behauptet» (ADR 0090). Kyrillisch gelegt wird nur in «Lernsets/Freestyle» und im
   Power-Training — die Kacheln in «Buchstaben» tragen die Umschrift, die in «Übersetzen»
   ganze Wörter eines Satzes. **Beim Satz gilt eine andere Frage** (ADR 0073): nicht «wurde
   eine Schreibweise behauptet», sondern «hat der Nutzer es verlangt». «Auch Sätze» wirkt
@@ -188,7 +198,10 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   Rückschritt), und der Deckel wirkt **nur nach oben**. Was ein gemeistertes Wort nach
   sich zieht, steht in `meisterFolgen()` und wird von beiden Übungen gerufen — Set- und
   Themenjubel hingen vorher in «Lernsets», wo seither nichts mehr die Endstufe erreicht.
-  Ein gedeckeltes Wort sagt es (`tippHinweisHtml()`), sonst klebt es unerklärt.
+  **Der Deckel rechnet, ohne es zu sagen** (ADR 0090): `tippDeckel` und `tippRest`
+  bleiben, die Hinweiszeile ist weg — sie schob die Kachel so weit nach unten, daß die
+  Übung scrollte, und **eine Übung, die scrollt, verliert ihre Knöpfe aus dem
+  Daumenbereich**.
 - **Die Schwelle öffnet, sie schiebt nicht** (ADR 0086). `setGeschafft()` heißt jetzt
   «vier von fünf Wörtern auf `BOX_MAX`» (`setSchwelle()`), und das Fenster fragt: bleiben
   oder weiter. `state.setBleib` hält das Set fest, bis es `setKomplett()` ist; wer bleibt,

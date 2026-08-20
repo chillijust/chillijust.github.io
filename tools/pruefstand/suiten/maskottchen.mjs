@@ -854,6 +854,70 @@ try {
     getComputedStyle(chiliFigur).filter === 'none',
     getComputedStyle(chiliFigur).filter);
 
+  // ── W · Nur ein Blatt liegt offen (ADR 0090) ──────────────
+  // **Ohne Zeit keine Überblendung.** Das Zurücktreten der Leiste läuft über
+  // eine Transition; im kopflosen Browser vergeht keine Zeit, und getComputedStyle
+  // liefert dann noch den alten Wert. Für die Messung wird sie abgeschaltet —
+  // geprüft ist das Ziel, nicht der Weg dorthin.
+  (function () {
+    var st = document.createElement('style');
+    st.textContent = '#uebLeiste .rundbtn, #wissenHuelle, .kachel-knopf' +
+      ' { transition: none !important; }';
+    document.head.appendChild(st);
+  })();
+  // **Nur der Knopf, in dem die Figur steht, ist offen.** Der Filterknopf
+  // schloß das Wissensblatt nicht — danach standen zwei offen, und beim
+  // Schließen des Filters sprang die Figur in den Wissensknopf zurück.
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  spurenStill();
+  tutEnde();
+  ALL_VOCAB.forEach(function (v) { state.boxes[v.id] = BOX_MAX; state.lastSeen[v.id] = Date.now(); });
+  trLevel = 1; trDir = 'ru-de'; trModus = 'lernen'; trTask = null;
+  setTab('uebersetzen');
+  pruefe('W0 in «Übersetzen» gibt es beide Knöpfe',
+    !!q('#wissenKnopf') && q('#wissenKnopf').hidden === false && !!q('#filterKnopf'));
+  q('#wissenKnopf').click();
+  pruefe('W1 das Wissensblatt geht auf, die Figur zieht ein',
+    wissenOffen && chiliStation === q('#chiliWissen'),
+    chiliStation && (chiliStation.id || chiliStation.className));
+  q('#filterKnopf').click();
+  pruefe('W2 der Filter schließt das Wissen', filterOffen && !wissenOffen,
+    'filter ' + filterOffen + ' / wissen ' + wissenOffen);
+  pruefe('W2b und die Figur steht jetzt im Filterknopf',
+    chiliStation === q('#chiliFilter'),
+    chiliStation && (chiliStation.id || chiliStation.className));
+  q('#filterKnopf').click();
+  pruefe('W3 beim Schließen springt sie nicht ins Wissen zurück',
+    !filterOffen && !wissenOffen && chiliStation !== q('#chiliWissen'),
+    chiliStation && (chiliStation.id || chiliStation.className));
+  // Und umgekehrt: Das Wissen schließt den Filter.
+  q('#filterKnopf').click();
+  q('#wissenKnopf').click();
+  pruefe('W4 das Wissen schließt den Filter', wissenOffen && !filterOffen,
+    'filter ' + filterOffen + ' / wissen ' + wissenOffen);
+  // **Das offene Blatt liegt oben** — ein runder Knopf mit z-index 40 stach
+  // sonst hindurch. Die Regel traf bis 2.7.1 nur .kachel-knopf, und seit
+  // ADR 0082 sitzt der Wissensknopf in der Leiste.
+  q('#wissenKnopf').click();
+  q('#filterKnopf').click();
+  pruefe('W5 bei offenem Filter tritt die Leiste zurück', (function () {
+    var k = q('#tutRund');
+    if (!k || k.hidden) return true;
+    return parseFloat(getComputedStyle(k).opacity) === 0;
+  })(), q('#tutRund') ? getComputedStyle(q('#tutRund')).opacity : 'kein Knopf');
+  pruefe('W5b und nimmt keine Tipper mehr an', (function () {
+    var k = q('#tutRund');
+    if (!k || k.hidden) return true;
+    return getComputedStyle(k).pointerEvents === 'none';
+  })(), q('#tutRund') ? getComputedStyle(q('#tutRund')).pointerEvents : '—');
+  q('#filterKnopf').click();
+  pruefe('W6 danach ist sie wieder da', (function () {
+    var k = q('#tutRund');
+    if (!k || k.hidden) return true;
+    return parseFloat(getComputedStyle(k).opacity) === 1;
+  })(), q('#tutRund') ? getComputedStyle(q('#tutRund')).opacity : '—');
+
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\\n')[1]);
 }
