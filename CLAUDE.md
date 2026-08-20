@@ -785,7 +785,12 @@ gibt es den Skill `ticket`.
   Treffer erneuert `lastSeen`, und ohne diese Ausnahme schob der erste das Wort um eine
   Woche weg, so daß die Folge sich nie füllte. Die erfüllte Folge wird abgeräumt, sonst
   gilt das Wort für immer als fällig. Gemessen: **null** von hundert Ziehungen trafen
-  vorher ein fehlendes Wort, danach zweiundsechzig.
+  vorher ein fehlendes Wort, danach zweiundsechzig. **Und was gerade dran war, kommt
+  nicht sofort wieder**: Die letzten `MERK_LETZTE` Ziehungen sind gesperrt, aber nur,
+  soweit der Vorrat es hergibt. Die Sperre steht **ganz vorn auf dem Vorrat** — weiter
+  unten ist die Quelle längst auf das eine fällige Wort eingeengt, und was allein
+  dasteht, läßt sich nicht ausschließen. «Drei Treffer in Folge» heißt nicht «drei
+  aufeinanderfolgende Aufgaben».
 - **«Tippen» und «Übersetzen» sind zweigeteilt** (ADR 0015): Lernen und Wiederholung.
   Fertig Gelerntes verlässt beide Stapel, bis die Frist `auffrischen` um ist. Wer dort
   etwas ändert, muss beide Stapel und die drei Leerzustände mitdenken — «noch nichts

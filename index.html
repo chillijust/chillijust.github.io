@@ -4429,7 +4429,7 @@ var APP_STAND = '2026-08-20'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.7.3T'; /* == VERSION == */
+var APP_VERSION = '2.7.4T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -8729,12 +8729,32 @@ function uebPool() {
 // längsten Zurückliegende mit der niedrigsten Stufe.
 // «nurWiederholen» überspringt die ersten beiden Stufen: Wer ausdrücklich
 // wiederholt, will den ganzen Bestand, nicht bloß das noch Unbekannte.
+// **Was gerade dran war, kommt nicht sofort wieder** (ADR 0090). Seit die
+// Endstufe drei getippte Treffer in Folge verlangt, hielt ein Wort mit
+// angefangener Folge die Auswahl allein besetzt: «муж · муж · муж · с · с · с».
+// Dreimal dasselbe Wort abzutippen zeigt nichts — die Folge soll beweisen, daß
+// die Schreibweise **bleibt**, und dafür braucht sie Abstand.
+//
+// Wieviel Abstand, richtet sich nach dem Vorrat: Bei zwei Wörtern gibt es
+// keinen, und eine Sperre, die alles sperrt, wäre keine.
+var MERK_LETZTE = 3;
+var letzteWahl = [];
+
 function waehleWort(pool, nurWiederholen) {
   // **Die eine Stelle, an der das Tagesmaß greift** (ADR 0056). Sie liegt hier,
   // weil «Lernsets», «Freestyle» und «Tippen» sich diese Auswahl teilen — in
   // «Tippen» ist der Filter ohnehin wirkungslos, dort ist nichts unbekannt.
   pool = uebVorrat(pool);
   if (!pool.length) return null;
+  // **Die Sperre steht ganz vorn**, auf dem Vorrat. Weiter unten wäre sie
+  // wirkungslos: Dort ist die Quelle längst auf das eine fällige Wort
+  // eingeengt, und was allein dasteht, läßt sich nicht ausschließen.
+  var sperre = Math.min(MERK_LETZTE, Math.max(0, pool.length - 2));
+  if (sperre) {
+    var jung = letzteWahl.slice(-sperre);
+    var frisch = pool.filter(function (v) { return jung.indexOf(v.id) === -1; });
+    if (frisch.length) pool = frisch;
+  }
   var jetzt = Date.now();
   var faellige = pool.filter(function (v) { return (state.boxes[v.id] || 0) > 0 && faellig(v, jetzt); });
   var neue = pool.filter(function (v) { return !state.lastSeen[v.id]; });
@@ -8776,7 +8796,12 @@ function waehleWort(pool, nurWiederholen) {
     return zeitA - zeitB;
   });
   var fenster = sortiert.slice(0, Math.min(5, sortiert.length));
-  return fenster[Math.floor(Math.random() * fenster.length)];
+  var wahl = fenster[Math.floor(Math.random() * fenster.length)];
+  if (wahl) {
+    letzteWahl.push(wahl.id);
+    if (letzteWahl.length > MERK_LETZTE) letzteWahl.shift();
+  }
+  return wahl;
 }
 // Zwei bis drei Buchstaben, die nicht im Wort stehen — bevorzugt solche, die
 // dem Wort ähnlich sehen könnten.
@@ -9054,6 +9079,7 @@ function ansichtenZuruecksetzen() {
   themenOffen = false;
   bilanzDetail = null;
   katWoerterOffen = false;
+  letzteWahl = [];
 
   backupOpen = false;
   backupMsg = '';

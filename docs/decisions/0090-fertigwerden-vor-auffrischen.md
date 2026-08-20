@@ -69,6 +69,45 @@ Runden bis das Set komplett ist: 6
 Von null auf zweiundsechzig, von siebenundzwanzig Runden auf sechs — und die
 Auffrischungen laufen sichtbar weiter mit.
 
+## Nachtrag: Abstand statt Abtippen
+
+Die Reparatur war richtig und trotzdem nicht fertig. **Befund am echten
+Lernstand** (der Nutzer legte seine Sicherung ins Repo): «Ich hatte *guten
+Morgen* schon 6 von 12 Mal.»
+
+Gemessen mit seinem Stand — elf Wörter im Set, vier davon unfertig, nichts
+fällig:
+
+```
+erste 14 in Folge: муж · муж · муж · с · с · с · работать · работать · работать · там · там · там
+```
+
+**Dreimal dasselbe Wort, unmittelbar hintereinander.** Ein Wort mit
+angefangener Tippfolge ist seit oben immer fällig — und stand damit als
+einziges in der Quelle. Logisch konsequent, in der Hand furchtbar.
+
+*«Drei Treffer in Folge» heißt nicht «drei aufeinanderfolgende Aufgaben».*
+Dreimal dasselbe Wort abzutippen zeigt gar nichts; die Folge soll beweisen,
+daß die Schreibweise **bleibt**, und dafür braucht sie Abstand.
+
+**Entscheidung:** Die letzten drei gezogenen Wörter sind gesperrt — aber nur,
+solange der Vorrat es hergibt (`min(3, pool.length - 2)`). Bei zwei Wörtern
+gibt es keinen Abstand, und eine Sperre, die alles sperrt, wäre keine.
+
+**Die Sperre steht ganz vorn, auf dem Vorrat.** Mein erster Versuch setzte sie
+ans Ende, kurz vor die Wahl — dort war sie wirkungslos: Die Quelle ist da
+längst auf das eine fällige Wort eingeengt, und was allein dasteht, läßt sich
+nicht ausschließen. Die Messung zeigte danach unverändert «жить · жить · жить».
+
+Danach:
+
+```
+папа · доброе утро · мой · жить · моя · доброе утро · с · жить · муж · доброе утро · с · жить
+```
+
+Drei Treffer für «доброе утро» in zwölf Runden, sauber verteilt — statt sechs
+am Stück.
+
 ## Was daran lehrreich ist
 
 **Eine Zahl schlägt ein Gefühl, in beide Richtungen.** Meine erste Vermutung
@@ -79,6 +118,7 @@ wenn die Zahl ihn zeigt, nicht wenn die Erklärung plausibel klingt.*
 
 ## Folgen
 
-- `wiederholung` W1–W7: die Lage, die Trefferquote in beide Richtungen
+- `wiederholung` X1–X4 (kein Wort unmittelbar zweimal, auch nicht mit einem
+  dazwischen; und ein kleiner Vorrat liefert trotzdem), W1–W7: die Lage, die Trefferquote in beide Richtungen
   (nicht null, aber auch nicht alles), und die Folge als Fälligkeitsgrund.
 - Die Messung selbst war die Gegenprobe: 0 vor der Reparatur, 62 danach.

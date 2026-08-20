@@ -13,7 +13,7 @@
 // **Der Cache trägt die Version im Namen**: Ein neuer Stand legt einen neuen
 // Speicher an, und der alte wird beim Aktivieren restlos gelöscht. Ohne das
 // bliebe irgendwann eine Fassung hängen, die niemand mehr loswird.
-var SW_VERSION = '2.7.3T'; /* == VERSION == */
+var SW_VERSION = '2.7.4T'; /* == VERSION == */
 var CACHE = 'chillingo-' + SW_VERSION;
 
 // Mehr ist es nicht. Die App ist **eine** Datei; Bilder, Schrift und Daten

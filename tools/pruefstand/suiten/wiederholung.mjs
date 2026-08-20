@@ -371,6 +371,55 @@ try {
   pruefe('W7 und danach ruht es wieder', faellig(wEins, Date.now()) === false);
   state.setBleib = null;
 
+  // ── X · Abstand statt Abtippen (ADR 0090) ─────────────────
+  // **Gemeldet:** «Ich hatte "guten Morgen" schon 6 von 12 Mal.» Gemessen war
+  // die Folge «муж · муж · муж · с · с · с» — ein Wort mit angefangener
+  // Tippfolge ist immer fällig und besetzte die Auswahl allein.
+  //
+  // Dreimal dasselbe Wort abzutippen zeigt nichts. Die Folge soll beweisen,
+  // daß die Schreibweise **bleibt**, und dafür braucht sie Abstand.
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  ['lernsets', 'tippen', 'uebersetzen'].forEach(function (k) { state.tutUebung[k] = 1; });
+  tutEnde();
+  var xW = LERNSETS[0].woerter;
+  xW.forEach(function (v) {
+    state.boxes[v.id] = BOX_MAX - 1;
+    state.lastSeen[v.id] = Date.now();
+  });
+  uebModus = 'lernsets'; uebAuswahl = 0; state.setBleib = 0;
+  var xFolge = [];
+  for (var xi = 0; xi < 30; xi++) {
+    var xV = waehleWort(uebPool());
+    if (!xV) break;
+    xFolge.push(xV.id);
+    updateBox(xV.id, true, true);
+  }
+  var xDoppelt = 0;
+  for (var xj = 1; xj < xFolge.length; xj++) if (xFolge[xj] === xFolge[xj - 1]) xDoppelt++;
+  pruefe('X1 kein Wort kommt unmittelbar zweimal', xDoppelt === 0,
+    xDoppelt + ' Wiederholungen · ' + xFolge.slice(0, 8).join(' '));
+  // Auch nicht mit einem einzigen Wort dazwischen, solange der Vorrat reicht.
+  var xNah = 0;
+  for (var xk = 2; xk < xFolge.length; xk++) if (xFolge[xk] === xFolge[xk - 2]) xNah++;
+  pruefe('X2 und auch nicht mit nur einem dazwischen', xNah === 0,
+    xNah + ' zu nah');
+  // **Die Sperre darf den Vorrat nicht leeren.** Bei zwei Wörtern gibt es
+  // keinen Abstand — dann muß trotzdem etwas kommen.
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  var xZwei = ALL_VOCAB.slice(0, 2);
+  xZwei.forEach(function (v) { state.boxes[v.id] = 2; state.lastSeen[v.id] = Date.now(); });
+  uebModus = 'freestyle'; uebThema = 'Alle';
+  var xLeer = 0;
+  for (var xm = 0; xm < 10; xm++) {
+    if (!waehleWort(xZwei)) xLeer++;
+  }
+  pruefe('X3 ein kleiner Vorrat liefert trotzdem', xLeer === 0, String(xLeer));
+  // Und bei einem einzigen Wort erst recht.
+  pruefe('X4 ein einziges Wort kommt weiter dran',
+    !!waehleWort([xZwei[0]]) && !!waehleWort([xZwei[0]]));
+
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);
 }
