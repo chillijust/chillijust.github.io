@@ -779,6 +779,13 @@ gibt es den Skill `ticket`.
   `tippenWoerter(setNr, modus)` — dieselbe Funktion rechnet die Zahlen in der Auswahl,
   sonst verspräche ein Chip etwas anderes, als sein Antippen liefert. «Übersetzen» bleibt
   bewusst bei drei Achsen.
+- **Fertigwerden geht vor Auffrischen** (ADR 0090). Unter den fälligen Wörtern kommen
+  die **unfertigen** zuerst; ist nichts Unfertiges fällig, bleibt es mit 60 % im Rennen.
+  Und **eine angefangene Tippfolge macht fällig** (`faellig()` fragt `tippFolge`) — jeder
+  Treffer erneuert `lastSeen`, und ohne diese Ausnahme schob der erste das Wort um eine
+  Woche weg, so daß die Folge sich nie füllte. Die erfüllte Folge wird abgeräumt, sonst
+  gilt das Wort für immer als fällig. Gemessen: **null** von hundert Ziehungen trafen
+  vorher ein fehlendes Wort, danach zweiundsechzig.
 - **«Tippen» und «Übersetzen» sind zweigeteilt** (ADR 0015): Lernen und Wiederholung.
   Fertig Gelerntes verlässt beide Stapel, bis die Frist `auffrischen` um ist. Wer dort
   etwas ändert, muss beide Stapel und die drei Leerzustände mitdenken — «noch nichts

@@ -113,6 +113,7 @@ Wer neu dazukommt und nur fünf lesen will:
 | [0087](0087-unter-dem-bildschirm-liegt-seite.md) | Unter dem Bildschirm liegt noch Seite — der Grund verdunkelt mit | ergänzt 0051, 0044 |
 | [0088](0088-tippen-in-lernsets-und-eine-echte-flamme.md) | Tippen in «Lernsets», ein Knopf statt einer Frage, eine echte Flamme | ändert 0086, 0053, 0046 |
 | [0089](0089-eine-taste-eine-stelle.md) | Eine Taste, eine Stelle — alle Tastaturen durch dieselbe Hand | ergänzt 0068, 0088 |
+| [0090](0090-fertigwerden-vor-auffrischen.md) | Fertigwerden geht vor Auffrischen — die fehlenden Wörter kommen dran | ändert 0015, 0088 |
 | [0090](0090-nur-ein-blatt-und-keine-zeile.md) | Nur ein Blatt offen, keine Hinweiszeile, Nachschrift auch getippt | ändert 0086, ergänzt 0070, 0082 |
 
 ## Einen neuen anlegen

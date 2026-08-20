@@ -4429,7 +4429,7 @@ var APP_STAND = '2026-08-20'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.7.2T'; /* == VERSION == */
+var APP_VERSION = '2.7.3T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -7205,6 +7205,10 @@ function updateBox(id, correct, getippt) {
         neu = BOX_MAX - 1;
         tippDeckel = true;
         tippRest = TIPP_FOLGE - folge;
+      } else {
+        // Erfüllt und abgeräumt: Eine stehengebliebene Folge hielte das Wort
+        // für immer «fällig» (siehe faellig()).
+        state.tippFolge[id] = 0;
       }
     }
   }
@@ -7349,6 +7353,11 @@ function auffrischSatz() {
 function faellig(v, jetzt) {
   var seit = state.lastSeen[v.id];
   if (!seit) return true;
+  // **Eine angefangene Folge ist keine Wiedervorlage** (ADR 0090). Wer ein Wort
+  // dreimal hintereinander schreiben soll, braucht keinen Abstand, sondern das
+  // Gegenteil — und weil jeder Treffer den Zeitstempel erneuert, galt es nach
+  // dem ersten für eine Woche als «nicht fällig» und kam nie wieder dran.
+  if ((state.tippFolge[v.id] || 0) > 0) return true;
   return jetzt - seit >= intervallFuer(state.boxes[v.id] || 0);
 }
 
@@ -8729,13 +8738,33 @@ function waehleWort(pool, nurWiederholen) {
   var jetzt = Date.now();
   var faellige = pool.filter(function (v) { return (state.boxes[v.id] || 0) > 0 && faellig(v, jetzt); });
   var neue = pool.filter(function (v) { return !state.lastSeen[v.id]; });
+  // Begonnen, aber noch nicht fertig — das, woran gerade wirklich gearbeitet wird.
+  var offen = pool.filter(function (v) {
+    var b = state.boxes[v.id] || 0;
+    return b > 0 && b < BOX_MAX;
+  });
   var quelle, nachAlter = false;
   if (nurWiederholen) {
     // Wiederholen heißt: bereits Begonnenes, das am längsten zurückliegt.
     quelle = pool.filter(function (v) { return state.lastSeen[v.id]; });
     nachAlter = true;
     if (!quelle.length) { quelle = pool; nachAlter = false; }
-  } else if (faellige.length && (!neue.length || Math.random() < 0.65)) quelle = faellige;
+  } else if (faellige.length && (!neue.length || Math.random() < 0.65)) {
+    // **Fertigwerden geht vor Auffrischen** (ADR 0090). Ein gemeistertes Wort
+    // aufzufrischen ist nie dringender, als ein angefangenes zu Ende zu
+    // bringen. In einem alten Set stehen zehn fällige Wiederholungen gegen
+    // zwei fehlende Wörter — und die kamen dann **gar nicht** mehr dran:
+    // Fälliges gewann, und unter dem Fälligen war nichts Unfertiges.
+    var faelligOffen = faellige.filter(function (v) {
+      return (state.boxes[v.id] || 0) < BOX_MAX;
+    });
+    if (faelligOffen.length) quelle = faelligOffen;
+    // Ist nichts Unfertiges fällig, bleibt es trotzdem im Rennen — sonst
+    // hielte ein Stapel Auffrischungen es beliebig lange auf. Nicht immer:
+    // Wiederholen ist der Sinn der Sache, es soll nur nicht alles besetzen.
+    else if (offen.length && Math.random() < 0.6) quelle = offen;
+    else quelle = faellige;
+  }
   else if (neue.length) quelle = neue;
   else quelle = pool;
 

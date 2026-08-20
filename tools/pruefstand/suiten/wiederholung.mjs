@@ -312,6 +312,65 @@ try {
   pruefe('J10 und eine echte Frist auch',
     mergeState(decodeBackup(encodeBackup())).settings.auffrischen === 21,
     String(mergeState(decodeBackup(encodeBackup())).settings.auffrischen));
+  // ── W · Fertigwerden geht vor Auffrischen (ADR 0090) ──────
+  // **Gemeldet:** «Wenn ich zu einem früheren Set gehe, um es zu
+  // vervollständigen, brauche ich eine Ewigkeit — es kommen zu viele
+  // Wiederholungen dazwischen.» Gemessen waren es **null** von hundert
+  // Ziehungen: Unter dem Fälligen stand nichts Unfertiges, und die Bedingung
+  // nahm dann immer das Fällige.
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  ['lernsets', 'tippen', 'uebersetzen'].forEach(function (k) { state.tutUebung[k] = 1; });
+  tutEnde();
+  var wW = LERNSETS[0].woerter;
+  var wGestern = Date.now() - TAG;
+  var wLange = Date.now() - 40 * TAG;
+  wW.forEach(function (v, i) {
+    var fehlt = i >= wW.length - 2;
+    state.boxes[v.id] = fehlt ? BOX_MAX - 1 : BOX_MAX;
+    state.lastSeen[v.id] = fehlt ? wGestern : wLange;
+  });
+  var wFehlt = wW.slice(wW.length - 2).map(function (v) { return v.id; });
+  uebModus = 'lernsets'; uebAuswahl = 0; state.setBleib = 0;
+  pruefe('W1 die Lage stimmt: zehn fällig, zwei unfertig',
+    faelligeAnzahl(uebPool()) === wW.length - 2 && wFehlt.length === 2,
+    String(faelligeAnzahl(uebPool())));
+  var wTreffer = 0;
+  for (var wi = 0; wi < 100; wi++) {
+    var wV = waehleWort(uebPool());
+    if (wV && wFehlt.indexOf(wV.id) !== -1) wTreffer++;
+  }
+  // Ein Drittel ist die Grenze zwischen «kommt dran» und «kommt nicht dran».
+  // Vor der Reparatur waren es null.
+  pruefe('W2 die fehlenden Wörter kommen wirklich dran', wTreffer > 33,
+    wTreffer + ' von 100');
+  // **Und das Auffrischen hört nicht auf** — es soll nur nicht alles besetzen.
+  pruefe('W3 die gemeisterten kommen weiter dran', wTreffer < 95,
+    wTreffer + ' von 100');
+
+  // **Eine angefangene Folge ist keine Wiedervorlage.** Jeder Treffer erneuert
+  // den Zeitstempel; ohne diese Regel galt ein Wort nach dem ersten getippten
+  // Treffer eine Woche lang als nicht fällig — und kam nie zum zweiten.
+  var wEins = ALL_VOCAB[0];
+  state.boxes[wEins.id] = BOX_MAX - 1;
+  state.lastSeen[wEins.id] = Date.now();
+  state.tippFolge[wEins.id] = 0;
+  pruefe('W4 frisch geübt und ohne Folge: nicht fällig',
+    faellig(wEins, Date.now()) === false);
+  updateBox(wEins.id, true, true);
+  pruefe('W5 nach dem ersten getippten Treffer aber schon',
+    state.tippFolge[wEins.id] === 1 && faellig(wEins, Date.now()) === true,
+    String(state.tippFolge[wEins.id]));
+  updateBox(wEins.id, true, true);
+  updateBox(wEins.id, true, true);
+  pruefe('W6 die erfüllte Folge wird abgeräumt',
+    state.boxes[wEins.id] === BOX_MAX && (state.tippFolge[wEins.id] || 0) === 0,
+    state.boxes[wEins.id] + ' / ' + state.tippFolge[wEins.id]);
+  // Sonst gälte das gemeisterte Wort für immer als fällig.
+  state.lastSeen[wEins.id] = Date.now();
+  pruefe('W7 und danach ruht es wieder', faellig(wEins, Date.now()) === false);
+  state.setBleib = null;
+
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);
 }
