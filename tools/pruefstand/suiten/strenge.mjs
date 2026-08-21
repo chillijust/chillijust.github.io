@@ -40,18 +40,21 @@ try {
   // ── A · Die Vorgaben ──────────────────────────────────────
   pruefe('A1 nachschreiben gilt für Wörter, nicht für Sätze',
     defaultSettings().rekonstruktion === 'woerter');
-  pruefe('A2 acht neue Wörter am Tag', defaultSettings().tagesmass === 8);
+  pruefe('A2 ein Tagesmaß gibt es nicht mehr',
+    defaultSettings().tagesmass === undefined && typeof ZAEHLER.tagesmass === 'undefined');
   pruefe('A3 das Fehlerprofil ist an', defaultSettings().fehlerprofil === true);
-  pruefe('A4 ein Stand von vor 1.9.0 bekommt alle drei', (function () {
+  pruefe('A4 ein Stand von vor 1.9.0 bekommt beide', (function () {
     var alt = mergeState({ settings: {} }).settings;
-    return alt.rekonstruktion === 'woerter' && alt.tagesmass === 8 && alt.fehlerprofil === true;
+    return alt.rekonstruktion === 'woerter' && alt.fehlerprofil === true;
   })());
   pruefe('A5 ein unsinniger Wert fällt auf die Vorgabe zurück',
     mergeState({ settings: { rekonstruktion: 'vielleicht' } }).settings.rekonstruktion === 'woerter');
-  pruefe('A6 das Tagesmaß bleibt in seinen Grenzen',
-    mergeState({ settings: { tagesmass: 999 } }).settings.tagesmass === TAGESMASS_MAX &&
-    mergeState({ settings: { tagesmass: -3 } }).settings.tagesmass === 8,
-    String(mergeState({ settings: { tagesmass: 999 } }).settings.tagesmass));
+  // **Ein alter Stand bringt sie nicht zurück.** mergeState übernimmt nur
+  // Schlüssel, die es in der Vorgabe gibt — ein gespeichertes Tagesmaß fällt
+  // dabei weg, statt still weiterzuwirken.
+  pruefe('A6 ein gespeichertes Tagesmaß fällt weg',
+    mergeState({ settings: { tagesmass: 3 } }).settings.tagesmass === undefined,
+    String(mergeState({ settings: { tagesmass: 3 } }).settings.tagesmass));
 
   // ── B · Rekonstruktion in «Tippen» ────────────────────────
   state = defaultState();
@@ -207,65 +210,49 @@ try {
   pruefe('D4 richtig verlangt nie etwas', reko === null);
   state.settings.rekonstruktion = 'woerter';
 
-  // ── E · Das Tagesmaß ──────────────────────────────────────
+  // ── E · Nichts bremst mehr ────────────────────────────────
+  // Das Tagesmaß ist weg (2.8.0). Die Gegenprobe ist nicht «die Einstellung
+  // fehlt» — das prüft A2 —, sondern **daß der Vorrat ungeschnitten bleibt**:
+  // Wer vierzig Wörter an einem Abend anfangen will, darf das.
   state = defaultState();
   ansichtenZuruecksetzen();
-  pruefe('E1 am Anfang war heute nichts neu', neuHeute() === 0 && !tagesmassVoll());
   var neuling = ALL_VOCAB[0];
   updateBox(neuling.id, true);
-  pruefe('E2 ein nie gesehenes Wort zählt als neu', neuHeute() === 1, String(neuHeute()));
-  updateBox(neuling.id, true);
-  pruefe('E3 dasselbe Wort noch einmal zählt nicht', neuHeute() === 1, String(neuHeute()));
-  for (var i = 1; i < state.settings.tagesmass; i++) updateBox(ALL_VOCAB[i].id, true);
-  pruefe('E4 das Maß ist voll', neuHeute() === state.settings.tagesmass && tagesmassVoll());
-  pruefe('E5 der Vorrat schrumpft auf Bekanntes',
-    uebVorrat(ALL_VOCAB).length === state.settings.tagesmass,
-    String(uebVorrat(ALL_VOCAB).length));
-  pruefe('E6 und die Auswahl liefert nur noch Bekanntes', (function () {
-    for (var k = 0; k < 40; k++) {
+  pruefe('E1 ein neues Wort verbraucht kein Kontingent',
+    (state.boxes[neuling.id] || 0) === 1 && !!state.lastSeen[neuling.id]);
+
+  // Vierzig neue Wörter — weit über dem, was das alte Maß erlaubte.
+  for (var i = 1; i < 40; i++) updateBox(ALL_VOCAB[i].id, true);
+  var begonnen = ALL_VOCAB.filter(function (v) { return !!state.lastSeen[v.id]; }).length;
+  pruefe('E2 vierzig an einem Tag sind erlaubt', begonnen === 40, String(begonnen));
+
+  // **Der Kern.** Frisch Gelerntes ist einen Tag lang nicht fällig, also zieht
+  // die Auswahl aus dem Unbekannten — deterministisch, ohne Losentscheid. Mit
+  // Tagesmaß kam hier nur noch Bekanntes.
+  pruefe('E3 und die Auswahl liefert weiter Neues', (function () {
+    for (var k = 0; k < 20; k++) {
       var v = waehleWort(ALL_VOCAB);
-      if (!v || !state.lastSeen[v.id]) return false;
+      if (!v) return false;
+      if (state.lastSeen[v.id]) return false;
     }
     return true;
   })());
-  // Ein neuer Tag räumt den Zähler.
-  state.neuHeute.tag = 0;
-  pruefe('E7 morgen ist der Zähler leer', neuHeute() === 0 && !tagesmassVoll());
-  state.neuHeute.tag = heuteNr();
 
-  // Null heißt: keine Grenze.
-  state.settings.tagesmass = 0;
-  pruefe('E8 ohne Grenze bremst nichts',
-    !tagesmassVoll() && uebVorrat(ALL_VOCAB).length === ALL_VOCAB.length);
-  state.settings.tagesmass = 8;
-
-  // Der Leerzustand: Er muss dastehen **und** einen Ausgang haben.
-  state = defaultState();
-  ansichtenZuruecksetzen();
-  state.settings.tagesmass = 1;
-  uebModus = 'freestyle'; uebThema = Object.keys(VOCAB_THEMES)[3];
-  var thema = VOCAB_THEMES[uebThema];
-  updateBox(ALL_VOCAB[0].id, true);   // ein neues Wort aus einem anderen Thema
-  setTab('freestyle');
-  pruefe('E9 der Leerzustand steht da',
-    !!q('.leer') && main.textContent.indexOf('Tagesmaß') !== -1,
-    thema ? 'Thema ' + uebThema : '');
-  pruefe('E10 er hat zwei Ausgänge', !!q('#massEinst') && !!q('#massWiederholen'));
-  q('#massWiederholen').click();
-  pruefe('E11 «Wiederholen» führt aus der Sackgasse',
-    uebThema === 'Alle' && !!uebQ && !!state.lastSeen[uebQ.word.id],
-    uebQ ? uebQ.word.ru : 'keine Frage');
-
-  // Und die Kachel meldet es, damit die Empfehlung nicht hinschickt.
-  state = defaultState();
-  ansichtenZuruecksetzen();
-  state.settings.tagesmass = 1;
-  updateBox(LERNSETS[0].woerter[0].id, true);
-  state.boxes[LERNSETS[0].woerter[0].id] = BOX_MAX;
-  state.lastSeen[LERNSETS[0].woerter[0].id] = Date.now();
+  // Die Kachel darf nichts von einem Maß erzählen, und die Übung muß eine
+  // Aufgabe hergeben — der Leerzustand «Das Tagesmaß ist erreicht» ist weg.
   var stand = uebungsStand('lernsets');
-  pruefe('E12 die Kachel meldet ein volles Maß nicht als Arbeit',
-    !stand.leer || stand.text.indexOf('Tagesmaß') !== -1, stand.text);
+  pruefe('E4 die Kachel kennt kein Maß mehr',
+    stand.text.indexOf('Tagesmaß') === -1 && !stand.leer, stand.text);
+
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  for (var i2 = 0; i2 < LERNSETS[0].woerter.length; i2++) {
+    updateBox(LERNSETS[0].woerter[i2].id, true);
+  }
+  setTab('lernsets');
+  pruefe('E5 die Übung gibt weiter eine Aufgabe her',
+    !!uebQ && main.textContent.indexOf('Tagesmaß') === -1,
+    uebQ ? uebQ.word.ru : 'keine Frage');
 
   // ── F · Das Fehlerprofil ──────────────────────────────────
   state = defaultState();
@@ -346,25 +333,14 @@ try {
   ansichtenZuruecksetzen();
   einstReiter = 'lernweg';
   setTab('einstellungen');
-  pruefe('G1 das Tagesmaß ist ein Zähler auf dem Lernweg',
-    alle('[data-zaehler="tagesmass"]').length === 2,
-    String(alle('[data-zaehler="tagesmass"]').length));
+  // **Kein Zähler trägt mehr das Tagesmaß.** Gefragt wird nach allen Zählern
+  // des Reiters, nicht nach einer Zahl — eine Prüfung, die aufzählt, mißt über
+  // jeden neuen Zähler hinweg.
+  pruefe('G1 auf dem Lernweg steht kein Tagesmaß mehr',
+    alle('[data-zaehler]').filter(function (t) {
+      return t.dataset.zaehler === 'tagesmass';
+    }).length === 0 && main.textContent.indexOf('Neue Wörter am Tag') === -1);
   pruefe('G2 das Fehlerprofil steht dort auch', !!q('[data-set="fehlerprofil"]'));
-  alle('[data-zaehler="tagesmass"]').filter(function (t) {
-    return t.dataset.schritt === '-1';
-  })[0].click();
-  pruefe('G3 die Taste zählt herunter', state.settings.tagesmass === 7,
-    String(state.settings.tagesmass));
-  state.settings.tagesmass = 0;
-  renderEinstellungen();
-  var wertfeld = q('[data-zaehler="tagesmass"]').parentNode.querySelector('.zaehler-wert');
-  pruefe('G4 null steht als «ohne Grenze» da, nicht als «0 neu/Tag»',
-    wertfeld.textContent.indexOf('ohne Grenze') !== -1 &&
-    wertfeld.textContent.indexOf('0') === -1, wertfeld.textContent);
-  pruefe('G5 und die Minustaste ist am Anschlag zu',
-    alle('[data-zaehler="tagesmass"]').filter(function (t) {
-      return t.dataset.schritt === '-1';
-    })[0].disabled === true);
 
   einstReiter = 'antworten';
   renderEinstellungen();
@@ -384,20 +360,18 @@ try {
     return t.dataset.schritt === '1';
   })[0].click();
   pruefe('G8 der Auffrischzähler rechnet weiter mit seinen Grenzen',
-    state.settings.auffrischen === vorherFrist + 1 && state.settings.tagesmass === 0,
-    state.settings.auffrischen + '/' + state.settings.tagesmass);
+    state.settings.auffrischen === vorherFrist + 1,
+    String(state.settings.auffrischen));
 
   // ── H · Nichts davon steht im Sicherungscode ──────────────
   // Beobachtungen über das Gerät, kein Lernstand — wie das Tempo (ADR 0052).
   state = defaultState();
   state.verwechselt[a.id] = {};
   state.verwechselt[a.id][b.id] = 3;
-  state.neuHeute = { tag: heuteNr(), n: 5 };
   var code = encodeBackup();
   var zurueck = mergeState(decodeBackup(code));
   pruefe('H1 das Fehlerprofil bleibt auf dem Gerät',
     Object.keys(zurueck.verwechselt).length === 0);
-  pruefe('H2 der Tageszähler auch', zurueck.neuHeute.n === 0);
   // **Die Aussage ist «es steht nicht drin»**, nicht «es sind elf Felder».
   // Eine Feldzahl wächst mit jeder angehängten Auskunft und sagt über das
   // Fehlerprofil nichts aus.

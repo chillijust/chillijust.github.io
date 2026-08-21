@@ -134,11 +134,11 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   Einstellung dort schwieg. **`reko = null` steht in `aufgabeBeginnt()`**, nicht nur in
   `rekoVerlangen()`: «Aufdecken» führt an jeder Prüfung vorbei, und die Nachschrift der
   vorigen Aufgabe stünde sonst über der nächsten — derselbe Fehler wie beim Kommentar der
-  Chili. **Das Tagesmaß** bremst an genau einer Stelle (`uebVorrat()` in
-  `waehleWort()`) und **nur Neues** — Wiederholen bleibt unbegrenzt (ADR 0048); der Tag
-  kommt aus `heuteNr()`, dem Kalender des Geräts. **Das Fehlerprofil** (`state.verwechselt`)
+  Chili. **Ein Tagesmaß gibt es nicht** (ADR 0091) — wer vierzig Wörter an einem Abend
+  anfangen will, darf das; eine Zahl, die den Übungswillen bremst, war eine Meinung über
+  den Nutzer. **Das Fehlerprofil** (`state.verwechselt`)
   liefert höchstens **zwei** der drei Ablenker; drei wären eine Wiedervorlage.
-  `verwechselt` und `neuHeute` gehören zum Gerät und stehen **nicht** im Sicherungscode.
+  `verwechselt` gehört zum Gerät und steht **nicht** im Sicherungscode.
 - **Die Lücke ist ein Paar, keine Zahl** (ADR 0055). Eine Aufgabe in «Schreibung» nennt
   beide Schreibweisen — die richtige (`ist`) und die nach Gehör (`klingt`); wo sie sich
   unterscheiden, ist die Lücke. Eine Zahl kann danebenliegen, ohne dass es jemand merkt —
@@ -260,7 +260,7 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   (23 Suiten fielen daran). **Umgehängt wird in einer Hülle** (ADR 0084):
   `leisteRahmen(zeichnen)` schickt heim, zeichnet und holt zurück — alle **sieben**
   Übungen fahren hindurch, ihre Rümpfe heißen innen `…InhaltZeichnen`. Eine Ansicht hat
-  viele Ausgänge (Fakt, Leerzustand, Tagesmaß), und an jeden einzeln zu denken hat
+  viele Ausgänge (Fakt, Leerzustand, fertige Kachel), und an jeden einzeln zu denken hat
   zweimal versagt. **Auf einer Faktkarte steht die Leiste gar nicht**: `faktKarteHtml()`
   setzt `data-ohne-leiste`, `leisteZeigen()` fragt danach — kein Verzeichnis im Code,
   das Ansichten aufzählt. Dazu `#uebLeiste[hidden] { display: none }`, denn beide
@@ -429,9 +429,8 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   **Darstellung und Ton**. Eine **Frist ist ein Zähler**, keine Chip-Reihe (ADR 0015):
   Grenzen und Vorgabe je Schlüssel in `ZAEHLER`/`zaehlerGrenzen()`, Gedrückthalten zählt
   weiter, und er zeichnet **an Ort und Stelle** nach — ein Renderlauf würde die gehaltene
-  Taste wegwerfen. Was im Feld steht, sagt `zaehlerAnzeige()`: Beim Tagesmaß heißt Null
-  «ohne Grenze», beim Auffrischen «gar nicht» — **nie «0 Tage»**, das hieße «sofort
-  wieder fällig». **Was ein Nullwert bedeutet, weiß nur der Zähler, dem er gehört**
+  Taste wegwerfen. Was im Feld steht, sagt `zaehlerAnzeige()`: Beim Auffrischen heißt Null
+  «gar nicht» — **nie «0 Tage»**, das hieße «sofort wieder fällig». **Was ein Nullwert bedeutet, weiß nur der Zähler, dem er gehört**
   (ADR 0074): `|| vorgabe` liest ihn als «nicht gesetzt» und ist überall dort falsch, wo
   Null etwas heißt — auch in `decodeBackup()`. Die Auffrischfrist steht an **einer** Stelle
   (`intervallFuer()`), und abgeschaltet ist sie `Infinity`, nicht 0; Wörter, Sätze,

@@ -115,6 +115,7 @@ Wer neu dazukommt und nur fünf lesen will:
 | [0089](0089-eine-taste-eine-stelle.md) | Eine Taste, eine Stelle — alle Tastaturen durch dieselbe Hand | ergänzt 0068, 0088 |
 | [0090](0090-fertigwerden-vor-auffrischen.md) | Fertigwerden geht vor Auffrischen — die fehlenden Wörter kommen dran | ändert 0015, 0088 |
 | [0090](0090-nur-ein-blatt-und-keine-zeile.md) | Nur ein Blatt offen, keine Hinweiszeile, Nachschrift auch getippt | ändert 0086, ergänzt 0070, 0082 |
+| [0091](0091-der-lernweg-wird-schlanker.md) | Der Lernweg wird schlanker — das Tagesmaß kommt raus | ändert 0056 |
 
 ## Einen neuen anlegen
 

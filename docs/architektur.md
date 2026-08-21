@@ -1491,28 +1491,17 @@ auch, und wer «Aufdecken» drückt, hat nichts behauptet und schreibt nichts na
 Seit es sie gibt, blenden «Tippen» und «Übersetzen» ihre eigene Tastatur in der Auflösung
 aus. Sie stand dort schon vorher ohne Eingabefeld; jetzt stünden zwei übereinander.
 
-### Das Tagesmaß
+### Das Tagesmaß — abgeschafft (ADR 0091)
 
-`state.neuHeute = { tag, n }` zählt, wie viel **Neues** heute angefangen wurde.
-Hochgezählt wird in `updateBox()` genau dann, wenn ein Wort noch keinen Zeitstempel hatte —
-davor, denn gleich darauf steht er da. Der Tag ist `heuteNr()`, also `JJJJMMTT` aus dem
-Kalender des Geräts: Wer um 23:50 anfängt, hat um 00:10 einen neuen Tag.
+Bis 2.7.4 zählte `state.neuHeute = { tag, n }`, wie viel **Neues** heute angefangen wurde,
+und `uebVorrat()` schnitt den Vorrat von `waehleWort()` zurecht, sobald die Einstellung
+`tagesmass` erreicht war. Seit 2.8.0 gibt es beides nicht mehr: kein Zähler, keine
+Einstellung, kein Leerzustand «Das Tagesmaß ist erreicht».
 
-**Gebremst wird an genau einer Stelle:** `waehleWort()` bekommt seinen Vorrat durch
-`uebVorrat()`, und der lässt bei vollem Maß nur durch, was schon einen Zeitstempel hat.
-«Lernsets», «Freestyle» und «Tippen» teilen sich diese Auswahl; in «Tippen» ist der Filter
-ohnehin wirkungslos, dort ist nichts unbekannt.
-
-Wiederholungen, die «Alle»-Stapel und alles Begonnene bleiben **unbegrenzt** — eine Grenze
-darauf wäre eine Grenze aufs Üben und widerspräche ADR 0048.
-
-Bremst das Maß einen ganzen Vorrat aus, steht ein eigener Leerzustand da, mit zwei
-Ausgängen: «Wiederholen» und «Maß ändern». Und `uebungsStand('lernsets')` meldet dann
-`leer`, damit die Empfehlung nicht dorthin schickt.
-
-Einstellung `tagesmass`, Vorgabe 8, Bereich 0–30. **Null heißt «ohne Grenze»** — und der
-Zähler sagt das auch: `zaehlerAnzeige()` tauscht dort beide Hälften, ein Gedankenstrich
-über «ohne Grenze». «0 neu/Tag» hieße wörtlich das Gegenteil.
+**`waehleWort()` bekommt den vollen Vorrat.** Wer vierzig Wörter an einem Abend anfangen
+will, darf das. Die Begründung steht in ADR 0091; kurz: Eine Zahl, die den Übungswillen
+bremst, ist eine Meinung über den Nutzer, und sie stand quer zu ADR 0048 («Üben können
+hängt nie an einem Datum»).
 
 ### Das Fehlerprofil
 
@@ -1524,8 +1513,8 @@ Wiedervorlage.
 
 Einstellung `fehlerprofil`, Vorgabe an. `VERWECHSELT_MAX` deckelt jeden Zähler bei 20.
 
-**Weder `verwechselt` noch `neuHeute` stehen im Sicherungscode.** Beides sind Beobachtungen
-über dieses Gerät, kein Lernstand — dieselbe Linie wie `tempo` (ADR 0052) und
+**`verwechselt` steht nicht im Sicherungscode.** Es ist eine Beobachtung über dieses
+Gerät, kein Lernstand — dieselbe Linie wie `tempo` (ADR 0052) und
 `wortFehler`/`patzer` (ADR 0033).
 
 ## Schreibung — was man hört, und was man schreibt
@@ -1843,7 +1832,6 @@ auf einen sinnvollen Bereich:
 | `tastaturAuto` | **an** | Verlangt eine Aufgabe Kyrillisch, klappt die eingebaute Tastatur gleich auf. Aus: Sie holen sie bei Bedarf. Wo Deutsch gefragt ist, kommt sie nie. |
 | `betonung` | `lernen` | Wann Betonungszeichen zu sehen sind: `lernen` (bis Stufe 3), `immer`, `nie` (ADR 0054). |
 | `auffrischen` | 21 | Tage, bis Fertiges einmal zur Sicherheit zurückkommt. **Frei wählbar von 1 bis 365** über einen Zähler mit − und + (ADR 0015). |
-| `tagesmass` | 8 | Wie viele Wörter an einem Tag **neu** anfangen dürfen. Zähler von 0 bis 30; **0 heißt «ohne Grenze»**. Wiederholen bleibt unbegrenzt (ADR 0056). |
 | `fehlerprofil` | an | Ablenker aus den eigenen Verwechslungen statt aus dem Zufall (ADR 0056). |
 | `rekonstruktion` | `woerter` | Nach einem Schreibfehler das Wort einmal nachschreiben: `woerter` · `immer` (auch Sätze) · `nie` (ADR 0056). |
 | `schema` | `dark` | Farbschema: `dark`, `classic`, `gruen`, `blau`, `rosa`. Steuert `data-schema` am `<html>`-Element; `dark` trägt keines. |
