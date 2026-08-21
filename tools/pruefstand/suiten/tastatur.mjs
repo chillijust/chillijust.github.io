@@ -57,6 +57,9 @@ try {
   // ── B · Im Bild: breit, mittig, greifbar ──────────────────
   ALL_VOCAB.forEach(function (v) { state.boxes[v.id] = BOX_MAX; });
   state.settings.tippenStufe = 2;
+  // Gemeistertes steht seit ADR 0091 nur noch in «Alle» — im Lernstapel wäre
+  // hier nichts, und statt der Tastatur stünde ein Leerzustand da.
+  tippenModus = 'alle';
   tKb = null;
   setTab('tippen');
   var leer = q('.key.space');

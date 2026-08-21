@@ -33,7 +33,9 @@ try {
   ansichtenZuruecksetzen();
   ALL_VOCAB.forEach(function (v) { state.boxes[v.id] = BOX_MAX; });
   state.settings.tippenStufe = 2;
-  tippenModus = 'lernen';
+  // **Gemeistertes steht seit ADR 0091 nur noch in «Alle».** Der Lernstapel
+  // wäre hier leer, und die Übung zeigte ihren Leerzustand statt einer Aufgabe.
+  tippenModus = 'alle';
   setTab('tippen');
   pruefe('A1 das Feld nennt der Taste ihren Zweck',
     q('#tInput').getAttribute('enterkeyhint') === 'go',

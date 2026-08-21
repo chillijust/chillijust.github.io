@@ -426,17 +426,13 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   Abfrage an der wirksamen Stelle. Gespeicherte Stände werden über `mergeState()`
   aufgefüllt — `state.settings` nie als Ganzes aus dem Speicher übernehmen. Die
   Einstellungen sind nach Fragen gegliedert: **Lernweg**, **Abgabe**, **Eingabe**,
-  **Darstellung und Ton**. Eine **Frist ist ein Zähler**, keine Chip-Reihe (ADR 0015):
-  Grenzen und Vorgabe je Schlüssel in `ZAEHLER`/`zaehlerGrenzen()`, Gedrückthalten zählt
-  weiter, und er zeichnet **an Ort und Stelle** nach — ein Renderlauf würde die gehaltene
-  Taste wegwerfen. Was im Feld steht, sagt `zaehlerAnzeige()`: Beim Auffrischen heißt Null
-  «gar nicht» — **nie «0 Tage»**, das hieße «sofort wieder fällig». **Was ein Nullwert bedeutet, weiß nur der Zähler, dem er gehört**
-  (ADR 0074): `|| vorgabe` liest ihn als «nicht gesetzt» und ist überall dort falsch, wo
-  Null etwas heißt — auch in `decodeBackup()`. Die Auffrischfrist steht an **einer** Stelle
-  (`intervallFuer()`), und abgeschaltet ist sie `Infinity`, nicht 0; Wörter, Sätze,
-  Buchstaben und beide Regelübungen fragen dort nach. **Vier Leerzustände versprechen ein
-  Wiedersehen** — wer die Frist anfasst, prüft alle vier. Soll eine geänderte Vorgabe auch bestehende Geräte
-  erreichen, den Schlüssel umbenennen — der alte Wert fällt in `mergeState()` weg.
+  **Darstellung und Ton**. **Einen Zähler gibt es nicht mehr** (ADR 0091) — mit dem
+  Tagesmaß und der Auffrischfrist ist auch `ZAEHLER` samt Mechanik entfallen; wer wieder
+  einen braucht, baut ihn neu, statt toten Code wiederzubeleben. Soll eine geänderte
+  Vorgabe auch bestehende Geräte erreichen, den Schlüssel umbenennen — der alte Wert
+  fällt in `mergeState()` weg, und **ein Schlüssel, den die Vorgabe nicht mehr kennt,
+  fällt dabei ganz heraus**: So verschwand die Auffrischfrist auch von Geräten, die sie
+  gespeichert hatten.
 - **Vorlesen nur über `hoerknopf(text, sprache)`** — der Text hängt als `data-say` am
   Knopf, ein einziger Zuhörer auf `#main` bedient alle. Nie einen eigenen Zuhörer je
   Knopf anhängen. Was die Antwort wäre, schweigt bis zur Auflösung.
@@ -777,25 +773,31 @@ gibt es den Skill `ticket`.
   und **ein gewähltes Set sticht die Stufenschwelle**. Beide Achsen liefert
   `tippenWoerter(setNr, modus)` — dieselbe Funktion rechnet die Zahlen in der Auswahl,
   sonst verspräche ein Chip etwas anderes, als sein Antippen liefert. «Übersetzen» bleibt
-  bewusst bei drei Achsen.
-- **Fertigwerden geht vor Auffrischen** (ADR 0090). Unter den fälligen Wörtern kommen
-  die **unfertigen** zuerst; ist nichts Unfertiges fällig, bleibt es mit 60 % im Rennen.
+  bewusst bei drei Achsen. Seit ADR 0091 ist «Alle» **der einzige** Weg zu Gemeistertem —
+  eine Auffrischfrist, die es von selbst zurückbrächte, gibt es nicht mehr.
+- **Unfertiges vor Fertigem** (ADR 0090, geschärft in ADR 0091). Fällig sein kann nur
+  noch, was unfertig ist — die Endstufe wird nie wieder fällig. Ist nichts fällig und
+  nichts neu, geht **Unfertiges vor** dem Rest: Ohne diesen Zweig blieben die zwei
+  fehlenden Wörter eines alten Sets unter zehn gemeisterten liegen (gemessen 27 von 100,
+  mit ihm 50 — zufällig wären es 17).
   Und **eine angefangene Tippfolge macht fällig** (`faellig()` fragt `tippFolge`) — jeder
   Treffer erneuert `lastSeen`, und ohne diese Ausnahme schob der erste das Wort um eine
   Woche weg, so daß die Folge sich nie füllte. Die erfüllte Folge wird abgeräumt, sonst
-  gilt das Wort für immer als fällig. Gemessen: **null** von hundert Ziehungen trafen
-  vorher ein fehlendes Wort, danach zweiundsechzig. **Und was gerade dran war, kommt
+  gilt das Wort für immer als fällig. **Und was gerade dran war, kommt
   nicht sofort wieder**: Die letzten `MERK_LETZTE` Ziehungen sind gesperrt, aber nur,
   soweit der Vorrat es hergibt. Die Sperre steht **ganz vorn auf dem Vorrat** — weiter
   unten ist die Quelle längst auf das eine fällige Wort eingeengt, und was allein
   dasteht, läßt sich nicht ausschließen. «Drei Treffer in Folge» heißt nicht «drei
   aufeinanderfolgende Aufgaben».
-- **«Tippen» und «Übersetzen» sind zweigeteilt** (ADR 0015): Lernen und Wiederholung.
-  Fertig Gelerntes verlässt beide Stapel, bis die Frist `auffrischen` um ist. Wer dort
-  etwas ändert, muss beide Stapel und die drei Leerzustände mitdenken — «noch nichts
-  freigeschaltet», «alles gelernt», «gerade nichts fällig» fühlen sich verschieden an
-  und sagen Verschiedenes. **«Übersetzen» hat einen dritten Stapel «Alle»** — ohne ihn
-  lässt sich Gemeistertes vor Ablauf der Frist nicht wiederholen.
+- **Fertig heißt fertig** (ADR 0015, geändert durch ADR 0091). «Tippen» und «Übersetzen»
+  haben **zwei** Stapel: **Lernen** (was noch aussteht) und **Alle**. Was die Endstufe
+  erreicht, verlässt den Lernstapel — und kommt **nicht** wieder: `intervallFuer(BOX_MAX)`
+  ist `Infinity`, ein Stapel «Wiederholung» existiert nicht mehr. Wiederholen bleibt
+  jederzeit möglich, es wird nur nicht mehr verlangt (ADR 0048). Wer dort etwas ändert,
+  denkt die Leerzustände mit — «noch nichts freigeschaltet», «alles getippt», «Set N ist
+  noch unberührt» fühlen sich verschieden an und sagen Verschiedenes. **Keiner von ihnen
+  verspricht ein Wiedersehen**; eine Prüfung in der Suite `wiederholung` liest alle fünf
+  Übungen daraufhin ab.
 
 ## Offen
 

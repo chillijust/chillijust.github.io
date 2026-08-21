@@ -1894,21 +1894,6 @@ body.unterwegs .reiter { top: 62px; }
 .luecke-de { margin: 6px 0 0; font-size: 14px; color: var(--dim); text-align: center; }
 .luecke-satz { margin: 8px 0 0; font-size: 16px; }
 .backup-note.warnung { color: var(--text); border-left: 2px solid var(--akzent); padding-left: 10px; }
-.zaehler { flex: none; display: flex; align-items: center; gap: 2px; }
-.zaehler-taste {
-  flex: none; width: 44px; height: 44px; padding: 0; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--card-2); border: 1px solid var(--line); color: var(--text);
-  cursor: pointer; -webkit-tap-highlight-color: transparent;
-}
-.zaehler-taste svg { width: 18px; height: 18px; }
-.zaehler-taste:disabled { opacity: .35; cursor: default; }
-.zaehler-wert {
-  min-width: 62px; text-align: center; font-size: 17px; color: var(--text);
-  font-variant-numeric: tabular-nums;
-}
-.zaehler-wert small { display: block; font-size: 10px; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--dim); margin-top: 1px; }
 /* Ab vier Knöpfen bliebe für den Hinweis eine Schlucht von wenigen Wörtern
    Breite. Dann rückt die Wahl unter den Text und nimmt die ganze Zeile. */
 .setting.breit { flex-wrap: wrap; }
@@ -3550,7 +3535,7 @@ var TUTORIALS = {
     ['tippen', '#tInput', 'In dieses Feld wird geschrieben. Die eingebaute kyrillische Tastatur kommt von allein, denn welche Sprache die Gerätetastatur hat, kann eine Webseite nicht bestimmen.'],
     ['tippen', '#tKbToggle', 'Damit blendest du sie aus, wenn du lieber mit der Tastatur des Geräts schreibst. Die Wahl merkt sich die App für das nächste Mal.'],
     ['tippen', '#tCheck', 'Nach dem Prüfen färbt sich das Getippte Zeichen für Zeichen. Satzzeichen, Groß- und Kleinschreibung und ё gegen е kosten dich nichts — es geht um das Wort, nicht um Pedanterie.'],
-    ['tippen', '#filterKnopf', 'Hier wählst du zwischen Lernen und Wiederholung. Fertig Gelerntes verlässt den Stapel und kommt erst nach der Auffrischfrist einmal zur Sicherheit zurück.']
+    ['tippen', '#filterKnopf', 'Hier wählst du den Stapel und das Set. «Lernen» zeigt, was noch aussteht — fertig Gelerntes verlässt ihn. Über «Alle» kommst du jederzeit wieder daran.']
   ],
   uebersetzen: [
     ['uebersetzen', '.card', 'Ein Satz geht erst auf, wenn jedes seiner Wörter sitzt. Darum steht diese Übung am Ende des Wegs — sie prüft nicht einzelne Vokabeln, sondern ob du sie zusammensetzen kannst.'],
@@ -4394,27 +4379,6 @@ var BOX_MAX = 4;
 // Ab dieser Leitner-Stufe gilt ein Wort als sitzend: Sätze werden damit
 // freigeschaltet, Lernsets damit abgeschlossen.
 var SATZ_STUFE = 2;
-// Die Auffrischfrist ist frei wählbar, aber nicht grenzenlos: Unter einem Tag
-// wäre «fertig» kein Zustand mehr, über einem Jahr keine Frist. Dazwischen
-// entscheidet der Nutzer, nicht eine Liste von vier Meinungen.
-// Null ist ein gültiger Wert und heißt «gar nicht mehr» (ADR 0074) — nicht
-// «sofort». Wer sein Fertiges nie wiedersehen will, soll das sagen dürfen.
-var AUFFRISCH_MIN = 0;
-var AUFFRISCH_MAX = 365;
-
-// **Grenzen und Vorgabe je Zähler an einer Stelle.** Sonst rechnet die Taste
-// mit anderen Zahlen, als beim Laden geprüft werden — und ein Wert, den man
-// nicht eintippen kann, steht trotzdem im Stand.
-var ZAEHLER = {
-  auffrischen: { min: AUFFRISCH_MIN, max: AUFFRISCH_MAX, vorgabe: 21 }
-};
-function zaehlerGrenzen(key, wert) {
-  var g = ZAEHLER[key];
-  var n = Math.round(wert);
-  if (!(n >= g.min)) return g.vorgabe;
-  return Math.min(g.max, n);
-}
-function auffrischGrenzen(tage) { return zaehlerGrenzen('auffrischen', tage); }
 var STORAGE_KEY = 'russisch_trainer_v1';
 // Stand der ausgelieferten Datei. Wird von tools/build.mjs gesetzt und geht in
 // jedes Ticket ein, damit ein Bericht sagt, welcher Stand gemeint war.
@@ -5100,9 +5064,8 @@ var ICON = {
   // Der Winkel am Klappknopf: Er zeigt nach unten, solange zu ist, und dreht
   // sich beim Öffnen. Ein Pfeil mit Schaft wäre hier zu viel — gefragt ist die
   // Richtung, nicht eine Bewegung.
-  winkelRunter: svg('<path d="M6 9.5l6 6 6-6"/>'),
-  minus: svg('<path d="M6 12h12"/>'),
-  plus: svg('<path d="M6 12h12M12 6v12"/>')
+  winkelRunter: svg('<path d="M6 9.5l6 6 6-6"/>')
+
 };
 
 // ── Sprachfakten ────────────────────────────────────────────
@@ -5491,7 +5454,6 @@ function defaultSettings() {
     // **Die neue Flamme gehört zu «Dark»** (ADR 0088) und steht dort immer.
     // In den hellen Schemata schaltet sie dieser Schalter dazu.
     flammeHell: false,
-    auffrischen: 21,           // Tage, bis Fertiges zur Sicherheit noch einmal drankommt
     // Nach einem Schreibfehler das Wort einmal richtig nachschreiben:
     // nie · woerter (einzelne Wörter und Formen, Vorgabe) · immer (auch Sätze).
     rekonstruktion: 'woerter',
@@ -5653,7 +5615,6 @@ function mergeState(parsed) {
     });
     var stufe = d.settings.tippenStufe;
     if (!(stufe >= 1 && stufe <= BOX_MAX)) d.settings.tippenStufe = 3;
-    d.settings.auffrischen = auffrischGrenzen(d.settings.auffrischen);
     if (['nie', 'woerter', 'immer'].indexOf(d.settings.rekonstruktion) === -1) {
       d.settings.rekonstruktion = 'woerter';
     }
@@ -7000,8 +6961,7 @@ function setSchnittPruefen() {
 
 // Was beim Laden schon geschafft ist, gilt als gefeiert: Ein Stand von vor
 // dieser Liste — oder eine eingespielte Sicherung, die sie nicht mitführt —
-// bekäme sonst beim nächsten Auffrischen ein Fenster für etwas, das längst
-// vorbei ist.
+// bekäme sonst ein Fenster für etwas, das längst vorbei ist.
 function jubelNachtragen() {
   for (var i = 0; i < LERNSETS.length; i++) if (setGeschafft(i)) state.gefeiert['set:' + i] = 1;
   Object.keys(VOCAB_THEMES).forEach(function (t) {
@@ -7176,8 +7136,9 @@ function updateBox(id, correct, getippt) {
 // kurze Weg vom Vokabeltraining zum ganzen Satz.
 var SET_MAX = 12;
 var TAG = 86400000;
-// Wiedervorlage je Leitner-Stufe: neu · 1 Tag · 3 · 7 · 21
-var INTERVALL = [0, TAG, 3 * TAG, 7 * TAG, 21 * TAG];
+// Wiedervorlage je Leitner-Stufe: neu · 1 Tag · 3 · 7. Für die Endstufe steht
+// hier nichts mehr — sie ist das Ende (ADR 0091).
+var INTERVALL = [0, TAG, 3 * TAG, 7 * TAG];
 
 var LERNSETS = (function () {
   // Sätze in der Reihenfolge, in der sie erreichbar werden: nach dem im Lehrplan
@@ -7258,44 +7219,14 @@ function verwechslungsPool() {
   var begonnen = ALL_VOCAB.filter(function (v) { return (state.boxes[v.id] || 0) > 0; });
   return begonnen.length >= 8 ? begonnen : ALL_VOCAB;
 }
-// Auf der Endstufe entscheidet die Einstellung, sonst die Leitner-Leiter.
+// **Gemeistert heißt fertig** (ADR 0091). Die Endstufe wird nie wieder fällig;
+// `Infinity` sagt genau das, denn `jetzt - seit >= Infinity` ist nie wahr.
+// Null wäre das Gegenteil — «sofort wieder dran». Darunter trägt die
+// Leitner-Leiter den Lernprozeß wie eh und je.
 function intervallFuer(box) {
-  if (box >= BOX_MAX) {
-    var tage = state.settings.auffrischen;
-    // **Null heißt: gar nicht mehr** (ADR 0074). `|| 21` stand hier und an
-    // drei weiteren Stellen — und hätte die Null still in die Vorgabe
-    // verwandelt, weil sie in JavaScript falsch ist. Eine Frist, die nie
-    // abläuft, ist unendlich, nicht null: `jetzt - seit >= Infinity` ist
-    // immer falsch, und damit wird nichts je wieder fällig.
-    if (tage === 0) return Infinity;
-    return (tage || 21) * TAG;
-  }
+  if (box >= BOX_MAX) return Infinity;
   return INTERVALL[Math.min(box, INTERVALL.length - 1)];
 }
-// Was die Leerzustände über die Auffrischung sagen — an **einer** Stelle, denn
-// bei abgeschalteter Frist wäre «nach 0 Tagen einmal zur Sicherheit» Unsinn.
-// **Vier Stellen versprechen ein Wiedersehen** — zwei in «Tippen», zwei in
-// «Übersetzen». Alle vier fragen jetzt hier nach, denn bei abgeschalteter
-// Frist gibt es keins, und ein leerer Zeitpunkt hinterließe «Die nächste
-// Auffrischung kommt .» (ADR 0074).
-function auffrischKommt(wann) {
-  if (!wann) return 'Das Auffrischen ist abgeschaltet.';
-  return 'Die n\u00e4chste Auffrischung kommt ' + esc(wann) + '.';
-}
-
-// Der Nachsatz hinter «… sitzt und ruht»: Ohne Frist gibt es kein Wiedersehen,
-// und ein Versprechen darauf wäre falsch.
-function ruhtWeiter(wann) {
-  if (!wann) return ' Das Auffrischen ist abgeschaltet — hier bleibt es leer.';
-  return ' Das N\u00e4chste kommt ' + esc(wann) + ' zur Sicherheit noch einmal.';
-}
-
-function auffrischSatz() {
-  var tage = state.settings.auffrischen;
-  if (!tage) return 'du hast das Auffrischen abgeschaltet, hier bleibt es darum leer.';
-  return 'nach ' + tage + ' Tagen einmal zur Sicherheit.';
-}
-
 function faellig(v, jetzt) {
   var seit = state.lastSeen[v.id];
   if (!seit) return true;
@@ -7493,7 +7424,6 @@ function filterInhaltHtml() {
   }
   if (currentTab === 'grammatik') {
     // Gemeistertes lässt sich damit jederzeit wiederholen — der Reihe nach
-    // kommt es sonst erst zurück, wenn die Auffrischfrist um ist.
     var bausteine = filterChip('gramwahl', '', 'Der Reihe nach', gramWahl === null);
     GRAMMATIK.forEach(function (b) {
       var stufe = gramBox(b);
@@ -7515,8 +7445,6 @@ function filterInhaltHtml() {
   if (currentTab === 'tippen') {
     var stapel = filterChip('tmodus', 'lernen', 'Lernen · ' + tippenLernen().length,
       tippenModus === 'lernen') +
-      filterChip('tmodus', 'wiederholung', 'Wiederholung · ' + tippenWiederholung().length,
-        tippenModus === 'wiederholung') +
       filterChip('tmodus', 'alle', 'Alle · ' + tippenAlle().length, tippenModus === 'alle');
     // Die Set-Reihe zählt im **gewählten Stapel** — sonst verspräche eine Zahl
     // etwas anderes, als das Antippen liefert. Gesperrte Sets stehen da, aber
@@ -7544,8 +7472,6 @@ function filterInhaltHtml() {
         filterChip('richtung', 'de-ru', 'DE \u2192 RU', trDir === 'de-ru')) +
       filterGruppe('Stapel',
         filterChip('trmodus', 'lernen', 'Lernen \u00b7 ' + trLernen(trLevel).length, trModus === 'lernen') +
-        filterChip('trmodus', 'wiederholung', 'Wiederholung \u00b7 ' + trWiederholung(trLevel).length,
-          trModus === 'wiederholung') +
         filterChip('trmodus', 'alle', 'Alle \u00b7 ' + freieSaetze(trLevel).length,
           trModus === 'alle'));
   }
@@ -8204,24 +8130,23 @@ function uebungsStand(id) {
       : { text: begonnen + ' von ' + ALL_VOCAB.length + ' begonnen' };
   }
   if (id === 'tippen') {
-    var lernen = tippenLernen().length, frisch = tippenWiederholung().length;
-    if (!lernen && !frisch) {
-      return tippenRuhend().length
+    var lernen = tippenLernen().length;
+    if (!lernen) {
+      return tippenFertig().length
         ? { text: 'alles getippt', leer: true }
         : { text: 'noch gesperrt', gesperrt: true };
     }
-    return { text: lernen + ' offen' + (frisch ? ' · ' + frisch + ' fällig' : ''), warm: !!frisch };
+    return { text: lernen + ' offen' };
   }
   if (id === 'uebersetzen') {
-    var frei = 0, offen2 = 0, faellig2 = 0;
+    var frei = 0, offen2 = 0;
     [1, 2, 3].forEach(function (n) {
       frei += freieSaetze(n).length;
       offen2 += trLernen(n).length;
-      faellig2 += trWiederholung(n).length;
     });
     if (!frei) return { text: 'noch gesperrt', gesperrt: true };
-    if (!offen2 && !faellig2) return { text: 'alles übersetzt', leer: true };
-    return { text: offen2 + ' offen' + (faellig2 ? ' · ' + faellig2 + ' fällig' : ''), warm: !!faellig2 };
+    if (!offen2) return { text: 'alles übersetzt', leer: true };
+    return { text: offen2 + ' offen' };
   }
   if (id === 'buchstaben') {
     var sitzt = abcGelernt();
@@ -8292,9 +8217,6 @@ var FORTSETZEN_FRIST = 2 * 60 * 60 * 1000;
 // vor. Danach hat man den Beweis erbracht, dass man liest, und eine Ermahnung
 // wäre Bevormundung.
 var ABC_ZUERST_BIS = 40;
-// Ab so vielen überfälligen Dingen lohnt eine eigene Runde. Darunter nimmt man
-// sie nebenbei mit.
-var AUFFRISCHEN_AB = 5;
 // Vor dem zweiten Lernset erklärt Grammatik nichts, was man schon gesehen
 // hätte — dieselbe Schwelle, die das Tutorial nennt.
 var GRAMMATIK_AB_SET = 1;
@@ -8339,17 +8261,7 @@ function empfLeiter() {
     });
   }
 
-  // 3 · Überfälliges. Was die Auffrischfrist überschritten hat, verblasst.
-  var frisch = tippenWiederholung().length;
-  var trFrisch = trWiederholung(1).length + trWiederholung(2).length + trWiederholung(3).length;
-  if (frisch + trFrisch >= AUFFRISCHEN_AB) {
-    stufen.push({
-      ziel: frisch >= trFrisch ? 'tippen' : 'uebersetzen', titel: 'Erst auffrischen',
-      note: (frisch + trFrisch) + ' Dinge warten auf die Sicherheitsrunde.'
-    });
-  }
-
-  // 4 · Der Hauptweg: die Wörter des laufenden Sets.
+  // 3 · Der Hauptweg: die Wörter des laufenden Sets.
   var set = LERNSETS[aktuellesSet()];
   var offen = set.woerter.filter(function (v) { return (state.boxes[v.id] || 0) < SATZ_STUFE; }).length;
   if (offen) {
@@ -8709,22 +8621,20 @@ function waehleWort(pool, nurWiederholen) {
     nachAlter = true;
     if (!quelle.length) { quelle = pool; nachAlter = false; }
   } else if (faellige.length && (!neue.length || Math.random() < 0.65)) {
-    // **Fertigwerden geht vor Auffrischen** (ADR 0090). Ein gemeistertes Wort
-    // aufzufrischen ist nie dringender, als ein angefangenes zu Ende zu
-    // bringen. In einem alten Set stehen zehn fällige Wiederholungen gegen
-    // zwei fehlende Wörter — und die kamen dann **gar nicht** mehr dran:
-    // Fälliges gewann, und unter dem Fälligen war nichts Unfertiges.
-    var faelligOffen = faellige.filter(function (v) {
-      return (state.boxes[v.id] || 0) < BOX_MAX;
-    });
-    if (faelligOffen.length) quelle = faelligOffen;
-    // Ist nichts Unfertiges fällig, bleibt es trotzdem im Rennen — sonst
-    // hielte ein Stapel Auffrischungen es beliebig lange auf. Nicht immer:
-    // Wiederholen ist der Sinn der Sache, es soll nur nicht alles besetzen.
-    else if (offen.length && Math.random() < 0.6) quelle = offen;
-    else quelle = faellige;
+    // **Fällig heißt seit ADR 0091 immer «unfertig»**: Die Endstufe wird nie
+    // wieder fällig, also steht hier nur noch, woran wirklich gearbeitet wird.
+    // Die frühere Sortierung innerhalb des Fälligen (ADR 0090) ist damit
+    // gegenstandslos — sie trennte Unfertiges von Auffrischungen, und
+    // Auffrischungen gibt es nicht mehr.
+    quelle = faellige;
   }
   else if (neue.length) quelle = neue;
+  // **Unfertiges vor Fertigem** — die Lehre aus ADR 0090 unter den neuen
+  // Bedingungen. Ist nichts fällig und nichts neu, blieben sonst die zwei
+  // fehlenden Wörter eines alten Sets unter zehn gemeisterten liegen: gemessen
+  // 27 von 100 Ziehungen. Ein gemeistertes Wort noch einmal zu sehen ist nie
+  // dringender, als ein angefangenes zu Ende zu bringen.
+  else if (offen.length) quelle = offen;
   else quelle = pool;
 
   var sortiert = quelle.slice().sort(function (a, b) {
@@ -9646,7 +9556,7 @@ function uebInhaltZeichnen() {
 // aus dem Lehrplan) mindestens SATZ_STUFE erreicht hat.
 var SATZ_STUFE = 2;
 var trLevel = 1, trDir = 'gemischt';   // 'gemischt' · 'ru-de' · 'de-ru'
-var trModus = 'lernen';   // 'lernen' · 'wiederholung' · 'alle'
+var trModus = 'lernen';   // 'lernen' · 'alle'
 // 'gemischt' ist der Regelfall: die Richtung wechselt dann mit der Stufe.
 var trTask = null, trBuilt = [], trPhase = 'ask', trCorrect = null, trRevealed = false;
 // Der getippte Satz und die eingeblendete Tastatur. Beides gehört an die
@@ -9774,23 +9684,14 @@ function freieSaetze(stufe) {
   return stufenSaetze(stufe).filter(satzFrei);
 }
 
-// Dieselbe Teilung wie in «Tippen»: was noch nicht sitzt, und was sitzt, aber
-// nach der Auffrischfrist einmal zur Sicherheit drankommt. Beim Lernen wird
-// nicht nach Fälligkeit gefiltert — wer üben will, soll üben dürfen.
+// Zwei Stapel statt dreier (ADR 0091): was noch nicht sitzt — und alles.
+// **«Ruhend» hieße, es käme wieder.** Seit die Endstufe das Ende ist, heißt es
+// schlicht «fertig», und der Name sagt das auch.
 function trLernen(stufe) {
   return freieSaetze(stufe).filter(function (s) { return satzBox(s) < BOX_MAX; });
 }
-function trWiederholung(stufe) {
-  var jetzt = Date.now();
-  return freieSaetze(stufe).filter(function (s) {
-    return satzBox(s) >= BOX_MAX && satzFaellig(s, jetzt);
-  });
-}
-function trRuhend(stufe) {
-  var jetzt = Date.now();
-  return freieSaetze(stufe).filter(function (s) {
-    return satzBox(s) >= BOX_MAX && !satzFaellig(s, jetzt);
-  });
+function trFertig(stufe) {
+  return freieSaetze(stufe).filter(function (s) { return satzBox(s) >= BOX_MAX; });
 }
 // Home zählt über alle Stufen, die Übung zeigt nur eine. Wer seine Stufe
 // fertig hat, stand darum vor «Stufe 1 sitzt», während die Kachel weiter
@@ -9800,35 +9701,16 @@ function trStufeMitArbeit() {
   satzStufen().forEach(function (n) {
     if (n === trLevel || beste) return;
     var offen = trLernen(n).length;
-    var faellig = trWiederholung(n).length;
-    if (offen || faellig) beste = { stufe: n, offen: offen, faellig: faellig };
+    if (offen) beste = { stufe: n, offen: offen };
   });
   return beste;
 }
 
-// Drei Stapel. «Lernen» und «Wiederholung» teilen den Bestand nach ADR 0015;
-// «Alle» hebt die Teilung auf. Es musste einen Weg geben, Fertiges vor Ablauf
-// der Frist noch einmal anzusehen — «Lernsets» hat ihn längst («alle»),
-// «Übersetzen» hatte ihn nicht, und wer alles gemeistert hatte, stand vor
-// zwei Stapeln mit null.
+// Zwei Stapel: «Lernen» zeigt, was noch aussteht, «Alle» hebt die Teilung auf.
+// Gemeistertes läßt sich damit jederzeit wiederholen — verlangt wird es nicht
+// mehr (ADR 0091).
 function trPool() {
-  if (trModus === 'alle') return freieSaetze(trLevel);
-  return trModus === 'wiederholung' ? trWiederholung(trLevel) : trLernen(trLevel);
-}
-function trNaechsteAuffrischung() {
-  var jetzt = Date.now();
-  var frist = intervallFuer(BOX_MAX);
-  // Abgeschaltet gibt es kein «nächstes Mal» — und «in Infinity Tagen» wäre
-  // die Art von Satz, die man einmal auf dem Gerät sieht und nie vergisst.
-  if (!isFinite(frist)) return '';
-  var beste = null;
-  trRuhend(trLevel).forEach(function (s) {
-    var wann = (state.satzSeen[s.ru] || 0) + frist;
-    if (beste === null || wann < beste) beste = wann;
-  });
-  if (beste === null) return '';
-  var tage = Math.max(1, Math.ceil((beste - jetzt) / TAG));
-  return tage === 1 ? 'morgen' : 'in ' + tage + ' Tagen';
+  return trModus === 'alle' ? freieSaetze(trLevel) : trLernen(trLevel);
 }
 
 // Niedrigste Stufe zuerst, bei Gleichstand das am längsten Zurückliegende.
@@ -9850,12 +9732,6 @@ function waehleSatz(pool, ausser) {
 
 // Ohne Argument wird der nächste Satz gewählt; mit Argument ein bestimmter.
 function buildTransTask(vorgabe) {
-  // Ist der gewählte Stapel leer und der andere nicht, dorthin wechseln.
-  if (!vorgabe && trModus !== 'alle' && !trPool().length) {
-    var anderer = trModus === 'lernen' ? 'wiederholung' : 'lernen';
-    trModus = anderer;
-    if (!trPool().length) trModus = 'lernen';
-  }
   var liste = freieSaetze(trLevel);
   var satz = vorgabe || waehleSatz(trPool(), trTask ? trTask.satz : null);
   if (!satz) { trTask = null; return; }
@@ -10062,13 +9938,11 @@ function saetzeGemeistert() {
 function renderUebersetzenLeer() {
   var frei = freieSaetze(trLevel);
   var offen = trLernen(trLevel).length;
-  var frisch = trWiederholung(trLevel).length;
-  var ruhend = trRuhend(trLevel).length;
 
   var andere = trStufeMitArbeit();
   var andereKnopf = andere
     ? '<button class="btn primary" id="trZuStufe">Zu Stufe ' + andere.stufe + ' \u00b7 ' +
-      (andere.offen ? andere.offen + ' offen' : andere.faellig + ' f\u00e4llig') + '</button>'
+      andere.offen + ' offen</button>'
     : '';
 
   var html = '<section><div class="leer">' + maskottchen('gross');
@@ -10090,28 +9964,19 @@ function renderUebersetzenLeer() {
     html += '<div class="btn-row">' + andereKnopf +
       '<button class="btn ' + (andereKnopf ? 'ghost' : 'primary') +
       '" id="trZuUeben">Zu \u00abLernsets\u00bb</button></div>';
-  } else if (trModus === 'wiederholung') {
-    html += '<h3>' + (ruhend ? 'Gerade nichts f\u00e4llig' : 'Noch nichts zum Auffrischen') + '</h3>' +
-      '<p>' + (ruhend
-        ? ruhend + (ruhend === 1 ? ' Satz sitzt und ruht.' : ' S\u00e4tze sitzen und ruhen.') +
-          ruhtWeiter(trNaechsteAuffrischung())
-        : 'Hier erscheinen S\u00e4tze, die du ' + BOX_MAX + '\u00d7 richtig \u00fcbersetzt hast \u2014 ' +
-          auffrischSatz()) + '</p>';
-    if (offen || andereKnopf) {
-      html += '<div class="btn-row">' +
-        (offen ? '<button class="btn primary" id="trZuLernen">' +
-          offen + (offen === 1 ? ' Satz offen' : ' S\u00e4tze offen') + '</button>' : '') +
-        andereKnopf + '</div>';
-    }
+  } else if (trModus === 'alle') {
+    html += '<h3>Nichts zum Wiederholen</h3>' +
+      '<p>Hier steht alles, was auf dieser Stufe schon freigeschaltet ist. ' +
+      'Noch ist nichts dabei.</p>' +
+      '<div class="btn-row">' + andereKnopf +
+      '<button class="btn ' + (andereKnopf ? 'ghost' : 'primary') +
+      '" id="trZuUeben">Zu \u00abLernsets\u00bb</button></div>';
   } else {
     html += '<h3>Stufe ' + trLevel + ' sitzt</h3>' +
       '<p>Alle ' + frei.length + ' freigeschalteten S\u00e4tze dieser Stufe hast du ' + BOX_MAX +
-      '\u00d7 richtig \u00fcbersetzt. ' +
-      (frisch
-        ? frisch + (frisch === 1 ? ' wartet' : ' warten') + ' zum Auffrischen.'
-        : auffrischKommt(trNaechsteAuffrischung())) + '</p>' +
+      '\u00d7 richtig \u00fcbersetzt \u2014 damit sind sie fertig.</p>' +
       '<div class="btn-row">' +
-      (frisch ? '<button class="btn primary" id="trZuFrisch">Wiederholen</button>' : '') +
+      (frei.length ? '<button class="btn primary" id="trZuAlle">Trotzdem wiederholen</button>' : '') +
       andereKnopf +
       '<button class="btn ghost" id="trZuUeben">Neue W\u00f6rter lernen</button></div>';
   }
@@ -10121,12 +9986,13 @@ function renderUebersetzenLeer() {
 
   var zu = document.getElementById('trZuUeben');
   if (zu) zu.addEventListener('click', function () { setTab('lernsets'); });
-  var frischBtn = document.getElementById('trZuFrisch');
-  if (frischBtn) frischBtn.addEventListener('click', function () {
-    trModus = 'wiederholung';
+  var alleBtn = document.getElementById('trZuAlle');
+  if (alleBtn) alleBtn.addEventListener('click', function () {
+    trModus = 'alle';
     trTask = null;
     buildTransTask();
     renderUebersetzen();
+    renderFilter();
   });
   var lernBtn = document.getElementById('trZuLernen');
   if (lernBtn) lernBtn.addEventListener('click', function () {
@@ -10138,7 +10004,7 @@ function renderUebersetzenLeer() {
   var stufeBtn = document.getElementById('trZuStufe');
   if (stufeBtn && andere) stufeBtn.addEventListener('click', function () {
     trLevel = andere.stufe;
-    trModus = andere.offen ? 'lernen' : 'wiederholung';
+    trModus = 'lernen';
     trTask = null;
     buildTransTask();
     renderUebersetzen();
@@ -10178,8 +10044,7 @@ function trInhaltZeichnen() {
   var getippt = t.art === 'tippen';
   // Der Ort im Lernweg über die Kachel, Richtung und Spielart hinein: links
   // wohin übersetzt wird, mittig wie. Rechts bleibt der Platz für «Wissen».
-  html += '<p class="kachel-ort">Stufe ' + trLevel +
-    (trModus === 'wiederholung' ? ' · zur Sicherheit' : '') + '</p>' +
+  html += '<p class="kachel-ort">Stufe ' + trLevel + '</p>' +
     '<div data-leiste></div>' +
     '<div class="card">' +
     '<div class="card-meta"><span>' + (promptIsRu ? 'RU → DE' : 'DE → RU') + '</span>' +
@@ -10270,8 +10135,7 @@ function trInhaltZeichnen() {
   }
   var sitzt = liste.filter(function (x) { return satzBox(x) >= BOX_MAX; }).length;
   html += '<p class="session-info">' + trPool().length +
-    (trModus === 'wiederholung' ? ' zum Auffrischen'
-      : trModus === 'alle' ? ' im Stapel' : ' offen') + ' · ' +
+    (trModus === 'alle' ? ' im Stapel' : ' offen') + ' · ' +
     sitzt + ' von ' + liste.length + ' sitzt';
   if (state.transStats.correct + state.transStats.wrong > 0) {
     html += ' · ' + state.transStats.correct + ' richtig, ' + state.transStats.wrong + ' falsch';
@@ -10828,11 +10692,9 @@ function abcKopfHtml() {
 function abcUebenHtml() {
   if (!abcQ) abcFrageBauen();
   if (!abcQ) {
-    var jetzt = Date.now();
-    var ruhend = ALPHABET.filter(function (b) { return abcGemeistert(b) && !abcFaellig(b, jetzt); }).length;
     return abcKopfHtml() + '<div class="leer">' + maskottchen('gross') +
       '<h3>Das Alphabet sitzt</h3><p>Alle ' + ALPHABET.length + ' Buchstaben sind ' +
-      BOX_MAX + '× richtig erkannt. ' + ruhend + ' ruhen bis zur nächsten Auffrischung.</p>' +
+      BOX_MAX + '× richtig erkannt — damit sind sie fertig.</p>' +
       '<div class="btn-row">' +
       '<button class="btn primary" id="abcAlle">Trotzdem üben</button>' +
       '<button class="btn ghost" id="abcZurTafel">Tafel ansehen</button></div></div>';
@@ -12139,14 +12001,9 @@ function renderGrammatik() { leisteRahmen(grammInhaltZeichnen); }
 function grammInhaltZeichnen() {
   var b = gramAktuell();
   if (!b) {
-    var jetzt = Date.now();
-    var ruhend = GRAMMATIK.filter(function (x) {
-      return gramGemeistert(x) && !gramFaellig(x, jetzt);
-    }).length;
     main.innerHTML = '<section><div class="leer">' + maskottchen('gross') +
       '<h3>Alle Regeln sitzen</h3><p>Alle ' + GRAMMATIK.length +
-      ' Bausteine sind ' + BOX_MAX + '× richtig angewandt. ' + ruhend +
-      ' ruhen bis zur nächsten Auffrischung.</p>' +
+      ' Bausteine sind ' + BOX_MAX + '× richtig angewandt — damit sind sie fertig.</p>' +
       '<p class="naechste">Wiederholen kannst du trotzdem jederzeit: ' +
       'Über die Auswahl oben lässt sich jeder Baustein einzeln vornehmen.</p>' +
       '</div></section>';
@@ -12609,14 +12466,9 @@ function schreibInhaltZeichnen() {
   }
   var r = orthoAktuell();
   if (!r) {
-    var jetzt = Date.now();
-    var ruhend = ORTHO.filter(function (x) {
-      return orthoGemeistert(x) && !orthoFaellig(x, jetzt);
-    }).length;
     main.innerHTML = '<section><div class="leer">' + maskottchen('gross') +
       '<h3>Alle Schreibregeln sitzen</h3><p>Alle ' + ORTHO.length +
-      ' Regeln sind ' + BOX_MAX + '× richtig angewandt. ' + ruhend +
-      ' ruhen bis zur nächsten Auffrischung.</p>' +
+      ' Regeln sind ' + BOX_MAX + '× richtig angewandt — damit sind sie fertig.</p>' +
       '<p class="naechste">Wiederholen kannst du trotzdem jederzeit: ' +
       'Über die Auswahl oben lässt sich jede Regel einzeln vornehmen.</p>' +
       '</div></section>';
@@ -13083,7 +12935,7 @@ var tWord = null, tResult = null, tHint = false, tKb = null;
 // Renderlauf von Hand zurückgeschrieben — mit der Prüfzeile gibt es das Feld
 // in der Auflösung aber nicht mehr.
 var tEingabe = '';
-var tippenModus = 'lernen';   // 'lernen' · 'wiederholung' · 'alle'
+var tippenModus = 'lernen';   // 'lernen' · 'alle'
 // Woher die Wörter kommen: der ganze Wortschatz oder ein einzelnes Lernset.
 var tippenSet = null;         // null = der Reihe nach, sonst die Set-Nummer
 
@@ -13107,8 +12959,6 @@ function tippenWoerter(setNr, modus) {
   var jetzt = Date.now();
   return tippenVorrat(setNr).filter(function (v) {
     var b = state.boxes[v.id] || 0;
-    // Fertig und die Frist ist um: einmal zur Sicherheit.
-    if (modus === 'wiederholung') return b >= BOX_MAX && faellig(v, jetzt);
     // Alles Begonnene, ohne Rücksicht auf Stufe und Frist — der Stapel zum
     // Festigen. Nie Gesehenes bleibt draußen: «Tippen» ist keine erste
     // Begegnung, sondern eine Behauptung.
@@ -13119,38 +12969,23 @@ function tippenWoerter(setNr, modus) {
   });
 }
 function tippenLernen() { return tippenWoerter(tippenSet, 'lernen'); }
-function tippenWiederholung() { return tippenWoerter(tippenSet, 'wiederholung'); }
 function tippenAlle() { return tippenWoerter(tippenSet, 'alle'); }
 function tippenPool() { return tippenWoerter(tippenSet, tippenModus); }
-// Fertig, aber noch nicht fällig — das sind die, die gerade ruhen.
-function tippenRuhend() {
-  var jetzt = Date.now();
+// Fertig — auf der Endstufe und damit durch (ADR 0091). **«Ruhend» hieße, es
+// käme wieder**; seit die Endstufe das Ende ist, wäre das ein Versprechen, das
+// niemand einlöst.
+function tippenFertig() {
   return tippenVorrat(tippenSet).filter(function (v) {
-    return (state.boxes[v.id] || 0) >= BOX_MAX && !faellig(v, jetzt);
+    return (state.boxes[v.id] || 0) >= BOX_MAX;
   });
-}
-// Wann wird das nächste ruhende Wort wieder fällig?
-function naechsteAuffrischung() {
-  var jetzt = Date.now();
-  var frist = intervallFuer(BOX_MAX);
-  if (!isFinite(frist)) return '';
-  var beste = null;
-  tippenRuhend().forEach(function (v) {
-    var wann = (state.lastSeen[v.id] || 0) + frist;
-    if (beste === null || wann < beste) beste = wann;
-  });
-  if (beste === null) return '';
-  var tage = Math.max(1, Math.ceil((beste - jetzt) / TAG));
-  return tage === 1 ? 'morgen' : 'in ' + tage + ' Tagen';
 }
 
 // Leerzustand: drei Fälle, die sich sehr verschieden anfühlen — noch nichts
-// freigeschaltet, alles getippt, oder gerade nichts fällig.
+// freigeschaltet, alles getippt, oder ein unberührtes Set.
 function renderTippenLeer() {
   var schwelle = tippenSchwelle(tippenSet);
-  var ruhend = tippenRuhend().length;
+  var fertig = tippenFertig().length;
   var offen = tippenLernen().length;
-  var frisch = tippenWiederholung().length;
   var fast = tippenVorrat(tippenSet).filter(function (v) {
     var b = state.boxes[v.id] || 0;
     return b > 0 && b < schwelle;
@@ -13175,30 +13010,13 @@ function renderTippenLeer() {
       '<div class="btn-row"><button class="btn primary" id="tZuUeben">Zu «Lernsets»</button>' +
       (tippenSet !== null ? '<button class="btn ghost" id="tAlleSets">Der Reihe nach</button>' : '') +
       '</div>';
-  } else if (tippenModus === 'wiederholung') {
-    html += '<h3>' + (ruhend ? 'Gerade nichts fällig' : 'Noch nichts zum Auffrischen') + '</h3>' +
-      '<p>' + (ruhend
-        ? ruhend + (ruhend === 1 ? ' Wort sitzt' : ' Wörter sitzen') + ' und ruhen.' +
-          ruhtWeiter(naechsteAuffrischung())
-        : 'Hier erscheinen Wörter, die du fertig gelernt hast — ' + auffrischSatz()) + '</p>';
-    html += '<div class="btn-row">' +
-      (offen ? '<button class="btn primary" id="tZuLernen">' +
-        offen + (offen === 1 ? ' Wort offen' : ' Wörter offen') + '</button>' : '') +
-      (tippenAlle().length ? '<button class="btn' + (offen ? ' ghost' : ' primary') +
-        '" id="tZuAlle">Trotzdem festigen</button>' : '') + '</div>';
-  } else if (ruhend || frisch) {
+  } else if (fertig) {
     html += '<h3>Alles getippt</h3>' +
       '<p>Auf der Lernstufe wartet kein Wort mehr. ' +
-      (ruhend ? ruhend + (ruhend === 1 ? ' Wort sitzt und ruht. ' : ' Wörter sitzen und ruhen. ') : '') +
-      (frisch
-        ? frisch + (frisch === 1 ? ' ist' : ' sind') + ' zum Auffrischen bereit.'
-        : auffrischKommt(naechsteAuffrischung())) +
-      '</p>';
-    // Der Ausweg, den es lange nicht gab: Gelerntes noch einmal schreiben,
-    // ohne auf die Frist zu warten.
+      fertig + (fertig === 1 ? ' Wort sitzt' : ' Wörter sitzen') + ' und ist damit fertig.</p>';
+    // Der Ausweg, den es lange nicht gab: Gelerntes noch einmal schreiben.
     html += '<div class="btn-row">' +
-      (frisch ? '<button class="btn primary" id="tZuFrisch">Wiederholen</button>' : '') +
-      '<button class="btn' + (frisch ? ' ghost' : ' primary') + '" id="tZuAlle">Trotzdem festigen</button>' +
+      '<button class="btn primary" id="tZuAlle">Trotzdem festigen</button>' +
       '<button class="btn ghost" id="tZuUeben">Neue Wörter lernen</button></div>';
   } else {
     html += '<h3>Noch kein Wort freigeschaltet</h3>' +
@@ -13215,18 +13033,11 @@ function renderTippenLeer() {
     html += '<div class="btn-row"><button class="btn primary" id="tZuUeben">Zu «Lernsets»</button></div>';
   }
 
-  html += '</div><p class="session-info">Schwelle und Auffrischfrist stehen in den Einstellungen.</p></section>';
+  html += '</div><p class="session-info">Die Schwelle steht in den Einstellungen.</p></section>';
   main.innerHTML = html;
 
   var zu = document.getElementById('tZuUeben');
   if (zu) zu.addEventListener('click', function () { setTab('lernsets'); });
-  var frischBtn = document.getElementById('tZuFrisch');
-  if (frischBtn) frischBtn.addEventListener('click', function () {
-    tippenModus = 'wiederholung';
-    tWord = null;
-    renderTippen();
-    renderFilter();
-  });
   var alleBtn = document.getElementById('tZuAlle');
   if (alleBtn) alleBtn.addEventListener('click', function () {
     tippenModus = 'alle';
@@ -13274,15 +13085,6 @@ function tippenInhaltZeichnen() {
     return;
   }
   if (tKb === null) tKb = tastaturVorgabe(true);
-  // Ist der gewählte Stapel leer und der andere nicht, dorthin wechseln —
-  // sonst stünde man vor einem Leerzustand, obwohl es etwas zu tun gibt.
-  // «Alle» bleibt davon unberührt: Wer festigen will, hat das ausdrücklich
-  // gewählt und soll nicht stillschweigend woandershin geschoben werden.
-  if (!tResult && tippenModus !== 'alle' && !tippenPool().length) {
-    var anderer = tippenModus === 'lernen' ? 'wiederholung' : 'lernen';
-    tippenModus = anderer;
-    if (!tippenPool().length) tippenModus = 'lernen';
-  }
   var pool = tippenPool();
   // Während der Rückmeldung bleibt das Wort stehen, auch wenn es nach einem
   // Fehler unter die Schwelle gerutscht ist — sonst verschwände die Auflösung.
@@ -13293,10 +13095,9 @@ function tippenInhaltZeichnen() {
   var total = stats.correct + stats.wrong;
 
   var html = '<section><div data-leiste></div><div class="card">' +
-    '<p class="task-label">' + (tippenModus === 'wiederholung'
-      ? 'Zur Sicherheit noch einmal'
-      : tippenModus === 'alle' ? 'Noch einmal, zum Festigen'
-        : 'Schreib auf Russisch') +
+    '<p class="task-label">' + (tippenModus === 'alle'
+      ? 'Noch einmal, zum Festigen'
+      : 'Schreib auf Russisch') +
     (tippenSet !== null && LERNSETS[tippenSet] ? ' · Set ' + (tippenSet + 1) : '') + '</p>' +
     '<p class="word">' + esc(w.de) + hoerknopf(w.de, 'de') + '</p>' +
     (tHint ? '<p class="translit">[' + esc(w.tr) + ']</p>' : '') +
@@ -13330,7 +13131,7 @@ function tippenInhaltZeichnen() {
     if (tKb) html += tastaturHtml('key');
   }
   html += '<p class="session-info">' + pool.length +
-    (tippenModus === 'wiederholung' ? ' zum Auffrischen' : ' offen') + ' · ' +
+    (tippenModus === 'alle' ? ' im Stapel' : ' offen') + ' · ' +
     stats.correct + ' richtig · ' + stats.wrong + ' falsch' +
     (total > 0 ? ' · Quote ' + Math.round(stats.correct / total * 100) + ' %' : '') + '</p></section>';
 
@@ -13530,67 +13331,6 @@ function einstReiterKopf() {
   });
 }
 
-// ── Der Zähler in den Einstellungen ─────────────────────────
-// Zwei Tasten und ein Wert. Gedrückt halten zählt weiter — ohne das wäre der
-// Weg von 21 auf 60 Tage vierzig Tipper, und der Zähler wäre schlechter als
-// die vier festen Stufen, die er ablöst.
-var zaehlerAnlauf = null;   // Wartezeit bis zur Wiederholung
-var zaehlerTakt = null;     // die Wiederholung selbst
-var zaehlerLief = false;    // hat die Wiederholung schon gezählt?
-
-function zaehlerSchritt(key, schritt) {
-  var alt = state.settings[key];
-  var neu = zaehlerGrenzen(key, (alt | 0) + schritt);
-  if (neu === alt) return false;
-  state.settings[key] = neu;
-  save();
-  return true;
-}
-
-// Was im Zähler steht. **Null ist kein Wert, sondern eine Abwesenheit** — «0
-// neu/Tag» hieße «gar nichts Neues», gemeint ist aber «keine Grenze». Darum
-// tauschen beide Hälften den Text.
-function zaehlerAnzeige(key, wert, einheit) {
-  // «0 Tage» hieße «sofort wieder fällig» — das Gegenteil des Gemeinten.
-  if (key === 'auffrischen' && !wert) return { zahl: '\u2014', einheit: 'gar nicht' };
-  return { zahl: String(wert), einheit: einheit };
-}
-
-// Nur die Zahl und die zwei Anschläge, nicht die ganze Ansicht.
-function zaehlerFrischen(wo) {
-  if (!wo) return;
-  var key = wo.querySelector('[data-zaehler]').dataset.zaehler;
-  var wert = state.settings[key];
-  var a = zaehlerAnzeige(key, wert, wo.dataset.einheit || '');
-  var zahl = wo.querySelector('.zaehler-wert');
-  zahl.firstChild.nodeValue = a.zahl;
-  zahl.querySelector('small').textContent = a.einheit;
-  wo.querySelectorAll('[data-zaehler]').forEach(function (t) {
-    var s = parseInt(t.dataset.schritt, 10);
-    t.disabled = s < 0 ? wert <= +wo.dataset.min : wert >= +wo.dataset.max;
-  });
-}
-
-function zaehlerHalten(tick) {
-  zaehlerLoslassen();
-  zaehlerAnlauf = setTimeout(function () {
-    zaehlerTakt = setInterval(function () {
-      zaehlerLief = true;
-      if (!tick()) zaehlerLoslassen();
-    }, 90);
-  }, 420);
-}
-
-function zaehlerLoslassen() {
-  if (zaehlerAnlauf) { clearTimeout(zaehlerAnlauf); zaehlerAnlauf = null; }
-  if (zaehlerTakt) { clearInterval(zaehlerTakt); zaehlerTakt = null; }
-}
-// Am Dokument, nicht am Knopf: Wer den Finger neben die Taste zieht und dort
-// loslässt, bekäme sonst einen Zähler, der weiterläuft.
-['pointerup', 'pointercancel', 'pointerleave'].forEach(function (art) {
-  document.addEventListener(art, zaehlerLoslassen);
-});
-
 function renderEinstellungen() {
   var s = state.settings;
 
@@ -13662,30 +13402,6 @@ function renderEinstellungen() {
     return html + '</span></div>';
   }
 
-  // Ein Wert zum Hoch- und Runterzählen. Für eine **Frist** ist das die
-  // ehrlichere Form als vier Chips: Jede Zahl dazwischen ist eine gültige
-  // Antwort, und wer 18 Tage will, soll nicht zwischen 14 und 21 wählen müssen.
-  function zaehler(key, titel, hinweis, einheit) {
-    var g = ZAEHLER[key];
-    var wert = s[key];
-    var a = zaehlerAnzeige(key, wert, einheit);
-    function taste(schritt, name, symbol, aus) {
-      return '<button class="zaehler-taste" data-zaehler="' + key +
-        '" data-schritt="' + schritt + '" aria-label="' + esc(name) +
-        '"' + (aus ? ' disabled' : '') + '>' + symbol + '</button>';
-    }
-    return '<div class="setting"><span class="setting-text">' +
-      '<span class="setting-title">' + esc(titel) + '</span>' +
-      '<span class="setting-note">' + esc(hinweis) + '</span></span>' +
-      '<span class="zaehler" role="group" aria-label="' + esc(titel) + '"' +
-      ' data-min="' + g.min + '" data-max="' + g.max + '" data-einheit="' + esc(einheit) + '">' +
-      taste(-1, 'Einen weniger', ICON.minus, wert <= g.min) +
-      '<span class="zaehler-wert" role="status">' + esc(a.zahl) +
-      '<small>' + esc(a.einheit) + '</small></span>' +
-      taste(1, 'Einen mehr', ICON.plus, wert >= g.max) +
-      '</span></div>';
-  }
-
   function wahlText(key, titel, hinweis, werte) {
     // Ab vier Knöpfen bliebe für den Hinweis eine Schlucht von wenigen Wörtern
     // Breite — dann rückt die Wahl unter den Text.
@@ -13718,9 +13434,6 @@ function renderEinstellungen() {
       'Beim Lernen hilft das Zeichen; im Druck steht es nicht.',
       [{ wert: 'lernen', text: 'Beim Lernen' }, { wert: 'immer', text: 'Immer' },
        { wert: 'nie', text: 'Nie' }]) +
-    zaehler('auffrischen', 'Auffrischen nach',
-      'Fertig Gelerntes verschwindet aus «Tippen» und «Übersetzen». Nach dieser Frist kommt es einmal zur Sicherheit zurück — richtig beantwortet, und es ist wieder draußen. Auf null gestellt kommt gar nichts mehr zurück.',
-      'Tage') +
     schalter('fehlerprofil', 'Ablenker aus deinen Fehlern',
       'Die App merkt sich, womit du ein Wort verwechselt hast, und stellt genau diese ' +
       'Wörter wieder nebeneinander. Aus: Die Ablenker kommen aus dem Zufall.') +
@@ -13859,24 +13572,6 @@ function renderEinstellungen() {
       save();
       renderEinstellungen();
     });
-  });
-  // Der Zähler zeichnet **an Ort und Stelle** nach, nicht über die ganze
-  // Ansicht: Wer die Taste hält, hielte sonst einen Knopf, den der Renderlauf
-  // gerade weggeworfen hat — und die Wiederholung liefe ins Leere.
-  main.querySelectorAll('[data-zaehler]').forEach(function (b) {
-    var schritt = parseInt(b.dataset.schritt, 10);
-    function tick() {
-      if (!zaehlerSchritt(b.dataset.zaehler, schritt)) { zaehlerLoslassen(); return false; }
-      zaehlerFrischen(b.parentNode);
-      return true;
-    }
-    b.addEventListener('click', function () {
-      // Nach einem Halten hat die Wiederholung schon gezählt; der Klick, der
-      // beim Loslassen noch kommt, würde sonst einen Tag draufsetzen.
-      if (zaehlerLief) { zaehlerLief = false; return; }
-      tick();
-    });
-    b.addEventListener('pointerdown', function () { zaehlerHalten(tick); });
   });
   // Den App-Reiter gibt es erst, seit es einen Service Worker gibt — und seine
   // Knöpfe nur, wenn er offen ist.
@@ -14731,11 +14426,12 @@ function encodeBackup() {
 
   var s = state.settings;
   var einst = BK_SETTINGS.map(function (k) { return k && s[k] ? '1' : '0'; }).join('') +
-    '.' + s.tippenStufe + '.' + s.auffrischen + '.' +
-    // Darstellung und Farbton gab es bis ADR 0039; ihre Stellen bleiben leer
-    // stehen, damit das Schema nicht dorthin rutscht, wo ein älterer Code
-    // etwas anderes führt.
-    '-.-.' + SCHEMATA.map(function (t) { return t.wert; }).indexOf(s.schema);
+    '.' + s.tippenStufe +
+    // **Drei Platzhalter, drei entfallene Einstellungen.** An Stelle 3 stand
+    // bis ADR 0091 die Auffrischfrist, an 4 und 5 bis ADR 0039 Darstellung und
+    // Farbton. Die Stellen bleiben stehen, damit das Schema nicht dorthin
+    // rutscht, wo ein älterer Code etwas anderes führt.
+    '.-.-.-.' + SCHEMATA.map(function (t) { return t.wert; }).indexOf(s.schema);
 
   var abc = bkStaendeAus(state.abcBox, state.abcSeen, bkKennung);
   // Neuntes Feld: der Grammatikstand. Er führt Regeln, nicht Wörter — darum
@@ -14886,13 +14582,11 @@ function decodeBackup(code) {
     if (k && n < schalter.length) d.settings[k] = schalter.charAt(n) === '1';
   });
   d.settings.tippenStufe = parseInt(e[1], 10) || 3;
-  // Nicht `|| 21`: Eine gesicherte Null ist eine Entscheidung, keine Lücke
-  // (ADR 0074). Die Grenzen zieht danach `mergeState()`.
-  var frist = parseInt(e[2], 10);
-  d.settings.auffrischen = isNaN(frist) ? 21 : frist;
-  // An Stelle 4 und 5 standen bis ADR 0039 Darstellung und Farbton; heute steht
-  // dort ein «-». Ein Code von damals wird über dieselben Regeln übersetzt wie
-  // ein alter Lernstand, ein Code ohne Angabe bleibt bei der Vorgabe.
+  // Stelle 3 trug bis ADR 0091 die Auffrischfrist, 4 und 5 bis ADR 0039
+  // Darstellung und Farbton; heute steht dort ein «-». Ein Code von damals
+  // wird über dieselben Regeln übersetzt wie ein alter Lernstand, ein Code
+  // ohne Angabe bleibt bei der Vorgabe. **Was der Code führt und die App nicht
+  // mehr kennt, wird überlesen** — nicht geraten.
   var schema = SCHEMATA[parseInt(e[5], 10)];
   if (schema) d.settings.schema = schema.wert;
   else if (e.length > 4 && e[4] !== '-') {

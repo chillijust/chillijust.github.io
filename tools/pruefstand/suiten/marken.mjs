@@ -52,7 +52,7 @@ try {
   ansichtenZuruecksetzen();
   ALL_VOCAB.forEach(function (v) { state.boxes[v.id] = BOX_MAX; });
   state.settings.tippenStufe = 2;
-  tippenModus = 'lernen';
+  tippenModus = 'alle';   // Gemeistertes steht seit ADR 0091 nur dort
   // Die Nachschrift nach einem Schreibfehler hält den «Weiter»-Knopf zu — hier
   // geht es aber um die Prüfzeile, nicht um das Tor. Die Suite «strenge» prüft
   // es an seiner eigenen Stelle.

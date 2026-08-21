@@ -153,9 +153,11 @@ try {
   pruefe('C4 ausgeschaltet bleibt sie zu', tastaturVorgabe(true) === false);
   state.settings.tastaturAuto = true;
 
-  // «Tippen» — die Antwort ist immer kyrillisch.
+  // «Tippen» — die Antwort ist immer kyrillisch. Gemeistertes steht seit
+  // ADR 0091 nur noch in «Alle»; im Lernstapel wäre hier nichts.
   ALL_VOCAB.forEach(function (v) { state.boxes[v.id] = BOX_MAX; });
   state.settings.tippenStufe = 2;
+  tippenModus = 'alle';
   tKb = null;
   setTab('tippen');
   pruefe('C5 in «Tippen» steht die Tastatur gleich da',

@@ -26,7 +26,6 @@ try {
   state.typingStats = { correct: 33, wrong: 5 };
   state.transStats = { correct: 8, wrong: 2 };
   state.settings.tippenStufe = 2;
-  state.settings.auffrischen = 14;
   state.settings.schema = 'classic';
   state.settings.ton = false;
   state.settings.requireComplete = true;
@@ -113,9 +112,15 @@ try {
     zurueck.answered === 254 && zurueck.factIdx === 12 &&
     zurueck.typingStats.correct === 33 && zurueck.transStats.wrong === 2);
   pruefe('B6 Einstellungen erhalten', zurueck.settings.tippenStufe === 2 &&
-    zurueck.settings.auffrischen === 14 && zurueck.settings.schema === 'classic' &&
+    zurueck.settings.schema === 'classic' &&
     zurueck.settings.ton === false && zurueck.settings.requireComplete === true &&
     zurueck.settings.confirmUeben === true);
+  // **Die Stelle der Auffrischfrist bleibt als Platzhalter stehen** (ADR 0091),
+  // damit das Schema dahinter nicht verrutscht — dieselbe Regel wie bei
+  // Darstellung und Farbton seit ADR 0039.
+  pruefe('B6b die entfallene Frist kommt nicht zurück',
+    zurueck.settings.auffrischen === undefined,
+    String(zurueck.settings.auffrischen));
   pruefe('B7 Unberührtes bleibt unberührt',
     Object.keys(zurueck.boxes).length === 40 && Object.keys(zurueck.satzBox).length === 6);
 
@@ -159,7 +164,7 @@ try {
   q('#tCheck').click();
   pruefe('F2 Rückmeldung steht', tResult === 'wrong');
   setTab('uebersetzen');
-  trLevel = 2; trModus = 'wiederholung';
+  trLevel = 2; trModus = 'alle';
   setTab('sicherung');
 
   // Ein ganz anderer Stand: nichts gelernt

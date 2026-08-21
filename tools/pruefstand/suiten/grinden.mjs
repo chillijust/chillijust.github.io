@@ -48,8 +48,11 @@ try {
   pruefe('B2 und nichts Ungesehenes', tippenAlle().every(function (v) {
     return (state.boxes[v.id] || 0) >= 1;
   }));
-  pruefe('B3 «Wiederholung» findet nichts — die Frist läuft noch',
-    tippenWiederholung().length === 0, String(tippenWiederholung().length));
+  // Seit ADR 0091 gibt es keinen Wiederholungsstapel mehr — Gemeistertes ist
+  // fertig und steht nur noch in «Alle».
+  pruefe('B3 der Lernstapel läßt Gemeistertes draußen',
+    tippenLernen().every(function (v) { return (state.boxes[v.id] || 0) < BOX_MAX; }),
+    String(tippenLernen().length));
   pruefe('B4 genau das ist der Ausweg: gemeistert und trotzdem übbar',
     tippenAlle().filter(function (v) { return (state.boxes[v.id] || 0) >= BOX_MAX; }).length === 5);
 
@@ -74,7 +77,7 @@ try {
   setTab('tippen');
   filterSetzen(true); renderFilter();
   var stapel = alle('[data-fw="tmodus"]');
-  pruefe('D1 drei Stapel', stapel.length === 3, String(stapel.length));
+  pruefe('D1 zwei Stapel', stapel.length === 2, String(stapel.length));
   var woher = alle('[data-fw="tset"]');
   pruefe('D2 «Der Reihe nach» plus jedes Set',
     woher.length === LERNSETS.length + 1, String(woher.length));
@@ -88,7 +91,7 @@ try {
     woher[1].textContent.indexOf('· ' + tippenWoerter(0, tippenModus).length) !== -1,
     woher[1].textContent);
   // Die Zahl muss dem **gewählten Stapel** folgen, nicht einem festen.
-  stapel[2].click();       // «Alle»
+  stapel[1].click();       // «Alle» — seit ADR 0091 der zweite, nicht der dritte
   filterSetzen(true); renderFilter();
   woher = alle('[data-fw="tset"]');
   pruefe('D5 sie folgt dem gewählten Stapel',

@@ -20,7 +20,7 @@
     ["tippen", "#tInput", "In dieses Feld wird geschrieben. Die eingebaute kyrillische Tastatur kommt von allein, denn welche Sprache die Gerätetastatur hat, kann eine Webseite nicht bestimmen."],
     ["tippen", "#tKbToggle", "Damit blendest du sie aus, wenn du lieber mit der Tastatur des Geräts schreibst. Die Wahl merkt sich die App für das nächste Mal."],
     ["tippen", "#tCheck", "Nach dem Prüfen färbt sich das Getippte Zeichen für Zeichen. Satzzeichen, Groß- und Kleinschreibung und ё gegen е kosten dich nichts — es geht um das Wort, nicht um Pedanterie."],
-    ["tippen", "#filterKnopf", "Hier wählst du zwischen Lernen und Wiederholung. Fertig Gelerntes verlässt den Stapel und kommt erst nach der Auffrischfrist einmal zur Sicherheit zurück."]
+    ["tippen", "#filterKnopf", "Hier wählst du den Stapel und das Set. «Lernen» zeigt, was noch aussteht — fertig Gelerntes verlässt ihn. Über «Alle» kommst du jederzeit wieder daran."]
   ],
   "uebersetzen": [
     ["uebersetzen", ".card", "Ein Satz geht erst auf, wenn jedes seiner Wörter sitzt. Darum steht diese Übung am Ende des Wegs — sie prüft nicht einzelne Vokabeln, sondern ob du sie zusammensetzen kannst."],

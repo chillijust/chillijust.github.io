@@ -348,9 +348,9 @@ vier Ansichten, die keine sind: Bilanz, Sicherung, Einstellungen, Tickets. Der B
 **Home** (`renderHome()`, Startansicht) ist kein Verzeichnis, sondern ein Lagebild. Jede
 Kachel nennt über `uebungsStand()`, was dort ansteht — «Set 1 · 11 offen», «21 fällig»,
 «noch gesperrt». Darüber steht `empfehlung()`: der eine Knopf, der immer richtig ist.
-Seine Reihenfolge ist bewusst: **erst fortsetzen**, dann auffrischen (wenn fünf oder mehr
-Dinge warten), dann das laufende Lernset, dann offene Sätze, dann Tippen, sonst Freestyle
-als Kür.
+Seine Reihenfolge ist bewusst: **erst fortsetzen**, dann das laufende Lernset, dann
+offene Sätze, dann Tippen, sonst Freestyle als Kür. Eine Stufe «Erst auffrischen» stand
+bis ADR 0091 an zweiter Stelle; sie ist mit dem Auffrischen entfallen.
 
 **Fortsetzen geht vor.** Wer vor zwei Stunden noch in «Übersetzen» geantwortet hat, will
 dorthin zurück und nicht in die Lernsets. `zuletztGeuebt(id)` merkt sich die Übung bei
@@ -527,7 +527,7 @@ weicht ab», sondern «hier stehen Sie».
 | --- | --- |
 | Lernsets | Auswahl (aktuelles Set · alles Freigeschaltete), einzelnes Set |
 | Freestyle | Thema |
-| Tippen | Stapel (Lernen · Wiederholung) |
+| Tippen | Stapel (Lernen · Alle), Vorrat (Set) |
 | Übersetzen | Stufe, Richtung, Stapel |
 
 `filterInhaltHtml()` baut die Gruppen, `filterWaehlen(gruppe, wert)` setzt den Wert,
@@ -662,7 +662,7 @@ sich dabei zugleich: die **Form** (`trArt()`) von der Vorlage zur freien Eingabe
 | 1 | DE → RU | Kacheln | bauen |
 | 2 | RU → DE | getippt | selbst formulieren |
 | 3 | DE → RU | getippt | das Schwerste |
-| 4 (Auffrischung) | DE → RU | getippt | die stärkste Behauptung |
+| 4 | DE → RU | getippt | die stärkste Behauptung |
 
 **Die Übung zeigt eine Stufe, Home zählt alle.** `uebungsStand('uebersetzen')` summiert
 über `satzStufen()`; die Übung arbeitet immer nur auf `trLevel`. Wer seine Stufe fertig
@@ -847,36 +847,30 @@ Kacheln mit ihren Beständen:
 | Stapel | Wörter | Sätze |
 | --- | --- | --- |
 | **Lernen** | `tippenStufe <= box < BOX_MAX` | `satzBox < BOX_MAX` |
-| **Wiederholung** | `box === BOX_MAX` **und** fällig | `satzBox === BOX_MAX` **und** fällig |
-| *(ruhend, nicht sichtbar)* | `box === BOX_MAX`, noch nicht fällig | `satzBox === BOX_MAX`, noch nicht fällig |
-| **Alle** *(nur Sätze)* | — | alle freigeschalteten, ohne Rücksicht auf Stufe und Frist |
+| **Alle** | alles Begonnene (`box >= 1`) | alle freigeschalteten, ohne Rücksicht auf Stufe |
+| *(fertig)* | `box === BOX_MAX` — `tippenFertig()` | `satzBox === BOX_MAX` — `trFertig()` |
 
-Wer etwas fertig lernt, sieht es also **nicht mehr** — bis die Auffrischfrist um ist.
-Dann kommt es einmal zur Sicherheit; richtig beantwortet ruht es wieder, falsch fällt es
-eine Stufe zurück und steht damit von selbst im Lernstapel.
+Wer etwas fertig lernt, sieht es also **nicht mehr** — und seit ADR 0091 kommt es auch
+nicht von selbst zurück. `intervallFuer(BOX_MAX)` ist `Infinity`; einen Stapel
+«Wiederholung» gibt es nicht mehr.
 
 **Beim Lernen gilt keine Fälligkeit.** Wer üben will, soll üben dürfen, nicht auf den
-nächsten Tag warten. Gefiltert wird erst auf der Endstufe — dort ist Warten der Sinn der
-Sache.
+nächsten Tag warten. `intervallFuer(box)` liefert darunter die feste Leitner-Leiter
+`INTERVALL` (0 · 1 · 3 · 7 Tage) — sie trägt den Lernprozeß und steht nicht zur
+Diskussion (ADR 0015).
 
-`intervallFuer(box)` liefert für die Endstufe die Einstellung `auffrischen`
-(7/14/21/30 Tage, Vorgabe 21), darunter die feste Leitner-Leiter `INTERVALL`.
+**Ein Selbstwechsel zwischen den Stapeln findet nicht mehr statt.** Er hatte nur einen
+Grund — den leeren Wiederholungsstapel —, und den gibt es nicht. Ist der Lernstapel
+leer, steht der Leerzustand «Alles getippt» da, und ein Knopf führt nach «Alle».
 
-**Umschalten geschieht von selbst:** Ist der gewählte Stapel leer und der andere nicht,
-wechseln `renderTippen()` beziehungsweise `buildTransTask()` hinüber. Sind beide leer,
-nennt der Leerzustand, wann das Nächste fällig wird (`naechsteAuffrischung()`,
-`trNaechsteAuffrischung()`). **Der Stapel «Alle» ist davon ausgenommen** — wer ihn
-gewählt hat, soll darin bleiben.
+**«Alle» ist der einzige Weg zu Gemeistertem.** Wer alles fertig hat, stünde sonst vor
+einem Stapel mit null und käme nie wieder daran — «Üben können hängt nie an einem Datum»
+(ADR 0048). Die Vorgabe bleibt «Lernen»: ADR 0015 gilt für den Regelfall, nicht für den
+ausdrücklichen Wunsch.
 
-**«Alle» hebt die Teilung auf**, und es musste ihn geben: Wer alle Sätze gemeistert hat,
-stand vor zwei Stapeln mit null und konnte nichts wiederholen, bis die Frist um war. Für
-Wörter gab es diesen Ausweg längst (`uebAuswahl === 'alle'` in «Lernsets», und «Freestyle»
-kennt den ganzen Wortschatz ohnehin); für Sätze fehlte er. Die Vorgabe bleibt «Lernen» —
-ADR 0015 gilt für den Regelfall, nicht für den ausdrücklichen Wunsch.
-
-Eine Antwort im Stapel «Alle» zählt ganz normal: Sie hält den Satz auf `BOX_MAX` und
-schiebt seine nächste Auffrischung nach hinten. Gemeldet wird nichts — `meisterPruefen()`
-kennt nur den **Übergang** auf die Endstufe (ADR 0026).
+Eine Antwort im Stapel «Alle» zählt ganz normal: Sie hält den Satz auf `BOX_MAX`.
+Gemeldet wird nichts — `meisterPruefen()` kennt nur den **Übergang** auf die Endstufe
+(ADR 0026).
 
 ### Sätze führen dieselbe Leiter
 
@@ -934,7 +928,7 @@ aber jede neue Vokabel würde alle folgenden verschieben und alte Codes still ve
 `tools/build.mjs` prüft, dass keine zwei Vokabeln, Sätze oder Fakten dieselbe Kennung
 tragen, und bricht sonst ab — die Wahrscheinlichkeit ist winzig, die Folge wäre lautlos.
 
-**Tagesgenau reicht**, weil alle Fristen in Tagen rechnen (`INTERVALL`, `auffrischen`).
+**Tagesgenau reicht**, weil alle Fristen in Tagen rechnen (`INTERVALL`).
 
 **Die Schalter stehen an festen Stellen** (`BK_SETTINGS`). Eine Einstellung, die es nicht
 mehr gibt, hinterlässt darum ein `null` als Platzhalter — wandern die Stellen, liest ein
@@ -1007,7 +1001,7 @@ Ein Buchstabe kennt **zwei Schwellen**, genau wie eine Vokabel:
 | Schwelle | Stufe | Prüfung | Bedeutung |
 | --- | --- | --- | --- |
 | **sitzt** | ab `SATZ_STUFE` (2) | `abcSitzt()` | man erkennt ihn — er zählt in «x von 33 sitzen» |
-| **gemeistert** | ab `BOX_MAX` (4) | `abcGemeistert()` | er verlässt den Stapel bis zur Auffrischfrist |
+| **gemeistert** | ab `BOX_MAX` (4) | `abcGemeistert()` | er verlässt den Stapel — endgültig (ADR 0091) |
 
 `abcPool()` fragt nach **gemeistert**, nicht nach «sitzt» — sonst fiele ein Buchstabe
 schon auf Stufe 2 aus der Übung heraus, und zwischen Erkennen und Können läge nichts mehr.
@@ -1831,18 +1825,14 @@ auf einen sinnvollen Bereich:
 | `tippenStufe` | 3 | Ab welcher Leitner-Stufe ein Wort in „Tippen" erscheint (1 bis 4). Ein **gewähltes Lernset sticht diese Schwelle** und beginnt bei 1 (ADR 0048). |
 | `tastaturAuto` | **an** | Verlangt eine Aufgabe Kyrillisch, klappt die eingebaute Tastatur gleich auf. Aus: Sie holen sie bei Bedarf. Wo Deutsch gefragt ist, kommt sie nie. |
 | `betonung` | `lernen` | Wann Betonungszeichen zu sehen sind: `lernen` (bis Stufe 3), `immer`, `nie` (ADR 0054). |
-| `auffrischen` | 21 | Tage, bis Fertiges einmal zur Sicherheit zurückkommt. **Frei wählbar von 1 bis 365** über einen Zähler mit − und + (ADR 0015). |
 | `fehlerprofil` | an | Ablenker aus den eigenen Verwechslungen statt aus dem Zufall (ADR 0056). |
 | `rekonstruktion` | `woerter` | Nach einem Schreibfehler das Wort einmal nachschreiben: `woerter` · `immer` (auch Sätze) · `nie` (ADR 0056). |
 | `schema` | `dark` | Farbschema: `dark`, `classic`, `gruen`, `blau`, `rosa`. Steuert `data-schema` am `<html>`-Element; `dark` trägt keines. |
 
-Die meisten Einstellungen sind Schalter oder eine Chip-Reihe; `auffrischen` ist ein
-**Zähler**. Er hat drei Eigenheiten, die zusammengehören: `auffrischGrenzen()` kappt in
-`mergeState()` **und** beim Zählen auf 1…365, **Gedrückthalten zählt weiter** (420 ms
-Anlauf, dann alle 90 ms), und er zeichnet **an Ort und Stelle** nach statt über
-`renderEinstellungen()` — wer die Taste hält, hielte sonst einen Knopf, den der Renderlauf
-gerade weggeworfen hat. Der Klick, der nach einem Halten noch kommt, wird über
-`zaehlerLief` verworfen, sonst legte das Loslassen einen Tag drauf.
+Alle Einstellungen sind heute Schalter oder Chip-Reihen. Den **Zähler** (zwei Tasten und
+ein Wert, mit Gedrückthalten) gab es für `auffrischen` und `tagesmass`; mit beiden ist er
+in ADR 0091 entfallen. Wer wieder einen braucht, baut ihn neu — der alte Code stand
+sonst als Leiche herum.
 
 Eine neue Einstellung braucht drei Dinge: einen Vorgabewert in `defaultSettings()`,
 eine Zeile in `renderEinstellungen()` und — falls sie das Verhalten einer Übung
@@ -1896,7 +1886,7 @@ Der Hörknopf der Frageseite fehlt dort bewusst — er läse die Antwort vor.
   drei Wörter, die am nächsten dran sind. Während der Rückmeldung bleibt das Wort stehen,
   auch wenn ein Fehler es unter die Schwelle geworfen hat.
 - **Tippen hat zwei Achsen** (ADR 0048): den **Stapel** (`tippenModus`: Lernen ·
-  Wiederholung · Alle) und den **Vorrat** (`tippenSet`: der ganze Wortschatz oder ein
+  Alle — «Wiederholung» ist mit ADR 0091 entfallen) und den **Vorrat** (`tippenSet`: der ganze Wortschatz oder ein
   einzelnes Lernset). Beide zusammen liefert `tippenWoerter(setNr, modus)` — dieselbe
   Funktion, die auch die Zahlen in der Auswahl rechnet, damit ein Chip nie etwas anderes
   verspricht, als sein Antippen liefert. Ein Set, das es nach einer Lehrplanänderung nicht

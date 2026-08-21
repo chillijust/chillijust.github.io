@@ -108,16 +108,20 @@ try {
   tippenModus = 'lernen'; tWord = null;
   setTab('tippen');
   q('#filterKnopf').click();
+  // **Zwei Stapel, nicht drei** (ADR 0091). «Wiederholung» ist weg — es gäbe
+  // nichts mehr hineinzulegen, seit die Endstufe das Ende ist.
   var st = alle('[data-fw="tmodus"]');
-  pruefe('F1 drei Stapel mit Zahlen', st.length === 3 &&
+  pruefe('F1 zwei Stapel mit Zahlen', st.length === 2 &&
     st[0].textContent.indexOf('Lernen · 4') === 0 &&
-    st[1].textContent.indexOf('Wiederholung · 2') === 0 &&
-    st[2].textContent.indexOf('Alle · 6') === 0,
+    st[1].textContent.indexOf('Alle · 6') === 0,
     st.map(function (x) { return x.textContent; }).join(' | '));
+  pruefe('F1b und keiner heißt mehr «Wiederholung»',
+    st.every(function (x) { return x.textContent.indexOf('Wiederholung') === -1; }));
   st[1].click();
-  pruefe('F2 Wechsel wirkt', tippenModus === 'wiederholung' && !filterOffen &&
+  pruefe('F2 Wechsel wirkt', tippenModus === 'alle' && !filterOffen &&
     q('#filterKnopf').classList.contains('aktiv'));
-  pruefe('F3 die Karte sagt es', q('.task-label').textContent.indexOf('Sicherheit') !== -1);
+  pruefe('F3 die Karte sagt es', q('.task-label').textContent.indexOf('Festigen') !== -1,
+    q('.task-label').textContent);
 
   // G · Übersetzen
   ALL_VOCAB.forEach(function (v) { state.boxes[v.id] = BOX_MAX; state.lastSeen[v.id] = Date.now(); });

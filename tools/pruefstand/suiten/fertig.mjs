@@ -37,9 +37,9 @@ try {
   // ── A · Der dritte Stapel: Fertiges wiederholen ───────────
   allesFertig();
   trLevel = 1;
-  pruefe('A0 nichts ist fällig — der gemeldete Fall',
-    trLernen(1).length === 0 && trWiederholung(1).length === 0 && trRuhend(1).length > 0,
-    trRuhend(1).length + ' ruhen');
+  pruefe('A0 nichts ist offen — der gemeldete Fall',
+    trLernen(1).length === 0 && trFertig(1).length > 0,
+    trFertig(1).length + ' fertig');
 
   trModus = 'alle';
   pruefe('A1 «Alle» gibt den ganzen freigeschalteten Bestand her',
@@ -57,11 +57,11 @@ try {
   filterSetzen(true);
   renderFilter();
   var chips = alle('[data-fw="trmodus"]').map(function (c) { return c.dataset.fv; });
-  pruefe('A5 drei Stapel stehen zur Wahl',
-    chips.join(',') === 'lernen,wiederholung,alle', chips.join(','));
+  pruefe('A5 zwei Stapel stehen zur Wahl',
+    chips.join(',') === 'lernen,alle', chips.join(','));
   pruefe('A6 «Alle» nennt seine Zahl',
-    alle('[data-fw="trmodus"]')[2].textContent.indexOf(String(freieSaetze(1).length)) !== -1,
-    alle('[data-fw="trmodus"]')[2].textContent);
+    alle('[data-fw="trmodus"]')[1].textContent.indexOf(String(freieSaetze(1).length)) !== -1,
+    alle('[data-fw="trmodus"]')[1].textContent);
   filterWaehlen('trmodus', 'lernen');
   pruefe('A7 zurück auf «Lernen» führt in den Leerzustand',
     trModus === 'lernen' && !!q('.leer'));
@@ -128,7 +128,7 @@ try {
   pruefe('C1 Home zählt ihn', uebungsStand('uebersetzen').text.indexOf('1 offen') === 0,
     uebungsStand('uebersetzen').text);
   pruefe('C2 die eigene Stufe hat nichts',
-    trLernen(trLevel).length === 0 && trWiederholung(trLevel).length === 0);
+    trLernen(trLevel).length === 0);
   pruefe('C3 trStufeMitArbeit findet die andere',
     !!trStufeMitArbeit() && trStufeMitArbeit().stufe === stufen[1],
     JSON.stringify(trStufeMitArbeit()));

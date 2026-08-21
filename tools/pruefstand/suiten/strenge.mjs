@@ -41,7 +41,7 @@ try {
   pruefe('A1 nachschreiben gilt für Wörter, nicht für Sätze',
     defaultSettings().rekonstruktion === 'woerter');
   pruefe('A2 ein Tagesmaß gibt es nicht mehr',
-    defaultSettings().tagesmass === undefined && typeof ZAEHLER.tagesmass === 'undefined');
+    defaultSettings().tagesmass === undefined);
   pruefe('A3 das Fehlerprofil ist an', defaultSettings().fehlerprofil === true);
   pruefe('A4 ein Stand von vor 1.9.0 bekommt beide', (function () {
     var alt = mergeState({ settings: {} }).settings;
@@ -352,16 +352,13 @@ try {
   })[0].click();
   pruefe('G7 ein Tipp stellt um', state.settings.rekonstruktion === 'nie');
 
-  // Der Auffrischzähler darf davon nichts abbekommen.
+  // **Auf dem Lernweg steht überhaupt kein Zähler mehr** (ADR 0091): Mit dem
+  // Tagesmaß und der Auffrischfrist ist auch die Zählermechanik entfallen.
   einstReiter = 'lernweg';
   renderEinstellungen();
-  var vorherFrist = state.settings.auffrischen;
-  alle('[data-zaehler="auffrischen"]').filter(function (t) {
-    return t.dataset.schritt === '1';
-  })[0].click();
-  pruefe('G8 der Auffrischzähler rechnet weiter mit seinen Grenzen',
-    state.settings.auffrischen === vorherFrist + 1,
-    String(state.settings.auffrischen));
+  pruefe('G8 kein Zähler mehr auf dem Lernweg',
+    alle('[data-zaehler]').length === 0 && !q('.zaehler-wert'),
+    String(alle('[data-zaehler]').length));
 
   // ── H · Nichts davon steht im Sicherungscode ──────────────
   // Beobachtungen über das Gerät, kein Lernstand — wie das Tempo (ADR 0052).

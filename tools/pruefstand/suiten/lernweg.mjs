@@ -73,10 +73,14 @@ try {
   pruefe('D1 gerade gesehen ist nicht fällig', !faellig(w0, Date.now()));
   state.lastSeen[w0.id] = Date.now() - 2 * TAG;
   pruefe('D2 nach zwei Tagen ist Stufe 1 fällig', faellig(w0, Date.now()));
+  // **Die Endstufe ist das Ende** (ADR 0091). Bis 2.7.4 kam ein gemeistertes
+  // Wort nach der Auffrischfrist noch einmal; jetzt gar nicht mehr.
   state.boxes[w0.id] = 4;
-  pruefe('D3 Stufe 4 hält 21 Tage', !faellig(w0, Date.now()));
+  pruefe('D3 Stufe 4 ruht', !faellig(w0, Date.now()));
   state.lastSeen[w0.id] = Date.now() - 22 * TAG;
-  pruefe('D4 nach 22 Tagen wieder fällig', faellig(w0, Date.now()));
+  pruefe('D4 auch nach 22 Tagen nicht fällig', !faellig(w0, Date.now()));
+  state.lastSeen[w0.id] = Date.now() - 365 * TAG;
+  pruefe('D4b und nach einem Jahr auch nicht', !faellig(w0, Date.now()));
 
   // E · Tippen-Sperre
   state.boxes = {}; state.lastSeen = {};
