@@ -352,6 +352,7 @@ tools/pruefstand/         Prüfstand: lauf.mjs, suiten/*.mjs, bild.mjs (siehe RE
 tools/freistellen.py      Maskottchen aus einem Bild freistellen (ohne Bildbibliothek)
 tools/skaliere.py         PNG auf Icon-Größe bringen (ohne Bildbibliothek)
 tools/appikon.py          App-Symbol bauen: Grund tauschen, Sprechblase umdrehen
+docs/appikon-hell-*.png   das ausgelieferte App-Symbol als Datei (180 und 1024)
 tools/palette.py          getönte Paletten aus dem neutralen Grundton rechnen
 docs/                     Architektur, Datenmodell, Deploy, Entscheidungen (ADRs)
 docs/decisions/           kurze ADRs, fortlaufend nummeriert — README.md ist der Index
@@ -722,7 +723,12 @@ gibt es den Skill `ticket`.
   `apple-touch-icon` einmal, beim Anlegen der Verknüpfung — keine Medienabfrage, keine
   Schnittstelle dafür. Ein Umschalter in den Einstellungen wäre eine Attrappe. Gebaut
   wird das Symbol mit `tools/appikon.py`; wer die Farben ändert, denkt an die
-  Sprechblase, die sonst im hellen Grund verschwindet.
+  Sprechblase, die sonst im hellen Grund verschwindet. **Das ausgelieferte Symbol ist
+  keine Datei** — es steht als Daten-URI im `<head>` von `index.html` (180 × 180, Grund
+  `#F4F2ED`), und wer es sucht, findet im Repo sonst nur `docs/IMG_2942.png`: das
+  **türkise Original**, aus dem es gebaut wird. Zum Nachsehen liegt es zusätzlich als
+  `docs/appikon-hell-180.png` (bitgleich mit dem ausgelieferten) und
+  `docs/appikon-hell-1024.png` (große Fassung).
 - **Das Power-Training zählt regulär mit** (ADR 0034). `ptPruefen()` ruft `updateBox()`
   und `meisterPruefen()` wie jede andere Übung; ein zweiter, abgekoppelter Lernstand wäre
   eine Lüge über den eigenen Fortschritt. `ptPool()` räumt beim Nachsehen auf — wer wieder
