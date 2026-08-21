@@ -4335,7 +4335,7 @@ var APP_STAND = '2026-08-21'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.9.0T'; /* == VERSION == */
+var APP_VERSION = '2.9.1T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -9078,7 +9078,12 @@ function uebPruefen() {
   // dort, wo am meisten geschrieben wird.
   rekoVerlangen(q.word.ru, q.mode === 'tiles' || q.mode === 'tippen', uebCorrect, false);
   var vorher = state.boxes[q.word.id] || 0;
-  updateBox(q.word.id, uebCorrect, false);
+  // **Hier wird gemeistert** (ADR 0092). Bis 2.9.0 stand an dritter Stelle ein
+  // festes `false` — die Tippaufgabe, die ADR 0088 eigens für «Lernsets»
+  // eingeführt hat, zählte damit nie als getippt. Der Deckel griff jedes Mal,
+  // `tippFolge` blieb auf null, und kein Wort erreichte je die Endstufe.
+  // *Eine Bedingung, die überall gleich lautet, prüft nichts.*
+  updateBox(q.word.id, uebCorrect, q.mode === 'tippen');
   meisterMeldung = null;
   meisterPruefen(vorher, state.boxes[q.word.id], 'Wort', q.word.ru + ' — ' + q.word.de,
     woerterGemeistert() + ' von ' + ALL_VOCAB.length + ' Wörtern');
@@ -9889,7 +9894,21 @@ function trInhaltZeichnen() {
     html += '</div>' + hoerzeile(t.ru, t.de) + patzerHtml() + meisterHtml();
   }
 
-  html += '</div>' + rekoHtml() + '<div class="btn-row">';
+  html += '</div>';
+  // Die eingebaute Tastatur nur, wo sie hilft: Ein deutscher Satz l\u00e4sst sich
+  // mit der Ger\u00e4tetastatur schreiben, ein kyrillischer oft nicht.
+  if (getippt && t.loesungRu && trPhase === 'ask') {
+    if (trKb === null) trKb = tastaturVorgabe(t.loesungRu);
+    html += '<button class="kb-toggle" id="trKbToggle">' +
+      (trKb ? 'Tastatur ausblenden' : 'Tastatur einblenden') + '</button>';
+    if (trKb) html += tastaturHtml('trkey');
+  }
+
+
+  // **Die Abgabe steht unter der Tastatur** (ADR 0092) — in allen Übungen
+  // gleich. Wer die Tastatur einblendet, schiebt den Knopf sonst über den
+  // Daumen hinaus, und in «Lernsets» war es seit jeher andersherum als hier.
+  html += rekoHtml() + '<div class="btn-row">';
   if (trPhase === 'ask') {
     html += '<button class="btn ghost" id="trReveal">Aufdecken</button>';
     // Beim Schreiben braucht es die Abgabe immer \u2014 anders als bei den Kacheln
@@ -9903,15 +9922,6 @@ function trInhaltZeichnen() {
       '>Weiter \u2192</button>';
   }
   html += '</div>';
-
-  // Die eingebaute Tastatur nur, wo sie hilft: Ein deutscher Satz l\u00e4sst sich
-  // mit der Ger\u00e4tetastatur schreiben, ein kyrillischer oft nicht.
-  if (getippt && t.loesungRu && trPhase === 'ask') {
-    if (trKb === null) trKb = tastaturVorgabe(t.loesungRu);
-    html += '<button class="kb-toggle" id="trKbToggle">' +
-      (trKb ? 'Tastatur ausblenden' : 'Tastatur einblenden') + '</button>';
-    if (trKb) html += tastaturHtml('trkey');
-  }
 
   if (ptOffen()) {
     html += '<button class="kb-toggle" id="ptLosFuss">Power-Training \u2192 ' +
@@ -11530,7 +11540,18 @@ function gramUebenHtml(b) {
     html += '</p></div>' + gramWarumHtml(b, q) + meisterHtml();
   }
 
-  html += '</div>' + rekoHtml() + '<div class="btn-row">';
+  html += '</div>';
+  if (q.tippen && gramPhase === 'ask') {
+    if (gramKb === null) gramKb = tastaturVorgabe(true);
+    html += '<button class="kb-toggle" id="gramKbToggle">' +
+      (gramKb ? 'Tastatur ausblenden' : 'Tastatur einblenden') + '</button>';
+    if (gramKb) html += tastaturHtml('gramkey');
+  }
+
+  // **Die Abgabe steht unter der Tastatur** (ADR 0092) — in allen Übungen
+  // gleich. Wer die Tastatur einblendet, schiebt den Knopf sonst über den
+  // Daumen hinaus, und in «Lernsets» war es seit jeher andersherum als hier.
+  html += rekoHtml() + '<div class="btn-row">';
   if (gramPhase === 'ask') {
     html += '<button class="btn ghost" id="gramWarum" aria-expanded="' +
       (gramRegelOffen ? 'true' : 'false') + '" aria-controls="gramRegelKlapp">Mehr \u2026</button>' +
@@ -11546,12 +11567,6 @@ function gramUebenHtml(b) {
   html += '<div class="regelklapp' + (gramRegelOffen ? ' auf' : '') + '" id="gramRegelKlapp"' +
     ' aria-hidden="' + (gramRegelOffen ? 'false' : 'true') + '"><div class="klappwrap">' +
     gramRegelHtml(b, false) + '</div></div>';
-  if (q.tippen && gramPhase === 'ask') {
-    if (gramKb === null) gramKb = tastaturVorgabe(true);
-    html += '<button class="kb-toggle" id="gramKbToggle">' +
-      (gramKb ? 'Tastatur ausblenden' : 'Tastatur einblenden') + '</button>';
-    if (gramKb) html += tastaturHtml('gramkey');
-  }
   html += '<p class="session-info">' + gramPool().length + ' offen · ' +
     gramMeisterschaft() + ' von ' + GRAMMATIK.length + ' Regeln sitzen</p>';
   return html;
@@ -12124,7 +12139,18 @@ function orthoUebenHtml(r) {
       orthoWarumHtml(r, a) + meisterHtml();
   }
 
-  html += '</div>' + rekoHtml() + '<div class="btn-row">';
+  html += '</div>';
+  if (q.tippen && orthoPhase === 'ask') {
+    if (orthoKb === null) orthoKb = tastaturVorgabe(true);
+    html += '<button class="kb-toggle" id="orthoKbToggle">' +
+      (orthoKb ? 'Tastatur ausblenden' : 'Tastatur einblenden') + '</button>';
+    if (orthoKb) html += tastaturHtml('orthokey');
+  }
+
+  // **Die Abgabe steht unter der Tastatur** (ADR 0092) — in allen Übungen
+  // gleich. Wer die Tastatur einblendet, schiebt den Knopf sonst über den
+  // Daumen hinaus, und in «Lernsets» war es seit jeher andersherum als hier.
+  html += rekoHtml() + '<div class="btn-row">';
   if (orthoPhase === 'ask') {
     html += '<button class="btn ghost" id="orthoWarum" aria-expanded="' +
       (orthoRegelOffen ? 'true' : 'false') + '" aria-controls="orthoRegelKlapp">Mehr …</button>' +
@@ -12138,12 +12164,6 @@ function orthoUebenHtml(r) {
   html += '<div class="regelklapp' + (orthoRegelOffen ? ' auf' : '') + '" id="orthoRegelKlapp"' +
     ' aria-hidden="' + (orthoRegelOffen ? 'false' : 'true') + '"><div class="klappwrap">' +
     orthoRegelHtml(r, false) + '</div></div>';
-  if (q.tippen && orthoPhase === 'ask') {
-    if (orthoKb === null) orthoKb = tastaturVorgabe(true);
-    html += '<button class="kb-toggle" id="orthoKbToggle">' +
-      (orthoKb ? 'Tastatur ausblenden' : 'Tastatur einblenden') + '</button>';
-    if (orthoKb) html += tastaturHtml('orthokey');
-  }
   html += '<p class="session-info">' + orthoPool().length + ' offen · ' +
     orthoMeisterschaft() + ' von ' + ORTHO.length + ' Regeln sitzen</p>';
   return html;
@@ -12518,7 +12538,18 @@ function ptInhaltZeichnen() {
       '</p></div>' + hoerzeile(q.wort.ru, q.wort.de) + meisterHtml();
   }
 
-  html += '</div>' + rekoHtml() + '<div class="btn-row">';
+  html += '</div>';
+  if (q.stufe !== 'kacheln' && ptPhase === 'ask') {
+    if (ptKb === null) ptKb = tastaturVorgabe(true);
+    html += '<button class="kb-toggle" id="ptKbToggle">' +
+      (ptKb ? 'Tastatur ausblenden' : 'Tastatur einblenden') + '</button>';
+    if (ptKb) html += tastaturHtml('ptkey');
+  }
+
+  // **Die Abgabe steht unter der Tastatur** (ADR 0092) — in allen Übungen
+  // gleich. Wer die Tastatur einblendet, schiebt den Knopf sonst über den
+  // Daumen hinaus, und in «Lernsets» war es seit jeher andersherum als hier.
+  html += rekoHtml() + '<div class="btn-row">';
   if (ptPhase === 'ask') {
     html += '<button class="btn primary" id="ptConfirm"' + (ptAbgabeBereit() ? '' : ' disabled') +
       '>Prüfen</button>';
@@ -12528,12 +12559,6 @@ function ptInhaltZeichnen() {
   }
   html += '</div>';
 
-  if (q.stufe !== 'kacheln' && ptPhase === 'ask') {
-    if (ptKb === null) ptKb = tastaturVorgabe(true);
-    html += '<button class="kb-toggle" id="ptKbToggle">' +
-      (ptKb ? 'Tastatur ausblenden' : 'Tastatur einblenden') + '</button>';
-    if (ptKb) html += tastaturHtml('ptkey');
-  }
   html += '<p class="session-info">' + ptPool().length + ' gefallene Wörter insgesamt</p></section>';
   main.innerHTML = html;
   ptBinden();
@@ -12826,14 +12851,6 @@ function tippenInhaltZeichnen() {
   if (tResult === 'right') html += '<p class="feedback good">' + ICON.haken + 'Правильно — richtig!</p>';
   // Erst nach der Abgabe zu hören: vorher wäre die Aussprache die halbe Antwort.
   if (tResult) html += hoerzeile(w.ru, w.de) + meisterHtml();
-  html += '</div>' + rekoHtml() + '<div class="btn-row">';
-  if (!tResult) {
-    html += '<button class="btn ghost" id="tHintBtn">Hinweis</button>' +
-      '<button class="btn primary" id="tCheck">Prüfen</button>';
-  } else {
-    html += '<button class="btn primary" id="tNext"' + (rekoFertig() ? '' : ' disabled') +
-      '>Nächstes Wort \u2192</button>';
-  }
   html += '</div>';
   // **Nur solange es ein Feld gibt.** In der Auflösung ist das Eingabefeld weg,
   // und eine Tastatur ohne Feld ist eine Attrappe — seit es die Nachschrift
@@ -12845,6 +12862,19 @@ function tippenInhaltZeichnen() {
     // gleichlautend ein zweites Mal, und ein Layout an zwei Stellen ist eines zu viel.
     if (tKb) html += tastaturHtml('key');
   }
+
+  // **Die Abgabe steht unter der Tastatur** (ADR 0092) — in allen Übungen
+  // gleich. Wer die Tastatur einblendet, schiebt den Knopf sonst über den
+  // Daumen hinaus, und in «Lernsets» war es seit jeher andersherum als hier.
+  html += rekoHtml() + '<div class="btn-row">';
+  if (!tResult) {
+    html += '<button class="btn ghost" id="tHintBtn">Hinweis</button>' +
+      '<button class="btn primary" id="tCheck">Prüfen</button>';
+  } else {
+    html += '<button class="btn primary" id="tNext"' + (rekoFertig() ? '' : ' disabled') +
+      '>Nächstes Wort \u2192</button>';
+  }
+  html += '</div>';
   html += '<p class="session-info">' + pool.length +
     (tippenModus === 'alle' ? ' im Stapel' : ' offen') + ' · ' +
     stats.correct + ' richtig · ' + stats.wrong + ' falsch' +
@@ -12866,7 +12896,12 @@ function tippenInhaltZeichnen() {
     });
     var vorher = state.boxes[w.id] || 0;
     var setVorher = aktuellesSet();
-    updateBox(w.id, ok, true);
+    // **«Tippen» meistert nicht** (ADR 0092). Es ist eine freiwillige Zugabe
+    // für den, der gerade lieber schreibt — der Lernweg läuft über «Lernsets»,
+    // und dort kommt ohnehin jedes Wort vorbei. Unterhalb der Endstufe zählt
+    // eine Antwort hier ganz normal; nur der letzte Schritt gehört der Übung,
+    // die den Lehrplan trägt.
+    updateBox(w.id, ok, false);
     meisterFolgen(w, vorher, setVorher);
     meisterMeldung = null;
     meisterPruefen(vorher, state.boxes[w.id], 'Wort', w.ru + ' — ' + w.de,

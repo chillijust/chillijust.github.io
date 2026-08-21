@@ -191,6 +191,72 @@ try {
   pruefe('K4 falsch stuft weiter zurück', state.boxes[kw.id] === BOX_MAX - 1,
     String(state.boxes[kw.id]));
 
+  // ── K5 · Der Weg dorthin, nicht nur die Funktion (ADR 0092)
+  // **Was K1–K4 nicht prüft:** Sie rufen updateBox() unmittelbar und geben
+  // das dritte Argument selbst mit. Ob die Übungen es richtig setzen, stand
+  // nirgends — und drei Fassungen lang tat «Lernsets» es nicht: dort stand ein
+  // festes «false», die Tippaufgabe aus ADR 0088 zählte nie als getippt, und
+  // kein Wort erreichte je die Endstufe. *Eine Prüfung, die die Funktion
+  // aufruft, prüft nicht den Aufrufer.*
+  state = defaultState(); ansichtenZuruecksetzen();
+  ['lernsets', 'tippen', 'uebersetzen'].forEach(function (k) { state.tutUebung[k] = 1; });
+  tutEnde();
+  // Das ganze Set auf die vorletzte Stufe: Dann ist jede Aufgabe eine
+  // Tippaufgabe, und die Auswahl zieht keines der ungesehenen Wörter vor.
+  LERNSETS[0].woerter.forEach(function (v) {
+    state.boxes[v.id] = BOX_MAX - 1;
+    state.lastSeen[v.id] = 1;
+  });
+  var kz = LERNSETS[0].woerter[0];
+  uebAuswahl = 'aktuell';
+  setTab('lernsets');
+  // **Die Aufgabe wird gestellt, nicht erwürfelt.** Gegenstand ist, was
+  // uebPruefen() aus einer Tippaufgabe macht — nicht, ob die Auswahl gerade
+  // dieses Wort zieht. Über waehleWort() käme es kaum wieder: Der erste
+  // Treffer erneuert seinen Zeitstempel und schiebt es ans Ende der Reihe.
+  var getippt = 0;
+  for (var ki = 0; ki < TIPP_FOLGE + 2 && (state.boxes[kz.id] || 0) < BOX_MAX; ki++) {
+    uebZuruecksetzen();
+    uebQ = { word: kz, mode: 'tippen' };
+    uebPhase = 'ask';
+    uebEingabe = kz.ru;
+    getippt++;
+    uebPruefen();
+  }
+  pruefe('K5 in «Lernsets» meistert eine getippte Aufgabe wirklich',
+    state.boxes[kz.id] === BOX_MAX, 'Stufe ' + state.boxes[kz.id] +
+    ' nach ' + getippt + ' getippten');
+  pruefe('K5b und die Folge wurde dabei gezählt und abgeräumt',
+    (state.tippFolge[kz.id] || 0) === 0 && getippt >= TIPP_FOLGE,
+    String(getippt));
+
+  // **«Tippen» meistert nicht** (ADR 0092): Es ist eine freiwillige Zugabe,
+  // der Lernweg läuft über «Lernsets».
+  state = defaultState(); ansichtenZuruecksetzen();
+  ['lernsets', 'tippen', 'uebersetzen'].forEach(function (k) { state.tutUebung[k] = 1; });
+  tutEnde();
+  var kt = LERNSETS[0].woerter[0];
+  state.boxes[kt.id] = BOX_MAX - 1;
+  state.lastSeen[kt.id] = 1;
+  state.settings.tippenStufe = 2;
+  tippenModus = 'lernen'; tippenSet = null; tWord = null; tResult = null;
+  setTab('tippen');
+  var runden = 0;
+  for (var kj = 0; kj < 8 && (state.boxes[kt.id] || 0) < BOX_MAX; kj++) {
+    if (!tWord) break;
+    var gefragt = tWord;
+    q('#tInput').value = gefragt.ru;
+    q('#tInput').dispatchEvent(new Event('input', { bubbles: true }));
+    q('#tCheck').click();
+    if (gefragt.id === kt.id) runden++;
+    if (state.boxes[kt.id] < BOX_MAX) state.boxes[kt.id] = BOX_MAX - 1;
+    tWord = null; tResult = null; renderTippen();
+  }
+  pruefe('K6 in «Tippen» bleibt es auf der vorletzten Stufe',
+    state.boxes[kt.id] === BOX_MAX - 1 && runden > 0,
+    'Stufe ' + state.boxes[kt.id] + ' nach ' + runden + ' Treffern');
+  state.settings.tippenStufe = 3;
+
   // ── L · Die Schwelle öffnet, sie schiebt nicht (ADR 0086) ─
   state = defaultState(); ansichtenZuruecksetzen();
   var lw = LERNSETS[0].woerter;

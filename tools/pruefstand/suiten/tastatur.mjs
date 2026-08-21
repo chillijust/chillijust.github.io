@@ -104,9 +104,31 @@ try {
   tippe(q('[data-key="BS"]'));
   pruefe('C2 die Rücktaste nimmt zurück', tEingabe === 'й ', '«' + tEingabe + '»');
 
-  // ── D · Alle vier Übungen bauen dieselbe Tastatur ─────────
+  // ── D · Alle Übungen bauen dieselbe Tastatur ──────────────
   // «Tippen» hatte eine eigene, gleichlautende Fassung — eine reicht.
   var stellen = [];
+  // **Und die Abgabe steht überall unter ihr** (ADR 0092). Gemessen wird am
+  // Rechteck, nicht an der Reihenfolge im Quelltext: Der Fehler war nie ein
+  // fehlender Knoten, sondern eine falsche Lage. In fünf von sechs Übungen
+  // stand der Prüfen-Knopf über der Tastatur und rutschte damit aus dem
+  // Daumenbereich, sobald sie aufging.
+  var lagen = [];
+  var lageOk = true;
+  var kachelOk = true;
+  function lageMessen(name) {
+    var kb = alle('.kb-row');
+    var reihe = q('.btn-row');
+    if (!kb.length || !reihe) { lagen.push(name + ':ohne'); return; }
+    var unten = kb[kb.length - 1].getBoundingClientRect().bottom;
+    var oben = reihe.getBoundingClientRect().top;
+    lagen.push(name + ':' + Math.round(oben - unten));
+    if (oben < unten) lageOk = false;
+    // **Und sie steht neben der Kachel, nicht darin.** Beim Umbau rutschte der
+    // Block vor den Kachelschluß: Die Tastatur wurde dadurch schmaler, und die
+    // oberste Reihe brach um — ein Zeichen stand allein auf einer Zeile. Der
+    // DOM-Test sah davon nichts, erst das Bild.
+    if (kb[0].closest && kb[0].closest('.card')) { lagen.push(name + ':IN DER KACHEL'); kachelOk = false; }
+  }
   function zaehle(name) {
     var r = alle('.kb-row');
     stellen.push(name + ':' + r.length + '/' + (q('.key.space') ? '1' : '0'));
@@ -115,6 +137,7 @@ try {
         'Zeichen löschen';
   }
   var ok = zaehle('tippen');
+  lageMessen('tippen');
 
   SENTENCES.forEach(function (sz) { state.satzBox[sz.ru] = 3; });
   trLevel = 1; trDir = 'de-ru'; trModus = 'lernen';
@@ -126,6 +149,7 @@ try {
   }
   setTab('uebersetzen');
   ok = zaehle('uebersetzen') && ok;
+  lageMessen('uebersetzen');
 
   GRAMMATIK.forEach(function (b) {
     state.gramSeen[b.id] = Date.now();
@@ -135,6 +159,7 @@ try {
   gramBaustein = null; gramQ = null; gramKb = null;
   setTab('grammatik');
   ok = zaehle('grammatik') && ok;
+  lageMessen('grammatik');
 
   state.patzer = {};
   ALL_VOCAB.filter(function (v) {
@@ -147,8 +172,40 @@ try {
   ptSatz.forEach(function (e) { e.treffer = 4; });
   ptQ = null; ptKb = null; ptNaechstes(); renderPower();
   ok = zaehle('power') && ok;
+  lageMessen('power');
 
-  pruefe('D1 alle vier Übungen zeigen denselben Aufbau', ok, stellen.join(' · '));
+  // «Schreibung» folgt dem Muster von «Grammatik».
+  ORTHO.forEach(function (r) {
+    state.orthoSeen[r.id] = Date.now();
+    state.orthoBox[r.id] = SATZ_STUFE;
+  });
+  orthoWahl = ORTHO[0].id;
+  orthoRegel = null; orthoQ = null; orthoKb = null;
+  setTab('schreibung');
+  if (q('.kb-row')) { ok = zaehle('schreibung') && ok; lageMessen('schreibung'); }
+
+  // Und «Lernsets» — dort stand die Abgabe seit jeher richtig, und genau
+  // deshalb fiel der Unterschied auf.
+  state = defaultState(); ansichtenZuruecksetzen();
+  // **Das ganze Set auf die Tippstufe.** Ein einzelnes vorbereitetes Wort
+  // genügt nicht: Die Auswahl zieht Neues zuerst, und ein Wort auf Stufe 0
+  // bekommt eine Kachelaufgabe — dann steht dort gar keine Tastatur.
+  LERNSETS[0].woerter.forEach(function (v) {
+    state.boxes[v.id] = state.settings.tippenStufe;
+    state.lastSeen[v.id] = 1;
+  });
+  uebAuswahl = 'aktuell'; uebKb = true; uebQ = null;
+  setTab('lernsets');
+  pruefe('D0 «Lernsets» zeigt eine Tippaufgabe mit Tastatur',
+    !!q('.kb-row') && !!uebQ && uebQ.mode === 'tippen',
+    uebQ ? uebQ.mode : 'keine Frage');
+  if (q('.kb-row')) { ok = zaehle('lernsets') && ok; lageMessen('lernsets'); }
+
+  pruefe('D1 alle Übungen zeigen denselben Aufbau', ok, stellen.join(' · '));
+  pruefe('D2 und überall steht die Abgabe unter der Tastatur', lageOk,
+    lagen.join(' · '));
+  pruefe('D3 die Tastatur steht neben der Kachel, nicht darin', kachelOk,
+    lagen.join(' · '));
 
   // ── Z · Die Schreibmarke gehört ins Feld (ADR 0068) ──────
   // Wer über die eingebaute Tastatur schreibt, sah bis 2.4.9 nicht, wo er im

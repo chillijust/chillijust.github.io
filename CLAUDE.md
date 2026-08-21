@@ -201,6 +201,11 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   bleiben, die Hinweiszeile ist weg — sie schob die Kachel so weit nach unten, daß die
   Übung scrollte, und **eine Übung, die scrollt, verliert ihre Knöpfe aus dem
   Daumenbereich**.
+- **Die Abgabe steht unter der Tastatur** (ADR 0092) — in allen sechs Übungen mit
+  eingebauter Tastatur gleich, und die Tastatur steht **neben der Kachel, nicht darin**:
+  Innerhalb wird sie schmaler, und die oberste Reihe bricht um. Beides prüft `tastatur`
+  D2/D3 **am Rechteck**; die Reihenfolge im Quelltext sagt darüber nichts, und der
+  Kachelfehler war im DOM unsichtbar — erst das Bildschirmfoto zeigte ihn.
 - **Die Schwelle öffnet, sie schiebt nicht** (ADR 0086). `setGeschafft()` heißt jetzt
   «vier von fünf Wörtern auf `BOX_MAX`» (`setSchwelle()`), und das Fenster fragt: bleiben
   oder weiter. `state.setBleib` hält das Set fest, bis es `setKomplett()` ist; wer bleibt,
