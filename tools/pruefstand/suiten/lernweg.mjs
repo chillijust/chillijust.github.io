@@ -25,7 +25,7 @@ try {
   // ist, und das wechselt mit dem Lernstand (ADR 0065).
   var kacheln = alle('#homeAlle [data-uebung]').map(function (b) { return b.dataset.uebung; }).join(',');
   pruefe('A1 Reihenfolge der Übungen',
-    kacheln === 'buchstaben,lernsets,freestyle,tippen,schreibung,power,grammatik,uebersetzen', kacheln);
+    kacheln === 'buchstaben,lernsets,tippen,schreibung,power,grammatik,uebersetzen', kacheln);
 
   // B · Lernsets statt Päckchen
   state.boxes = {}; state.lastSeen = {};
@@ -219,7 +219,7 @@ try {
   // als Pfeil neben der Flammenreihe — ein Knopf fragt nicht.
   state = defaultState(); ansichtenZuruecksetzen();
   spurenStill(); tutEnde();
-  uebModus = 'lernsets'; uebAuswahl = 'aktuell';
+  uebAuswahl = 'aktuell';
   setTab('lernsets');
   pruefe('M1 solange nichts offensteht, gibt es keinen Pfeil', !q('#setWeiter'));
   var mw = LERNSETS[0].woerter;

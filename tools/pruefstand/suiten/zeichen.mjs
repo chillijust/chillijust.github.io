@@ -241,7 +241,7 @@ try {
   // ── F · Vom Meldeblatt in die Liste ───────────────────────
   state = defaultState();
   ansichtenZuruecksetzen();
-  setTab('freestyle');
+  setTab('lernsets');
   tippe(q('#meldeKnopf'));
   pruefe('F1 das Blatt ist offen', meldeOffen);
   pruefe('F2 es führt in die Liste', !!q('#meldeAlle') && !q('#meldeAlle').hidden);
@@ -262,7 +262,7 @@ try {
   pruefe('F7 «Abbrechen» wirft ihn weg', q('#meldeTitel').value === '');
   tippe(q('#meldeAbbruch'));
 
-  setTab('freestyle');
+  setTab('lernsets');
   tippe(q('#meldeKnopf'));
   pruefe('F8 außerhalb der Liste ist er wieder da', q('#meldeAlle').hidden === false);
   pruefe('F9 er ist groß genug zum Treffen',

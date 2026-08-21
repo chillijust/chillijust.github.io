@@ -28,7 +28,11 @@ function nurDieses(ru, stufe) {
     state.lastSeen[v.id] = Date.now();
   });
   state.boxes[ru] = stufe === undefined ? SATZ_STUFE : stufe;
-  state.lastSeen[ru] = 0;
+  // **Nicht 0.** Der Stapel «alles Freigeschaltete» wählt über den Zweig
+  // «nurWiederholen», und der filtert auf einen *wahren* Zeitstempel — eine
+  // Null ist in JavaScript falsch, und das Wort fiele aus dem Vorrat. Eins
+  // heißt «vor sehr langer Zeit» und kommt damit zuerst dran.
+  state.lastSeen[ru] = 1;
 }
 
 // Eine Lücke erzwingen: so lange neu bauen, bis eine kommt. Der Modus wird
@@ -94,8 +98,10 @@ try {
   // Nur bei sitzenden Wörtern und lesbaren Sätzen.
   state = defaultState();
   ansichtenZuruecksetzen();
-  uebModus = 'freestyle'; uebThema = 'Alle';
-  setTab('freestyle');
+  // Seit ADR 0091 gibt es nur noch «Lernsets»; «alles Freigeschaltete» ist der
+  // Vorrat, der früher Freestyle mit Thema «Alle» war.
+  uebAuswahl = 'alle';
+  setTab('lernsets');
   nurDieses('книга', SATZ_STUFE - 1);
   pruefe('C1 unter der Satzstufe gibt es keine Lücke', holLuecke(150) === null);
 
@@ -103,11 +109,6 @@ try {
   var qq = holLuecke();
   pruefe('C2 über der Satzstufe schon', !!qq && qq.word.id === 'книга',
     qq ? qq.word.id : 'keine');
-
-  // Im Lesemodus geht es um Buchstaben, nicht um Formen.
-  uebLesen = true;
-  pruefe('C3 im Lesemodus nicht', holLuecke(150) === null);
-  uebLesen = false;
 
   // Ein Wort ohne andere Formen bekommt keine Lücke — zwischen «он» und «он»
   // gäbe es nichts zu wählen.
@@ -134,8 +135,10 @@ try {
   // ── E · Die Aufgabe am Schirm ─────────────────────────────
   state = defaultState();
   ansichtenZuruecksetzen();
-  uebModus = 'freestyle'; uebThema = 'Alle';
-  setTab('freestyle');
+  // Seit ADR 0091 gibt es nur noch «Lernsets»; «alles Freigeschaltete» ist der
+  // Vorrat, der früher Freestyle mit Thema «Alle» war.
+  uebAuswahl = 'alle';
+  setTab('lernsets');
   nurDieses('книга');
   var qz = holLuecke();
   pruefe('E1 eine Lücke ist zu bekommen', !!qz);

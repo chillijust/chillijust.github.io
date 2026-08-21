@@ -132,7 +132,7 @@ try {
   // ── E · Im Meldeblatt nicht ───────────────────────────────
   state = defaultState();
   ansichtenZuruecksetzen();
-  setTab('freestyle');
+  setTab('lernsets');
   tippe(q('#meldeKnopf'));
   q('#meldeText').value = 'Erste Zeile';
   var v5 = enter(q('#meldeText'));
@@ -144,7 +144,7 @@ try {
   state = defaultState();
   ansichtenZuruecksetzen();
   ALL_VOCAB.slice(0, 40).forEach(function (v) { state.boxes[v.id] = 2; });
-  setTab('freestyle');
+  setTab('lernsets');
   var knopf = q('#filterKnopf');
   pruefe('F1 der Knopf trägt sein Zeichen in einer Hülle',
     !!q('#filterZeichen') && !!q('#filterZeichen svg'));

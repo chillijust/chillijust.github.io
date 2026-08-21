@@ -297,14 +297,17 @@ try {
   // eine Wiedervorlage statt einer Aufgabe.
   state = defaultState();
   ansichtenZuruecksetzen();
-  ALL_VOCAB.forEach(function (v) { state.boxes[v.id] = 1; state.lastSeen[v.id] = Date.now(); });
+  // Alles gemeistert, damit jedes Set offen steht; nur das Zielwort steht auf
+  // Stufe 1 und bekommt darum eine Wahlaufgabe mit Ablenkern.
+  ALL_VOCAB.forEach(function (v) { state.boxes[v.id] = BOX_MAX; state.lastSeen[v.id] = Date.now(); });
   var ziel = ALL_VOCAB[5];
-  state.lastSeen[ziel.id] = 0;
+  state.boxes[ziel.id] = 1;
+  state.lastSeen[ziel.id] = 1;   // nicht 0 — siehe «nurWiederholen»
   state.verwechselt[ziel.id] = {};
   state.verwechselt[ziel.id][ALL_VOCAB[9].id] = 4;
   state.verwechselt[ziel.id][ALL_VOCAB[11].id] = 3;
   state.verwechselt[ziel.id][ALL_VOCAB[13].id] = 2;
-  uebModus = 'freestyle'; uebThema = 'Alle';
+  uebAuswahl = 'alle';
   var mitProfil = null;
   for (var m = 0; m < 300 && !mitProfil; m++) {
     uebQ = null; uebZuruecksetzen(); uebQ = buildQuestion();
@@ -418,8 +421,8 @@ try {
     state.boxes[v.id] = SATZ_STUFE;
     state.lastSeen[v.id] = Date.now();
   });
-  uebModus = 'freestyle'; uebThema = 'Alle'; uebLesen = false;
-  setTab('freestyle');
+  uebAuswahl = 'alle';
+  setTab('lernsets');
   var kachelFrage = null, kachelKeys = null;
   for (var t = 0; t < 400 && !kachelKeys; t++) {
     uebZuruecksetzen();

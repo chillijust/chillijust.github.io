@@ -42,7 +42,7 @@ vierten Feld für Wortart und Geschlecht.
   Präpositiv sperrt mit ihr alle aus — in einer Mutter ist niemand.
 
 - **Die Reihenfolge in dieser Datei ist der Lehrplan.** Sie bestimmt, in welcher Folge
-  die Lernsets entstehen und in welcher Reihenfolge Freestyle die Themen anbietet. Wer
+  die Lernsets entstehen. Wer
   Wörter einfügt oder umsortiert, verschiebt damit den Lernweg — Ergänzungen deshalb ans
   Ende des passenden Themas, nicht mittendrin.
 - Der Themenname ist nur noch Überschrift. Die Vokabel-Kennung ist das russische Wort
@@ -228,8 +228,10 @@ sind.
 4. **Kein Satz vor seinen Wörtern.** Der Aufbau ist keine Empfehlung, sondern eine
    Sperre: `benoetigt` entscheidet, ob ein Satz erscheint.
 5. **Ein neues Wort kostet einen Platz im Lehrplan.** Ergänzungen ans Ende des passenden
-   Themas. Ein Wort, das kein Satz braucht, taucht in keinem Lernset auf — es lebt dann
-   in Freestyle.
+   Themas. Ein Wort, das kein Satz braucht, taucht in **keinem Lernset** auf — und seit
+   «Freestyle» fort ist (ADR 0091), wäre es nur noch über «Tippen» erreichbar. Heute
+   kommt jedes der 395 Wörter in mindestens einem Satz vor; wer Vokabeln ergänzt,
+   schreibt ihnen also Sätze dazu.
 
 ## Lernstand im Browser
 

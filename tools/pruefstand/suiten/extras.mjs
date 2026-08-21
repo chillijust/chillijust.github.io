@@ -141,14 +141,14 @@ try {
   // H · Gemeinsamer Lernstand
   state.boxes = {}; state.lastSeen = {};
   var wort = ALL_VOCAB.filter(function (v) { return v.theme === 'Tiere'; })[0];
-  uebModus = 'freestyle'; uebThema = 'Tiere';
+  uebAuswahl = 0;
   updateBox(wort.id, true);
   pruefe('H1 Freestyle schreibt in denselben Stand', state.boxes[wort.id] === 1);
-  uebModus = 'lernsets';
+  uebAuswahl = 'aktuell';
   var setWort = LERNSETS[0].woerter[0];
   updateBox(setWort.id, true);
   updateBox(setWort.id, true);
-  uebModus = 'freestyle'; uebThema = 'Alle';
+  uebAuswahl = 'alle';
   pruefe('H2 Lernsets-Fortschritt gilt auch im Freestyle', state.boxes[setWort.id] === 2);
   pruefe('H3 Freestyle-Fortschritt zählt für die Sets',
     LERNSETS[0].woerter.filter(function (v) { return (state.boxes[v.id] || 0) >= SATZ_STUFE; }).length === 1);

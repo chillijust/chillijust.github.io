@@ -133,13 +133,21 @@ try {
   // ── E · Am Schirm ─────────────────────────────────────────
   state = defaultState();
   ansichtenZuruecksetzen();
+  // **Alle Sets müssen offen stehen.** Seit «Freestyle» fort ist, zieht auch
+  // «alles Freigeschaltete» nur aus den *freien* Sets — bei lauter Nullen wäre
+  // das allein Set 1, und das Zielwort läge außerhalb. Also alles gemeistert
+  // und nur das eine Wort zurück auf Anfang.
   ALL_VOCAB.forEach(function (v) {
-    state.boxes[v.id] = 0;
+    state.boxes[v.id] = BOX_MAX;
     state.lastSeen[v.id] = Date.now();
   });
-  state.lastSeen['молоко'] = 0;
-  uebModus = 'freestyle'; uebThema = 'Alle';
-  setTab('freestyle');
+  state.boxes['молоко'] = 0;
+  // **Nicht 0.** Der Stapel wählt über den Zweig «nurWiederholen», und der
+  // filtert auf einen *wahren* Zeitstempel. Eins heißt «vor sehr langer Zeit»
+  // und kommt damit zuerst dran.
+  state.lastSeen['молоко'] = 1;
+  uebAuswahl = 'alle';
+  setTab('lernsets');
   var gefunden = null;
   for (var i = 0; i < 200 && !gefunden; i++) {
     uebQ = null; uebZuruecksetzen(); uebQ = buildQuestion();

@@ -89,18 +89,24 @@ try {
     uebungsStand('tippen').leer === true &&
     uebungsStand('grammatik').leer === true);
   pruefe('B2 gesperrt bleibt gesperrt', uebungsStand('power').gesperrt === true);
-  pruefe('B3 volle Übungen tragen kein «leer»',
-    !uebungsStand('freestyle').leer && !uebungsStand('lernsets').leer);
+  pruefe('B3 volle Übungen tragen kein «leer»', !uebungsStand('lernsets').leer);
 
   ['buchstaben', 'uebersetzen', 'tippen', 'grammatik'].forEach(function (id) {
     state.zuletzt = { uebung: id, zeit: Date.now() };
     var e = empfehlung();
+    // **Ins Leere führt sie nie.** Seit ADR 0091 darf sie sehr wohl nach
+    // «Tippen» zeigen, wenn sonst alles erledigt ist — dann bringt sie aber
+    // den Stapel «Alle» mit, und dort steht etwas. Der Leerzustand, den der
+    // Test meint, gehört dem Lernstapel.
+    var mitStapel = e.ziel === 'tippen' && e.stapel === 'alle' &&
+      tippenWoerter(null, 'alle').length > 0;
     pruefe('B4.' + id + ' führt nicht in die leere Übung zurück',
-      e.ziel !== id, e.ziel + ' — ' + e.titel);
+      e.ziel !== id || mitStapel, e.ziel + ' — ' + e.titel);
   });
 
   // Wo etwas zu tun ist, führt «Weiter mit …» weiterhin dorthin.
   state.abcBox[ALPHABET[0][1]] = 1;
+  state.abcSeen[ALPHABET[0][1]] = 1;
   state.zuletzt = { uebung: 'buchstaben', zeit: Date.now() };
   pruefe('B5 mit offener Arbeit führt sie sehr wohl dorthin',
     empfehlung().ziel === 'buchstaben', empfehlung().ziel);
@@ -163,45 +169,6 @@ try {
   setTab('uebersetzen');
   pruefe('C11 und er steht auch nicht da', !q('#trZuStufe'));
 
-  // ── D · Der Wink lässt sich schließen ─────────────────────
-  state = defaultState();
-  ansichtenZuruecksetzen();
-  ALPHABET.forEach(function (b) { state.abcBox[b[1]] = BOX_MAX; });
-  state.abcBox['а'] = 1;      // sonst ist die Übung leer
-  setTab('buchstaben');
-  var lesbar = leseWoerter().length;
-  pruefe('D0 es gibt genug zu lesen', lesbar >= LESE_MINDEST, String(lesbar));
-  pruefe('D1 der Wink steht da', !!q('.lese-wink'));
-  pruefe('D2 er hat einen Schließknopf', !!q('#leseWinkZu'));
-  pruefe('D3 der Knopf ist groß genug',
-    q('#leseWinkZu').getBoundingClientRect().width >= 44 &&
-    q('#leseWinkZu').getBoundingClientRect().height >= 44,
-    q('#leseWinkZu').getBoundingClientRect().width.toFixed(0) + '×' +
-    q('#leseWinkZu').getBoundingClientRect().height.toFixed(0));
-  pruefe('D4 und heißt so für Vorleser',
-    q('#leseWinkZu').getAttribute('aria-label') === 'Hinweis schließen');
-
-  tippe(q('#leseWinkZu'));
-  pruefe('D5 zugeklappt ist er weg', !q('.lese-wink'));
-  pruefe('D6 der Stand ist vermerkt', state.leseWinkAb === lesbar, String(state.leseWinkAb));
-  renderBuchstaben();
-  pruefe('D7 er bleibt weg', !q('.lese-wink'));
-
-  // Er kommt wieder, wenn mehr lesbar ist.
-  state.abcBox['а'] = BOX_MAX;
-  state.abcBox['б'] = 1;
-  renderBuchstaben();
-  pruefe('D8 mit mehr lesbaren Wörtern kommt er zurück',
-    leseWoerter().length > state.leseWinkAb ? !!q('.lese-wink') : true,
-    leseWoerter().length + ' gegen ' + state.leseWinkAb);
-  pruefe('D9 der Weg in den Lesemodus steht weiterhin darin',
-    q('.lese-wink') ? !!q('#leseLos') : true);
-
-  // Der Vermerk überlebt einen Neustart, aber nicht den Sicherungscode.
-  var gemerkt = state.leseWinkAb;
-  var zurueck = mergeState(JSON.parse(JSON.stringify(state)));
-  pruefe('D10 er übersteht das Laden', zurueck.leseWinkAb === gemerkt, String(zurueck.leseWinkAb));
-  pruefe('D11 ein frischer Stand fängt bei null an', defaultState().leseWinkAb === 0);
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);
 }

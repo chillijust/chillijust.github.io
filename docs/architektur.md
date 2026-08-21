@@ -340,7 +340,7 @@ und wächst über `blaseAuf` (0,6 s) herein, statt aufzuploppen. Unter
 
 ## Navigation: Home, Kopf, Menü
 
-Die App hat sieben **Übungen** (Lernsets, Freestyle, Tippen, Übersetzen, Buchstaben,
+Die App hat sieben **Übungen** (Lernsets, Tippen, Übersetzen, Buchstaben,
 Grammatik, Power-Training) und
 vier Ansichten, die keine sind: Bilanz, Sicherung, Einstellungen, Tickets. Der Begriff
 «Rubrik» ist hinfällig; im Nutzertext wie im Code heißt es **Übung**.
@@ -349,8 +349,13 @@ vier Ansichten, die keine sind: Bilanz, Sicherung, Einstellungen, Tickets. Der B
 Kachel nennt über `uebungsStand()`, was dort ansteht — «Set 1 · 11 offen», «21 fällig»,
 «noch gesperrt». Darüber steht `empfehlung()`: der eine Knopf, der immer richtig ist.
 Seine Reihenfolge ist bewusst: **erst fortsetzen**, dann das laufende Lernset, dann
-offene Sätze, dann Tippen, sonst Freestyle als Kür. Eine Stufe «Erst auffrischen» stand
-bis ADR 0091 an zweiter Stelle; sie ist mit dem Auffrischen entfallen.
+offene Sätze, dann Tippen. Ist die Leiter leer, greift die **Fortsetzung** («Weiter mit
+…», wenn man vor weniger als zwei Stunden dort war) und erst danach der **Auffang**:
+«Wörter wiederholen» führt nach «Tippen» in den Stapel «Alle». Zwei Stufen sind mit
+ADR 0091 entfallen — «Erst auffrischen» und die Kür in «Freestyle». **Die Reihenfolge
+Fortsetzung vor Auffang ist wesentlich:** Solange die Kür ganz unten stand, war die
+Leiter nie leer, und der Auffang kam nie zum Zug; steht er vor der Fortsetzung, verschluckt
+er sie.
 
 **Fortsetzen geht vor.** Wer vor zwei Stunden noch in «Übersetzen» geantwortet hat, will
 dorthin zurück und nicht in die Lernsets. `zuletztGeuebt(id)` merkt sich die Übung bei
@@ -526,7 +531,6 @@ weicht ab», sondern «hier stehen Sie».
 | Übung | Gruppen im Panel |
 | --- | --- |
 | Lernsets | Auswahl (aktuelles Set · alles Freigeschaltete), einzelnes Set |
-| Freestyle | Thema |
 | Tippen | Stapel (Lernen · Alle), Vorrat (Set) |
 | Übersetzen | Stufe, Richtung, Stapel |
 
@@ -601,7 +605,7 @@ Einstellungen und nennt Einstellung, Kontextzustand, Freigabe und Sitzungsart. O
 sähen «Schalter aus», «Kontext schlafend», «Stummschalter» und «keine Unterstützung» von
 außen gleich aus — nämlich still (ADR 0027).
 
-Ausgelöst wird der Klang an genau vier Stellen: `uebPruefen()` (Lernsets/Freestyle),
+Ausgelöst wird der Klang an genau vier Stellen: `uebPruefen()` (Lernsets),
 `trFinish()` (Übersetzen), `check()` in `renderTippen()` und `abcPruefen()`
 (Buchstaben) — jeweils über `meisterTon()`, das zwischen «richtig» und «gemeistert»
 entscheidet. «Aufdecken» bleibt still, weil das keine Antwort ist.
@@ -1039,52 +1043,17 @@ Der Sicherungscode trägt die Buchstaben als achtes Feld. Ältere Codes haben si
 `decodeBackup()` liest die Prüfsumme darum immer aus dem letzten Feld und behandelt das
 achte als optional.
 
-### Der Lesemodus — wozu das Alphabet gut ist
+### Der Lesemodus — abgeschafft (ADR 0091)
 
-«Buchstaben» und «Freestyle» standen nebeneinander, ohne voneinander zu wissen: Wer das
-Alphabet übte, sah nie, wozu. Ein Wort, dessen Buchstaben **alle gemeistert** sind, lässt
-sich lesen — und das ist der erste Lohn des Alphabets (ADR 0035).
+Bis 2.7.4 sammelte «Freestyle» unter dem Schalter «Aus Buchstaben lesen» die Wörter,
+deren Zeichen alle gemeistert waren — die Brücke vom Alphabet in den Wortschatz
+(ADR 0035). Mit der Übung ist sie entfallen: `uebLesen`, `leseWoerter()`,
+`wortLesbar()`, der Wink am Fuß von «Buchstaben», die gelockerte Buchstabenstrafe
+(`state.leseFehler`) und beide Leerzustände dazu.
 
-`wortLesbar(v, meister)` prüft genau das; `leseWoerter()` sammelt die Wörter. Maßstab ist
-**gemeistert** (`BOX_MAX`), nicht «sitzt»: Wer ein Zeichen erst zweimal erkannt hat, liest
-damit noch kein Wort. Leerzeichen und Striche zählen nicht mit — sie stehen in keinem
-Alphabet.
-
-| wo | was |
-| --- | --- |
-| **«Buchstaben», am Fuß** | Der Wink (`.lese-wink`): «368 Wörter können Sie schon lesen» mit einem Knopf, der direkt in den Modus führt — nicht bloß in die Übung, wo man ihn erst suchen müsste. Er erscheint ab `LESE_MINDEST` (3); eine Ankündigung ohne Deckung wäre eine Verlockung ins Leere. **Er lässt sich schließen** (`state.leseWinkAb`) — und kommt wieder, wenn mehr Wörter lesbar sind als beim Zuklappen. Dann ist er neue Nachricht statt Wiederholung. |
-| **«Freestyle», über dem Thema** | Der Schalter (`.lese-schalter`, `uebLesen`), volle Breite, mit der Zahl der lesbaren Wörter. Er steht in der Ansicht, **nicht in der Auswahl**: Wer die Buchstaben gerade gemeistert hat, soll ihn sehen, nicht suchen. Ohne lesbare Wörter steht er gar nicht da. |
-
-Der Modus schneidet **quer durch die Themen**: Er fragt nicht, wovon ein Wort handelt,
-sondern ob man es entziffern kann. Beides wirkt zusammen — Thema *und* Lesbarkeit.
-Zusätzlich rücken die **Kacheln eine Stufe vor** (ab Stufe 1 statt 2): Dort geht es um
-Buchstaben, und zusammensetzen ist die Übung, die danach fragt. Auf Stufe 0 bleibt es bei
-der Auswahl — ein nie gesehenes Wort zu legen wäre Raten.
-
-**Der Leerzustand hat zwei Ausgänge.** Fällt ein Buchstabe zurück, kann der Vorrat
-wegschmelzen; dann stehen «Alle Wörter» und «Zu ‹Buchstaben›» da. Ein Modus, in den man
-hineinkommt, aber nicht heraus, wäre eine Falle.
-
-### Wenn ein Buchstabe nicht trägt
-
-Dieselbe Idee wie beim Verschreiben in «Übersetzen» (ADR 0033), nur milder. Wer im
-Lesemodus ein Wort **legt** und dabei einen Buchstaben gar nicht unterbringt, kennt ihn
-nicht: `state.leseFehler` zählt die Serie je Zeichen, bei `LESE_STRAFE` (4) fällt der
-Buchstabe **eine** Stufe und steht damit wieder in «Buchstaben».
-
-Drei Einschränkungen, alle aus demselben Grund — gewertet wird nur, was etwas über
-Buchstaben aussagt:
-
-- **Nur beim Legen.** Eine Auswahlfrage sagt über Schreibung nichts.
-- **Nur was fehlt, nicht was falsch steht.** Wer alle Buchstaben hat und bloß die
-  Reihenfolge verdreht, kennt sie ja (`fehlendeBuchstaben()` vergleicht als Menge).
-- **Vier statt drei.** Wer mit dem Alphabet anfängt, ist Anfänger.
-
-Dass ein gefallener Buchstabe Wörter aus dem Lesemodus mitnimmt, ist keine Nebenwirkung,
-sondern der Sinn: Er sitzt eben nicht mehr. Die Meldung sagt es auch so.
-
-`state.leseFehler` steht wie `wortFehler` und `patzer` **nicht** im Sicherungscode — eine
-Momentaufnahme, kein Lernstand.
+Was der Gedanke wollte — zeigen, wozu das Alphabet gut ist —, leistet heute der Lernweg
+selbst: Die Lernsets führen von den Zeichen über die Wörter zu den Sätzen, und
+«Buchstaben» steht als erste Übung ganz vorn.
 
 ## Vorlesen
 
@@ -1103,8 +1072,8 @@ Zwei gleiche Lautsprecher sagen nicht, welcher welche Sprache spricht.
 
 | Ort | Wann | Was |
 | --- | --- | --- |
-| Lernsets, Freestyle | an der Frage | die Frageseite, in ihrer Sprache |
-| Lernsets, Freestyle | nach der Auflösung | Wort und Bedeutung |
+| Lernsets | an der Frage | die Frageseite, in ihrer Sprache |
+| Lernsets | nach der Auflösung | Wort und Bedeutung |
 | Tippen | an der Vorgabe | das deutsche Wort |
 | Tippen | nach der Abgabe | beide Seiten |
 | Übersetzen | am Satz | die Frageseite |
@@ -1576,11 +1545,14 @@ die Klasse `cyr`.
 **Lernsets entstehen ausschließlich aus Sätzen.** `LERNSETS` sortiert die Sätze nach ihrem
 im Lehrplan spätesten Wort und füllt daraus Päckchen zu höchstens `SET_MAX` Wörtern. Daraus
 folgt etwas, das lange niemandem auffiel: **Ein Wort, das kein Satz braucht, liegt in
-keinem Set.** Es schaltet nichts frei, taucht in «Übersetzen» nie auf und ist nur über
-«Freestyle» und «Tippen» erreichbar — die Übungen ohne Lehrplan.
+keinem Set.** Es schaltet nichts frei, taucht in «Übersetzen» nie auf und wäre nur über
+«Tippen» erreichbar.
 
 Vor Etappe 6 lagen so 262 von 395 Wörtern außerhalb. Mehr Vokabeln hätten das Verhältnis
-verschlechtert; mehr **Sätze** holen die vorhandenen nach Hause (ADR 0057).
+verschlechtert; mehr **Sätze** holen die vorhandenen nach Hause (ADR 0057). **Heute liegt
+kein Wort mehr außerhalb** — alle 395 kommen in mindestens einem der 219 Sätze vor und
+damit in einem der 35 Lernsets. Das war die Voraussetzung dafür, «Freestyle» streichen zu
+können (ADR 0091); wer Vokabeln ergänzt, schreibt ihnen also Sätze dazu.
 
 `data/saetze.json` steht darum **nach Stufe und Reifegrad sortiert** — wer die Datei liest,
 sieht den Weg, und die Sets entstehen aus derselben Ordnung. Die Suite `lehrplan` prüft es.
@@ -1800,7 +1772,6 @@ Ein einziges Objekt `state` hält den gesamten Lernstand:
 | `fakten` | je Sprachfakt `{ n: wie oft gezeigt, f: Favorit }`, unter einer kurzen Kennung |
 | `wortFehler` | Serie falscher Schreibungen je Wort — bei `WORT_STRAFE` fällt das Wort zurück |
 | `patzer` | zurückgestufte Wörter mit dem Zeitpunkt ihres Falls — der Topf des Power-Trainings |
-| `leseFehler` | Serie fehlender Buchstaben im Lesemodus — bei `LESE_STRAFE` fällt das Zeichen |
 | `leseWinkAb` | bei wie vielen lesbaren Wörtern der Wink zuletzt weggeklickt wurde |
 | `settings` | Einstellungen des Nutzers, siehe unten |
 
@@ -1847,7 +1818,7 @@ Einstellungen mit, weil `mergeState()` auch auf dem Sicherungscode arbeitet.
 Erreichbar sind sie über den Reglerknopf in der Kopfzeile, nicht über einen eigenen Tab —
 Home trägt bereits vier Kacheln.
 
-## Lernweg: Lernsets, Freestyle, Fälligkeit
+## Lernweg: Lernsets, Fälligkeit
 
 Alle Übungsrubriken ziehen aus demselben Bestand (`ALL_VOCAB`) und schreiben in denselben
 Leitner-Stand (`state.boxes`). Unterschiedlich ist nur, *welchen Ausschnitt* sie sehen:
@@ -1855,7 +1826,6 @@ Leitner-Stand (`state.boxes`). Unterschiedlich ist nur, *welchen Ausschnitt* sie
 | Übung | Ausschnitt |
 | --- | --- |
 | Lernsets | das laufende Set, wahlweise ein früheres oder alle freigeschalteten |
-| Freestyle | ein Thema freier Wahl oder der ganze Bestand, ohne Sperre |
 | Tippen | der ganze Wortschatz ab `settings.tippenStufe` (Vorgabe 3) — oder ein einzelnes Lernset, dann ab Stufe 1 |
 | Übersetzen | nur Sätze, deren Voraussetzungen alle mindestens `SATZ_STUFE` (2) haben |
 
@@ -1870,18 +1840,16 @@ Der Hörknopf der Frageseite fehlt dort bewusst — er läse die Antwort vor.
   ihrem im Lehrplan spätesten Wort sortiert; ihre noch unbekannten Voraussetzungen füllen
   ein Set, bis `SET_MAX` (12) erreicht ist. Jedes Set kennt damit die Sätze, die es
   freischaltet — das ist der kurze Weg vom Vokabeltraining zum ganzen Satz. Aktuell:
-  12 Sets, 133 Wörter; die übrigen 247 sind Freestyle-Material.
+  35 Sets, alle 395 Wörter.
 - Ein Set gilt als geschafft, wenn jedes seiner Wörter `SATZ_STUFE` erreicht hat — genau
   die Schwelle, ab der auch die Sätze erscheinen. `aktuellesSet()` ist das erste
   ungeschaffte; spätere sind gesperrt.
-- **Freestyle** kennt keine Sperre: Thema wählen (oder „Alle") und üben. Es ist der Ort
-  für die Wörter, die kein Satz braucht.
-- Beide Übungen teilen sich Fragelogik und Zustand; `uebModus` entscheidet über
-  Wortvorrat und Kopfzeile, `render()` setzt beim Wechsel die Frage zurück.
-- **Fälligkeit** steckt in `state.lastSeen[id]` und `INTERVALL` (neu · 1 · 3 · 7 · 21 Tage
-  je Leitner-Stufe). `waehleWort(pool, nurWiederholen)` wählt in drei Stufen: fällige
-  Wiederholungen, dann noch nie gesehene Wörter, dann das am längsten zurückliegende Wort
-  mit der niedrigsten Stufe. Mit `nurWiederholen` zählt allein das Alter.
+- **Fälligkeit** steckt in `state.lastSeen[id]` und `INTERVALL` (neu · 1 · 3 · 7 Tage je
+  Leitner-Stufe; die Endstufe wird nie wieder fällig — ADR 0091). `waehleWort(pool,
+  nurWiederholen)` wählt in vier Stufen: fällige Wörter (das sind seit ADR 0091 immer
+  unfertige), dann noch nie gesehene, dann **Unfertiges vor Fertigem**, sonst der ganze
+  Vorrat. Mit `nurWiederholen` zählt allein das Alter — und dieser Zweig filtert auf einen
+  *wahren* Zeitstempel: Ein `lastSeen` von 0 fiele heraus.
 - **Tippen** ist gesperrt, bis Wörter die Schwelle erreichen; der Leerzustand nennt die
   drei Wörter, die am nächsten dran sind. Während der Rückmeldung bleibt das Wort stehen,
   auch wenn ein Fehler es unter die Schwelle geworfen hat.
@@ -1990,7 +1958,7 @@ sonst verlieren bestehende Nutzer ihren Stand.
 Ereignis → Zustand ändern → save() → render()
 ```
 
-`render()` verzweigt anhand von `currentTab`: `lernsets` und `freestyle` führen beide in
+`render()` verzweigt anhand von `currentTab`: `lernsets` führt in
 `renderUeben()` (mit gesetztem `uebModus`), dazu `renderTippen()`, `renderUebersetzen()`,
 `renderEinstellungen()` und `renderBilanz()`. Den Wechsel übernimmt
 immer `setTab()` — es merkt sich in `letzterTab` den Rückweg aus den Einstellungen und

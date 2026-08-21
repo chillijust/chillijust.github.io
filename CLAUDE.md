@@ -22,7 +22,6 @@ Lernstand, zählt nicht in Serie und Fortschritt; Einstieg ist das Üben, die Ta
 hinter einem eigenen Knopf), dann folgen:
 **Lernsets** (zielgerichtet: die Wörter der nächsten Sätze, schaltet «Übersetzen» frei;
 das nächste Set öffnet bei **80 % gemeistert**, und gemeistert wird nur getippt — ADR 0086),
-**Freestyle** (freies Vokabeltraining nach Thema, ohne Sperren),
 **Tippen** (Eingabequiz mit kyrillischer Tastatur, ab Leitner-Stufe 3),
 **Übersetzen** (nur Sätze, deren Wörter sitzen; Form und Richtung steigern sich mit der
 Stufe — Kacheln vor Tippen, RU→DE vor DE→RU),
@@ -124,7 +123,7 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   Schreibweise so wenig wie der, der es falsch tippt; wer unter fertigen Wörtern wählt,
   behauptet keine. Seit «Lernsets» tippen läßt (ADR 0088), gilt sie auch
   **dort** — die Frage lautet nie «welcher Modus», sondern «wurde eine Schreibweise
-  behauptet» (ADR 0090). Kyrillisch gelegt wird nur in «Lernsets/Freestyle» und im
+  behauptet» (ADR 0090). Kyrillisch gelegt wird nur in «Lernsets» und im
   Power-Training — die Kacheln in «Buchstaben» tragen die Umschrift, die in «Übersetzen»
   ganze Wörter eines Satzes. **Beim Satz gilt eine andere Frage** (ADR 0073): nicht «wurde
   eine Schreibweise behauptet», sondern «hat der Nutzer es verlangt». «Auch Sätze» wirkt
@@ -230,10 +229,10 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   Verwechslungen (erst ab dem **zweiten** Mal — ein Ausrutscher ist kein Muster), Zeichen
   unter der Schwelle, Überfälliges. **Jede Zeile nennt einen Grund und einen Weg
   dorthin**; wo die Übung gesperrt ist, entfällt der Knopf, statt ins Leere zu führen.
-- **Alle acht stehen im Tutorial im Baum** (ADR 0051). `kachelSichtbar()` und
-  `homeWeitere()` fragen zuerst `tutOffen` — vor dem Scheinwerfer stehen immer alle acht
-  unten. **Alle acht stehen dann im Baum**,
-  nur zugeklappt: Acht Tutorial-Schritte zeigen auf je eine Kachel, und der Scheinwerfer
+- **Alle sieben stehen im Tutorial im Baum** (ADR 0051). `kachelSichtbar()` und
+  `homeWeitere()` fragen zuerst `tutOffen` — vor dem Scheinwerfer stehen immer alle
+  sieben unten. **Alle sieben stehen dann im Baum**,
+  nur zugeklappt: Die Tutorial-Schritte zeigen auf je eine Kachel, und der Scheinwerfer
   klappt selbst auf, wenn sein Ziel nicht **sichtbar** ist (`getClientRects()`, nicht
   `querySelector` — ein `[hidden]` findet der sehr wohl). `kachelHtml()` steht einmal für
   beide Listen. Eine neue Übung braucht einen Eintrag in `UEBUNG_GRUPPEN` **und** in
@@ -377,7 +376,7 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   Angezeigt **nur** über `ruAnzeige()`/`betontesWort()`; verglichen wird nie mit ihr
   (`normalize()` wirft U+0301 weg), gesprochen auch nicht. Die Einstellung `betonung`
   blendet sie ab Stufe 3 aus — im Druck steht keine.
-- **Das Wort steht im Satz** (ADR 0053). «Lernsets» und «Freestyle» haben eine vierte
+- **Das Wort steht im Satz** (ADR 0053). «Lernsets» hat eine vierte
   Aufgabenform: die **Kontext-Lücke**. Ab `SATZ_STUFE` und nur in einem **freigeschalteten**
   Satz — ein Satz voller unbekannter Wörter erklärt nichts. Die Ablenker sind andere
   **Formen desselben Wortes** aus `grammForm()`; unter zwei davon gibt es keine Lücke
@@ -621,7 +620,7 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   «в на» liest sich als «B HA». `.cyr` ist von `text-transform` ausgenommen — im
   Datenfeld hilft das aber nicht, dort gehört gar kein Kyrillisch hin.
 - **Die Sätze tragen den Lehrplan** (ADR 0057). Ein Wort ohne Satz liegt in keinem Set
-  und ist nur über «Freestyle» und «Tippen» erreichbar — mehr Vokabeln allein bringen
+  und wäre nur über «Tippen» erreichbar — mehr Vokabeln allein bringen
   darum nichts, mehr Sätze alles. `data/saetze.json` steht **nach Stufe und Reifegrad
   sortiert**. **Nichts Bestehendes umformulieren:** Die Kennung eines Satzes im
   Sicherungscode ist sein Text. Schneidet der Zuwachs die Lernsets neu, wird
@@ -714,10 +713,6 @@ gibt es den Skill `ticket`.
   `state.wortFehler`, die Gefallenen in `state.patzer`; richtig geschrieben löscht beides.
   Beides steht bewusst **nicht** im Sicherungscode — es sind Momentaufnahmen, kein
   Lernstand.
-- **Ein Wort ist lesbar, wenn alle seine Buchstaben *gemeistert* sind** (ADR 0035) —
-  nicht, wenn sie «sitzen». Der Lesemodus in «Freestyle» (`uebLesen`) schneidet quer
-  durch die Themen. Sein Leerzustand braucht **zwei Ausgänge**: Ein gefallener Buchstabe
-  kann den Vorrat wegschmelzen lassen, und ein Modus ohne Ausgang wäre eine Falle.
 - **Das App-Symbol lässt sich zur Laufzeit nicht wechseln.** iOS liest
   `apple-touch-icon` einmal, beim Anlegen der Verknüpfung — keine Medienabfrage, keine
   Schnittstelle dafür. Ein Umschalter in den Einstellungen wäre eine Attrappe. Gebaut

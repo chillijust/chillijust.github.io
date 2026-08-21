@@ -94,7 +94,7 @@ try {
   state.boxes = {}; state.lastSeen = {}; state.answered = 0;
   setFenster = null;
   state.setBleib = null;
-  uebModus = 'lernsets'; uebAuswahl = 'aktuell';
+  uebAuswahl = 'aktuell';
   var woerter = LERNSETS[0].woerter;
   woerter.forEach(function (v) { state.boxes[v.id] = BOX_MAX - 1; });
   for (var di = 0; di < setSchwelle(0) - 1; di++) state.boxes[woerter[di].id] = BOX_MAX;
@@ -468,8 +468,8 @@ try {
   // das: Was oben in «Meine Auswahl» steht, wiederholt sich dort nicht.
   // Gezählt wird darum über die ganze Seite — und zwar **ohne Doppelte**.
   var aufHome = alle('#main [data-uebung]').map(function (b) { return b.dataset.uebung; });
-  pruefe('L1 acht Kacheln, jede genau einmal',
-    aufHome.length === 8 &&
+  pruefe('L1 sieben Kacheln, jede genau einmal',
+    aufHome.length === 7 &&
     aufHome.filter(function (x, i) { return aufHome.indexOf(x) !== i; }).length === 0,
     aufHome.join());
   pruefe('L2 jede nennt ihren Stand',
@@ -507,7 +507,7 @@ try {
   spurenStill();
   ansichtenZuruecksetzen();
   ALL_VOCAB.slice(0, 40).forEach(function (v) { state.boxes[v.id] = 2; });
-  setTab('freestyle');
+  setTab('lernsets');
   pruefe('N1 der Auswahlknopf lässt überstehen',
     getComputedStyle(q('#filterKnopf')).overflow === 'visible',
     getComputedStyle(q('#filterKnopf')).overflow);

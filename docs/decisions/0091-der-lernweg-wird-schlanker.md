@@ -2,7 +2,8 @@
 
 **Stand:** in Arbeit · 2026-08-21 · aus einem Vorhaben des Nutzers
 **Ändert:** ADR 0056 (das Tagesmaß) · ADR 0015 (fertig heißt raus) ·
-ADR 0074 (die Null im Zähler) · ADR 0090 (Fertigwerden vor Auffrischen)
+ADR 0074 (die Null im Zähler) · ADR 0090 (Fertigwerden vor Auffrischen) ·
+ADR 0008 (Lernsets und Freestyle) · ADR 0035 (der Lesemodus) · ADR 0066 (die Leiter)
 
 Ein Umbau in Etappen, jede für sich abgenommen. Dieser Eintrag wächst mit;
 was hier steht, ist entschieden und ausgeliefert.
@@ -159,3 +160,86 @@ Fehlerpfad statt den Fall prüfte.
   und «Schreibung» sagten «ruhen bis zur nächsten Auffrischung».
 - Der Prüfstand steht bei 2420 Prüfungen (von 2440). Die Differenz ist
   gerechnet: −23 aus der neu geschriebenen Suite, +3 neue anderswo.
+
+## 3 · «Freestyle» kommt raus (2.9.0)
+
+**Ausgangslage:** Der Nutzer: «Freestyle ist glaub unnötig.» Die Übung teilte
+sich den ganzen Aufgabencode mit «Lernsets» — sie war ein zweiter Eingang mit
+anderem Vorrat (Thema statt Set) und trug zwei Dinge exklusiv: den Lesemodus
+(ADR 0035) und den Zugang zu Wörtern, die in keinem Satz vorkommen (ADR 0057).
+
+### Die Vorbedingung war schon erfüllt
+
+Bevor irgendetwas gestrichen wurde, die Messung:
+
+```
+Vokabeln gesamt:            395
+in mindestens einem Satz:   395
+in KEINEM Satz:               0
+Wörter in Lernsets:      395 von 395   (35 Sets)
+```
+
+**Die Sorge aus ADR 0057 ist durch die Datenpflege gegenstandslos geworden.**
+Als sie formuliert wurde, lagen 262 von 395 Wörtern außerhalb der Sets; heute
+keines. Freestyle konnte ersatzlos weg, ohne daß ein einziges Wort unerreichbar
+wird. *Eine Regel, die einmal galt, gilt nicht dadurch weiter, daß sie
+irgendwo steht — man muß sie nachmessen.*
+
+Auf Nachfrage ausdrücklich **kein** Build-Wächter dafür: Wer künftig ein Wort
+ohne Satz einträgt, bekommt keinen Abbruch. Der Hinweis steht in
+`docs/datenmodell.md`.
+
+### Was mitging
+
+Die Übung selbst, die Themenwahl im Filter, `uebModus`, `uebThema` — und der
+**Lesemodus** vollständig: `uebLesen`, `leseWoerter()`, `wortLesbar()`,
+`gemeisterteBuchstaben()`, der Schalter über dem Thema, der Wink am Fuß von
+«Buchstaben» samt `state.leseWinkAb`, die gelockerte Buchstabenstrafe
+(`state.leseFehler`, `LESE_STRAFE`) und beide Leerzustände dazu.
+
+Was der Lesemodus wollte — zeigen, wozu das Alphabet gut ist —, leistet der
+Lernweg selbst: Zeichen, Wörter, Sätze, und «Buchstaben» steht ganz vorn.
+
+### Der neue Auffang — und was er beinahe verschluckt hätte
+
+Ganz unten in der Empfehlungsleiter stand die Kür in «Freestyle»: *«Alles
+Fällige ist erledigt — Zeit für eine Kür.»* Auf Nachfrage tritt an ihre Stelle
+**«Wörter wiederholen»** — nach «Tippen», aber in den Stapel «Alle». Ein
+Vorschlag zielt damit erstmals nicht nur auf eine Übung, sondern auf einen
+Stapel darin (`e.stapel`); ohne das führte der Knopf in den leeren Lernstapel.
+
+**Dabei fiel eine stille Änderung auf, die keiner verlangt hatte.** Solange die
+Kür ganz unten stand, war die Leiter **nie leer** — der Zweig «wenn nichts
+übrig ist» war toter Code. Mein erster Entwurf setzte den neuen Auffang an
+dieselbe Stelle, an der jener Zweig stand: **vor** der Fortsetzung. Damit
+verschluckte er sie: Wer vor fünf Minuten Buchstaben geübt hatte und sonst
+nichts offen hatte, bekam nicht mehr «Weiter mit Buchstaben», sondern den
+Auffang. Der Prüfstand meldete es als `B5`.
+
+*Wer eine Sprosse entfernt, die immer trug, ändert die Bedeutung aller
+Bedingungen darunter.* Die Reihenfolge lautet jetzt: Leiter → Fortsetzung →
+Auffang.
+
+### Was der Prüfstand sonst noch fand
+
+**Ein Kunstzustand, der real nicht vorkommt.** Drei Suiten setzten
+`state.lastSeen[wort] = 0`, um «vor sehr langer Zeit» auszudrücken. Solange
+Freestyle den Vorrat lieferte, war das folgenlos. Seit «alles Freigeschaltete»
+den Platz einnimmt, läuft die Wahl über den Zweig `nurWiederholen` — und der
+filtert auf einen *wahren* Zeitstempel. Eine Null ist in JavaScript falsch, das
+Wort fiel aus dem Vorrat, und die Aufgabe kam nie. Ein `lastSeen` von 0 hieße
+1. Januar 1970; die App schreibt so etwas nie.
+
+**Und ein zweiter, gröberer:** «alles Freigeschaltete» ist nicht «der ganze
+Wortschatz». Es sind die Wörter der **freien** Sets — bei lauter niedrigen
+Stufen also allein Set 1. Zwei Suiten suchten ein Wort, das dort nicht lag.
+
+### Folgen
+
+- Sieben Übungen statt acht. `UEBUNGEN`, `UEBUNG_GRUPPEN`, `QUOTE_THEMEN` und
+  die Kachelzahl in fünf Suiten.
+- `bruecke` verliert die Abschnitte C–G (43 Prüfungen), `fertig` den Abschnitt D
+  (12) — beides prüfte den Lesemodus. Die Suite `bruecke` behält A und B
+  (Klappkarte, Rückweg) und heißt im Kopf jetzt danach.
+- Der Prüfstand steht bei 2362 Prüfungen (von 2420). Der Rückgang entspricht den
+  gestrichenen Lesemodus-Abschnitten.

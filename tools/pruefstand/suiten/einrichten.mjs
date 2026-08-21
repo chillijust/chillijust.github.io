@@ -51,7 +51,7 @@ try {
       'oben,weitere,versteckt');
   pruefe('A4 jede Übung steht genau einmal darin', (function () {
     var ids = alle('.einr-zeile').map(function (z) { return z.dataset.eid; });
-    return ids.length === 8 && ids.filter(function (x, i) { return ids.indexOf(x) !== i; }).length === 0;
+    return ids.length === 7 && ids.filter(function (x, i) { return ids.indexOf(x) !== i; }).length === 0;
   })(), alle('.einr-zeile').map(function (z) { return z.dataset.eid; }).join());
   pruefe('A5 es gibt einen Weg zurück und einen zur Automatik',
     !!q('#einrAuto') && !!q('#einrFertig'));
@@ -106,9 +106,9 @@ try {
     homeFaellig(null).indexOf('power') === -1,
     JSON.stringify(uebungsStand('power')));
   pruefe('C4 und die Höchstzahl von drei gilt für Angeheftetes nicht', (function () {
-    state.settings.homeOben = ['power', 'grammatik', 'buchstaben', 'tippen', 'freestyle'];
+    state.settings.homeOben = ['power', 'grammatik', 'buchstaben', 'tippen'];
     renderHome();
-    return homeOben(null).length === 5;
+    return homeOben(null).length === 4;
   })(), String(homeOben(null).length));
   pruefe('C5 nichts steht zweimal auf der Seite', (function () {
     var ids = alle('#main [data-uebung]').map(function (b) { return b.dataset.uebung; });

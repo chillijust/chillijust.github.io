@@ -437,7 +437,7 @@ try {
   ticketsSichern();
   state = defaultState();
   ansichtenZuruecksetzen();
-  setTab('freestyle');
+  setTab('lernsets');
   q('#meldeKnopf').click();
   q('#meldeTitel').value = 'Eine Kleinigkeit';
   q('#meldeText').value = 'Dazu ein Satz';

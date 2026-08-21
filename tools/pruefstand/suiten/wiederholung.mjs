@@ -258,7 +258,7 @@ try {
     state.lastSeen[v.id] = fehlt ? wGestern : wLange;
   });
   var wFehlt = wW.slice(wW.length - 2).map(function (v) { return v.id; });
-  uebModus = 'lernsets'; uebAuswahl = 0; state.setBleib = 0;
+  uebAuswahl = 0; state.setBleib = 0;
   // **Seit ADR 0091 ist die Lage eine andere:** Die zehn gemeisterten Wörter
   // sind nach vierzig Tagen *nicht* fällig, sondern fertig. Fällig kann nur
   // noch sein, was unfertig ist — und die zwei waren gestern dran, also ist
@@ -323,7 +323,7 @@ try {
     state.boxes[v.id] = BOX_MAX - 1;
     state.lastSeen[v.id] = Date.now();
   });
-  uebModus = 'lernsets'; uebAuswahl = 0; state.setBleib = 0;
+  uebAuswahl = 0; state.setBleib = 0;
   var xFolge = [];
   for (var xi = 0; xi < 30; xi++) {
     var xV = waehleWort(uebPool());
@@ -346,7 +346,7 @@ try {
   ansichtenZuruecksetzen();
   var xZwei = ALL_VOCAB.slice(0, 2);
   xZwei.forEach(function (v) { state.boxes[v.id] = 2; state.lastSeen[v.id] = Date.now(); });
-  uebModus = 'freestyle'; uebThema = 'Alle';
+  uebAuswahl = 'alle';
   var xLeer = 0;
   for (var xm = 0; xm < 10; xm++) {
     if (!waehleWort(xZwei)) xLeer++;

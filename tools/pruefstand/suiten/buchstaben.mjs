@@ -147,7 +147,7 @@ try {
   // widersprach dem Tutorial, das seit jeher mit ihnen anfängt.
   pruefe('G1 «Buchstaben» steht ganz vorn',
     alle('#homeAlle [data-uebung]').map(function (b) { return b.dataset.uebung; }).join(',') ===
-    'buchstaben,lernsets,freestyle,tippen,schreibung,power,grammatik,uebersetzen',
+    'buchstaben,lernsets,tippen,schreibung,power,grammatik,uebersetzen',
     alle('#homeAlle [data-uebung]').map(function (b) { return b.dataset.uebung; }).join(','));
   // **Nach Namen fragen, nicht nach Platz**: Die sechste Kachel war eine
   // Position, keine Aussage — seit die Übersicht oben eine Auswahl trägt,

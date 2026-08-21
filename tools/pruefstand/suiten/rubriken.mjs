@@ -21,7 +21,7 @@ try {
   // «#homeAlle».
   var kacheln = alle('#homeAlle [data-uebung]').map(function (b) { return b.dataset.uebung; }).join(',');
   pruefe('A1 sieben Übungen auf Home',
-    kacheln === 'buchstaben,lernsets,freestyle,tippen,schreibung,power,grammatik,uebersetzen', kacheln);
+    kacheln === 'buchstaben,lernsets,tippen,schreibung,power,grammatik,uebersetzen', kacheln);
   pruefe('A2 App heißt Chillingo', q('h1').textContent.indexOf('Chillingo') === 0 &&
     document.title.indexOf('Chillingo') === 0);
   pruefe('A3 Doppeltipp-Zoom aus',
@@ -61,36 +61,55 @@ try {
   setTab('uebersetzen');
   pruefe('C3 Übersetzen ist nach einem Set spielbar', !q('.leer') && !!q('.built'));
 
-  // D · Freestyle
-  setTab('freestyle');
-  filterSetzen(true); renderFilter();
-  pruefe('D1 Themenwahl statt Setwahl', !!q('[data-fw="thema"]') && !q('[data-fw="set"]'));
-  pruefe('D2 alle Themen wählbar',
-    alle('[data-fw="thema"]').length === Object.keys(VOCAB_THEMES).length + 1,
-    String(alle('[data-fw="thema"]').length));
-  filterSetzen(false);
-  uebThema = 'Tiere';
-  uebNext(true);
-  var nurThema = true;
-  for (var j = 0; j < 20; j++) if (waehleWort(uebPool()).theme !== 'Tiere') nurThema = false;
-  pruefe('D3 Freestyle bleibt im Thema', nurThema);
-  pruefe('D4 Freestyle ohne Sperre', uebPool().length === VOCAB_THEMES['Tiere'].length);
-  uebThema = 'Alle';
-  uebNext(true);
-  pruefe('D5 «Alle» nutzt den ganzen Bestand', uebPool().length === ALL_VOCAB.length);
-
-  // E · Wechsel der Rubrik setzt die Frage neu
-  var vorher = uebQ;
+  // D · Die Auswahl in «Lernsets»
+  // **Eine Themenwahl gibt es nicht mehr** (ADR 0091): «Freestyle» ist
+  // entfallen, und mit ihm der einzige Ort, an dem nach Thema gefiltert wurde.
   setTab('lernsets');
-  pruefe('E1 Rubrikwechsel baut neu auf', uebModus === 'lernsets' && uebQ !== vorher);
+  filterSetzen(true); renderFilter();
+  pruefe('D1 Setwahl statt Themenwahl', !!q('[data-fw="set"]') && !q('[data-fw="thema"]'));
+  pruefe('D2 «aktuell» und «alles Freigeschaltete» stehen zur Wahl',
+    alle('[data-fw="auswahl"]').length >= 2 || !!q('[data-fw="set"]'));
+  filterSetzen(false);
+  uebAuswahl = 'aktuell';
+  uebNext(true);
+  var nurSet = true;
+  var setWoerter = LERNSETS[aktuellesSet()].woerter.map(function (v) { return v.id; });
+  for (var j = 0; j < 20; j++) {
+    if (setWoerter.indexOf(waehleWort(uebPool()).id) === -1) nurSet = false;
+  }
+  pruefe('D3 das laufende Set bleibt unter sich', nurSet);
+  pruefe('D4 und der Vorrat ist genau das Set',
+    uebPool().length === LERNSETS[aktuellesSet()].woerter.length);
+  uebAuswahl = 'alle';
+  uebNext(true);
+  pruefe('D5 «Alles Freigeschaltete» nimmt mehr',
+    uebPool().length === freigeschalteteWoerter().length,
+    uebPool().length + ' von ' + ALL_VOCAB.length);
+
+  // E · Ein Wechsel der Auswahl setzt die Frage neu
+  // **Den Rubrikwechsel gibt es nicht mehr** (ADR 0091) — «Lernsets» und
+  // «Freestyle» waren zwei Eingänge in dieselbe Übung, und der Wechsel
+  // zwischen ihnen räumte die laufende Frage weg. Geblieben ist die Auswahl.
+  uebAuswahl = 'aktuell';
+  uebNext(true);
+  var vorher = uebQ;
+  filterWaehlen('set', 'alle');
+  pruefe('E1 ein Wechsel der Auswahl baut neu auf',
+    uebAuswahl === 'alle' && uebQ !== vorher, uebAuswahl);
+  uebAuswahl = 'aktuell';
+  uebNext(true);
 
   // F · Zusatzkacheln
   state.boxes = {}; state.lastSeen = {};
-  var wort = ALL_VOCAB.filter(function (v) { return v.ru.length >= 5 && v.ru.indexOf(' ') === -1; })[0];
-  // **Unterhalb der Tippstufe** (ADR 0088): Darüber wird in «Lernsets» und
-  // «Freestyle» nur noch geschrieben, Kacheln kommen dort nicht mehr vor.
+  // **Das Wort muß im laufenden Set liegen.** Seit «Freestyle» fort ist, zieht
+  // die Übung aus dem Set, nicht mehr aus dem ganzen Wortschatz.
+  var wort = LERNSETS[0].woerter.filter(function (v) {
+    return v.ru.length >= 5 && v.ru.indexOf(' ') === -1;
+  })[0] || LERNSETS[0].woerter[0];
+  // **Unterhalb der Tippstufe** (ADR 0088): Darüber wird in «Lernsets» nur
+  // noch geschrieben, Kacheln kommen dort nicht mehr vor.
   state.boxes[wort.id] = SATZ_STUFE;
-  uebModus = 'freestyle'; uebThema = wort.theme;
+  uebAuswahl = 'aktuell';
   var versuche = 0, gefunden = null;
   while (versuche < 60 && !gefunden) {
     var f = buildQuestion();
@@ -155,7 +174,7 @@ try {
   // I · Aufgaben sitzen tiefer, Listen nicht
   function tief(id) { setTab(id); return document.body.classList.contains('aufgabe'); }
   pruefe('I1 Übungen rücken nach unten',
-    ['lernsets', 'freestyle', 'tippen', 'uebersetzen', 'buchstaben', 'grammatik']
+    ['lernsets', 'tippen', 'uebersetzen', 'buchstaben', 'grammatik']
       .every(tief));
   pruefe('I2 Home nicht', !tief('home'));
   pruefe('I3 Menüansichten nicht',
@@ -199,7 +218,7 @@ try {
   // Das ganze Angebot liegt zugeklappt im Baum — nicht weggelassen: Das
   // Tutorial zeigt auf einzelne Kacheln, und ein Ziel, das es nicht gibt, wäre
   // ein stiller Fehler.
-  pruefe('Z5 alle acht stehen im Baum', alle('#homeAlle [data-uebung]').length === 8,
+  pruefe('Z5 alle sieben stehen im Baum', alle('#homeAlle [data-uebung]').length === 7,
     String(alle('#homeAlle [data-uebung]').length));
   pruefe('Z6 zugeklappt sind sie nicht zu sehen',
     getComputedStyle(q('#homeAlle')).display === 'none');
@@ -260,7 +279,7 @@ try {
     state.boxes[v.id] = SATZ_STUFE - 1;
     state.patzer[v.id] = Date.now();
   });
-  zuletztGeuebt('freestyle');
+  zuletztGeuebt('tippen');
   var e = empfehlung();
   pruefe('Y1 Zurückgefallenes sticht die Fortsetzung', e.ziel === 'power',
     e.ziel + ' — ' + e.titel);
@@ -269,7 +288,7 @@ try {
   // **Die Zeichen gehen vor, solange man am Anfang steht.**
   state = defaultState();
   ansichtenZuruecksetzen();
-  zuletztGeuebt('freestyle');
+  zuletztGeuebt('tippen');
   pruefe('Y3 am Anfang zuerst die Zeichen', empfehlung().ziel === 'buchstaben',
     empfehlung().ziel + ' — ' + empfehlung().titel);
   // Wer längst liest, bekommt keine Ermahnung mehr: Dieselbe Lage, aber mit
@@ -282,9 +301,12 @@ try {
   state = defaultState();
   ansichtenZuruecksetzen();
   ALPHABET.forEach(function (b) { state.abcBox[b[1]] = BOX_MAX; });
-  zuletztGeuebt('freestyle');
+  // **Eine Übung, die auch etwas hergibt.** «Tippen» wäre hier gesperrt, und
+  // eine Fortsetzung ins Leere wird verworfen — der Test führe dann grün, ohne
+  // die Fortsetzung je zu prüfen.
+  zuletztGeuebt('grammatik');
   var f = empfehlung();
-  pruefe('Y5 ohne Defizit führt sie zurück, wo man war', f.ziel === 'freestyle',
+  pruefe('Y5 ohne Defizit führt sie zurück, wo man war', f.ziel === 'grammatik',
     f.ziel + ' — ' + f.titel);
   pruefe('Y6 und sagt es auch', f.titel.indexOf('Weiter mit') === 0, f.titel);
   // Jede Sprosse nennt einen Grund — eine leere Zeile wäre eine Ansage.
@@ -304,13 +326,13 @@ try {
     return alle('#main [data-uebung]').map(function (b) { return b.dataset.uebung; });
   }
   pruefe('X1 die Vorgabe zeigt alles, jede genau einmal',
-    state.settings.homeAus.length === 0 && aufHome().length === 8 &&
+    state.settings.homeAus.length === 0 && aufHome().length === 7 &&
     aufHome().filter(function (x, i) { return aufHome().indexOf(x) !== i; }).length === 0,
     aufHome().join());
-  state.settings.homeAus = ['freestyle', 'grammatik'];
+  state.settings.homeAus = ['power', 'grammatik'];
   renderHome();
   pruefe('X2 Abgewähltes verschwindet',
-    aufHome().length === 6 && aufHome().indexOf('freestyle') === -1,
+    aufHome().length === 5 && aufHome().indexOf('power') === -1,
     aufHome().join());
   pruefe('X3 auch aus dem Fälligen',
     !q('#main [data-uebung="grammatik"]'));
@@ -328,8 +350,8 @@ try {
   // Kachel, und ein Wähler ins Leere ist ein stiller Fehler.
   tutStarten(false);
   renderHome();
-  pruefe('X6 im Tutorial stehen alle acht da',
-    alle('#homeAlle [data-uebung]').length === 8 && !!q('[data-uebung="buchstaben"]'),
+  pruefe('X6 im Tutorial stehen alle sieben da',
+    alle('#homeAlle [data-uebung]').length === 7 && !!q('[data-uebung="buchstaben"]'),
     String(alle('#homeAlle [data-uebung]').length));
   tutEnde();
   // ── X7ff · Das Einrichte-Fenster (ADR 0075) ──────────────
@@ -342,9 +364,9 @@ try {
   pruefe('X7 die Einstellungen führen ins Fenster', !!q('#zuEinrichten'));
   q('#zuEinrichten').click();
   pruefe('X7b es öffnet sich', currentTab === 'einrichten' && !!q('[data-liste="oben"]'));
-  pruefe('X8 alle acht stehen darin, jede genau einmal', (function () {
+  pruefe('X8 alle sieben stehen darin, jede genau einmal', (function () {
     var ids = alle('.einr-zeile').map(function (z) { return z.dataset.eid; });
-    return ids.length === 8 && ids.filter(function (x, i) { return ids.indexOf(x) !== i; }).length === 0;
+    return ids.length === 7 && ids.filter(function (x, i) { return ids.indexOf(x) !== i; }).length === 0;
   })(), alle('.einr-zeile').map(function (z) { return z.dataset.eid; }).join());
   pruefe('X8b und es gibt drei Rubriken',
     alle('.einr-liste').length === 3 &&

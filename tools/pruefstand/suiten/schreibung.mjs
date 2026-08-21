@@ -287,7 +287,7 @@ try {
   // einige Kacheln auf, und welche das sind, hängt vom Lernstand ab. Geprüft
   // wird darum die Reihenfolge **unter denen, die unten stehen**.
   var unten = alle('#homeAlle [data-uebung]').map(function (b) { return b.dataset.uebung; });
-  var plan = ['buchstaben', 'lernsets', 'freestyle', 'tippen', 'schreibung',
+  var plan = ['buchstaben', 'lernsets', 'tippen', 'schreibung',
     'power', 'grammatik', 'uebersetzen'];
   pruefe('G1 die Kachel steht bei den Wörtern, hinter «Tippen»',
     unten.join() === plan.filter(function (id) { return unten.indexOf(id) !== -1; }).join() &&

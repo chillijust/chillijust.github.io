@@ -92,7 +92,7 @@ try {
       ALL_VOCAB.slice(0, 30).forEach(function (v) { state.boxes[v.id] = 2; });
       setTab('lernsets'); uebNext(true);
     }],
-    ['Lernsets leer', function () { setTab('lernsets'); uebLesen = true; renderUeben(); }],
+    ['Lernsets leer', function () { setTab('lernsets'); uebAuswahl = 'alle'; renderUeben(); }],
     ['Tippen', function () {
       ALL_VOCAB.slice(0, 20).forEach(function (v) { state.boxes[v.id] = 3; });
       setTab('tippen');

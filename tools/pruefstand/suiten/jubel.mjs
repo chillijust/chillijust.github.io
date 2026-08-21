@@ -79,7 +79,7 @@ try {
   // dort, und die Schwelle liegt bei 80 % der Endstufe. Der Weg über
   // «Lernsets» kann ein Set gar nicht mehr über die Schwelle bringen.
   state = defaultState(); ansichtenZuruecksetzen();
-  uebModus = 'lernsets'; uebAuswahl = 0; setTab('lernsets');
+  uebAuswahl = 0; setTab('lernsets');
   var woerter = LERNSETS[0].woerter;
   // Einer unter der Schwelle: Das nächste getippte Wort nimmt sie.
   setVoll(0, BOX_MAX - 1);
@@ -125,7 +125,7 @@ try {
 
   // ── C · Themen ────────────────────────────────────────────
   state = defaultState(); ansichtenZuruecksetzen();
-  uebModus = 'freestyle'; setTab('freestyle');
+  uebAuswahl = 'alle'; setTab('lernsets');
   var thema = Object.keys(VOCAB_THEMES)[0];
   var themaWoerter = ALL_VOCAB.filter(function (v) { return v.theme === thema; });
   themaWoerter.forEach(function (v) { state.boxes[v.id] = BOX_MAX; });
@@ -206,7 +206,7 @@ try {
   pruefe('G4 aber nicht, was offen ist', !jubelSchon('set:1') && !jubelSchon('regel'));
   // Und der Rückfall danach feiert nicht.
   state.boxes[LERNSETS[0].woerter[2].id] = SATZ_STUFE - 1;
-  uebModus = 'lernsets'; uebAuswahl = 0; setTab('lernsets');
+  uebAuswahl = 0; setTab('lernsets');
   uebGeschafftesSet = null;
   antworte(LERNSETS[0].woerter[2], true);
   pruefe('G5 ein nachgetragenes Set feiert nicht erneut',

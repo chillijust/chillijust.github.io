@@ -31,7 +31,7 @@ Wer neu dazukommt und nur fünf lesen will:
 | [0005](0005-kopfbereich-und-ikonografie.md) | Kopf als Statusanzeige, Symbole als Inline-SVG | Kopf später umgebaut (0018, 0019); die SVG-Regel gilt |
 | [0006](0006-lernweg-paeckchen-und-freischaltung.md) | Päckchen, Wiedervorlage, gesperrtes Tippen | |
 | [0007](0007-lehrplan-und-satzvoraussetzungen.md) | Funktionswörter zuerst, Sätze mit Voraussetzungen | |
-| [0008](0008-lernsets-und-freestyle.md) | «Üben» wird zu «Lernsets» und «Freestyle» | |
+| [0008](0008-lernsets-und-freestyle.md) | «Üben» wird zu «Lernsets» und «Freestyle» | ⚠︎ «Freestyle» abgeschafft durch 0091 |
 | [0009](0009-faktensammlung-darstellung-symbol.md) | Faktensammlung, Darstellungswahl, App-Symbol | Darstellungswahl abgelöst durch 0039 |
 | [0010](0010-maskottchen-in-der-app.md) | Das Maskottchen tritt in der App auf | |
 | [0011](0011-wandernde-chili.md) | Die Chili wandert statt aufzutauchen | |
@@ -58,7 +58,7 @@ Wer neu dazukommt und nur fünf lesen will:
 | [0032](0032-praepositiv-und-belebtheit.md) | Der Präpositiv — warum Grammatik allein nicht reicht | |
 | [0033](0033-wer-schreibt-der-bleibt.md) | «Falsch» ist eine dürftige Auskunft | |
 | [0034](0034-power-training-und-gezielte-regel.md) | Power-Training, und die Regel gezielt wählen | |
-| [0035](0035-buchstaben-tragen-woerter.md) | Buchstaben tragen Wörter | |
+| [0035](0035-buchstaben-tragen-woerter.md) | Buchstaben tragen Wörter | ⚠︎ Lesemodus abgeschafft durch 0091 |
 | [0036](0036-zurueck-heisst-woher.md) | Zurück heißt: woher man kam | |
 | [0037](0037-buchstaben-zeigen-und-tastatur-waehlen.md) | Zeigen, wo es klemmte — und die Tastatur mitbringen | |
 | [0038](0038-farbton-als-zweite-achse.md) | Der Farbton ist eine zweite Achse | ⚠︎ ersetzt durch 0039 |
@@ -115,7 +115,7 @@ Wer neu dazukommt und nur fünf lesen will:
 | [0089](0089-eine-taste-eine-stelle.md) | Eine Taste, eine Stelle — alle Tastaturen durch dieselbe Hand | ergänzt 0068, 0088 |
 | [0090](0090-fertigwerden-vor-auffrischen.md) | Fertigwerden geht vor Auffrischen — die fehlenden Wörter kommen dran | ändert 0015, 0088 |
 | [0090](0090-nur-ein-blatt-und-keine-zeile.md) | Nur ein Blatt offen, keine Hinweiszeile, Nachschrift auch getippt | ändert 0086, ergänzt 0070, 0082 |
-| [0091](0091-der-lernweg-wird-schlanker.md) | Der Lernweg wird schlanker — Tagesmaß und Auffrischen kommen raus | ändert 0056, 0015, 0074, 0090 |
+| [0091](0091-der-lernweg-wird-schlanker.md) | Der Lernweg wird schlanker — Tagesmaß, Auffrischen und «Freestyle» kommen raus | ändert 0056, 0015, 0074, 0090, 0008, 0035, 0066 |
 
 ## Einen neuen anlegen
 

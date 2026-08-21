@@ -293,7 +293,7 @@ try {
   state = defaultState();
   ansichtenZuruecksetzen();
   ALL_VOCAB.slice(0, 40).forEach(function (v) { state.boxes[v.id] = 2; });
-  uebModus = 'lernsets'; uebAuswahl = 0;
+  uebAuswahl = 0;
   setTab('lernsets');
   uebNext(true);
   pruefe('D1 die Uhr läuft nach dem Aufbau', aufgabeSeit > 0, String(aufgabeSeit));

@@ -86,20 +86,25 @@ try {
   q('[data-fw="set"][data-fv="aktuell"]').click();
   pruefe('D9 zurück auf den Regelfall', !q('#filterKnopf').classList.contains('aktiv'));
 
-  // E · Freestyle
-  setTab('freestyle');
-  uebThema = 'Alle';
+  // E · Die Set-Reihe in «Lernsets»
+  // **Eine Themenwahl gibt es nicht mehr** (ADR 0091) — sie war der Filter von
+  // «Freestyle», und die Übung ist entfallen. Geblieben ist die Set-Reihe,
+  // und die ist lang genug, um dieselbe Frage zu stellen: Bleibt sie rollbar?
+  setTab('lernsets');
+  uebAuswahl = 'aktuell';
   renderKopf();
   q('#filterKnopf').click();
-  pruefe('E1 alle Themen zur Wahl',
-    alle('[data-fw="thema"]').length === Object.keys(VOCAB_THEMES).length + 1);
+  pruefe('E1 keine Themenwahl mehr', !q('[data-fw="thema"]'));
+  pruefe('E1b dafür jedes Set zur Wahl',
+    alle('[data-fw="set"]').length === LERNSETS.length + 2,
+    String(alle('[data-fw="set"]').length));
   pruefe('E2 lange Liste bleibt scrollbar',
     getComputedStyle(q('.filterpanel .menuinhalt')).overflowY === 'auto');
-  var thema = Object.keys(VOCAB_THEMES)[2];
-  alle('[data-fw="thema"]').filter(function (b) { return b.dataset.fv === thema; })[0].click();
-  pruefe('E3 Thema gesetzt', uebThema === thema && q('#filterKnopf').classList.contains('aktiv'), uebThema);
-  pruefe('E4 die Ansicht nennt es', main.textContent.indexOf(thema) !== -1);
-  uebThema = 'Alle'; uebNext(true); renderKopf();
+  q('[data-fw="set"][data-fv="alle"]').click();
+  pruefe('E3 Auswahl gesetzt',
+    uebAuswahl === 'alle' && q('#filterKnopf').classList.contains('aktiv'),
+    String(uebAuswahl));
+  uebAuswahl = 'aktuell'; uebNext(true); renderKopf();
 
   // F · Tippen
   state.boxes = {}; state.lastSeen = {};

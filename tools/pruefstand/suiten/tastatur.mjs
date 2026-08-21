@@ -199,7 +199,7 @@ try {
     state.boxes[v.id] = state.settings.tippenStufe;
     state.lastSeen[v.id] = Date.now();
   });
-  uebModus = 'lernsets'; uebAuswahl = 'aktuell';
+  uebAuswahl = 'aktuell';
   uebKb = true;
   setTab('lernsets');
   pruefe('AA1 ab der Tippstufe wird geschrieben', !!uebQ && uebQ.mode === 'tippen',
