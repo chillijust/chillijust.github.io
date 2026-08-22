@@ -21,8 +21,13 @@ import { HIER, BAU, chromiumFinden } from './helfer.mjs';
 const SUITEN_ORDNER = join(HIER, 'suiten');
 
 const argumente = process.argv.slice(2);
-const leise = argumente.includes('-q');
-const gewaehlt = argumente.filter((a) => a !== '-q');
+// **Grün schweigt.** Vierzig Zeilen «ALLE n TESTS BESTANDEN» sagen dasselbe wie
+// die Schlusszeile — und wer den Läufer aus einer Sitzung heraus fährt, schleppt
+// sie danach bei jedem weiteren Aufruf mit. Rot redet unverändert: Dort ist die
+// Ausgabe der ganze Zweck. `-v` holt die alte Fassung zurück; `-q` bleibt als
+// Schreibweise erlaubt, damit vorhandene Aufrufer nicht brechen.
+const laut = argumente.includes('-v');
+const gewaehlt = argumente.filter((a) => a !== '-q' && a !== '-v');
 
 // Alle Suiten, oder die genannten. Eine neue Datei in `suiten/` wird von selbst
 // mitgenommen — eine Liste, die man pflegen muss, wird irgendwann vergessen.
@@ -97,7 +102,7 @@ for (const name of suiten) {
   if (titel.startsWith('ALLE')) {
     gruen++;
     pruefungen += parseInt(titel.replace(/\D/g, ''), 10) || 0;
-    if (!leise) console.log(`=== ${name} === ${titel}`);
+    if (laut) console.log(`=== ${name} === ${titel}`);
   } else {
     rot++; kaputt.push(name);
     console.log(`=== ${name} === ${titel || 'KEIN ERGEBNIS'}`);

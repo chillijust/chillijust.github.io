@@ -13,7 +13,7 @@ und schreibt sein Urteil in den Seitentitel.
 ```sh
 node tools/pruefstand/lauf.mjs        # alle Suiten, ~16 s
 node tools/pruefstand/lauf.mjs jubel  # nur eine
-node tools/pruefstand/lauf.mjs -q     # nur Zusammenfassung und was rot ist
+node tools/pruefstand/lauf.mjs -v     # auch jede grüne Suite einzeln nennen
 ```
 
 `tools/pruefstand/README.md` hat den vollständigen Aufbau und eine Vorlage zum

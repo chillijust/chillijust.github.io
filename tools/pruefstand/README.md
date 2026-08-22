@@ -9,7 +9,7 @@ Seitentitel.
 ```sh
 node tools/pruefstand/lauf.mjs              # alle Suiten (~16 s)
 node tools/pruefstand/lauf.mjs jubel flammen  # nur diese
-node tools/pruefstand/lauf.mjs -q           # nur Zusammenfassung und was rot ist
+node tools/pruefstand/lauf.mjs -v           # auch jede grüne Suite einzeln nennen
 ```
 
 Der Rückgabewert ist 0, wenn alles grün ist, sonst 1. Ein Hook

@@ -1,6 +1,6 @@
 ---
 name: ticket
-description: Ein Chillingo-Ticket vom Befund bis zur bestätigten Auslieferung abarbeiten — reproduzieren, reparieren, absichern, Version, Commit, Deploy prüfen. Verwenden, sobald ein Ticket im Format «# Chillingo · N Tickets» ankommt oder ein Fehler beziehungsweise Wunsch aus der App gemeldet wird.
+description: Ein Chillingo-Ticket vom Befund bis zum Push abarbeiten — reproduzieren, reparieren, im Prüfstand absichern, dokumentieren, Version stempeln, committen. Verwenden, sobald ein Ticket im Format «# Chillingo · N Tickets» ankommt oder ein Fehler beziehungsweise Wunsch aus der App gemeldet wird.
 ---
 
 # Ein Ticket abarbeiten
@@ -48,29 +48,18 @@ dritte = alles Übrige. Ein Fehler ist die dritte.
 steht das *Warum*, nicht das *Was*.
 
 **10 · Push.** Der Hook fährt `build.mjs --check`, `pruefen.mjs` und den
-Prüfstand und hält an, wenn etwas rot ist.
+Prüfstand und hält an, wenn etwas rot ist. **Damit ist das Ticket erledigt.**
 
-**11 · Auslieferung bestätigen.** Den Pages-Build abwarten und prüfen (siehe
-unten). Erst dann ist das Ticket erledigt.
+**Den Pages-Bau nicht mehr über GitHub nachschlagen.** Der Hook hat den ganzen
+Prüfstand da bereits gefahren, und ein Lauf-Abruf schüttet bis zu 50 000 Zeichen
+in den Kontext, die von da an bei jedem weiteren Aufruf mitkosten. Statt dessen
+dem Nutzer sagen: die Live-Seite ist aus der Arbeitsumgebung nicht abrufbar
+(Proxy), er möge am Gerät gegenprüfen — und eine Home-Bildschirm-Verknüpfung
+hält ihren eigenen Cache. Nur wenn er ausdrücklich nach dem Lauf fragt, wird er
+abgerufen.
 
-## Die Auslieferung prüfen
-
-`chillijust.github.io` ist aus der Arbeitsumgebung **nicht erreichbar** (Proxy).
-Der Nachweis läuft über den Workflow-Lauf. Die Antwort des GitHub-Werkzeugs ist
-zu groß fürs Lesen und wird in eine Datei gespeichert — daraus lesen:
-
-```sh
-python3 -c "
-import json
-d=json.load(open('<gespeicherte Datei>'))
-r=d['workflow_runs'][0]
-print(r['head_sha'][:7], r.get('status'), r.get('conclusion'), r.get('updated_at'))
-"
-```
-
-Der Bau braucht ein bis drei Minuten. Danach dem Nutzer sagen, dass die
-Live-Seite selbst nicht abrufbar war und er am Gerät gegenprüfen möge — und dass
-eine Home-Bildschirm-Verknüpfung ihren eigenen Cache hält.
+**11 · Schnitt anbieten.** Ist der Block ausgeliefert, «Sir, hier wäre ein guter
+Schnitt» sagen und in zwei Sätzen nennen, was ein Nachfolger wissen muss.
 
 ## Wie berichtet wird
 
