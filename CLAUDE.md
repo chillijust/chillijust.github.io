@@ -21,7 +21,7 @@ nicht «Rubrik». Die Reihenfolge **ist der Lernweg** — Zeichen, Wörter, Sät
 Lernstand, zählt nicht in Serie und Fortschritt; Einstieg ist das Üben, die Tafel liegt
 hinter einem eigenen Knopf), dann folgen:
 **Lernsets** (zielgerichtet: die Wörter der nächsten Sätze, schaltet «Übersetzen» frei;
-das nächste Set öffnet bei **80 % gemeistert**, und gemeistert wird nur getippt — ADR 0086),
+das nächste Set öffnet bei **80 % gemeistert**, und gemeistert wird **nur hier** — ADR 0086/0092),
 **Tippen** (Eingabequiz mit kyrillischer Tastatur, ab Leitner-Stufe 3),
 **Übersetzen** (nur Sätze, deren Wörter sitzen; Form und Richtung steigern sich mit der
 Stufe — Kacheln vor Tippen, RU→DE vor DE→RU),
@@ -190,9 +190,14 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   getippt)` deckelt bei `BOX_MAX - 1`, bis ein Wort **`TIPP_FOLGE`-mal hintereinander**
   richtig geschrieben wurde (`state.tippFolge`, eine Momentaufnahme wie `wortFehler` und
   **nicht** im Sicherungscode); ein Fehler setzt die Folge auf null.
-  **Geschrieben wird auch in «Lernsets»**: Ab `settings.tippenStufe` gibt `buildQuestion()`
-  `mode: 'tippen'` zurück — dieselbe Gestalt wie in der Übung «Tippen», Feld und
-  eingebaute Tastatur inbegriffen. Die **Kontext-Lücke lebt darum unterhalb** dieser
+  **Gemeistert wird ausschließlich in «Lernsets»** (ADR 0092): Ab `tippAb()` gibt
+  `buildQuestion()` `mode: 'tippen'` zurück — dieselbe Gestalt wie in der Übung
+  «Tippen», Feld und eingebaute Tastatur inbegriffen —, und **nur `uebPruefen()` reicht
+  das dritte Argument wahrheitsgemäß durch**. Die Übung «Tippen» ist eine freiwillige
+  Zugabe und ruft `updateBox(…, false)`: Sie hebt bis vor die Endstufe, nie darüber.
+  Wer das dritte Argument irgendwo fest verdrahtet, hebelt den Mechanismus aus — genau
+  das tat «Lernsets» drei Fassungen lang, und **eine Prüfung, die `updateBox()` selbst
+  aufruft, merkt davon nichts** (`lernweg` K5/K6 gehen darum den Weg über die Übungen). Die **Kontext-Lücke lebt darum unterhalb** dieser
   Stufe (ändert ADR 0053); ohne diese Grenze verschwände sie ganz. **Wer oben steht, bleibt oben** (eine Kachelwiederholung ist kein
   Rückschritt), und der Deckel wirkt **nur nach oben**. Was ein gemeistertes Wort nach
   sich zieht, steht in `meisterFolgen()` und wird von beiden Übungen gerufen — Set- und
@@ -201,6 +206,15 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   bleiben, die Hinweiszeile ist weg — sie schob die Kachel so weit nach unten, daß die
   Übung scrollte, und **eine Übung, die scrollt, verliert ihre Knöpfe aus dem
   Daumenbereich**.
+- **Eine Einstellung darf vorziehen, nicht aufschieben** (ADR 0093). `tippAb()` deckelt
+  `settings.tippenStufe` bei `BOX_MAX - 1`; die rohe Einstellung wird nirgends mehr
+  gelesen. Über den letzten Schritt hinaus gibt es keinen Weg, denn dort verlangt
+  `updateBox()` eine **getippte** Antwort. Stand die Einstellung darüber — «4» war
+  wählbar —, bekam man auf der vorletzten Stufe ewig Kacheln, der Deckel warf jede
+  richtige Antwort zurück, und **kein Wort erreichte je die Endstufe** (gemessen: 0 von
+  12 gegen 10 von 12). Die Wahl bietet darum nur noch 2 und 3. **Wer eine Grenze
+  einführt, prüft jede Einstellung, die daran vorbeizielt** — `lernweg` K7 lernt ein Set
+  bei *jeder* wählbaren Stufe fertig, statt eine anzunehmen.
 - **Die Abgabe steht unter der Tastatur** (ADR 0092) — in allen sechs Übungen mit
   eingebauter Tastatur gleich, und die Tastatur steht **neben der Kachel, nicht darin**:
   Innerhalb wird sie schmaler, und die oberste Reihe bricht um. Beides prüft `tastatur`

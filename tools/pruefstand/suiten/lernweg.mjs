@@ -115,7 +115,15 @@ try {
 
   // G · Einstellungen
   setTab('einstellungen');
-  pruefe('G1 Stufenwahl vorhanden', alle('[data-wahl="tippenStufe"]').length === 3);
+  // **Nur noch zwei Stufen zur Wahl** (ADR 0093): Über BOX_MAX-1 führt kein
+  // Weg, weil der letzte Schritt eine getippte Antwort verlangt. Eine Wahl,
+  // die nichts bewirkt, wäre eine Attrappe.
+  pruefe('G1 Stufenwahl vorhanden', alle('[data-wahl="tippenStufe"]').length === 2,
+    String(alle('[data-wahl="tippenStufe"]').length));
+  pruefe('G1b und keine reicht über den letzten Schritt hinaus',
+    alle('[data-wahl="tippenStufe"]').every(function (b) {
+      return parseInt(b.dataset.wert, 10) <= BOX_MAX - 1;
+    }));
   alle('[data-wahl="tippenStufe"]')[0].click();
   pruefe('G2 Stufe umgestellt', state.settings.tippenStufe === 2);
   var g = mergeState({ settings: { tippenStufe: 99 } });
@@ -255,6 +263,40 @@ try {
   pruefe('K6 in «Tippen» bleibt es auf der vorletzten Stufe',
     state.boxes[kt.id] === BOX_MAX - 1 && runden > 0,
     'Stufe ' + state.boxes[kt.id] + ' nach ' + runden + ' Treffern');
+  state.settings.tippenStufe = 3;
+
+  // ── K7 · Kein Weg darf sich zumauern (ADR 0093) ───────────
+  // **Gemeldet:** «In den Lernsets kommen nie Aufgaben zum Schreiben.»
+  // Die Ursache lag nicht in buildQuestion(), sondern in einer Einstellung, die
+  // weiter reichte als der Mechanismus: Bei «Tippen ab Stufe 4» bekam ein Wort
+  // auf der vorletzten Stufe ewig Kacheln — und updateBox() warf jede richtige
+  // Antwort zurück, weil der letzte Schritt eine getippte verlangt.
+  //
+  // Geprüft wird der **ganze Weg**: Läßt sich ein Set bei jeder wählbaren
+  // Stufe fertig lernen? Eine Zahl, die von der Einstellung abhängt, ist der
+  // einzige Beweis, den man dafür nicht wegdiskutieren kann.
+  [2, 3, BOX_MAX].forEach(function (ts) {
+    state = defaultState(); ansichtenZuruecksetzen();
+    ['lernsets', 'tippen', 'uebersetzen'].forEach(function (k) { state.tutUebung[k] = 1; });
+    tutEnde();
+    state.settings.tippenStufe = ts;
+    var kw7 = LERNSETS[0].woerter;
+    kw7.forEach(function (v) { state.boxes[v.id] = BOX_MAX - 1; state.lastSeen[v.id] = 1; });
+    uebAuswahl = 'aktuell';
+    setTab('lernsets');
+    var getippt7 = 0;
+    for (var k7 = 0; k7 < 80; k7++) {
+      uebQ = null; uebZuruecksetzen();
+      uebQ = buildQuestion();
+      if (!uebQ) break;
+      if (uebQ.mode === 'tippen') getippt7++;
+      updateBox(uebQ.word.id, true, uebQ.mode === 'tippen');
+    }
+    var fertig7 = kw7.filter(function (v) { return (state.boxes[v.id] || 0) >= BOX_MAX; }).length;
+    pruefe('K7 bei Stufe ' + ts + ' läßt sich das Set fertig lernen',
+      fertig7 > 0 && getippt7 > 0,
+      fertig7 + ' von ' + kw7.length + ' gemeistert · ' + getippt7 + ' getippte Aufgaben');
+  });
   state.settings.tippenStufe = 3;
 
   // ── L · Die Schwelle öffnet, sie schiebt nicht (ADR 0086) ─

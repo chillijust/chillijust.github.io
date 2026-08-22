@@ -4328,14 +4328,24 @@ var BOX_MAX = 4;
 // Ab dieser Leitner-Stufe gilt ein Wort als sitzend: Sätze werden damit
 // freigeschaltet, Lernsets damit abgeschlossen.
 var SATZ_STUFE = 2;
+// **Ab welcher Stufe geschrieben wird — nie später als der letzte Schritt**
+// (ADR 0093). Die Einstellung darf vorziehen, nicht aufschieben: Über
+// `BOX_MAX - 1` gibt es keinen Weg mehr, denn dort verlangt `updateBox()` eine
+// **getippte** Antwort (ADR 0086). Stand die Einstellung darüber — und «4» war
+// wählbar —, bekam man auf der vorletzten Stufe ewig Kacheln, der Deckel warf
+// jede richtige Antwort zurück, und **kein Wort erreichte je die Endstufe**.
+// Gemessen: null von zwölf, während dieselbe Lage bei Stufe 3 zehn ergab.
+function tippAb() {
+  return Math.min(state.settings.tippenStufe, BOX_MAX - 1);
+}
 var STORAGE_KEY = 'russisch_trainer_v1';
 // Stand der ausgelieferten Datei. Wird von tools/build.mjs gesetzt und geht in
 // jedes Ticket ein, damit ein Bericht sagt, welcher Stand gemeint war.
-var APP_STAND = '2026-08-21'; /* == STAND == */
+var APP_STAND = '2026-08-22'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.9.1T'; /* == VERSION == */
+var APP_VERSION = '2.9.2T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -8693,7 +8703,7 @@ function buildQuestion() {
   // **Unterhalb der Tippstufe** (ADR 0088): Darüber wird nur noch geschrieben,
   // und eine Lücke, die nicht meistern kann, hielte das Wort nur auf. Die
   // Lücke lebt damit auf Stufe 2 — dort, wo sie seit ADR 0053 beginnt.
-  if (box >= SATZ_STUFE && box < state.settings.tippenStufe &&
+  if (box >= SATZ_STUFE && box < tippAb() &&
     Math.random() < 0.5) {
     var stellen = lueckeStellen(word);
     if (stellen.length) {
@@ -8715,7 +8725,7 @@ function buildQuestion() {
   // **Ab der Tippstufe wird geschrieben, nicht mehr gewählt** (ADR 0088).
   // Vorher mußte man für den letzten Schritt in die Übung «Tippen» wechseln —
   // ein Umweg für etwas, das zum Lernweg gehört.
-  if (box >= state.settings.tippenStufe) {
+  if (box >= tippAb()) {
     return { word: word, mode: 'tippen' };
   }
 
@@ -12688,7 +12698,7 @@ function tippenVorrat(setNr) {
 // SATZ_STUFE als geschafft, «Tippen» beginnt aber erst bei settings.tippenStufe
 // — wer sein frisch gelerntes Set nachschreiben will, fände sonst nichts vor.
 function tippenSchwelle(setNr) {
-  return setNr === null ? state.settings.tippenStufe : 1;
+  return setNr === null ? tippAb() : 1;
 }
 
 // Die drei Stapel an einer Stelle, damit die Auswahl dieselben Zahlen nennt,
@@ -13176,9 +13186,11 @@ function renderEinstellungen() {
   // bleibt oben stehen — man soll jederzeit sehen, wo man ist.
   var teile = {};
   teile.lernweg =
-    wahl('tippenStufe', 'Tippen ab Stufe',
-      'Ab welcher Leitner-Stufe ein Wort in «Tippen» erscheint. Stufe 3 heißt: drei Mal nacheinander richtig — richtig getippt macht es dann Stufe 4 voll.',
-      [{ wert: 2, text: '2' }, { wert: 3, text: '3' }, { wert: 4, text: '4' }]) +
+    wahl('tippenStufe', 'Schreiben ab Stufe',
+      'Ab welcher Stufe du ein Wort selbst schreibst statt es zu legen — in «Lernsets» wie in «Tippen». ' +
+      'Stufe 3 heißt: dreimal nacheinander richtig, dann wird geschrieben. Später als Stufe ' +
+      (BOX_MAX - 1) + ' geht nicht: Der letzte Schritt zur Endstufe verlangt eine getippte Antwort.',
+      [{ wert: 2, text: '2' }, { wert: 3, text: '3' }]) +
     wahlText('betonung', 'Betonungszeichen',
       'Der betonte Vokal klingt voll, alle anderen fallen zusammen — молоко́ spricht sich «malakó». ' +
       'Beim Lernen hilft das Zeichen; im Druck steht es nicht.',
