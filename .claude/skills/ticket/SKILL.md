@@ -59,7 +59,9 @@ hält ihren eigenen Cache. Nur wenn er ausdrücklich nach dem Lauf fragt, wird e
 abgerufen.
 
 **11 · Schnitt anbieten.** Ist der Block ausgeliefert, «Sir, hier wäre ein guter
-Schnitt» sagen und in zwei Sätzen nennen, was ein Nachfolger wissen muss.
+Schnitt» sagen — und die Übergabe **als Codeblock zum Kopieren** anhängen, in der
+Form, die in `CLAUDE.md` unter «Umgang mit mir» steht. Nie als Fließtext: Was der
+Nutzer abschreiben muss, schreibt er nicht ab.
 
 ## Wie berichtet wird
 

@@ -11,8 +11,20 @@ mir, statt still eine Seite zu wählen.
 noch einmal mit — ein abgeschlossener Vorgang, der im Kontext liegen bleibt, kostet
 weiter und trägt nichts mehr bei (gemessen: von 84 000 auf 780 000 Tokens in einer
 Sitzung, zwei Drittel der Kosten). Ist ein Ticketblock ausgeliefert und der Lauf grün,
-sage ich **«Sir, hier wäre ein guter Schnitt»** und nenne in zwei Sätzen, was ein
-Nachfolger wissen muß. Ob `/clear` kommt, entscheiden Sie.
+sage ich **«Sir, hier wäre ein guter Schnitt»**. Ob `/clear` kommt, entscheiden Sie.
+
+**Die Übergabe kommt immer kopierfertig** — als Codeblock, den Sie ohne eine Änderung in
+die neue Sitzung einsetzen können, nie als Fließtext zum Abschreiben. Sie trägt genau
+fünf Zeilen und **nur die Lage**: Was das Projekt ist, steht in dieser Datei und wird
+ohnehin geladen; es zu wiederholen kostet zweimal.
+
+```
+Chillingo, Branch main. Stand <sha>, Version <VERSION>.
+Zuletzt: <was gerade fertig wurde, ein Satz>
+Offen: <was als Nächstes ansteht — oder «nichts»>
+Achtung: <nur was diese Lage betrifft — sonst Zeile weglassen>
+Lies CLAUDE.md.
+```
 
 ## Projekt
 
@@ -106,6 +118,7 @@ tools/appikon.py          App-Symbol bauen: Grund tauschen, Sprechblase umdrehen
 docs/appikon-hell-*.png   das ausgelieferte App-Symbol als Datei (180 und 1024)
 tools/palette.py          getönte Paletten aus dem neutralen Grundton rechnen
 docs/                     Architektur, Datenmodell, Deploy, Entscheidungen (ADRs)
+docs/arbeitsweise.md      Kurzanleitung für den Nutzer: Schnitt, Modell, Übergabe
 docs/decisions/           kurze ADRs, fortlaufend numeriert — README.md ist der Index
 docs/archiv/              abgearbeitete Pläne; nichts davon ist offen
 ```
