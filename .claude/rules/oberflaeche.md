@@ -150,6 +150,10 @@ Gilt für `index.html`. Die Begründungen stehen in den genannten ADRs unter
   ist eine Eigenschaft der Liste, keine Zahl im Code. **Ein fester Satz behauptet keine
   Zahl, die er nicht kennt** — wer eine nennt, nimmt `{n}`, `{f}` oder `{s}`. **Gelegt ist
   nicht geschrieben**: Lob für ё, Weichzeichen oder Wortlänge nur bei getippten Aufgaben.
+- **Ein Fakt hört sich selbst zu, wenn er Kyrillisch trägt** (ADR 0095). `faktRussisch(text)`
+  liest die russischen Abschnitte **an der Schrift**, nicht an «» — nicht jeder Fakt zäunt
+  sein Wort damit ein. Derselbe `hoerknopf()` wie überall, an beiden Stellen, an denen ein
+  Fakt zu lesen ist: Karte **und** Liste. Ohne Kyrillisch kein Knopf.
 - **Die Chili sagt den Kommentar selbst** (ADR 0060) — `#chiliBlase`, geführt von
   `blaseAktualisieren()`, unter der Figur im Kopf, endet rechts am Inhaltsrand, wächst
   nach links. **Nicht** in `#chiliBuehne` (die wird umgehängt). Nur sichtbar, **solange

@@ -4367,7 +4367,7 @@ var APP_STAND = '2026-08-22'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.9.3T'; /* == VERSION == */
+var APP_VERSION = '2.10.0T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -6454,6 +6454,16 @@ function faktFaellig() {
   return true;
 }
 
+// Was ein Fakt an russischem Text trägt, wird vorgelesen — der Rest ist
+// deutscher Fließtext. Erkannt wird an der Schrift, nicht an «»: Nicht jeder
+// Fakt zäunt sein Wort damit ein (etwa, wenn nur ein Buchstabe gemeint ist).
+// Mehrere Fundstellen werden nacheinander gesprochen, ein Fakt ganz ohne
+// Kyrillisch bekommt gar keinen Knopf — `hoerknopf()` schweigt bei leerem Text.
+function faktRussisch(text) {
+  var treffer = (text || '').match(/[А-Яа-яЁё][А-Яа-яЁё́]*(?:[ -][А-Яа-яЁё́]+)*/g);
+  return treffer ? treffer.join(', ') : '';
+}
+
 function faktKarteHtml() {
   var st = faktStand(faktKarte);
   // «Ohne Leiste» steht am Inhalt, nicht in einer Abfrage nebenan: Die Karte
@@ -6461,7 +6471,7 @@ function faktKarteHtml() {
   return '<section data-ohne-leiste>' +
     '<div class="sprechblase">' +
     '<span class="fact-label">Wusstest du?</span>' +
-    '<p class="fact-text">' + esc(faktKarte) + '</p></div>' +
+    '<p class="fact-text">' + esc(faktKarte) + hoerknopf(faktRussisch(faktKarte), 'ru') + '</p></div>' +
     '<div class="fakt-fuss">' + maskottchen('klein') +
     '<button class="sternbtn' + (st.f ? ' an' : '') + '" id="factFav" ' +
     'aria-pressed="' + (st.f ? 'true' : 'false') + '" aria-label="Als Favorit merken">' +
@@ -13505,7 +13515,7 @@ function renderFakten() {
     liste.forEach(function (f, i) {
       var stand = faktStand(f);
       html += '<div class="faktzeile' + (stand.n === 0 ? ' neu' : '') + '">' +
-        '<span class="fakttext">' + esc(f) +
+        '<span class="fakttext">' + esc(f) + hoerknopf(faktRussisch(f), 'ru') +
         '<span class="faktzahl">' + (stand.n === 0 ? 'noch nicht gezeigt'
           : stand.n === 1 ? 'einmal gezeigt' : stand.n + '× gezeigt') + '</span></span>' +
         '<button class="sternbtn' + (stand.f ? ' an' : '') + '" data-fav="' + i +

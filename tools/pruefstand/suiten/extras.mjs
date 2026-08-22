@@ -50,8 +50,31 @@ try {
   q('[data-fav]').click();
   pruefe('C6 Stern in der Liste schaltet um',
     FACTS.filter(function (f) { return faktStand(f).f; }).length !== sternVorher);
+
+  // C+ · faktRussisch(): was am Fakt russisch ist, wird ausgelesen — Zitat wie
+  // freistehendes Vorkommen, unabhängig von «»
+  pruefe('C7a faktRussisch holt das Zitat',
+    faktRussisch('«Бутерброд» kommt vom deutschen „Butterbrot".') === 'Бутерброд');
+  pruefe('C7b mehrere Fundstellen, durch Komma getrennt',
+    faktRussisch('«Стул» (Stuhl) und «тарелка» (Teller) kamen über das Deutsche.') === 'Стул, тарелка');
+  pruefe('C7c auch frei stehend, ohne «»',
+    faktRussisch('Handschrift-Falle: Das kursive т sieht aus wie ein m.') === 'т');
+  pruefe('C7d ganz ohne Kyrillisch bleibt sie leer', faktRussisch('Nur Deutsch hier.') === '');
+  var ohneKyr = FACTS.filter(function (f) { return !faktRussisch(f); });
+  var mitKyr = FACTS.filter(function (f) { return faktRussisch(f); });
+  pruefe('C7e die meisten echten Fakten tragen Kyrillisch',
+    mitKyr.length > ohneKyr.length && ohneKyr.length > 0,
+    mitKyr.length + ' mit, ' + ohneKyr.length + ' ohne');
+  var zeileOhne = alle('.faktzeile').filter(function (z) { return z.textContent.indexOf(ohneKyr[0]) !== -1; })[0];
+  var zeileMit = alle('.faktzeile').filter(function (z) { return z.textContent.indexOf(mitKyr[0]) !== -1; })[0];
+  pruefe('C7f ein Fakt ohne Kyrillisch bekommt in der Liste keinen Hörknopf',
+    !!zeileOhne && !zeileOhne.querySelector('[data-say]'));
+  pruefe('C7g einer mit Kyrillisch schon, und russisch beschriftet',
+    !!zeileMit && zeileMit.querySelector('[data-say]') &&
+    zeileMit.querySelector('[data-say]').dataset.lang === 'ru');
+
   q('#faktenBack').click();
-  pruefe('C7 Zurück verlässt die Ansicht', currentTab !== 'fakten', currentTab);
+  pruefe('C8 Zurück verlässt die Ansicht', currentTab !== 'fakten', currentTab);
 
   // D · Faktenkarte beim Üben
   state.fakten = {}; state.answered = 5; state.boxes = {}; state.lastSeen = {};
@@ -61,6 +84,17 @@ try {
   pruefe('D2 Fakt ist als gezeigt vermerkt', faktStand(faktKarte).n === 1);
   q('#factFav').click();
   pruefe('D3 Stern auf der Karte merkt vor', faktStand(faktKarte).f === true);
+
+  // D+ · Der Hörknopf auf der Karte selbst — direkt am Baustein geprüft, damit
+  // die Aussage nicht vom zufällig gezogenen Fakt abhängt.
+  var faktKarteVorher = faktKarte;
+  faktKarte = mitKyr[0];
+  pruefe('D3a die Karte bekommt einen Hörknopf, wenn der Fakt Kyrillisch trägt',
+    faktKarteHtml().indexOf('data-say="' + mitKyr[0].match(/[А-Яа-яЁё][А-Яа-яЁё́]*/)[0]) !== -1);
+  faktKarte = ohneKyr[0];
+  pruefe('D3b ohne Kyrillisch bleibt sie stumm', faktKarteHtml().indexOf('data-say="') === -1);
+  faktKarte = faktKarteVorher;
+
   q('#factAlle').click();
   pruefe('D4 «Alle Fakten» führt in die Sammlung', currentTab === 'fakten');
   setTab('lernsets');

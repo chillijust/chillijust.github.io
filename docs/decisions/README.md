@@ -119,6 +119,7 @@ Wer neu dazukommt und nur fünf lesen will:
 | [0092](0092-gemeistert-wird-in-lernsets.md) | Gemeistert wird in «Lernsets», die Abgabe steht unter der Tastatur | ändert 0086, 0088 |
 | [0093](0093-eine-einstellung-darf-nicht-zumauern.md) | Eine Einstellung darf vorziehen, nicht aufschieben | ändert 0086, 0088 |
 | [0094](0094-eine-frage-eine-flamme-ein-balken.md) | Eine Frage, eine Flamme je Schema, ein Balken je Übung | ändert 0086, 0088, 0074 |
+| [0095](0095-der-fakt-hoert-sich-selbst-zu.md) | Der Fakt hört sich selbst zu — russischer Text erkannt an der Schrift, nicht an «» | |
 
 ## Einen neuen anlegen
 
