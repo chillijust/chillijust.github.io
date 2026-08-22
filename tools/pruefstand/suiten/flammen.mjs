@@ -147,8 +147,29 @@ try {
   updateDarstellung();
   pruefe('E4e mit Schalter auch dort die Glut',
     farbe(pp[BOX_MAX]) === tokenFarbe('--flamme'), farbe(pp[BOX_MAX]));
+  // **In «Dark» gilt dieselbe Wahl, nur ein eigener Schlüssel** (ADR 0094).
+  // Bis 2.9.2 stand die Glut dort fest und der Schalter war gesperrt.
+  state.settings.schema = 'dark';
+  state.settings.flammeDark = false;
+  updateDarstellung();
+  pruefe('E4f auch in Dark läßt sie sich abschalten',
+    farbe(pp[BOX_MAX]) === tokenFarbe('--akzent'), farbe(pp[BOX_MAX]));
+  state.settings.flammeDark = true;
+  updateDarstellung();
+  pruefe('E4g und wieder an', farbe(pp[BOX_MAX]) === tokenFarbe('--flamme'),
+    farbe(pp[BOX_MAX]));
+  // **Zwei Schemata, zwei Wahlen** — wer in Dark abschaltet, verliert die Glut
+  // in «Classic» nicht.
+  state.settings.flammeDark = false;
+  state.settings.flammeHell = true;
+  state.settings.schema = 'classic';
+  updateDarstellung();
+  pruefe('E4h die helle Wahl bleibt davon unberührt',
+    farbe(pp[BOX_MAX]) === tokenFarbe('--flamme'), farbe(pp[BOX_MAX]));
+
   state.settings.schema = schemaVorherF;
   state.settings.flammeHell = false;
+  state.settings.flammeDark = true;
   updateDarstellung();
   pruefe('E5 der Strich trägt --line',
     getComputedStyle(pp[0]).backgroundColor === tokenFarbe('--line'),
@@ -191,6 +212,40 @@ try {
   pruefe('F5 und lässt die offenen Runden als Strich stehen',
     alle('.paket-punkte .pp.s0').length > 0 &&
     alle('.paket-punkte .pp.s0 svg').length === 0);
+
+  // ── H · Der Schalter zeigt, worüber er entscheidet ────────
+  // **Zwei Befunde in einem Ticket** (ADR 0094): Die Vorschau trug die
+  // Endstufe zweimal — «1, 2, 3, 4, 4», damit die Reihe fünf Zeichen hat —,
+  // und in «Dark» waren beide Knöpfe gesperrt.
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  tutEnde();
+  einstReiter = 'darstellung';
+  setTab('einstellungen');
+  var proben = alle('.flammprobe');
+  pruefe('H1 zwei Reihen zur Wahl', proben.length === 2, String(proben.length));
+  pruefe('H2 jede Stufe steht genau einmal darin', proben.every(function (pr) {
+    var st = Array.prototype.slice.call(pr.querySelectorAll('.pp')).map(function (x) {
+      return (x.className.match(/s(\d)/) || [])[1];
+    });
+    return st.join(',') === '0,1,2,3,4';
+  }), Array.prototype.slice.call(proben[0].querySelectorAll('.pp')).map(function (x) {
+    return (x.className.match(/s(\d)/) || [])[1];
+  }).join(','));
+  var chips = alle('[data-flammwahl]');
+  pruefe('H3 in «Dark» sind die Knöpfe bedienbar',
+    state.settings.schema === 'dark' && chips.length === 2 &&
+    chips.every(function (c) { return !c.disabled; }),
+    chips.filter(function (c) { return c.disabled; }).length + ' gesperrt');
+  // Und ein Tipp wirkt auch dort.
+  chips.filter(function (c) { return c.dataset.flammwahl === 'alt'; })[0]
+    .dispatchEvent(new MouseEvent('click', { bubbles: true }));
+  pruefe('H4 ein Tipp schaltet die Glut in Dark ab',
+    state.settings.flammeDark === false &&
+    !document.documentElement.getAttribute('data-flamme'),
+    String(state.settings.flammeDark));
+  state.settings.flammeDark = true;
+  updateDarstellung();
 
   // ── G · Die Reihe verträgt Unfug ──────────────────────────
   // ── H · Der Takt bleibt über den Umbruch hinweg ───────────

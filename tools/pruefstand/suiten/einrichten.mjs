@@ -130,17 +130,43 @@ try {
     homeOben(null).length <= HOME_FAELLIG_MAX,
     homeOben(null).join());
 
-  // ── D · Der Lernbedarf in der Bilanz ──────────────────────
-  // «Defizite» heißt seit ADR 0086 «Lernbedarf» und steht als eigener
-  // Abschnitt über den einzelnen Befunden.
+  // ── D · Woran es hakt, in der Bilanz ──────────────────────
+  // **Ein Abschnitt, nicht zwei** (ADR 0094): «Lernbedarf» und «Woran es
+  // gerade hakt» beantworteten dieselbe Frage in zwei Auflösungen und standen
+  // trotzdem getrennt untereinander. Jetzt eine Überschrift, darunter erst die
+  // Quoten, dann die einzelnen Befunde.
   state = defaultState();
   ansichtenZuruecksetzen();
   setTab('bilanz');
   pruefe('D1 ohne Befund steht der Abschnitt trotzdem da',
-    main.textContent.indexOf('Lernbedarf') !== -1 &&
-    main.textContent.indexOf('Woran es gerade hakt') !== -1);
+    main.textContent.indexOf('Woran es hakt') !== -1, '');
+  pruefe('D1a und nur eine Überschrift dafür', (function () {
+    var h = Array.prototype.slice.call(main.querySelectorAll('h2'))
+      .map(function (x) { return x.textContent; });
+    return h.filter(function (t) {
+      return t.indexOf('hakt') !== -1 || t.indexOf('Lernbedarf') !== -1;
+    }).length === 1;
+  })(), Array.prototype.slice.call(main.querySelectorAll('h2'))
+    .map(function (x) { return x.textContent; }).join(' | '));
   pruefe('D1b und der Weg zur ganzen Aufstellung immer',
     !!q('[data-detail="lernbedarf"]'));
+  // **Der Ring über allem** (ADR 0094). Er steht erst, wenn genug gezählt ist:
+  // «50 %» aus zwei Antworten wäre eine Behauptung, keine Auskunft.
+  pruefe('D1c ohne Zählung kein Gesamtring', !q('.quote-gesamt'));
+  for (var dq = 0; dq < QUOTE_MIN; dq++) quoteZaehlen('tippen', dq % 2 === 0);
+  setTab('home'); setTab('bilanz');
+  pruefe('D1d ab QUOTE_MIN Antworten steht er da', !!q('.quote-gesamt'));
+  pruefe('D1e und nennt beide Zahlen', (function () {
+    var z = gesamtQuote();
+    var t = q('.quote-gesamt').textContent;
+    return z.r + z.f === QUOTE_MIN && t.indexOf(String(z.f)) !== -1 &&
+      t.indexOf(String(z.r + z.f)) !== -1;
+  })(), q('.quote-gesamt') ? q('.quote-gesamt').textContent.slice(0, 60) : '—');
+  // Er zählt über **alle** Übungen, nicht über eine.
+  quoteZaehlen('buchstaben', false);
+  pruefe('D1f er summiert über alle Übungen',
+    gesamtQuote().r + gesamtQuote().f === QUOTE_MIN + 1,
+    String(gesamtQuote().r + gesamtQuote().f));
 
   // ── D2 · Die Fehlerquote wird gezählt (ADR 0086) ──────────
   // Aus einer Leitner-Stufe geht hervor, wie weit ein Wort ist — nicht, wie

@@ -159,14 +159,24 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   Fortschritt in Prozent (`prozentText()`): unter einem Prozent steht «unter 1 %», und
   100 % gehört dem, der wirklich alle hat — bei 394 von 395 steht 99 %. Die Serie daneben
   sagt, was sie zählt («3 richtig in Folge»), denn eine Zahl ohne Gegenstand ist keine
-  Auskunft.
+  Auskunft. **Jede Übung trägt ihren eigenen Balken** (ADR 0094):
+  `uebungsFortschritt(id)` gibt `{ ist, soll }`, `fortschrittHtml()` zeichnet daraus —
+  auf jeder Kachel und in der Empfehlung neben der Chili, dort für deren Ziel. Gezählt
+  wird **gemeistert von allem**, nie «von dem, was freigeschaltet ist»: eine Zahl, die
+  schrumpft, sobald ein Set aufgeht, wäre keine Fortschrittsanzeige. Wo eine Übung
+  keinen eigenen Bestand hat, steht kein Balken, und **die Breite trägt nie allein** —
+  die Zahl steht im `aria-label`.
 - **Die Fortschrittsreihe brennt** (ADR 0046) — ein Zeichen je Wort, gebaut von
   `ppHtml(stufe)` und sonst nirgends: Stufe 0 bleibt ein Strich, ab Stufe 1 wächst eine
   Flamme mit. **Nur Gold flackert**; die Animation hängt an `.punkt` und `.pp.s4`, nicht
   an `.flamme-aussen` allein. **Die Endstufe trägt Glut** (ADR 0088): außen `--flamme`,
-  innen `--flamme-kern`, 14 × 19 px. Sie gehört zu «Dark» und steht dort immer; in den
-  hellen Schemata schaltet `settings.flammeHell` sie dazu, geführt über `data-flamme`
-  am Wurzelelement. Der Schalter **zeigt beide Reihen** auf dem Grund, den man sieht.
+  innen `--flamme-kern`, 14 × 19 px. **Jedes Schema hat seine eigene
+  Antwort** (ADR 0094): `flammeSchluessel()` wählt zwischen `settings.flammeDark` und
+  `settings.flammeHell`, geführt über `data-flamme` am Wurzelelement — eine Sperre für
+  «Dark» gibt es nicht mehr, weder in JavaScript noch im Stil. Der Schalter **zeigt
+  beide Reihen** auf dem Grund, den man sieht, und in ihnen steht **jede Stufe genau
+  einmal** (`[0, 1, 2, 3, 4]`) — eine Vorschau, die eine verschluckt und eine andere
+  verdoppelt, zeigt nicht, worüber sie entscheidet.
 - **Die Übersicht zeigt einen Weg, nicht das Angebot** (ADR 0065). Drei Zonen: die
   Empfehlung, darunter **«Meine Auswahl»** (`homeOben()`), darunter **«Weitere Übungen»**
   (`homeWeitere()`) mit den drei Gruppen **Zeichen · Wörter · Sätze** — und ihre
@@ -237,14 +247,19 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   ihre ID im Klartext, Themen ihre Kennung, **eine Liste ohne zweiten Abschnitt**; daß
   keine Themenkennung wie eine Übung heißt, hält die Suite `sicherung` fest. Angezeigt
   wird in der Bilanz nur, was über `QUOTE_MIN` Antworten und `QUOTE_SCHWELLE` liegt —
-  «0 %» wäre eine Behauptung über etwas, das nie stattfand. Drei Zonen: die auffälligen
-  Übungen, «Alle Kategorien» (`bilanzDetail = 'lernbedarf'`) und die einzelne Kategorie
+  «0 %» wäre eine Behauptung über etwas, das nie stattfand. Drei Zonen: der Abschnitt
+  **«Woran es hakt»** in der Bilanz, «Alle Kategorien» (`bilanzDetail = 'lernbedarf'`)
+  und die einzelne Kategorie
   (`kat:<übung>`) mit Themen, Wörtern hinter einem Klappfeld und dem Weg in die Übung.
   **Zurück aus einer Kategorie führt in die Aufstellung**, nicht ganz hinaus. Jede
   Detailansicht endet über `bilanzDetailFertig()` — eine Ansicht mit vielen Ausgängen
   hängt ihre Zuhörer an einer Stelle an.
-- **Die Bilanz zeigt Defizite** (ADR 0075) unter «Woran es gerade hakt», nach dem
-  Lernbedarf und vor dem Lernweg: Zurückgefallenes,
+- **Lernbedarf und Defizite sind ein Abschnitt** (ADR 0094, ändert ADR 0075/0086):
+  **«Woran es hakt»** trägt oben den Gesamtring (`gesamtQuote()`, `.donut.klein` —
+  178 px schoben die Befunde aus dem Bild), darunter die auffälligen Übungen mit ihrem
+  Ring, darunter die einzelnen Befunde, am Fuß den einen Weg in «Alle Kategorien».
+  Zwei Überschriften über einer Frage behaupten, es seien zwei. Die Befunde sind
+  Zurückgefallenes,
   Verwechslungen (erst ab dem **zweiten** Mal — ein Ausrutscher ist kein Muster), Zeichen
   unter der Schwelle, Überfälliges. **Jede Zeile nennt einen Grund und einen Weg
   dorthin**; wo die Übung gesperrt ist, entfällt der Knopf, statt ins Leere zu führen.
@@ -293,7 +308,11 @@ tutStarten)` übergab das Ereignis als «ruhig» und nahm der Figur den Flug.
   steht das Fragezeichen erst, wenn das große Tutorial **einmal ganz** lief — davor trägt der goldene Riegel im Inhalt die Einladung, und **nie beides**. Die Ziele sind **je Spur** eindeutig, und
   jeder Schritt einer Übungsspur trägt ihren eigenen Ort. **Wer eine Suite schreibt, die
   eine Übung betritt, stellt die Spuren still** — sonst steht die Chili in der
-  Tutorial-Blase statt in der Ansicht.
+  Tutorial-Blase statt in der Ansicht. Und **wer den Tutorial-Zustand braucht, stellt
+  ihn selbst her** (ADR 0094): Die Testseite lädt mit leerem Speicher, die App fragt
+  beim Start von selbst — darauf zu bauen heißt, vom ersten `tutEnde()` einer fremden
+  Prüfung abzuhängen. `tutStarten()` setzt dabei nur den Scheinwerfer und zeichnet die
+  Ansicht **nicht** neu; `setTab()` gehört danach, nicht davor.
 - **Das Tutorial ist ein Scheinwerfer** (ADR 0051) — ein durchsichtiges `#tutLoch` mit
   `box-shadow: 0 0 0 9999px`, das die echte Oberfläche anleuchtet. Die zwölf Schritte
   sind **Inhalt** und stehen in `data/tutorial.json` (`[Ort, Ziel, Text]`); ein Schritt

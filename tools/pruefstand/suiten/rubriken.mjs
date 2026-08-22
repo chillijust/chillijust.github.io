@@ -192,12 +192,63 @@ try {
 
 
 
+  // ── W · Jede Kachel trägt ihren Fortschritt (ADR 0094) ───
+  // **Gemeldet:** «Die Fortschrittsanzeige oben zeigt nur den Fortschritt von
+  // Lernsets.» Sie zeigte den ganzen Wortschatz — und der wächst nur, wenn man
+  // Wörter meistert; in «Buchstaben» oder «Grammatik» bewegte sie sich nie.
+  //
+  // Überall dieselbe Frage: **gemeistert von allem**. Nicht «von dem, was
+  // freigeschaltet ist» — eine Zahl, die schrumpft, sobald Neues aufgeht, wäre
+  // keine Fortschrittsanzeige.
+  state = defaultState(); ansichtenZuruecksetzen();
+  tutEnde();
+  state.tutorialFertig = 1;
+  ALPHABET.slice(0, 11).forEach(function (b) {
+    state.abcBox[b[1]] = BOX_MAX; state.abcSeen[b[1]] = 1;
+  });
+  setTab('home');
+  pruefe('W1 «Buchstaben» hat einen eigenen Balken',
+    !!q('[data-uebung="buchstaben"] .fortschritt'));
+  pruefe('W2 und er steht auf einem Drittel', (function () {
+    var f = uebungsFortschritt('buchstaben');
+    return f.ist === 11 && f.soll === ALPHABET.length;
+  })(), JSON.stringify(uebungsFortschritt('buchstaben')));
+  // **Er wächst mit der eigenen Übung**, nicht mit dem Wortschatz: Bis hierher
+  // wurde kein einziges Wort gemeistert.
+  pruefe('W3 der Wortschatz steht dabei auf null',
+    uebungsFortschritt('lernsets').ist === 0,
+    String(uebungsFortschritt('lernsets').ist));
+  // Jede Kachel auf der Seite trägt einen — außer denen ohne eigenen Bestand.
+  pruefe('W4 jede sichtbare Kachel hat einen Balken', (function () {
+    return alle('#main [data-uebung]').every(function (k) {
+      return !uebungsFortschritt(k.dataset.uebung) || !!k.querySelector('.fortschritt');
+    });
+  })());
+  // **Und die Empfehlung trägt den ihrer Übung** — dort, wo die Chili steht.
+  pruefe('W5 die Empfehlung trägt den Balken ihres Ziels',
+    !!q('#homeEmpf .fortschritt') || !uebungsFortschritt(empfehlung().ziel),
+    empfehlung().ziel);
+  // Ein Vorleser bekommt die Zahl, nicht nur eine Breite.
+  pruefe('W6 der Balken nennt seine Zahl für Vorleser', (function () {
+    var b = q('[data-uebung="buchstaben"] .fortschritt');
+    return b && (b.getAttribute('aria-label') || '').indexOf('11 von 33') === 0;
+  })(), (q('[data-uebung="buchstaben"] .fortschritt') || {}).getAttribute
+    ? q('[data-uebung="buchstaben"] .fortschritt').getAttribute('aria-label') : '—');
+
   // ── Z · Die Übersicht zeigt einen Weg (ADR 0065) ─────────
   // Acht gleichrangige Kacheln auf einmal überfordern: Man sieht ein Angebot,
   // aber keinen Anfang. Jetzt stehen oben die Empfehlung und höchstens drei
   // fällige Kacheln, alles Übrige liegt hinter einem Tipp.
   state = defaultState();
   ansichtenZuruecksetzen();
+  // **Alle sieben stehen nur im Baum, solange das Tutorial offen ist**
+  // (ADR 0051) — und offen war es hier bisher nur, weil die Testseite mit
+  // leerem Speicher lädt und die App beim Start von selbst fragt. Das war eine
+  // stille Abhängigkeit: Der erste Abschnitt, der «tutEnde()» ruft, nahm Z5 die
+  // Grundlage. Sie steht jetzt da, wo sie gebraucht wird — und **vor** dem
+  // Zeichnen: «tutStarten()» setzt den Scheinwerfer, es baut die Ansicht nicht
+  // neu.
+  tutStarten('home', true);
   setTab('home');
   pruefe('Z1 die Empfehlung steht oben', !!q('#homeEmpf'));
   var oben = alle('#main [data-uebung]').filter(function (b) {

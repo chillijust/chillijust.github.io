@@ -671,6 +671,18 @@ body.filter-offen #wissenHuelle { opacity: 0; pointer-events: none; }
   box-shadow: inset 0 1px 0 var(--lip), 0 8px 18px var(--shade); color: var(--text);
 }
 .kachel:active { transform: scale(.98); }
+/* Der Fortschrittsbalken je Übung (ADR 0094): ganz unten in der Kachel, über
+   die volle Breite. `margin-top: auto` schiebt ihn an den Fuß, gleich wie hoch
+   der Text darüber ausfällt — sonst stünde er in jeder Kachel woanders. */
+.fortschritt {
+  display: block; width: 100%; height: 4px; margin-top: auto;
+  background: var(--line); border-radius: 999px; overflow: hidden;
+}
+.fortschritt-fill {
+  display: block; height: 100%; background: var(--akzent); border-radius: 999px;
+}
+/* In der Empfehlung sitzt er unter der Zeile und nimmt ihre Breite. */
+.empf-balken { margin-top: 8px; }
 .kachel.gesperrt { opacity: .55; }
 .kachel-name { font-family: Georgia, serif; font-size: 17px; }
 .kachel-note { font-size: 12px; color: var(--dim); line-height: 1.4; }
@@ -738,18 +750,18 @@ body.filter-offen #wissenHuelle { opacity: 0; pointer-events: none; }
 .pp.s2 svg { width: 7.5px; height: 10px; opacity: .6; }
 .pp.s3 svg { width: 9px;   height: 12px; }
 .pp.s4 svg { width: 11px;  height: 15px; color: var(--akzent); }
-/* **Die neue Flamme** (ADR 0088): größer und zweifarbig. Sie gehört zu «Dark»
-   und steht dort immer; in den hellen Schemata schaltet sie ein Schalter dazu
-   (`data-flamme="neu"` am Wurzelelement).
+/* **Die neue Flamme** (ADR 0088): größer und zweifarbig. Die innere Zunge
+   trägt eine eigene Farbe statt einer Deckung auf der äußeren — ein heller
+   Kern in einem roten Mantel ist das, was eine Flamme ausmacht.
 
-   Die innere Zunge trägt jetzt eine eigene Farbe statt einer Deckung auf der
-   äußeren — ein heller Kern in einem roten Mantel ist das, was eine Flamme
-   ausmacht. */
-:root:not([data-schema]) .pp.s4 svg,
+   **Es entscheidet allein `data-flamme="neu"`** (ADR 0094). Hier stand
+   zusätzlich `:root:not([data-schema])`, und weil «Dark» kein `data-schema`
+   trägt, brannte die Glut dort **immer** — gleichgültig, was das Attribut
+   sagte. Die Sperre am Schalter war die Folge, nicht die Ursache: Er hätte
+   nichts bewirkt. *Eine Regel an zwei Orten ist eine Regel zu viel.* */
 :root[data-flamme="neu"] .pp.s4 svg {
   width: 14px; height: 19px; color: var(--flamme);
 }
-:root:not([data-schema]) .pp.s4 .flamme-innen,
 :root[data-flamme="neu"] .pp.s4 .flamme-innen {
   color: var(--flamme-kern); opacity: 1;
 }
@@ -1705,6 +1717,16 @@ body.unterwegs .reiter { top: 62px; }
 /* **Die Kategorien des Lernbedarfs** (ADR 0086): eine antippbare Zeile je
    Übung, links der Ring mit der Quote, rechts Name und Zahl. Ein Knopf, kein
    Kasten — dahinter liegt etwas, und das soll man sehen. */
+/* Der Ring über allem: mittig, mit der Zeile darunter. Er steht vor den
+   einzelnen Übungen — erst das Ganze, dann die Teile.
+
+   **Schmaler als der Ring einer Detailansicht** (ADR 0094): Dort trägt er die
+   Seite allein, hier stehen die eigentlichen Befunde darunter. Mit den vollen
+   178 px schob er sie unter die Falz — man sah die Zahl und nicht, was sie
+   auslöst. */
+.quote-gesamt { text-align: center; margin: 0 0 16px; }
+.quote-gesamt .donut { width: 132px; margin-bottom: 10px; }
+.quote-gesamt .detail-fuss { margin-top: 0; }
 .kat-feld { display: flex; flex-direction: column; gap: 8px; margin: 10px 0 12px; }
 .kat {
   display: flex; align-items: center; gap: 14px; width: 100%;
@@ -4345,7 +4367,7 @@ var APP_STAND = '2026-08-22'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.9.2T'; /* == VERSION == */
+var APP_VERSION = '2.9.3T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -5413,6 +5435,11 @@ function defaultSettings() {
     // **Die neue Flamme gehört zu «Dark»** (ADR 0088) und steht dort immer.
     // In den hellen Schemata schaltet sie dieser Schalter dazu.
     flammeHell: false,
+    // **Dark führt seine eigene Wahl** (ADR 0094). Bis 2.9.2 stand die neue
+    // Flamme dort fest und der Schalter war gesperrt — ein Knopf, den man
+    // sieht und nicht drücken kann, erklärt sich nie von selbst. Die Vorgabe
+    // bleibt, was sie war: In «Dark» brennt sie.
+    flammeDark: true,
     // Nach einem Schreibfehler das Wort einmal richtig nachschreiben:
     // nie · woerter (einzelne Wörter und Formen, Vorgabe) · immer (auch Sätze).
     rekonstruktion: 'woerter',
@@ -6194,17 +6221,26 @@ function updateDarstellung() {
   var wurzel = document.documentElement;
   if (schema.wert === 'dark') wurzel.removeAttribute('data-schema');
   else wurzel.setAttribute('data-schema', schema.wert);
-  // **Die neue Flamme steht in «Dark» immer** (ADR 0088); in den hellen
-  // Schemata entscheidet der Schalter. Ein Attribut statt einer Klasse, weil
-  // das Schema daneben genauso geführt wird — eine Sprache für dieselbe Sache.
-  if (schema.wert === 'dark' || state.settings.flammeHell) {
-    wurzel.setAttribute('data-flamme', 'neu');
-  } else wurzel.removeAttribute('data-flamme');
+  // **Jedes Schema führt seine eigene Flammenwahl** (ADR 0094, ändert 0088).
+  // Ein Attribut statt einer Klasse, weil das Schema daneben genauso geführt
+  // wird — eine Sprache für dieselbe Sache.
+  if (flammeNeu()) wurzel.setAttribute('data-flamme', 'neu');
+  else wurzel.removeAttribute('data-flamme');
   // Safari färbt die Statusleiste nach diesem Wert.
   var meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute('content', schema.grund);
 }
 
+
+// **Welche Flamme gilt — an einer Stelle** (ADR 0094). «Dark» und die hellen
+// Schemata führen getrennte Wahlen: Wer in Dark die Glut abschaltet, soll sie
+// in «Classic» nicht auch verlieren. Zwei Schlüssel, eine Frage.
+function flammeSchluessel() {
+  return state.settings.schema === 'dark' ? 'flammeDark' : 'flammeHell';
+}
+function flammeNeu() {
+  return !!state.settings[flammeSchluessel()];
+}
 
 function woerterGemeistert() {
   var n = 0;
@@ -8297,7 +8333,8 @@ function renderHome() {
     '<button class="empfehlung" id="homeEmpf">' + maskottchen('klein') +
     '<span class="empf-text"><span class="empf-label">Als Nächstes</span>' +
     '<span class="empf-titel">' + esc(e.titel) + '</span>' +
-    '<span class="empf-note">' + esc(e.note) + '</span></span></button>';
+    '<span class="empf-note">' + esc(e.note) + '</span>' +
+    fortschrittHtml(e.ziel, 'empf-balken') + '</span></button>';
 
   // **Meine Auswahl** (ADR 0075): automatisch das Fällige, oder genau das, was
   // im Einrichte-Fenster hierhergezogen wurde. Was empfohlen ist, steht schon
@@ -8382,6 +8419,41 @@ function kachelSichtbar(id) {
 
 // Eine Kachel — dieselbe Gestalt oben wie unten. Sie steht genau einmal im
 // Code: Eine Übung, die in beiden Listen anders aussähe, wäre zwei Übungen.
+// **Fortschritt je Übung** (ADR 0094). Der Balken im Kopf zeigt den ganzen
+// Wortschatz und wächst darum nur, wenn man Wörter meistert — in «Buchstaben»
+// oder «Grammatik» bewegte er sich nie, obwohl man vorankam.
+//
+// **Überall dieselbe Frage: gemeistert von allem.** Nicht «von dem, was
+// freigeschaltet ist» — eine Zahl, die schrumpft, sobald Neues aufgeht, ist
+// keine Fortschrittsanzeige. `null` heißt: Diese Übung hat keinen eigenen
+// Bestand, den man fertig lernen könnte.
+function uebungsFortschritt(id) {
+  if (id === 'buchstaben') return { ist: abcMeisterschaft(), soll: ALPHABET.length };
+  if (id === 'grammatik') return { ist: gramMeisterschaft(), soll: GRAMMATIK.length };
+  if (id === 'schreibung') return { ist: orthoMeisterschaft(), soll: ORTHO.length };
+  if (id === 'uebersetzen') {
+    return { ist: SENTENCES.filter(function (s) { return satzBox(s) >= BOX_MAX; }).length,
+      soll: SENTENCES.length };
+  }
+  // «Lernsets», «Tippen» und das Power-Training arbeiten am selben Wortschatz
+  // und zeigen darum denselben Balken — sie sind drei Wege zu einem Ziel.
+  if (id === 'lernsets' || id === 'tippen' || id === 'power') {
+    return { ist: woerterGemeistert(), soll: ALL_VOCAB.length };
+  }
+  return null;
+}
+
+// Der Balken selbst — eine Gestalt für Kachel und Empfehlung. Er trägt seine
+// Zahl als `aria-label`: Die Breite allein sagt einem Vorleser nichts.
+function fortschrittHtml(id, klasse) {
+  var f = uebungsFortschritt(id);
+  if (!f || !f.soll) return '';
+  var anteil = f.ist / f.soll * 100;
+  return '<span class="fortschritt' + (klasse ? ' ' + klasse : '') + '"' +
+    ' role="img" aria-label="' + f.ist + ' von ' + f.soll + ' gemeistert">' +
+    '<span class="fortschritt-fill" style="width:' + anteil + '%"></span></span>';
+}
+
 function kachelHtml(id) {
   var u = uebungVon(id);
   if (!u) return '';
@@ -8389,7 +8461,8 @@ function kachelHtml(id) {
   return '<button class="kachel' + (st.gesperrt ? ' gesperrt' : '') + '" data-uebung="' + id + '">' +
     '<span class="kachel-name">' + esc(u.name) + '</span>' +
     '<span class="kachel-note">' + esc(u.note) + '</span>' +
-    '<span class="kachel-stand' + (st.warm ? ' faellig' : '') + '">' + esc(st.text) + '</span></button>';
+    '<span class="kachel-stand' + (st.warm ? ' faellig' : '') + '">' + esc(st.text) + '</span>' +
+    fortschrittHtml(id) + '</button>';
 }
 
 // **Was heute noch wartet.** Eine Übung zählt, wenn dort wirklich etwas zu tun
@@ -13115,25 +13188,26 @@ function renderEinstellungen() {
   // In «Dark» gehört die neue Flamme dazu und der Schalter ist wirkungslos —
   // dann sagt er das, statt still nichts zu tun.
   function flammenWahl() {
+    // **Die ganze Leiter, jede Stufe einmal** (ADR 0094). Hier stand
+    // `[1, 2, 3, 4, 4]` — die Endstufe zweimal, damit die Reihe fünf Zeichen
+    // hat. Fünf sind es auch so: Stufe 0 ist der Strich, mit dem jedes Wort
+    // anfängt, und der gehört in eine Vorschau der Reihe genauso hinein.
     var reihe = function (klasse) {
       var h = '<span class="flammprobe ' + klasse + '">';
-      [1, 2, 3, 4, 4].forEach(function (st) { h += ppHtml(st); });
+      [0, 1, 2, 3, 4].forEach(function (st) { h += ppHtml(st); });
       return h + '</span>';
     };
-    var dark = s.schema === 'dark';
-    var an = dark || s.flammeHell;
+    var an = flammeNeu();
     return '<div class="setting breit"><span class="setting-text">' +
       '<span class="setting-title">Flammen</span>' +
-      '<span class="setting-note">' + (dark
-        ? 'In «Dark» brennt die neue Flamme immer — sie gehört zu dieser Palette. ' +
-          'Der Schalter greift in den hellen Schemata.'
-        : 'Die neue Flamme ist größer und trägt Glut. Sie gehört zu «Dark»; ' +
-          'hier kannst du sie dazuschalten.') + '</span></span>' +
+      '<span class="setting-note">Die neue Flamme ist größer und trägt Glut. ' +
+      'Deine Wahl gilt für dieses Schema — «Dark» und die hellen merken sie sich ' +
+      'getrennt.</span></span>' +
       '<span class="seg flammseg" role="group" aria-label="Flammen">' +
       '<button class="chip flammchip' + (an ? '' : ' active') + '" data-flammwahl="alt"' +
-      (dark ? ' disabled' : '') + '>' + reihe('alt') + '<span>Ruhig</span></button>' +
+      '>' + reihe('alt') + '<span>Ruhig</span></button>' +
       '<button class="chip flammchip' + (an ? ' active' : '') + '" data-flammwahl="neu"' +
-      (dark ? ' disabled' : '') + '>' + reihe('neu') + '<span>Mit Glut</span></button>' +
+      '>' + reihe('neu') + '<span>Mit Glut</span></button>' +
       '</span></div>';
   }
 
@@ -13314,7 +13388,7 @@ function renderEinstellungen() {
   if (zuEinr) zuEinr.addEventListener('click', function () { setTab('einrichten'); });
   main.querySelectorAll('[data-flammwahl]').forEach(function (b) {
     b.addEventListener('click', function () {
-      state.settings.flammeHell = b.dataset.flammwahl === 'neu';
+      state.settings[flammeSchluessel()] = b.dataset.flammwahl === 'neu';
       save();
       updateDarstellung();
       renderEinstellungen();
@@ -14728,6 +14802,20 @@ function defizite() {
 var QUOTE_SCHWELLE = 0.2;
 var QUOTE_MIN = 8; // unter so wenigen Antworten ist eine Quote Zufall
 
+// **Die Quote über alles** (ADR 0094). Der Ring oben in der Bilanz zeigt, wie
+// viele Antworten insgesamt danebenlagen — über alle Übungen zusammengezählt.
+// Gefragt wird `state.quote`, dieselbe Zählung wie in den einzelnen Ringen;
+// eine zweite Rechnung wäre eine zweite Wahrheit.
+function gesamtQuote() {
+  var z = { r: 0, f: 0 };
+  UEBUNGEN.forEach(function (u) {
+    var q = state.quote[u.id];
+    if (!q) return;
+    z.r += q.r; z.f += q.f;
+  });
+  return z;
+}
+
 function lernbedarf(alle) {
   var raus = [];
   UEBUNGEN.forEach(function (u) {
@@ -14770,12 +14858,27 @@ function quoteRing(z, klein) {
     prozentText(anteil * 100, z.f, n), 'Fehler', klein !== false);
 }
 
+// **Ein Abschnitt, nicht zwei** (ADR 0094). «Lernbedarf» und «Woran es gerade
+// hakt» standen getrennt untereinander und beantworteten dieselbe Frage in zwei
+// Auflösungen: erst *wo* es hakt, dann *was* genau. Das ist eine Reihenfolge,
+// keine Trennung — die Überschrift dazwischen behauptete zwei Themen.
 function lernbedarfHtml() {
   var liste = lernbedarf(false);
-  var html = '<h2>Lernbedarf</h2>';
+  var gz = gesamtQuote();
+  var gn = gz.r + gz.f;
+  var html = '<h2>Woran es hakt</h2>';
+
+  // Der Ring über allem. **Unter QUOTE_MIN Antworten steht er nicht da** —
+  // «50 %» aus zwei Antworten wäre eine Behauptung, keine Auskunft.
+  if (gn >= QUOTE_MIN) {
+    html += '<div class="quote-gesamt">' + quoteRing(gz, false) +
+      '<p class="detail-fuss">' + gz.f + ' von ' + gn +
+      ' Antworten lagen daneben — über alle Übungen.</p></div>';
+  }
+
   if (!liste.length) {
-    html += '<p class="backup-note">Nichts hakt: In keiner Übung liegt die ' +
-      'Fehlerquote auffällig hoch. Sobald sich das ändert, steht es hier.</p>';
+    html += '<p class="backup-note">In keiner Übung liegt die Fehlerquote ' +
+      'auffällig hoch. Sobald sich das ändert, steht es hier.</p>';
   } else {
     html += '<div class="kat-feld">';
     liste.forEach(function (k) {
@@ -14787,20 +14890,18 @@ function lernbedarfHtml() {
     });
     html += '</div>';
   }
-  // **Der Weg zur ganzen Aufstellung steht immer da** — auch wenn gerade
-  // nichts hakt. Wer wissen will, wie er dasteht, soll nicht warten müssen,
-  // bis etwas schiefgeht.
-  html += '<button class="blatt-link" data-detail="lernbedarf">Alle Kategorien →</button>';
   return html;
 }
 
+// Die einzelnen Befunde — sie stehen unter den Quoten im selben Abschnitt und
+// tragen darum **keine eigene Überschrift** mehr.
 function defiziteHtml() {
   var liste = defizite();
-  var html = '<h2>Woran es gerade hakt</h2>';
+  var html = '';
   if (!liste.length) {
-    return html + '<p class="backup-note">Nichts liegt quer: keine zurückgefallenen ' +
+    return '<p class="backup-note">Nichts liegt quer: keine zurückgefallenen ' +
       'Wörter, keine wiederkehrenden Verwechslungen, alle Zeichen sitzen, nichts ' +
-      'überfällig. Hier steht sonst, woran es gerade hakt.</p>';
+      'überfällig.</p>' + lernbedarfFuss();
   }
   html += '<div class="defizite">';
   liste.forEach(function (d, i) {
@@ -14815,7 +14916,14 @@ function defiziteHtml() {
         esc(d.knopf) + ' →</button>' : '') +
       '</div>';
   });
-  return html + '</div>';
+  return html + '</div>' + lernbedarfFuss();
+}
+
+// **Der Weg zur ganzen Aufstellung steht immer da** — auch wenn gerade nichts
+// hakt. Wer wissen will, wie er dasteht, soll nicht warten müssen, bis etwas
+// schiefgeht. Er steht jetzt am Fuß des gemeinsamen Abschnitts.
+function lernbedarfFuss() {
+  return '<button class="blatt-link" data-detail="lernbedarf">Alle Kategorien →</button>';
 }
 
 function renderBilanz() {

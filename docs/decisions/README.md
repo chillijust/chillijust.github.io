@@ -118,6 +118,7 @@ Wer neu dazukommt und nur fünf lesen will:
 | [0091](0091-der-lernweg-wird-schlanker.md) | Der Lernweg wird schlanker — Tagesmaß, Auffrischen und «Freestyle» kommen raus | ändert 0056, 0015, 0074, 0090, 0008, 0035, 0066 |
 | [0092](0092-gemeistert-wird-in-lernsets.md) | Gemeistert wird in «Lernsets», die Abgabe steht unter der Tastatur | ändert 0086, 0088 |
 | [0093](0093-eine-einstellung-darf-nicht-zumauern.md) | Eine Einstellung darf vorziehen, nicht aufschieben | ändert 0086, 0088 |
+| [0094](0094-eine-frage-eine-flamme-ein-balken.md) | Eine Frage, eine Flamme je Schema, ein Balken je Übung | ändert 0086, 0088, 0074 |
 
 ## Einen neuen anlegen
 
