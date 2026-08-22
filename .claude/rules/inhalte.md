@@ -67,8 +67,10 @@ Nach jeder Änderung: `node tools/build.mjs` (`--check` = nur prüfen).
   in `<span class="bet">` hüllen — **ohne `esc()` darum**, das steckt schon drin.
   `betontesWort()` mit U+0301 bleibt die Textfassung für den Prüfstand. **Nie ins Wort
   schreiben** — die Kennung im Lernstand *ist* das russische Wort, und ein Tippfehler darin
-  löscht einen Lernstand. Angezeigt **nur** über `ruAnzeige()`/`betontesWort()`; verglichen wird nie mit ihr
-  (`normalize()` wirft U+0301 weg), gesprochen auch nicht. Die Einstellung `betonung` blendet sie ab Stufe 3 aus.
+  löscht einen Lernstand. Angezeigt wird **nur** über `ruAnzeige()`/`betontesWort()`
+  beziehungsweise deren Html-Fassungen; **verglichen** wird nie mit ihr (`normalize()` wirft
+  U+0301 weg), gesprochen auch nicht. Die Einstellung `betonung` blendet sie ab Stufe 3 aus —
+  im Druck steht keine.
 - **Die Lücke ist ein Paar, keine Zahl** (ADR 0055). Eine Aufgabe in «Schreibung» nennt beide
   Schreibweisen — die richtige (`ist`) und die nach Gehör (`klingt`); wo sie sich
   unterscheiden, ist die Lücke. Eine Zahl kann danebenliegen, ohne daß es jemand merkt —
