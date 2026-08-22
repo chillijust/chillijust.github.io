@@ -38,6 +38,61 @@ was **CLAUDE.md nicht wissen kann**: die Lage von heute.
 
 Fehlt Ihnen die Übergabe, genügt: *«Gib mir die Übergabe.»*
 
+## Drei Beispiele
+
+### 1 · Tickets aus der App abarbeiten
+
+Der häufigste Fall. Neue Sitzung, dann **eine** Nachricht:
+
+> ```
+> Chillingo, Branch main. Stand bbf5394, Version 2.9.3T.
+> Zuletzt: ADR 0094 ausgeliefert.
+> Offen: 2.9.3T wartet auf Abnahme am Gerät.
+> Lies CLAUDE.md.
+> ```
+>
+> \# Chillingo · 2 Tickets
+>
+> 1 · Fehler: In «Tippen» steht der Prüfen-Knopf nach dem Drehen des Geräts
+> unter dem Rand.
+>
+> 2 · Wunsch: Die Bilanz soll das Tempo je Woche zeigen, nicht je Übung.
+
+Ich erkenne das Format und fahre den Skill `ticket` von selbst: reproduzieren,
+reparieren, im Prüfstand absichern, ADR schreiben, Version stempeln, committen,
+pushen. Am Ende kommt der Schnitt mit der neuen Übergabe.
+
+**Ist nichts offen, lassen Sie die Übergabe einfach weg** und schicken nur die Tickets.
+`CLAUDE.md` lädt ohnehin.
+
+### 2 · Frei an der App entwickeln
+
+Wenn der Umfang noch unklar ist — «ich will die Lernlogik umbauen», «Buchstaben soll
+anders funktionieren» —, **erst `Shift+Tab` für den Planmodus**, dann:
+
+> Ich will, daß «Tippen» in «Übersetzen» aufgeht. Verschaff dir einen Überblick und
+> leg mir einen Plan vor, etappenweise. Stell Rückfragen, wo mehrere Lesarten möglich
+> sind — ich entscheide lieber vorher als hinterher.
+
+Ich lese mich ein, frage nach, schreibe den Plan. Sie geben ihn frei, dann baue ich.
+**Der Planmodus spart am meisten**, weil er die teure Sorte Fehler verhindert: zwei
+Stunden in die falsche Richtung.
+
+**Schnitt nach jeder Etappe**, nicht erst am Ende des Umbaus. Ein dreistündiger Umbau
+in einer einzigen Sitzung ist genau der Fall, der 780 000 Tokens erzeugt hat.
+
+### 3 · Nur kurz etwas nachsehen
+
+Keine Sitzung aufmachen, kein `/clear`. In einer laufenden Sitzung:
+
+> /btw Was macht `waehleWort()` nochmal genau?
+
+Die Antwort landet **nicht** im Gesprächsverlauf und kostet danach nichts mehr. Ohne
+`/btw` schleppen Sie die Antwort bis zum Sitzungsende bei jedem weiteren Aufruf mit.
+
+Dasselbe gilt für «Läuft der Build?», «Was steht in ADR 0086?», «Welche Version ist
+draußen?» — alles Fragen, deren Antwort man einmal braucht und nie wieder.
+
 ## Zwei Befehle zum Nachsehen
 
 | | |
