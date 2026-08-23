@@ -152,7 +152,7 @@ try {
   state = defaultState();
   ansichtenZuruecksetzen();
   GRAMMATIK.forEach(function (b) {
-    state.gramBox[b.id] = b.aufgabe === 'dat' ? 0 : BOX_MAX;
+    state.gramBox[b.id] = b.aufgabe === 'dat' ? 0 : GRAMM_BOX_MAX;
     state.gramSeen[b.id] = Date.now();
   });
   gramWahl = dativB.id;

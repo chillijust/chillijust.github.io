@@ -197,7 +197,7 @@ try {
   setTab('uebersetzen'); ortPruefen('uebersetzen leer');
   ALPHABET.forEach(function (b) { state.abcBox[b.zeichen] = BOX_MAX; state.abcSeen[b.zeichen] = Date.now(); });
   abcQ = null; setTab('buchstaben'); ortPruefen('buchstaben leer');
-  GRAMMATIK.forEach(function (b) { state.gramBox[b.id] = BOX_MAX; state.gramSeen[b.id] = Date.now(); });
+  GRAMMATIK.forEach(function (b) { state.gramBox[b.id] = GRAMM_BOX_MAX; state.gramSeen[b.id] = Date.now(); });
   gramQ = null; setTab('grammatik'); ortPruefen('grammatik leer');
   ORTHO.forEach(function (r) { state.orthoBox[r.id] = BOX_MAX; state.orthoSeen[r.id] = Date.now(); });
   orthoQ = null; setTab('schreibung'); ortPruefen('schreibung leer');

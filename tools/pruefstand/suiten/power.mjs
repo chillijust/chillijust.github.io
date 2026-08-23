@@ -43,7 +43,7 @@ try {
   state = defaultState();
   ansichtenZuruecksetzen();
   GRAMMATIK.forEach(function (b) {
-    state.gramBox[b.id] = BOX_MAX;
+    state.gramBox[b.id] = GRAMM_BOX_MAX;
     state.gramSeen[b.id] = Date.now();
   });
   setTab('grammatik');

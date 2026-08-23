@@ -120,6 +120,7 @@ Wer neu dazukommt und nur fünf lesen will:
 | [0093](0093-eine-einstellung-darf-nicht-zumauern.md) | Eine Einstellung darf vorziehen, nicht aufschieben | ändert 0086, 0088 |
 | [0094](0094-eine-frage-eine-flamme-ein-balken.md) | Eine Frage, eine Flamme je Schema, ein Balken je Übung | ändert 0086, 0088, 0074 |
 | [0095](0095-der-fakt-hoert-sich-selbst-zu.md) | Der Fakt hört sich selbst zu — russischer Text erkannt an der Schrift, nicht an «» | |
+| [0096](0096-grammatik-fuehrt-eine-eigene-schwelle.md) | Grammatik führt eine eigene Schwelle — doppelt so viele Wiederholungen wie ein Wort | |
 
 ## Einen neuen anlegen
 

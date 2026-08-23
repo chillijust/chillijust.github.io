@@ -169,16 +169,16 @@ try {
 
   // ── E · Grammatik ─────────────────────────────────────────
   state = defaultState(); ansichtenZuruecksetzen();
-  GRAMMATIK.forEach(function (x) { state.gramBox[x.id] = BOX_MAX; state.gramSeen[x.id] = 0; });
+  GRAMMATIK.forEach(function (x) { state.gramBox[x.id] = GRAMM_BOX_MAX; state.gramSeen[x.id] = 0; });
   var reg = GRAMMATIK[2];
-  state.gramBox[reg.id] = BOX_MAX - 1;
+  state.gramBox[reg.id] = GRAMM_BOX_MAX - 1;
   gramBaustein = reg.id; gramQ = null; setTab('grammatik');
   zaehlen();
   gramQ.baustein = reg.id; gramQ.tippen = false; gramPicked = gramQ.loesung; gramPruefen();
   pruefe('E1 alle Regeln feiern', gezaehlt.join() === 'regel', gezaehlt.join());
   zurueck();
   var reg2 = GRAMMATIK[5];
-  state.gramBox[reg2.id] = BOX_MAX - 1;
+  state.gramBox[reg2.id] = GRAMM_BOX_MAX - 1;
   gramBaustein = reg2.id; gramQ = null; renderGrammatik();
   zaehlen();
   gramQ.baustein = reg2.id; gramQ.tippen = false; gramPicked = gramQ.loesung; gramPruefen();

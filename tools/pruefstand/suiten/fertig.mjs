@@ -29,7 +29,7 @@ function allesFertig() {
   });
   GRAMMATIK.forEach(function (b) {
     state.gramSeen[b.id] = Date.now();
-    state.gramBox[b.id] = BOX_MAX;
+    state.gramBox[b.id] = GRAMM_BOX_MAX;
   });
 }
 

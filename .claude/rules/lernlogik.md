@@ -57,6 +57,9 @@ Gilt für `index.html`. Begründungen in den genannten ADRs unter `docs/decision
 - **Der Deckel rechnet, ohne es zu sagen** (ADR 0090): `tippDeckel` und `tippRest` bleiben,
   die Hinweiszeile ist weg — sie schob die Kachel so weit nach unten, daß die Übung
   scrollte, und **eine Übung, die scrollt, verliert ihre Knöpfe aus dem Daumenbereich**.
+- **Grammatik führt eine eigene Schwelle** (ADR 0096): `GRAMM_BOX_MAX` (8), nicht
+  `BOX_MAX` — ein Baustein braucht doppelt so viele Wiederholungen wie ein Wort, bevor
+  er sitzt. `meisterPruefen()` nimmt dafür ein optionales siebtes Argument.
 - **Eine Einstellung darf vorziehen, nicht aufschieben** (ADR 0093). `tippAb()` deckelt
   `settings.tippenStufe` bei `BOX_MAX - 1`; die rohe Einstellung wird nirgends mehr gelesen.
   Stand sie darüber — «4» war wählbar —, bekam man auf der vorletzten Stufe ewig Kacheln

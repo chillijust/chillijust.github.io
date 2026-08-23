@@ -131,7 +131,7 @@ try {
   state = defaultState();
   ansichtenZuruecksetzen();
   state.gramSeen[GRAMMATIK[0].id] = Date.now();
-  state.gramBox[GRAMMATIK[0].id] = BOX_MAX;
+  state.gramBox[GRAMMATIK[0].id] = GRAMM_BOX_MAX;
   // Nicht über die Position suchen — die Reihenfolge der Bausteine ändert sich.
   var akk = gramFinde('akkusativ');
   state.gramSeen[akk.id] = Date.now();
@@ -507,6 +507,28 @@ try {
     try { return Object.keys(decodeBackup(altRumpf + '~' + bkPruefsumme(altRumpf)).merk).length === 0; }
     catch (e) { return 'wirft: ' + e.message; }
   })() === true);
+  state = defaultState();
+  ansichtenZuruecksetzen();
+
+  // ── R · Grammatik führt eine eigene Schwelle (ADR 0096) ────
+  // Ein Baustein soll sich festigen, bevor die Übung weiterzieht — dafür
+  // braucht er mehr Wiederholung als ein Wort.
+  var rb = GRAMMATIK[0];
+  pruefe('R1 die Grammatikschwelle liegt über der gewöhnlichen',
+    GRAMM_BOX_MAX > BOX_MAX, GRAMM_BOX_MAX + ' vs ' + BOX_MAX);
+  state.gramBox[rb.id] = BOX_MAX;
+  pruefe('R2 an der alten Schwelle sitzt der Baustein noch nicht', !gramGemeistert(rb));
+  for (var ri = gramBox(rb); ri < GRAMM_BOX_MAX; ri++) gramUpdate(rb, true);
+  pruefe('R3 erst an der eigenen Schwelle gilt er als gemeistert',
+    gramBox(rb) === GRAMM_BOX_MAX && gramGemeistert(rb), String(gramBox(rb)));
+  gramUpdate(rb, true);
+  pruefe('R4 richtige Antworten heben die Stufe nicht über die Schwelle',
+    gramBox(rb) === GRAMM_BOX_MAX, String(gramBox(rb)));
+  gramWahl = rb.id; gramBaustein = null; gramQ = null;
+  setTab('grammatik');
+  pruefe('R5 die Punktereihe zeigt jede Stufe bis zur eigenen Schwelle',
+    alle('.boxdots span').length === GRAMM_BOX_MAX + 1, String(alle('.boxdots span').length));
+
   state = defaultState();
   ansichtenZuruecksetzen();
 

@@ -16,7 +16,7 @@ function oeffne(id, stufe) {
   ansichtenZuruecksetzen();
   GRAMMATIK.forEach(function (b) {
     state.gramSeen[b.id] = Date.now();
-    state.gramBox[b.id] = BOX_MAX;
+    state.gramBox[b.id] = GRAMM_BOX_MAX;
   });
   state.gramBox[id] = stufe === undefined ? 0 : stufe;
   gramWahl = id; gramBaustein = null; gramQ = null;
@@ -241,7 +241,7 @@ try {
   // ── J · Zeichnen, ohne zu stolpern ────────────────────────
   var stolper = [];
   GRAMMATIK.forEach(function (bb) {
-    [0, 1, SATZ_STUFE, BOX_MAX].forEach(function (st) {
+    [0, 1, SATZ_STUFE, BOX_MAX, GRAMM_BOX_MAX].forEach(function (st) {
       try {
         oeffne(bb.id, st);
         if (!main.innerHTML) stolper.push(bb.id + '/' + st + ': leer');
