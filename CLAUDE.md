@@ -148,8 +148,12 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   ein. `--check` vergleicht ohne ihn.
 - **Commits:** einer je logischer Änderung, Nachricht auf Deutsch, Betreffzeile im
   Imperativ. Im Rumpf steht, *warum*.
-- **Branches:** neue Branches nur auf meine ausdrückliche Ansage. Direkte Arbeit auf
-  `main` nur, wenn ich es für den jeweiligen Vorgang freigegeben habe.
+- **Branches:** Gearbeitet und gepusht wird **immer auf `main`** — ein Branch ist nur
+  Backup, nie das Ziel. Schreibt eine Umgebung von sich aus einen anderen Arbeits-Branch
+  vor, gilt das nicht: dort committen, dann auf `main` bringen (Fast-Forward reicht meist)
+  und dorthin pushen. Landet trotzdem etwas auf einem anderen Branch — eigenes Vertun oder
+  eine fremde Sitzung —, wird es bei der nächsten Gelegenheit nach `main` nachgeholt, nicht
+  stehengelassen. Neue Branches nur auf meine ausdrückliche Ansage.
 
 ## Prüfstand und Push
 
