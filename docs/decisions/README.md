@@ -122,6 +122,7 @@ Wer neu dazukommt und nur fünf lesen will:
 | [0095](0095-der-fakt-hoert-sich-selbst-zu.md) | Der Fakt hört sich selbst zu — russischer Text erkannt an der Schrift, nicht an «» | |
 | [0096](0096-grammatik-fuehrt-eine-eigene-schwelle.md) | Grammatik führt eine eigene Schwelle — doppelt so viele Wiederholungen wie ein Wort | |
 | [0097](0097-die-frage-ist-die-aufgabe.md) | Die Frage der Entdecken-Karte ist die Aufgabe, kein Fußnötchen | |
+| [0098](0098-eine-wahl-gibt-den-platz-frei.md) | Eine gewählte Regel gibt den Platz frei, sobald sie sitzt | ergänzt 0020, 0069 |
 
 ## Einen neuen anlegen
 

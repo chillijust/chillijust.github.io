@@ -68,6 +68,13 @@ Gilt für `index.html`. Begründungen in den genannten ADRs unter `docs/decision
   daran vorbeizielt** — `lernweg` K7 lernt ein Set bei *jeder* wählbaren Stufe fertig.
 - **Gemeistert meldet nur der Übergang** auf `BOX_MAX` (ADR 0026). Wer `meisterPruefen()`
   auch beim Auffrischen auslöst, macht aus der Meldung Rauschen.
+- **Eine gewählte Regel gibt den Platz frei, sobald sie sitzt** (ADR 0098). Der Filter
+  sticht die Reihenfolge — aber nur, solange es etwas zu stechen gibt: `wahlErledigt()`
+  läßt `orthoWahl`/`gramWahl` beim **Weitergehen** fallen, sobald die Wahl gemeistert ist,
+  und ruft `renderFilter()`, damit der Trichter seinen Ring verliert. **Nie im Renderlauf
+  fragen** — `orthoAktuell()` läuft auch während der Auflösung, und eine Regel, die dort
+  wechselt, nimmt die offene Rückmeldung mit. Ohne das drillte der Filter Fertiges, während
+  unberührte Regeln als Strich danebenstanden.
 
 ## Lernsets und Schwelle
 

@@ -365,6 +365,65 @@ try {
     state.gefeiert.schreibung === 1);
   pruefe('I2 der Anlass hat einen Namen und Texte',
     !!JUBEL_ANLASS.schreibung && !!JUBEL.schreibung && JUBEL.schreibung.length === 3);
+
+  // ── J · Eine gewählte Regel gibt den Platz frei, wenn sie sitzt (ADR 0098) ──
+  // **Der gemeldete Befund.** Der Filter stand auf «Akanje», die Regel saß
+  // längst — und drei unberührte Regeln standen als Strich daneben, ohne je an
+  // die Reihe zu kommen. Der Filter sticht die Reihenfolge, und das tat er auch
+  // dann noch, wenn es nichts mehr zu stechen gab.
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  // Genau die Lage aus dem Bildschirmfoto: Akanje einen Schritt vor der
+  // Endstufe, vier weitere sitzen, die letzten drei sind unberührt.
+  ORTHO.forEach(function (r, i) {
+    state.orthoBox[r.id] = i === 0 ? BOX_MAX - 1 : (i < 5 ? BOX_MAX : 0);
+    if (i < 5) state.orthoSeen[r.id] = Date.now();
+  });
+  orthoWahl = 'akanje'; orthoRegel = 'akanje'; orthoQ = null; orthoRegelNeu = false;
+  setTab('schreibung');
+  pruefe('J1 die gewählte Regel wird abgefragt', orthoAktuell().id === 'akanje',
+    orthoAktuell().id);
+  renderKopf();
+  pruefe('J2 der Trichter zeigt die Wahl an', q('#filterKnopf').classList.contains('aktiv'));
+  var wartend = ORTHO.filter(function (r) { return orthoBox(r) === 0; })
+    .map(function (r) { return r.id; }).join();
+  pruefe('J3 drei Regeln stehen unberührt daneben',
+    wartend === 'weichzeichen,ogo,assimilation', wartend);
+
+  stelleAuf('akanje', 'молоко');
+  renderSchreibung();
+  orthoEingabe = 'молоко';
+  q('#orthoConfirm').disabled = false;
+  q('#orthoConfirm').click();
+  pruefe('J4 richtig geschrieben — jetzt sitzt sie',
+    orthoBox(orthoFinde('akanje')) === BOX_MAX, String(orthoBox(orthoFinde('akanje'))));
+  // **Die Wahl fällt beim Weitergehen, nicht im Renderlauf**: Eine Regel, die
+  // unter der offenen Auflösung wechselt, nimmt sie mit.
+  pruefe('J5 solange die Auflösung steht, bleibt die Wahl', orthoWahl === 'akanje',
+    String(orthoWahl));
+  q('#orthoNext').click();
+  pruefe('J6 beim Weitergehen fällt sie', orthoWahl === null, String(orthoWahl));
+  pruefe('J7 und die nächste unberührte Regel kommt dran',
+    orthoAktuell().id === 'weichzeichen', orthoAktuell().id);
+  pruefe('J8 der Trichter hat seinen Ring abgelegt',
+    !q('#filterKnopf').classList.contains('aktiv'));
+
+  // Die Gegenprobe: Was noch nicht sitzt, bleibt gewählt — sonst wäre der
+  // Filter wertlos, sobald man ihn braucht.
+  state.orthoBox['ogo'] = 1; state.orthoSeen['ogo'] = Date.now();
+  orthoWahl = 'ogo'; orthoRegel = 'ogo'; orthoQ = null; orthoRegelNeu = false;
+  renderSchreibung();
+  var aOgo = orthoFinde('ogo').aufgaben[0];
+  stelleAuf('ogo', aOgo.ist);
+  renderSchreibung();
+  waehle(orthoStelle(aOgo).richtig);
+  pruefe('J9 richtig, aber noch nicht an der Endstufe',
+    orthoCorrect === true && orthoBox(orthoFinde('ogo')) < BOX_MAX,
+    String(orthoBox(orthoFinde('ogo'))));
+  q('#orthoNext').click();
+  pruefe('J10 eine Regel, die noch nicht sitzt, bleibt gewählt', orthoWahl === 'ogo',
+    String(orthoWahl));
+  pruefe('J11 und wird weiter abgefragt', orthoAktuell().id === 'ogo', orthoAktuell().id);
 } catch (e) {
   log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);
 }

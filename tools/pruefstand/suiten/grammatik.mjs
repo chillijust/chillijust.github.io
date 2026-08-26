@@ -534,6 +534,50 @@ try {
   pruefe('R5 die Punktereihe zeigt jede Stufe bis zur eigenen Schwelle',
     alle('.boxdots span').length === GRAMM_BOX_MAX + 1, String(alle('.boxdots span').length));
 
+  // ── S · Ein gewählter Baustein gibt den Platz frei, wenn er sitzt (ADR 0098) ──
+  // Gemeldet wurde die Falle in «Schreibung»; sie steckte hier genauso, denn
+  // beide Übungen fragen ihre Wahl mit demselben Handgriff ab. **Wer nur die
+  // gemeldete Stelle repariert, bekommt die nächste Meldung.**
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  var sb = GRAMMATIK[0];
+  state.gramBox[sb.id] = GRAMM_BOX_MAX - 1;
+  state.gramSeen[sb.id] = Date.now();
+  gramWahl = sb.id; gramBaustein = sb.id; gramQ = null; gramRegelNeu = false;
+  setTab('grammatik');
+  pruefe('S1 der gewählte Baustein wird abgefragt', gramAktuell().id === sb.id,
+    gramAktuell().id);
+  renderKopf();
+  pruefe('S2 der Trichter zeigt die Wahl an', q('#filterKnopf').classList.contains('aktiv'));
+  // Einen Schritt über die Schwelle heben, ohne den Weg über die Aufgabe: Hier
+  // geht es um das Loslassen, nicht um die Bewertung.
+  gramUpdate(sb, true);
+  pruefe('S3 jetzt sitzt er', gramGemeistert(sb), String(gramBox(sb)));
+  gramPhase = 'feedback'; gramCorrect = true; reko = null;
+  renderGrammatik();
+  pruefe('S4 solange die Auflösung steht, bleibt die Wahl', gramWahl === sb.id,
+    String(gramWahl));
+  q('#gramNext').click();
+  pruefe('S5 beim Weitergehen fällt sie', gramWahl === null, String(gramWahl));
+  pruefe('S6 und ein anderer Baustein kommt dran', gramAktuell().id !== sb.id,
+    gramAktuell().id);
+  pruefe('S7 der Trichter hat seinen Ring abgelegt',
+    !q('#filterKnopf').classList.contains('aktiv'));
+
+  // Gegenprobe: Was noch nicht sitzt, bleibt gewählt.
+  state = defaultState();
+  ansichtenZuruecksetzen();
+  var sb2 = GRAMMATIK[1];
+  state.gramBox[sb2.id] = 1; state.gramSeen[sb2.id] = Date.now();
+  gramWahl = sb2.id; gramBaustein = sb2.id; gramQ = null; gramRegelNeu = false;
+  setTab('grammatik');
+  gramPhase = 'feedback'; gramCorrect = true; reko = null;
+  renderGrammatik();
+  q('#gramNext').click();
+  pruefe('S8 ein Baustein, der noch nicht sitzt, bleibt gewählt', gramWahl === sb2.id,
+    String(gramWahl));
+  pruefe('S9 und wird weiter abgefragt', gramAktuell().id === sb2.id, gramAktuell().id);
+
   state = defaultState();
   ansichtenZuruecksetzen();
 

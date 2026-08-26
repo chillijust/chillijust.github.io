@@ -4376,7 +4376,7 @@ var APP_STAND = '2026-08-26'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.11.1T'; /* == VERSION == */
+var APP_VERSION = '2.11.2T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -7565,6 +7565,22 @@ function renderFilter() {
     b.addEventListener('click', function () { filterWaehlen(b.dataset.fw, b.dataset.fv); });
     b.tabIndex = filterOffen ? 0 : -1;
   });
+}
+
+// **Eine gewählte Regel gibt den Platz frei, sobald sie sitzt** (ADR 0098).
+// Der Filter sticht die Reihenfolge — und tat das auch dann noch, wenn nichts
+// mehr zu stechen war: Die gewählte Regel stand längst auf der Endstufe, wurde
+// aber weiter abgefragt, während unberührte Regeln als Strich danebenstanden
+// und nie an die Reihe kamen. Wer eine Regel wählt, will sie fertig lernen; ist
+// sie fertig, ist die Wahl erledigt.
+//
+// Gefragt wird **beim Weitergehen**, nie im Renderlauf: `orthoAktuell()` läuft
+// auch während der Auflösung, und eine Regel, die dort unter der offenen
+// Rückmeldung wechselt, nimmt sie mit.
+function wahlErledigt(wahl, finde, gemeistert) {
+  if (!wahl) return false;
+  var r = finde(wahl);
+  return !!r && gemeistert(r);
 }
 
 // ── Wissen: warum steht dieses Wort so da? ──────────────────
@@ -11940,9 +11956,14 @@ function grammInhaltZeichnen() {
   if (next) next.addEventListener('click', function () {
     if (!rekoFertig()) return;
     reko = null;
+    // Sitzt der gefilterte Baustein, fällt die Wahl (ADR 0098) — sonst gäbe
+    // `gramAktuell()` ihn sofort wieder zurück.
+    var wahlFiel = wahlErledigt(gramWahl, gramFinde, gramGemeistert);
+    if (wahlFiel) gramWahl = null;
     gramBaustein = null;    // gemeisterte Regel abgeben, sonst dieselbe weiter
     gramFrageBauen();
     renderGrammatik();
+    if (wahlFiel) renderFilter();   // der Trichter trüge sonst weiter seinen Ring
   });
 }
 
@@ -12407,10 +12428,15 @@ function schreibInhaltZeichnen() {
   if (next) next.addEventListener('click', function () {
     if (!rekoFertig()) return;
     reko = null;
+    // Sitzt die gefilterte Regel, fällt die Wahl (ADR 0098) — sonst gäbe
+    // `orthoAktuell()` sie sofort wieder zurück.
+    var wahlFiel = wahlErledigt(orthoWahl, orthoFinde, orthoGemeistert);
+    if (wahlFiel) orthoWahl = null;
     orthoRegel = null;    // gemeisterte Regel abgeben, sonst dieselbe weiter
     orthoFrageBauen();
     faktFaellig();        // der Fakt liegt beim Weitergehen, nicht in der Auflösung
     renderSchreibung();
+    if (wahlFiel) renderFilter();   // der Trichter trüge sonst weiter seinen Ring
   });
 }
 
