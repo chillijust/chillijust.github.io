@@ -92,6 +92,11 @@ try {
   var b = GRAMMATIK[0];
   pruefe('D1 sechste Kachel führt hierher', currentTab === 'grammatik');
   pruefe('D2 unentdeckt heißt entdecken', !gramEntdeckt(b) && !!q('[data-gramdeutung]'));
+  // Die Frage ist die Aufgabe selbst, kein Fußnötchen — sie trägt darum nicht
+  // die Klasse für Randnotizen, sondern die für lesbaren Fließtext.
+  pruefe('D2b die Frage steht lesbar da, nicht als Hinweis',
+    !!q('.entdecken-frage') && q('.entdecken-frage').textContent === b.frage &&
+    !q('.card > .hint'));
   pruefe('D3 Paare aus bekannten Wörtern', alle('.gram-paar').length >= 3);
   pruefe('D4 mindestens drei Deutungen', alle('[data-gramdeutung]').length >= 3);
   alle('[data-gramdeutung]')[(b.richtig + 1) % b.deutungen.length].click();

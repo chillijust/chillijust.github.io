@@ -150,6 +150,11 @@ try {
   setTab('schreibung');
   var r0 = orthoAktuell();
   pruefe('C1 die erste Regel ist noch unentdeckt', !orthoEntdeckt(r0));
+  // Die Frage ist die Aufgabe selbst, kein Fußnötchen — sie trägt darum nicht
+  // die Klasse für Randnotizen, sondern die für lesbaren Fließtext.
+  pruefe('C1b die Frage steht lesbar da, nicht als Hinweis',
+    !!q('.entdecken-frage') && q('.entdecken-frage').textContent === r0.frage &&
+    !q('.card > .hint'));
   pruefe('C2 sie wird zuerst gezeigt, nicht abgefragt',
     alle('[data-orthodeutung]').length === 3 && !q('[data-orthoopt]'),
     String(alle('[data-orthodeutung]').length));

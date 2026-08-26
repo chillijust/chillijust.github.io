@@ -839,6 +839,9 @@ body.filter-offen #wissenHuelle { opacity: 0; pointer-events: none; }
 .answer { font-size: 17px; color: var(--ice); margin: 12px 0 0; }
 .translit { font-size: 13px; color: var(--dim); font-style: italic; margin: 4px 0 0; }
 .hint { font-size: 13px; color: var(--dim); margin-top: 12px; }
+/* Die Frage der Entdecken-Karte ist die Aufgabe selbst, nicht ihr Fußnötchen —
+   sie braucht die Lesbarkeit von Fließtext, nicht die eines Hinweises. */
+.entdecken-frage { font-size: 16px; line-height: 1.45; font-weight: 500; margin: 12px 0 0; }
 /* Die Vorgabe der Grammatikaufgabe: kein Kleingedrucktes, sondern Teil der
    Frage. «он / она» sagt, welche Form verlangt ist — wer das überliest,
    beantwortet die falsche Aufgabe. */
@@ -4369,11 +4372,11 @@ function tippAb() {
 var STORAGE_KEY = 'russisch_trainer_v1';
 // Stand der ausgelieferten Datei. Wird von tools/build.mjs gesetzt und geht in
 // jedes Ticket ein, damit ein Bericht sagt, welcher Stand gemeint war.
-var APP_STAND = '2026-08-23'; /* == STAND == */
+var APP_STAND = '2026-08-26'; /* == STAND == */
 // Drei Zahlen, drei Fragen: Was ändert sich für den Lernstand? Was kommt dazu?
 // Was sieht anders aus? Die Zahl steht in der Datei VERSION und wird von
 // `tools/build.mjs` hierher gestempelt — nicht von Hand.
-var APP_VERSION = '2.11.0T'; /* == VERSION == */
+var APP_VERSION = '2.11.1T'; /* == VERSION == */
 
 // ── Maskottchen ─────────────────────────────────────────────
 // Die freigestellte Chili gibt es genau einmal: als #chiliFigur (geschnitten
@@ -11480,7 +11483,7 @@ function gramVerbe(b) {
 
 function gramEntdeckenHtml(b) {
   var html = '<p class="task-label">' + esc(b.name) + ' · entdecken</p>' +
-    '<div class="card"><p class="hint">' + esc(b.frage) + '</p><div class="gram-paare">';
+    '<div class="card"><p class="entdecken-frage">' + esc(b.frage) + '</p><div class="gram-paare">';
   gramPaare(b).forEach(function (p) {
     html += '<div class="gram-paar"><span class="cyr">' + esc(p.links) + '</span>' +
       '<span class="gram-pfeil" aria-hidden="true">→</span>' +
@@ -12122,7 +12125,7 @@ function orthoPaare(r) {
 function orthoEntdeckenHtml(r) {
   var hoerbar = r.hoerbar !== false;
   var html = '<p class="task-label">' + esc(r.name) + ' · entdecken</p>' +
-    '<div class="card"><p class="hint">' + esc(r.frage) + '</p><div class="gram-paare">' +
+    '<div class="card"><p class="entdecken-frage">' + esc(r.frage) + '</p><div class="gram-paare">' +
     '<div class="gram-paar"><span class="gram-deutung">' +
     (hoerbar ? 'gehört' : 'gemeint') + '</span>' +
     '<span class="gram-pfeil" aria-hidden="true"></span>' +
