@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Daten und index.html synchron
+      - name: Eingebettetes und Version auf Stand
         run: node tools/build.mjs --check
 
       - name: DOCTYPE, Fremdadressen, Syntax

@@ -1,6 +1,6 @@
 ---
 name: pruefstand
-description: Den Prüfstand von Chillingo bedienen und erweitern — Suiten schreiben, einen Befund am echten DOM reproduzieren, Bildschirmfotos in Handybreite machen. Verwenden, wenn eine Änderung an index.html abgesichert, ein gemeldeter Fehler nachgestellt oder das Aussehen geprüft werden soll.
+description: Den Prüfstand von Chillinal bedienen und erweitern — Suiten schreiben, einen Befund am echten DOM reproduzieren, Bildschirmfotos in Handybreite machen. Verwenden, wenn eine Änderung an index.html abgesichert, ein gemeldeter Fehler nachgestellt oder das Aussehen geprüft werden soll.
 ---
 
 # Prüfstand
@@ -11,8 +11,8 @@ Skript angehängt, ein kopfloser Browser lädt sie, das Skript prüft am echten 
 und schreibt sein Urteil in den Seitentitel.
 
 ```sh
-node tools/pruefstand/lauf.mjs        # alle Suiten, ~16 s
-node tools/pruefstand/lauf.mjs jubel  # nur eine
+node tools/pruefstand/lauf.mjs        # alle Suiten
+node tools/pruefstand/lauf.mjs thema  # nur eine
 node tools/pruefstand/lauf.mjs -v     # auch jede grüne Suite einzeln nennen
 ```
 
@@ -25,11 +25,11 @@ sofort mit, sie muss nur nach `bau/t-<dateiname>.html` schreiben.
 1. **Erst reproduzieren, dann verstehen.** Ein Prüfskript schreiben, das den
    Befund am DOM zeigt — bevor eine Zeile am Code geändert wird. Ohne das
    repariert man, was man vermutet, statt was gemeldet wurde.
-2. **Prüfen, ob der Befund stimmt.** Er stimmt oft nicht wörtlich. «Das Set wird
-   von einem Wort gemeistert» hieß in Wahrheit: Ein *wiederholtes* Vollwerden
-   feiert erneut. Die Bedingung war richtig, ihre Häufigkeit war falsch.
-3. **Fragen, ob dieselbe Ursache anderswo steckt.** Derselbe Fehler saß in vier
-   Übungen. Wer nur die gemeldete repariert, bekommt drei weitere Meldungen.
+2. **Prüfen, ob der Befund stimmt.** Er stimmt oft nicht wörtlich — gemeldet wird
+   das Symptom, nicht die Bedingung dahinter.
+3. **Fragen, ob dieselbe Ursache anderswo steckt.** Gewohnheiten, Abgewöhnen und
+   Termine teilen sich Muster (Tagesgrenze, Kachel, Ring). Wer nur die gemeldete
+   Stelle repariert, bekommt die nächste Meldung.
 4. **Reparieren**, dann die Prüfung in eine Suite überführen — sie ist ab jetzt
    das Gedächtnis für diesen Fehler.
 5. **Alles fahren** (`lauf.mjs`), nicht nur die neue Suite.
@@ -38,30 +38,30 @@ sofort mit, sie muss nur nach `bau/t-<dateiname>.html` schreiben.
 
 Geprüft gehört, was sich still ändern kann und teuer auffällt:
 
-- **Was genau einmal im Dokument stehen darf** — die Chili (`#chiliFigur`), ein
-  runder Knopf, in den sie springt. Zweimal eingebettet heißt: sie flackert
-  zwischen zwei Orten.
+- **Was genau einmal im Dokument stehen darf** — die Chili (`#chiliFigur`).
+  Zweimal eingebettet heißt: sie flackert zwischen zwei Orten.
 - **Rechtecke statt Klassennamen.** «Der Knopf liegt rechts vom Titel» als
   `getBoundingClientRect()`-Vergleich prüfen, nicht über eine CSS-Klasse. Der
   Fehler war nie ein fehlender Klassenname, sondern eine falsche Lage.
 - **Errechnete Farben** über `getComputedStyle`, verglichen mit dem Wert, den
   ein Token liefert — nicht mit einer eingetippten Hexzahl.
 - **Zustandsübergänge**, nicht Zustände: «feiert beim ersten Mal» *und* «feiert
-  beim zweiten Mal nicht».
+  beim zweiten Mal nicht», «abgehakt» *und* «nochmal getippt = zurück».
 - **Leerzustände.** Fast jeder gemeldete Fehler saß in einem.
+- **Die Zeit**: Mitternacht, Wochenwechsel, Monatsende. Eine Prüfung, die von
+  «heute» abhängt, setzt ihr Datum selbst, statt auf den Lauftag zu hoffen.
 
 ## Fallen, die schon zugeschnappt sind
 
-- **Keine Prüfung in einem `if`, dessen Bedingung ausgelost wird.** Die
-  Aufgabenform wechselt zufällig. Stattdessen weiterblättern, bis die gewünschte
-  Form kommt, und das Erreichen selbst prüfen.
+- **Keine Prüfung in einem `if`, dessen Bedingung vom Zufall oder vom Lauftag
+  abhängt.** Sie läuft mal und mal nicht, und die Zahl im Titel schwankt still.
 - **Die Zahl im Titel ist ein Messwert.** Sinkt sie ohne Grund, ist eine Prüfung
   verschwunden, nicht bestanden. Bei jedem Lauf kurz hinsehen.
-- **Feldnamen nachschlagen, nicht raten.** `abcQ.modus`, aber `uebQ.mode`. Ein
-  falscher Name lässt die Prüfung stumm in den falschen Zweig laufen.
-- **`renderKopf()` läuft vor der Ansicht.** Wer etwas in eine Kachel hängt: erst
-  nach Hause schicken, dann zeichnen, dann umhängen.
-- **Die Seite immer mit `testseite(html, test)` bauen**, nie von Hand über
+- **Feldnamen nachschlagen, nicht raten.** Ein falscher Name lässt die Prüfung
+  stumm in den falschen Zweig laufen.
+- **Was gesucht wird, steht nicht wörtlich im Prüfskript** — es hängt im selben
+  Dokument und fände sich selbst (siehe `.claude/rules/pruefstand.md`).
+- **Die Seite immer mit `suite()` oder `testseite()` bauen**, nie von Hand über
   `html.replace('</body>', …)`. In einem Ersatz*text* sind `$&`, `` $` ``, `$'`
   und `$1` Steuerzeichen — ein `'\$&'` im Prüfskript wurde stillschweigend zu
   `</body>` und machte die Seite unlesbar.
@@ -71,13 +71,14 @@ Geprüft gehört, was sich still ändern kann und teuer auffällt:
 ## Bildschirmfotos
 
 ```sh
-node tools/pruefstand/bild.mjs szenen.mjs
+node tools/pruefstand/bild.mjs              # Dashboard, hell und dunkel
+node tools/pruefstand/bild.mjs szenen.mjs   # eigene Szenen
 ```
 
 Eine Szenendatei gibt Name auf Skript zurück (Beispiel im README). Gerätemaß ist
 430 × 932. **Es wird nichts eingespritzt** — die Seite rendert, wie sie
-ausgeliefert wird. Der Vorgänger setzte eine dunkle Palette von Hand nach und
-zeigte nach ADR 0041 still die alten Farben.
+ausgeliefert wird. Immer **hell und dunkel** ansehen: `themaSetzen('hell')`,
+`themaSetzen('dunkel')`.
 
 Ein Bild ersetzt keine Prüfung: Es zeigt, ob etwas *aussieht* wie gedacht, nicht
 ob es *bleibt*. Was einmal falsch aussah, gehört danach in eine Suite.

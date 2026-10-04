@@ -23,9 +23,10 @@ Zweiter Grund für dieselbe Klasse von Fehlern: YAML-Front-Matter. Beginnt eine 
 ## Ablauf für eine Änderung
 
 ```sh
-node tools/build.mjs --check     # /data und index.html sind synchron
-node tools/pruefen.mjs           # DOCTYPE, Front-Matter, externe Ressourcen, JS-Syntax
-python3 -m http.server 8000      # lokal ansehen
+node tools/build.mjs             # Schriften, Chili, Symbol einbetten; Version stempeln
+node tools/pruefen.mjs           # DOCTYPE, Front-Matter, Fremdadressen, CSP, JS-Syntax
+node tools/pruefstand/lauf.mjs   # Prüfstand
+python3 -m http.server 8000      # lokal ansehen (der Worker braucht http, nicht file://)
 git push origin main
 ```
 
@@ -35,66 +36,34 @@ ist. Den Status zeigt der Reiter **Actions** („pages build and deployment") od
 
 ## Nach dem Deploy prüfen
 
-1. https://chillijust.github.io/ **hart neu laden** (Safari: Verlauf und Websitedaten für
-   die Seite löschen, oder in einem privaten Tab öffnen). Pages liefert mit
-   `Cache-Control: max-age=600`, ein normales Neuladen zeigt also bis zu zehn Minuten
-   lang den alten Stand.
-2. Erwartet: die App erscheint sofort — kein Benutzername als Überschrift, kein
-   sichtbarer HTML-Text, keine Theme-Leiste.
-3. Auf dem iPhone: **Seit 2.4.0 erledigt das der Service Worker** (ADR 0059). Die
-   abgelegte App startet aus ihrem eigenen Speicher, sieht im Hintergrund nach und meldet
-   sich mit «Eine neue Fassung liegt bereit — jetzt laden». Wer nicht warten will, findet
-   unter **Einstellungen → App** den Knopf «Suchen». Er dreht, solange er fragt, und sagt
-   danach, woran er war: «Aktuell» oder — wenn die Anfrage gar nicht durchkam — «Kein
-   Netz». Findet sich eine Fassung, heißt er **«Update»** und ist golden; ein Tipp darauf
-   lädt sie, ein Balken zeigt es an. Bis 2.4.0 meldete er auch im Funkloch «Aktuell» und
-   behauptete damit etwas über einen Stand, den er nie gesehen hatte; bis 2.4.2 meldete er
-   «Neue Fassung bereit» und konnte sie nicht laden (ADR 0062).
-
-   Der frühere Rat — Verknüpfung löschen und neu anlegen — ist damit hinfällig. Klemmt
-   trotzdem etwas, steht am selben Ort der Notausgang «Speicher der App leeren»: Er meldet
-   den Worker ab und lädt neu. Der Lernstand bleibt dabei unberührt, er hängt am Ursprung
-   (`chillijust.github.io`) und nicht am Worker — sicherheitshalber vorher trotzdem den
-   Sicherungscode aus der Bilanz notieren.
+1. Pages liefert mit `Cache-Control: max-age=600`; ein normales Neuladen im Browser zeigt
+   bis zu zehn Minuten lang den alten Stand.
+2. **Auf dem iPhone erledigt das der Service Worker.** Die abgelegte App startet aus ihrem
+   eigenen Speicher, sieht im Hintergrund nach und meldet sich mit «Eine neue Fassung ist
+   da · Jetzt laden». Wer nicht warten will: **Menü → Einstellungen → Nach Aktualisierung
+   suchen**. Der Knopf sagt danach, woran er war: «Aktuell», «Kein Netz» oder «Neue
+   Fassung laden».
+3. Klemmt etwas, steht am selben Ort der Notausgang **«App neu einrichten»**: Er meldet den
+   Worker ab, leert dessen Speicher und lädt neu. Die Daten im `localStorage` bleiben.
 4. **Zwei Dateien gehören zum Stand**, `index.html` und `sw.js`. Beide werden von
    `build.mjs` mit derselben Version gestempelt; steht in `sw.js` eine andere, legt ein
-   neuer Stand keinen neuen Speicher an und kommt beim Nutzer nie an. `pruefen.mjs`
-   bricht darüber ab.
+   neuer Stand keinen neuen Speicher an und kommt beim Nutzer nie an. `pruefen.mjs` und die
+   Suite `offline` brechen darüber ab.
 
-## Eigene Domain (geplant: chillingo.…)
+## Der Übergang von Chillingo (einmalig, 0.1.0T)
 
-Custom Domains gibt es auch im kostenlosen Tarif, solange das Repository öffentlich ist.
-Der Ablauf, **bevor** etwas im Repository passiert:
+Auf dem Gerät läuft Chillingos Worker. Er findet beim Nachsehen ein neues `sw.js`, das neue
+wartet, und Chillingo zeigt seinen Hinweis. Ein Tipp auf «Jetzt laden» schickt
+`uebernehmen` — **dasselbe Wort, das Chillinals Worker versteht** —, der neue Worker
+übernimmt, räumt Chillingos Cache ab, und die Seite lädt als Chillinal neu.
 
-1. **Domain kaufen** (beliebiger Anbieter). Erst danach lassen sich die Einträge setzen.
-2. **DNS beim Anbieter setzen** — je nachdem, welche Form die Adresse haben soll:
-   - `www.chillingo.de` → ein **CNAME**-Eintrag `www` mit dem Ziel `chillijust.github.io`
-     (mit Punkt am Ende, falls der Anbieter das verlangt).
-   - `chillingo.de` ohne „www" (Apex) → vier **A**-Einträge auf
-     `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
-     und, wenn IPv6 unterstützt wird, vier **AAAA**-Einträge auf
-     `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`,
-     `2606:50c0:8003::153`. Manche Anbieter bieten stattdessen ALIAS/ANAME auf
-     `chillijust.github.io` an — das ist die bequemere Variante.
-   - **Die Adressen vor dem Eintragen in der GitHub-Dokumentation gegenprüfen**
-     (`docs.github.com/de/pages` → „Apex-Domain konfigurieren"); GitHub hat sie in der
-     Vergangenheit geändert.
-3. **In GitHub eintragen:** Settings → Pages → Custom domain → Domain eintragen und
-   speichern. GitHub legt dabei selbst eine Datei `CNAME` im Repository an — die gehört
-   dorthin und darf nicht gelöscht werden.
-4. **Warten**, bis die DNS-Prüfung durchläuft (Minuten bis Stunden), dann **Enforce
-   HTTPS** aktivieren. Das Zertifikat stellt GitHub kostenlos aus; es kann bis zu 24
-   Stunden dauern, bis der Haken setzbar ist.
-5. Optional, aber sinnvoll: die Domain unter Settings → Pages → „Verify domain"
-   bestätigen, damit sie niemand anderes für seine Seite beanspruchen kann.
-
-**Wichtig für den Lernstand:** Der Fortschritt liegt im `localStorage` und hängt am
-Ursprung der Seite. Unter einer neuen Domain ist die App zunächst leer. Vor dem Umzug
-den Sicherungscode aus der Bilanz kopieren und auf der neuen Adresse wieder einspielen —
-und die Home-Bildschirm-Verknüpfung neu anlegen.
-
-Die alte Adresse `chillijust.github.io` leitet nach dem Eintragen automatisch auf die
-neue Domain um.
+- **Name und Symbol der Verknüpfung** bleiben «Chillingo» mit der alten Chili, bis die
+  Verknüpfung neu angelegt wird. iOS liest beides nur beim Anlegen.
+- **Vorsicht beim Neuanlegen:** Eine Home-Bildschirm-App hat auf iOS ihren eigenen
+  Speicher. Wird die alte Verknüpfung gelöscht, geht Chillingos Lernstand auf dem Gerät mit
+  — und, sobald es welche gibt, Chillinals Daten. Der Chillingo-Stand liegt als
+  Sicherungscode auf `backup/chillingo-2.11.2T-2026-10-04` (`docs/ChilliSicherung`).
+  Am billigsten ist das Neuanlegen, solange Chillinal noch leer ist.
 
 ## Einstellungen, die niemand aus dem Repository heraus sieht
 
@@ -107,30 +76,25 @@ Branch `main`, Ordner `/ (root)`.
 ## Version
 
 Drei Zahlen in der Datei `VERSION` im Wurzelverzeichnis — die **einzige** Stelle, an der
-sie von Hand steht. **Dahinter darf ein `T` stehen** (`2.4.6T`): Die Fassung ist
+sie von Hand steht. **Dahinter darf ein `T` stehen** (`0.1.0T`): Die Fassung ist
 ausgeliefert, damit sie am Gerät angesehen werden kann, aber noch nicht abgenommen. Ist
 sie es, fällt das T weg und die Zahl bleibt. Das T gehört **in** die Version, nicht
-daneben — der Cache des Workers heißt nach ihr, und «2.4.6T» und «2.4.6» müssen zwei
-Stände sein, sonst käme die abgenommene Fassung nie beim Gerät an. `tools/build.mjs` stempelt sie als `APP_VERSION` nach `index.html`,
-wie es den Stand als `APP_STAND` stempelt. Von dort geht sie in jedes Ticket und steht
-unten in den Einstellungen.
+daneben — der Cache des Workers heißt nach ihr, und «0.1.0T» und «0.1.0» müssen zwei
+Stände sein, sonst käme die abgenommene Fassung nie beim Gerät an. `tools/build.mjs` stempelt sie als `APP_VERSION` nach `index.html` und als `SW_VERSION`
+nach `sw.js`, wie es den Stand als `APP_STAND` stempelt. Sie steht in den Einstellungen
+und geht in jedes Ticket.
 
 | Ziffer | wird größer, wenn … | Beispiel |
 | --- | --- | --- |
-| **erste** | sich etwas Grundlegendes ändert: der Lernstand, das Format des Sicherungscodes, der Aufbau des Lernwegs. Kurz: wenn ein Stand von vorher **anders gelesen** wird. | 1.x.x → 2.0.0 |
-| **zweite** | etwas **dazukommt**: eine Übung, ein Grammatikbaustein, neue Vokabeln, ein neues Farbschema. | 1.2.0 → 1.3.0 |
-| **dritte** | alles Übrige: Oberfläche, Texte, Fehlerbehebungen. | 1.3.0 → 1.3.1 |
+| **erste** | gespeicherte Daten oder der Sicherungscode **anders gelesen** werden müssen | 0.x.x → 1.0.0 |
+| **zweite** | etwas **dazukommt**: ein Bauabschnitt, eine Ansicht, eine Funktion | 0.1.0 → 0.2.0 |
+| **dritte** | alles Übrige: Oberfläche, Texte, Fehlerbehebungen | 0.2.0 → 0.2.1 |
 
-Die dritte Ziffer ist bewusst weiter gefasst als «Oberfläche»: Sonst hätte eine reine
-Fehlerbehebung keinen Platz, und die kommt häufiger vor als eine neue Übung.
+Chillinal beginnt bei **0.1.0T**. Die erste Ziffer bleibt 0, bis alle acht Bauabschnitte
+stehen; die Abnahme danach heißt 1.0.0.
 
 **Version und Stand sind zwei Dinge.** Die Version sagt, welche Fassung gemeint ist, der
-Stand, von wann sie war. Im Ticket stehen beide: `App-Stand: 1.0.0 · 2026-08-09`. Tickets
-von vor der Zählung führen nur den Stand.
-
-**Der Sicherungscode hat seine eigene Zählung** (`CHG2`) und hat mit der Version nichts zu
-tun. Sie darf sich zehnmal ändern, ohne dass ein Code veraltet — und wenn sich das Format
-doch ändert, ist das genau der Fall, in dem die erste Ziffer steigt.
+Stand, von wann sie war. Im Ticket stehen beide: `App-Stand: 0.2.0 · 2026-10-11`.
 
 ### Eine Version festhalten
 
@@ -151,6 +115,6 @@ Momentaufnahmen unter `backup/`.
 Von Hand — auf einem Rechner mit vollen Rechten — geht der Tag natürlich weiterhin:
 
 ```sh
-git tag -a v1.0.0 <commit> -m "Chillingo 1.0.0"
+git tag -a v1.0.0 <commit> -m "Chillinal 1.0.0"
 git push origin v1.0.0
 ```

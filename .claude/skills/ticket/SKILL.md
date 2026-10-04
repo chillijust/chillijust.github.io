@@ -1,6 +1,6 @@
 ---
 name: ticket
-description: Ein Chillingo-Ticket vom Befund bis zum Push abarbeiten — reproduzieren, reparieren, im Prüfstand absichern, dokumentieren, Version stempeln, committen. Verwenden, sobald ein Ticket im Format «# Chillingo · N Tickets» ankommt oder ein Fehler beziehungsweise Wunsch aus der App gemeldet wird.
+description: Ein Chillinal-Ticket vom Befund bis zum Push abarbeiten — reproduzieren, reparieren, im Prüfstand absichern, dokumentieren, Version stempeln, committen. Verwenden, sobald ein Ticket im Format «# Chillinal · N Tickets» ankommt oder ein Fehler beziehungsweise Wunsch aus der App gemeldet wird.
 ---
 
 # Ein Ticket abarbeiten
@@ -21,10 +21,9 @@ Befund am DOM zeigt, **bevor** eine Zeile geändert wird → Skill `pruefstand`.
 Der gemeldete Befund stimmt oft nicht wörtlich; der Prüfstand sagt, was wirklich
 passiert.
 
-**3 · Fragen, ob dieselbe Ursache anderswo steckt.** Die App hat sieben Übungen,
-die sich Muster teilen. Ein Fehler im Jubel saß in vier davon, ein Fehler im
-Abstand in allen Fortschrittsreihen. Wer nur die gemeldete Stelle repariert,
-bekommt die nächste Meldung.
+**3 · Fragen, ob dieselbe Ursache anderswo steckt.** Gewohnheiten, Abgewöhnen
+und Termine teilen sich Muster — Tagesgrenze, Kachel, Ring, Kalender. Wer nur die
+gemeldete Stelle repariert, bekommt die nächste Meldung.
 
 **4 · Reparieren** — im vorhandenen Stil (ES5-nah, `var`, `function`, zwei
 Leerzeichen, deutsche Kommentare, die das *Warum* nennen).
@@ -33,7 +32,7 @@ Leerzeichen, deutsche Kommentare, die das *Warum* nennen).
 ab jetzt das Gedächtnis dafür.
 
 **6 · Aussehen prüfen**, wenn die Änderung sichtbar ist: Bildschirmfoto in
-Handybreite, und zwar in **Dark und einem hellen Schema**.
+Handybreite, und zwar **hell und dunkel**.
 
 **7 · Dokumentieren.** Eine Entscheidung mit Begründung bekommt einen ADR unter
 `docs/decisions/`, fortlaufend nummeriert. Eine Regel, an die man sich später
@@ -41,7 +40,7 @@ halten muss, kommt zusätzlich als **ein Satz** in `CLAUDE.md`. Berührt die
 Änderung Zustand oder Renderzyklus, gehört sie in `docs/architektur.md`.
 
 **8 · Version stempeln** (`VERSION`, danach `node tools/build.mjs`):
-erste Ziffer = der Lernstand wird anders gelesen · zweite = etwas kommt dazu ·
+erste Ziffer = gespeicherte Daten werden anders gelesen · zweite = etwas kommt dazu ·
 dritte = alles Übrige. Ein Fehler ist die dritte.
 
 **9 · Commit** — einer je logischer Änderung, Betreff im Imperativ, im Rumpf

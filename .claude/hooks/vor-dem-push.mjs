@@ -35,7 +35,7 @@ if (/PRUEFSTAND=aus/.test(befehl)) {
 }
 
 const schritte = [
-  ['Daten und index.html synchron', ['tools/build.mjs', '--check']],
+  ['Eingebettetes und Version auf Stand', ['tools/build.mjs', '--check']],
   ['DOCTYPE, Fremdadressen, Syntax', ['tools/pruefen.mjs']],
   ['Prüfstand', ['tools/pruefstand/lauf.mjs', '-q']]
 ];

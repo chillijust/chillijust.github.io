@@ -1,4 +1,4 @@
-# So arbeiten wir mit Claude an Chillingo
+# So arbeiten wir mit Claude an Chillinal
 
 Kurzanleitung für den Nutzer. Warum das so ist, steht am Ende.
 
@@ -11,12 +11,12 @@ und setzen die Übergabe als erste Nachricht ein. Fertig.
 
 **2 · Das Modell steht auf Sonnet.**
 Das ist die Vorgabe in `.claude/settings.json` und gilt ab der nächsten frischen Sitzung.
-Wird etwas kniffelig — Lernlogik umbauen, ein Fehler, der sich versteckt —, tippen Sie
+Wird etwas kniffelig — die Stärke-Rechnung umbauen, ein Fehler, der sich versteckt —, tippen Sie
 `/model opus`. Das gilt nur für diese eine Sitzung. Ich sage Bescheid, wenn ich meine,
 daß es sich lohnt.
 
 **3 · Nebenfragen mit `/btw`.**
-«Was macht eigentlich `waehleWort()`?» — mit `/btw` davor bleibt die Antwort außerhalb
+«Was macht eigentlich `themaWirksam()`?» — mit `/btw` davor bleibt die Antwort außerhalb
 des Gesprächs und kostet danach nichts mehr.
 
 ## Die Übergabe
@@ -24,14 +24,14 @@ des Gesprächs und kostet danach nichts mehr.
 Sie kommt immer als Codeblock, fünf Zeilen, zum Kopieren ohne Änderung:
 
 ```
-Chillingo, Branch main. Stand <sha>, Version <VERSION>.
+Chillinal, Branch main. Stand <sha>, Version <VERSION>.
 Zuletzt: <was gerade fertig wurde, ein Satz>
 Offen: <was als Nächstes ansteht — oder «nichts»>
 Achtung: <nur was diese Lage betrifft — sonst Zeile weglassen>
 Lies CLAUDE.md.
 ```
 
-**Mehr braucht es nicht.** Was Chillingo ist, welche Übungen es gibt, wie der Prüfstand
+**Mehr braucht es nicht.** Was Chillinal ist, welche Ansichten es gibt, wie der Prüfstand
 läuft — das steht in `CLAUDE.md` und wird beim Start jeder Sitzung von selbst geladen.
 Es in die Übergabe zu schreiben hieße, es zweimal zu bezahlen. Die Übergabe trägt nur,
 was **CLAUDE.md nicht wissen kann**: die Lage von heute.
@@ -45,18 +45,18 @@ Fehlt Ihnen die Übergabe, genügt: *«Gib mir die Übergabe.»*
 Der häufigste Fall. Neue Sitzung, dann **eine** Nachricht:
 
 > ```
-> Chillingo, Branch main. Stand bbf5394, Version 2.9.3T.
-> Zuletzt: ADR 0094 ausgeliefert.
-> Offen: 2.9.3T wartet auf Abnahme am Gerät.
+> Chillinal, Branch main. Stand bbf5394, Version 0.4.1T.
+> Zuletzt: ADR 0007 ausgeliefert.
+> Offen: 0.4.1T wartet auf Abnahme am Gerät.
 > Lies CLAUDE.md.
 > ```
 >
-> \# Chillingo · 2 Tickets
+> \# Chillinal · 2 Tickets
 >
-> 1 · Fehler: In «Tippen» steht der Prüfen-Knopf nach dem Drehen des Geräts
-> unter dem Rand.
+> 1 · Fehler: Nach Mitternacht bleibt die Kachel von gestern abgehakt, bis ich die
+> App schließe.
 >
-> 2 · Wunsch: Die Bilanz soll das Tempo je Woche zeigen, nicht je Übung.
+> 2 · Wunsch: Die Heatmap soll mit Montag beginnen, nicht mit Sonntag.
 
 Ich erkenne das Format und fahre den Skill `ticket` von selbst: reproduzieren,
 reparieren, im Prüfstand absichern, ADR schreiben, Version stempeln, committen,
@@ -67,10 +67,10 @@ pushen. Am Ende kommt der Schnitt mit der neuen Übergabe.
 
 ### 2 · Frei an der App entwickeln
 
-Wenn der Umfang noch unklar ist — «ich will die Lernlogik umbauen», «Buchstaben soll
+Wenn der Umfang noch unklar ist — «ich will die Stärke anders rechnen», «Termine sollen
 anders funktionieren» —, **erst `Shift+Tab` für den Planmodus**, dann:
 
-> Ich will, daß «Tippen» in «Übersetzen» aufgeht. Verschaff dir einen Überblick und
+> Ich will, daß Abgewöhnen und Angewöhnen auf einer Kachelreihe stehen. Verschaff dir einen Überblick und
 > leg mir einen Plan vor, etappenweise. Stell Rückfragen, wo mehrere Lesarten möglich
 > sind — ich entscheide lieber vorher als hinterher.
 
@@ -85,12 +85,12 @@ in einer einzigen Sitzung ist genau der Fall, der 780 000 Tokens erzeugt hat.
 
 Keine Sitzung aufmachen, kein `/clear`. In einer laufenden Sitzung:
 
-> /btw Was macht `waehleWort()` nochmal genau?
+> /btw Was macht `themaWirksam()` nochmal genau?
 
 Die Antwort landet **nicht** im Gesprächsverlauf und kostet danach nichts mehr. Ohne
 `/btw` schleppen Sie die Antwort bis zum Sitzungsende bei jedem weiteren Aufruf mit.
 
-Dasselbe gilt für «Läuft der Build?», «Was steht in ADR 0086?», «Welche Version ist
+Dasselbe gilt für «Läuft der Build?», «Was steht in ADR 0001?», «Welche Version ist
 draußen?» — alles Fragen, deren Antwort man einmal braucht und nie wieder.
 
 ## Zwei Befehle zum Nachsehen

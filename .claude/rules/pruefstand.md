@@ -3,27 +3,27 @@ paths:
   - "tools/pruefstand/**"
 ---
 
-# Prüfstand · Chillingo
+# Prüfstand · Chillinal
 
 Gilt für die Suiten. Ausführlich in `tools/pruefstand/README.md` und im Skill `pruefstand`.
 
+- **Eine Suite baut ihre Seite mit `suite(name, html, rumpf)`** aus `helfer.mjs`. Der Rumpf
+  hat `pruefe`, `q`, `alle`, `frisch()` und darf ein Promise zurückgeben — dann wird erst
+  geurteilt, wenn es erfüllt ist.
 - **Eine Suite bricht mit `throw` ab, nie mit `process.exit()`** — ein Ausstieg beim Bauen
   beendet den Läufer selbst, ohne Ausgabe und ohne Grund.
 - **Backticks brechen `String.raw`** — auch im Kommentar. Symptom: «SUITE BRICHT AB —
   Unexpected identifier». Statt dessen «» oder Klartext.
-- **Wer eine Suite schreibt, die eine Übung betritt, stellt die Spuren still** (ADR 0079) —
-  sonst steht die Chili in der Tutorial-Blase statt in der Ansicht.
-- **Wer den Tutorial-Zustand braucht, stellt ihn selbst her** (ADR 0094): Die Testseite lädt
-  mit leerem Speicher, die App fragt beim Start von selbst — darauf zu bauen heißt, vom ersten
-  `tutEnde()` einer fremden Prüfung abzuhängen. `tutStarten()` setzt nur den Scheinwerfer und
-  zeichnet die Ansicht **nicht** neu; `setTab()` gehört danach, nicht davor.
-- **Eine Prüfung fragt eine Kachel nach Namen**, nie nach Platz — dieselbe Übung steht
-  zweimal im Baum.
-- **Eine Prüfung zählt nicht auf, sie fragt nach allen.** Eine Liste (runde Knöpfe, Felder im
-  Sicherungscode, Binder der Tastatur, Reiter der Einstellungen) mißt über jede neue Lücke
-  hinweg. Sollwerte aus der Stelle in `EINST_REITER` rechnen, nie aus einer festen Zahl.
-- **Nur das Bild findet manches.** Ein DOM-Test sagt nichts über Größe und Umbruch: Die
-  Tastatur in der Kachel war im DOM unsichtbar, der Ring in der Bilanz halbseitengroß. Bei
-  sichtbaren Änderungen ein Bildschirmfoto in Handybreite, in **Dark und einem hellen Schema**.
-- **Der kopflose Browser kennt weder Safe-Area noch iOS-Leiste** — was darunter liegt (ADR
-  0087), findet nur das Gerät.
+- **Was die Prüfung sucht, steht nicht wörtlich in ihr.** Das Prüfskript hängt im selben
+  Dokument: Ein Emoji im Suchmuster findet sich selbst, Chillingos Schlüssel im Klartext
+  ließe `pruefen.mjs` anschlagen. Zeichen über `String.fromCharCode`, Schlüssel
+  zusammengesetzt; gelesen wird `#app`, nicht `document.body`.
+- **Übergänge abschalten, wenn eine Farbe gefragt ist** — der kopflose Browser läßt sie
+  nicht zuverlässig ablaufen; gefragt ist das Ziel, nicht der Weg.
+- **Eine Prüfung zählt nicht auf, sie fragt nach allen.** Menüeinträge, Knöpfe,
+  Trefferflächen: über `alle()` und eine Bedingung für jeden, nicht über eine feste Zahl.
+- **Das Menü blendet nach dem Schließen noch aus.** Wer danach Knöpfe zählt, fragt `#app`.
+- **Nur das Bild findet manches.** Ein DOM-Test sagt nichts über Größe und Umbruch. Bei
+  sichtbaren Änderungen ein Bildschirmfoto in Handybreite, **hell und dunkel**.
+- **Der kopflose Browser kennt weder Safe-Area noch iOS-Leiste noch ein dunkles Gerät** —
+  was davon abhängt, findet nur das Gerät.

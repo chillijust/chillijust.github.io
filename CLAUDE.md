@@ -10,8 +10,9 @@ mir, statt still eine Seite zu wählen.
 **Eine Sitzung trägt einen Vorgang.** Jeder Aufruf schickt die ganze bisherige Sitzung
 noch einmal mit — ein abgeschlossener Vorgang, der im Kontext liegen bleibt, kostet
 weiter und trägt nichts mehr bei (gemessen: von 84 000 auf 780 000 Tokens in einer
-Sitzung, zwei Drittel der Kosten). Ist ein Ticketblock ausgeliefert und der Lauf grün,
-sage ich **«Sir, hier wäre ein guter Schnitt»**. Ob `/clear` kommt, entscheiden Sie.
+Sitzung, zwei Drittel der Kosten). Ist ein Ticketblock oder Bauabschnitt ausgeliefert und
+der Lauf grün, sage ich **«Sir, hier wäre ein guter Schnitt»**. Ob `/clear` kommt,
+entscheiden Sie.
 
 **Die Übergabe kommt immer kopierfertig** — als Codeblock, den Sie ohne eine Änderung in
 die neue Sitzung einsetzen können, nie als Fließtext zum Abschreiben. Sie trägt genau
@@ -19,7 +20,7 @@ fünf Zeilen und **nur die Lage**: Was das Projekt ist, steht in dieser Datei un
 ohnehin geladen; es zu wiederholen kostet zweimal.
 
 ```
-Chillingo, Branch main. Stand <sha>, Version <VERSION>.
+Chillinal, Branch main. Stand <sha>, Version <VERSION>.
 Zuletzt: <was gerade fertig wurde, ein Satz>
 Offen: <was als Nächstes ansteht — oder «nichts»>
 Achtung: <nur was diese Lage betrifft — sonst Zeile weglassen>
@@ -28,29 +29,38 @@ Lies CLAUDE.md.
 
 ## Projekt
 
-**Chillingo** — Web-App zum Russischlernen (Kyrillisch lesen, schreiben, übersetzen).
-Alles Inhaltliche steht in `index.html`; daneben liegt ein Service Worker, der nichts
-anderes tut, als sie beiseitezulegen (ADR 0059). Gehostet über GitHub Pages unter
-https://chillijust.github.io/. Zielgerät: iPhone 15 Pro Max (iOS 26.5.2), installiert
-über „Zum Home-Bildschirm" als PWA im Vollbild.
+**Chillinal** (Chilli + Journal) — Web-App zum An- und Abgewöhnen von Gewohnheiten, mit
+Terminen, offline, Daten nur auf dem Gerät. Alles Inhaltliche steht in `index.html`;
+daneben liegt ein Service Worker, der nichts anderes tut, als sie beiseitezulegen.
+Gehostet über GitHub Pages unter https://chillijust.github.io/. Zielgerät: iPhone 15 Pro
+Max (iOS 26.5.2), installiert über „Zum Home-Bildschirm" als PWA im Vollbild.
 
-Einstieg ist **Home**: Empfehlung plus eine Kachel je Übung. Der Begriff ist **Übung**,
-nicht «Rubrik». **Die Reihenfolge ist der Lernweg** — Zeichen, Wörter, Sätze (ADR 0066):
+**Das Pflichtenheft ist `docs/chillinal-plan.md`.** Was dort steht, ist entschieden —
+Ansichten, Stärke-Rechnung, Farben, Bauabschnitte. Wer davon abweicht, sagt es und hält
+es in einem ADR fest.
 
-| Übung | wozu |
+Chillinal hat **Chillingo** (Russischlernen) auf `main` abgelöst (ADR 0001). Chillingo ruht
+vollständig auf `backup/chillingo-2.11.2T-2026-10-04`, samt Sicherungscode des
+Lernstands. Sein `localStorage` liegt auf dem Gerät weiter und wird nie angefaßt.
+
+Start ist das **Dashboard**; alles Weitere öffnet der **runde Menüknopf** (drei Striche).
+Eine Reiterleiste gibt es nicht — der Kopf trägt unterwegs den Rückweg. Maskottchen ist
+die Chili.
+
+| Bauabschnitt | Stand |
 | --- | --- |
-| **Buchstaben** | das kyrillische Alphabet — freiwillig, eigener Lernstand, zählt nicht in Serie und Fortschritt; Einstieg ist das Üben, die Tafel liegt hinter einem eigenen Knopf |
-| **Lernsets** | die Wörter der nächsten Sätze, schaltet «Übersetzen» frei; das nächste Set öffnet bei **80 % gemeistert**, und gemeistert wird **nur hier** (ADR 0086/0092) |
-| **Tippen** | Eingabequiz mit kyrillischer Tastatur, ab Leitner-Stufe 3 — freiwillige Zugabe |
-| **Übersetzen** | nur Sätze, deren Wörter sitzen; Form und Richtung steigern sich mit der Stufe (Kacheln vor Tippen, RU→DE vor DE→RU) |
-| **Schreibung** | warum man nicht schreibt, was man hört — eine Regel je Karteikarte, zählt mit |
-| **Grammatik** | warum ein Wort so dasteht — freiwillig, entdecken statt belehren |
-| **Power-Training** | die zurückgefallenen Wörter zurückholen — drei auf einmal, ab drei gefallenen offen |
+| 1 · Umbau, Gerüst, Kopf, Farben, Schriften, Symbol, `sw.js` | fertig (0.1.0T) |
+| 2 · Gewohnheiten: anlegen, Rhythmus, Abhaken, Stärke, nie zweimal | offen |
+| 3 · Abgewöhnen, 10-Minuten-Welle | offen |
+| 4 · Termine, Monatskalender, Tagesansicht | offen |
+| 5 · Kalender-Export (`.ics`) | offen |
+| 6 · Rückblick: Heatmap, Detail, Journal | offen |
+| 7 · Sicherung, Einstellungen, Tickets | offen |
+| 8 · Feinschliff | offen |
 
-Keine Übungen, sondern **im Menü** (runder Knopf, drei Striche), in dieser Reihenfolge:
-**Einstellungen**, **Bilanz**, **Sicherung**, **Tickets**. Dazu **Sprachfakten** aus der
-Faktenkarte oder der Bilanz. Eine Reiterleiste gibt es nicht — der Kopf trägt unterwegs
-den Rückweg. Maskottchen ist die Chili.
+Im Menü stehen alle Einträge des Pflichtenhefts von Anfang an; was noch nicht gebaut ist,
+trägt «bald» und meldet sich mit einer Zeile. **Wer einen Abschnitt baut, gibt dem
+Eintrag sein `ziel`** — die Suite `menue` prüft, daß «bald» und Gebautes zusammenpassen.
 
 ## Wo die Regeln stehen
 
@@ -59,72 +69,67 @@ Diese Datei trägt nur, was **immer** gilt. Das Übrige liegt themenweise unter
 
 | Datei | greift bei | Inhalt |
 | --- | --- | --- |
-| `.claude/rules/oberflaeche.md` | `index.html` | Chili, Blätter und runde Knöpfe, Leiste, Tutorial, Kopf und Fortschritt, Übersicht, Jubel, Einstellungen, Farben, Tastatur, Ton, Update, Tickets |
-| `.claude/rules/lernlogik.md` | `index.html` | Strenge, Meistern und Deckel, Lernsets, Fälligkeit und Stapel, Buchstaben, Übersetzen, Empfehlung, Bilanz, Sicherungscode |
-| `.claude/rules/inhalte.md` | `data/**`, `build.mjs` | Grammatik, Sätze und Lehrplan, Betonung, Schreibung |
+| `.claude/rules/oberflaeche.md` | `index.html` | Farben, Darstellung, Schrift, Kopf, Menü, Chili, Bewegung, Speicher |
 | `.claude/rules/pruefstand.md` | `tools/pruefstand/**` | wie eine Suite entsteht und woran sie scheitert |
-| `.claude/rules/docs.md` | `docs/**` | ADRs, Index, Archiv |
+| `.claude/rules/docs.md` | `docs/**` | ADRs, Index |
 
 Die Begründung hinter jeder Regel steht im jeweiligen ADR unter `docs/decisions/`
 (Index: `docs/decisions/README.md`). Wer eine Regel ändert, ändert sie **dort**, wo sie
-steht — nicht zusätzlich hier.
+steht — nicht zusätzlich hier. Kommt mit Abschnitt 2 die Rechenlogik, bekommt sie ihre
+eigene Datei (`.claude/rules/logik.md`).
 
 ## Harte Rahmenbedingungen — nicht verhandelbar
 
 - Kein React, kein JSX, kein Build-Schritt, keine npm-Toolchain im Auslieferungspfad.
-- **Zwei Dateien, nicht mehr** (ADR 0059): `index.html` und `sw.js`. Alles Inhaltliche
-  steht in der ersten; der Worker kennt kein Wort Russisch. Die CSP trägt dafür genau eine
-  Ausnahme, `worker-src 'self'` — **`connect-src` bleibt weg**, die Seite baut keine
-  Verbindung auf. `pruefen.mjs` hält `sw.js` an dieselbe Leine und bricht ab, wenn eine
-  Direktive mehr aufmacht. Ein `manifest.json` gibt es bewußt nicht.
+- **Zwei Dateien, nicht mehr** (ADR 0001): `index.html` und `sw.js`. Alles Inhaltliche
+  steht in der ersten. Die CSP trägt dafür genau eine Ausnahme, `worker-src 'self'` —
+  **`connect-src` bleibt weg**, die Seite baut keine Verbindung auf. `pruefen.mjs` hält
+  `sw.js` an dieselbe Leine. Ein `manifest.json` gibt es bewußt nicht.
 - **Keine externen Ressourcen**: keine CDNs, keine Google Fonts, keine externen Bilder,
-  keine API-Aufrufe. Alles inline. Symbole als Inline-SVG über `ICON` — **keine
-  Emoji-Zeichen**, iOS rendert sie als farbige Grafik. `tools/pruefen.mjs` bricht darüber
-  ab. Die Content-Security-Policy im `<head>` macht die Regel erzwingbar; sie bleibt drin.
+  keine API-Aufrufe. Schriften (Lora, Poppins) und Bilder stecken als Daten-URI in der
+  Datei. Symbole als Inline-SVG über `ICON` — **keine Emoji-Zeichen**, iOS rendert sie als
+  farbige Grafik. `tools/pruefen.mjs` bricht darüber ab. Die Content-Security-Policy im
+  `<head>` macht die Regel erzwingbar; sie bleibt drin.
+- **Erinnerungen nur über den Kalender-Export** (`.ics`, Abschnitt 5) — kein Server, keine
+  Push-Nachrichten.
 - **Die ausgelieferte Datei ist öffentlich lesbar.** Nie ein Token, ein Passwort oder einen
   Schlüssel hineinschreiben — auch nicht verschleiert, auch nicht «nur zum Testen».
   `pruefen.mjs` sucht nach tokenähnlichem Text und bricht bei **jeder** Fremdadresse ab.
-  Daß die Seite öffentlich ist, ist für die Daten belanglos: Lernstand und Tickets liegen
-  im `localStorage` des Geräts.
-- **Persistenz ausschließlich über `localStorage`**, jeder Zugriff in `try/catch`.
+- **Persistenz ausschließlich über `localStorage`**, Schlüssel `chillinal_v1`, jeder
+  Zugriff in `try/catch`. **Chillingos Schlüssel kommt im Quelltext nicht vor, und
+  `localStorage.clear()` gibt es nicht** — `pruefen.mjs` bricht über beides ab.
 - **Mobile-first**: Touch-Ziele ≥ 44 × 44 px, keine Hover-abhängige Bedienung,
   `-webkit-tap-highlight-color: transparent`, `env(safe-area-inset-*)` für Notch und
   Home-Indicator.
-- **Die App duzt** (ADR 0050). Jeder Text, der den Nutzer anspricht, sagt «du» — auch
-  Kommentare und Jubel. **Der Lehrstoff bleibt davon unberührt:** «вы» heißt weiterhin
-  «ihr / Sie», «Sie schreibt einen Brief» ist она пишет, und eine Grammatikerklärung darf
-  «sie» über Wörter sagen. Die Suite `anrede` liest den gerenderten Text jeder Ansicht und
-  führt die Ausnahmen namentlich — wer eine hinzufügt, begründet sie dort.
+- **Die App duzt.** Jeder Text, der den Nutzer anspricht, sagt «du». Die Suite `geruest`
+  liest den gerenderten Text und schlägt bei «Sie»/«Ihnen» an.
+- **Kein Name und kein Logo von Anthropic** — nur Farben und Typografie.
 - Die App muß offline funktionieren, nachdem sie einmal geladen wurde.
 
 ## Verzeichnisse
 
 ```
 index.html                die App — hier steht alles Inhaltliche
-sw.js                     Service Worker: legt die App beiseite, mehr nicht (ADR 0059)
+sw.js                     Service Worker: legt die App beiseite, mehr nicht
 .nojekyll                 schaltet Jekyll ab, niemals löschen
-data/*.json               Lerninhalte, einzige Quelle für Vokabeln/Sätze/Fakten/
-                          Tastatur/Buchstaben/Grammatik/Verben/Nomen/Kommentare/
-                          Tutorial/Betonung/Schreibregeln/Minimalpaare
-tools/build.mjs           /data prüfen und in index.html einbetten (--check = nur prüfen)
-tools/pruefen.mjs         Vor-Push-Prüfung von index.html
+VERSION                   die Version, einzige Stelle von Hand
+tools/build.mjs           Schriften, Chili, Symbol einbetten; Version stempeln (--check = nur prüfen)
+tools/pruefen.mjs         Vor-Push-Prüfung von index.html und sw.js
+tools/appsymbol.mjs       App-Symbol als SVG zeichnen und zu PNG rendern (180, 1024)
+tools/schriften/          Lora und Poppins, lateinische Teilmenge, woff2, samt OFL
 tools/pruefstand/         Prüfstand: lauf.mjs, suiten/*.mjs, bild.mjs (siehe README dort)
 .claude/rules/            Regeln nach Thema, geladen bei passender Datei
 .claude/skills/           Abläufe für Claude: pruefstand, ticket
 .claude/hooks/            vor-dem-push.mjs — hält den Push an, wenn etwas rot ist
-tools/freistellen.py      Maskottchen aus einem Bild freistellen (ohne Bildbibliothek)
-tools/skaliere.py         PNG auf Icon-Größe bringen (ohne Bildbibliothek)
-tools/appikon.py          App-Symbol bauen: Grund tauschen, Sprechblase umdrehen
-docs/appikon-hell-*.png   das ausgelieferte App-Symbol als Datei (180 und 1024)
-tools/palette.py          getönte Paletten aus dem neutralen Grundton rechnen
-docs/                     Architektur, Datenmodell, Deploy, Entscheidungen (ADRs)
-docs/arbeitsweise.md      Kurzanleitung für den Nutzer: Schnitt, Modell, Übergabe
+docs/chillinal-plan.md    das Pflichtenheft
+docs/maskottchen-freigestellt.png   die Chili (Quelle für App und Symbol)
+docs/appsymbol-*.png      das App-Symbol; 180 ist bitgleich mit dem ausgelieferten
+docs/                     Architektur, Deploy, Arbeitsweise
 docs/decisions/           kurze ADRs, fortlaufend numeriert — README.md ist der Index
-docs/archiv/              abgearbeitete Pläne; nichts davon ist offen
 ```
 
 Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
-`docs/datenmodell.md` (Format der Inhalte), `docs/deploy.md` (Pages, Cache).
+`docs/deploy.md` (Pages, Cache, Version).
 
 ## Konventionen
 
@@ -134,18 +139,18 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   Anführungszeichen. Gliederung über Kommentarbalken.
 - **Alle Ausgaben durch `esc()`**, Ereignisbehandler nach dem Setzen von `innerHTML`
   anhängen, nie als `onclick`-Attribut.
-- **Der Datenblock zwischen `DATEN:START` und `DATEN:ENDE` ist generiert.** Inhalte
-  ausschließlich in `/data` ändern, danach `node tools/build.mjs`.
+- **Eingebettetes setzt `tools/build.mjs`**, nie die Hand: der Schriftblock zwischen
+  `SCHRIFTEN:START` und `SCHRIFTEN:ENDE`, `CHILI_BILD`, das `apple-touch-icon`. Wer das
+  Symbol ändert, fährt erst `node tools/appsymbol.mjs`, dann `node tools/build.mjs`.
 - **Die Version steht in `VERSION`**, sonst nirgends von Hand (siehe `docs/deploy.md`):
-  erste Ziffer = der Lernstand wird anders gelesen, zweite = etwas kommt dazu, dritte =
-  alles Übrige. `tools/build.mjs` stempelt sie als `APP_VERSION`. **Ein angehängtes `T`
-  heißt «noch nicht abgenommen»** (`2.4.6T`) — die Fassung wird ausgeliefert, damit sie am
-  Gerät angesehen werden kann; fällt das T weg, ist sie freigegeben. Es gehört **in** die
-  Zahl: Der Cache des Workers heißt nach der Version. **Aus demselben Grund darf das T
-  zählen** (ADR 0083): Wird an einer angesagten Fassung ein zweites Mal nachgebessert,
-  heißt die nächste Ansicht `2.5.0T2`.
-- **`APP_STAND` setzt `tools/build.mjs`**, nicht die Hand. Der Wert geht in jedes Ticket
-  ein. `--check` vergleicht ohne ihn.
+  erste Ziffer = gespeicherte Daten werden anders gelesen, zweite = etwas kommt dazu,
+  dritte = alles Übrige. `tools/build.mjs` stempelt sie als `APP_VERSION` und
+  `SW_VERSION`. **Ein angehängtes `T` heißt «noch nicht abgenommen»** (`0.1.0T`) — die
+  Fassung wird ausgeliefert, damit sie am Gerät angesehen werden kann; fällt das T weg,
+  ist sie freigegeben. Es gehört **in** die Zahl: Der Cache des Workers heißt nach der
+  Version. **Aus demselben Grund darf das T zählen**: Wird an einer angesagten Fassung ein
+  zweites Mal nachgebessert, heißt die nächste Ansicht `0.2.0T2`.
+- **`APP_STAND` setzt `tools/build.mjs`**, nicht die Hand. `--check` vergleicht ohne ihn.
 - **Commits:** einer je logischer Änderung, Nachricht auf Deutsch, Betreffzeile im
   Imperativ. Im Rumpf steht, *warum*.
 - **Branches:** Gearbeitet und gepusht wird **immer auf `main`** — ein Branch ist nur
@@ -153,7 +158,8 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
   vor, gilt das nicht: dort committen, dann auf `main` bringen (Fast-Forward reicht meist)
   und dorthin pushen. Landet trotzdem etwas auf einem anderen Branch — eigenes Vertun oder
   eine fremde Sitzung —, wird es bei der nächsten Gelegenheit nach `main` nachgeholt, nicht
-  stehengelassen. Neue Branches nur auf meine ausdrückliche Ansage.
+  stehengelassen. Neue Branches nur auf meine ausdrückliche Ansage. **`backup/*` wird nie
+  verändert.**
 
 ## Prüfstand und Push
 
@@ -162,9 +168,10 @@ angehängt, ein kopfloser Browser lädt sie, das Skript prüft und schreibt sein
 den Seitentitel.
 
 ```sh
-node tools/pruefstand/lauf.mjs   # alle Suiten, ~16 s — grün schweigt, rot redet
-node tools/pruefstand/lauf.mjs jubel flammen   # nur diese
+node tools/pruefstand/lauf.mjs                 # alle Suiten — grün schweigt, rot redet
+node tools/pruefstand/lauf.mjs thema menue     # nur diese
 node tools/pruefstand/lauf.mjs -v              # auch jede grüne Suite nennen
+node tools/pruefstand/bild.mjs                 # Bildschirmfotos, hell und dunkel
 ```
 
 **Der Push ist abgesichert.** `.claude/hooks/vor-dem-push.mjs` fährt vor jedem `git push`
@@ -176,9 +183,9 @@ Notausgang, wenn es wirklich raus muß: `PRUEFSTAND=aus` vor den Befehl. Ein Git
 das Gedächtnis für jeden Fehler, der schon einmal da war. Wie eine Suite entsteht: Skill
 `pruefstand` und `tools/pruefstand/README.md`.
 
-**`index.html` nie in Blöcken lesen.** 15 000 Zeilen — mit `grep -n` und engem Kontext
-suchen, nicht mit `sed -n 'A,Bp'` über hunderte Zeilen. Was einmal im Kontext liegt,
-kostet bis zum Sitzungsende bei jedem Aufruf mit.
+**`index.html` nicht in großen Blöcken lesen.** Sie wächst mit jedem Abschnitt — mit
+`grep -n` und engem Kontext suchen. Die eingebetteten Daten-URIs sind je eine einzige,
+sehr lange Zeile; `cut -c1-200` hält sie aus dem Kontext.
 
 **Für einen ganzen Vorgang** — vom gemeldeten Befund bis zur Auslieferung — gibt es den
 Skill `ticket`.
@@ -186,41 +193,33 @@ Skill `ticket`.
 ## Bekannte Fallstricke
 
 - **Jekyll.** Ohne `.nojekyll` rendert Pages Markdown und packt alles in ein
-  Theme-Layout — genau der Fehler, der die Seite ursprünglich unbrauchbar machte
-  (ADR 0003). Datei nie löschen. Kein YAML-Front-Matter in `index.html`.
+  Theme-Layout. Datei nie löschen. Kein YAML-Front-Matter in `index.html`.
 - **Fehlendes DOCTYPE.** Ohne `<!DOCTYPE html>` in Zeile 1 rendert Safari im
-  Quirks-Mode; Flexbox und Viewport verhalten sich anders. War schon einmal versehentlich
-  entfernt.
+  Quirks-Mode; Flexbox und Viewport verhalten sich anders.
 - **iOS-Quick-Look** (Vorschau aus Dateien/Mail) zeigt HTML anders als Safari und
   speichert nichts dauerhaft. Testen immer in Safari oder in der
   Home-Bildschirm-Verknüpfung.
 - **`localStorage`** wirft im privaten Modus und bei vollem Kontingent. Jeder Zugriff in
-  `try/catch`; schlägt das Schreiben fehl, Hinweis auf den Sicherungscode zeigen.
-  Schlüssel: `russisch_trainer_v1` — Schemawechsel nur mit neuem Schlüssel und Migration.
-- **`speechSynthesis`** braucht auf iOS eine Nutzergeste, liefert Stimmen erst verzögert
-  und schweigt im Stummschalter-Modus. Nie in einen Ablauf einbauen, der ohne
-  Sprachausgabe nicht funktioniert; Aufrufe in `try/catch`.
-- **Der Service Worker liefert, was er gespeichert hat** (ADR 0059) — aus dem Speicher
-  sofort, im Hintergrund nachsehen. Der Cache heißt nach der Version; wer den Namen
-  entkoppelt, liefert für immer den alten Stand aus. **Kein `skipWaiting` beim
-  Einrichten:** Der neue Worker wartet auf «Jetzt laden» oder den Knopf «Update»
-  (ADR 0062). Klemmt etwas, gibt es den Notausgang in den Einstellungen unter «App» — er
-  läßt den Lernstand unberührt. **Ohne Netz kommt kein Urteil:** «Nach Aktualisierung
-  suchen» meldet dann «Kein Netz», nicht «Aktuell» (ADR 0052). **`update()` ist fertig,
-  bevor die neue Fassung wartet** — wer sofort urteilt, sagt «Aktuell» und sieht sie eine
-  Sekunde später auftauchen.
+  `try/catch`; schlägt das Schreiben fehl, sagt die App es. Schemawechsel nur mit neuem
+  Schlüssel und Migration; neue Felder bekommen ihren Vorgabewert in `grundStand()`.
+- **Die Tagesgrenze ist lokale Mitternacht.** Eine offene App merkt den Tageswechsel nur,
+  wenn sie danach zeichnet — `visibilitychange` zeichnet den Kopf neu.
+- **Der Service Worker liefert, was er gespeichert hat** — aus dem Speicher sofort, im
+  Hintergrund nachsehen. Der Cache heißt nach der Version; wer den Namen entkoppelt,
+  liefert für immer den alten Stand aus. **Kein `skipWaiting` beim Einrichten:** Der neue
+  Worker wartet auf «Jetzt laden» oder den Knopf in den Einstellungen. Die Nachrichten
+  `version` und `uebernehmen` bleiben, wie sie sind — sie sind Chillingos Wortschatz, und
+  nur über ihn kam Chillinal aufs Gerät. Klemmt etwas, gibt es den Notausgang
+  «App neu einrichten» in den Einstellungen; er läßt die Daten unberührt. **Ohne Netz
+  kommt kein Urteil:** «Nach Aktualisierung suchen» meldet dann «Kein Netz», nicht
+  «Aktuell». **`update()` ist fertig, bevor die neue Fassung wartet.**
+- **Die Statusleiste** steht auf `black-translucent`, ihre Grundfarbe setzt `theme-color`
+  je nach Darstellung. Wie iOS die Schrift darin bei hellem Grund färbt, zeigt nur das Gerät.
 - **Das App-Symbol läßt sich zur Laufzeit nicht wechseln.** iOS liest `apple-touch-icon`
-  einmal, beim Anlegen der Verknüpfung. Ein Umschalter wäre eine Attrappe. Gebaut wird es
-  mit `tools/appikon.py`; wer die Farben ändert, denkt an die Sprechblase. **Das
-  ausgelieferte Symbol ist keine Datei** — es steht als Daten-URI im `<head>` von
-  `index.html` (180 × 180, Grund `#F4F2ED`). `docs/IMG_2942.png` ist das **türkise
-  Original**; zum Nachsehen liegen `docs/appikon-hell-180.png` (bitgleich mit dem
-  ausgelieferten) und `docs/appikon-hell-1024.png` daneben.
+  einmal, beim Anlegen der Verknüpfung — wer Chillingos Verknüpfung behält, behält dessen
+  Symbol, bis er sie neu anlegt.
 
 ## Offen
 
-- `apple-mobile-web-app-capable` gilt als veraltet zugunsten von
-  `mobile-web-app-capable`. Safari braucht weiterhin die alte Variante; beide zu setzen
-  wäre die saubere Lösung, ist aber noch nicht umgesetzt.
-- Angelegt sind die Skills `pruefstand` und `ticket`. Weitere waren einmal vorgesehen; ob
-  sie gebraucht werden, ist offen.
+- Der Kalender-Export: ob in der Home-Bildschirm-App Download oder Teilen-Blatt
+  (`navigator.share` mit Datei) zuverlässig im Kalender landet, ist am Gerät zu klären.
