@@ -39,6 +39,8 @@ offen ist nur, was unter **Offen** steht.
 | Tickets | kommen mit, Format `# Chillinal · N Tickets` |
 | Werkzeuge | Prüfstand, Vor-Push-Hook, GitHub-Lauf, `pruefen.mjs` samt Emoji-Sperre |
 | Obergrenze | sanfter Hinweis ab 3 Gewohnheiten unter 50 % Stärke, kein Verbot |
+| Erster Start | leeres Dashboard: die Chili begrüßt, Knopf «Erste Gewohnheit anlegen» — kein Tutorial |
+| Chili-Grafik | Chillingos freigestellte Chili (`docs/maskottchen-freigestellt.png`), auch im neuen Symbol |
 
 ## Farben
 
@@ -151,6 +153,3 @@ Je Abschnitt eine Sitzung, am Ende grün und gepusht.
 
 - Der aktuelle Chillingo-Sicherungscode — kommt nach `docs/ChilliSicherung` auf dem
   Backup-Branch (dort liegt der Stand vom 2026-08-27).
-- Erster Start: kurze Einführung oder gleich ein leeres Dashboard mit «Erste Gewohnheit
-  anlegen»?
-- Die Chili-Grafik: Chillingos freigestellte Chili übernehmen oder neu zeichnen?
