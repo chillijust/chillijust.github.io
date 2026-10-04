@@ -151,5 +151,5 @@ Je Abschnitt eine Sitzung, am Ende grün und gepusht.
 
 ## Offen
 
-- Der aktuelle Chillingo-Sicherungscode — kommt nach `docs/ChilliSicherung` auf dem
-  Backup-Branch (dort liegt der Stand vom 2026-08-27).
+Nichts. Der Chillingo-Lernstand vom 2026-10-04 liegt als Sicherungscode in
+`docs/ChilliSicherung` auf dem Backup-Branch.
