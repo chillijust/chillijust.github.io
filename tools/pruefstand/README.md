@@ -7,8 +7,8 @@ sie, das Skript prüft am **echten DOM** und schreibt sein Urteil in den
 Seitentitel.
 
 ```sh
-node tools/pruefstand/lauf.mjs              # alle Suiten (~16 s)
-node tools/pruefstand/lauf.mjs jubel flammen  # nur diese
+node tools/pruefstand/lauf.mjs              # alle Suiten
+node tools/pruefstand/lauf.mjs thema menue  # nur diese
 node tools/pruefstand/lauf.mjs -v           # auch jede grüne Suite einzeln nennen
 ```
 
@@ -21,7 +21,7 @@ Push an, wenn etwas rot ist.
 | | |
 | --- | --- |
 | `lauf.mjs` | der Läufer |
-| `helfer.mjs` | Wege (`WURZEL`, `APP`, `BAU`), Browsersuche |
+| `helfer.mjs` | Wege (`WURZEL`, `APP`, `BAU`), Browsersuche, `testseite()`, `suite()` |
 | `bild.mjs` | Bildschirmfotos in Handybreite (430 × 932) |
 | `suiten/*.mjs` | die Suiten — eine Datei, ein Thema |
 | `bau/` | erzeugte Testseiten und Bilder, wegwerfbar (in `.gitignore`) |
@@ -30,74 +30,75 @@ Der Läufer liest `suiten/` selbst aus: **Eine neue Datei läuft ab sofort mit.*
 Sie muss ihre Seite nach `bau/t-<dateiname>.html` schreiben; tut sie das nicht,
 meldet der Läufer das als Fehler statt sie zu übergehen.
 
+| Suite | prüft |
+| --- | --- |
+| `geruest` | Kopf, leeres Dashboard, Chili, Trefferflächen, Duzen, Emoji, Schriften |
+| `thema` | hell/dunkel/automatisch, Schalter, beide dunklen Paletten gleich, Chillingos Speicher unberührt |
+| `menue` | Reihenfolge, «bald» gegen Gebautes, Rückweg, Schließen |
+| `speicher` | Lesen, Kaputtes, werfender Speicher |
+| `offline` | `sw.js` von außen, App ohne Worker, Hinweis, Knopf, Notausgang |
+
 ## Eine Suite schreiben
 
 ```js
-import { readFileSync, writeFileSync } from 'node:fs';
-import { WURZEL, BAU, testseite } from '../helfer.mjs';
-const html = readFileSync(WURZEL + '/index.html', 'utf8');
+import { readFileSync } from 'node:fs';
+import { APP, suite } from '../helfer.mjs';
+const html = readFileSync(APP, 'utf8');
 
-const test = String.raw`
-var log = [];
-function pruefe(n, c, e) { log.push((c ? 'PASS ' : 'FAIL ') + n + (e ? ' [' + e + ']' : '')); }
-function q(s) { return document.querySelector(s); }
-function alle(s) { return Array.prototype.slice.call(document.querySelectorAll(s)); }
-
-try {
-  state = defaultState();
-  ansichtenZuruecksetzen();
-  setTab('lernsets');
-  pruefe('A1 die Aufgabe steht da', !!q('.card'));
-} catch (e) {
-  log.push('AUSNAHME: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);
-}
-
-var pre = document.createElement('pre');
-pre.id = 'testlog';
-pre.textContent = log.join('\n');
-document.body.appendChild(pre);
-var f = log.filter(function (l) { return l.indexOf('FAIL') === 0 || l.indexOf('AUSNAHME') === 0; });
-document.title = f.length === 0 ? 'ALLE ' + log.length + ' TESTS BESTANDEN' : 'FEHLGESCHLAGEN: ' + f.length;
-`;
-
-writeFileSync(BAU + '/t-meins.html', testseite(html, test));
+suite('meins', html, String.raw`
+frisch();
+zeige('einstellungen');
+pruefe('A1 der Knopf steht da', !!q('#swKnopf'));
+pruefe('A2 jeder Knopf ist groß genug', alle('#app button').every(function (b) {
+  return b.getBoundingClientRect().height >= 44;
+}));
+`);
 ```
 
-Das Prüfskript läuft **im Gültigkeitsbereich der App**: `state`, `LERNSETS`,
-`setTab()`, jede Funktion steht bereit. `String.raw` verhindert, dass Node die
+`suite()` stellt bereit: `pruefe(name, bedingung, extra)`, `q()`, `alle()` und
+`frisch()` (Menü zu, Grundstand, Dashboard). Gibt der Rumpf ein Promise zurück,
+wird erst geurteilt, wenn es erfüllt ist — so lassen sich Schriften
+(`document.fonts.ready`) oder ein `setTimeout` der App abwarten.
+
+Das Prüfskript läuft **im Gültigkeitsbereich der App**: `state`, `ANSICHTEN`,
+`zeige()`, jede Funktion steht bereit. `String.raw` verhindert, dass Node die
 Fluchtzeichen frisst, bevor der Browser sie sieht.
+
+Eine Prüfung **von außen** — etwa an `sw.js`, das unter `file://` nicht läuft —
+steht vor dem `suite()`-Aufruf in Node und wirft bei einem Fehler (siehe
+`offline.mjs`).
 
 ## Regeln, die aus Schaden entstanden sind
 
-- **Keine Prüfung in einem `if`, dessen Bedingung ausgelost wird.** Die
-  Aufgabenform wechselt zufällig; stand eine Prüfung in `if (uebQ.mode !== 'tiles')`,
-  lief sie mal und mal nicht — und die Zahl der Prüfungen schwankte still von
-  Lauf zu Lauf. Stattdessen weiterblättern, bis die gewünschte Form kommt, und
-  das Erreichen selbst prüfen. Zweimal passiert (`funktionstest`, `meister`).
+Aus Chillingo übernommen, jede einmal teuer bezahlt:
+
+- **Keine Prüfung in einem `if`, dessen Bedingung vom Zufall oder vom Lauftag
+  abhängt.** Sie lief mal und mal nicht — und die Zahl der Prüfungen schwankte
+  still von Lauf zu Lauf.
 - **Die Zahl im Titel ist ein Messwert.** Sinkt sie ohne Grund, ist eine Prüfung
   verschwunden, nicht bestanden.
 - **Ein grüner Lauf muss 0 zurückgeben.** Der Vorgänger hängte den Rückgabewert
   an ein `grep`, das bei vollständigem Erfolg nichts fand — und meldete Erfolg
   als Fehlschlag.
-- **Nichts einspritzen, was die App selbst setzt.** Der alte Bildhelfer setzte
-  eine dunkle Palette von Hand nach, aus der Zeit vor ADR 0039. Nach ADR 0041
-  zeigte er still die alten Farben. `bild.mjs` rendert die Datei, wie sie
-  ausgeliefert wird.
-- **Kein Backtick im Prüfskript.** Es steckt in einem `String.raw`-Template;
-  ein Backtick beendet es mitten im Satz. Auch nicht in Kommentaren — dort
-  liest es sich harmlos und bricht trotzdem die Datei.
-- **Kein `$&` im Prüfskript** — und kein `` $` ``, `$'` oder `$1`. Die Seite
-  entsteht über `String.replace`, und dort sind das Steuerzeichen: Ein
-  `'\$&'`, wie man es zum Maskieren eines regulären Ausdrucks schreibt, wurde
-  stillschweigend zu `</body>`, und das Skript war danach kein gültiges
-  JavaScript mehr. `testseite()` in `helfer.mjs` setzt darum eine Funktion als
-  Ersatz ein und ist immun; wer die Seite von Hand zusammenbaut, tritt wieder
-  hinein. **Also immer `testseite(html, test)` benutzen.**
+- **Nichts einspritzen, was die App selbst setzt.** `bild.mjs` rendert die Datei,
+  wie sie ausgeliefert wird.
+- **Kein Backtick im Prüfskript**, auch nicht in Kommentaren — es steckt in einem
+  `String.raw`-Template.
+- **Kein `$&` in einer Ersatz-Zeichenkette.** In `String.replace` sind `$&`,
+  `` $` ``, `$'` und `$1` Steuerzeichen. `testseite()` und `suite()` setzen darum
+  eine Funktion als Ersatz ein; wer die Seite von Hand zusammenbaut, tritt wieder
+  hinein.
+
+Neu mit Chillinal:
+
+- **Was gesucht wird, steht nicht wörtlich im Prüfskript.** Das Skript hängt im
+  selben Dokument: Die Emoji-Prüfung fand anfangs die Zeichen in ihrem eigenen
+  Suchmuster. Grenzen über `String.fromCharCode`, gelesen wird `#app`.
 
 ## Bildschirmfotos
 
 ```sh
-node tools/pruefstand/bild.mjs             # Home und ein Lernset
+node tools/pruefstand/bild.mjs             # Dashboard, hell und dunkel
 node tools/pruefstand/bild.mjs szenen.mjs  # eigene Szenen
 ```
 
@@ -105,12 +106,10 @@ Eine Szenendatei gibt ein Objekt zurück — Name auf Skript:
 
 ```js
 export default {
-  'abc-voll': 'ALPHABET.forEach(function (b) { state.abcBox[b[1]] = BOX_MAX; }); ' +
-    'abcAnsicht = "ueben"; abcQ = null; setTab("buchstaben");',
-  'hell': 'state.settings.schema = "classic"; updateDarstellung(); render();'
+  'menue': 'themaSetzen("hell"); menueOeffnen();',
+  'einst-dunkel': 'themaSetzen("dunkel"); zeige("einstellungen");'
 };
 ```
 
-Als Modul erlaubt `schuss(namen, { ausschnitt: '.paket' })` einen Ausschnitt —
-nützlich, um eine einzelne Reihe groß anzusehen. Die Überbreite wird bei jedem
-Bild gemeldet; sie muss 0 sein.
+Als Modul erlaubt `schuss(namen, { ausschnitt: '.willkommen' })` einen Ausschnitt.
+Die Überbreite wird bei jedem Bild gemeldet; sie muss 0 sein.

@@ -7,7 +7,7 @@
 
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { existsSync, mkdirSync, readdirSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 
 export const HIER = dirname(fileURLToPath(import.meta.url));
@@ -62,4 +62,45 @@ export function testseite(html, test) {
     'setTimeout(function () {' + test + '}, 150);\n' +
     '</scr' + 'ipt>\n';
   return html.replace('</body>', function () { return skript + '</body>'; });
+}
+
+// **Eine Suite in einem Zug**: Die Prüfhilfen stehen bereit, das Urteil landet
+// im Titel, eine Ausnahme wird gemeldet statt verschluckt. Der Rumpf darf ein
+// Promise zurückgeben — dann wird erst geurteilt, wenn es erfüllt ist (etwa
+// nach document.fonts.ready).
+//
+// Im Rumpf bereit: pruefe(name, bedingung, extra) · q(selektor) · alle(selektor)
+// · frisch() setzt die App auf den Anfang zurück.
+export function suite(name, html, rumpf) {
+  const test = String.raw`
+var log = [];
+function pruefe(n, c, e) { log.push((c ? 'PASS ' : 'FAIL ') + n + (e !== undefined && e !== '' ? ' [' + e + ']' : '')); }
+function q(s) { return document.querySelector(s); }
+function alle(s) { return Array.prototype.slice.call(document.querySelectorAll(s)); }
+function frisch() {
+  menueSchliessen();
+  state = grundStand();
+  themaAnwenden();
+  zeige('home');
+}
+function abschluss() {
+  var pre = document.createElement('pre');
+  pre.id = 'testlog';
+  pre.textContent = log.join('\n');
+  document.body.appendChild(pre);
+  var f = log.filter(function (l) { return l.indexOf('FAIL') === 0 || l.indexOf('AUSNAHME') === 0; });
+  document.title = f.length === 0 ? 'ALLE ' + log.length + ' TESTS BESTANDEN' : 'FEHLGESCHLAGEN: ' + f.length;
+}
+function ausnahme(e) {
+  log.push('AUSNAHME: ' + e.message + ' | ' + String(e.stack || '').split('\n')[1]);
+}
+(function () {
+  var p;
+  try { p = (function () {` + rumpf + String.raw`
+  })(); } catch (e) { ausnahme(e); abschluss(); return; }
+  if (p && typeof p.then === 'function') p.then(abschluss, function (e) { ausnahme(e); abschluss(); });
+  else abschluss();
+})();
+`;
+  writeFileSync(join(BAU, 't-' + name + '.html'), testseite(html, test));
 }

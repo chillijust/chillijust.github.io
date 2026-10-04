@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Vor-Push-Prüfung für index.html **und sw.js**.
+// Vor-Push-Prüfung für index.html **und sw.js** — Chillinal.
 //
 //   node tools/pruefen.mjs
 //
@@ -13,9 +13,9 @@ import { dirname, join } from 'node:path';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
-// Seit 2.4.0 gehört eine zweite Datei zum Auslieferungspfad (ADR 0059). Sie
-// bekommt dieselben Regeln — nur die eine, die für sie sinnlos wäre, nicht:
-// `fetch` ist im Service Worker der Zweck, nicht der Verstoß.
+// Die zweite Datei im Auslieferungspfad (ADR 0001). Sie bekommt dieselben
+// Regeln — nur die eine, die für sie sinnlos wäre, nicht: `fetch` ist im
+// Service Worker der Zweck, nicht der Verstoß.
 const SW_PFAD = join(ROOT, 'sw.js');
 const sw = existsSync(SW_PFAD) ? readFileSync(SW_PFAD, 'utf8') : null;
 
@@ -42,7 +42,7 @@ const fetches = [...html.matchAll(/\b(?:fetch|XMLHttpRequest|importScripts|Event
 if (fetches.length) hinweise.push('Netzwerkaufrufe im Quelltext gefunden (' + fetches.length + ') — die App soll offline laufen.');
 
 // 4b · gar keine Fremdadresse. Die App verweist nirgendwohin und lädt nichts;
-// Tickets werden kopiert, nicht verschickt.
+// Tickets werden kopiert, nicht verschickt, der Kalender-Export ist eine Datei.
 const adressen = [...new Set([...html.matchAll(/https?:\/\/[^\s'"<>)]+/g)].map((m) => m[0]))];
 if (adressen.length) {
   fehler.push('Fremdadressen im Quelltext: ' + adressen.join(', ') +
@@ -65,11 +65,14 @@ const csp = /<meta\s+http-equiv="Content-Security-Policy"\s+content="([^"]+)"/i.
 if (!csp) {
   fehler.push('Content-Security-Policy fehlt — ohne sie ist «keine externen Ressourcen» nur eine Absprache.');
 } else {
-  for (const pflicht of ["default-src 'none'", 'img-src data:']) {
+  for (const pflicht of ["default-src 'none'", 'img-src data:', 'font-src data:']) {
     if (!csp[1].includes(pflicht)) fehler.push('Content-Security-Policy ohne «' + pflicht + '».');
   }
   // **Die eine benannte Ausnahme.** Ohne sie ließe sich der Service Worker
   // nicht anmelden; mehr als 'self' darf sie nie werden.
+  if (/connect-src/.test(csp[1])) {
+    fehler.push('Content-Security-Policy mit connect-src — die Seite baut keine Verbindung auf.');
+  }
   if (sw && !csp[1].includes("worker-src 'self'")) {
     fehler.push("Content-Security-Policy ohne «worker-src 'self'» — sw.js ließe sich " +
       'nicht anmelden.');
@@ -144,9 +147,25 @@ if (!/var APP_STAND = '\d{4}-\d{2}-\d{2}';/.test(html)) {
   hinweise.push('APP_STAND fehlt oder hat kein Datumsformat — «node tools/build.mjs» setzt ihn.');
 }
 
-// 9 · Datenblock und /data synchron
-const marker = html.includes('/* == DATEN:START') && html.includes('/* == DATEN:ENDE == */');
-if (!marker) fehler.push('Datenmarker in index.html fehlen — tools/build.mjs kann nicht greifen.');
+// 9 · Eingebettetes vorhanden und von build.mjs gesetzt
+if (!html.includes('/* == SCHRIFTEN:START') || !html.includes('/* == SCHRIFTEN:ENDE == */')) {
+  fehler.push('Schriftmarker in index.html fehlen — tools/build.mjs kann nicht greifen.');
+}
+if (!/<link rel="apple-touch-icon" href="data:image\/png;base64,/.test(html)) {
+  fehler.push('Das App-Symbol fehlt — «node tools/build.mjs» bettet es ein.');
+}
+if (!/var CHILI_BILD = 'data:image\/png;base64,/.test(html)) {
+  fehler.push('Die Chili fehlt — «node tools/build.mjs» bettet sie ein.');
+}
+
+// 10 · Chillingos Lernstand bleibt liegen (ADR 0001). Sein Schlüssel kommt im
+// Quelltext nicht vor, und geleert wird der Speicher nie im Ganzen.
+if (/russisch_trainer_v1/.test(html)) {
+  fehler.push('index.html nennt «russisch_trainer_v1» — Chillingos Lernstand wird nicht angefasst.');
+}
+if (/localStorage\s*\.\s*clear\s*\(/.test(html)) {
+  fehler.push('localStorage.clear() gefunden — das löschte auch Chillingos Lernstand.');
+}
 
 console.log('index.html · ' + html.split('\n').length + ' Zeilen · ' + (html.length / 1024).toFixed(0) + ' KB');
 if (sw) console.log('sw.js · ' + sw.split('\n').length + ' Zeilen · ' + (sw.length / 1024).toFixed(1) + ' KB');

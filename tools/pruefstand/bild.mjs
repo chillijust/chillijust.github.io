@@ -1,20 +1,17 @@
 // Die Augenprüfung: Bildschirmfotos in Handybreite.
 //
-//   node tools/pruefstand/bild.mjs                  Home und eine Übung
+//   node tools/pruefstand/bild.mjs                  Dashboard, hell und dunkel
 //   node tools/pruefstand/bild.mjs szenen.mjs       eigene Szenen
 //
 // Eine Szene ist ein Name und ein Stück Skript, das nach dem Laden läuft:
 //
 //   export default {
-//     'lernsets': 'uebAuswahl = 0; setTab("lernsets"); uebNext(true);',
-//     'hell':     'state.settings.schema = "classic"; updateDarstellung(); render();'
+//     'dunkel':        'themaSetzen("dunkel");',
+//     'einstellungen': 'zeige("einstellungen");'
 //   };
 //
 // **Hier wird nichts eingespritzt.** Die Seite rendert so, wie sie ausgeliefert
-// wird. Der Vorgänger setzte eine dunkle Palette von Hand nach — aus der Zeit,
-// als «Dark» noch an `prefers-color-scheme` hing. Seit ADR 0039 ist «Dark» die
-// Vorgabe im `:root`, und die eingespritzten Werte waren still veraltet: Die
-// Bilder zeigten monatelang die Palette von vor ADR 0041.
+// wird — Farben, Schriften, Symbol.
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -92,9 +89,8 @@ if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
   const szenen = datei
     ? (await import(pathToFileURL(resolve(datei)).href)).default
     : {
-      'home': '',
-      'lernsets': 'ALL_VOCAB.slice(0, 40).forEach(function (v) { state.boxes[v.id] = 2; }); ' +
-        'uebAuswahl = 0; setTab("lernsets"); uebNext(true);'
+      'hell': 'themaSetzen("hell");',
+      'dunkel': 'themaSetzen("dunkel");'
     };
   const bilder = await zeigen(szenen);
   bilder.forEach((b) => console.log(b));
