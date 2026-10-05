@@ -77,8 +77,8 @@ state = {
   `exportTermine(heute)` (was heute oder später noch liegt) und `exportGewohnheiten()`
   (laufend, mit Erinnerung) — je ein VEVENT über `terminEreignis` bzw.
   `gewohnheitEreignis`, Zeiten schwebend in der Zeit des Geräts, Zeilen über `icsFalten`.
-  Hinaus geht sie über `icsTeilen` (Teilen-Blatt, nur wo `kannTeilen()`) oder `icsLaden`
-  (Blob, `<a download>`); beide setzen `exportiert`.
+  Hinaus geht sie über `icsLaden` (Blob, `<a download>`), das `exportiert` setzt;
+  Teilen gibt es nicht mehr (ADR 0013).
   Die Kachel zeichnet ihre Wege immer mit, nur verborgen; `exTeileNachziehen()` (aus
   `bindeExport`) vergleicht mit `exTeileZuvor` und läßt Geändertes über `teilTropfen`
   auf- und zugehen. Außerhalb der Exportansicht ist `exTeileZuvor` `null` (ADR 0012).
@@ -107,7 +107,8 @@ der Umschalter (ADR 0007).
   `homeScroll` die Rollposition. Der Tag im Kalender öffnet mit `tropfenFallen`, schließt
   mit `leisteZurueck`.
   Der Hinweis (`hinweisZeigen`/`hinweisSchliessen`) liegt außerhalb von `#app` in
-  `#hinweisBlatt` und überlebt darum jedes `render()`.
+  `#hinweisBlatt` und überlebt darum jedes `render()`. Er tropft über `tropfenAuf` und
+  `tropfenZu` wie eine Ansicht (ADR 0013).
 
 - `zeige(name, id)` wechselt die Ansicht; ein unbekannter Name landet beim Dashboard.
   `neu` und `bearbeiten` legen dabei den `entwurf` an; `bearbeiten` ohne gültige `id`

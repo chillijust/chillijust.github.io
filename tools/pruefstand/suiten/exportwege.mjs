@@ -1,7 +1,8 @@
 // Die Wege hinaus (0.5.0T8): Die Knöpfe der Export-Kachel tropfen auf und zu,
 // statt zu schnappen; unter «Bearbeiten» kommt «Markierung aufheben», wenn
 // allein Dazugeholtes gewählt ist, und setzt es auf neu zurück; nach «Als
-// Datei laden» steht ein Hinweis mittig, bis «OK» kommt.
+// Datei laden» steht ein Hinweis mittig, bis «OK» kommt. Er tropft wie die
+// Ansichten — derselbe Weg, dieselbe Dauer (0.5.0T9, ADR 0013).
 //
 // Die Uhr steht: «heute» ist Mittwoch, der 14. Oktober 2026, 8 Uhr.
 import { readFileSync } from 'node:fs';
@@ -41,12 +42,18 @@ pruefe('W1 Neues: die Wege stehen offen, der Satz verborgen', !q('#exWege').hidd
 // ── H · Der Hinweis nach dem Laden ──────────────────────────
 var vorher = q('#exLaden').getBoundingClientRect();
 laden();
-var karte = q('#hinweisKarte'), erstes = laeuft(karte) ? karte.getAnimations()[0].effect.getKeyframes()[0] : {};
+var karte = q('#hinweisKarte'), huelle = q('body > .tropfen-huelle');
+function bilder(el) { var a = el && el.getAnimations()[0]; return a ? a.effect.getKeyframes() : []; }
+function dauer(el) { var a = el && el.getAnimations()[0]; return a ? a.effect.getTiming().duration : 0; }
+var erstes = bilder(huelle)[0] || {}, letztes = bilder(huelle).slice(-1)[0] || {};
 pruefe('H1 statt der Meldung ein Hinweis, der wartet', offen() && q('#hinweisTitel').textContent === 'Datei geladen' &&
   /Öffne sie/.test(q('#hinweisText').textContent) && karte.getAttribute('role') === 'alertdialog' &&
   !q('#meldung').classList.contains('zeigt'));
-pruefe('H2 er quillt als Tropfen aus «Als Datei laden»', laeuft(karte) && Number(erstes.opacity) === 0 &&
-  /translate\(/.test(erstes.transform) && /%/.test(erstes.borderRadius) && laeuft(q('#hinweisInhalt')), JSON.stringify(erstes));
+pruefe('H2 er quillt mit dem Tropfen der Ansichten aus «Als Datei laden»', laeuft(huelle) &&
+  dauer(huelle) === TROPFEN_DAUER && bilder(huelle).length === 5 && Number(erstes.opacity) === 0 &&
+  erstes.borderRadius === TROPFEN_AUF && Math.abs(parseFloat(erstes.left) + parseFloat(erstes.width) / 2 -
+  (vorher.left + vorher.width / 2)) < 2 && letztes.borderRadius === '18px' && karte.style.opacity === '0',
+  JSON.stringify([erstes, letztes]));
 pruefe('H3 die Kachel hat ihre Knöpfe schon zugetropft', q('#exWege').hidden && !q('#exLaden').getClientRects().length &&
   !q('#exNichts').hidden &&
   !!q('#app .geist') && vorher.height > 0);
@@ -61,11 +68,28 @@ return durch().then(function () {
 }).then(function () {
   pruefe('H7 nach vier Sekunden steht er noch', offen());
   q('#hinweisOk').click();
-  pruefe('H8 «OK» schließt sofort, der Tropfen fließt in «Zuletzt»', !offen() && laeuft(karte) &&
-    laeuft(q('#exZuletzt')) && getComputedStyle(q('#hinweisBlatt')).pointerEvents === 'none');
+  var zu = q('body > .tropfen-huelle'), z = q('#exZuletzt').getBoundingClientRect(), ende = bilder(zu)[3] || {};
+  pruefe('H8 «OK» schließt sofort, der Tropfen der Ansichten fließt in «Zuletzt»', !offen() && laeuft(zu) &&
+    dauer(zu) === TROPFEN_DAUER && (bilder(zu)[0] || {}).borderRadius === '18px' && ende.borderRadius === TROPFEN_ZU &&
+    Math.abs(parseFloat(ende.top) + parseFloat(ende.height) / 2 - (z.top + z.height / 2)) < 2 &&
+    karte.style.opacity === '0' && laeuft(q('#exZuletzt')) &&
+    getComputedStyle(q('#hinweisBlatt')).pointerEvents === 'none', JSON.stringify(ende));
   return durch();
 }).then(function () {
-  pruefe('H9 danach ist er weg', q('#hinweisBlatt').hidden && !laeuft(karte) && geister().length === 0);
+  pruefe('H9 danach ist er weg', q('#hinweisBlatt').hidden && !laeuft(karte) && geister().length === 0 &&
+    !q('body > .tropfen-huelle') && karte.style.opacity === '');
+  var quelle = { left: 40, top: 600, width: 200, height: 50 }, fort = document.createElement('span');
+  hinweisZeigen('Probe', 'Probe', quelle, fort);
+  return durch();
+}).then(function () {
+  q('#hinweisOk').click();
+  var rueck = bilder(q('body > .tropfen-huelle'))[3] || {};
+  pruefe('H10 ist das Ziel nicht zu sehen, fließt er dorthin zurück, woher er kam',
+    Math.abs(parseFloat(rueck.left) + parseFloat(rueck.width) / 2 - 140) < 2 &&
+    Math.abs(parseFloat(rueck.top) + parseFloat(rueck.height) / 2 - 625) < 2, JSON.stringify(rueck));
+  return durch();
+}).then(function () {
+  pruefe('H11 auch dann räumt er auf', q('#hinweisBlatt').hidden && !q('body > .tropfen-huelle'));
 
   // ── K · Die Kachel tropft auf und zu ──────────────────────
   q('#exBearbeiten').click();
@@ -128,7 +152,7 @@ return durch().then(function () {
   bewegungAus = function () { return true; };
   laden();
   pruefe('O1 ohne Bewegung: kein Geist, kein Tropfen', offen() && geister().length === 0 &&
-    !q('#hinweisKarte').getAnimations().length && !q('#app .ex-wege').getAnimations().length);
+    !q('body > .tropfen-huelle') && q('#hinweisKarte').style.opacity === '' && !q('#app .ex-wege').getAnimations().length);
   q('#hinweisOk').click();
   pruefe('O2 und «OK» schließt auf der Stelle', q('#hinweisBlatt').hidden);
   bewegungAus = echt;

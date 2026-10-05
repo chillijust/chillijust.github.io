@@ -1,6 +1,6 @@
 # 0012 · Markierung aufheben, Knöpfe tropfen, ein Hinweis wartet auf «OK»
 
-*2026-10-05 · Ansicht von 0.5.0T7 · Version 0.5.0T8 · ergänzt 0007, 0011*
+*2026-10-05 · Ansicht von 0.5.0T7 · Version 0.5.0T8 · ergänzt 0007, 0011 · Tropfen des Hinweises und Teilen abgelöst durch 0013*
 
 ## Ausgangslage
 

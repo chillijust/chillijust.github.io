@@ -54,7 +54,7 @@ die Chili.
 | 2 · Gewohnheiten: anlegen, Rhythmus, Abhaken, Stärke, nie zweimal; Kalender, Nachtragen, langer Druck | fertig (0.2.0) |
 | 3 · Abgewöhnen, 10-Minuten-Welle; Chili und Kalender in einer Karte | fertig (0.3.0T2, frei mit 0.4.0) |
 | 4 · Termine im Kalender, Tagesansicht; Tropfen statt Aufploppen, Tropfenform, Menü unter dem Knopf | fertig (0.4.0) |
-| 5 · Kalender-Export (`.ics`), Erinnerung je Gewohnheit; «Heute» als Rückweg, Name «Chilli Journal», Schriftzug «Lodern» (frei); Exportiertes merken, Markierung aufheben, Hinweis | gebaut, Abnahme Export offen (0.5.0T8) |
+| 5 · Kalender-Export (`.ics`), Erinnerung je Gewohnheit; «Heute» als Rückweg, Name «Chilli Journal», Schriftzug «Lodern» (frei); Exportiertes merken, Markierung aufheben, Hinweis; nur Laden | gebaut, Abnahme offen (0.5.0T9) |
 | 6 · Rückblick: Heatmap, Detail, Journal | offen |
 | 7 · Sicherung, Einstellungen, Tickets | offen |
 | 8 · Feinschliff | offen |
@@ -222,6 +222,4 @@ Skill `ticket`.
 
 ## Offen
 
-- Der Kalender-Export: Teilen-Blatt und Download sind beide gebaut (ADR 0009). Welcher in
-  der Home-Bildschirm-App zuverlässig im Kalender landet, klärt die Abnahme; der andere geht
-  danach.
+- Abnahme 0.5.0T9 am Gerät; danach 0.5.0 frei.

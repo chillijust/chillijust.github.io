@@ -1,6 +1,6 @@
 # 0009 · Kalender-Export im Einzelnen
 
-*2026-10-05 · Bauabschnitt 5 · Version 0.5.0T*
+*2026-10-05 · Bauabschnitt 5 · Version 0.5.0T · «beide Wege» abgelöst durch 0013: nur Laden*
 
 ## Ausgangslage
 

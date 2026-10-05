@@ -52,8 +52,8 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 - **Ein Termin ist eine Zeile mit blauem Strich** (`zeichneTerminZeile`), auf dem
   Dashboard wie in der Tagesliste; im Kalender trägt sein Tag **einen** blauen Punkt, vorn
   (ADR 0006). Die Tagesansicht ist die Liste unter dem Kalender, keine eigene Ansicht.
-- **Der Kalender-Export** hat «Teilen» nur, wo `kannTeilen()`, und «Als Datei laden» immer;
-  eine Gewohnheit trägt dort einen grauen Strich, keinen blauen. Was aus dem Export geöffnet
+- **Der Kalender-Export** hat einen Weg, «Als Datei laden» — Teilen kam am Gerät nicht im
+  Kalender an (ADR 0013); eine Gewohnheit trägt dort einen grauen Strich, keinen blauen. Was aus dem Export geöffnet
   wird, kehrt über `rueckZiel` dorthin zurück (ADR 0009).
 - **Was schon im Kalender steht, tritt zurück** (`.ex-alt`) und geht nur über «Bearbeiten»
   noch einmal hinaus; Neues geht immer mit, Geändertes trägt einen Vermerk (ADR 0011).
@@ -80,7 +80,8 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 - **Knöpfe, die kommen und gehen, über `teilTropfen(el, an)`** (ADR 0012). Ein Teil mit
   eigenem `display` braucht `[hidden] { display: none; }`, sonst bleibt es sichtbar.
 - **Was man lesen muß, bevor es weitergeht, ist ein Hinweis** (`hinweisZeigen`, wartet auf
-  «OK»), keine Meldung — die geht nach zwei Sekunden.
+  «OK»), keine Meldung — die geht nach zwei Sekunden. Er tropft mit `tropfenAuf`/`tropfenZu`
+  wie eine Ansicht; **eine zweite Tropfen-Mechanik gibt es nicht** (ADR 0013).
 - **Bewegt wird über `bewegt()` mit der `FEDER`**; CSS nimmt `var(--feder, ease)`. Ausnahme: Tropfen
   schwingen nicht über (ADR 0008).
 - **Was aus einem runden Knopf kommt oder in ihn geht, ist ein Tropfen** (`tropfenAuf`,

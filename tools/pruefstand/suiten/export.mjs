@@ -1,8 +1,8 @@
 // Kalender-Export (0.5.0T): die Rechnung der .ics, die Erinnerung einer
-// Gewohnheit, die Ansicht mit Teilen und Laden.
+// Gewohnheit, die Ansicht mit dem Laden. Teilen gibt es nicht mehr (ADR 0013).
 //
 // Die Uhr steht: «heute» ist Mittwoch, der 14. Oktober 2026, 8 Uhr.
-// Teilen und Laden werden abgefangen — gefragt ist, was hinausginge.
+// Das Laden wird abgefangen — gefragt ist, was hinausginge.
 import { readFileSync } from 'node:fs';
 import { APP, suite } from '../helfer.mjs';
 const html = readFileSync(APP, 'utf8');
@@ -178,12 +178,13 @@ pruefe('A7 die Zahl zählt, was hinausgeht', q('#exZahl').textContent === '2' &&
 pruefe('A8 Trefferflächen', zuKlein().length === 0, zuKlein().join(', '));
 pruefe('A9 die Ansicht duzt', !siezt(), siezt() && siezt().join(' | '));
 
-// Ohne Teilen ist «Als Datei laden» der Hauptknopf.
-var teilenWar = navigator.share, kannWar = navigator.canShare;
-Object.defineProperty(navigator, 'share', { value: undefined, configurable: true, writable: true });
+// «Als Datei laden» ist der einzige Weg, und der Hauptknopf — auch wo das
+// Gerät teilen könnte.
+Object.defineProperty(navigator, 'canShare', { value: function () { return true; }, configurable: true, writable: true });
+Object.defineProperty(navigator, 'share', { value: function () { return Promise.resolve(); }, configurable: true, writable: true });
 render();
-pruefe('A10 ohne Teilen nur Laden, als Hauptknopf', !q('#exTeilen') && !!q('#exLaden') &&
-  !q('#exLaden').classList.contains('zart'));
+pruefe('A10 nur Laden, als Hauptknopf, auch wo das Gerät teilen kann', !q('#exTeilen') && !!q('#exLaden') &&
+  !q('#exLaden').classList.contains('zart') && typeof icsTeilen === 'undefined' && typeof kannTeilen === 'undefined');
 
 // Laden: die Adresse und der Klick werden abgefangen.
 var erwartetLaden = kalenderDatei(HEUTE, zeitJetzt());
@@ -199,48 +200,11 @@ pruefe('A12 und merkt sich den Export', state.exportiert === zeitJetzt() &&
   JSON.parse(localStorage.getItem(SPEICHER)).exportiert === zeitJetzt() && q('#exZuletzt').textContent !== 'noch nie');
 pruefe('A13 kein Link bleibt liegen', !document.querySelector('a[download]'));
 
-// Teilen: einmal angenommen, einmal abgebrochen.
-var geteilt = [], antwort = 'ja';
-Object.defineProperty(navigator, 'canShare', { value: function () { return true; }, configurable: true, writable: true });
-Object.defineProperty(navigator, 'share', { value: function (d) {
-  geteilt.push(d);
-  if (antwort === 'ja') return Promise.resolve();
-  var e = new Error('abgebrochen'); e.name = 'AbortError';
-  return Promise.reject(e);
-}, configurable: true, writable: true });
-state.exportiert = null;
-ohneMarken();
-render();
-var erwartetTeilen = kalenderDatei(HEUTE, zeitJetzt());
-pruefe('A14 mit Teilen zwei Knöpfe, Teilen vorn', !!q('#exTeilen') && q('#exLaden').classList.contains('zart') &&
-  q('#exTeilen').compareDocumentPosition(q('#exLaden')) === Node.DOCUMENT_POSITION_FOLLOWING);
-q('#exTeilen').click();
-var blobDatei = blobs[0];
-return Promise.resolve().then(function () { return new Promise(function (f) { setTimeout(f, 0); }); }).then(function () {
-  var d = geteilt[0], f = d && d.files && d.files[0];
-  pruefe('A15 Teilen reicht eine .ics-Datei weiter', f && f.name === 'chillinal.ics' && /text\/calendar/.test(f.type));
-  pruefe('A16 und merkt sich den Export', state.exportiert === zeitJetzt() && /Geteilt/.test(q('#meldung').textContent));
-  return blobText(f);
-}).then(function (text) {
-  pruefe('A17 die geteilte Datei ist die gerechnete', text === erwartetTeilen &&
-    /BEGIN:VEVENT/.test(text));
-  return blobText(blobDatei);
-}).then(function (text) {
-  pruefe('A18 die geladene ebenso', text === erwartetLaden);
-  antwort = 'nein';
+return blobText(blobs[0]).then(function (text) {
+  pruefe('A14 die geladene Datei ist die gerechnete', text === erwartetLaden && /BEGIN:VEVENT/.test(text));
+  hinweisSchliessen();
+  // Von hier und zurück — mit allem wieder neu, damit die Zahl zählt.
   ohneMarken();
-  render();
-  state.exportiert = null;
-  q('#meldung').textContent = '';
-  q('#exTeilen').click();
-  return new Promise(function (f) { setTimeout(f, 0); });
-}).then(function () {
-  pruefe('A19 abgebrochen ist nicht exportiert und kein Fehler', state.exportiert === null &&
-    !/ging nicht/.test(q('#meldung').textContent));
-  Object.defineProperty(navigator, 'share', { value: teilenWar, configurable: true, writable: true });
-  Object.defineProperty(navigator, 'canShare', { value: kannWar, configurable: true, writable: true });
-
-  // Von hier und zurück.
   render();
   q('[data-exgw="ohne"]').click();
   pruefe('A20 eine Gewohnheit öffnet sich', ansicht === 'bearbeiten' && q('#gwName').value === 'Laufen');

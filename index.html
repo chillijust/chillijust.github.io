@@ -1031,7 +1031,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.5.0T8';
+var APP_VERSION = '0.5.0T9';
 var APP_STAND = '2026-10-05';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -1597,15 +1597,19 @@ function huellenBild(r, rund, op, off) {
 }
 
 // Zu: der Geist `g` der Fläche `r` fließt als Tropfen in den Knopf `ziel`,
-// der ihn mit einem kleinen Nicken schluckt.
-function tropfenZu(g, r, ziel) {
+// der ihn mit einem kleinen Nicken schluckt. `rund` sind die Ecken der Fläche
+// (eine Ansicht 20px), `fertig` kommt, wenn er geschluckt ist.
+function tropfenZu(g, r, ziel, rund, fertig) {
   var w = tropfenWeg(sichtbar(r), ziel.getBoundingClientRect()), h = tropfenHuelle(g, r.width);
   var dauer = TROPFEN_DAUER;
   function sk(b, off) { return { transform: 'scale(' + (b.width / r.width).toFixed(4) + ')', offset: off }; }
-  bewegt(h, [huellenBild(w.gross, '20px', 1, 0), huellenBild(w.mitte, '40% 40% 40% 18%', 1, 0.38),
+  bewegt(h, [huellenBild(w.gross, rund || '20px', 1, 0), huellenBild(w.mitte, '40% 40% 40% 18%', 1, 0.38),
     huellenBild(w.tropfen, TROPFEN_ZU, 1, 0.7), huellenBild(w.klein, TROPFEN_ZU, 1, 0.9),
     huellenBild(w.klein, TROPFEN_ZU, 0, 1)],
-    { dauer: dauer, kurve: 'cubic-bezier(.35, 0, .4, 1)', fill: 'forwards' }, function () { weg(h); });
+    { dauer: dauer, kurve: 'cubic-bezier(.35, 0, .4, 1)', fill: 'forwards' }, function () {
+      weg(h);
+      if (fertig) fertig();
+    });
   bewegt(g, [sk(w.gross, 0), sk(w.mitte, 0.38), sk(w.tropfen, 0.7), sk(w.klein, 0.9), sk(w.klein, 1)],
     { dauer: dauer, kurve: 'cubic-bezier(.35, 0, .4, 1)', fill: 'forwards' });
   bewegt(ziel, [{ transform: 'scale(1)' }, { transform: 'scale(1.14)', offset: 0.45 }, { transform: 'scale(1)' }],
@@ -1615,7 +1619,8 @@ function tropfenZu(g, r, ziel) {
 
 // Auf: die neue Ansicht `neu` quillt als Tropfen aus der Fläche `q`. Gezeigt
 // wird ihr Geist; die echte Ansicht steht derweil unsichtbar schon bereit.
-function tropfenAuf(neu, q) {
+// `rund` sind die Ecken, in denen er ankommt (eine Ansicht hat keine).
+function tropfenAuf(neu, q, rund) {
   var g = geist(neu);
   if (!g) return null;
   var n = neu.getBoundingClientRect(), w = tropfenWeg(sichtbar(n), q), h = tropfenHuelle(g, n.width), dauer = TROPFEN_DAUER;
@@ -1623,7 +1628,7 @@ function tropfenAuf(neu, q) {
   neu.style.opacity = '0';
   bewegt(h, [huellenBild(w.klein, TROPFEN_AUF, 0, 0), huellenBild(w.klein, TROPFEN_AUF, 1, 0.08),
     huellenBild(w.tropfen, TROPFEN_AUF, 1, 0.3), huellenBild(w.mitte, '40% 18% 40% 40%', 1, 0.62),
-    huellenBild(w.gross, '0px', 1, 1)],
+    huellenBild(w.gross, rund || '0px', 1, 1)],
     { dauer: dauer, kurve: 'cubic-bezier(.3, 0, .25, 1)', fill: 'forwards' }, function () {
       neu.style.opacity = '';
       weg(h);
@@ -1841,32 +1846,14 @@ function teilTropfen(el, an) {
 // ── Hinweis: wartet auf «OK» ────────────────────────────────────
 // Eine Meldung geht nach zwei Sekunden — zu schnell für das, was man lesen
 // muß, bevor es weitergeht. Der Hinweis steht mittig, bis «OK» kommt. Er
-// quillt als Tropfen aus der Fläche `quelle` und fließt beim Schließen in das
-// Element `ziel` — ist es nicht (mehr) zu sehen, dorthin zurück, woher er kam.
+// quillt mit dem Tropfen der Ansichten (tropfenAuf) aus der Fläche `quelle` —
+// dem getippten Knopf, gemessen bevor neu gezeichnet wird — und fließt beim
+// Schließen (tropfenZu) in das Element `ziel`; ist es nicht (mehr) zu sehen,
+// dorthin zurück, woher er kam.
+// Eine eigene Mechanik lief gleich lang, sah aber gehetzt aus (ADR 0013).
 var hinweisQuelle = null, hinweisZiel = null;
 
-// Die Spitze zeigt dorthin, woher der Tropfen kommt: gerade darüber oder
-// darunter mittig, sonst in die Ecke.
-function tropfenSpitze(dx, dy, breite) {
-  if (Math.abs(dx) < breite * 0.2) return dy > 0 ? '50% 50% 50% 50% / 35% 35% 65% 65%' : '50% 50% 50% 50% / 65% 65% 35% 35%';
-  if (dy < 0) return dx > 0 ? '50% 0% 50% 50%' : '0% 50% 50% 50%';
-  return dx > 0 ? '50% 50% 0% 50%' : '50% 50% 50% 0%';
-}
-
-// Wie das Menüblatt: von der Mitte der Karte zur Mitte von `q`, ein Kreis von
-// Knopfgröße, die Ecken vom Tropfen zur Karte.
-function hinweisBilder(q) {
-  var b = $('hinweisKarte').getBoundingClientRect();
-  if (!q || !q.width || !b.width || !b.height) return null;
-  var dx = q.left + q.width / 2 - (b.left + b.width / 2), dy = q.top + q.height / 2 - (b.top + b.height / 2);
-  var d = Math.max(Math.min(q.width, q.height), 40), spitze = tropfenSpitze(dx, dy, b.width);
-  function bild(t, sx, sy, r, op, off) {
-    return { transform: 'translate(' + px(dx * t) + ', ' + px(dy * t) + ') scale(' + sx.toFixed(4) + ', ' + sy.toFixed(4) + ')',
-      borderRadius: r, opacity: op, offset: off };
-  }
-  return [bild(1, d / b.width, d / b.height, spitze, 0, 0), bild(1, d / b.width, d / b.height, spitze, 1, 0.14),
-    bild(0.4, 0.55, 0.42, spitze, 1, 0.45), bild(0, 1, 1, '18px', 1, 1)];
-}
+function zuSehen(el) { return !!el && document.contains(el) && el.getClientRects().length > 0; }
 
 function hinweisZeigen(titel, text, quelle, ziel) {
   var blatt = $('hinweisBlatt'), offen = !blatt.hidden && blatt.classList.contains('offen');
@@ -1879,36 +1866,26 @@ function hinweisZeigen(titel, text, quelle, ziel) {
   void blatt.offsetWidth;
   blatt.classList.add('offen');
   try { $('hinweisKarte').focus({ preventScroll: true }); } catch (e) { /* egal */ }
-  var bilder = hinweisBilder(hinweisQuelle);
-  if (!bilder) return;
-  bewegt($('hinweisKarte'), bilder, { dauer: TROPFEN_DAUER, kurve: TROPFEN_KURVE });
-  bewegt($('hinweisInhalt'), [{ opacity: 0 }, { opacity: 1 }], { dauer: TROPFEN_DAUER * 0.5, warten: TROPFEN_DAUER * 0.4,
-    kurve: 'ease-out', fill: 'backwards' });
+  if (hinweisQuelle && hinweisQuelle.width) tropfenAuf($('hinweisKarte'), hinweisQuelle, '18px');
 }
 
-// Schließen ist Öffnen rückwärts — gleiche Dauer, gespiegelte Bilder; das
-// Ziel nickt, wenn der Tropfen ankommt.
+// Schließen: Der Schleier blendet aus, die Karte geht als Geist in den
+// Tropfen; das Blatt verschwindet, wenn er angekommen ist.
 function hinweisSchliessen() {
-  var blatt = $('hinweisBlatt'), karte = $('hinweisKarte'), inhalt = $('hinweisInhalt');
+  var blatt = $('hinweisBlatt'), karte = $('hinweisKarte');
   if (blatt.hidden || !blatt.classList.contains('offen')) return;
   blatt.classList.remove('offen');
-  var el = hinweisZiel && document.contains(hinweisZiel) && hinweisZiel.getClientRects().length ? hinweisZiel : null;
-  var ziel = el ? el.getBoundingClientRect() : hinweisQuelle;
-  function zu() { if (!blatt.classList.contains('offen')) blatt.hidden = true; }
-  var bilder = bewegungAus() ? null : hinweisBilder(ziel);
-  if (!bilder) { zu(); return; }
-  var a = bewegt(inhalt, [{ opacity: 1 }, { opacity: 0 }], { dauer: TROPFEN_DAUER * 0.35, kurve: 'ease-in', fill: 'forwards' });
-  var b = null;
-  b = bewegt(karte, bilder.reverse().map(function (f) { f.offset = 1 - f.offset; return f; }),
-    { dauer: TROPFEN_DAUER, kurve: TROPFEN_KURVE, fill: 'forwards' }, function () {
-      zu();
-      if (b) b.cancel();
-      if (a) a.cancel();
-    });
-  if (el) {
-    bewegt(el, [{ transform: 'scale(1)' }, { transform: 'scale(1.14)', offset: 0.45 }, { transform: 'scale(1)' }],
-      { dauer: 320, warten: TROPFEN_DAUER * 0.8, kurve: 'ease-out' });
-  }
+  // Die Quelle ist nur eine Fläche: Sie nickt nicht, sie nimmt nur auf.
+  var q = hinweisQuelle, ziel = zuSehen(hinweisZiel) ? hinweisZiel
+    : q && q.width ? { getBoundingClientRect: function () { return q; } } : null;
+  var g = ziel ? geist(karte) : null;
+  if (!g) { blatt.hidden = true; return; }
+  var r = karte.getBoundingClientRect();
+  karte.style.opacity = '0';
+  tropfenZu(g, r, ziel, '18px', function () {
+    karte.style.opacity = '';
+    if (!blatt.classList.contains('offen')) blatt.hidden = true;
+  });
 }
 
 // ── Umschalter: die Markierung fließt hinüber ───────────────────
@@ -2430,20 +2407,13 @@ function kalenderDatei(heute, nun, auswahl) {
   return z.map(icsFalten).join('\r\n') + '\r\n';
 }
 
-// Zwei Wege aufs Gerät. Welcher in der Home-Bildschirm-App zuverlässig im
-// Kalender landet, klärt das Gerät — darum gibt es beide (ADR 0009).
+// Ein Weg aufs Gerät: die Datei laden. Am Gerät abgenommen; Teilen kam nicht im
+// Kalender an (ADR 0013).
 function icsBlob(auswahl) {
   return new Blob([kalenderDatei(heuteSchluessel(), zeitJetzt(), auswahl)], { type: 'text/calendar;charset=utf-8' });
 }
 
-function kannTeilen() {
-  try {
-    return !!(navigator.share && navigator.canShare && window.File &&
-      navigator.canShare({ files: [new File([''], ICS_DATEI, { type: 'text/calendar' })] }));
-  } catch (e) { return false; }
-}
-
-// Gemerkt wird genau, was in der Datei stand — die Auswahl von vor dem Teilen.
+// Gemerkt wird genau, was in der Datei stand — die Auswahl von vor dem Laden.
 function exportiertMerken(auswahl) {
   var nun = zeitJetzt();
   state.exportiert = nun;
@@ -2455,22 +2425,9 @@ function exportiertMerken(auswahl) {
   if (ansicht === 'export') render();
 }
 
-// Teilen muß im Tipp selbst geschehen — iOS verlangt die Geste dazu.
-function icsTeilen() {
-  var datei, auswahl = exportAuswahl(heuteSchluessel());
-  try { datei = new File([icsBlob(auswahl)], ICS_DATEI, { type: 'text/calendar' }); } catch (e) { datei = null; }
-  if (!datei || !kannTeilen()) { melden('Teilen geht hier nicht. Lade die Datei.'); return; }
-  navigator.share({ files: [datei], title: 'Chilli Journal' }).then(function () {
-    exportiertMerken(auswahl);
-    melden('Geteilt. Wähle im Kalender «Alle hinzufügen».');
-  }, function (err) {
-    if (!err || err.name !== 'AbortError') melden('Teilen ging nicht. Lade die Datei.');
-  });
-}
-
 function icsLaden() {
   var url, auswahl = exportAuswahl(heuteSchluessel()), knopf = $('exLaden');
-  var quelle = knopf && knopf.getClientRects().length ? knopf.getBoundingClientRect() : null;
+  var quelle = zuSehen(knopf) ? knopf.getBoundingClientRect() : null;
   try { url = URL.createObjectURL(icsBlob(auswahl)); } catch (e) { melden('Die Datei ließ sich nicht anlegen.'); return; }
   var a = document.createElement('a');
   a.href = url;
@@ -3649,8 +3606,8 @@ function terminLoeschenTippen() {
 
 // ── Kalender-Export ─────────────────────────────────────────────
 //
-// Zeigt, was hinausgeht, und hat zwei Knöpfe: Teilen (wo das Gerät es kann)
-// und die Datei laden. Was schon im Kalender steht, ist abgedunkelt und geht
+// Zeigt, was hinausgeht, und lädt es als Datei — Teilen kam am Gerät nicht im
+// Kalender an und ist gegangen (ADR 0013). Was schon im Kalender steht, ist abgedunkelt und geht
 // nicht noch einmal mit — außer es wird unter «Bearbeiten» dazugeholt. Neues
 // geht immer mit (ADR 0011). Eine Gewohnheit ohne Erinnerung steht mit da und
 // führt mit einem Tipp dorthin, wo man ihr eine Uhrzeit gibt.
@@ -3721,7 +3678,7 @@ function zeichneExport() {
       'nichts für den Kalender. Leg einen Termin an oder gib einer Gewohnheit eine Erinnerung.</span></p>' +
       '</section>';
   }
-  var auswahl = exportAuswahl(heute), teilen = kannTeilen();
+  var auswahl = exportAuswahl(heute);
   var zahl = auswahl.termine.length + auswahl.gewohnheiten.length;
   // Aufheben nur, wenn allein Dazugeholtes gewählt ist — Neues hat keine Marke.
   var aufheben = exBearbeiten && zahl > 0 && auswahl.termine.concat(auswahl.gewohnheiten).every(function (e) {
@@ -3734,8 +3691,7 @@ function zeichneExport() {
       '<div class="zeile"><span>Zuletzt</span><span class="wert" id="exZuletzt">' +
         esc(state.exportiert ? zeitpunktText(state.exportiert) : 'noch nie') + '</span></div>' +
       '<div class="ex-wege" id="exWege"' + (zahl ? '' : ' hidden') + '><div class="knopfreihe">' +
-        (teilen ? '<button type="button" class="knopf" id="exTeilen">' + ICON.export + 'Teilen</button>' : '') +
-        '<button type="button" class="knopf' + (teilen ? ' zart' : '') + '" id="exLaden">Als Datei laden</button>' +
+        '<button type="button" class="knopf" id="exLaden">Als Datei laden</button>' +
       '</div><div class="ex-aufheben" id="exAufhebenTeil"' + (aufheben ? '' : ' hidden') + '>' +
         '<button type="button" class="knopf zart" id="exAufheben">Markierung aufheben</button></div></div>' +
       '<p class="klein" id="exNichts"' + (zahl ? ' hidden' : '') + '>Alles steht schon im Kalender. Unter «Bearbeiten» ' +
@@ -3775,7 +3731,6 @@ function exTeileNachziehen() {
 
 function bindeExport() {
   exTeileNachziehen();
-  if ($('exTeilen')) $('exTeilen').addEventListener('click', icsTeilen);
   if ($('exLaden')) $('exLaden').addEventListener('click', icsLaden);
   if ($('exAufheben')) $('exAufheben').addEventListener('click', exAufheben);
   if ($('exBearbeiten')) $('exBearbeiten').addEventListener('click', function () {
