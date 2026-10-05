@@ -13,7 +13,8 @@ es wächst mit jedem Bauabschnitt.
 | `<script>` | genau einer, `'use strict'`, ES5-nah |
 
 Im Skript, von oben: Version und Stand · `CHILI_BILD` · Hilfen (`esc`, `ICON`, Datum,
-`melden`, Tage) · Zustand und Speicher · Darstellung · Gewohnheiten (Rechnung) · Ansichten ·
+`melden`, Tage) · Zustand und Speicher · Darstellung · Gewohnheiten (Rechnung) · Abgewöhnen
+(Rechnung, Welle) · Ansichten ·
 Menü · Service Worker · Start.
 
 ## Zustand
@@ -31,7 +32,16 @@ state = {
     angelegt: '2026-10-05',              // Tagesschlüssel, lokale Zeit
     erledigt: ['2026-10-05', …],         // sortiert, einmalig
     archiviert: null                     // | Tagesschlüssel
-  }]
+  }],
+  abgewoehnen: [{
+    id: 'a…',
+    name: 'Rauchen',
+    start: 1791100000000,                // Zeitpunkt in ms — «frei seit» ist eine Dauer
+    rueckfaelle: [{ zeit: …, notiz: '' }],  // sortiert, keiner vor dem Start
+    draenge: [1791200000000, …],         // gewonnene Dränge
+    archiviert: null
+  }],
+  welle: null                            // | { id, start } — die laufende 10-Minuten-Welle
 }
 ```
 
@@ -40,6 +50,11 @@ state = {
 - **`jetzt()` ist die einzige Uhr**; Tage sind Schlüssel `JJJJ-MM-TT` (`tagSchluessel`,
   `tagPlus`, `wochenAnfang`).
 - `gewohnheitLesen()` prüft jede Gewohnheit einzeln; was nicht paßt, fällt weg.
+  `lasterLesen()` ebenso fürs Abgewöhnen; eine Welle gilt nur für etwas, das es gibt und
+  das nicht archiviert ist.
+- **Abgewöhnen** (ADR 0004): `lasterAuswerten(a, nun)` liefert «frei seit», Rekord und
+  Stärke; `zeitJetzt()` ist `jetzt()` in Millisekunden. Geändert wird nur über
+  `rueckfallEintragen`, `welleBeginnen` und `welleGewonnen`.
 
 - **Ein Schlüssel**: `chillinal_v1`. `laden()` liest, `stand(roh)` übernimmt nur bekannte
   Felder mit gültigen Werten und füllt den Rest aus `grundStand()`. Kaputtes JSON, ein
@@ -58,8 +73,14 @@ keine Teilaktualisierung — eine Ansicht ist schnell genug neu gezeichnet.
 - `zeige(name, id)` wechselt die Ansicht; ein unbekannter Name landet beim Dashboard.
   `neu` und `bearbeiten` legen dabei den `entwurf` an; `bearbeiten` ohne gültige `id`
   landet ebenfalls beim Dashboard.
-- **Ansichten:** `home` (Dashboard), `neu` (Neue Gewohnheit), `bearbeiten` (Gewohnheit:
-  Stand, Formular, Archivieren), `einstellungen`.
+- **Ansichten:** `home` (Dashboard), `neu` (Neue Gewohnheit, mit Umschalter Angewöhnen |
+  Abgewöhnen), `bearbeiten` (Gewohnheit: Stand, Formular, Archivieren), `abgewoehnen`
+  (Stand, Formular, Rückfälle, Archivieren), `welle` (Drang), `rueckfall`, `einstellungen`.
+  `abgewoehnen` und `rueckfall` brauchen eine gültige `id`, `welle` eine laufende Welle —
+  sonst geht es zum Dashboard.
+- **Der Takt:** `takt()` läuft jede Sekunde und schreibt «frei seit» (`[data-frei]`), die
+  Restzeit auf dem Drang-Knopf (`[data-wellerest]`) und den Ring der Welle an Ort und
+  Stelle. Neu gezeichnet wird nur, wenn die Welle durch ist.
 - **Das Formular zeichnet sich beim Wählen nicht neu**: Rhythmus, Tage und Zähler ändern
   `entwurf` und die Knöpfe an Ort und Stelle; gespeichert wird mit dem Knopf.
 - **Abhaken** (`[data-haken]`) ändert `erledigt`, speichert und zeichnet neu; die eben
@@ -75,7 +96,8 @@ keine Teilaktualisierung — eine Ansicht ist schnell genug neu gezeichnet.
   Einblenden des Rasters.
 - **Ringe** werden mit dem Ziel gezeichnet und tragen in `data-von` den zuletzt gezeigten
   Wert (`ringZuletzt`); `ringeFuellen()` läßt sie nach jedem `render()` herüberlaufen.
-- `visibilitychange` zeichnet das Dashboard ganz neu — nach Mitternacht ist es ein anderer Tag.
+- `visibilitychange` zeichnet das Dashboard und die Welle ganz neu — nach Mitternacht ist es
+  ein anderer Tag, nach zehn Minuten im Hintergrund ist die Welle durch.
 - Der Kopf hat zwei Gestalten: auf dem Dashboard Titel, Datum, Sonne/Mond, Menüknopf;
   unterwegs Rückweg und Titel.
 - Das Menü ist ein Blatt über der Seite, gezeichnet beim Öffnen aus `MENUE`. Ein Eintrag

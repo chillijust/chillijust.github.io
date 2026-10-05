@@ -44,6 +44,10 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   trägt «bald»; wer ihn baut, setzt `ziel` und trägt die Ansicht in `ANSICHTEN` ein.
 - **Die Kachel kennt zwei Gesten**: kurz tippen hakt ab, lange drücken (`langDruecken`)
   öffnet die Gewohnheit. Ein zweites Ziel auf der Kachel gibt es nicht (ADR 0003).
+- **Die Abgewöhnen-Kachel** hat nichts abzuhaken: Antippen oder lange drücken öffnet sie;
+  *Drang* und *Rückfall* sind eigene Knöpfe darunter (ADR 0004).
+- **Was live läuft, schreibt `takt()` an Ort und Stelle** (`[data-frei]`,
+  `[data-wellerest]`, der Ring der Welle) — kein `render()` im Sekundentakt.
 - **Eine neue Ansicht** ist ein Eintrag in `ANSICHTEN` (`titel`, `zeichnen`), ihre Ereignisse
   hängen in `bindeAnsicht()` — nie als Attribut.
 

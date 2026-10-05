@@ -367,6 +367,62 @@ svg { display: block; }
 .punkt.verpasst { background: transparent; box-shadow: inset 0 0 0 1.5px var(--linie); opacity: 1; }
 .punkt.heute { background: transparent; box-shadow: inset 0 0 0 1.5px var(--text-2); opacity: 1; }
 
+/* ── Dashboard: Abgewöhnen ─────────────────────────────────────
+   Dieselbe Kachel, eine Zeile Knöpfe darunter. Die Zahl läuft live und
+   springt dank gleich breiter Ziffern nicht. */
+.ab-kachel { flex-direction: column; align-items: stretch; gap: 4px; padding: 6px; }
+.ab-kachel.welle { box-shadow: inset 0 0 0 2px var(--akzent), var(--schatten); }
+.ab-scheibe { color: var(--akzent); }
+.ab-frei { font-size: 15px; color: var(--text-2); }
+.ab-zahl { font-family: var(--sans); font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+.ab-knoepfe { display: flex; gap: 8px; padding: 0 2px 2px; }
+.ab-knopf {
+  flex: 1;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 14px;
+  background: var(--flaeche-2);
+  font-size: 15px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  transition: transform .15s ease;
+}
+.ab-knopf:active { transform: scale(.96); }
+.ab-knopf svg { width: 18px; height: 18px; color: var(--akzent); }
+
+/* ── Drang: die Welle ──────────────────────────────────────────
+   Der Ring läuft in zehn Minuten leer, Sekunde für Sekunde, linear. */
+.welle { text-align: center; padding-top: 4px; }
+.welle-bild { position: relative; width: min(72vw, 300px); aspect-ratio: 1; margin: 10px auto 8px; }
+.welle-ring circle { stroke-width: 2.2; }
+.welle-fuell { transition: stroke-dashoffset 1s linear; }
+.welle #chiliFigur { position: absolute; left: 28%; top: 26%; width: 44%; height: 44%; margin: 0; }
+.welle-zeit { font-family: var(--sans); font-size: 44px; font-weight: 600; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.welle-satz { max-width: 32ch; margin: 8px auto 20px; color: var(--text-2); font-style: italic; }
+.welle .knopfreihe { max-width: 380px; margin: 0 auto; }
+
+/* ── Rückfall ──────────────────────────────────────────────── */
+.rf-satz { margin: 4px 0 0; }
+.rf-zeile { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 6px 0; }
+.rf-zeile + .rf-zeile { border-top: 1px solid var(--flaeche-2); }
+.rf-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.rf-wann { font-family: var(--sans); font-size: 15px; font-variant-numeric: tabular-nums; }
+.rf-notiz { font-size: 14px; font-style: italic; color: var(--text-2); overflow-wrap: anywhere; }
+.rf-loeschen {
+  flex: none;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 14px;
+  background: var(--flaeche-2);
+  font-size: 14px;
+  font-weight: 500;
+}
+.rf-loeschen.frage { box-shadow: inset 0 0 0 2px var(--akzent); }
+.rf-leer { margin: 0; }
+
 /* ── Dashboard: Kalender ───────────────────────────────────── */
 .kal { padding: 14px; }
 .kal-kopf { display: flex; align-items: center; gap: 4px; margin: 10px 0 6px; }
@@ -466,6 +522,9 @@ button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
 .eingabe:focus { outline: none; border-color: var(--akzent); }
 .eingabe::placeholder { color: var(--text-2); opacity: .75; }
 .abschnitt h2 label { cursor: pointer; }
+textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
+.start-felder { display: flex; gap: 8px; }
+.start-felder .eingabe { flex: 1; min-width: 0; }
 .rh-teil { margin-top: 10px; }
 .rh-teil[hidden] { display: none; }
 .tage { display: flex; gap: 4px; }
@@ -652,7 +711,7 @@ button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.2.0';
+var APP_VERSION = '0.3.0T';
 var APP_STAND = '2026-10-05';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -699,7 +758,10 @@ var ICON = {
   haken: svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>'),
   weiter: svg('<path d="M9 5l7 7-7 7"/>'),
   minus: svg('<path d="M5 12h14"/>'),
-  hinweis: svg('<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.01"/>')
+  hinweis: svg('<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.01"/>'),
+  frei: svg('<circle cx="12" cy="12" r="8"/><path d="M6.4 6.4l11.2 11.2"/>'),
+  welle: svg('<path d="M2 9c2.5 0 2.5-3 5-3s2.5 3 5 3 2.5-3 5-3 2.5 3 5 3"/>' +
+    '<path d="M2 16c2.5 0 2.5-3 5-3s2.5 3 5 3 2.5-3 5-3 2.5 3 5 3"/>')
 };
 
 var WOCHENTAGE = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
@@ -772,7 +834,9 @@ function grundStand() {
     schema: 1,
     thema: 'auto',   // 'auto' folgt dem Gerät, sonst 'hell' oder 'dunkel'
     kalender: 'woche',   // was der Kalender zuletzt zeigte: 'woche' oder 'monat'
-    gewohnheiten: []
+    gewohnheiten: [],
+    abgewoehnen: [],
+    welle: null          // die laufende 10-Minuten-Welle: { id, start } oder null
   };
 }
 
@@ -786,6 +850,20 @@ function stand(roh) {
     roh.gewohnheiten.forEach(function (g) {
       var gut = gewohnheitLesen(g);
       if (gut && !ids[gut.id]) { ids[gut.id] = true; s.gewohnheiten.push(gut); }
+    });
+  }
+  if (Array.isArray(roh.abgewoehnen)) {
+    var aids = {};
+    roh.abgewoehnen.forEach(function (a) {
+      var gut = lasterLesen(a);
+      if (gut && !aids[gut.id]) { aids[gut.id] = true; s.abgewoehnen.push(gut); }
+    });
+  }
+  // Eine Welle gilt nur für etwas, das es noch gibt und das nicht archiviert ist.
+  var w = roh.welle;
+  if (w && typeof w === 'object' && istZeit(w.start)) {
+    s.abgewoehnen.forEach(function (a) {
+      if (a.id === w.id && !a.archiviert) s.welle = { id: a.id, start: w.start };
     });
   }
   return s;
@@ -818,6 +896,38 @@ function gewohnheitLesen(g) {
     angelegt: g.angelegt,
     erledigt: erledigt,
     archiviert: istSchluessel(g.archiviert) ? g.archiviert : null
+  };
+}
+
+// Etwas zum Abgewöhnen, wie es gespeichert wird:
+//   { id, name, start: Zeit, rueckfaelle: [{ zeit, notiz }, …], draenge: [Zeit, …],
+//     archiviert: Tag | null }
+// Zeiten sind Millisekunden seit 1970 — «frei seit» ist eine Dauer, kein Tag.
+// Ein Rückfall vor dem Start kann es nicht geben; er fällt weg.
+var NOTIZ_MAX = 200;
+
+function istZeit(t) { return typeof t === 'number' && isFinite(t) && t > 0; }
+
+function lasterLesen(a) {
+  if (!a || typeof a !== 'object' || typeof a.id !== 'string' || !a.id) return null;
+  var name = typeof a.name === 'string' ? a.name.trim().slice(0, NAME_MAX) : '';
+  if (!name || !istZeit(a.start)) return null;
+  var rueckfaelle = [];
+  if (Array.isArray(a.rueckfaelle)) {
+    a.rueckfaelle.forEach(function (r) {
+      if (!r || !istZeit(r.zeit) || r.zeit < a.start) return;
+      rueckfaelle.push({ zeit: r.zeit, notiz: typeof r.notiz === 'string' ? r.notiz.trim().slice(0, NOTIZ_MAX) : '' });
+    });
+  }
+  rueckfaelle.sort(function (x, y) { return x.zeit - y.zeit; });
+  var draenge = Array.isArray(a.draenge) ? a.draenge.filter(istZeit).sort(function (x, y) { return x - y; }) : [];
+  return {
+    id: a.id,
+    name: name,
+    start: a.start,
+    rueckfaelle: rueckfaelle,
+    draenge: draenge,
+    archiviert: istSchluessel(a.archiviert) ? a.archiviert : null
   };
 }
 
@@ -1088,8 +1198,108 @@ function umschaltenUndZeichnen(id, k) {
   chiliFlammt = false;
 }
 
-function neueId() {
-  return 'g' + Date.now().toString(36) + Math.floor(Math.random() * 1296).toString(36);
+function neueId(art) {
+  return (art || 'g') + Date.now().toString(36) + Math.floor(Math.random() * 1296).toString(36);
+}
+
+// ════════════════════════════════════════════════════════════════
+//  Abgewöhnen: frei seit, Rekord, Stärke, die 10-Minuten-Welle
+// ════════════════════════════════════════════════════════════════
+//
+// Gespeichert sind Start, Rückfälle und gewonnene Dränge — alles Übrige rechnet
+// `lasterAuswerten(a, nun)` bei jedem Zeichnen neu (ADR 0004).
+//
+// «frei seit» und der Rekord sind Dauern und werden in Millisekunden gerechnet.
+// Die Stärke zählt Tage und nimmt dafür die Tagesschlüssel wie die Gewohnheiten.
+var STAERKE_TAGE = 66;           // Stärke = Anteil freier Tage der letzten 66
+var WELLE_MS = 10 * 60 * 1000;   // ein Drang flaut nach Minuten ab
+
+function aktivesLaster() {
+  return state.abgewoehnen.filter(function (a) { return !a.archiviert; });
+}
+
+function lasterNach(id) {
+  for (var i = 0; i < state.abgewoehnen.length; i++) {
+    if (state.abgewoehnen[i].id === id) return state.abgewoehnen[i];
+  }
+  return null;
+}
+
+function zeitJetzt() { return jetzt().getTime(); }
+
+// frei (ms seit dem letzten Rückfall oder dem Start), rekord (die längste
+// freie Strecke, die laufende eingeschlossen), rekordLaeuft (die laufende ist
+// die längste), staerke (0–1), rueckfaelle, draenge (gewonnene).
+// Was nach `nun` liegt, gibt es noch nicht — die Uhr des Geräts kann springen.
+function lasterAuswerten(a, nun) {
+  var zuletzt = a.start, rekord = 0, rueckTage = {}, zahl = 0;
+  a.rueckfaelle.forEach(function (r) {
+    if (r.zeit > nun) return;
+    rekord = Math.max(rekord, r.zeit - zuletzt);
+    zuletzt = r.zeit;
+    rueckTage[tagSchluessel(new Date(r.zeit))] = true;
+    zahl++;
+  });
+  var frei = Math.max(0, nun - zuletzt);
+  var heute = tagSchluessel(new Date(nun)), erster = tagSchluessel(new Date(a.start)), freiTage = 0;
+  for (var k = tagPlus(heute, 1 - STAERKE_TAGE); k <= heute; k = tagPlus(k, 1)) {
+    if (k >= erster && !rueckTage[k]) freiTage++;
+  }
+  return {
+    frei: frei,
+    rekord: Math.max(rekord, frei),
+    rekordLaeuft: frei >= rekord,
+    staerke: freiTage / STAERKE_TAGE,
+    rueckfaelle: zahl,
+    draenge: a.draenge.length
+  };
+}
+
+// «12 T 4 h», «4 h 12 min», «12 min 05 s» — je kürzer, desto feiner.
+function dauer(ms) {
+  var s = Math.floor(Math.max(0, ms) / 1000), m = Math.floor(s / 60), h = Math.floor(m / 60), t = Math.floor(h / 24);
+  if (t) return t + ' T ' + (h % 24) + ' h';
+  if (h) return h + ' h ' + (m % 60) + ' min';
+  return m + ' min ' + zwei(s % 60) + ' s';
+}
+
+// «9:42» — was von der Welle übrig ist.
+function restText(ms) {
+  var s = Math.ceil(Math.max(0, ms) / 1000);
+  return Math.floor(s / 60) + ':' + zwei(s % 60);
+}
+
+function welleRest(nun) {
+  return state.welle ? Math.max(0, state.welle.start + WELLE_MS - nun) : 0;
+}
+
+// Ein Rückfall: Er setzt «frei seit» zurück, der Rekord bleibt stehen. Kam er
+// aus einer Welle, ist die Welle damit vorbei.
+function rueckfallEintragen(id, notiz) {
+  var a = lasterNach(id), nun = zeitJetzt();
+  if (!a || nun < a.start) return false;
+  a.rueckfaelle.push({ zeit: nun, notiz: String(notiz || '').trim().slice(0, NOTIZ_MAX) });
+  if (state.welle && state.welle.id === id) state.welle = null;
+  return speichern();
+}
+
+// Gewonnen zählt erst, wenn die zehn Minuten herum sind.
+function welleGewonnen() {
+  var w = state.welle, a = w && lasterNach(w.id), nun = zeitJetzt();
+  if (!a || welleRest(nun) > 0) return false;
+  a.draenge.push(nun);
+  state.welle = null;
+  return speichern();
+}
+
+function welleBeginnen(id) {
+  var a = lasterNach(id);
+  if (!a || a.archiviert) return false;
+  if (!state.welle) {
+    state.welle = { id: id, start: zeitJetzt() };
+    speichern();
+  }
+  return true;
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -1105,6 +1315,9 @@ var ANSICHTEN = {
   home: { titel: 'Chillinal', zeichnen: zeichneHome },
   neu: { titel: 'Neue Gewohnheit', zeichnen: zeichneFormular },
   bearbeiten: { titel: 'Gewohnheit', zeichnen: zeichneFormular },
+  abgewoehnen: { titel: 'Abgewöhnen', zeichnen: zeichneFormular },
+  welle: { titel: 'Drang', zeichnen: zeichneWelle },
+  rueckfall: { titel: 'Rückfall', zeichnen: zeichneRueckfall },
   einstellungen: { titel: 'Einstellungen', zeichnen: zeichneEinstellungen }
 };
 
@@ -1120,19 +1333,27 @@ var MENUE = [
   { id: 'tickets', name: 'Tickets', icon: 'ticket' }
 ];
 
-// `id` braucht nur «bearbeiten»: welche Gewohnheit. Ohne eine gültige geht
-// es nach Hause, nicht in ein leeres Formular.
+// `id` sagt «bearbeiten» die Gewohnheit, «abgewoehnen» und «rueckfall», worum
+// es geht. Ohne eine gültige geht es nach Hause, nicht in ein leeres Formular;
+// «welle» ohne laufende Welle ebenso.
 function zeige(name, id) {
   if (!ANSICHTEN[name]) name = 'home';
   if (name === 'bearbeiten' && !gewohnheitNach(id)) name = 'home';
-  entwurf = name === 'neu' ? entwurfAus(null) : name === 'bearbeiten' ? entwurfAus(gewohnheitNach(id)) : null;
+  if ((name === 'abgewoehnen' || name === 'rueckfall') && !lasterNach(id)) name = 'home';
+  if (name === 'welle' && !state.welle) name = 'home';
+  entwurf = name === 'neu' ? entwurfAus(null) : name === 'bearbeiten' ? entwurfAus(gewohnheitNach(id))
+    : name === 'abgewoehnen' ? entwurfAusLaster(lasterNach(id)) : null;
+  // Wer aus der Welle zum Rückfall kommt, kann zur Welle zurück.
+  rueckfallFuer = name === 'rueckfall' ? { id: id, notiz: '',
+    ausWelle: ansicht === 'welle' && !!state.welle && state.welle.id === id } : null;
   ansicht = name;
   render();
   try { window.scrollTo(0, 0); } catch (e) { /* egal */ }
 }
 
 function render() {
-  if ((ansicht === 'neu' || ansicht === 'bearbeiten') && !entwurf) ansicht = 'home';
+  if ((ansicht === 'neu' || ansicht === 'bearbeiten' || ansicht === 'abgewoehnen') && !entwurf) ansicht = 'home';
+  if ((ansicht === 'rueckfall' && !rueckfallFuer) || (ansicht === 'welle' && !state.welle)) ansicht = 'home';
   renderKopf();
   var feld = $('ansicht');
   feld.innerHTML = ANSICHTEN[ansicht].zeichnen();
@@ -1191,8 +1412,8 @@ var geradeAbgehakt = null;     // die Kachel, die eben getippt wurde
 var chiliFlammt = false;       // false, 'flammt' oder 'lodert' (Tag eben voll geworden)
 
 function zeichneHome() {
-  var aktiv = aktiveGewohnheiten();
-  if (!aktiv.length) return zeichneWillkommen();
+  var aktiv = aktiveGewohnheiten(), laster = aktivesLaster();
+  if (!aktiv.length && !laster.length) return zeichneWillkommen();
   var heute = heuteSchluessel();
   var liste = aktiv.map(function (g) { return { g: g, a: auswerten(g, heute) }; });
   var dran = liste.filter(function (e) { return e.a.faelligHeute; });
@@ -1203,6 +1424,8 @@ function zeichneHome() {
       dran.map(zeichneKachel).join('') + '</div></section>' : '') +
     (frei.length ? '<section class="abschnitt"><h2>Heute nicht dran</h2><div class="gw-liste gedimmt">' +
       frei.map(zeichneKachel).join('') + '</div></section>' : '') +
+    (laster.length ? '<section class="abschnitt"><h2>Abgewöhnen</h2><div class="gw-liste">' +
+      laster.map(zeichneLasterKachel).join('') + '</div></section>' : '') +
     zeichneKalender(heute);
 }
 
@@ -1259,6 +1482,33 @@ function zeichneKachel(e) {
     '</button>' +
     '</div>';
 }
+
+// Abgewöhnen: «frei seit» läuft live (`takt`), darunter Stärke und Rekord.
+// Antippen oder lange drücken öffnet; die Knöpfe Drang und Rückfall sind
+// eigene Ziele. Läuft eine Welle, trägt der Drang-Knopf ihre Restzeit.
+function zeichneLasterKachel(a) {
+  var e = lasterAuswerten(a, zeitJetzt()), welle = !!state.welle && state.welle.id === a.id;
+  var info = 'Stärke ' + prozent(e.staerke) + ' % · ' +
+    (!e.rueckfaelle ? 'Noch kein Rückfall' : e.rekordLaeuft ? 'Rekord läuft' : 'Rekord ' + dauer(e.rekord)) +
+    (e.draenge ? ' · ' + e.draenge + (e.draenge === 1 ? ' Drang' : ' Dränge') + ' besiegt' : '');
+  return '<div class="gw-kachel ab-kachel' + (welle ? ' welle' : '') + '">' +
+    '<button type="button" class="gw-haken ab-oeffnen" data-ab="' + esc(a.id) + '">' +
+      '<span class="gw-ring">' + ring(e.staerke, a.id) + '<span class="gw-scheibe ab-scheibe">' + ICON.frei + '</span></span>' +
+      '<span class="gw-text"><span class="gw-name">' + esc(a.name) + '</span>' +
+        '<span class="ab-frei">frei seit <span class="ab-zahl" data-frei="' + esc(a.id) + '">' +
+          esc(dauer(e.frei)) + '</span></span>' +
+        '<span class="gw-info">' + esc(info) + '</span></span>' +
+    '</button>' +
+    '<div class="ab-knoepfe">' +
+      '<button type="button" class="ab-knopf" data-drang="' + esc(a.id) + '">' + ICON.welle +
+        '<span' + (welle ? ' data-wellerest' : '') + '>' +
+        esc(welle ? welleKnopfText(welleRest(zeitJetzt())) : 'Drang') + '</span></button>' +
+      '<button type="button" class="ab-knopf" data-rueckfall="' + esc(a.id) + '">Rückfall</button>' +
+    '</div>' +
+    '</div>';
+}
+
+function welleKnopfText(rest) { return rest ? 'Welle ' + restText(rest) : 'Welle vorbei'; }
 
 // Noch gibt es nichts abzuhaken: Die Chili begrüßt, ein Knopf führt zur
 // ersten Gewohnheit. Kein Tutorial — der Knopf ist die Anleitung.
@@ -1408,22 +1658,44 @@ function zeichneTagesleiste(k, heute) {
 // Wählen nicht neu — sonst ginge die Tastatur zu.
 var entwurf = null;
 
+// Ein Entwurf für beide Richtungen. `richtung` ist 'an' (angewöhnen) oder
+// 'ab' (abgewöhnen); ein neuer Entwurf darf sie wechseln, ein bestehender nicht.
+// «Frei seit» steht als Tag und Uhrzeit darin, wie die Felder sie liefern.
 function entwurfAus(g) {
-  var r = g ? g.rhythmus : { art: 'taeglich' };
+  var r = g ? g.rhythmus : { art: 'taeglich' }, nun = jetzt();
   return {
     id: g ? g.id : null,
+    richtung: 'an',
     name: g ? g.name : '',
     art: r.art,
     tage: r.tage ? r.tage.slice() : [1, 2, 3, 4, 5],
     anzahl: r.anzahl || 3,
-    archivFrage: false
+    startTag: tagSchluessel(nun),
+    startUhr: zwei(nun.getHours()) + ':' + zwei(nun.getMinutes()),
+    startGeaendert: false,
+    archivFrage: false,
+    loeschFrage: -1
   };
 }
 
+function entwurfAusLaster(a) {
+  var e = entwurfAus(null), d = new Date(a.start);
+  e.id = a.id;
+  e.richtung = 'ab';
+  e.name = a.name;
+  e.startTag = tagSchluessel(d);
+  e.startUhr = zwei(d.getHours()) + ':' + zwei(d.getMinutes());
+  return e;
+}
+
 var RHYTHMEN = [['taeglich', 'Täglich'], ['wochentage', 'Wochentage'], ['proWoche', 'Pro Woche']];
+var RICHTUNGEN = [['an', 'Angewöhnen'], ['ab', 'Abgewöhnen']];
+var BEISPIEL = { an: 'Zum Beispiel: Zehn Minuten lesen', ab: 'Zum Beispiel: Rauchen' };
 
 function zeichneFormular() {
-  var heute = heuteSchluessel(), g = entwurf.id ? gewohnheitNach(entwurf.id) : null;
+  var heute = heuteSchluessel(), ab = entwurf.richtung === 'ab';
+  var g = !ab && entwurf.id ? gewohnheitNach(entwurf.id) : null;
+  var l = ab && entwurf.id ? lasterNach(entwurf.id) : null;
   var html = '';
   if (g) {
     var a = auswerten(g, heute), woche = g.rhythmus.art === 'proWoche';
@@ -1434,16 +1706,25 @@ function zeichneFormular() {
       '<div class="zeile"><span>Seit</span><span class="wert">' +
         esc(datumLang(ausSchluessel(g.angelegt))) + '</span></div>' +
       '</div></section>';
-  } else if (schwacheZahl(heute) >= HINWEIS_AB) {
-    html += '<p class="hinweis" id="gwHinweis">' + ICON.hinweis + '<span>Du baust gerade an ' +
-      schwacheZahl(heute) + ' Gewohnheiten, die noch nicht sitzen. Mehr auf einmal macht alle ' +
-      'schwächer — vielleicht erst eine festigen?</span></p>';
+  } else if (l) {
+    html += zeichneLasterStand(l);
+  } else {
+    if (schwacheZahl(heute) >= HINWEIS_AB) {
+      html += '<p class="hinweis" id="gwHinweis">' + ICON.hinweis + '<span>Du baust gerade an ' +
+        schwacheZahl(heute) + ' Gewohnheiten, die noch nicht sitzen. Mehr auf einmal macht alle ' +
+        'schwächer — vielleicht erst eine festigen?</span></p>';
+    }
+    html += '<section class="abschnitt"><div class="wahl" role="group" aria-label="Richtung">' +
+      RICHTUNGEN.map(function (r) {
+        return '<button type="button" data-richtung="' + r[0] + '" aria-pressed="' +
+          (entwurf.richtung === r[0] ? 'true' : 'false') + '">' + esc(r[1]) + '</button>';
+      }).join('') + '</div></section>';
   }
   html += '<section class="abschnitt"><h2><label for="gwName">Name</label></h2>' +
       '<input id="gwName" class="eingabe" type="text" maxlength="' + NAME_MAX + '" autocomplete="off" ' +
-        'enterkeyhint="done" placeholder="Zum Beispiel: Zehn Minuten lesen" value="' + esc(entwurf.name) + '">' +
+        'enterkeyhint="done" placeholder="' + esc(BEISPIEL[entwurf.richtung]) + '" value="' + esc(entwurf.name) + '">' +
     '</section>' +
-    '<section class="abschnitt"><h2>Rhythmus</h2>' +
+    '<section class="abschnitt" id="rhAbschnitt"' + (ab ? ' hidden' : '') + '><h2>Rhythmus</h2>' +
       '<div class="wahl" role="group" aria-label="Rhythmus">' + RHYTHMEN.map(function (r) {
         return '<button type="button" data-art="' + r[0] + '" aria-pressed="' +
           (entwurf.art === r[0] ? 'true' : 'false') + '">' + esc(r[1]) + '</button>';
@@ -1460,11 +1741,55 @@ function zeichneFormular() {
       '</div>' +
       '<p class="klein" id="rhText">' + esc(rhythmusErklaerung(entwurf.art)) + '</p>' +
     '</section>' +
+    '<section class="abschnitt" id="abStart"' + (ab ? '' : ' hidden') + '><h2>Frei seit</h2>' +
+      '<div class="start-felder">' +
+        '<input id="abTag" class="eingabe" type="date" aria-label="Tag" max="' + heute + '" value="' +
+          esc(entwurf.startTag) + '">' +
+        '<input id="abUhr" class="eingabe" type="time" aria-label="Uhrzeit" value="' + esc(entwurf.startUhr) + '">' +
+      '</div>' +
+      '<p class="klein">' + (l ? 'Rückfälle bleiben, wo sie sind.' : 'Schon früher aufgehört? Dann stell den Tag zurück.') +
+      '</p></section>' +
+    (l ? zeichneRueckfallListe(l) : '') +
     '<div class="knopfreihe">' +
-      '<button type="button" class="knopf" id="gwSpeichern">' + (g ? 'Speichern' : 'Anlegen') + '</button>' +
-      (g ? '<button type="button" class="knopf zart" id="gwArchivieren">Archivieren</button>' : '') +
+      '<button type="button" class="knopf" id="gwSpeichern">' + (g || l ? 'Speichern' : 'Anlegen') + '</button>' +
+      (g || l ? '<button type="button" class="knopf zart" id="gwArchivieren">Archivieren</button>' : '') +
     '</div>';
   return html;
+}
+
+function zeichneLasterStand(l) {
+  var e = lasterAuswerten(l, zeitJetzt());
+  function zeile(was, wert) {
+    return '<div class="zeile"><span>' + was + '</span><span class="wert">' + wert + '</span></div>';
+  }
+  return '<section class="abschnitt"><h2>Stand</h2><div class="kachel">' +
+    zeile('Frei seit', '<span class="ab-zahl" data-frei="' + esc(l.id) + '">' + esc(dauer(e.frei)) + '</span>') +
+    zeile('Rekord', e.rekordLaeuft ? 'läuft gerade' : esc(dauer(e.rekord))) +
+    zeile('Stärke', prozent(e.staerke) + ' %') +
+    zeile('Dränge besiegt', e.draenge) +
+    zeile('Rückfälle', e.rueckfaelle) +
+    '</div></section>';
+}
+
+// «Mo, 5. Okt., 14:32»
+function zeitpunktText(t) {
+  var d = new Date(t);
+  return WT_KURZ[d.getDay()] + ', ' + d.getDate() + '. ' + MON_KURZ[d.getMonth()] + ', ' +
+    zwei(d.getHours()) + ':' + zwei(d.getMinutes());
+}
+
+// Die Rückfälle, neuester zuerst. Einer, der aus Versehen eingetragen wurde,
+// geht mit zwei Tipps wieder weg.
+function zeichneRueckfallListe(l) {
+  var html = '<section class="abschnitt"><h2>Rückfälle</h2><div class="kachel rf-liste">';
+  if (!l.rueckfaelle.length) return html + '<p class="klein rf-leer">Noch keiner.</p></div></section>';
+  for (var i = l.rueckfaelle.length - 1; i >= 0; i--) {
+    var r = l.rueckfaelle[i];
+    html += '<div class="rf-zeile"><span class="rf-text"><span class="rf-wann">' + esc(zeitpunktText(r.zeit)) +
+      '</span>' + (r.notiz ? '<span class="rf-notiz">' + esc(r.notiz) + '</span>' : '') + '</span>' +
+      '<button type="button" class="rf-loeschen" data-rf-loeschen="' + i + '">Löschen</button></div>';
+  }
+  return html + '</div></section>';
 }
 
 function rhythmusErklaerung(art) {
@@ -1478,6 +1803,17 @@ function bindeFormular() {
   name.addEventListener('input', function () { entwurf.name = this.value; });
   name.addEventListener('keydown', function (e) { if (e.key === 'Enter') this.blur(); });
 
+  alleIn('[data-richtung]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      entwurf.richtung = this.getAttribute('data-richtung');
+      alleIn('[data-richtung]').forEach(function (x) {
+        x.setAttribute('aria-pressed', x === b ? 'true' : 'false');
+      });
+      $('rhAbschnitt').hidden = entwurf.richtung === 'ab';
+      $('abStart').hidden = entwurf.richtung !== 'ab';
+      $('gwName').setAttribute('placeholder', BEISPIEL[entwurf.richtung]);
+    });
+  });
   alleIn('[data-art]').forEach(function (b) {
     b.addEventListener('click', function () {
       entwurf.art = this.getAttribute('data-art');
@@ -1503,6 +1839,12 @@ function bindeFormular() {
   $('anzWeniger').addEventListener('click', function () { anzahl(-1); });
   $('anzMehr').addEventListener('click', function () { anzahl(1); });
 
+  $('abTag').addEventListener('input', function () { entwurf.startTag = this.value; entwurf.startGeaendert = true; });
+  $('abUhr').addEventListener('input', function () { entwurf.startUhr = this.value; entwurf.startGeaendert = true; });
+  alleIn('[data-rf-loeschen]').forEach(function (b) {
+    b.addEventListener('click', rueckfallLoeschenTippen);
+  });
+
   $('gwSpeichern').addEventListener('click', entwurfSpeichern);
   if ($('gwArchivieren')) $('gwArchivieren').addEventListener('click', archivierenTippen);
 }
@@ -1514,6 +1856,7 @@ function entwurfSpeichern() {
     $('gwName').focus();
     return;
   }
+  if (entwurf.richtung === 'ab') { lasterSpeichern(name); return; }
   if (entwurf.art === 'wochentage' && !entwurf.tage.length) {
     melden('Wähle mindestens einen Tag.');
     return;
@@ -1525,15 +1868,46 @@ function entwurfSpeichern() {
     g.name = name.slice(0, NAME_MAX);
     g.rhythmus = rhythmusLesen(r);
   } else {
-    state.gewohnheiten.push({ id: neueId(), name: name.slice(0, NAME_MAX), rhythmus: rhythmusLesen(r),
+    state.gewohnheiten.push({ id: neueId('g'), name: name.slice(0, NAME_MAX), rhythmus: rhythmusLesen(r),
       angelegt: heuteSchluessel(), erledigt: [], archiviert: null });
   }
   if (speichern()) melden(g ? 'Gespeichert.' : 'Angelegt. Antippen heißt erledigt, lange drücken öffnet sie.');
   zeige('home');
 }
 
+// Tag und Uhrzeit aus den Feldern, als Zeitpunkt — oder null, wenn eins fehlt.
+function startAusEntwurf() {
+  if (!istSchluessel(entwurf.startTag) || !/^\d{2}:\d{2}$/.test(entwurf.startUhr)) return null;
+  var d = ausSchluessel(entwurf.startTag), u = entwurf.startUhr.split(':');
+  d.setHours(+u[0], +u[1], 0, 0);
+  return d.getTime();
+}
+
+// Unberührte Felder lassen den Start, wie er ist: neu heißt «jetzt», auf die
+// Sekunde, bestehend heißt der gespeicherte Zeitpunkt. Die Felder kennen nur
+// Minuten — sonst verschöbe jedes Speichern den Start um ein paar Sekunden.
+function lasterSpeichern(name) {
+  var l = entwurf.id ? lasterNach(entwurf.id) : null, nun = zeitJetzt();
+  var start = !entwurf.startGeaendert ? (l ? l.start : nun) : startAusEntwurf();
+  if (!start) { melden('Gib an, seit wann du frei bist.'); return; }
+  if (start > nun) { melden('Der Start liegt in der Zukunft.'); return; }
+  if (l && l.rueckfaelle.length && start > l.rueckfaelle[0].zeit) {
+    melden('Der Start liegt nach deinem ersten Rückfall.');
+    return;
+  }
+  if (l) {
+    l.name = name.slice(0, NAME_MAX);
+    l.start = start;
+  } else {
+    state.abgewoehnen.push({ id: neueId('a'), name: name.slice(0, NAME_MAX), start: start, rueckfaelle: [],
+      draenge: [], archiviert: null });
+  }
+  if (speichern()) melden(l ? 'Gespeichert.' : 'Angelegt. Kommt ein Drang, tipp auf «Drang».');
+  zeige('home');
+}
+
 // Archivieren will zwei Tipps: Die Kachel verschwindet vom Dashboard. Ihre
-// Einträge bleiben im Speicher.
+// Einträge bleiben im Speicher. Eine laufende Welle endet mit ihr.
 function archivierenTippen() {
   if (!entwurf.archivFrage) {
     entwurf.archivFrage = true;
@@ -1541,10 +1915,133 @@ function archivierenTippen() {
     this.classList.add('frage');
     return;
   }
-  var g = gewohnheitNach(entwurf.id);
+  var g = entwurf.richtung === 'ab' ? lasterNach(entwurf.id) : gewohnheitNach(entwurf.id);
   if (g) g.archiviert = heuteSchluessel();
+  if (state.welle && state.welle.id === entwurf.id) state.welle = null;
   if (speichern()) melden('Archiviert. Deine Einträge bleiben erhalten.');
   zeige('home');
+}
+
+// Ein Rückfall geht mit zwei Tipps weg; der erste fragt nur.
+function rueckfallLoeschenTippen() {
+  var i = +this.getAttribute('data-rf-loeschen'), l = lasterNach(entwurf.id);
+  if (entwurf.loeschFrage !== i) {
+    alleIn('[data-rf-loeschen]').forEach(function (x) { x.textContent = 'Löschen'; x.classList.remove('frage'); });
+    entwurf.loeschFrage = i;
+    this.textContent = 'Wirklich?';
+    this.classList.add('frage');
+    return;
+  }
+  entwurf.loeschFrage = -1;
+  if (!l || !l.rueckfaelle[i]) return;
+  l.rueckfaelle.splice(i, 1);
+  if (speichern()) melden('Gelöscht.');
+  render();
+}
+
+// ── Drang: die 10-Minuten-Welle ─────────────────────────────────
+//
+// Ein großer Ring, der in zehn Minuten abläuft, und ein Satz zum Aussitzen.
+// «Nachgegeben» geht jederzeit und führt zum Rückfall, «Gewonnen» erst, wenn
+// die Welle durch ist. Die Welle steht im Zustand: Sie läuft weiter, auch wenn
+// die App zu ist, und wartet danach auf das Urteil.
+var WELLE_SAETZE = [
+  'Ein Drang ist wie eine Welle: Er steigt, bricht und flaut ab. Du mußt nur oben bleiben.',
+  'Atme länger aus als ein. Der Drang wird nicht stärker, nur lauter.',
+  'Du mußt jetzt nichts entscheiden. Nur diese paar Minuten abwarten.',
+  'Trink ein Glas Wasser, geh ein paar Schritte. Die Welle zieht auch ohne dich vorbei.'
+];
+
+function zeichneWelle() {
+  var w = state.welle, a = lasterNach(w.id), rest = welleRest(zeitJetzt()), durch = rest === 0;
+  var u = 2 * Math.PI * 15.5;
+  return '<section class="welle' + (durch ? ' durch' : '') + '" id="welle">' +
+    '<div class="etikett">' + esc(a ? a.name : '') + '</div>' +
+    '<div class="welle-bild">' +
+      '<svg class="ring welle-ring" viewBox="0 0 36 36" aria-hidden="true">' +
+        '<circle class="ring-spur" cx="18" cy="18" r="15.5"/>' +
+        '<circle class="ring-fuell welle-fuell" id="welleFuell" cx="18" cy="18" r="15.5" stroke-dasharray="' +
+          u.toFixed(2) + '" stroke-dashoffset="' + (u * (1 - rest / WELLE_MS)).toFixed(2) + '"/>' +
+      '</svg>' +
+      '<img id="chiliFigur" src="' + CHILI_BILD + '" alt="">' +
+    '</div>' +
+    '<div class="welle-zeit" id="welleZeit" role="timer">' + esc(restText(rest)) + '</div>' +
+    '<p class="welle-satz">' + esc(durch ? 'Die Welle ist durch. Wie ist es ausgegangen?'
+      : WELLE_SAETZE[Math.floor(w.start / 1000) % WELLE_SAETZE.length]) + '</p>' +
+    '<div class="knopfreihe">' +
+      (durch ? '<button type="button" class="knopf" id="welleGewonnen">Gewonnen</button>' : '') +
+      '<button type="button" class="knopf zart" id="welleNachgegeben">Nachgegeben</button>' +
+    '</div>' +
+    (durch ? '' : '<p class="klein">Die Welle läuft weiter, auch wenn du die App schließt.</p>') +
+    '</section>';
+}
+
+function bindeWelle() {
+  if ($('welleGewonnen')) {
+    $('welleGewonnen').addEventListener('click', function () {
+      if (!welleGewonnen()) return;
+      melden('Gewonnen. Die Welle ist durch.');
+      chiliFlammt = 'flammt';
+      zeige('home');
+      chiliFlammt = false;
+    });
+  }
+  $('welleNachgegeben').addEventListener('click', function () {
+    if (state.welle) zeige('rueckfall', state.welle.id);
+  });
+}
+
+// ── Rückfall ────────────────────────────────────────────────────
+//
+// Eine eigene Ansicht statt eines Blatts: Ein festes Blatt mit einem Textfeld
+// schiebt die Tastatur auf iOS aus dem Bild. Erst der Knopf trägt ein.
+var rueckfallFuer = null;   // { id, notiz, ausWelle }
+
+function zeichneRueckfall() {
+  var a = lasterNach(rueckfallFuer.id), e = lasterAuswerten(a, zeitJetzt());
+  return '<section class="abschnitt"><div class="kachel">' +
+      '<div class="etikett">' + esc(a.name) + '</div>' +
+      '<p class="rf-satz">Passiert. Dein Rekord von ' + esc(dauer(e.rekord)) +
+        ' bleibt stehen — ab jetzt zählt es neu.</p>' +
+    '</div></section>' +
+    '<section class="abschnitt"><h2><label for="rfNotiz">Notiz</label></h2>' +
+      '<textarea id="rfNotiz" class="eingabe notiz" rows="3" maxlength="' + NOTIZ_MAX + '" ' +
+        'placeholder="Was war los? Freiwillig.">' + esc(rueckfallFuer.notiz) + '</textarea>' +
+    '</section>' +
+    '<div class="knopfreihe">' +
+      '<button type="button" class="knopf" id="rfEintragen">Rückfall eintragen</button>' +
+      '<button type="button" class="knopf zart" id="rfAbbrechen">' +
+        (rueckfallFuer.ausWelle ? 'Zurück zur Welle' : 'Abbrechen') + '</button>' +
+    '</div>';
+}
+
+function bindeRueckfall() {
+  $('rfNotiz').addEventListener('input', function () { rueckfallFuer.notiz = this.value; });
+  $('rfEintragen').addEventListener('click', function () {
+    if (rueckfallEintragen(rueckfallFuer.id, rueckfallFuer.notiz)) melden('Eingetragen. Ab jetzt zählt es neu.');
+    zeige('home');
+  });
+  $('rfAbbrechen').addEventListener('click', function () {
+    zeige(rueckfallFuer.ausWelle && state.welle ? 'welle' : 'home');
+  });
+}
+
+// Was live läuft, jede Sekunde: «frei seit», die Restzeit auf dem Drang-Knopf
+// und der Ring der Welle. Nur Text und Ring ändern sich — neu gezeichnet wird
+// erst, wenn die Welle durch ist und das Urteil braucht.
+function takt() {
+  var nun = zeitJetzt(), rest = welleRest(nun);
+  alleIn('[data-frei]').forEach(function (el) {
+    var a = lasterNach(el.getAttribute('data-frei'));
+    if (a) el.textContent = dauer(lasterAuswerten(a, nun).frei);
+  });
+  alleIn('[data-wellerest]').forEach(function (el) { el.textContent = welleKnopfText(rest); });
+  var welle = ansicht === 'welle' && $('welle');
+  if (!welle) return;
+  if ((rest === 0) !== welle.classList.contains('durch')) { render(); return; }
+  $('welleZeit').textContent = restText(rest);
+  var u = 2 * Math.PI * 15.5;
+  $('welleFuell').setAttribute('stroke-dashoffset', (u * (1 - rest / WELLE_MS)).toFixed(2));
 }
 
 // ── Einstellungen ───────────────────────────────────────────────
@@ -1586,8 +2083,30 @@ function bindeAnsicht() {
     });
     langDruecken(b, function () { zeige('bearbeiten', id); });
   });
+  alleIn('[data-ab]').forEach(function (b) {
+    var id = b.getAttribute('data-ab');
+    b.addEventListener('click', function () {
+      if (langGedrueckt && Date.now() - langGedrueckt < 1000) return;
+      zeige('abgewoehnen', id);
+    });
+    langDruecken(b, function () { zeige('abgewoehnen', id); });
+  });
+  // Eine Welle zur Zeit: Läuft schon eine, führt jeder Drang-Knopf zu ihr.
+  alleIn('[data-drang]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var id = this.getAttribute('data-drang');
+      if (state.welle && state.welle.id !== id) melden('Es läuft schon eine Welle.');
+      else welleBeginnen(id);
+      zeige('welle');
+    });
+  });
+  alleIn('[data-rueckfall]').forEach(function (b) {
+    b.addEventListener('click', function () { zeige('rueckfall', this.getAttribute('data-rueckfall')); });
+  });
   bindeKalender();
   if ($('gwName')) bindeFormular();
+  if ($('welle')) bindeWelle();
+  if ($('rfNotiz')) bindeRueckfall();
 
   var knoepfe = document.querySelectorAll('.wahl [data-thema]');
   for (var i = 0; i < knoepfe.length; i++) {
@@ -1918,8 +2437,9 @@ function start() {
   // Nach Mitternacht ist ein anderer Tag: Datum, Tagesring und Kacheln stimmen
   // auch dann, wenn die App über Nacht offen blieb.
   document.addEventListener('visibilitychange', function () {
-    if (!document.hidden && ansicht === 'home') render();
+    if (!document.hidden && (ansicht === 'home' || ansicht === 'welle')) render();
   });
+  setInterval(takt, 1000);
 
   swAnmelden();
 }

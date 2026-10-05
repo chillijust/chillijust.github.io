@@ -37,6 +37,8 @@ meldet der Läufer das als Fehler statt sie zu übergehen.
 | `menue` | Reihenfolge, «bald» gegen Gebautes, Rückweg, Schließen, «Neue Gewohnheit» |
 | `speicher` | Lesen, Kaputtes, werfender Speicher |
 | `gewohnheiten` | Stärke, Serie, nie zweimal, Anlegen, Abhaken, Bearbeiten, Archiv, Hinweis ab 3, Speicher |
+| `kalender` | langer Druck, Woche und Monat, Tönung, Tag antippen, Nachtragen |
+| `abgewoehnen` | frei seit, Rekord, Stärke, Speicher, Anlegen, Takt, Rückfall, Welle, Bearbeiten, Duzen |
 | `offline` | `sw.js` von außen, App ohne Worker, Hinweis, Knopf, Notausgang |
 
 ## Eine Suite schreiben

@@ -13,7 +13,7 @@
 // Speicher an, und jeder andere wird beim Aktivieren restlos gelöscht — auch
 // der von Chillingo, das unter derselben Adresse lief. Den Lernstand im
 // localStorage berührt das nicht.
-var SW_VERSION = '0.2.0'; /* == VERSION == */
+var SW_VERSION = '0.3.0T'; /* == VERSION == */
 var CACHE = 'chillinal-' + SW_VERSION;
 
 // Die App ist **eine** Datei; Schriften, Bilder und Symbol stecken in ihr.
