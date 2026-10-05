@@ -156,6 +156,11 @@ pruefe('D4 Namen werden nicht als HTML gelesen', !q('.gw-name b') &&
 var erste = state.gewohnheiten[0].id;
 q('[data-haken="' + erste + '"]').click();
 pruefe('D5 antippen = erledigt', state.gewohnheiten[0].erledigt.indexOf(HEUTE) !== -1);
+pruefe('D5a die Chili flammt auf', q('#chiliFigur').classList.contains('flammt') &&
+  getComputedStyle(q('#chiliFigur')).animationName.indexOf('flammen') !== -1,
+  getComputedStyle(q('#chiliFigur')).animationName);
+zeige('home');
+pruefe('D5b nur einmal: neu gezeichnet flammt sie nicht wieder', !q('#chiliFigur').classList.contains('flammt'));
 pruefe('D6 die Kachel sagt es', q('[data-haken="' + erste + '"]').getAttribute('aria-pressed') === 'true' &&
   q('[data-haken="' + erste + '"]').parentNode.classList.contains('erledigt'));
 pruefe('D7 der Tagesring zählt mit', q('#tagesZahl').textContent === '1 von 2');
@@ -164,6 +169,7 @@ pruefe('D9 die Kachel bleibt, wo sie war', alle('[data-haken]')[0].getAttribute(
 q('[data-haken="' + erste + '"]').click();
 pruefe('D10 nochmal = zurück', state.gewohnheiten[0].erledigt.indexOf(HEUTE) === -1 &&
   q('#tagesZahl').textContent === '0 von 2');
+pruefe('D10a zurücknehmen ist kein Jubel', !q('#chiliFigur').classList.contains('flammt'));
 q('.gedimmt [data-haken]').click();
 pruefe('D11 auch Gedimmtes läßt sich abhaken', state.gewohnheiten[2].erledigt.indexOf(HEUTE) !== -1 &&
   q('#tagesZahl').textContent === '0 von 2');

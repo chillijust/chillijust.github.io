@@ -88,10 +88,12 @@ pruefe('N2a pro Woche verpaßt keinen Tag', status('C') === 'frei' && status('B'
 q('[data-nachtrag="B"]').click();
 pruefe('N3 nachgetragen und gespeichert', gewohnheitNach('B').erledigt.indexOf(vor(2)) !== -1 &&
   JSON.parse(localStorage.getItem(SPEICHER)).gewohnheiten[1].erledigt.indexOf(vor(2)) !== -1);
+pruefe('N3a nachtragen läßt die Chili aufflammen', q('#chiliFigur').classList.contains('flammt'));
 pruefe('N4 die Stärke rechnet neu', auswerten(gewohnheitNach('B'), HEUTE).staerke > vorher);
 pruefe('N5 der Tag ist jetzt voll, die Leiste bleibt offen', tag(vor(2)).classList.contains('voll') && !!q('#kalLeiste'));
 q('[data-nachtrag="B"]').click();
-pruefe('N6 nochmal = zurück', gewohnheitNach('B').erledigt.indexOf(vor(2)) === -1);
+pruefe('N6 nochmal = zurück', gewohnheitNach('B').erledigt.indexOf(vor(2)) === -1 &&
+  !q('#chiliFigur').classList.contains('flammt'));
 tag(vor(2)).click();
 pruefe('N7 nochmal antippen schließt den Tag', !q('#kalLeiste') && kalTag === null);
 tag(HEUTE).click();
