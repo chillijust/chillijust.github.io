@@ -142,7 +142,8 @@ der Umschalter (ADR 0007).
 - **Tropfen** (`tropfenAuf`, `tropfenZu`): Wo die Quelle rund ist (`tropfenQuelle`), läuft
   der Übergang in einer festen Hülle (`.tropfen-huelle`) mit einem Geist darin statt als
   Zoom. Woche | Monat behalten `kalTag`; `kalAnker` und `versatzFuer` wählen, was zu sehen
-  ist, `kalFliessen` läßt den Monat aus der Woche quellen und zurück.
+  ist, `kalFliessen` läßt den Monat aus der Woche quellen und zurück; Kartenhöhe (`heldTakt`) und
+  Tagesliste (`leisteGleiten`) laufen dabei im selben `KAL_TAKT`.
 
 ## Darstellung
 

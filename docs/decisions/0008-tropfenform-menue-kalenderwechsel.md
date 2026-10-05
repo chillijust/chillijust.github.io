@@ -47,3 +47,19 @@ Form zu klein, um gesehen zu werden.
 - Suiten: `bewegung` D1–D16 und R6–R8, `kalender` U1–U6.
 - Wie der Tropfen auf dem iPhone wirkt (Tempo, Größe der dritten Station), zeigt nur das
   Gerät.
+
+## Nachgestellt · 0.4.0T4
+
+Am Gerät angesehen: Die Tropfen waren zu gemächlich, das Menü schloß weniger flüssig, als
+es öffnete, und beim Kalenderwechsel schnappte es.
+
+- **Tropfen 35 % schneller**: Ansichten 416 ms (`TROPFEN_DAUER`), Menü 338 ms
+  (`MENUE_DAUER`).
+- **Das Menü schließt wie es öffnet**, nur rückwärts: dieselben Bilder, dieselbe Dauer,
+  gespiegelte Zeitpunkte. Der Inhalt geht, bevor das Blatt sich staucht, und am Knopf
+  blendet der Tropfen aus, statt schlagartig zu verschwinden — beides war der Ruck.
+- **Woche | Monat in einem Takt** (`KAL_TAKT`, 520 ms, ohne Überschwingen): Raster bzw.
+  Geist, Kartenhöhe (`heldTakt`) und Tagesliste (`leisteGleiten`). Vorher liefen drei
+  Bewegungen mit drei Dauern und zwei Kurven, und die Tagesliste sprang sofort an ihren
+  neuen Platz — das war das Schnappen. Die Ränder des Rasters wandern linear im Takt, nur
+  die Ecken bauchen sich in der Mitte.

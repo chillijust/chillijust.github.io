@@ -159,6 +159,10 @@ return durch().then(function () {
     Math.abs(br.right - kn.right) < 1.5, br.top + ' ' + br.right + ' / ' + kn.bottom + ' ' + kn.right);
   menueSchliessen();
   pruefe('D3 zu fließt es zurück in den Knopf', laeuft(bl) && !q('#menue').classList.contains('offen') && !q('#menue').hidden);
+  var zuBild = bl.getAnimations()[0], zuEnde = zuBild.effect.getKeyframes().slice(-1)[0];
+  pruefe('D3a zu ist auf an Dauer gleich und blendet am Knopf aus, statt zu verschwinden',
+    zuBild.effect.getTiming().duration === MENUE_DAUER && MENUE_DAUER === 338 && String(zuEnde.opacity) === '0' &&
+    zuEnde.borderRadius === TROPFEN_ZU, zuBild.effect.getTiming().duration + ' ' + zuEnde.opacity);
   return durch();
 }).then(function () {
   pruefe('D4 danach ist es weg', q('#menue').hidden && !laeuft(q('#menue .blatt')));
@@ -179,6 +183,7 @@ return durch().then(function () {
   pruefe('D9 zurück fließt die Ansicht als Tropfen in den Menüknopf', ansicht === 'home' && !!h && laeuft(h) &&
     !!h.querySelector('.geist'));
   pruefe('D10 mit dem Bauch voran, die Spitze unten links', z.borderRadius === TROPFEN_ZU, z.borderRadius);
+  pruefe('D10a um 35 % schneller als zuerst', h.getAnimations()[0].effect.getTiming().duration === 416);
   pruefe('D11 und landet auf dem Knopf', Math.abs(parseFloat(z.left) + parseFloat(z.width) / 2 - (k.left + k.width / 2)) < 2 &&
     Math.abs(parseFloat(z.top) + parseFloat(z.height) / 2 - (k.top + k.height / 2)) < 2);
   pruefe('D12 Kacheln bleiben Rechtecke', !tropfenQuelle(q('[data-haken]')) && !tropfenQuelle(q('[data-termin]')) &&
@@ -193,8 +198,19 @@ return durch().then(function () {
   var bild = laeuft(q('#kalRaster')) ? q('#kalRaster').getAnimations()[0].effect.getKeyframes()[0].clipPath : '';
   pruefe('D14 zum Monat: der Tag bleibt, der Monat quillt aus seiner Woche', kalTag === '2026-10-16' && !!q('#kalLeiste') &&
     /^inset\([1-9]/.test(bild), bild);
+  function takt(el) {
+    var a = el && el.getAnimations()[0], t = a ? a.effect.getTiming() : {};
+    return t.duration + ' ' + t.easing;
+  }
+  // Die Kurve schreibt der Browser um (.32 wird 0.32) — verglichen wird untereinander.
+  var soll = takt(q('#kalRaster'));
+  pruefe('D14b der Takt ist der des Kalenders', soll.indexOf(KAL_TAKT.dauer + ' cubic-bezier(') === 0, soll);
+  pruefe('D14a Raster, Karte und Tagesliste in einem Takt', takt(q('#kalRaster')) === soll && takt(q('.held')) === soll &&
+    takt(q('#kalLeiste')) === soll, takt(q('#kalRaster')) + ' / ' + takt(q('.held')) + ' / ' + takt(q('#kalLeiste')));
   ausbewegt();
   q('[data-kalender="woche"]').click();
+  pruefe('D15a zurück ebenso: Geist, Karte und Tagesliste', takt(geister()[0]) === soll && takt(q('.held')) === soll &&
+    takt(q('#kalLeiste')) === soll, takt(geister()[0]) + ' / ' + takt(q('.held')) + ' / ' + takt(q('#kalLeiste')));
   var gk = geister();
   pruefe('D15 zur Woche: der Monat zieht sich als Geist zusammen', kalTag === '2026-10-16' && !!q('#kalLeiste') &&
     gk.length === 1 && laeuft(gk[0]) && !!gk[0].shadowRoot.querySelector('#kalRaster') && alle('#kalRaster').length === 1);

@@ -879,7 +879,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.4.0T3';
+var APP_VERSION = '0.4.0T4';
 var APP_STAND = '2026-10-05';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -1339,6 +1339,12 @@ function tropfenQuelle(el) {
 var TROPFEN_ZU = '50% 50% 50% 0%';
 var TROPFEN_AUF = '50% 0% 50% 50%';
 var TROPFEN_KURVE = 'cubic-bezier(.45, 0, .2, 1)';
+// Am Gerät abgenommen: um 35 % schneller als zuerst (640 und 520 ms).
+var TROPFEN_DAUER = Math.round(640 * 0.65);
+var MENUE_DAUER = Math.round(520 * 0.65);
+// Woche | Monat: Raster, Kartenhöhe und Tagesliste laufen in einem Takt, ohne
+// Überschwingen — wer zwei Takte sieht, sieht es schnappen.
+var KAL_TAKT = { dauer: 520, kurve: 'cubic-bezier(.32, .72, 0, 1)' };
 
 function mischen(a, b, t) { return a + (b - a) * t; }
 
@@ -1386,7 +1392,7 @@ function huellenBild(r, rund, op, off) {
 // der ihn mit einem kleinen Nicken schluckt.
 function tropfenZu(g, r, ziel) {
   var w = tropfenWeg(sichtbar(r), ziel.getBoundingClientRect()), h = tropfenHuelle(g, r.width);
-  var dauer = 640;
+  var dauer = TROPFEN_DAUER;
   function sk(b, off) { return { transform: 'scale(' + (b.width / r.width).toFixed(4) + ')', offset: off }; }
   bewegt(h, [huellenBild(w.gross, '20px', 1, 0), huellenBild(w.mitte, '40% 40% 40% 18%', 1, 0.38),
     huellenBild(w.tropfen, TROPFEN_ZU, 1, 0.7), huellenBild(w.klein, TROPFEN_ZU, 1, 0.9),
@@ -1404,7 +1410,7 @@ function tropfenZu(g, r, ziel) {
 function tropfenAuf(neu, q) {
   var g = geist(neu);
   if (!g) return null;
-  var n = neu.getBoundingClientRect(), w = tropfenWeg(sichtbar(n), q), h = tropfenHuelle(g, n.width), dauer = 640;
+  var n = neu.getBoundingClientRect(), w = tropfenWeg(sichtbar(n), q), h = tropfenHuelle(g, n.width), dauer = TROPFEN_DAUER;
   function sk(b, off) { return { transform: 'scale(' + (b.width / n.width).toFixed(4) + ')', offset: off }; }
   neu.style.opacity = '0';
   bewegt(h, [huellenBild(w.klein, TROPFEN_AUF, 0, 0), huellenBild(w.klein, TROPFEN_AUF, 1, 0.08),
@@ -1510,11 +1516,15 @@ function heldHoehe() {
 
 // Die Karte springt nicht auf ihre neue Höhe, sie fließt hin — alles darunter
 // rückt mit.
+var heldTakt = null;   // ein Takt für die nächste Höhe, sonst die Feder
+
 function heldNachziehen(h0) {
-  var h = document.querySelector('.held'), h1 = h ? h.offsetHeight : 0;
+  var h = document.querySelector('.held'), h1 = h ? h.offsetHeight : 0, t = heldTakt;
+  heldTakt = null;
   if (!h0 || !h1 || h0 === h1) return;
   h.style.overflow = 'hidden';
-  bewegt(h, [{ height: px(h0) }, { height: px(h1) }], { dauer: 580 }, function () { h.style.overflow = ''; });
+  bewegt(h, [{ height: px(h0) }, { height: px(h1) }], { dauer: t ? t.dauer : 580, kurve: t ? t.kurve : FEDER },
+    function () { h.style.overflow = ''; });
 }
 
 // Ein Tropfen löst sich vom getippten Tag, fällt, wird breit und ist die
@@ -2346,23 +2356,35 @@ function kalFliessen(anker, vorher) {
   var r = raster.getBoundingClientRect();
   if (!vorher) {
     var oben = Math.max(0, reihe.top - r.top - 3), unten = Math.max(0, r.bottom - reihe.bottom - 3);
+    // Die Ränder wandern linear im Takt — nur die Ecken bauchen sich in der Mitte.
     bewegt(raster, [{ clipPath: 'inset(' + px(oben) + ' 0px ' + px(unten) + ' 0px round 16px)' },
-      { clipPath: 'inset(' + px(oben * 0.35) + ' 0px ' + px(unten * 0.35) + ' 0px round 40px)', offset: 0.45 },
-      { clipPath: 'inset(0px 0px 0px 0px round 0px)' }], { dauer: 620, kurve: TROPFEN_KURVE });
+      { clipPath: 'inset(' + px(oben * 0.5) + ' 0px ' + px(unten * 0.5) + ' 0px round 40px)', offset: 0.5 },
+      { clipPath: 'inset(0px 0px 0px 0px round 0px)' }], KAL_TAKT);
     return;
   }
   var g = vorher.geist, a = vorher.rect, alt = vorher.reihe;
-  bewegt(raster, [{ opacity: 0 }, { opacity: 1 }], { dauer: 260, warten: 300, kurve: 'ease-out', fill: 'backwards' });
+  bewegt(raster, [{ opacity: 0 }, { opacity: 1 }], { dauer: KAL_TAKT.dauer * 0.5, warten: KAL_TAKT.dauer * 0.4,
+    kurve: 'ease-out', fill: 'backwards' });
   if (!g || !alt) return;
   g.style.cssText = 'position: fixed; margin: 0; left: ' + px(a.left) + '; top: ' + px(a.top) + '; width: ' +
     px(a.width) + '; z-index: 2;';
   document.body.appendChild(g);
   var o = Math.max(0, alt.top - a.top - 3), u = Math.max(0, a.bottom - alt.bottom - 3), dy = reihe.top - alt.top;
   bewegt(g, [{ clipPath: 'inset(0px 0px 0px 0px round 0px)', transform: 'none', opacity: 1 },
-    { clipPath: 'inset(' + px(o * 0.6) + ' 0px ' + px(u * 0.6) + ' 0px round 40px)', transform: 'translateY(' + px(dy * 0.5) + ')',
+    { clipPath: 'inset(' + px(o * 0.5) + ' 0px ' + px(u * 0.5) + ' 0px round 40px)', transform: 'translateY(' + px(dy * 0.5) + ')',
       opacity: 1, offset: 0.5 },
     { clipPath: 'inset(' + px(o) + ' 0px ' + px(u) + ' 0px round 16px)', transform: 'translateY(' + px(dy) + ')', opacity: 0 }],
-    { dauer: 560, kurve: TROPFEN_KURVE, fill: 'forwards' }, function () { weg(g); });
+    { dauer: KAL_TAKT.dauer, kurve: KAL_TAKT.kurve, fill: 'forwards' }, function () { weg(g); });
+}
+
+// Die Tagesliste springt nicht an ihren neuen Platz, sie gleitet im selben
+// Takt wie Raster und Karte dorthin.
+function leisteGleiten(obenVorher) {
+  var l = $('kalLeiste');
+  if (obenVorher === null || !l || bewegungAus()) return;
+  var dy = obenVorher - l.getBoundingClientRect().top;
+  if (Math.abs(dy) < 1) return;
+  bewegt(l, [{ transform: 'translateY(' + px(dy) + ')' }, { transform: 'none' }], KAL_TAKT);
 }
 
 function zeichneKalender(heute) {
@@ -3156,11 +3178,14 @@ function bindeKalender() {
       if (wahl === state.kalender) return;
       var heute = heuteSchluessel(), anker = kalAnker(heute), alt = $('kalRaster');
       var vorher = wahl === 'woche' ? { geist: geist(alt), rect: alt.getBoundingClientRect(), reihe: reiheVon(anker) } : null;
+      var leiste = $('kalLeiste'), leisteOben = leiste ? leiste.getBoundingClientRect().top : null;
       state.kalender = wahl;
       kalVersatz = versatzFuer(anker, heute);
       speichern();
+      heldTakt = KAL_TAKT;
       render();
       kalFliessen(anker, vorher);
+      leisteGleiten(leisteOben);
     });
   });
   $('kalZurueck').addEventListener('click', function () { kalVersatz--; neu(); });
@@ -3237,9 +3262,19 @@ function blattBilder(rund) {
   function bild(sx, sy, y, r, off) {
     return { transform: 'translateY(' + px(y) + ') scale(' + sx.toFixed(4) + ', ' + sy.toFixed(4) + ')', borderRadius: r, offset: off };
   }
-  return [bild(kr.width / br.width, kr.height / br.height, dy, rund, 0),
-    bild(0.55, 0.42, dy * 0.4, rund === TROPFEN_AUF ? '40% 14% 40% 40%' : '40% 40% 40% 14%', 0.45),
-    bild(1, 1, 0, '18px', 1)];
+  var klein = bild(kr.width / br.width, kr.height / br.height, dy, rund, 0);
+  var mitte = bild(0.55, 0.42, dy * 0.4, rund === TROPFEN_AUF ? '40% 14% 40% 40%' : '40% 40% 40% 14%', 0.45);
+  var voll = bild(1, 1, 0, '18px', 1);
+  var leise = {}, k;
+  for (k in klein) leise[k] = klein[k];
+  // Am Knopf blendet der Tropfen ein und aus, statt zu erscheinen oder zu
+  // verschwinden — sonst endet das Schließen mit einem Ruck.
+  klein.opacity = 1;
+  leise.opacity = 0;
+  mitte.opacity = 1;
+  voll.opacity = 1;
+  klein.offset = 0.14;
+  return [leise, klein, mitte, voll];
 }
 
 function menueOeffnen() {
@@ -3252,8 +3287,9 @@ function menueOeffnen() {
   huelle.classList.add('offen');
   var bilder = blattBilder(TROPFEN_AUF);
   if (bilder) {
-    bewegt(b, bilder, { dauer: 520, kurve: TROPFEN_KURVE });
-    bewegt($('menueListe'), [{ opacity: 0 }, { opacity: 1 }], { dauer: 260, warten: 200, kurve: 'ease-out', fill: 'backwards' });
+    bewegt(b, bilder, { dauer: MENUE_DAUER, kurve: TROPFEN_KURVE });
+    bewegt($('menueListe'), [{ opacity: 0 }, { opacity: 1 }], { dauer: MENUE_DAUER * 0.5, warten: MENUE_DAUER * 0.4,
+      kurve: 'ease-out', fill: 'backwards' });
   }
 }
 
@@ -3266,12 +3302,15 @@ function menueSchliessen(sofort) {
   function zu() { if (!huelle.classList.contains('offen')) huelle.hidden = true; }
   var bilder = sofort ? null : blattBilder(TROPFEN_ZU);
   if (!bilder || bewegungAus()) { zu(); return; }
+  // Das Schließen ist das Öffnen rückwärts — dieselben Bilder, dieselbe Dauer,
+  // gespiegelte Zeitpunkte. Der Inhalt geht, bevor das Blatt sich staucht.
   // Nur die eigenen Bilder abräumen: Wer währenddessen wieder öffnet, behält
   // seinen Tropfen.
-  var liste = bewegt($('menueListe'), [{ opacity: 1 }, { opacity: 0 }], { dauer: 140, kurve: 'ease-in', fill: 'forwards' });
+  var liste = bewegt($('menueListe'), [{ opacity: 1 }, { opacity: 0 }], { dauer: MENUE_DAUER * 0.35, kurve: 'ease-in',
+    fill: 'forwards' });
   var blatt = null;
-  blatt = bewegt(b, bilder.reverse().map(function (f, i) { f.offset = [0, 0.55, 1][i]; return f; }),
-    { dauer: 420, kurve: TROPFEN_KURVE, fill: 'forwards' }, function () {
+  blatt = bewegt(b, bilder.reverse().map(function (f) { f.offset = 1 - f.offset; return f; }),
+    { dauer: MENUE_DAUER, kurve: TROPFEN_KURVE, fill: 'forwards' }, function () {
       zu();
       if (blatt) blatt.cancel();
       if (liste) liste.cancel();

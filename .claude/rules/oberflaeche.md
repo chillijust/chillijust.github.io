@@ -74,7 +74,10 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 - **Was aus einem runden Knopf kommt oder in ihn geht, ist ein Tropfen** (`tropfenAuf`,
   `tropfenZu`, `tropfenQuelle`) — Bauch voran, Spitze hinten. Kacheln und Zeilen zoomen.
 - **Das Menü klappt unter seinem Knopf auf** (`menueOeffnen`, `blattLegen`), nie als Blatt
-  von unten.
+  von unten. Schließen ist Öffnen rückwärts — gleiche Dauer, gespiegelte Bilder.
+- **Was zusammen geht, geht in einem Takt**: Wer Raster, Karte und Liste zugleich bewegt,
+  gibt allen dieselbe Dauer und Kurve (`KAL_TAKT`, `heldTakt`) — zwei Takte sehen aus wie
+  Schnappen (ADR 0008).
 - Animation nur, wo sie Rückmeldung gibt (Abhaken, Ring, Schalter, Blatt). Unter
   `prefers-reduced-motion: reduce` steht alles still; Abläufe, die auf das Ende einer
   Animation warten, fragen `bewegungAus()`.
