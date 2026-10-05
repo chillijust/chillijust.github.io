@@ -41,6 +41,8 @@ function feld(zeilen, name) {
   return null;
 }
 function neu() { rueckZiel = null; frisch(); }
+// Alles wieder neu, als wäre nie exportiert worden (ADR 0011).
+function ohneMarken() { state.termine.concat(state.gewohnheiten).forEach(function (e) { e.imKalender = null; }); }
 
 // ── I · Die Rechnung ────────────────────────────────────────
 pruefe('I1 Text wird maskiert', icsText('a,b;c\\d' + String.fromCharCode(10) + 'e') === 'a\\,b\\;c\\\\d\\ne');
@@ -184,6 +186,7 @@ pruefe('A10 ohne Teilen nur Laden, als Hauptknopf', !q('#exTeilen') && !!q('#exL
   !q('#exLaden').classList.contains('zart'));
 
 // Laden: die Adresse und der Klick werden abgefangen.
+var erwartetLaden = kalenderDatei(HEUTE, zeitJetzt());
 var blobs = [], geklickt = null, klickWar = HTMLAnchorElement.prototype.click, urlWar = URL.createObjectURL;
 URL.createObjectURL = function (b) { blobs.push(b); return 'blob:pruefung'; };
 HTMLAnchorElement.prototype.click = function () { geklickt = { href: this.getAttribute('href'), name: this.download }; };
@@ -206,7 +209,9 @@ Object.defineProperty(navigator, 'share', { value: function (d) {
   return Promise.reject(e);
 }, configurable: true, writable: true });
 state.exportiert = null;
+ohneMarken();
 render();
+var erwartetTeilen = kalenderDatei(HEUTE, zeitJetzt());
 pruefe('A14 mit Teilen zwei Knöpfe, Teilen vorn', !!q('#exTeilen') && q('#exLaden').classList.contains('zart') &&
   q('#exTeilen').compareDocumentPosition(q('#exLaden')) === Node.DOCUMENT_POSITION_FOLLOWING);
 q('#exTeilen').click();
@@ -217,12 +222,14 @@ return Promise.resolve().then(function () { return new Promise(function (f) { se
   pruefe('A16 und merkt sich den Export', state.exportiert === zeitJetzt() && /Geteilt/.test(q('#meldung').textContent));
   return f.text();
 }).then(function (text) {
-  pruefe('A17 die geteilte Datei ist die gerechnete', text === kalenderDatei(HEUTE, zeitJetzt()) &&
+  pruefe('A17 die geteilte Datei ist die gerechnete', text === erwartetTeilen &&
     /BEGIN:VEVENT/.test(text));
   return blobDatei.text();
 }).then(function (text) {
-  pruefe('A18 die geladene ebenso', text === kalenderDatei(HEUTE, zeitJetzt()));
+  pruefe('A18 die geladene ebenso', text === erwartetLaden);
   antwort = 'nein';
+  ohneMarken();
+  render();
   state.exportiert = null;
   q('#meldung').textContent = '';
   q('#exTeilen').click();

@@ -18,3 +18,4 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0008](0008-tropfenform-menue-kalenderwechsel.md) | Tropfenform, Menü unter dem Knopf, Woche \| Monat hält den Tag | gilt |
 | [0009](0009-kalender-export-im-einzelnen.md) | Kalender-Export: schwebende Zeiten, Teilen und Laden, Erinnerung der Gewohnheit | gilt |
 | [0010](0010-chilli-journal-und-heute.md) | Der Name heißt «Chilli Journal», «Heute» führt den Kalender nach Hause | gilt |
+| [0011](0011-was-schon-im-kalender-steht.md) | Was schon im Kalender steht, geht nicht noch einmal hinaus | gilt |

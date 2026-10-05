@@ -55,6 +55,8 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 - **Der Kalender-Export** hat «Teilen» nur, wo `kannTeilen()`, und «Als Datei laden» immer;
   eine Gewohnheit trägt dort einen grauen Strich, keinen blauen. Was aus dem Export geöffnet
   wird, kehrt über `rueckZiel` dorthin zurück (ADR 0009).
+- **Was schon im Kalender steht, tritt zurück** (`.ex-alt`) und geht nur über «Bearbeiten»
+  noch einmal hinaus; Neues geht immer mit, Geändertes trägt einen Vermerk (ADR 0011).
 - **Was live läuft, schreibt `takt()` an Ort und Stelle** (`[data-frei]`,
   `[data-wellerest]`, der Ring der Welle) — kein `render()` im Sekundentakt.
 - **Eine neue Ansicht** ist ein Eintrag in `ANSICHTEN` (`titel`, `zeichnen`), ihre Ereignisse
