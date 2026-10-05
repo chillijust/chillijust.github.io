@@ -49,7 +49,7 @@ die Chili.
 
 | Bauabschnitt | Stand |
 | --- | --- |
-| 1 · Umbau, Gerüst, Kopf, Farben, Schriften, Symbol, `sw.js` | fertig (0.1.0T) |
+| 1 · Umbau, Gerüst, Kopf, Farben, Schriften, Symbol, `sw.js` | fertig (0.1.0) |
 | 2 · Gewohnheiten: anlegen, Rhythmus, Abhaken, Stärke, nie zweimal | offen |
 | 3 · Abgewöhnen, 10-Minuten-Welle | offen |
 | 4 · Termine, Monatskalender, Tagesansicht | offen |
