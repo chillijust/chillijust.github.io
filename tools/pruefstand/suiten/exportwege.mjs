@@ -73,6 +73,13 @@ return durch().then(function () {
   pruefe('H4a die Karte ist aus Glas: getönt, durchscheinend, verschwommen', karte.classList.contains('glas') &&
     /blur\(/.test(glasFilter) && /saturate\(/.test(glasFilter) && /rgba\(.*0?\.\d+\)$/.test(kst.backgroundColor) &&
     !!token('--glas') && /inset/.test(kst.boxShadow), [glasFilter, kst.backgroundColor].join(' | '));
+  var vorfahr = karte.parentElement, grenze = null;
+  for (; vorfahr && vorfahr !== document.documentElement; vorfahr = vorfahr.parentElement) {
+    var vs = getComputedStyle(vorfahr);
+    if (Number(vs.opacity) < 1 || vs.filter !== 'none' || (vs.backdropFilter || 'none') !== 'none') grenze = vorfahr.id || vorfahr.className;
+  }
+  pruefe('H4b kein Vorfahr begrenzt das Glas — die Seite scheint durch, nicht nur der Schleier', grenze === null &&
+    Number(getComputedStyle(q('#hinweisBlatt')).opacity) === 1, String(grenze));
   pruefe('H5 «OK» ist groß genug', q('#hinweisOk').getBoundingClientRect().height >= 44 &&
     q('#hinweisOk').textContent === 'OK');
   pruefe('H6 er duzt', !/(^|\s)(Sie|Ihnen)\b/.test(q('#hinweisBlatt').textContent));

@@ -84,7 +84,8 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   «OK»), keine Meldung — die geht nach zwei Sekunden. Er tropft mit `tropfenAuf`/`tropfenZu`
   wie eine Ansicht, nur mit `HINWEIS_DAUER` (60 % schneller) und beim Schließen früh als
   Tropfen (`frueh`); **eine zweite Tropfen-Mechanik gibt es nicht** (ADR 0013). Er ist aus
-  Glas (`.glas`), auch im Tropfen (`glas` im `opt`); Ansichten nicht (ADR 0014).
+  Glas (`.glas`), auch im Tropfen (`glas` im `opt`); Ansichten nicht. **Kein Vorfahr von
+  Glas blendet seine Deckkraft** — sonst sieht es nur ihn und bleibt matt (ADR 0014).
 - **Bewegt wird über `bewegt()` mit der `FEDER`**; CSS nimmt `var(--feder, ease)`. Ausnahme: Tropfen
   schwingen nicht über (ADR 0008).
 - **Was aus einem runden Knopf kommt oder in ihn geht, ist ein Tropfen** (`tropfenAuf`,
