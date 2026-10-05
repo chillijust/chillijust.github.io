@@ -170,6 +170,7 @@ return durch().then(function () {
   ausbewegt();
   q('[data-menue="einstellungen"]').click();
   var h = q('.tropfen-huelle');
+  pruefe('D7a eine Ansicht tropft ohne Glas — das hat nur der Hinweis (ADR 0014)', !!h && !h.classList.contains('glas'));
   pruefe('D5 die Einstellungen quellen als Tropfen aus dem Eintrag', ansicht === 'einstellungen' && !!h && laeuft(h) &&
     q('#ansicht').style.opacity === '0');
   pruefe('D6 das Menü ist im selben Augenblick weg', q('#menue').hidden);

@@ -52,6 +52,12 @@
   --knopf: #141413;
   --knopf-text: #FAF9F5;
   --schatten: 0 1px 2px rgba(20, 20, 19, .06), 0 6px 20px rgba(20, 20, 19, .06);
+  /* Glas (ADR 0014): eine Tönung, durch die der Grund verschwommen scheint,
+     eine Kante und ein Lichtsaum oben. */
+  --glas: rgba(250, 249, 245, .68);
+  --glas-kante: rgba(255, 255, 255, .55);
+  --glas-licht: rgba(255, 255, 255, .95);
+  --glas-schleier: rgba(20, 20, 19, .10);
   --rund: 20px;
   --serif: 'Lora', Georgia, 'Times New Roman', serif;
   --sans: 'Poppins', -apple-system, 'Helvetica Neue', Arial, sans-serif;
@@ -70,6 +76,10 @@
     --knopf: #FAF9F5;
     --knopf-text: #141413;
     --schatten: 0 1px 2px rgba(0, 0, 0, .3);
+    --glas: rgba(43, 43, 40, .64);
+    --glas-kante: rgba(255, 255, 255, .14);
+    --glas-licht: rgba(255, 255, 255, .28);
+    --glas-schleier: rgba(0, 0, 0, .38);
     color-scheme: dark;
   }
 }
@@ -85,6 +95,10 @@
   --knopf: #FAF9F5;
   --knopf-text: #141413;
   --schatten: 0 1px 2px rgba(0, 0, 0, .3);
+  --glas: rgba(43, 43, 40, .64);
+  --glas-kante: rgba(255, 255, 255, .14);
+  --glas-licht: rgba(255, 255, 255, .28);
+  --glas-schleier: rgba(0, 0, 0, .38);
   color-scheme: dark;
 }
 
@@ -929,7 +943,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
   align-items: center;
   justify-content: center;
   padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
-  background: rgba(20, 20, 19, .18);
+  background: var(--glas-schleier);
   opacity: 0;
   transition: opacity .22s ease;
 }
@@ -940,11 +954,21 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
   width: 100%;
   max-width: 340px;
   padding: 22px 20px 18px;
-  background: var(--grund);
   border-radius: 18px;
-  box-shadow: 0 2px 6px rgba(20, 20, 19, .10), 0 16px 40px rgba(20, 20, 19, .18);
   text-align: center;
 }
+/* Glas: Was dahinter liegt, scheint verschwommen und satter durch; die Kante
+   faßt es, der Lichtsaum oben gibt die Wölbung. Die Karte trägt es, solange
+   sie steht, die Hülle, solange sie tropft — der Geist darin ist dann klar,
+   sonst läge Glas auf Glas (ADR 0014). */
+.glas, .tropfen-huelle.glas {
+  background: var(--glas);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  backdrop-filter: blur(30px) saturate(180%);
+  box-shadow: inset 0 1px 0 var(--glas-licht), inset 0 0 0 1px var(--glas-kante),
+    0 2px 6px rgba(20, 20, 19, .08), 0 18px 44px rgba(20, 20, 19, .20);
+}
+.glas.im-tropfen { background: none; -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none; }
 .hinweis-karte h2 { margin: 0 0 6px; font-family: var(--sans); font-size: 18px; font-weight: 600; }
 .hinweis-karte p { margin: 0 0 18px; font-size: 16px; color: var(--text-2); }
 .hinweis-karte .knopf { width: 100%; }
@@ -1013,7 +1037,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 </div>
 <div id="meldung" role="status" aria-live="polite"></div>
 <div id="hinweisBlatt" hidden>
-  <div class="hinweis-karte" id="hinweisKarte" tabindex="-1" role="alertdialog" aria-modal="true" aria-labelledby="hinweisTitel"
+  <div class="hinweis-karte glas" id="hinweisKarte" tabindex="-1" role="alertdialog" aria-modal="true" aria-labelledby="hinweisTitel"
     aria-describedby="hinweisText">
     <div id="hinweisInhalt">
       <h2 id="hinweisTitel"></h2>
@@ -1031,7 +1055,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.5.0T12';
+var APP_VERSION = '0.5.0T13';
 var APP_STAND = '2026-10-05';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -1563,9 +1587,11 @@ function sichtbar(r) {
 }
 
 // Die Hülle: feste Lage, Inhalt in voller Breite `breite`, von oben links skaliert.
-function tropfenHuelle(inhalt, breite) {
-  var h = document.createElement('div');
-  h.className = 'tropfen-huelle';
+// `glas`: Die Hülle trägt das Glas, der Inhalt darin wird klar (ADR 0014).
+function tropfenHuelle(inhalt, breite, glas) {
+  var h = document.createElement('div'), innen = glas && inhalt.shadowRoot && inhalt.shadowRoot.lastChild;
+  h.className = 'tropfen-huelle' + (glas ? ' glas' : '');
+  if (innen && innen.classList) innen.classList.add('im-tropfen');
   h.setAttribute('aria-hidden', 'true');
   inhalt.style.cssText = 'position: absolute; left: 0; top: 0; margin: 0; width: ' + px(breite) +
     '; transform-origin: 0 0;';
@@ -1614,10 +1640,11 @@ function tropfenSpitzeZu(von, k) {
 // Zu: der Geist `g` der Fläche `r` fließt als Tropfen in den Knopf `ziel`,
 // der ihn mit einem kleinen Nicken schluckt. `opt` ist frei: `rund` die Ecken
 // der Fläche (eine Ansicht 20px), `dauer` die eigene Dauer, `frueh` den Tropfen
-// früh formen und halten, `fertig` kommt, wenn er geschluckt ist.
+// früh formen und halten, `glas` die Hülle aus Glas, `fertig` kommt, wenn er
+// geschluckt ist.
 function tropfenZu(g, r, ziel, opt) {
   opt = opt || {};
-  var k = ziel.getBoundingClientRect(), w = tropfenWeg(sichtbar(r), k), h = tropfenHuelle(g, r.width);
+  var k = ziel.getBoundingClientRect(), w = tropfenWeg(sichtbar(r), k), h = tropfenHuelle(g, r.width, opt.glas);
   var dauer = opt.dauer || TROPFEN_DAUER, t = opt.frueh ? TROPFEN_ZU_FRUEH : TROPFEN_ZU_TAKT;
   var spitze = opt.frueh ? tropfenSpitzeZu(sichtbar(r), k) : TROPFEN_ZU;
   function sk(b, off) { return { transform: 'scale(' + (b.width / r.width).toFixed(4) + ')', offset: off }; }
@@ -1637,18 +1664,19 @@ function tropfenZu(g, r, ziel, opt) {
 
 // Auf: die neue Ansicht `neu` quillt als Tropfen aus der Fläche `q`. Gezeigt
 // wird ihr Geist; die echte Ansicht steht derweil unsichtbar schon bereit.
-// `rund` sind die Ecken, in denen er ankommt (eine Ansicht hat keine), `dauer`
-// die eigene Dauer, sonst die der Ansichten.
-function tropfenAuf(neu, q, rund, dauer) {
+// `opt` ist frei: `rund` die Ecken, in denen er ankommt (eine Ansicht hat
+// keine), `dauer` die eigene Dauer, `glas` die Hülle aus Glas.
+function tropfenAuf(neu, q, opt) {
+  opt = opt || {};
   var g = geist(neu);
   if (!g) return null;
-  var n = neu.getBoundingClientRect(), w = tropfenWeg(sichtbar(n), q), h = tropfenHuelle(g, n.width);
-  dauer = dauer || TROPFEN_DAUER;
+  var n = neu.getBoundingClientRect(), w = tropfenWeg(sichtbar(n), q), h = tropfenHuelle(g, n.width, opt.glas);
+  var dauer = opt.dauer || TROPFEN_DAUER;
   function sk(b, off) { return { transform: 'scale(' + (b.width / n.width).toFixed(4) + ')', offset: off }; }
   neu.style.opacity = '0';
   bewegt(h, [huellenBild(w.klein, TROPFEN_AUF, 0, 0), huellenBild(w.klein, TROPFEN_AUF, 1, 0.08),
     huellenBild(w.tropfen, TROPFEN_AUF, 1, 0.3), huellenBild(w.mitte, '40% 18% 40% 40%', 1, 0.62),
-    huellenBild(w.gross, rund || '0px', 1, 1)],
+    huellenBild(w.gross, opt.rund || '0px', 1, 1)],
     { dauer: dauer, kurve: 'cubic-bezier(.3, 0, .25, 1)', fill: 'forwards' }, function () {
       neu.style.opacity = '';
       weg(h);
@@ -1889,7 +1917,7 @@ function hinweisZeigen(titel, text, quelle, ziel) {
   void blatt.offsetWidth;
   blatt.classList.add('offen');
   try { $('hinweisKarte').focus({ preventScroll: true }); } catch (e) { /* egal */ }
-  if (hinweisQuelle && hinweisQuelle.width) tropfenAuf($('hinweisKarte'), hinweisQuelle, '18px', HINWEIS_DAUER);
+  if (hinweisQuelle && hinweisQuelle.width) tropfenAuf($('hinweisKarte'), hinweisQuelle, { rund: '18px', dauer: HINWEIS_DAUER, glas: true });
 }
 
 // Schließen: Der Schleier blendet aus, die Karte geht als Geist in den
@@ -1905,7 +1933,7 @@ function hinweisSchliessen() {
   if (!g) { blatt.hidden = true; return; }
   var r = karte.getBoundingClientRect();
   karte.style.opacity = '0';
-  tropfenZu(g, r, ziel, { rund: '18px', dauer: HINWEIS_DAUER, frueh: true, fertig: function () {
+  tropfenZu(g, r, ziel, { rund: '18px', dauer: HINWEIS_DAUER, frueh: true, glas: true, fertig: function () {
     karte.style.opacity = '';
     if (!blatt.classList.contains('offen')) blatt.hidden = true;
   } });

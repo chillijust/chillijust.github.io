@@ -27,6 +27,7 @@ function laden() {
 }
 // Der Browser kürzt Ecken («0% 50% 50% 50%» wird «0% 50% 50%»): so vergleichen.
 function ecken(r) { var d = document.createElement('div'); d.style.borderRadius = r; return d.style.borderRadius; }
+function token(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
 function offen() { return !q('#hinweisBlatt').hidden && q('#hinweisBlatt').classList.contains('offen'); }
 function clips(el) {
   return el.getAnimations().map(function (a) { return a.effect.getKeyframes()[0].clipPath || ''; }).join();
@@ -51,6 +52,11 @@ var erstes = bilder(huelle)[0] || {}, letztes = bilder(huelle).slice(-1)[0] || {
 pruefe('H1 statt der Meldung ein Hinweis, der wartet', offen() && q('#hinweisTitel').textContent === 'Datei geladen' &&
   /Öffne sie/.test(q('#hinweisText').textContent) && karte.getAttribute('role') === 'alertdialog' &&
   !q('#meldung').classList.contains('zeigt'));
+var innen = huelle && huelle.firstChild && huelle.firstChild.shadowRoot && huelle.firstChild.shadowRoot.lastChild;
+pruefe('H2a auch der Tropfen ist Glas, der Geist darin klar', !!huelle && huelle.classList.contains('glas') &&
+  /blur\(/.test(getComputedStyle(huelle).backdropFilter || getComputedStyle(huelle).webkitBackdropFilter || '') &&
+  !!innen && innen.classList.contains('im-tropfen') && getComputedStyle(innen).backgroundImage === 'none' &&
+  /rgba\(0, 0, 0, 0\)|transparent/.test(getComputedStyle(innen).backgroundColor));
 pruefe('H2 er quillt mit dem Tropfen der Ansichten aus «Als Datei laden»', laeuft(huelle) &&
   dauer(huelle) === HINWEIS_DAUER && HINWEIS_DAUER === Math.round(TROPFEN_DAUER * 0.4) && bilder(huelle).length === 5 && Number(erstes.opacity) === 0 &&
   erstes.borderRadius === TROPFEN_AUF && Math.abs(parseFloat(erstes.left) + parseFloat(erstes.width) / 2 -
@@ -63,6 +69,10 @@ return durch().then(function () {
   var k = karte.getBoundingClientRect(), mx = innerWidth / 2, my = innerHeight / 2;
   pruefe('H4 mittig', Math.abs(k.left + k.width / 2 - mx) < 2 && Math.abs(k.top + k.height / 2 - my) < 2,
     [k.left, k.top, k.width, k.height, innerWidth, innerHeight].join());
+  var kst = getComputedStyle(karte), glasFilter = kst.backdropFilter || kst.webkitBackdropFilter || '';
+  pruefe('H4a die Karte ist aus Glas: getönt, durchscheinend, verschwommen', karte.classList.contains('glas') &&
+    /blur\(/.test(glasFilter) && /saturate\(/.test(glasFilter) && /rgba\(.*0?\.\d+\)$/.test(kst.backgroundColor) &&
+    !!token('--glas') && /inset/.test(kst.boxShadow), [glasFilter, kst.backgroundColor].join(' | '));
   pruefe('H5 «OK» ist groß genug', q('#hinweisOk').getBoundingClientRect().height >= 44 &&
     q('#hinweisOk').textContent === 'OK');
   pruefe('H6 er duzt', !/(^|\s)(Sie|Ihnen)\b/.test(q('#hinweisBlatt').textContent));
@@ -86,6 +96,7 @@ return durch().then(function () {
     tropfenSpitzeZu({ left: 0, top: 0, width: 10, height: 10 }, { left: 100, top: -100, width: 10, height: 10 }) === TROPFEN_ZU &&
     tropfenSpitzeZu({ left: 0, top: 0, width: 10, height: 10 }, { left: -100, top: 100, width: 10, height: 10 }) === '50% 0% 50% 50%');
   pruefe('H8c die Ansichten behalten ihren Takt', TROPFEN_ZU_TAKT.join() === '0.38,0.7,0.9');
+  pruefe('H8d auch zurück tropft er als Glas', zu.classList.contains('glas'));
   return durch();
 }).then(function () {
   pruefe('H9 danach ist er weg', q('#hinweisBlatt').hidden && !laeuft(karte) && geister().length === 0 &&
