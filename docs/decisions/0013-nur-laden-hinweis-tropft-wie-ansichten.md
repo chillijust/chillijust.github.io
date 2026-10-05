@@ -1,6 +1,6 @@
 # 0013 · Nur «Als Datei laden»; der Hinweis tropft wie die Ansichten
 
-*2026-10-05 · Abnahme von 0.5.0T8 · Version 0.5.0T9, Tempo 0.5.0T10/T11 · löst in 0009 «beide Wege» ab, ändert in 0012 den Tropfen des Hinweises*
+*2026-10-05 · Abnahme von 0.5.0T8 · Version 0.5.0T9, Tempo 0.5.0T10/T11, Form 0.5.0T12 · löst in 0009 «beide Wege» ab, ändert in 0012 den Tropfen des Hinweises*
 
 ## Ausgangslage
 
@@ -29,6 +29,13 @@ Die Abnahme am Gerät (iPhone, Home-Bildschirm-App) hat ergeben:
   166 statt 416 ms);
   beide Funktionen nehmen dafür eine `dauer`. Die Ansichten bleiben, wie sie sind — eine
   Karte ist kleiner und ihr Weg kürzer.
+- **Beim Schließen ist er früh ein Tropfen** (0.5.0T12): Eine Ansicht wird erst bei 70 %
+  des Wegs zum Tropfen und ist bei 90 % schon knopfklein — bei 166 ms stünde die Form zwei
+  Bilder lang. Der Hinweis nimmt darum `TROPFEN_ZU_FRUEH` (halbrund 18 %, Tropfen 40 %,
+  Knopfgröße 86 %) und hält die Form bis zum Ziel; die Spitze sitzt in der Ecke, die vom
+  Ziel abgewandt ist (`tropfenSpitzeZu`). `tropfenZu` nimmt dafür ein `opt`
+  (`rund`, `dauer`, `frueh`, `fertig`); ohne bleibt alles wie bei den Ansichten
+  (`TROPFEN_ZU_TAKT`).
 - Die Quelle wird gemessen, **bevor** neu gezeichnet wird — nach dem Laden ist der Knopf
   schon zugetropft. Ist das Ziel beim Schließen nicht zu sehen, fließt er in die Quelle
   zurück; dort nickt nichts.

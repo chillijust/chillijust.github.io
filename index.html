@@ -1031,7 +1031,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.5.0T11';
+var APP_VERSION = '0.5.0T12';
 var APP_STAND = '2026-10-05';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -1596,22 +1596,39 @@ function huellenBild(r, rund, op, off) {
     opacity: op, offset: off };
 }
 
+// Wann die Stationen erreicht sind: halbwegs rund, Tropfen, Knopfgröße. Eine
+// Ansicht wird spät zum Tropfen. Ein kurzer Tropfen (der Hinweis) muß die Form
+// früh annehmen und bis zum Ziel halten — sonst steht sie nur zwei Bilder
+// lang und man sieht ein Schrumpfen, keinen Tropfen (ADR 0013).
+var TROPFEN_ZU_TAKT = [0.38, 0.7, 0.9];
+var TROPFEN_ZU_FRUEH = [0.18, 0.4, 0.86];
+
+// Die Spitze zieht hinterher: Sie sitzt in der Ecke, die vom Ziel abgewandt
+// ist (Ecken oben links, oben rechts, unten rechts, unten links).
+function tropfenSpitzeZu(von, k) {
+  var nachRechts = k.left + k.width / 2 >= von.left + von.width / 2, nachOben = k.top + k.height / 2 <= von.top + von.height / 2;
+  var ecke = nachOben ? (nachRechts ? 3 : 2) : (nachRechts ? 0 : 1);
+  return [0, 1, 2, 3].map(function (i) { return i === ecke ? '0%' : '50%'; }).join(' ');
+}
+
 // Zu: der Geist `g` der Fläche `r` fließt als Tropfen in den Knopf `ziel`,
-// der ihn mit einem kleinen Nicken schluckt. `rund` sind die Ecken der Fläche
-// (eine Ansicht 20px), `fertig` kommt, wenn er geschluckt ist; `dauer` ist
-// die eigene Dauer, sonst die der Ansichten.
-function tropfenZu(g, r, ziel, rund, fertig, dauer) {
-  var w = tropfenWeg(sichtbar(r), ziel.getBoundingClientRect()), h = tropfenHuelle(g, r.width);
-  dauer = dauer || TROPFEN_DAUER;
+// der ihn mit einem kleinen Nicken schluckt. `opt` ist frei: `rund` die Ecken
+// der Fläche (eine Ansicht 20px), `dauer` die eigene Dauer, `frueh` den Tropfen
+// früh formen und halten, `fertig` kommt, wenn er geschluckt ist.
+function tropfenZu(g, r, ziel, opt) {
+  opt = opt || {};
+  var k = ziel.getBoundingClientRect(), w = tropfenWeg(sichtbar(r), k), h = tropfenHuelle(g, r.width);
+  var dauer = opt.dauer || TROPFEN_DAUER, t = opt.frueh ? TROPFEN_ZU_FRUEH : TROPFEN_ZU_TAKT;
+  var spitze = opt.frueh ? tropfenSpitzeZu(sichtbar(r), k) : TROPFEN_ZU;
   function sk(b, off) { return { transform: 'scale(' + (b.width / r.width).toFixed(4) + ')', offset: off }; }
-  bewegt(h, [huellenBild(w.gross, rund || '20px', 1, 0), huellenBild(w.mitte, '40% 40% 40% 18%', 1, 0.38),
-    huellenBild(w.tropfen, TROPFEN_ZU, 1, 0.7), huellenBild(w.klein, TROPFEN_ZU, 1, 0.9),
-    huellenBild(w.klein, TROPFEN_ZU, 0, 1)],
+  bewegt(h, [huellenBild(w.gross, opt.rund || '20px', 1, 0), huellenBild(w.mitte, '40% 40% 40% 18%', 1, t[0]),
+    huellenBild(w.tropfen, spitze, 1, t[1]), huellenBild(w.klein, spitze, 1, t[2]),
+    huellenBild(w.klein, spitze, 0, 1)],
     { dauer: dauer, kurve: 'cubic-bezier(.35, 0, .4, 1)', fill: 'forwards' }, function () {
       weg(h);
-      if (fertig) fertig();
+      if (opt.fertig) opt.fertig();
     });
-  bewegt(g, [sk(w.gross, 0), sk(w.mitte, 0.38), sk(w.tropfen, 0.7), sk(w.klein, 0.9), sk(w.klein, 1)],
+  bewegt(g, [sk(w.gross, 0), sk(w.mitte, t[0]), sk(w.tropfen, t[1]), sk(w.klein, t[2]), sk(w.klein, 1)],
     { dauer: dauer, kurve: 'cubic-bezier(.35, 0, .4, 1)', fill: 'forwards' });
   bewegt(ziel, [{ transform: 'scale(1)' }, { transform: 'scale(1.14)', offset: 0.45 }, { transform: 'scale(1)' }],
     { dauer: 320, warten: dauer * 0.8, kurve: 'ease-out' });
@@ -1888,10 +1905,10 @@ function hinweisSchliessen() {
   if (!g) { blatt.hidden = true; return; }
   var r = karte.getBoundingClientRect();
   karte.style.opacity = '0';
-  tropfenZu(g, r, ziel, '18px', function () {
+  tropfenZu(g, r, ziel, { rund: '18px', dauer: HINWEIS_DAUER, frueh: true, fertig: function () {
     karte.style.opacity = '';
     if (!blatt.classList.contains('offen')) blatt.hidden = true;
-  }, HINWEIS_DAUER);
+  } });
 }
 
 // ── Umschalter: die Markierung fließt hinüber ───────────────────

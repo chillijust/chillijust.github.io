@@ -25,6 +25,8 @@ function laden() {
   HTMLAnchorElement.prototype.click = klickWar;
   URL.createObjectURL = urlWar;
 }
+// Der Browser kürzt Ecken («0% 50% 50% 50%» wird «0% 50% 50%»): so vergleichen.
+function ecken(r) { var d = document.createElement('div'); d.style.borderRadius = r; return d.style.borderRadius; }
 function offen() { return !q('#hinweisBlatt').hidden && q('#hinweisBlatt').classList.contains('offen'); }
 function clips(el) {
   return el.getAnimations().map(function (a) { return a.effect.getKeyframes()[0].clipPath || ''; }).join();
@@ -67,13 +69,23 @@ return durch().then(function () {
   return warten(4000);   // eine Meldung wäre nach 2,6 s fort
 }).then(function () {
   pruefe('H7 nach vier Sekunden steht er noch', offen());
+  var r0 = karte.getBoundingClientRect();
   q('#hinweisOk').click();
   var zu = q('body > .tropfen-huelle'), z = q('#exZuletzt').getBoundingClientRect(), ende = bilder(zu)[3] || {};
-  pruefe('H8 «OK» schließt sofort, der Tropfen der Ansichten fließt in «Zuletzt»', !offen() && laeuft(zu) &&
-    dauer(zu) === HINWEIS_DAUER && (bilder(zu)[0] || {}).borderRadius === '18px' && ende.borderRadius === TROPFEN_ZU &&
+  pruefe('H8 «OK» schließt sofort, der Tropfen fließt in «Zuletzt»', !offen() && laeuft(zu) &&
+    dauer(zu) === HINWEIS_DAUER && (bilder(zu)[0] || {}).borderRadius === '18px' && ende.borderRadius === ecken(tropfenSpitzeZu(r0, z)) &&
     Math.abs(parseFloat(ende.top) + parseFloat(ende.height) / 2 - (z.top + z.height / 2)) < 2 &&
     karte.style.opacity === '0' && laeuft(q('#exZuletzt')) &&
     getComputedStyle(q('#hinweisBlatt')).pointerEvents === 'none', JSON.stringify(ende));
+  var st = bilder(zu), form = (st[2] || {}).borderRadius;
+  pruefe('H8a kurz vor dem Ziel ist er schon ein Tropfen und bleibt es', st.length === 5 &&
+    st[2].offset === 0.4 && /0%/.test(form) && form === st[3].borderRadius && form === st[4].borderRadius &&
+    st[3].offset === 0.86 && parseFloat(st[2].width) < r0.width * 0.65, JSON.stringify(st.map(function (b) {
+      return [b.offset, b.borderRadius, b.width]; })));
+  pruefe('H8b die Spitze zeigt vom Ziel weg', form === ecken(tropfenSpitzeZu(r0, z)) &&
+    tropfenSpitzeZu({ left: 0, top: 0, width: 10, height: 10 }, { left: 100, top: -100, width: 10, height: 10 }) === TROPFEN_ZU &&
+    tropfenSpitzeZu({ left: 0, top: 0, width: 10, height: 10 }, { left: -100, top: 100, width: 10, height: 10 }) === '50% 0% 50% 50%');
+  pruefe('H8c die Ansichten behalten ihren Takt', TROPFEN_ZU_TAKT.join() === '0.38,0.7,0.9');
   return durch();
 }).then(function () {
   pruefe('H9 danach ist er weg', q('#hinweisBlatt').hidden && !laeuft(karte) && geister().length === 0 &&
