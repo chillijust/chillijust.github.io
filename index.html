@@ -173,6 +173,32 @@ svg.wm { display: block; flex: none; color: var(--text); overflow: visible; }
 .wm-los .wm-fallen { animation: wmFallen .7s cubic-bezier(.3, 1.25, .5, 1) both; animation-delay: var(--wm-v); }
 .wm-los .wm-f1 { animation-delay: var(--wm-v); }
 .wm-los .wm-f2 { animation-delay: calc(var(--wm-v) + .18s); }
+.wm-dick { stroke-width: 4.8; }
+/* Gruppen, die nur verschieben und verkleinern, rechnen vom Nullpunkt aus. */
+.wm .wm-ort { transform-box: view-box; transform-origin: 0 0; }
+.wm-kursiv { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 17px; fill: var(--text-2); }
+.wm-lodern { transform-origin: 50% 100%; animation: wmLodern 2.6s ease-in-out infinite; }
+.wm-lodern.wm-l2 { animation-duration: 3.1s; animation-delay: -1.2s; }
+.wm-schein { opacity: .18; animation: wmSchein 2.6s ease-in-out infinite; }
+.wm-l2 .wm-schein { animation-duration: 3.1s; animation-delay: -1.2s; }
+.wm-los .wm-aufflammen { transform-origin: 50% 100%; animation: wmAufflammen .9s cubic-bezier(.2, .8, .3, 1) both; }
+.wm-los .wm-a1 { animation-delay: var(--wm-v); }
+.wm-los .wm-a2 { animation-delay: calc(var(--wm-v) + .25s); }
+.wm-los .wm-j1 { animation-delay: .7s; }
+.wm-los .wm-j2 { animation-delay: 1.35s; }
+@keyframes wmAufflammen {
+  0% { opacity: 0; transform: translateY(5px) scale(.3, 0); }
+  45% { opacity: 1; transform: translateY(-1px) scale(.85, 1.35); }
+  70% { transform: scale(1.05, .9); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes wmLodern {
+  0%, 100% { transform: none; }
+  22% { transform: scale(.94, 1.08) skewX(-3deg); }
+  48% { transform: scale(1.04, .95) skewX(2deg); }
+  74% { transform: scale(.97, 1.05) skewX(-1.5deg); }
+}
+@keyframes wmSchein { 0%, 100% { opacity: .1; } 45% { opacity: .26; } }
 @keyframes wmSchreiben { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
 @keyframes wmAuf { from { opacity: 0; transform: translateY(-5px) scale(.6); } to { opacity: 1; transform: none; } }
 @keyframes wmFallen { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
@@ -969,7 +995,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.5.0T3';
+var APP_VERSION = '0.5.0T4';
 var APP_STAND = '2026-10-05';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -1305,6 +1331,14 @@ function wmFlamme(x, y, s, nr) {
   return '<g transform="translate(' + x + ',' + y + ') scale(' + s + ')"><path class="wm-glut wm-flamme wm-f' + nr +
     '" d="' + WM_FLAMME + '"/></g>';
 }
+// Eine Flamme, die aus dem i aufsteigt und danach weiterlodert — leise, mit
+// einem Schein dahinter. Das Lodern läuft auch ohne `wm-los` (ADR 0010).
+function wmFlammeLodernd(x, y, s, nr) {
+  return '<g class="wm-ort" transform="translate(' + x + ',' + y + ') scale(' + s + ')"><g class="wm-lodern wm-l' + nr + '">' +
+    '<g class="wm-aufflammen wm-a' + nr + '">' +
+    '<path class="wm-glut wm-schein" transform="scale(1.35)" d="' + WM_FLAMME + '"/>' +
+    '<path class="wm-glut" d="' + WM_FLAMME + '"/></g></g></g>';
+}
 function wmSchoteStehend(x, r, nr) {
   return '<g transform="translate(' + x + ',52) rotate(' + r + ')"><g class="wm-wachsen wm-f' + nr + '">' +
     '<path class="wm-glut" d="M0,0 C-4,0 -5,-6 -5,-14 C-5,-26 -3,-34 0,-38 C3,-34 5,-26 5,-14 C5,-6 4,0 0,0 Z"/>' +
@@ -1312,6 +1346,15 @@ function wmSchoteStehend(x, r, nr) {
 }
 
 var MARKEN = [
+  { id: 'lodern', vor: 1.0, name: 'Lodern', breite: 98, zusatz: null, runde: 2,
+    satz: 'Die Handschrift aus Glut; die Flammen steigen aus den i auf und lodern weiter. Darunter Journal an der Linie.',
+    svg: function () {
+      return '<g class="wm-ort" transform="translate(-5,0) scale(.78)"><path class="wm-zug wm-dick wm-schreiben" pathLength="1" d="' +
+          WM_ZUG + '"/></g>' +
+        wmFlammeLodernd(58.2, 24.6, .74, 1) + wmFlammeLodernd(86.3, 24.6, .74, 2) +
+        '<path class="wm-linie wm-schreiben wm-j1" pathLength="1" d="M5,57 L27,57"/>' +
+        '<text class="wm-kursiv wm-auf wm-j2" x="32" y="61">Journal</text>';
+    } },
   { id: 'hallo', vor: 1.05, name: 'Hallo', breite: 112, zusatz: 'kursiv',
     satz: 'Eine Linie, ohne abzusetzen, klein geschrieben. Der letzte Punkt ist ein Tropfen Chili.',
     svg: function () {
@@ -1395,7 +1438,9 @@ function zeichneMarke(id, n, los) {
 }
 
 function zeichneSchriftzugWahl() {
-  var wahl = [{ id: '', name: 'Schlicht', satz: 'So, wie es jetzt ist: nur gesetzt, ohne Zeichnung.' }].concat(MARKEN);
+  // Der jüngste Entwurf steht ganz oben, noch vor «Schlicht».
+  var wahl = [MARKEN[0], { id: '', name: 'Schlicht', satz: 'So, wie es jetzt ist: nur gesetzt, ohne Zeichnung.' }]
+    .concat(MARKEN.slice(1));
   return '<section class="abschnitt" id="schriftzugWahl"><h2>Schriftzug wählen</h2>' +
     '<p class="wm-hinweis">Vorschau, bis du dich entschieden hast. Tippe einen an: Er spielt sich hier ab und steht ' +
     'sofort oben im Kopf. Tippst du oben auf den Schriftzug, läuft er dort noch einmal.</p>' +
@@ -1404,7 +1449,7 @@ function zeichneSchriftzugWahl() {
       return '<button type="button" class="wm-karte" data-marke="' + esc(m.id) + '" aria-pressed="' + (an ? 'true' : 'false') +
         '" aria-label="' + esc('Schriftzug ' + m.name) + '">' +
         '<span class="wm-bild">' + zeichneMarke(m.id, 'w' + i, false) + '</span>' +
-        '<span class="wm-name">' + esc(m.name) + (m.runde ? ' <span class="wm-runde">Runde 1</span>' : '') + '</span>' +
+        '<span class="wm-name">' + esc(m.name) + (m.runde ? ' <span class="wm-runde">Runde ' + m.runde + '</span>' : '') + '</span>' +
         '<span class="wm-satz-text">' + esc(m.satz) + '</span></button>';
     }).join('') + '</div></section>';
 }

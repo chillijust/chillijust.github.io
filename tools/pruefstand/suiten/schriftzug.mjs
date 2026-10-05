@@ -30,11 +30,11 @@ pruefe('A6 ein Tipp darauf bleibt auf der Übersicht', ansicht === 'home');
 
 // ── B · Die Auswahl ─────────────────────────────────────────
 var karten = alle('#schriftzugWahl [data-marke]');
-pruefe('B1 unten stehen «Schlicht» und alle Entwürfe zur Wahl', karten.length === MARKEN.length + 1 &&
-  karten[0].getAttribute('data-marke') === '' &&
+pruefe('B1 unten stehen «Schlicht» und alle Entwürfe zur Wahl, der jüngste ganz oben', karten.length === MARKEN.length + 1 &&
+  karten[0].getAttribute('data-marke') === 'lodern' && karten[1].getAttribute('data-marke') === '' &&
   q('#ansicht').lastElementChild === q('#schriftzugWahl'), karten.length);
 pruefe('B2 ohne Wahl ist «Schlicht» gewählt und der Kopf gesetzt, nicht gezeichnet',
-  karten[0].getAttribute('aria-pressed') === 'true' && !q('#kopf svg.wm') && q('#kopf .marke').textContent === 'Chilli');
+  karten[1].getAttribute('aria-pressed') === 'true' && !q('#kopf svg.wm') && q('#kopf .marke').textContent === 'Chilli');
 pruefe('B3 jeder Entwurf hat eine Breite, einen Satz und zeichnet etwas', MARKEN.every(function (m) {
   return m.breite > 60 && m.breite <= 140 && m.satz.length > 20 && /<(path|text|circle)/.test(m.svg('x'));
 }));
@@ -60,6 +60,22 @@ pruefe('C6 neu gezeichnet läuft der Kopf nicht von selbst wieder ab', !q('#kopf
 q('[data-marke="etikett"]').click();
 pruefe('C7 «Etikett» trägt JOURNAL selbst, ohne zweites «Journal»', !q('#kopf .marke-zusatz') &&
   /JOURNAL/.test(q('#kopf svg.wm').textContent));
+q('[data-marke="lodern"]').click();
+pruefe('C7a «Lodern» trägt Journal kursiv unter der Linie, ohne zweites «Journal»', !q('#kopf .marke-zusatz') &&
+  getComputedStyle(q('#kopf .wm-kursiv')).fontStyle === 'italic' && q('#kopf .wm-kursiv').textContent === 'Journal' &&
+  q('#kopf .wm-linie').getBoundingClientRect().right < q('#kopf .wm-kursiv').getBoundingClientRect().left);
+render();
+var lod = alle('#kopf .wm-lodern');
+pruefe('C7b die Flammen lodern weiter, auch ohne Ablauf — beide, nicht im Gleichtakt', lod.length === 2 && !q('#kopf svg.wm-los') &&
+  lod.every(function (g) { return getComputedStyle(g).animationName === 'wmLodern' &&
+    getComputedStyle(g).animationIterationCount === 'infinite'; }) &&
+  getComputedStyle(lod[0]).animationDelay !== getComputedStyle(lod[1]).animationDelay);
+markeAbspielen(q('#kopf svg.wm'));
+pruefe('C7c beim Ablauf steigen sie von unten auf, nach der Schrift',
+  alle('#kopf .wm-aufflammen').every(function (g) { var c = getComputedStyle(g);
+    return c.animationName === 'wmAufflammen' && parseFloat(c.animationDelay) >= 1; }) &&
+  /translateY\(5px\)/.test(Array.prototype.map.call(document.styleSheets[0].cssRules,
+    function (r) { return r.name === 'wmAufflammen' ? r.cssText : ''; }).join('')));
 MARKEN.forEach(function (m) {
   q('[data-marke="' + m.id + '"]').click();
   var k = q('#kopf').getBoundingClientRect(), t = q('#markeKnopf').getBoundingClientRect(), s = q('#themaKnopf').getBoundingClientRect();
