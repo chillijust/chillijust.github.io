@@ -173,6 +173,16 @@ pruefe('D10a zurücknehmen ist kein Jubel', !q('#chiliFigur').classList.contains
 q('.gedimmt [data-haken]').click();
 pruefe('D11 auch Gedimmtes läßt sich abhaken', state.gewohnheiten[2].erledigt.indexOf(HEUTE) !== -1 &&
   q('#tagesZahl').textContent === '0 von 2');
+function chili() { return q('#chiliFigur').className; }
+q('[data-haken="' + erste + '"]').click();
+pruefe('D11a der erste von zweien flammt nur', chili() === 'flammt', chili());
+q('[data-haken="' + state.gewohnheiten[1].id + '"]').click();
+pruefe('D11b der letzte Haken des Tages lodert', chili() === 'lodert' &&
+  getComputedStyle(q('#chiliFigur')).animationName.indexOf('lodern') !== -1, chili());
+q('.gedimmt [data-haken]').click();
+q('.gedimmt [data-haken]').click();
+pruefe('D11c neben einem vollen Tag flammt sie nur', chili() === 'flammt' &&
+  q('#tagesZahl').textContent === '2 von 2', chili());
 pruefe('D12 jeder Ring hat Spur und Füllung', alle('.ring').every(function (r) {
   return !!r.querySelector('.ring-spur') && !!r.querySelector('.ring-fuell');
 }) && alle('.ring').length === 4);

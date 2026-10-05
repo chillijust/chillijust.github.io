@@ -52,7 +52,8 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 - `#chiliFigur` steht **genau einmal** im Dokument. Das Bild ist `CHILI_BILD`, eingebettet
   von `build.mjs` — nie eine zweite Kopie als Daten-URI von Hand.
 - **Ein gesetzter Haken läßt sie einmal aufflammen** (`chiliFlammt`, Klasse `flammt`) —
-  auf der Kachel wie beim Nachtragen; Zurücknehmen ist kein Jubel. Danach wippt sie weiter.
+  auf der Kachel wie beim Nachtragen; Zurücknehmen ist kein Jubel. Macht der Haken den Tag
+  voll, **lodert** sie statt dessen (`lodert`). Danach wippt sie weiter.
 
 ## Bewegung
 
