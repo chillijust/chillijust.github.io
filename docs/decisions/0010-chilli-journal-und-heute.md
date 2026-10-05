@@ -1,6 +1,6 @@
 # 0010 · Der Name heißt «Chilli Journal», «Heute» führt den Kalender nach Hause
 
-*2026-10-05 · Ansicht von 0.5.0T · Version 0.5.0T2*
+*2026-10-05 · Ansicht von 0.5.0T · Version 0.5.0T2, Auswahl des Schriftzugs und Heimweg 0.5.0T3*
 
 ## Ausgangslage
 
@@ -23,6 +23,17 @@ heute.
   zurück, wählt den heutigen Tag und öffnet seine Liste — im Takt des Kalenders
   (`KAL_TAKT`). Woche oder Monat bleibt, wie es war. Ist heute schon gewählt, geschieht
   nichts. Kein eigener Knopf: Das Wort war schon da.
+- **Die Überschrift führt zur Übersicht.** Unterwegs ist der Titel ein Knopf (`#titelHeim`),
+  der immer zum Dashboard geht — auch wo der Rückweg einen Schritt zurück führt (aus dem
+  Export). Auf dem Dashboard ist der Schriftzug selbst der Knopf (`#markeKnopf`): Er rollt
+  nach oben und läßt den Schriftzug einmal ablaufen.
+- **Der Schriftzug wird am Gerät gewählt.** Unten auf dem Dashboard stehen die Entwürfe
+  (`MARKEN`, `zeichneSchriftzugWahl`) neben «Schlicht»; ein Tipp spielt den Entwurf ab und
+  setzt ihn in den Kopf, gespeichert als `schriftzug`. Jeder Entwurf ist ein SVG aus
+  eigenen Linien oder Poppins, Farben nur über Tokens. **Die Stiele sind grau, nicht grün**
+  — Grün heißt erledigt. Bewegt wird einmal, beim Start und auf Wunsch (`wm-los`), nie
+  im Kreis; unter «Bewegung reduzieren» steht alles still. Ist der Entwurf entschieden,
+  fliegen Auswahl und die übrigen Entwürfe wieder hinaus.
 
 ## Begründung
 
@@ -33,5 +44,6 @@ dem Wort «Heute» kostet keinen Platz und steht genau dort, wo man nach heute s
 
 - Wer die Verknüpfung auf dem Home-Bildschirm behält, sieht dort weiter den alten Namen,
   bis er sie neu anlegt — iOS liest den Titel nur beim Anlegen.
-- Der gezeichnete, bewegte Schriftzug folgt als eigene Entscheidung (drei Entwürfe).
-- Suiten: `geruest` A1/A1a, `kalender` H1–H5, `export` (`PRODID`).
+- Die Auswahl ist ein Gerüst auf Zeit: Mit der Entscheidung bleibt ein Entwurf, der Rest
+  und das Feld `schriftzug` gehen (oder es bleibt, falls mehrere bleiben sollen).
+- Suiten: `geruest` A1/A1a, `kalender` H1–H5, `export` (`PRODID`), `schriftzug`.

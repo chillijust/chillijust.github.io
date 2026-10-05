@@ -36,6 +36,9 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 
 - **Der Kopf hat zwei Gestalten**: Dashboard (Titel, Datum, Sonne/Mond, Menüknopf) und
   unterwegs (Rückweg, Titel). Keine Reiterleiste.
+- **Die Überschrift führt zur Übersicht** (`#titelHeim`, `#markeKnopf`), immer — auch wo der
+  Rückweg zum Export geht. Der Schriftzug kommt aus `zeichneMarke`, «Chilli» steht vorn und
+  am größten; Bewegung nur mit `wm-los`, einmal (ADR 0010).
 - **Runde Knöpfe** (`.rund`) sind 44 × 44 und tragen ein Symbol aus `ICON` mit `aria-label`.
 - **Der Sonne/Mond-Schalter ist ein Schieber** (`.thema-schalter`, `role="switch"`,
   `aria-checked` = dunkel): Sonne links, Mond rechts, beide immer sichtbar, der Knauf liegt
