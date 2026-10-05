@@ -49,6 +49,9 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 - **Ein Termin ist eine Zeile mit blauem Strich** (`zeichneTerminZeile`), auf dem
   Dashboard wie in der Tagesliste; im Kalender trägt sein Tag **einen** blauen Punkt, vorn
   (ADR 0006). Die Tagesansicht ist die Liste unter dem Kalender, keine eigene Ansicht.
+- **Der Kalender-Export** hat «Teilen» nur, wo `kannTeilen()`, und «Als Datei laden» immer;
+  eine Gewohnheit trägt dort einen grauen Strich, keinen blauen. Was aus dem Export geöffnet
+  wird, kehrt über `rueckZiel` dorthin zurück (ADR 0009).
 - **Was live läuft, schreibt `takt()` an Ort und Stelle** (`[data-frei]`,
   `[data-wellerest]`, der Ring der Welle) — kein `render()` im Sekundentakt.
 - **Eine neue Ansicht** ist ein Eintrag in `ANSICHTEN` (`titel`, `zeichnen`), ihre Ereignisse

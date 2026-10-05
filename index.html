@@ -546,6 +546,10 @@ button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
 }
 .tm-zeile:active { transform: scale(.98); }
 .tm-zeile + .tm-zeile { border-top: 1px solid var(--flaeche-2); border-radius: 0; }
+/* Eine Gewohnheit im Export trägt keinen blauen Strich — Blau heißt Termin. */
+.ex-gw .tm-zeit { border-left-color: var(--linie); }
+.ex-gw.aus .tm-zeit { color: var(--text-2); }
+.ex-gw.aus .tm-zeit svg { width: 18px; height: 18px; }
 .tm-zeit {
   flex: none;
   width: 60px;
@@ -879,7 +883,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.4.0';
+var APP_VERSION = '0.5.0T';
 var APP_STAND = '2026-10-05';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -1005,7 +1009,8 @@ function grundStand() {
     gewohnheiten: [],
     abgewoehnen: [],
     termine: [],
-    welle: null          // die laufende 10-Minuten-Welle: { id, start } oder null
+    welle: null,         // die laufende 10-Minuten-Welle: { id, start } oder null
+    exportiert: null     // wann zuletzt eine .ics hinausging, als Zeitpunkt
   };
 }
 
@@ -1035,6 +1040,7 @@ function stand(roh) {
       if (gut && !tids[gut.id]) { tids[gut.id] = true; s.termine.push(gut); }
     });
   }
+  if (istZeit(roh.exportiert)) s.exportiert = roh.exportiert;
   // Eine Welle gilt nur für etwas, das es noch gibt und das nicht archiviert ist.
   var w = roh.welle;
   if (w && typeof w === 'object' && istZeit(w.start)) {
@@ -1046,7 +1052,9 @@ function stand(roh) {
 }
 
 // Eine Gewohnheit, wie sie gespeichert wird:
-//   { id, name, rhythmus, angelegt: Tag, erledigt: [Tag, …], archiviert: Tag | null }
+//   { id, name, rhythmus, angelegt: Tag, erledigt: [Tag, …], archiviert: Tag | null,
+//     erinnerung: 'HH:MM' | null }
+// Die Erinnerung ist nur für den Kalender-Export da (ADR 0009).
 // Was nicht paßt, fällt weg — lieber eine Gewohnheit weniger als eine kaputte.
 // Beide Grenzen stehen hier oben: `laden()` läuft, bevor das Skript weiter unten
 // ankommt, und eine spätere `var` wäre dann noch undefined.
@@ -1071,7 +1079,8 @@ function gewohnheitLesen(g) {
     rhythmus: rhythmus,
     angelegt: g.angelegt,
     erledigt: erledigt,
-    archiviert: istSchluessel(g.archiviert) ? g.archiviert : null
+    archiviert: istSchluessel(g.archiviert) ? g.archiviert : null,
+    erinnerung: istUhr(g.erinnerung) ? g.erinnerung : null
   };
 }
 
@@ -1957,6 +1966,182 @@ function wiederholungText(t) {
 }
 
 // ════════════════════════════════════════════════════════════════
+//  Kalender-Export
+// ════════════════════════════════════════════════════════════════
+//
+// Eine `.ics` nach RFC 5545: ein VEVENT je Termin und je Gewohnheit mit
+// Erinnerung, Wiederholung als RRULE, Erinnerung als VALARM, die UID stabil
+// je Eintrag (ADR 0009). Zeiten sind «schwebend» — ohne Zeitzone, so wie die
+// App rechnet: in der Zeit des Geräts. iOS importiert eine Kopie; ein Abo, das
+// sich selbst nachführt, bräuchte einen Server.
+var ICS_DATEI = 'chillinal.ics';
+var ICS_TAG = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+var ICS_FREQ = { taeglich: 'DAILY', woechentlich: 'WEEKLY', monatlich: 'MONTHLY' };
+// Eine Gewohnheit steht eine Viertelstunde im Kalender, ein Termin ohne Ende
+// eine Stunde.
+var ICS_GEWOHNHEIT_MIN = 15;
+var ICS_TERMIN_MIN = 60;
+
+// Text in einem Feld: Rückstrich, Semikolon, Komma und Zeilenumbruch werden
+// maskiert.
+function icsText(t) {
+  return String(t).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,')
+    .replace(/\r\n|\r|\n/g, '\\n');
+}
+
+// Zeilen über 75 Byte werden gefaltet; die Fortsetzung beginnt mit einem
+// Leerzeichen. Gezählt wird in UTF-8 — ein «ü» sind zwei Byte, und kein
+// Zeichen wird mitten durchgeschnitten.
+function icsFalten(zeile) {
+  var aus = '', n = 0, grenze = 75;
+  for (var i = 0; i < zeile.length; i++) {
+    var c = zeile.charCodeAt(i), z = zeile.charAt(i);
+    if (c >= 0xD800 && c <= 0xDBFF && i + 1 < zeile.length) z += zeile.charAt(++i);
+    var b = c < 0x80 ? 1 : c < 0x800 ? 2 : z.length > 1 ? 4 : 3;
+    if (n + b > grenze) { aus += '\r\n '; n = 1; grenze = 75; }
+    aus += z;
+    n += b;
+  }
+  return aus;
+}
+
+function icsDatum(k) { return k.replace(/-/g, ''); }
+function icsZeitpunkt(d) {
+  return d.getFullYear() + zwei(d.getMonth() + 1) + zwei(d.getDate()) + 'T' +
+    zwei(d.getHours()) + zwei(d.getMinutes()) + '00';
+}
+// Tag und Uhrzeit, um `plus` Minuten verschoben — über Date, damit ein Ende
+// nach Mitternacht auf den nächsten Tag fällt.
+function icsUhr(k, uhr, plus) {
+  var d = ausSchluessel(k), u = uhr.split(':');
+  d.setHours(+u[0], +u[1] + (plus || 0), 0, 0);
+  return icsZeitpunkt(d);
+}
+// DTSTAMP in UTC.
+function icsStempel(ms) {
+  var d = new Date(ms);
+  return d.getUTCFullYear() + zwei(d.getUTCMonth() + 1) + zwei(d.getUTCDate()) + 'T' +
+    zwei(d.getUTCHours()) + zwei(d.getUTCMinutes()) + zwei(d.getUTCSeconds()) + 'Z';
+}
+// Minuten vor dem Beginn als TRIGGER: 15 → -PT15M, 0 → PT0M, ganztags «am Tag
+// um 9» (−540) → PT9H, «1 Tag vorher um 9» (900) → -PT15H.
+function icsVorlauf(min) {
+  var m = Math.abs(min), t = Math.floor(m / 1440), h = Math.floor(m % 1440 / 60), r = m % 60;
+  var zeit = (h ? h + 'H' : '') + (r || (!h && !t) ? r + 'M' : '');
+  return (min > 0 ? '-' : '') + 'P' + (t ? t + 'D' : '') + (zeit ? 'T' + zeit : '');
+}
+
+function icsAlarm(trigger, text) {
+  return ['BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + icsText(text), 'TRIGGER:' + trigger, 'END:VALARM'];
+}
+
+// Was hinausgeht: Termine, die heute oder später noch einmal liegen, und jede
+// laufende Gewohnheit mit Erinnerung. Vergangenes bleibt draußen.
+function exportTermine(heute) {
+  return state.termine.filter(function (t) {
+    return t.wiederholung === 'keine' ? t.tag >= heute : !t.wiederholungBis || t.wiederholungBis >= heute;
+  }).sort(function (a, b) {
+    if (a.tag !== b.tag) return a.tag < b.tag ? -1 : 1;
+    return (a.von || '') < (b.von || '') ? -1 : (a.von || '') > (b.von || '') ? 1 : 0;
+  });
+}
+function exportGewohnheiten() {
+  return state.gewohnheiten.filter(function (g) { return !g.archiviert && !!g.erinnerung; });
+}
+
+function terminEreignis(t, stempel) {
+  var z = ['BEGIN:VEVENT', 'UID:' + t.id + '@chillinal', 'DTSTAMP:' + stempel, 'SUMMARY:' + icsText(t.titel)];
+  if (t.ganztags) {
+    z.push('DTSTART;VALUE=DATE:' + icsDatum(t.tag), 'DTEND;VALUE=DATE:' + icsDatum(tagPlus(t.tag, 1)));
+  } else {
+    z.push('DTSTART:' + icsUhr(t.tag, t.von), 'DTEND:' + (t.bis ? icsUhr(t.tag, t.bis) : icsUhr(t.tag, t.von, ICS_TERMIN_MIN)));
+  }
+  // UNTIL hat dieselbe Art wie DTSTART: ganztags ein Tag, sonst das Ende dieses
+  // Tages in der Zeit des Geräts.
+  if (ICS_FREQ[t.wiederholung]) {
+    z.push('RRULE:FREQ=' + ICS_FREQ[t.wiederholung] + (t.wiederholungBis
+      ? ';UNTIL=' + icsDatum(t.wiederholungBis) + (t.ganztags ? '' : 'T235959') : ''));
+  }
+  if (t.ort) z.push('LOCATION:' + icsText(t.ort));
+  if (t.notiz) z.push('DESCRIPTION:' + icsText(t.notiz));
+  if (t.vorlauf !== null) z = z.concat(icsAlarm(icsVorlauf(t.vorlauf), t.titel));
+  z.push('END:VEVENT');
+  return z;
+}
+
+// Eine Gewohnheit beginnt im Kalender am ersten fälligen Tag ab dem Anlegen —
+// DTSTART muß zur RRULE passen, sonst zählt er als zusätzlicher Termin.
+function gewohnheitEreignis(g, stempel) {
+  var r = g.rhythmus, start = g.angelegt, regel = 'FREQ=DAILY';
+  if (r.art === 'wochentage') {
+    while (r.tage.indexOf(ausSchluessel(start).getDay()) === -1) start = tagPlus(start, 1);
+    regel = 'FREQ=WEEKLY;BYDAY=' + [1, 2, 3, 4, 5, 6, 0].filter(function (t) {
+      return r.tage.indexOf(t) !== -1;
+    }).map(function (t) { return ICS_TAG[t]; }).join(',');
+  }
+  return ['BEGIN:VEVENT', 'UID:' + g.id + '@chillinal', 'DTSTAMP:' + stempel, 'SUMMARY:' + icsText(g.name),
+    'DTSTART:' + icsUhr(start, g.erinnerung), 'DTEND:' + icsUhr(start, g.erinnerung, ICS_GEWOHNHEIT_MIN),
+    'RRULE:' + regel, 'DESCRIPTION:' + icsText('Gewohnheit aus Chillinal · ' + rhythmusText(r))]
+    .concat(icsAlarm('PT0M', g.name), ['END:VEVENT']);
+}
+
+function kalenderDatei(heute, nun) {
+  var stempel = icsStempel(nun), z = ['BEGIN:VCALENDAR', 'VERSION:2.0',
+    'PRODID:-//Chillinal//Chillinal ' + APP_VERSION + '//DE', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH'];
+  exportTermine(heute).forEach(function (t) { z = z.concat(terminEreignis(t, stempel)); });
+  exportGewohnheiten().forEach(function (g) { z = z.concat(gewohnheitEreignis(g, stempel)); });
+  z.push('END:VCALENDAR');
+  return z.map(icsFalten).join('\r\n') + '\r\n';
+}
+
+// Zwei Wege aufs Gerät. Welcher in der Home-Bildschirm-App zuverlässig im
+// Kalender landet, klärt das Gerät — darum gibt es beide (ADR 0009).
+function icsBlob() {
+  return new Blob([kalenderDatei(heuteSchluessel(), zeitJetzt())], { type: 'text/calendar;charset=utf-8' });
+}
+
+function kannTeilen() {
+  try {
+    return !!(navigator.share && navigator.canShare && window.File &&
+      navigator.canShare({ files: [new File([''], ICS_DATEI, { type: 'text/calendar' })] }));
+  } catch (e) { return false; }
+}
+
+function exportiertMerken() {
+  state.exportiert = zeitJetzt();
+  speichern();
+  if (ansicht === 'export') render();
+}
+
+// Teilen muß im Tipp selbst geschehen — iOS verlangt die Geste dazu.
+function icsTeilen() {
+  var datei;
+  try { datei = new File([icsBlob()], ICS_DATEI, { type: 'text/calendar' }); } catch (e) { datei = null; }
+  if (!datei || !kannTeilen()) { melden('Teilen geht hier nicht. Lade die Datei.'); return; }
+  navigator.share({ files: [datei], title: 'Chillinal' }).then(function () {
+    exportiertMerken();
+    melden('Geteilt. Wähle im Kalender «Alle hinzufügen».');
+  }, function (err) {
+    if (!err || err.name !== 'AbortError') melden('Teilen ging nicht. Lade die Datei.');
+  });
+}
+
+function icsLaden() {
+  var url;
+  try { url = URL.createObjectURL(icsBlob()); } catch (e) { melden('Die Datei ließ sich nicht anlegen.'); return; }
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = ICS_DATEI;
+  a.hidden = true;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+  exportiertMerken();
+  melden('Datei geladen. Öffne sie, um sie in den Kalender zu holen.');
+}
+
+// ════════════════════════════════════════════════════════════════
 //  Ansichten
 // ════════════════════════════════════════════════════════════════
 //
@@ -1974,6 +2159,7 @@ var ANSICHTEN = {
   rueckfall: { titel: 'Rückfall', zeichnen: zeichneRueckfall },
   terminNeu: { titel: 'Neuer Termin', zeichnen: zeichneTerminFormular },
   termin: { titel: 'Termin', zeichnen: zeichneTerminFormular },
+  export: { titel: 'Kalender-Export', zeichnen: zeichneExport },
   einstellungen: { titel: 'Einstellungen', zeichnen: zeichneEinstellungen }
 };
 
@@ -1983,7 +2169,7 @@ var MENUE = [
   { id: 'gewohnheit', name: 'Neue Gewohnheit', icon: 'plus', ziel: 'neu' },
   { id: 'termin', name: 'Neuer Termin', icon: 'termin', ziel: 'terminNeu' },
   { id: 'journal', name: 'Journal', icon: 'journal' },
-  { id: 'export', name: 'Kalender-Export', icon: 'export' },
+  { id: 'export', name: 'Kalender-Export', icon: 'export', ziel: 'export' },
   { id: 'einstellungen', name: 'Einstellungen', icon: 'zahnrad', ziel: 'einstellungen' },
   { id: 'sicherung', name: 'Sicherung', icon: 'sicherung' },
   { id: 'tickets', name: 'Tickets', icon: 'ticket' }
@@ -1993,7 +2179,13 @@ var MENUE = [
 // es geht, «termin» den Termin. Ohne eine gültige geht es nach Hause, nicht in
 // ein leeres Formular; «welle» ohne laufende Welle ebenso. «terminNeu» nimmt
 // statt einer id den Tag, an dem der Termin liegen soll.
+// Wer aus dem Export eine Gewohnheit oder einen Termin öffnet, kommt dorthin
+// zurück — mit dem Rückweg wie nach dem Speichern.
+var rueckZiel = null;
+
 function zeige(name, id) {
+  if (name === 'home' && rueckZiel && ansicht !== 'home') name = rueckZiel;
+  rueckZiel = ansicht === 'export' && (name === 'bearbeiten' || name === 'termin') ? 'export' : null;
   if (!ANSICHTEN[name]) name = 'home';
   if (name === 'bearbeiten' && !gewohnheitNach(id)) name = 'home';
   if (name === 'termin' && !terminNach(id)) name = 'home';
@@ -2482,6 +2674,8 @@ function entwurfAus(g) {
     art: r.art,
     tage: r.tage ? r.tage.slice() : [1, 2, 3, 4, 5],
     anzahl: r.anzahl || 3,
+    erinnern: !!(g && g.erinnerung),
+    erinnerung: g && g.erinnerung ? g.erinnerung : '08:00',
     startTag: tagSchluessel(nun),
     startUhr: zwei(nun.getHours()) + ':' + zwei(nun.getMinutes()),
     startGeaendert: false,
@@ -2553,6 +2747,17 @@ function zeichneFormular() {
       '</div>' +
       '<p class="klein" id="rhText">' + esc(rhythmusErklaerung(entwurf.art)) + '</p>' +
     '</section>' +
+    '<section class="abschnitt" id="gwErinnerung"' + (ab ? ' hidden' : '') + '><h2>Erinnerung</h2>' +
+      '<div class="tm-schalterzeile"><span id="gwErinnernName">Im Kalender erinnern</span>' +
+        '<button type="button" class="schalter" id="gwErinnern" role="switch" aria-labelledby="gwErinnernName" ' +
+          'aria-checked="' + (entwurf.erinnern ? 'true' : 'false') + '"><span class="schalter-spur">' +
+          '<span class="schalter-knauf"></span></span></button></div>' +
+      '<div class="rh-teil" id="gwUhrTeil"' + (entwurf.erinnern ? '' : ' hidden') + '>' +
+        '<input id="gwUhr" class="eingabe" type="time" aria-label="Uhrzeit der Erinnerung" value="' +
+          esc(entwurf.erinnerung) + '">' +
+      '</div>' +
+      '<p class="klein" id="gwErText">' + esc(erinnerungErklaerung(entwurf)) + '</p>' +
+    '</section>' +
     '<section class="abschnitt" id="abStart"' + (ab ? '' : ' hidden') + '><h2>Frei seit</h2>' +
       '<div class="start-felder">' +
         '<input id="abTag" class="eingabe" type="date" aria-label="Tag" max="' + heute + '" value="' +
@@ -2604,6 +2809,14 @@ function zeichneRueckfallListe(l) {
   return html + '</div></section>';
 }
 
+// Erinnert wird nur über den Kalender-Export (ADR 0009). Wer x-mal pro Woche
+// will, wählt die Tage selbst — der Kalender erinnert darum jeden Tag.
+function erinnerungErklaerung(e) {
+  if (!e.erinnern) return 'Der Kalender erinnert dich, sobald du eine Uhrzeit wählst und exportierst.';
+  if (e.art === 'proWoche') return 'Jeden Tag zu dieser Zeit — welche Tage es werden, entscheidest du.';
+  return 'An jedem fälligen Tag zu dieser Zeit. Erinnert wird über den Kalender-Export.';
+}
+
 function rhythmusErklaerung(art) {
   if (art === 'wochentage') return 'Nur an den Tagen, die du wählst.';
   if (art === 'proWoche') return 'An Tagen deiner Wahl. Gezählt wird die Woche, Montag bis Sonntag.';
@@ -2622,6 +2835,7 @@ function bindeFormular() {
         x.setAttribute('aria-pressed', x === b ? 'true' : 'false');
       });
       teilZeigen($('rhAbschnitt'), entwurf.richtung !== 'ab');
+      teilZeigen($('gwErinnerung'), entwurf.richtung !== 'ab');
       teilZeigen($('abStart'), entwurf.richtung === 'ab');
       wahlenSetzen();
       $('gwName').setAttribute('placeholder', BEISPIEL[entwurf.richtung]);
@@ -2637,6 +2851,7 @@ function bindeFormular() {
       teilZeigen($('rhAnzahl'), entwurf.art === 'proWoche');
       wahlenSetzen();
       $('rhText').textContent = rhythmusErklaerung(entwurf.art);
+      $('gwErText').textContent = erinnerungErklaerung(entwurf);
     });
   });
   alleIn('[data-tag]').forEach(function (b) {
@@ -2650,6 +2865,13 @@ function bindeFormular() {
     entwurf.anzahl = Math.max(1, Math.min(PRO_WOCHE_MAX, entwurf.anzahl + d));
     $('anzWert').textContent = entwurf.anzahl + '× pro Woche';
   }
+  $('gwErinnern').addEventListener('click', function () {
+    entwurf.erinnern = !entwurf.erinnern;
+    this.setAttribute('aria-checked', entwurf.erinnern ? 'true' : 'false');
+    teilZeigen($('gwUhrTeil'), entwurf.erinnern);
+    $('gwErText').textContent = erinnerungErklaerung(entwurf);
+  });
+  $('gwUhr').addEventListener('input', function () { entwurf.erinnerung = this.value; });
   $('anzWeniger').addEventListener('click', function () { anzahl(-1); });
   $('anzMehr').addEventListener('click', function () { anzahl(1); });
 
@@ -2675,15 +2897,21 @@ function entwurfSpeichern() {
     melden('Wähle mindestens einen Tag.');
     return;
   }
+  if (entwurf.erinnern && !istUhr(entwurf.erinnerung)) {
+    melden('Wähle eine Uhrzeit für die Erinnerung.');
+    $('gwUhr').focus();
+    return;
+  }
   var r = entwurf.art === 'wochentage' ? { art: 'wochentage', tage: entwurf.tage.slice() }
     : entwurf.art === 'proWoche' ? { art: 'proWoche', anzahl: entwurf.anzahl } : { art: 'taeglich' };
-  var g = entwurf.id ? gewohnheitNach(entwurf.id) : null;
+  var g = entwurf.id ? gewohnheitNach(entwurf.id) : null, uhr = entwurf.erinnern ? entwurf.erinnerung : null;
   if (g) {
     g.name = name.slice(0, NAME_MAX);
     g.rhythmus = rhythmusLesen(r);
+    g.erinnerung = uhr;
   } else {
     state.gewohnheiten.push({ id: neueId('g'), name: name.slice(0, NAME_MAX), rhythmus: rhythmusLesen(r),
-      angelegt: heuteSchluessel(), erledigt: [], archiviert: null });
+      angelegt: heuteSchluessel(), erledigt: [], archiviert: null, erinnerung: uhr });
   }
   if (speichern()) melden(g ? 'Gespeichert.' : 'Angelegt. Antippen heißt erledigt, lange drücken öffnet sie.');
   zeige('home');
@@ -3047,6 +3275,61 @@ function terminLoeschenTippen() {
   zeige('home');
 }
 
+// ── Kalender-Export ─────────────────────────────────────────────
+//
+// Zeigt, was hinausgeht, und hat zwei Knöpfe: Teilen (wo das Gerät es kann)
+// und die Datei laden. Eine Gewohnheit ohne Erinnerung steht mit da und führt
+// mit einem Tipp dorthin, wo man ihr eine Uhrzeit gibt.
+function zeichneExport() {
+  var heute = heuteSchluessel(), termine = exportTermine(heute);
+  var gewohnheiten = state.gewohnheiten.filter(function (g) { return !g.archiviert; });
+  var mit = exportGewohnheiten().length, html = '';
+  if (termine.length) {
+    html += '<section class="abschnitt"><h2>Termine</h2><div class="tm-liste">' +
+      termine.map(zeichneTerminZeile).join('') + '</div></section>';
+  }
+  if (gewohnheiten.length) {
+    html += '<section class="abschnitt"><h2>Gewohnheiten</h2><div class="tm-liste">' +
+      gewohnheiten.map(function (g) {
+        var text = g.erinnerung ? rhythmusText(g.rhythmus) : 'ohne Erinnerung, bleibt draußen';
+        return '<button type="button" class="tm-zeile ex-gw' + (g.erinnerung ? '' : ' aus') + '" data-exgw="' +
+            esc(g.id) + '" aria-label="' + esc(g.name + ', ' + (g.erinnerung ? g.erinnerung + ', ' : '') + text) + '">' +
+          '<span class="tm-zeit">' + (g.erinnerung ? esc(g.erinnerung) : ICON.minus) + '</span>' +
+          '<span class="tm-text"><span class="tm-titel">' + esc(g.name) + '</span>' +
+            '<span class="tm-mehr">' + esc(text) + '</span></span>' +
+        '</button>';
+      }).join('') + '</div>' +
+      (mit < gewohnheiten.length ? '<p class="klein">Tipp eine an, um ihr eine Uhrzeit zu geben.</p>' : '') +
+      '</section>';
+  }
+  if (!termine.length && !mit) {
+    return html + '<section class="abschnitt"><p class="hinweis" id="exLeer">' + ICON.hinweis + '<span>Noch ' +
+      'nichts für den Kalender. Leg einen Termin an oder gib einer Gewohnheit eine Erinnerung.</span></p>' +
+      '</section>';
+  }
+  var teilen = kannTeilen(), zahl = termine.length + mit;
+  return html + '<section class="abschnitt"><h2>Exportieren</h2><div class="kachel">' +
+      '<div class="zeile"><span>Einträge</span><span class="wert" id="exZahl">' + zahl + '</span></div>' +
+      '<div class="zeile"><span>Zuletzt</span><span class="wert" id="exZuletzt">' +
+        esc(state.exportiert ? zeitpunktText(state.exportiert) : 'noch nie') + '</span></div>' +
+      '<div class="knopfreihe">' +
+        (teilen ? '<button type="button" class="knopf" id="exTeilen">' + ICON.export + 'Teilen</button>' : '') +
+        '<button type="button" class="knopf' + (teilen ? ' zart' : '') + '" id="exLaden">Als Datei laden</button>' +
+      '</div>' +
+    '</div>' +
+    '<p class="klein">Dein Kalender bekommt eine Kopie. Änderst du später etwas, exportierst du neu und ' +
+      'löschst die alten Einträge im Kalender von Hand. Vergangene Termine bleiben draußen.</p>' +
+    '</section>';
+}
+
+function bindeExport() {
+  if ($('exTeilen')) $('exTeilen').addEventListener('click', icsTeilen);
+  if ($('exLaden')) $('exLaden').addEventListener('click', icsLaden);
+  alleIn('[data-exgw]').forEach(function (b) {
+    b.addEventListener('click', function () { zeige('bearbeiten', this.getAttribute('data-exgw')); });
+  });
+}
+
 // ── Einstellungen ───────────────────────────────────────────────
 function zeichneEinstellungen() {
   var wahl = [['auto', 'Automatisch'], ['hell', 'Hell'], ['dunkel', 'Dunkel']];
@@ -3117,6 +3400,7 @@ function bindeAnsicht() {
   if ($('welle')) bindeWelle();
   if ($('rfNotiz')) bindeRueckfall();
   if ($('tmTitel')) bindeTerminFormular();
+  if (ansicht === 'export') bindeExport();
 
   var knoepfe = document.querySelectorAll('.wahl [data-thema]');
   for (var i = 0; i < knoepfe.length; i++) {

@@ -13,8 +13,8 @@ es wächst mit jedem Bauabschnitt.
 | `<script>` | genau einer, `'use strict'`, ES5-nah |
 
 Im Skript, von oben: Version und Stand · `CHILI_BILD` · Hilfen (`esc`, `ICON`, Datum,
-`melden`, Tage) · Zustand und Speicher · Darstellung · Gewohnheiten (Rechnung) · Abgewöhnen
-(Rechnung, Welle) · Termine · Bewegung (Tropfen) · Ansichten ·
+`melden`, Tage) · Zustand und Speicher · Darstellung · Bewegung (Tropfen) · Gewohnheiten
+(Rechnung) · Abgewöhnen (Rechnung, Welle) · Termine · Kalender-Export (`.ics`) · Ansichten ·
 Menü · Service Worker · Start.
 
 ## Zustand
@@ -31,7 +31,8 @@ state = {
                                          // | { art: 'proWoche', anzahl: 3 }      (1–6)
     angelegt: '2026-10-05',              // Tagesschlüssel, lokale Zeit
     erledigt: ['2026-10-05', …],         // sortiert, einmalig
-    archiviert: null                     // | Tagesschlüssel
+    archiviert: null,                    // | Tagesschlüssel
+    erinnerung: null                     // | 'HH:MM' — nur für den Kalender-Export
   }],
   abgewoehnen: [{
     id: 'a…',
@@ -52,7 +53,8 @@ state = {
     vorlauf: 15,                         // Minuten vor dem Beginn, aus VORLAUF_ZEIT / VORLAUF_GANZ, oder null
     ort: '', notiz: ''
   }],
-  welle: null                            // | { id, start } — die laufende 10-Minuten-Welle
+  welle: null,                           // | { id, start } — die laufende 10-Minuten-Welle
+  exportiert: null                       // | Zeitpunkt in ms — wann zuletzt eine .ics hinausging
 }
 ```
 
@@ -70,6 +72,13 @@ state = {
 - **Termine** (ADR 0006): `terminAm(t, k)` sagt, ob ein Termin an einem Tag liegt,
   `termineAm(k)` liefert sie sortiert (ganztags zuerst, dann Uhrzeit). Monatlich fällt in
   Monaten ohne die Tageszahl aus. `terminLesen()` prüft jeden einzeln.
+
+- **Kalender-Export** (ADR 0009): `kalenderDatei(heute, nun)` schreibt die `.ics` aus
+  `exportTermine(heute)` (was heute oder später noch liegt) und `exportGewohnheiten()`
+  (laufend, mit Erinnerung) — je ein VEVENT über `terminEreignis` bzw.
+  `gewohnheitEreignis`, Zeiten schwebend in der Zeit des Geräts, Zeilen über `icsFalten`.
+  Hinaus geht sie über `icsTeilen` (Teilen-Blatt, nur wo `kannTeilen()`) oder `icsLaden`
+  (Blob, `<a download>`); beide setzen `exportiert`.
 
 - **Ein Schlüssel**: `chillinal_v1`. `laden()` liest, `stand(roh)` übernimmt nur bekannte
   Felder mit gültigen Werten und füllt den Rest aus `grundStand()`. Kaputtes JSON, ein
@@ -101,7 +110,9 @@ der Umschalter (ADR 0007).
 - **Ansichten:** `home` (Dashboard), `neu` (Neue Gewohnheit, mit Umschalter Angewöhnen |
   Abgewöhnen), `bearbeiten` (Gewohnheit: Stand, Formular, Archivieren), `abgewoehnen`
   (Stand, Formular, Rückfälle, Archivieren), `welle` (Drang), `rueckfall`, `terminNeu` und
-  `termin` (Formular, Löschen), `einstellungen`. `termin` braucht eine gültige `id`,
+  `termin` (Formular, Löschen), `export` (Kalender-Export), `einstellungen`. Wer aus `export` eine
+  Gewohnheit oder einen Termin öffnet, kommt über `rueckZiel` dorthin zurück — mit dem
+  Rückweg wie nach dem Speichern. `termin` braucht eine gültige `id`,
   `terminNeu` nimmt statt dessen einen Tag; beide legen `terminEntwurf` an.
   `abgewoehnen` und `rueckfall` brauchen eine gültige `id`, `welle` eine laufende Welle —
   sonst geht es zum Dashboard.

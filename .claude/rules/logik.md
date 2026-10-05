@@ -28,5 +28,8 @@ Gilt für die Gewohnheiten in `index.html`. Begründungen in ADR 0002 und im Pfl
 - **Termine liegen über `terminAm(t, k)`**, nie über eigene Datumsrechnung: monatlich
   fällt aus, wo der Monat den Tag nicht hat — wie in einer `RRULE`. Eine Reihe ändert sich
   nur als Ganzes; `vorlauf` sind Minuten vor dem Beginn, ganztags vor Mitternacht (ADR 0006).
+- **Die `.ics` entsteht nur in `kalenderDatei`**, aus `terminEreignis` und `gewohnheitEreignis`:
+  Zeiten schwebend (ohne Zeitzone), Zeilen mit CRLF und über `icsFalten`, Text über `icsText`,
+  UID = `id@chillinal`. Vergangenes und Gewohnheiten ohne `erinnerung` bleiben draußen (ADR 0009).
 - **Das Formular zeichnet sich beim Wählen nicht neu** — es ändert `entwurf` und die Knöpfe
   an Ort und Stelle, sonst ginge die Tastatur zu.

@@ -16,3 +16,4 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0006](0006-termine-im-einzelnen.md) | Termine: Felder, Wiederholung, Erinnerung, Tagesliste | gilt |
 | [0007](0007-tropfen-statt-aufploppen.md) | Tropfen statt Aufploppen: Geist, Feder, Zoom aus dem Getippten | gilt; Menü und Schrumpfen in den Menüknopf abgelöst durch 0008 |
 | [0008](0008-tropfenform-menue-kalenderwechsel.md) | Tropfenform, Menü unter dem Knopf, Woche \| Monat hält den Tag | gilt |
+| [0009](0009-kalender-export-im-einzelnen.md) | Kalender-Export: schwebende Zeiten, Teilen und Laden, Erinnerung der Gewohnheit | gilt |
