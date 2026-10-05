@@ -13,7 +13,7 @@ var heute = new Date();
 pruefe('A2 und das heutige Datum, ausgeschrieben',
   q('#kopf .datum').textContent === WOCHENTAGE[heute.getDay()] + ', ' + heute.getDate() + '. ' +
     MONATE[heute.getMonth()], q('#kopf .datum').textContent);
-pruefe('A3 Sonne/Mond und Menü stehen im Kopf', !!q('#kopf #themaKnopf') && !!q('#kopf #menuKnopf'));
+pruefe('A3 Sonne/Mond-Schalter und Menü stehen im Kopf', !!q('#kopf #themaKnopf') && !!q('#kopf #menuKnopf'));
 var titel = q('#kopf h1').getBoundingClientRect();
 var menue = q('#menuKnopf').getBoundingClientRect();
 var thema = q('#themaKnopf').getBoundingClientRect();

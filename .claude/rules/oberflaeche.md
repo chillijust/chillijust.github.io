@@ -37,6 +37,9 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 - **Der Kopf hat zwei Gestalten**: Dashboard (Titel, Datum, Sonne/Mond, Menüknopf) und
   unterwegs (Rückweg, Titel). Keine Reiterleiste.
 - **Runde Knöpfe** (`.rund`) sind 44 × 44 und tragen ein Symbol aus `ICON` mit `aria-label`.
+- **Der Sonne/Mond-Schalter ist ein Schieber** (`.thema-schalter`, `role="switch"`,
+  `aria-checked` = dunkel): Sonne links, Mond rechts, beide immer sichtbar, der Knauf liegt
+  unter dem, was gilt. Er fährt erst hinüber, dann zeichnet der Kopf neu.
 - **Das Menü** folgt dem Pflichtenheft in Reihenfolge und Wortlaut. Ein Eintrag ohne `ziel`
   trägt «bald»; wer ihn baut, setzt `ziel` und trägt die Ansicht in `ANSICHTEN` ein.
 - **Eine neue Ansicht** ist ein Eintrag in `ANSICHTEN` (`titel`, `zeichnen`), ihre Ereignisse

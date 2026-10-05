@@ -33,8 +33,20 @@ pruefe('A1 Vorgabe ist «auto»', state.thema === 'auto');
 pruefe('A2 dann trägt <html> kein Attribut', !document.documentElement.hasAttribute('data-thema'));
 pruefe('A3 der Grund ist Elfenbein', grund() === 'rgb(250, 249, 245)', grund());
 pruefe('A4 die Statusleiste auch', meta() === '#FAF9F5', meta());
-pruefe('A5 der Schalter zeigt die Sonne', !!q('#themaKnopf circle'));
-pruefe('A6 und sagt, was er tut', q('#themaKnopf').getAttribute('aria-label') === 'Dunkel schalten');
+// Der Schalter ist ein Schieber: Sonne links, Mond rechts, beide immer da;
+// der Knauf liegt unter dem, was gilt.
+function mitte(el) { var r = el.getBoundingClientRect(); return r.left + r.width / 2; }
+function knaufAuf() {
+  var k = mitte(q('#themaKnopf .knauf'));
+  var hell = mitte(q('#themaKnopf .hell')), dunkel = mitte(q('#themaKnopf .dunkel'));
+  return Math.abs(k - hell) < 2 ? 'sonne' : Math.abs(k - dunkel) < 2 ? 'mond' : k + '';
+}
+pruefe('A5 der Schalter ist ein Schalter', q('#themaKnopf').getAttribute('role') === 'switch' &&
+  q('#themaKnopf').getAttribute('aria-label') === 'Dunkle Darstellung');
+pruefe('A6 er steht auf «hell»', q('#themaKnopf').getAttribute('aria-checked') === 'false');
+pruefe('A7 die Sonne links, der Mond rechts', !!q('#themaKnopf .hell circle') &&
+  !q('#themaKnopf .dunkel circle') && mitte(q('#themaKnopf .hell')) < mitte(q('#themaKnopf .dunkel')));
+pruefe('A8 der Knauf liegt auf der Sonne', knaufAuf() === 'sonne', knaufAuf());
 
 // ── B · Die Medienabfrage und die Wahl tragen dieselbe Palette ─
 function regelWerte(pruefRegel) {
@@ -72,7 +84,8 @@ return warte(400).then(function () {
   pruefe('C2 <html> trägt es', document.documentElement.getAttribute('data-thema') === 'dunkel');
   pruefe('C3 der Grund wird dunkel', grund() === 'rgb(20, 20, 19)', grund());
   pruefe('C4 die Statusleiste folgt', meta() === '#141413', meta());
-  pruefe('C5 der Schalter zeigt den Mond', !q('#themaKnopf circle') && !!q('#themaKnopf path'));
+  pruefe('C5 der Schalter steht auf «dunkel»', q('#themaKnopf').getAttribute('aria-checked') === 'true');
+  pruefe('C5a der Knauf liegt auf dem Mond', knaufAuf() === 'mond', knaufAuf());
   pruefe('C6 die Wahl ist gemerkt', gespeichert() === 'dunkel', gespeichert());
   pruefe('C7 und übersteht das Laden', laden().thema === 'dunkel');
   pruefe('C8 der Akzent bleibt die Chili', token('--akzent') === '#D97757', token('--akzent'));
@@ -83,6 +96,7 @@ return warte(400).then(function () {
   pruefe('C10 der zweite Tipp schaltet hell — fest, nicht zurück auf auto', state.thema === 'hell');
   pruefe('C11 <html> trägt «hell»', document.documentElement.getAttribute('data-thema') === 'hell');
   pruefe('C12 der Grund ist wieder Elfenbein', grund() === 'rgb(250, 249, 245)', grund());
+  pruefe('C13 der Knauf ist zurück auf der Sonne', knaufAuf() === 'sonne', knaufAuf());
 
   // ── D · Die Wahl in den Einstellungen ─────────────────────
   zeige('einstellungen');
