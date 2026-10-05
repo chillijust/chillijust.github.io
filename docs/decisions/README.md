@@ -9,3 +9,4 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | Nr. | Titel | Stand |
 | --- | --- | --- |
 | [0001](0001-chillinal-loest-chillingo-ab.md) | Chillinal löst Chillingo ab | gilt |
+| [0002](0002-staerke-im-einzelnen.md) | Gewohnheiten: Stärke, Serie und «nie zweimal» im Einzelnen | gilt |

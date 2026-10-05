@@ -50,7 +50,7 @@ die Chili.
 | Bauabschnitt | Stand |
 | --- | --- |
 | 1 · Umbau, Gerüst, Kopf, Farben, Schriften, Symbol, `sw.js` | fertig (0.1.0) |
-| 2 · Gewohnheiten: anlegen, Rhythmus, Abhaken, Stärke, nie zweimal | offen |
+| 2 · Gewohnheiten: anlegen, Rhythmus, Abhaken, Stärke, nie zweimal | fertig (0.2.0T) |
 | 3 · Abgewöhnen, 10-Minuten-Welle | offen |
 | 4 · Termine, Monatskalender, Tagesansicht | offen |
 | 5 · Kalender-Export (`.ics`) | offen |
@@ -70,13 +70,13 @@ Diese Datei trägt nur, was **immer** gilt. Das Übrige liegt themenweise unter
 | Datei | greift bei | Inhalt |
 | --- | --- | --- |
 | `.claude/rules/oberflaeche.md` | `index.html` | Farben, Darstellung, Schrift, Kopf, Menü, Chili, Bewegung, Speicher |
+| `.claude/rules/logik.md` | `index.html` | Stärke, Serie, nie zweimal, Tage, Uhr |
 | `.claude/rules/pruefstand.md` | `tools/pruefstand/**` | wie eine Suite entsteht und woran sie scheitert |
 | `.claude/rules/docs.md` | `docs/**` | ADRs, Index |
 
 Die Begründung hinter jeder Regel steht im jeweiligen ADR unter `docs/decisions/`
 (Index: `docs/decisions/README.md`). Wer eine Regel ändert, ändert sie **dort**, wo sie
-steht — nicht zusätzlich hier. Kommt mit Abschnitt 2 die Rechenlogik, bekommt sie ihre
-eigene Datei (`.claude/rules/logik.md`).
+steht — nicht zusätzlich hier.
 
 ## Harte Rahmenbedingungen — nicht verhandelbar
 

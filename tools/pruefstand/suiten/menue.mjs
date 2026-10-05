@@ -63,5 +63,13 @@ pruefe('E3 Escape schließt', !huelle.classList.contains('offen'));
 zeige('gibtsnicht');
 pruefe('F1 statt eines leeren Bilds das Dashboard', ansicht === 'home' && !!q('#chiliFigur'));
 q('#ersteGewohnheit').click();
-pruefe('F2 «Erste Gewohnheit anlegen» antwortet', /nächsten Fassung/.test(q('#meldung').textContent));
+pruefe('F2 «Erste Gewohnheit anlegen» öffnet das Formular', ansicht === 'neu' && !!q('#gwName'));
+
+// ── G · «Neue Gewohnheit» im Menü ───────────────────────────
+frisch();
+menueOeffnen();
+q('[data-menue="gewohnheit"]').click();
+pruefe('G1 öffnet das Formular', ansicht === 'neu' && !!q('#gwName'));
+pruefe('G2 mit Titel im Kopf', q('#kopf h1').textContent === 'Neue Gewohnheit');
+frisch();
 `);

@@ -34,8 +34,9 @@ meldet der Läufer das als Fehler statt sie zu übergehen.
 | --- | --- |
 | `geruest` | Kopf, leeres Dashboard, Chili, Trefferflächen, Duzen, Emoji, Schriften |
 | `thema` | hell/dunkel/automatisch, Schalter, beide dunklen Paletten gleich, Chillingos Speicher unberührt |
-| `menue` | Reihenfolge, «bald» gegen Gebautes, Rückweg, Schließen |
+| `menue` | Reihenfolge, «bald» gegen Gebautes, Rückweg, Schließen, «Neue Gewohnheit» |
 | `speicher` | Lesen, Kaputtes, werfender Speicher |
+| `gewohnheiten` | Stärke, Serie, nie zweimal, Anlegen, Abhaken, Bearbeiten, Archiv, Hinweis ab 3, Speicher |
 | `offline` | `sw.js` von außen, App ohne Worker, Hinweis, Knopf, Notausgang |
 
 ## Eine Suite schreiben

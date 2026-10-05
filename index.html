@@ -246,6 +246,157 @@ svg { display: block; }
 .willkommen h2 { font-size: 22px; margin-bottom: 8px; }
 .willkommen p { margin: 0 auto 22px; max-width: 30ch; color: var(--text-2); }
 
+/* ── Ringe ─────────────────────────────────────────────────────
+   Eine Spur und eine Füllung im Akzent. Die Füllung beginnt oben und läuft
+   im Uhrzeigersinn; ringeFuellen() läßt sie vom alten Wert herüberlaufen. */
+.ring { display: block; width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring circle { fill: none; stroke-width: 3.2; }
+.ring-spur { stroke: var(--flaeche-2); }
+.ring-fuell { stroke: var(--akzent); transition: stroke-dashoffset .7s cubic-bezier(.3, .8, .3, 1); }
+
+/* ── Dashboard: Tagesring ──────────────────────────────────── */
+.tagesring { display: flex; align-items: center; gap: 20px; padding: 18px 20px; margin-bottom: 22px; }
+.tr-bild { position: relative; width: 112px; height: 112px; flex: none; }
+.tagesring #chiliFigur {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 70px;
+  height: 70px;
+  margin: -37px 0 0 -35px;
+}
+.tr-text { min-width: 0; }
+.etikett {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text-2);
+}
+.tr-zahl {
+  font-family: var(--sans);
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.tr-text p { margin: 2px 0 0; font-size: 15px; color: var(--text-2); }
+
+/* ── Dashboard: Gewohnheiten ───────────────────────────────── */
+.gw-liste { display: flex; flex-direction: column; gap: 10px; }
+.gw-kachel {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 6px 6px 4px;
+  border-radius: var(--rund);
+  background: var(--flaeche);
+  box-shadow: var(--schatten);
+  transition: background-color .3s ease, box-shadow .3s ease;
+}
+/* Nie zweimal: Gestern verpaßt, heute noch offen — die Kachel trägt einen Rand. */
+.gw-kachel.warnen { box-shadow: inset 0 0 0 2px var(--akzent), var(--schatten); }
+.gw-liste.gedimmt .gw-kachel { opacity: .6; }
+.gw-haken {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 76px;
+  padding: 6px 8px;
+  border-radius: 16px;
+  text-align: left;
+  transition: transform .15s ease;
+}
+.gw-haken:active { transform: scale(.98); }
+.gw-ring { position: relative; width: 54px; height: 54px; flex: none; }
+.gw-scheibe {
+  position: absolute;
+  inset: 9px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--flaeche-2);
+  color: var(--linie);
+  transition: background-color .25s ease, color .25s ease;
+}
+.gw-scheibe svg { width: 20px; height: 20px; }
+.gw-kachel.erledigt .gw-scheibe { background: var(--erledigt); color: var(--grund); }
+.gw-kachel.gerade.erledigt .gw-scheibe { animation: abgehakt .5s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes abgehakt {
+  0% { transform: scale(.55); }
+  100% { transform: scale(1); }
+}
+.gw-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.gw-name { font-size: 17px; font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
+.gw-info { font-size: 13px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.gw-warnung { display: inline-flex; align-items: center; gap: 6px; color: var(--text); font-weight: 600; }
+.gw-warnung::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--akzent); }
+.gw-punkte { display: flex; gap: 6px; margin-top: 5px; }
+.punkt { width: 9px; height: 9px; border-radius: 50%; background: var(--linie); opacity: .35; }
+.punkt.erledigt { background: var(--erledigt); opacity: 1; }
+.punkt.verpasst { background: transparent; box-shadow: inset 0 0 0 1.5px var(--linie); opacity: 1; }
+.punkt.heute { background: transparent; box-shadow: inset 0 0 0 1.5px var(--text-2); opacity: 1; }
+.gw-pfeil { background: transparent; color: var(--text-2); }
+.gw-pfeil svg { width: 20px; height: 20px; }
+
+/* ── Formular ──────────────────────────────────────────────── */
+/* 17 px: Unter 16 px zoomt Safari beim Antippen ins Feld. */
+.eingabe {
+  width: 100%;
+  min-height: 50px;
+  padding: 10px 16px;
+  border: 1.5px solid var(--flaeche-2);
+  border-radius: 14px;
+  background: var(--flaeche);
+  color: var(--text);
+  font: 17px/1.4 var(--serif);
+  -webkit-appearance: none;
+  appearance: none;
+}
+.eingabe:focus { outline: none; border-color: var(--akzent); }
+.eingabe::placeholder { color: var(--text-2); opacity: .75; }
+.abschnitt h2 label { cursor: pointer; }
+.rh-teil { margin-top: 10px; }
+.rh-teil[hidden] { display: none; }
+.tage { display: flex; gap: 4px; }
+.tage button {
+  flex: 1;
+  min-width: 0;
+  min-height: 46px;
+  border-radius: 14px;
+  background: var(--flaeche-2);
+  color: var(--text-2);
+  font-size: 15px;
+  font-weight: 500;
+  transition: background-color .2s ease, color .2s ease;
+}
+.tage button[aria-pressed="true"] { background: var(--knopf); color: var(--knopf-text); }
+.zaehler {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px;
+  border-radius: 16px;
+  background: var(--flaeche-2);
+}
+.zaehler .rund { background: var(--grund); box-shadow: var(--schatten); }
+.zaehler .wert { font-family: var(--sans); font-weight: 600; font-variant-numeric: tabular-nums; }
+.hinweis {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin: 0 0 22px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--flaeche);
+  font-size: 15px;
+}
+.hinweis svg { width: 22px; height: 22px; flex: none; color: var(--akzent); margin-top: 1px; }
+.knopf.frage { box-shadow: inset 0 0 0 2px var(--akzent); }
+
 /* ── Menü ──────────────────────────────────────────────────── */
 #menue {
   position: fixed;
@@ -393,7 +544,7 @@ svg { display: block; }
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.1.0';
+var APP_VERSION = '0.2.0T';
 var APP_STAND = '2026-10-05';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -437,15 +588,52 @@ var ICON = {
     '2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'),
   sicherung: svg('<path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/>'),
   ticket: svg('<path d="M4 6h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4z"/><path d="M10 9h4M10 15h4"/>'),
-  haken: svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>')
+  haken: svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>'),
+  weiter: svg('<path d="M9 5l7 7-7 7"/>'),
+  minus: svg('<path d="M5 12h14"/>'),
+  hinweis: svg('<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.01"/>')
 };
 
 var WOCHENTAGE = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 var MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September',
   'Oktober', 'November', 'Dezember'];
 
+// Kurz, in der Reihenfolge der Woche: Montag zuerst.
+var WT_KURZ = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+var WOCHE = [1, 2, 3, 4, 5, 6, 0];
+
 function datumLang(d) {
   return WOCHENTAGE[d.getDay()] + ', ' + d.getDate() + '. ' + MONATE[d.getMonth()];
+}
+
+// ── Tage ────────────────────────────────────────────────────────
+//
+// Ein Tag ist ein Schlüssel «JJJJ-MM-TT» in lokaler Zeit, die Grenze lokale
+// Mitternacht. Schlüssel lassen sich als Text vergleichen. Gerechnet wird über
+// setDate, nie über Millisekunden — sonst verrutscht die Zeitumstellung einen Tag.
+// `jetzt()` ist die einzige Uhr; der Prüfstand stellt sie.
+function jetzt() { return new Date(); }
+
+function zwei(n) { return (n < 10 ? '0' : '') + n; }
+function tagSchluessel(d) {
+  return d.getFullYear() + '-' + zwei(d.getMonth() + 1) + '-' + zwei(d.getDate());
+}
+function ausSchluessel(k) {
+  var t = k.split('-');
+  return new Date(+t[0], +t[1] - 1, +t[2]);
+}
+function heuteSchluessel() { return tagSchluessel(jetzt()); }
+function tagPlus(k, n) {
+  var d = ausSchluessel(k);
+  d.setDate(d.getDate() + n);
+  return tagSchluessel(d);
+}
+function istSchluessel(k) {
+  return typeof k === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(k) && tagSchluessel(ausSchluessel(k)) === k;
+}
+// Die Woche beginnt am Montag.
+function wochenAnfang(k) {
+  return tagPlus(k, -((ausSchluessel(k).getDay() + 6) % 7));
 }
 
 // Eine kurze Meldung unten. Eine zur Zeit; die nächste ersetzt die vorige.
@@ -474,7 +662,8 @@ var SPEICHER = 'chillinal_v1';
 function grundStand() {
   return {
     schema: 1,
-    thema: 'auto'   // 'auto' folgt dem Gerät, sonst 'hell' oder 'dunkel'
+    thema: 'auto',   // 'auto' folgt dem Gerät, sonst 'hell' oder 'dunkel'
+    gewohnheiten: []
   };
 }
 
@@ -482,7 +671,58 @@ function stand(roh) {
   var s = grundStand();
   if (!roh || typeof roh !== 'object') return s;
   if (roh.thema === 'hell' || roh.thema === 'dunkel' || roh.thema === 'auto') s.thema = roh.thema;
+  if (Array.isArray(roh.gewohnheiten)) {
+    var ids = {};
+    roh.gewohnheiten.forEach(function (g) {
+      var gut = gewohnheitLesen(g);
+      if (gut && !ids[gut.id]) { ids[gut.id] = true; s.gewohnheiten.push(gut); }
+    });
+  }
   return s;
+}
+
+// Eine Gewohnheit, wie sie gespeichert wird:
+//   { id, name, rhythmus, angelegt: Tag, erledigt: [Tag, …], archiviert: Tag | null }
+// Was nicht paßt, fällt weg — lieber eine Gewohnheit weniger als eine kaputte.
+// Beide Grenzen stehen hier oben: `laden()` läuft, bevor das Skript weiter unten
+// ankommt, und eine spätere `var` wäre dann noch undefined.
+var NAME_MAX = 40;
+var PRO_WOCHE_MAX = 6;
+
+function gewohnheitLesen(g) {
+  if (!g || typeof g !== 'object' || typeof g.id !== 'string' || !g.id) return null;
+  var name = typeof g.name === 'string' ? g.name.trim().slice(0, NAME_MAX) : '';
+  var rhythmus = rhythmusLesen(g.rhythmus);
+  if (!name || !rhythmus || !istSchluessel(g.angelegt)) return null;
+  var erledigt = [];
+  if (Array.isArray(g.erledigt)) {
+    g.erledigt.forEach(function (k) {
+      if (istSchluessel(k) && erledigt.indexOf(k) === -1) erledigt.push(k);
+    });
+  }
+  erledigt.sort();
+  return {
+    id: g.id,
+    name: name,
+    rhythmus: rhythmus,
+    angelegt: g.angelegt,
+    erledigt: erledigt,
+    archiviert: istSchluessel(g.archiviert) ? g.archiviert : null
+  };
+}
+
+// täglich · bestimmte Wochentage (0 = Sonntag) · x-mal pro Woche (1–6)
+function rhythmusLesen(r) {
+  if (!r || typeof r !== 'object') return null;
+  if (r.art === 'taeglich') return { art: 'taeglich' };
+  if (r.art === 'wochentage' && Array.isArray(r.tage)) {
+    var tage = [0, 1, 2, 3, 4, 5, 6].filter(function (t) { return r.tage.indexOf(t) !== -1; });
+    return tage.length ? { art: 'wochentage', tage: tage } : null;
+  }
+  if (r.art === 'proWoche' && r.anzahl === Math.floor(r.anzahl) && r.anzahl >= 1 && r.anzahl <= PRO_WOCHE_MAX) {
+    return { art: 'proWoche', anzahl: r.anzahl };
+  }
+  return null;
 }
 
 function laden() {
@@ -568,6 +808,146 @@ function bewegungAus() {
 }
 
 // ════════════════════════════════════════════════════════════════
+//  Gewohnheiten: Stärke, Serie, nie zweimal
+// ════════════════════════════════════════════════════════════════
+//
+// Alles wird aus `erledigt` und dem Rhythmus abgeleitet, nichts davon
+// gespeichert — ein geänderter Rhythmus rechnet die Geschichte neu.
+// Die Regeln im Einzelnen: ADR 0002 und .claude/rules/logik.md.
+//
+// Stärke: gleitender Mittelwert über die fälligen Gelegenheiten,
+// s ← s·(1−α) + α·x. α so, daß 66 erfüllte Gelegenheiten in Folge von 0 auf
+// 90 % führen (Lally 2010: im Mittel 66 Tage bis zur Automatik).
+var ALPHA = 1 - Math.pow(0.1, 1 / 66);
+var SCHWACH = 0.5;      // darunter sitzt eine Gewohnheit noch nicht
+var HINWEIS_AB = 3;     // so viele schwache, dann der sanfte Hinweis
+
+function aktiveGewohnheiten() {
+  return state.gewohnheiten.filter(function (g) { return !g.archiviert; });
+}
+
+function gewohnheitNach(id) {
+  for (var i = 0; i < state.gewohnheiten.length; i++) {
+    if (state.gewohnheiten[i].id === id) return state.gewohnheiten[i];
+  }
+  return null;
+}
+
+function faelligAm(g, k) {
+  if (g.rhythmus.art === 'taeglich') return true;
+  if (g.rhythmus.art === 'wochentage') return g.rhythmus.tage.indexOf(ausSchluessel(k).getDay()) !== -1;
+  return false;   // x-mal pro Woche: gewertet wird die Woche, nicht der Tag
+}
+
+// Was die Kachel braucht: staerke (0–1), serie, warnen, faelligHeute,
+// erledigtHeute, punkte (die letzten 7 Tage) und, je Woche, treffer/ziel.
+function auswerten(g, heute) {
+  var erl = {};
+  g.erledigt.forEach(function (k) { erl[k] = true; });
+  var a = g.rhythmus.art === 'proWoche' ? wochenRechnung(g, heute, erl) : tagesRechnung(g, heute, erl);
+  a.erledigtHeute = !!erl[heute];
+  a.punkte = punkte(g, heute, erl);
+  return a;
+}
+
+// Täglich und Wochentage: jeder fällige Tag ist eine Gelegenheit. Heute zählt
+// erst, wenn es erledigt ist — ein offener Tag ist kein Aussetzer.
+// Die Serie zählt erledigte Gelegenheiten und bricht erst beim zweiten
+// Aussetzer in Folge.
+function tagesRechnung(g, heute, erl) {
+  var s = 0, serie = 0, fehl = 0, vorige = null;
+  for (var k = g.angelegt; k <= heute; k = tagPlus(k, 1)) {
+    if (!faelligAm(g, k)) continue;
+    var x = erl[k] ? 1 : 0;
+    if (k === heute && !x) break;
+    s = s * (1 - ALPHA) + ALPHA * x;
+    if (x) { serie++; fehl = 0; } else if (++fehl >= 2) serie = 0;
+    if (k < heute) vorige = x;
+  }
+  var faellig = faelligAm(g, heute);
+  return {
+    staerke: s,
+    serie: serie,
+    faelligHeute: faellig,
+    // Nie zweimal: Die letzte fällige Gelegenheit vor heute ist verpaßt.
+    warnen: faellig && !erl[heute] && vorige === 0
+  };
+}
+
+// x-mal pro Woche: gewertet am Wochenende (Montag bis Sonntag), erreicht = 1,
+// sonst anteilig. Eine Woche wiegt so viel wie ihre x Gelegenheiten. Die erste,
+// angebrochene Woche verlangt nur so viele, wie Tage übrig waren.
+function wochenRechnung(g, heute, erl) {
+  var n = g.rhythmus.anzahl, s = 0, serie = 0, fehl = 0, vorige = null;
+  var diese = wochenAnfang(heute), faellig = false, warnen = false, treffer = 0, ziel = n;
+  for (var mo = wochenAnfang(g.angelegt); mo <= diese; mo = tagPlus(mo, 7)) {
+    var tage = 0, vorher = 0;
+    treffer = 0;
+    for (var i = 0; i < 7; i++) {
+      var k = tagPlus(mo, i);
+      if (k < g.angelegt) continue;
+      tage++;
+      if (erl[k]) { treffer++; if (k < heute) vorher++; }
+    }
+    ziel = Math.min(n, tage);
+    if (mo === diese) {
+      faellig = vorher < ziel;
+      warnen = treffer < ziel && !erl[heute] && vorige === 0;
+      if (treffer < ziel) break;   // die Woche läuft noch
+    }
+    var r = Math.min(1, treffer / ziel), f = Math.pow(1 - ALPHA, ziel);
+    s = s * f + (1 - f) * r;
+    if (r >= 1) { serie++; fehl = 0; } else if (++fehl >= 2) serie = 0;
+    if (mo < diese) vorige = r >= 1 ? 1 : 0;
+  }
+  return { staerke: s, serie: serie, faelligHeute: faellig, warnen: warnen, treffer: treffer, ziel: ziel };
+}
+
+// Die letzten sieben Tage, ältester zuerst.
+function punkte(g, heute, erl) {
+  var p = [];
+  for (var i = 6; i >= 0; i--) {
+    var k = tagPlus(heute, -i), art;
+    var faellig = g.rhythmus.art === 'proWoche' || faelligAm(g, k);
+    if (erl[k]) art = 'erledigt';
+    else if (k < g.angelegt || !faellig) art = 'frei';
+    else if (k === heute) art = 'heute';
+    else art = g.rhythmus.art === 'proWoche' ? 'frei' : 'verpasst';
+    p.push({ tag: k, art: art });
+  }
+  return p;
+}
+
+function prozent(s) { return Math.round(s * 100); }
+
+function schwacheZahl(heute) {
+  return aktiveGewohnheiten().filter(function (g) {
+    return auswerten(g, heute).staerke < SCHWACH;
+  }).length;
+}
+
+function rhythmusText(r) {
+  if (r.art === 'taeglich') return 'Täglich';
+  if (r.art === 'proWoche') return r.anzahl + '× pro Woche';
+  if (r.tage.length === 7) return 'Jeden Tag';
+  return WOCHE.filter(function (t) { return r.tage.indexOf(t) !== -1; })
+    .map(function (t) { return WT_KURZ[t]; }).join(', ');
+}
+
+// Antippen = erledigt, nochmal = zurück. Nur für heute.
+function abhaken(id) {
+  var g = gewohnheitNach(id);
+  if (!g) return;
+  var heute = heuteSchluessel(), i = g.erledigt.indexOf(heute);
+  if (i === -1) { g.erledigt.push(heute); g.erledigt.sort(); } else g.erledigt.splice(i, 1);
+  speichern();
+}
+
+function neueId() {
+  return 'g' + Date.now().toString(36) + Math.floor(Math.random() * 1296).toString(36);
+}
+
+// ════════════════════════════════════════════════════════════════
 //  Ansichten
 // ════════════════════════════════════════════════════════════════
 //
@@ -578,13 +958,15 @@ var ansicht = 'home';
 
 var ANSICHTEN = {
   home: { titel: 'Chillinal', zeichnen: zeichneHome },
+  neu: { titel: 'Neue Gewohnheit', zeichnen: zeichneFormular },
+  bearbeiten: { titel: 'Gewohnheit', zeichnen: zeichneFormular },
   einstellungen: { titel: 'Einstellungen', zeichnen: zeichneEinstellungen }
 };
 
 // Das Menü in der Reihenfolge des Pflichtenhefts. `ziel` ist eine Ansicht;
 // ohne Ziel ist der Eintrag angekündigt, aber noch nicht gebaut.
 var MENUE = [
-  { id: 'gewohnheit', name: 'Neue Gewohnheit', icon: 'plus' },
+  { id: 'gewohnheit', name: 'Neue Gewohnheit', icon: 'plus', ziel: 'neu' },
   { id: 'termin', name: 'Neuer Termin', icon: 'termin' },
   { id: 'journal', name: 'Journal', icon: 'journal' },
   { id: 'export', name: 'Kalender-Export', icon: 'export' },
@@ -593,19 +975,43 @@ var MENUE = [
   { id: 'tickets', name: 'Tickets', icon: 'ticket' }
 ];
 
-function zeige(name) {
+// `id` braucht nur «bearbeiten»: welche Gewohnheit. Ohne eine gültige geht
+// es nach Hause, nicht in ein leeres Formular.
+function zeige(name, id) {
   if (!ANSICHTEN[name]) name = 'home';
+  if (name === 'bearbeiten' && !gewohnheitNach(id)) name = 'home';
+  entwurf = name === 'neu' ? entwurfAus(null) : name === 'bearbeiten' ? entwurfAus(gewohnheitNach(id)) : null;
   ansicht = name;
   render();
   try { window.scrollTo(0, 0); } catch (e) { /* egal */ }
 }
 
 function render() {
+  if ((ansicht === 'neu' || ansicht === 'bearbeiten') && !entwurf) ansicht = 'home';
   renderKopf();
   var feld = $('ansicht');
   feld.innerHTML = ANSICHTEN[ansicht].zeichnen();
   bindeAnsicht();
+  ringeFuellen();
 }
+
+// Ringe füllen sich vom zuletzt gezeigten Wert zum neuen. Gezeichnet wird mit
+// dem Ziel; erst hier springt der Ring zurück und läuft hinüber.
+function ringeFuellen() {
+  var ringe = alleIn('.ring-fuell[data-von]');
+  if (!ringe.length || bewegungAus()) return;
+  ringe.forEach(function (r) {
+    r.style.transition = 'none';
+    r.style.strokeDashoffset = r.getAttribute('data-von');
+  });
+  void document.body.offsetWidth;
+  ringe.forEach(function (r) {
+    r.style.transition = '';
+    r.style.strokeDashoffset = r.getAttribute('stroke-dashoffset');
+  });
+}
+
+function alleIn(sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); }
 
 function renderKopf() {
   var kopf = $('kopf');
@@ -613,7 +1019,7 @@ function renderKopf() {
     var dunkel = themaWirksam() === 'dunkel';
     kopf.innerHTML =
       '<div class="kopf-titel"><h1>Chillinal</h1>' +
-      '<div class="datum">' + esc(datumLang(new Date())) + '</div></div>' +
+      '<div class="datum">' + esc(datumLang(jetzt())) + '</div></div>' +
       '<button type="button" class="thema-schalter" id="themaKnopf" role="switch" ' +
         'aria-checked="' + (dunkel ? 'true' : 'false') + '" aria-label="Dunkle Darstellung">' +
         '<span class="knauf"></span><span class="seite hell">' + ICON.sonne + '</span>' +
@@ -632,9 +1038,86 @@ function renderKopf() {
 
 // ── Dashboard ───────────────────────────────────────────────────
 //
+// Oben der Tagesring mit der Chili, darunter, was heute dran ist, darunter
+// gedimmt, was heute nicht dran ist. Die Kacheln bleiben beim Abhaken stehen,
+// wo sie sind — nichts springt unter dem Finger weg.
+var ringZuletzt = {};          // id → zuletzt gezeigter Anteil, für die Animation
+var geradeAbgehakt = null;     // die Kachel, die eben getippt wurde
+
+function zeichneHome() {
+  var aktiv = aktiveGewohnheiten();
+  if (!aktiv.length) return zeichneWillkommen();
+  var heute = heuteSchluessel();
+  var liste = aktiv.map(function (g) { return { g: g, a: auswerten(g, heute) }; });
+  var dran = liste.filter(function (e) { return e.a.faelligHeute; });
+  var frei = liste.filter(function (e) { return !e.a.faelligHeute; });
+  var fertig = dran.filter(function (e) { return e.a.erledigtHeute; }).length;
+  return zeichneTagesring(fertig, dran.length) +
+    (dran.length ? '<section class="abschnitt"><h2>Gewohnheiten</h2><div class="gw-liste">' +
+      dran.map(zeichneKachel).join('') + '</div></section>' : '') +
+    (frei.length ? '<section class="abschnitt"><h2>Heute nicht dran</h2><div class="gw-liste gedimmt">' +
+      frei.map(zeichneKachel).join('') + '</div></section>' : '');
+}
+
+// Ein Ring: Spur und Füllung, gezeichnet mit dem Ziel. `schluessel` merkt sich
+// den Wert, damit der nächste Ring vom alten aus losläuft.
+function ring(anteil, schluessel) {
+  var u = 2 * Math.PI * 15.5;
+  var von = ringZuletzt[schluessel] === undefined ? 0 : ringZuletzt[schluessel];
+  ringZuletzt[schluessel] = anteil;
+  return '<svg class="ring" viewBox="0 0 36 36" aria-hidden="true">' +
+    '<circle class="ring-spur" cx="18" cy="18" r="15.5"/>' +
+    '<circle class="ring-fuell" cx="18" cy="18" r="15.5" stroke-dasharray="' + u.toFixed(2) + '" ' +
+      'stroke-dashoffset="' + (u * (1 - anteil)).toFixed(2) + '" data-von="' + (u * (1 - von)).toFixed(2) + '"/>' +
+    '</svg>';
+}
+
+function zeichneTagesring(fertig, von) {
+  var zahl, text;
+  if (!von) { zahl = 'frei'; text = 'Heute ist nichts fällig.'; }
+  else {
+    zahl = fertig + ' von ' + von;
+    text = fertig === von ? 'Alles erledigt.' : 'Noch ' + (von - fertig) + ' offen.';
+  }
+  return '<section class="kachel tagesring" aria-label="Heute ' + esc(zahl) + '">' +
+    '<div class="tr-bild">' + ring(von ? fertig / von : 0, '#tag') +
+      '<img id="chiliFigur" src="' + CHILI_BILD + '" alt=""></div>' +
+    '<div class="tr-text"><div class="etikett">Heute</div>' +
+      '<div class="tr-zahl" id="tagesZahl">' + esc(zahl) + '</div>' +
+      '<p>' + esc(text) + '</p></div>' +
+    '</section>';
+}
+
+function zeichneKachel(e) {
+  var g = e.g, a = e.a, woche = g.rhythmus.art === 'proWoche';
+  var info;
+  if (a.warnen) {
+    info = '<span class="gw-warnung">' + (woche ? 'Diese Woche nicht wieder' : 'Heute nicht wieder') + '</span>';
+  } else {
+    info = 'Stärke ' + prozent(a.staerke) + ' %' +
+      (woche ? ' · ' + Math.min(a.treffer, a.ziel) + ' von ' + a.ziel + ' diese Woche'
+        : a.serie ? ' · Serie ' + a.serie : '');
+  }
+  var klassen = 'gw-kachel' + (a.erledigtHeute ? ' erledigt' : '') + (a.warnen ? ' warnen' : '') +
+    (geradeAbgehakt === g.id ? ' gerade' : '');
+  return '<div class="' + klassen + '">' +
+    '<button type="button" class="gw-haken" data-haken="' + esc(g.id) + '" aria-pressed="' +
+      (a.erledigtHeute ? 'true' : 'false') + '">' +
+      '<span class="gw-ring">' + ring(a.staerke, g.id) + '<span class="gw-scheibe">' + ICON.haken + '</span></span>' +
+      '<span class="gw-text"><span class="gw-name">' + esc(g.name) + '</span>' +
+        '<span class="gw-info">' + info + '</span>' +
+        '<span class="gw-punkte" aria-hidden="true">' + a.punkte.map(function (p) {
+          return '<span class="punkt ' + p.art + '"></span>';
+        }).join('') + '</span></span>' +
+    '</button>' +
+    '<button type="button" class="rund gw-pfeil" data-bearbeiten="' + esc(g.id) + '" aria-label="' +
+      esc(g.name) + ' ansehen">' + ICON.weiter + '</button>' +
+    '</div>';
+}
+
 // Noch gibt es nichts abzuhaken: Die Chili begrüßt, ein Knopf führt zur
 // ersten Gewohnheit. Kein Tutorial — der Knopf ist die Anleitung.
-function zeichneHome() {
+function zeichneWillkommen() {
   return '<section class="kachel willkommen">' +
     '<img id="chiliFigur" src="' + CHILI_BILD + '" alt="Die Chili winkt">' +
     '<h2>Hallo, ich bin die Chili.</h2>' +
@@ -642,6 +1125,152 @@ function zeichneHome() {
     '<button type="button" class="knopf" id="ersteGewohnheit">' + ICON.plus +
     '<span>Erste Gewohnheit anlegen</span></button>' +
     '</section>';
+}
+
+// ── Neue Gewohnheit · Gewohnheit ────────────────────────────────
+//
+// Ein Formular für beides. Was getippt und gewählt ist, steht im `entwurf`;
+// gespeichert wird erst mit dem Knopf. Das Formular zeichnet sich beim
+// Wählen nicht neu — sonst ginge die Tastatur zu.
+var entwurf = null;
+
+function entwurfAus(g) {
+  var r = g ? g.rhythmus : { art: 'taeglich' };
+  return {
+    id: g ? g.id : null,
+    name: g ? g.name : '',
+    art: r.art,
+    tage: r.tage ? r.tage.slice() : [1, 2, 3, 4, 5],
+    anzahl: r.anzahl || 3,
+    archivFrage: false
+  };
+}
+
+var RHYTHMEN = [['taeglich', 'Täglich'], ['wochentage', 'Wochentage'], ['proWoche', 'Pro Woche']];
+
+function zeichneFormular() {
+  var heute = heuteSchluessel(), g = entwurf.id ? gewohnheitNach(entwurf.id) : null;
+  var html = '';
+  if (g) {
+    var a = auswerten(g, heute), woche = g.rhythmus.art === 'proWoche';
+    html += '<section class="abschnitt"><h2>Stand</h2><div class="kachel">' +
+      '<div class="zeile"><span>Stärke</span><span class="wert">' + prozent(a.staerke) + ' %</span></div>' +
+      '<div class="zeile"><span>Serie</span><span class="wert">' + a.serie + ' ' +
+        (woche ? (a.serie === 1 ? 'Woche' : 'Wochen') : (a.serie === 1 ? 'Tag' : 'Tage')) + '</span></div>' +
+      '<div class="zeile"><span>Seit</span><span class="wert">' +
+        esc(datumLang(ausSchluessel(g.angelegt))) + '</span></div>' +
+      '</div></section>';
+  } else if (schwacheZahl(heute) >= HINWEIS_AB) {
+    html += '<p class="hinweis" id="gwHinweis">' + ICON.hinweis + '<span>Du baust gerade an ' +
+      schwacheZahl(heute) + ' Gewohnheiten, die noch nicht sitzen. Mehr auf einmal macht alle ' +
+      'schwächer — vielleicht erst eine festigen?</span></p>';
+  }
+  html += '<section class="abschnitt"><h2><label for="gwName">Name</label></h2>' +
+      '<input id="gwName" class="eingabe" type="text" maxlength="' + NAME_MAX + '" autocomplete="off" ' +
+        'enterkeyhint="done" placeholder="Zum Beispiel: Zehn Minuten lesen" value="' + esc(entwurf.name) + '">' +
+    '</section>' +
+    '<section class="abschnitt"><h2>Rhythmus</h2>' +
+      '<div class="wahl" role="group" aria-label="Rhythmus">' + RHYTHMEN.map(function (r) {
+        return '<button type="button" data-art="' + r[0] + '" aria-pressed="' +
+          (entwurf.art === r[0] ? 'true' : 'false') + '">' + esc(r[1]) + '</button>';
+      }).join('') + '</div>' +
+      '<div class="rh-teil tage" id="rhTage" role="group" aria-label="Wochentage"' +
+        (entwurf.art === 'wochentage' ? '' : ' hidden') + '>' + WOCHE.map(function (t) {
+          return '<button type="button" data-tag="' + t + '" aria-label="' + WOCHENTAGE[t] + '" aria-pressed="' +
+            (entwurf.tage.indexOf(t) !== -1 ? 'true' : 'false') + '">' + WT_KURZ[t] + '</button>';
+        }).join('') + '</div>' +
+      '<div class="rh-teil zaehler" id="rhAnzahl"' + (entwurf.art === 'proWoche' ? '' : ' hidden') + '>' +
+        '<button type="button" class="rund" id="anzWeniger" aria-label="Seltener">' + ICON.minus + '</button>' +
+        '<span class="wert" id="anzWert" aria-live="polite">' + entwurf.anzahl + '× pro Woche</span>' +
+        '<button type="button" class="rund" id="anzMehr" aria-label="Öfter">' + ICON.plus + '</button>' +
+      '</div>' +
+      '<p class="klein" id="rhText">' + esc(rhythmusErklaerung(entwurf.art)) + '</p>' +
+    '</section>' +
+    '<div class="knopfreihe">' +
+      '<button type="button" class="knopf" id="gwSpeichern">' + (g ? 'Speichern' : 'Anlegen') + '</button>' +
+      (g ? '<button type="button" class="knopf zart" id="gwArchivieren">Archivieren</button>' : '') +
+    '</div>';
+  return html;
+}
+
+function rhythmusErklaerung(art) {
+  if (art === 'wochentage') return 'Nur an den Tagen, die du wählst.';
+  if (art === 'proWoche') return 'An Tagen deiner Wahl. Gezählt wird die Woche, Montag bis Sonntag.';
+  return 'Jeden Tag einmal.';
+}
+
+function bindeFormular() {
+  var name = $('gwName');
+  name.addEventListener('input', function () { entwurf.name = this.value; });
+  name.addEventListener('keydown', function (e) { if (e.key === 'Enter') this.blur(); });
+
+  alleIn('[data-art]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      entwurf.art = this.getAttribute('data-art');
+      alleIn('[data-art]').forEach(function (x) {
+        x.setAttribute('aria-pressed', x === b ? 'true' : 'false');
+      });
+      $('rhTage').hidden = entwurf.art !== 'wochentage';
+      $('rhAnzahl').hidden = entwurf.art !== 'proWoche';
+      $('rhText').textContent = rhythmusErklaerung(entwurf.art);
+    });
+  });
+  alleIn('[data-tag]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var t = +this.getAttribute('data-tag'), i = entwurf.tage.indexOf(t);
+      if (i === -1) entwurf.tage.push(t); else entwurf.tage.splice(i, 1);
+      this.setAttribute('aria-pressed', i === -1 ? 'true' : 'false');
+    });
+  });
+  function anzahl(d) {
+    entwurf.anzahl = Math.max(1, Math.min(PRO_WOCHE_MAX, entwurf.anzahl + d));
+    $('anzWert').textContent = entwurf.anzahl + '× pro Woche';
+  }
+  $('anzWeniger').addEventListener('click', function () { anzahl(-1); });
+  $('anzMehr').addEventListener('click', function () { anzahl(1); });
+
+  $('gwSpeichern').addEventListener('click', entwurfSpeichern);
+  if ($('gwArchivieren')) $('gwArchivieren').addEventListener('click', archivierenTippen);
+}
+
+function entwurfSpeichern() {
+  var name = entwurf.name.trim();
+  if (!name) {
+    melden('Gib ihr noch einen Namen.');
+    $('gwName').focus();
+    return;
+  }
+  if (entwurf.art === 'wochentage' && !entwurf.tage.length) {
+    melden('Wähle mindestens einen Tag.');
+    return;
+  }
+  var r = entwurf.art === 'wochentage' ? { art: 'wochentage', tage: entwurf.tage.slice() }
+    : entwurf.art === 'proWoche' ? { art: 'proWoche', anzahl: entwurf.anzahl } : { art: 'taeglich' };
+  var g = entwurf.id ? gewohnheitNach(entwurf.id) : null;
+  if (g) {
+    g.name = name.slice(0, NAME_MAX);
+    g.rhythmus = rhythmusLesen(r);
+  } else {
+    state.gewohnheiten.push({ id: neueId(), name: name.slice(0, NAME_MAX), rhythmus: rhythmusLesen(r),
+      angelegt: heuteSchluessel(), erledigt: [], archiviert: null });
+  }
+  if (speichern()) melden(g ? 'Gespeichert.' : 'Angelegt. Antippen heißt erledigt.');
+  zeige('home');
+}
+
+// Archivieren will zwei Tipps: Die Kachel verschwindet vom Dashboard. Ihre
+// Einträge bleiben im Speicher.
+function archivierenTippen() {
+  if (!entwurf.archivFrage) {
+    entwurf.archivFrage = true;
+    this.textContent = 'Wirklich archivieren?';
+    this.classList.add('frage');
+    return;
+  }
+  var g = gewohnheitNach(entwurf.id);
+  if (g) g.archiviert = heuteSchluessel();
+  if (speichern()) melden('Archiviert. Deine Einträge bleiben erhalten.');
+  zeige('home');
 }
 
 // ── Einstellungen ───────────────────────────────────────────────
@@ -671,7 +1300,20 @@ function zeichneEinstellungen() {
 // Ereignisse erst nach dem Setzen von innerHTML, nie als Attribut.
 function bindeAnsicht() {
   var erste = $('ersteGewohnheit');
-  if (erste) erste.addEventListener('click', function () { bald(); });
+  if (erste) erste.addEventListener('click', function () { zeige('neu'); });
+
+  alleIn('[data-haken]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      geradeAbgehakt = this.getAttribute('data-haken');
+      abhaken(geradeAbgehakt);
+      render();
+      geradeAbgehakt = null;
+    });
+  });
+  alleIn('[data-bearbeiten]').forEach(function (b) {
+    b.addEventListener('click', function () { zeige('bearbeiten', this.getAttribute('data-bearbeiten')); });
+  });
+  if ($('gwName')) bindeFormular();
 
   var knoepfe = document.querySelectorAll('.wahl [data-thema]');
   for (var i = 0; i < knoepfe.length; i++) {
@@ -935,9 +1577,10 @@ function start() {
     else if (mq.addListener) mq.addListener(neu);
   } catch (e) { /* ohne Medienabfrage bleibt es hell */ }
 
-  // Das Datum im Kopf stimmt auch nach Mitternacht, wenn die App offen blieb.
+  // Nach Mitternacht ist ein anderer Tag: Datum, Tagesring und Kacheln stimmen
+  // auch dann, wenn die App über Nacht offen blieb.
   document.addEventListener('visibilitychange', function () {
-    if (!document.hidden && ansicht === 'home') renderKopf();
+    if (!document.hidden && ansicht === 'home') render();
   });
 
   swAnmelden();

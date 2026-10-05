@@ -13,16 +13,32 @@ es wächst mit jedem Bauabschnitt.
 | `<script>` | genau einer, `'use strict'`, ES5-nah |
 
 Im Skript, von oben: Version und Stand · `CHILI_BILD` · Hilfen (`esc`, `ICON`, Datum,
-`melden`) · Zustand und Speicher · Darstellung · Ansichten · Menü · Service Worker · Start.
+`melden`, Tage) · Zustand und Speicher · Darstellung · Gewohnheiten (Rechnung) · Ansichten ·
+Menü · Service Worker · Start.
 
 ## Zustand
 
 ```js
 state = {
   schema: 1,
-  thema: 'auto'      // 'auto' | 'hell' | 'dunkel'
+  thema: 'auto',     // 'auto' | 'hell' | 'dunkel'
+  gewohnheiten: [{
+    id: 'g…',
+    name: 'Lesen',                       // höchstens NAME_MAX Zeichen
+    rhythmus: { art: 'taeglich' }        // | { art: 'wochentage', tage: [1, 4] }  (0 = Sonntag)
+                                         // | { art: 'proWoche', anzahl: 3 }      (1–6)
+    angelegt: '2026-10-05',              // Tagesschlüssel, lokale Zeit
+    erledigt: ['2026-10-05', …],         // sortiert, einmalig
+    archiviert: null                     // | Tagesschlüssel
+  }]
 }
 ```
+
+- **Gespeichert sind nur Tage.** Stärke, Serie, «nie zweimal» und die Punkte rechnet
+  `auswerten(g, heute)` bei jedem Zeichnen neu (ADR 0002, `.claude/rules/logik.md`).
+- **`jetzt()` ist die einzige Uhr**; Tage sind Schlüssel `JJJJ-MM-TT` (`tagSchluessel`,
+  `tagPlus`, `wochenAnfang`).
+- `gewohnheitLesen()` prüft jede Gewohnheit einzeln; was nicht paßt, fällt weg.
 
 - **Ein Schlüssel**: `chillinal_v1`. `laden()` liest, `stand(roh)` übernimmt nur bekannte
   Felder mit gültigen Werten und füllt den Rest aus `grundStand()`. Kaputtes JSON, ein
@@ -38,7 +54,18 @@ state = {
 .zeichnen()` liefert HTML, danach hängt `bindeAnsicht()` die Ereignisse an. Kein Diffing,
 keine Teilaktualisierung — eine Ansicht ist schnell genug neu gezeichnet.
 
-- `zeige(name)` wechselt die Ansicht; ein unbekannter Name landet beim Dashboard.
+- `zeige(name, id)` wechselt die Ansicht; ein unbekannter Name landet beim Dashboard.
+  `neu` und `bearbeiten` legen dabei den `entwurf` an; `bearbeiten` ohne gültige `id`
+  landet ebenfalls beim Dashboard.
+- **Ansichten:** `home` (Dashboard), `neu` (Neue Gewohnheit), `bearbeiten` (Gewohnheit:
+  Stand, Formular, Archivieren), `einstellungen`.
+- **Das Formular zeichnet sich beim Wählen nicht neu**: Rhythmus, Tage und Zähler ändern
+  `entwurf` und die Knöpfe an Ort und Stelle; gespeichert wird mit dem Knopf.
+- **Abhaken** (`[data-haken]`) ändert `erledigt`, speichert und zeichnet neu; die eben
+  getippte Kachel trägt dabei `gerade` für ihre Animation. Kacheln bleiben, wo sie sind.
+- **Ringe** werden mit dem Ziel gezeichnet und tragen in `data-von` den zuletzt gezeigten
+  Wert (`ringZuletzt`); `ringeFuellen()` läßt sie nach jedem `render()` herüberlaufen.
+- `visibilitychange` zeichnet das Dashboard ganz neu — nach Mitternacht ist es ein anderer Tag.
 - Der Kopf hat zwei Gestalten: auf dem Dashboard Titel, Datum, Sonne/Mond, Menüknopf;
   unterwegs Rückweg und Titel.
 - Das Menü ist ein Blatt über der Seite, gezeichnet beim Öffnen aus `MENUE`. Ein Eintrag
