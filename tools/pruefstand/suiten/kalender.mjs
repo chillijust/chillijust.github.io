@@ -161,6 +161,27 @@ pruefe('U6 die Ankerrechnung', kalAnker(HEUTE) === HEUTE && versatzFuer('2026-12
   versatzFuer('2026-10-11', HEUTE) === -1);
 state.kalender = 'woche';
 
+// ── H · «Heute» führt den Kalender nach Hause ──────────────
+aufbauen();
+q('#kalVor').click();
+q('#kalVor').click();
+q('#heuteKnopf').click();
+pruefe('H1 aus der Ferne: zurück zu heute, der Tag gewählt, die Liste offen', kalVersatz === 0 && kalTag === HEUTE &&
+  !!q('#kalLeiste') && tag(HEUTE).classList.contains('gewaehlt') && q('#kalTitel').textContent === 'KW 42 · 12.–18. Oktober');
+tag(vor(1)).click();
+q('#heuteKnopf').click();
+pruefe('H2 ein anderer Tag gewählt: heute statt dessen', kalTag === HEUTE && !!q('#kalLeiste'));
+q('#heuteKnopf').click();
+pruefe('H3 schon da: nichts klappt zu', kalTag === HEUTE && !!q('#kalLeiste'));
+q('[data-kalender="monat"]').click();
+q('#kalZurueck').click();
+q('#heuteKnopf').click();
+pruefe('H4 im Monat bleibt es beim Monat, nur zurück zu heute', state.kalender === 'monat' && kalVersatz === 0 &&
+  q('#kalTitel').textContent === 'Oktober 2026' && kalTag === HEUTE);
+pruefe('H5 «Heute» ist eine Trefferfläche', q('#heuteKnopf').tagName === 'BUTTON' &&
+  q('#heuteKnopf').getBoundingClientRect().height >= 44 && q('#tagesZahl').closest('#heuteKnopf') !== null);
+state.kalender = 'woche';
+
 // ── L · Langer Druck ────────────────────────────────────────
 aufbauen();
 pruefe('L1 der Pfeil ist weg', !q('[data-bearbeiten]') && !q('.gw-pfeil'));

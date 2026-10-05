@@ -29,7 +29,8 @@ Lies CLAUDE.md.
 
 ## Projekt
 
-**Chillinal** (Chilli + Journal) — Web-App zum An- und Abgewöhnen von Gewohnheiten, mit
+**Chillinal** (Chilli + Journal; sichtbar heißt die App **«Chilli Journal»**, unter dem Symbol
+«Chilli» — ADR 0010) — Web-App zum An- und Abgewöhnen von Gewohnheiten, mit
 Terminen, offline, Daten nur auf dem Gerät. Alles Inhaltliche steht in `index.html`;
 daneben liegt ein Service Worker, der nichts anderes tut, als sie beiseitezulegen.
 Gehostet über GitHub Pages unter https://chillijust.github.io/. Zielgerät: iPhone 15 Pro
@@ -53,7 +54,7 @@ die Chili.
 | 2 · Gewohnheiten: anlegen, Rhythmus, Abhaken, Stärke, nie zweimal; Kalender, Nachtragen, langer Druck | fertig (0.2.0) |
 | 3 · Abgewöhnen, 10-Minuten-Welle; Chili und Kalender in einer Karte | fertig (0.3.0T2, frei mit 0.4.0) |
 | 4 · Termine im Kalender, Tagesansicht; Tropfen statt Aufploppen, Tropfenform, Menü unter dem Knopf | fertig (0.4.0) |
-| 5 · Kalender-Export (`.ics`), Erinnerung je Gewohnheit | gebaut, Abnahme offen (0.5.0T) |
+| 5 · Kalender-Export (`.ics`), Erinnerung je Gewohnheit; «Heute» als Rückweg, Name «Chilli Journal» | gebaut, Abnahme offen (0.5.0T2) |
 | 6 · Rückblick: Heatmap, Detail, Journal | offen |
 | 7 · Sicherung, Einstellungen, Tickets | offen |
 | 8 · Feinschliff | offen |

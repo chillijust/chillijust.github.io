@@ -100,7 +100,7 @@ state.gewohnheiten = [gw({ id: 'mit', erinnerung: '07:00' }), gw({ id: 'ohne' })
 var datei = kalenderDatei(HEUTE, zeitJetzt()), zeilen = datei.split(CRLF);
 var uids = zeilen.filter(function (x) { return x.indexOf('UID:') === 0; }).map(function (x) { return x.slice(4); });
 pruefe('I15 die Datei ist ein Kalender', zeilen[0] === 'BEGIN:VCALENDAR' && zeilen[1] === 'VERSION:2.0' &&
-  datei.slice(-15) === 'END:VCALENDAR' + CRLF && hat(zeilen, 'PRODID:-//Chillinal//Chillinal ' + APP_VERSION + '//DE'));
+  datei.slice(-15) === 'END:VCALENDAR' + CRLF && hat(zeilen, 'PRODID:-//Chilli//Chilli Journal ' + APP_VERSION + '//DE'));
 pruefe('I16 jede Zeile endet mit CRLF', datei.replace(new RegExp(CRLF, 'g'), '').indexOf(String.fromCharCode(10)) === -1 &&
   datei.replace(new RegExp(CRLF, 'g'), '').indexOf(String.fromCharCode(13)) === -1);
 pruefe('I17 Vergangenes, Archiviertes und Gewohnheiten ohne Uhrzeit bleiben draußen',

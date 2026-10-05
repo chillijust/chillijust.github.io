@@ -8,7 +8,11 @@ suite('geruest', html, String.raw`
 frisch();
 
 // ── A · Kopf ────────────────────────────────────────────────
-pruefe('A1 der Kopf nennt die App', q('#kopf h1') && q('#kopf h1').textContent === 'Chillinal');
+pruefe('A1 der Kopf nennt die App, «Chilli» vorn und größer', q('#kopf h1') &&
+  q('#kopf h1').getAttribute('aria-label') === 'Chilli Journal' && q('#kopf .marke').textContent === 'Chilli' &&
+  parseFloat(getComputedStyle(q('#kopf .marke')).fontSize) > parseFloat(getComputedStyle(q('#kopf .marke-zusatz')).fontSize));
+pruefe('A1a Titel «Chilli Journal», unter dem Symbol nur «Chilli»', document.title === 'Chilli Journal' &&
+  q('meta[name="apple-mobile-web-app-title"]').content === 'Chilli');
 var heute = new Date();
 pruefe('A2 und das heutige Datum, ausgeschrieben',
   q('#kopf .datum').textContent === WOCHENTAGE[heute.getDay()] + ', ' + heute.getDate() + '. ' +
