@@ -308,8 +308,16 @@ svg { display: block; }
   border-radius: 16px;
   text-align: left;
   transition: transform .15s ease;
+  /* Lange drücken öffnet die Gewohnheit — dabei soll iOS weder Text markieren
+     noch sein eigenes Menü aufziehen. */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 .gw-haken:active { transform: scale(.98); }
+/* Wer hält, sieht die Kachel langsam einsinken. Erst nach einer kurzen Frist,
+   sonst zuckt jede Kachel, über die der Daumen beim Blättern streicht. */
+.gw-haken.halten { transform: scale(.95); transition: transform .35s ease .15s; }
 .gw-ring { position: relative; width: 54px; height: 54px; flex: none; }
 .gw-scheibe {
   position: absolute;
@@ -338,8 +346,88 @@ svg { display: block; }
 .punkt.erledigt { background: var(--erledigt); opacity: 1; }
 .punkt.verpasst { background: transparent; box-shadow: inset 0 0 0 1.5px var(--linie); opacity: 1; }
 .punkt.heute { background: transparent; box-shadow: inset 0 0 0 1.5px var(--text-2); opacity: 1; }
-.gw-pfeil { background: transparent; color: var(--text-2); }
-.gw-pfeil svg { width: 20px; height: 20px; }
+
+/* ── Dashboard: Kalender ───────────────────────────────────── */
+.kal { padding: 14px; }
+.kal-kopf { display: flex; align-items: center; gap: 4px; margin: 10px 0 6px; }
+.kal-kopf .rund { background: transparent; }
+.kal-titel {
+  flex: 1;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 15px;
+  text-align: center;
+  border-radius: 12px;
+}
+button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
+.kal-raster { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.kal-raster.neu { animation: kalNeu .3s ease; }
+@keyframes kalNeu { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.kal-wt {
+  text-align: center;
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-2);
+  padding: 2px 0 4px;
+}
+.kal-tag {
+  min-height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  border-radius: 12px;
+  font-variant-numeric: tabular-nums;
+  transition: background-color .25s ease, box-shadow .2s ease;
+}
+.kal-raster.woche .kal-tag { min-height: 62px; }
+.kal-zahl { font-family: 'Poppins', system-ui, sans-serif; font-size: 15px; font-weight: 500; }
+.kal-quote { font-size: 12px; color: var(--text-2); min-height: 15px; }
+/* Getönt nach dem Anteil des Erledigten — Grün heißt erledigt. */
+.kal-tag.wenig { background: color-mix(in srgb, var(--erledigt) 22%, transparent); }
+.kal-tag.viel { background: color-mix(in srgb, var(--erledigt) 50%, transparent); }
+.kal-tag.voll { background: var(--erledigt); color: var(--grund); }
+.kal-tag.voll .kal-quote { color: var(--grund); }
+.kal-tag.null { box-shadow: inset 0 0 0 1.5px var(--flaeche-2); }
+.kal-tag.zukunft { color: var(--text-2); }
+.kal-tag.heute .kal-zahl { font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.kal-tag.gewaehlt { box-shadow: inset 0 0 0 2px var(--akzent); }
+.kal-tag.fremd { visibility: hidden; }
+.kal-leiste { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--flaeche-2); }
+.kal-leiste-kopf { font-family: 'Poppins', system-ui, sans-serif; font-weight: 600; font-size: 15px; margin: 0 4px 6px; }
+.kal-zeile {
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 6px;
+  border-radius: 12px;
+  text-align: left;
+}
+.kal-haken {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px var(--linie);
+  color: transparent;
+  transition: background-color .2s ease, color .2s ease;
+}
+.kal-haken svg { width: 16px; height: 16px; }
+.kal-zeile.erledigt .kal-haken { background: var(--erledigt); color: var(--grund); box-shadow: none; }
+.kal-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.kal-status { font-size: 13px; color: var(--text-2); }
+.kal-leiste .klein { margin: 6px 4px 0; }
 
 /* ── Formular ──────────────────────────────────────────────── */
 /* 17 px: Unter 16 px zoomt Safari beim Antippen ins Feld. */
@@ -544,7 +632,7 @@ svg { display: block; }
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.2.0T';
+var APP_VERSION = '0.2.0T2';
 var APP_STAND = '2026-10-05';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -663,6 +751,7 @@ function grundStand() {
   return {
     schema: 1,
     thema: 'auto',   // 'auto' folgt dem Gerät, sonst 'hell' oder 'dunkel'
+    kalender: 'woche',   // was der Kalender zuletzt zeigte: 'woche' oder 'monat'
     gewohnheiten: []
   };
 }
@@ -671,6 +760,7 @@ function stand(roh) {
   var s = grundStand();
   if (!roh || typeof roh !== 'object') return s;
   if (roh.thema === 'hell' || roh.thema === 'dunkel' || roh.thema === 'auto') s.thema = roh.thema;
+  if (roh.kalender === 'woche' || roh.kalender === 'monat') s.kalender = roh.kalender;
   if (Array.isArray(roh.gewohnheiten)) {
     var ids = {};
     roh.gewohnheiten.forEach(function (g) {
@@ -934,14 +1024,26 @@ function rhythmusText(r) {
     .map(function (t) { return WT_KURZ[t]; }).join(', ');
 }
 
-// Antippen = erledigt, nochmal = zurück. Nur für heute.
-function abhaken(id) {
-  var g = gewohnheitNach(id);
-  if (!g) return;
-  var heute = heuteSchluessel(), i = g.erledigt.indexOf(heute);
-  if (i === -1) { g.erledigt.push(heute); g.erledigt.sort(); } else g.erledigt.splice(i, 1);
-  speichern();
+// Antippen = erledigt, nochmal = zurück — heute auf der Kachel, im Kalender
+// bis zu NACHTRAG_TAGE zurück. Nie in der Zukunft und nie vor dem Anlegen:
+// Ein Haken dort verschöbe die Stärke um Tage, die es nicht gab.
+var NACHTRAG_TAGE = 7;
+
+function aenderbarAm(g, k) {
+  var heute = heuteSchluessel();
+  return !!g && k <= heute && k >= g.angelegt && k >= tagPlus(heute, -NACHTRAG_TAGE);
 }
+
+function umschalten(id, k) {
+  var g = gewohnheitNach(id);
+  if (!aenderbarAm(g, k)) return false;
+  var i = g.erledigt.indexOf(k);
+  if (i === -1) { g.erledigt.push(k); g.erledigt.sort(); } else g.erledigt.splice(i, 1);
+  speichern();
+  return true;
+}
+
+function abhaken(id) { return umschalten(id, heuteSchluessel()); }
 
 function neueId() {
   return 'g' + Date.now().toString(36) + Math.floor(Math.random() * 1296).toString(36);
@@ -1056,7 +1158,8 @@ function zeichneHome() {
     (dran.length ? '<section class="abschnitt"><h2>Gewohnheiten</h2><div class="gw-liste">' +
       dran.map(zeichneKachel).join('') + '</div></section>' : '') +
     (frei.length ? '<section class="abschnitt"><h2>Heute nicht dran</h2><div class="gw-liste gedimmt">' +
-      frei.map(zeichneKachel).join('') + '</div></section>' : '');
+      frei.map(zeichneKachel).join('') + '</div></section>' : '') +
+    zeichneKalender(heute);
 }
 
 // Ein Ring: Spur und Füllung, gezeichnet mit dem Ziel. `schluessel` merkt sich
@@ -1110,8 +1213,6 @@ function zeichneKachel(e) {
           return '<span class="punkt ' + p.art + '"></span>';
         }).join('') + '</span></span>' +
     '</button>' +
-    '<button type="button" class="rund gw-pfeil" data-bearbeiten="' + esc(g.id) + '" aria-label="' +
-      esc(g.name) + ' ansehen">' + ICON.weiter + '</button>' +
     '</div>';
 }
 
@@ -1125,6 +1226,135 @@ function zeichneWillkommen() {
     '<button type="button" class="knopf" id="ersteGewohnheit">' + ICON.plus +
     '<span>Erste Gewohnheit anlegen</span></button>' +
     '</section>';
+}
+
+// ── Dashboard: Kalender ─────────────────────────────────────────
+//
+// Woche oder Monat, umschaltbar; die Wahl bleibt gespeichert. Jeder Tag ist
+// nach dem Anteil des Erledigten getönt. Ein angetippter Tag zeigt darunter
+// seine Gewohnheiten — bis NACHTRAG_TAGE zurück lassen sie sich nachtragen.
+// Termine kommen mit Bauabschnitt 4 als Punkt dazu.
+var kalVersatz = 0;        // Wochen oder Monate von heute aus
+var kalTag = null;         // der angetippte Tag, null = keiner
+var kalGewechselt = false; // das Raster ist eben neu — es darf einblenden
+
+var MON_KURZ = ['Jan.', 'Feb.', 'März', 'Apr.', 'Mai', 'Juni', 'Juli', 'Aug.', 'Sep.', 'Okt.', 'Nov.', 'Dez.'];
+
+// Wie voll ein Tag war. «x-mal pro Woche» hat keinen fälligen Tag: Ein
+// erledigter zählt als genutzte Gelegenheit, ein freier gar nicht.
+function tagesStand(k) {
+  var von = 0, fertig = 0;
+  aktiveGewohnheiten().forEach(function (g) {
+    if (k < g.angelegt) return;
+    var erl = g.erledigt.indexOf(k) !== -1;
+    if (g.rhythmus.art === 'proWoche' ? erl : faelligAm(g, k)) {
+      von++;
+      if (erl) fertig++;
+    }
+  });
+  return { von: von, fertig: fertig };
+}
+
+// Die Tönung eines Tages. Heute offen ist noch kein «null» — wie bei der Stärke.
+function kalStufe(t, k, heute) {
+  if (k > heute) return 'zukunft';
+  if (!t.von) return 'frei';
+  if (t.fertig === t.von) return 'voll';
+  if (!t.fertig) return k === heute ? 'frei' : 'null';
+  return t.fertig / t.von >= 0.5 ? 'viel' : 'wenig';
+}
+
+// Kalenderwoche nach ISO: Woche 1 enthält den 4. Januar.
+function kalenderwoche(montag) {
+  var jahr = ausSchluessel(tagPlus(montag, 3)).getFullYear();
+  var n = 1;
+  for (var k = wochenAnfang(jahr + '-01-04'); k < montag; k = tagPlus(k, 7)) n++;
+  return n;
+}
+
+function spanne(von, bis) {
+  var a = ausSchluessel(von), b = ausSchluessel(bis);
+  if (a.getMonth() === b.getMonth()) return a.getDate() + '.–' + b.getDate() + '. ' + MONATE[b.getMonth()];
+  return a.getDate() + '. ' + MON_KURZ[a.getMonth()] + ' – ' + b.getDate() + '. ' + MON_KURZ[b.getMonth()];
+}
+
+// Welche Tage das Raster zeigt: eine Woche ab Montag, oder ein Monat, auf
+// ganze Wochen aufgefüllt.
+function kalBereich(heute) {
+  if (state.kalender === 'monat') {
+    var d = ausSchluessel(heute);
+    var erster = new Date(d.getFullYear(), d.getMonth() + kalVersatz, 1);
+    var monat = erster.getMonth(), jahr = erster.getFullYear();
+    var letzter = tagSchluessel(new Date(jahr, monat + 1, 0));
+    return { von: wochenAnfang(tagSchluessel(erster)), bis: tagPlus(wochenAnfang(letzter), 6),
+      monat: monat, titel: MONATE[monat] + ' ' + jahr };
+  }
+  var mo = tagPlus(wochenAnfang(heute), 7 * kalVersatz), so = tagPlus(mo, 6);
+  return { von: mo, bis: so, monat: null, titel: 'KW ' + kalenderwoche(mo) + ' · ' + spanne(mo, so) };
+}
+
+function zeichneKalender(heute) {
+  var b = kalBereich(heute), woche = b.monat === null;
+  var html = '<section class="abschnitt" aria-label="Kalender"><h2>Kalender</h2><div class="kachel kal">' +
+    '<div class="wahl" role="group" aria-label="Ansicht">' +
+      [['woche', 'Woche'], ['monat', 'Monat']].map(function (w) {
+        return '<button type="button" data-kalender="' + w[0] + '" aria-pressed="' +
+          (state.kalender === w[0] ? 'true' : 'false') + '">' + w[1] + '</button>';
+      }).join('') + '</div>' +
+    '<div class="kal-kopf">' +
+      '<button type="button" class="rund" id="kalZurueck" aria-label="' + (woche ? 'Woche' : 'Monat') +
+        ' davor">' + ICON.zurueck + '</button>' +
+      (kalVersatz
+        ? '<button type="button" class="kal-titel" id="kalHeute" aria-label="' + esc(b.titel) +
+          ', zurück zu heute">' + esc(b.titel) + '</button>'
+        : '<div class="kal-titel" id="kalTitel">' + esc(b.titel) + '</div>') +
+      '<button type="button" class="rund" id="kalVor" aria-label="' + (woche ? 'Woche' : 'Monat') +
+        ' danach">' + ICON.weiter + '</button>' +
+    '</div>' +
+    '<div class="kal-raster ' + (woche ? 'woche' : 'monat') + (kalGewechselt ? ' neu' : '') + '" id="kalRaster">' +
+      WOCHE.map(function (t) { return '<span class="kal-wt" aria-hidden="true">' + WT_KURZ[t] + '</span>'; }).join('');
+  for (var k = b.von; k <= b.bis; k = tagPlus(k, 1)) {
+    var d = ausSchluessel(k);
+    if (!woche && d.getMonth() !== b.monat) { html += '<span class="kal-tag fremd"></span>'; continue; }
+    var t = tagesStand(k), stufe = kalStufe(t, k, heute), zaehlt = t.von && k <= heute;
+    html += '<button type="button" class="kal-tag ' + stufe + (k === heute ? ' heute' : '') +
+      (k === kalTag ? ' gewaehlt' : '') + '" data-kaltag="' + k + '" aria-pressed="' +
+      (k === kalTag ? 'true' : 'false') + '" aria-label="' + esc(datumLang(d)) +
+      (zaehlt ? ', ' + t.fertig + ' von ' + t.von + ' erledigt' : '') + '">' +
+      '<span class="kal-zahl">' + d.getDate() + '</span>' +
+      (woche ? '<span class="kal-quote">' + (zaehlt ? t.fertig + '/' + t.von : '') + '</span>' : '') +
+      '</button>';
+  }
+  html += '</div>';
+  if (kalTag && kalTag >= b.von && kalTag <= b.bis) html += zeichneTagesleiste(kalTag, heute);
+  return html + '</div></section>';
+}
+
+// Der angetippte Tag: seine Gewohnheiten, abhakbar, solange er nah genug ist.
+function zeichneTagesleiste(k, heute) {
+  var liste = aktiveGewohnheiten().filter(function (g) { return g.angelegt <= k; });
+  var html = '<div class="kal-leiste" id="kalLeiste" aria-live="polite">' +
+    '<div class="kal-leiste-kopf">' + esc(datumLang(ausSchluessel(k))) + '</div>';
+  if (k > heute) return html + '<p class="klein">Dieser Tag kommt noch.</p></div>';
+  if (!liste.length) return html + '<p class="klein">Da gab es noch keine Gewohnheit.</p></div>';
+  var zuAlt = false;
+  liste.forEach(function (g) {
+    var erl = g.erledigt.indexOf(k) !== -1;
+    // «x-mal pro Woche» verpaßt keinen Tag — gewertet wird die Woche.
+    var wie = erl ? 'erledigt' : g.rhythmus.art === 'proWoche' ? 'frei'
+      : !faelligAm(g, k) ? 'nicht dran' : k === heute ? 'offen' : 'verpasst';
+    var innen = '<span class="kal-haken">' + ICON.haken + '</span>' +
+      '<span class="kal-name">' + esc(g.name) + '</span><span class="kal-status">' + wie + '</span>';
+    if (aenderbarAm(g, k)) {
+      html += '<button type="button" class="kal-zeile' + (erl ? ' erledigt' : '') + '" data-nachtrag="' +
+        esc(g.id) + '" aria-pressed="' + (erl ? 'true' : 'false') + '">' + innen + '</button>';
+    } else {
+      zuAlt = true;
+      html += '<div class="kal-zeile' + (erl ? ' erledigt' : '') + '">' + innen + '</div>';
+    }
+  });
+  if (zuAlt) html += '<p class="klein">Nachtragen geht bis ' + NACHTRAG_TAGE + ' Tage zurück.</p>';
+  return html + '</div>';
 }
 
 // ── Neue Gewohnheit · Gewohnheit ────────────────────────────────
@@ -1254,7 +1484,7 @@ function entwurfSpeichern() {
     state.gewohnheiten.push({ id: neueId(), name: name.slice(0, NAME_MAX), rhythmus: rhythmusLesen(r),
       angelegt: heuteSchluessel(), erledigt: [], archiviert: null });
   }
-  if (speichern()) melden(g ? 'Gespeichert.' : 'Angelegt. Antippen heißt erledigt.');
+  if (speichern()) melden(g ? 'Gespeichert.' : 'Angelegt. Antippen heißt erledigt, lange drücken öffnet sie.');
   zeige('home');
 }
 
@@ -1303,16 +1533,17 @@ function bindeAnsicht() {
   if (erste) erste.addEventListener('click', function () { zeige('neu'); });
 
   alleIn('[data-haken]').forEach(function (b) {
+    var id = b.getAttribute('data-haken');
     b.addEventListener('click', function () {
-      geradeAbgehakt = this.getAttribute('data-haken');
-      abhaken(geradeAbgehakt);
+      if (langGedrueckt && Date.now() - langGedrueckt < 1000) return;
+      geradeAbgehakt = id;
+      abhaken(id);
       render();
       geradeAbgehakt = null;
     });
+    langDruecken(b, function () { zeige('bearbeiten', id); });
   });
-  alleIn('[data-bearbeiten]').forEach(function (b) {
-    b.addEventListener('click', function () { zeige('bearbeiten', this.getAttribute('data-bearbeiten')); });
-  });
+  bindeKalender();
   if ($('gwName')) bindeFormular();
 
   var knoepfe = document.querySelectorAll('.wahl [data-thema]');
@@ -1328,6 +1559,70 @@ function bindeAnsicht() {
       swAufraeumen(function () { window.location.reload(); });
     });
   }
+}
+
+// Lange drücken öffnet, kurz tippen hakt ab. Der Klick, der dem langen Druck
+// folgt, darf nicht auch noch abhaken. Wer beim Halten den Finger bewegt,
+// blättert — dann bleibt es beim Blättern. Ein Rechtsklick (oder Androids
+// eigener langer Druck) tut dasselbe.
+var LANG_MS = 500;
+var langGedrueckt = 0;   // wann der letzte lange Druck auslöste
+
+function langDruecken(el, beiLang) {
+  var uhr = null, x = 0, y = 0;
+  function aus() {
+    if (uhr) { clearTimeout(uhr); uhr = null; }
+    el.classList.remove('halten');
+  }
+  function los() {
+    aus();
+    langGedrueckt = Date.now();
+    beiLang();
+  }
+  el.addEventListener('pointerdown', function (e) {
+    if (e.button) return;
+    x = e.clientX; y = e.clientY;
+    el.classList.add('halten');
+    uhr = setTimeout(los, LANG_MS);
+  });
+  el.addEventListener('pointermove', function (e) {
+    if (uhr && Math.abs(e.clientX - x) + Math.abs(e.clientY - y) > 10) aus();
+  });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (n) { el.addEventListener(n, aus); });
+  el.addEventListener('contextmenu', function (e) {
+    e.preventDefault();
+    if (Date.now() - langGedrueckt > LANG_MS) los();
+  });
+}
+
+function bindeKalender() {
+  if (!$('kalRaster')) return;
+  function neu() { kalTag = null; kalGewechselt = true; render(); kalGewechselt = false; }
+  alleIn('[data-kalender]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var wahl = this.getAttribute('data-kalender');
+      if (wahl === state.kalender) return;
+      state.kalender = wahl;
+      kalVersatz = 0;
+      speichern();
+      neu();
+    });
+  });
+  $('kalZurueck').addEventListener('click', function () { kalVersatz--; neu(); });
+  $('kalVor').addEventListener('click', function () { kalVersatz++; neu(); });
+  if ($('kalHeute')) $('kalHeute').addEventListener('click', function () { kalVersatz = 0; neu(); });
+  alleIn('[data-kaltag]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var k = this.getAttribute('data-kaltag');
+      kalTag = kalTag === k ? null : k;
+      render();
+    });
+  });
+  alleIn('[data-nachtrag]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      if (umschalten(this.getAttribute('data-nachtrag'), kalTag)) render();
+    });
+  });
 }
 
 function bald() {

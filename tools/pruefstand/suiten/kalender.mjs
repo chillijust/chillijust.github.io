@@ -1,0 +1,157 @@
+// Kalender und langer Druck (0.2.0T2): Woche und Monat, Tönung nach dem
+// Erledigten, Nachtragen bis sieben Tage zurück — und die Kachel, die kurz
+// getippt abhakt und lange gedrückt die Gewohnheit öffnet.
+//
+// Die Uhr steht: «heute» ist Mittwoch, der 14. Oktober 2026 (KW 42, 12.–18.).
+import { readFileSync } from 'node:fs';
+import { APP, suite } from '../helfer.mjs';
+const html = readFileSync(APP, 'utf8');
+
+suite('kalender', html, String.raw`
+jetzt = function () { return new Date(2026, 9, 14, 12, 0); };
+var HEUTE = '2026-10-14';
+function vor(n) { return tagPlus(HEUTE, -n); }
+function gw(id, rhythmus, angelegt, erledigt) {
+  return gewohnheitLesen({ id: id, name: id, rhythmus: rhythmus, angelegt: angelegt, erledigt: erledigt || [] });
+}
+var TAEGLICH = { art: 'taeglich' };
+function tag(k) { return q('[data-kaltag="' + k + '"]'); }
+function zuKlein(wo) {
+  return alle(wo + ' button').filter(function (k) {
+    var r = k.getBoundingClientRect();
+    if (r.width === 0 && r.height === 0) return false;
+    return r.width < 44 || r.height < 44;
+  }).map(function (k) { return k.id || k.className || k.textContent.trim().slice(0, 20); });
+}
+function aufbauen() {
+  frisch();
+  kalVersatz = 0;
+  kalTag = null;
+  state.gewohnheiten = [
+    gw('A', TAEGLICH, vor(20), [vor(1), vor(2)]),
+    gw('B', TAEGLICH, vor(20), [vor(1)]),
+    gw('C', { art: 'proWoche', anzahl: 3 }, vor(20), [vor(1)])
+  ];
+  zeige('home');
+}
+
+// ── K · Kalender ────────────────────────────────────────────
+frisch();
+pruefe('K1 ohne Gewohnheit kein Kalender', !q('#kalRaster') && !!q('#ersteGewohnheit'));
+aufbauen();
+pruefe('K2 die Woche ist die Vorgabe', state.kalender === 'woche' &&
+  alle('#kalRaster [data-kaltag]').length === 7 && q('#kalTitel').textContent === 'KW 42 · 12.–18. Oktober',
+  q('#kalTitel') && q('#kalTitel').textContent);
+pruefe('K3 Kalenderwochen nach ISO', kalenderwoche('2025-12-29') === 1 && kalenderwoche('2026-12-28') === 53 &&
+  kalenderwoche('2026-10-12') === 42);
+pruefe('K4 alles erledigt ist voll', tag(vor(1)).classList.contains('voll'));
+pruefe('K5 die Hälfte ist viel', tag(vor(2)).classList.contains('viel'));
+pruefe('K6 heute offen ist noch nicht null', tag(HEUTE).classList.contains('frei') && tag(HEUTE).classList.contains('heute'));
+pruefe('K7 morgen ist Zukunft', tag(tagPlus(HEUTE, 1)).classList.contains('zukunft'));
+pruefe('K8 ein ganz verpaßter Tag ist null', kalStufe(tagesStand(vor(3)), vor(3), HEUTE) === 'null');
+pruefe('K9 die Woche zeigt den Anteil', tag(vor(1)).textContent.indexOf('3/3') !== -1, tag(vor(1)).textContent);
+pruefe('K10 pro Woche zählt nur, wenn erledigt', tagesStand(vor(1)).von === 3 && tagesStand(vor(2)).von === 2);
+pruefe('K11 Trefferflächen in der Woche', zuKlein('#app').length === 0, zuKlein('#app').join(', '));
+
+q('[data-kalender="monat"]').click();
+pruefe('K12 umgeschaltet auf den Monat', state.kalender === 'monat' &&
+  alle('#kalRaster [data-kaltag]').length === 31 && q('#kalTitel').textContent === 'Oktober 2026');
+pruefe('K13 die Wahl ist gespeichert', JSON.parse(localStorage.getItem(SPEICHER)).kalender === 'monat');
+pruefe('K14 und kommt beim Laden zurück', laden().kalender === 'monat');
+pruefe('K15 Fremdes fällt auf die Woche', stand({ kalender: 'jahr' }).kalender === 'woche');
+// Der 1. Oktober 2026 ist ein Donnerstag, der 31. ein Samstag: drei Lücken
+// vorn, eine hinten.
+var zellen = alle('#kalRaster .kal-tag').map(function (z) { return z.classList.contains('fremd') ? '-' : 'x'; }).join('');
+pruefe('K16 der Monat beginnt am Montag', zellen === '---' + new Array(32).join('x') + '-', zellen);
+pruefe('K17 Trefferflächen im Monat', zuKlein('#app').length === 0, zuKlein('#app').join(', '));
+q('#kalZurueck').click();
+pruefe('K18 ein Monat davor', q('#kalHeute') && q('#kalHeute').textContent === 'September 2026' &&
+  alle('#kalRaster [data-kaltag]').length === 30);
+q('#kalHeute').click();
+pruefe('K19 der Titel führt zurück zu heute', q('#kalTitel').textContent === 'Oktober 2026' && kalVersatz === 0);
+q('[data-kalender="woche"]').click();
+q('#kalVor').click();
+q('#kalVor').click();
+pruefe('K20 eine Woche über die Monatsgrenze', q('#kalHeute').textContent === 'KW 44 · 26. Okt. – 1. Nov.',
+  q('#kalHeute').textContent);
+
+// ── N · Tag antippen, nachtragen ────────────────────────────
+aufbauen();
+var vorher = auswerten(gewohnheitNach('B'), HEUTE).staerke;
+tag(vor(2)).click();
+pruefe('N1 der Tag zeigt seine Gewohnheiten', !!q('#kalLeiste') &&
+  /Montag, 12\. Oktober/.test(q('#kalLeiste').textContent) && alle('[data-nachtrag]').length === 3);
+pruefe('N2 er ist gewählt', tag(vor(2)).classList.contains('gewaehlt'));
+function status(id) { return q('[data-nachtrag="' + id + '"] .kal-status').textContent; }
+pruefe('N2a pro Woche verpaßt keinen Tag', status('C') === 'frei' && status('B') === 'verpasst' &&
+  status('A') === 'erledigt', status('A') + ' ' + status('B') + ' ' + status('C'));
+q('[data-nachtrag="B"]').click();
+pruefe('N3 nachgetragen und gespeichert', gewohnheitNach('B').erledigt.indexOf(vor(2)) !== -1 &&
+  JSON.parse(localStorage.getItem(SPEICHER)).gewohnheiten[1].erledigt.indexOf(vor(2)) !== -1);
+pruefe('N4 die Stärke rechnet neu', auswerten(gewohnheitNach('B'), HEUTE).staerke > vorher);
+pruefe('N5 der Tag ist jetzt voll, die Leiste bleibt offen', tag(vor(2)).classList.contains('voll') && !!q('#kalLeiste'));
+q('[data-nachtrag="B"]').click();
+pruefe('N6 nochmal = zurück', gewohnheitNach('B').erledigt.indexOf(vor(2)) === -1);
+tag(vor(2)).click();
+pruefe('N7 nochmal antippen schließt den Tag', !q('#kalLeiste') && kalTag === null);
+tag(HEUTE).click();
+q('[data-nachtrag="A"]').click();
+pruefe('N8 heute nachgetragen ist wie abgehakt', q('[data-haken="A"]').getAttribute('aria-pressed') === 'true');
+tag(tagPlus(HEUTE, 1)).click();
+pruefe('N9 ein künftiger Tag läßt sich nicht abhaken', !q('[data-nachtrag]') &&
+  /kommt noch/.test(q('#kalLeiste').textContent));
+pruefe('N10 auch nicht von Hand', umschalten('A', tagPlus(HEUTE, 1)) === false);
+pruefe('N11 sieben Tage zurück geht', umschalten('B', vor(7)) === true && umschalten('B', vor(7)) === true);
+pruefe('N12 acht nicht', umschalten('B', vor(8)) === false);
+state.gewohnheiten.push(gw('D', TAEGLICH, vor(2), []));
+pruefe('N13 vor dem Anlegen nicht', umschalten('D', vor(3)) === false && umschalten('D', vor(2)) === true);
+q('[data-kalender="monat"]').click();
+tag(vor(8)).click();
+pruefe('N14 ein alter Tag zeigt nur an', !q('[data-nachtrag]') && alle('#kalLeiste .kal-zeile').length === 3 &&
+  /bis 7 Tage zurück/.test(q('#kalLeiste').textContent));
+tag(vor(3)).click();
+pruefe('N15 vor dem Anlegen fehlt die Gewohnheit', alle('#kalLeiste .kal-name').map(function (n) {
+  return n.textContent;
+}).join() === 'A,B,C');
+pruefe('N16 Trefferflächen mit offener Leiste', zuKlein('#app').length === 0, zuKlein('#app').join(', '));
+var siez = q('#app').innerText.match(/(^|[.!?:]\s+|\s)(Sie|Ihnen|Ihre?[mnrs]?)\b/g);
+pruefe('N17 auch der Kalender duzt', !siez, siez && siez.join(' | '));
+
+// ── L · Langer Druck ────────────────────────────────────────
+aufbauen();
+pruefe('L1 der Pfeil ist weg', !q('[data-bearbeiten]') && !q('.gw-pfeil'));
+function druck(id, art, x, y) {
+  q('[data-haken="' + id + '"]').dispatchEvent(new PointerEvent(art,
+    { bubbles: true, button: 0, clientX: x || 20, clientY: y || 20, pointerType: 'touch' }));
+}
+function warten(ms) { return new Promise(function (f) { setTimeout(f, ms); }); }
+
+druck('A', 'pointerdown');
+var gehalten = q('[data-haken="A"]').classList.contains('halten');
+return warten(LANG_MS + 100).then(function () {
+  pruefe('L2 die Kachel sinkt beim Halten ein', gehalten);
+  pruefe('L3 lange drücken öffnet die Gewohnheit', ansicht === 'bearbeiten' && q('#gwName').value === 'A');
+  pruefe('L4 und hakt nicht ab', gewohnheitNach('A').erledigt.indexOf(HEUTE) === -1);
+  zeige('home');
+  q('[data-haken="A"]').click();
+  pruefe('L5 der Klick gleich danach hakt nicht ab', gewohnheitNach('A').erledigt.indexOf(HEUTE) === -1);
+  langGedrueckt = 0;
+  druck('A', 'pointerdown');
+  druck('A', 'pointerup');
+  q('[data-haken="A"]').click();
+  return warten(LANG_MS + 100);
+}).then(function () {
+  pruefe('L6 kurz tippen hakt ab und bleibt', ansicht === 'home' && gewohnheitNach('A').erledigt.indexOf(HEUTE) !== -1);
+  druck('B', 'pointerdown', 20, 20);
+  druck('B', 'pointermove', 20, 60);
+  return warten(LANG_MS + 100);
+}).then(function () {
+  pruefe('L7 wer beim Halten blättert, öffnet nichts', ansicht === 'home' &&
+    !q('[data-haken="B"]').classList.contains('halten'));
+  q('[data-haken="B"]').dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
+  pruefe('L8 ein Rechtsklick öffnet auch', ansicht === 'bearbeiten' && q('#gwName').value === 'B');
+  langGedrueckt = 0;
+  frisch();
+  speichern();
+});
+`);

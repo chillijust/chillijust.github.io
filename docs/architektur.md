@@ -22,6 +22,7 @@ Menü · Service Worker · Start.
 state = {
   schema: 1,
   thema: 'auto',     // 'auto' | 'hell' | 'dunkel'
+  kalender: 'woche', // 'woche' | 'monat' — was der Kalender zuletzt zeigte
   gewohnheiten: [{
     id: 'g…',
     name: 'Lesen',                       // höchstens NAME_MAX Zeichen
@@ -63,6 +64,15 @@ keine Teilaktualisierung — eine Ansicht ist schnell genug neu gezeichnet.
   `entwurf` und die Knöpfe an Ort und Stelle; gespeichert wird mit dem Knopf.
 - **Abhaken** (`[data-haken]`) ändert `erledigt`, speichert und zeichnet neu; die eben
   getippte Kachel trägt dabei `gerade` für ihre Animation. Kacheln bleiben, wo sie sind.
+  **Lange drücken** (`langDruecken`, 500 ms) öffnet statt dessen `bearbeiten`; der Klick
+  danach ist gesperrt (`langGedrueckt`).
+- **Jede Änderung eines Tages** geht über `umschalten(id, tag)` — die Kachel für heute,
+  der Kalender (`[data-nachtrag]`) für bis zu `NACHTRAG_TAGE` zurück.
+- **Kalender** (`zeichneKalender`, `bindeKalender`): `state.kalender` wählt Woche oder
+  Monat; was zu sehen ist, halten `kalVersatz` (Wochen bzw. Monate von heute) und `kalTag`
+  (der angetippte Tag) — beide nur im Speicher der Seite, nicht in `state`. Getönt wird aus
+  `tagesStand(k)` über `kalStufe`; Blättern und Umschalten setzen `kalGewechselt` für das
+  Einblenden des Rasters.
 - **Ringe** werden mit dem Ziel gezeichnet und tragen in `data-von` den zuletzt gezeigten
   Wert (`ringZuletzt`); `ringeFuellen()` läßt sie nach jedem `render()` herüberlaufen.
 - `visibilitychange` zeichnet das Dashboard ganz neu — nach Mitternacht ist es ein anderer Tag.

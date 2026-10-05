@@ -1,6 +1,6 @@
 # 0002 · Gewohnheiten: Stärke, Serie und «nie zweimal» im Einzelnen
 
-*2026-10-05 · Bauabschnitt 2 · Version 0.2.0T*
+*2026-10-05 · Bauabschnitt 2 · Version 0.2.0T · Pfeil und «kein Nachtragen» abgelöst durch 0003*
 
 ## Ausgangslage
 
@@ -34,9 +34,9 @@ jetzt irgendwohin führen.
 
 **Oberfläche**
 
-- Abgehakt wird nur **heute**; Nachtragen gibt es nicht.
+- Abgehakt wird nur **heute**; Nachtragen gibt es nicht. *(Abgelöst durch 0003: bis 7 Tage zurück im Kalender.)*
 - Gedimmte Kacheln («Heute nicht dran») lassen sich trotzdem abhaken.
-- Der Pfeil führt vorerst zur Ansicht **«Gewohnheit»**: Stand (Stärke, Serie, seit),
+- Der Pfeil *(abgelöst durch 0003: langer Druck)* führt vorerst zur Ansicht **«Gewohnheit»**: Stand (Stärke, Serie, seit),
   dasselbe Formular wie beim Anlegen, «Archivieren» mit zweitem Tipp. Die Heatmap kommt mit
   Abschnitt 6 hinzu, ebenso das **Zurückholen** archivierter Gewohnheiten — bis dahin
   bleiben sie unsichtbar im Speicher.
