@@ -81,7 +81,8 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   eigenem `display` braucht `[hidden] { display: none; }`, sonst bleibt es sichtbar.
 - **Was man lesen muß, bevor es weitergeht, ist ein Hinweis** (`hinweisZeigen`, wartet auf
   «OK»), keine Meldung — die geht nach zwei Sekunden. Er tropft mit `tropfenAuf`/`tropfenZu`
-  wie eine Ansicht; **eine zweite Tropfen-Mechanik gibt es nicht** (ADR 0013).
+  wie eine Ansicht, nur mit `HINWEIS_DAUER` (30 % schneller); **eine zweite
+  Tropfen-Mechanik gibt es nicht** (ADR 0013).
 - **Bewegt wird über `bewegt()` mit der `FEDER`**; CSS nimmt `var(--feder, ease)`. Ausnahme: Tropfen
   schwingen nicht über (ADR 0008).
 - **Was aus einem runden Knopf kommt oder in ihn geht, ist ein Tropfen** (`tropfenAuf`,

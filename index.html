@@ -1031,7 +1031,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.5.0T9';
+var APP_VERSION = '0.5.0T10';
 var APP_STAND = '2026-10-05';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -1598,10 +1598,11 @@ function huellenBild(r, rund, op, off) {
 
 // Zu: der Geist `g` der Fläche `r` fließt als Tropfen in den Knopf `ziel`,
 // der ihn mit einem kleinen Nicken schluckt. `rund` sind die Ecken der Fläche
-// (eine Ansicht 20px), `fertig` kommt, wenn er geschluckt ist.
-function tropfenZu(g, r, ziel, rund, fertig) {
+// (eine Ansicht 20px), `fertig` kommt, wenn er geschluckt ist; `dauer` ist
+// die eigene Dauer, sonst die der Ansichten.
+function tropfenZu(g, r, ziel, rund, fertig, dauer) {
   var w = tropfenWeg(sichtbar(r), ziel.getBoundingClientRect()), h = tropfenHuelle(g, r.width);
-  var dauer = TROPFEN_DAUER;
+  dauer = dauer || TROPFEN_DAUER;
   function sk(b, off) { return { transform: 'scale(' + (b.width / r.width).toFixed(4) + ')', offset: off }; }
   bewegt(h, [huellenBild(w.gross, rund || '20px', 1, 0), huellenBild(w.mitte, '40% 40% 40% 18%', 1, 0.38),
     huellenBild(w.tropfen, TROPFEN_ZU, 1, 0.7), huellenBild(w.klein, TROPFEN_ZU, 1, 0.9),
@@ -1619,11 +1620,13 @@ function tropfenZu(g, r, ziel, rund, fertig) {
 
 // Auf: die neue Ansicht `neu` quillt als Tropfen aus der Fläche `q`. Gezeigt
 // wird ihr Geist; die echte Ansicht steht derweil unsichtbar schon bereit.
-// `rund` sind die Ecken, in denen er ankommt (eine Ansicht hat keine).
-function tropfenAuf(neu, q, rund) {
+// `rund` sind die Ecken, in denen er ankommt (eine Ansicht hat keine), `dauer`
+// die eigene Dauer, sonst die der Ansichten.
+function tropfenAuf(neu, q, rund, dauer) {
   var g = geist(neu);
   if (!g) return null;
-  var n = neu.getBoundingClientRect(), w = tropfenWeg(sichtbar(n), q), h = tropfenHuelle(g, n.width), dauer = TROPFEN_DAUER;
+  var n = neu.getBoundingClientRect(), w = tropfenWeg(sichtbar(n), q), h = tropfenHuelle(g, n.width);
+  dauer = dauer || TROPFEN_DAUER;
   function sk(b, off) { return { transform: 'scale(' + (b.width / n.width).toFixed(4) + ')', offset: off }; }
   neu.style.opacity = '0';
   bewegt(h, [huellenBild(w.klein, TROPFEN_AUF, 0, 0), huellenBild(w.klein, TROPFEN_AUF, 1, 0.08),
@@ -1851,6 +1854,9 @@ function teilTropfen(el, an) {
 // Schließen (tropfenZu) in das Element `ziel`; ist es nicht (mehr) zu sehen,
 // dorthin zurück, woher er kam.
 // Eine eigene Mechanik lief gleich lang, sah aber gehetzt aus (ADR 0013).
+// Derselbe Tropfen, aber 30 % schneller als eine Ansicht — am Gerät so gewünscht:
+// Eine Karte ist kleiner als eine Ansicht, ihr Weg kürzer (ADR 0013).
+var HINWEIS_DAUER = Math.round(TROPFEN_DAUER * 0.7);
 var hinweisQuelle = null, hinweisZiel = null;
 
 function zuSehen(el) { return !!el && document.contains(el) && el.getClientRects().length > 0; }
@@ -1866,7 +1872,7 @@ function hinweisZeigen(titel, text, quelle, ziel) {
   void blatt.offsetWidth;
   blatt.classList.add('offen');
   try { $('hinweisKarte').focus({ preventScroll: true }); } catch (e) { /* egal */ }
-  if (hinweisQuelle && hinweisQuelle.width) tropfenAuf($('hinweisKarte'), hinweisQuelle, '18px');
+  if (hinweisQuelle && hinweisQuelle.width) tropfenAuf($('hinweisKarte'), hinweisQuelle, '18px', HINWEIS_DAUER);
 }
 
 // Schließen: Der Schleier blendet aus, die Karte geht als Geist in den
@@ -1885,7 +1891,7 @@ function hinweisSchliessen() {
   tropfenZu(g, r, ziel, '18px', function () {
     karte.style.opacity = '';
     if (!blatt.classList.contains('offen')) blatt.hidden = true;
-  });
+  }, HINWEIS_DAUER);
 }
 
 // ── Umschalter: die Markierung fließt hinüber ───────────────────

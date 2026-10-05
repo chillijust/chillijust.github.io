@@ -1,6 +1,6 @@
 # 0013 · Nur «Als Datei laden»; der Hinweis tropft wie die Ansichten
 
-*2026-10-05 · Abnahme von 0.5.0T8 · Version 0.5.0T9 · löst in 0009 «beide Wege» ab, ändert in 0012 den Tropfen des Hinweises*
+*2026-10-05 · Abnahme von 0.5.0T8 · Version 0.5.0T9, Tempo 0.5.0T10 · löst in 0009 «beide Wege» ab, ändert in 0012 den Tropfen des Hinweises*
 
 ## Ausgangslage
 
@@ -24,6 +24,10 @@ Die Abnahme am Gerät (iPhone, Home-Bildschirm-App) hat ergeben:
   Kurve, dieselbe Dauer, die Hülle mit dem Geist der Karte. Beide nehmen dafür die Ecken
   der Fläche mit (`rund`, beim Hinweis 18px), `tropfenZu` zusätzlich `fertig`. Die eigene
   Mechanik (`hinweisBilder`, `tropfenSpitze`) ist entfernt.
+- **Nur das Tempo ist eigen**: Am Gerät abgenommen, darf der Hinweis 30 % schneller
+  tropfen als eine Ansicht (`HINWEIS_DAUER` = 0,7 × `TROPFEN_DAUER`, 291 statt 416 ms);
+  beide Funktionen nehmen dafür eine `dauer`. Die Ansichten bleiben, wie sie sind — eine
+  Karte ist kleiner und ihr Weg kürzer.
 - Die Quelle wird gemessen, **bevor** neu gezeichnet wird — nach dem Laden ist der Knopf
   schon zugetropft. Ist das Ziel beim Schließen nicht zu sehen, fließt er in die Quelle
   zurück; dort nickt nichts.
