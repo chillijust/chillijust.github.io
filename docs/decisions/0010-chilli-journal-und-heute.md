@@ -1,6 +1,6 @@
 # 0010 · Der Name heißt «Chilli Journal», «Heute» führt den Kalender nach Hause
 
-*2026-10-05 · Ansicht von 0.5.0T · Version 0.5.0T2, Auswahl des Schriftzugs und Heimweg 0.5.0T3, Entwurf «Lodern» 0.5.0T4*
+*2026-10-05 · Ansicht von 0.5.0T · Version 0.5.0T2, Auswahl des Schriftzugs und Heimweg 0.5.0T3, Entwurf «Lodern» 0.5.0T4, breiter 0.5.0T5*
 
 ## Ausgangslage
 

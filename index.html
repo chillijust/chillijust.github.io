@@ -173,7 +173,8 @@ svg.wm { display: block; flex: none; color: var(--text); overflow: visible; }
 .wm-los .wm-fallen { animation: wmFallen .7s cubic-bezier(.3, 1.25, .5, 1) both; animation-delay: var(--wm-v); }
 .wm-los .wm-f1 { animation-delay: var(--wm-v); }
 .wm-los .wm-f2 { animation-delay: calc(var(--wm-v) + .18s); }
-.wm-dick { stroke-width: 4.8; }
+/* Breit gezogen: senkrechte Striche 4,2, waagrechte etwas feiner — wie mit der Feder. */
+.wm-dick { stroke-width: 4.2; }
 /* Gruppen, die nur verschieben und verkleinern, rechnen vom Nullpunkt aus. */
 .wm .wm-ort { transform-box: view-box; transform-origin: 0 0; }
 .wm-kursiv { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 17px; fill: var(--text-2); }
@@ -995,7 +996,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.5.0T4';
+var APP_VERSION = '0.5.0T5';
 var APP_STAND = '2026-10-05';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -1346,12 +1347,12 @@ function wmSchoteStehend(x, r, nr) {
 }
 
 var MARKEN = [
-  { id: 'lodern', vor: 1.0, name: 'Lodern', breite: 98, zusatz: null, runde: 2,
+  { id: 'lodern', vor: 1.0, name: 'Lodern', breite: 122, zusatz: null, runde: 2,
     satz: 'Die Handschrift aus Glut; die Flammen steigen aus den i auf und lodern weiter. Darunter Journal an der Linie.',
     svg: function () {
-      return '<g class="wm-ort" transform="translate(-5,0) scale(.78)"><path class="wm-zug wm-dick wm-schreiben" pathLength="1" d="' +
+      return '<g class="wm-ort" transform="translate(-8,0) scale(1,.78)"><path class="wm-zug wm-dick wm-schreiben" pathLength="1" d="' +
           WM_ZUG + '"/></g>' +
-        wmFlammeLodernd(58.2, 24.6, .74, 1) + wmFlammeLodernd(86.3, 24.6, .74, 2) +
+        wmFlammeLodernd(73, 24.6, .74, 1) + wmFlammeLodernd(109, 24.6, .74, 2) +
         '<path class="wm-linie wm-schreiben wm-j1" pathLength="1" d="M5,57 L27,57"/>' +
         '<text class="wm-kursiv wm-auf wm-j2" x="32" y="61">Journal</text>';
     } },
