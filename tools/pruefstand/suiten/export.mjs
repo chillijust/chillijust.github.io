@@ -198,10 +198,6 @@ pruefe('A11 Laden reicht chillinal.ics weiter', geklickt && geklickt.name === 'c
 pruefe('A12 und merkt sich den Export', state.exportiert === zeitJetzt() &&
   JSON.parse(localStorage.getItem(SPEICHER)).exportiert === zeitJetzt() && q('#exZuletzt').textContent !== 'noch nie');
 pruefe('A13 kein Link bleibt liegen', !document.querySelector('a[download]'));
-// Der Hinweis wartet auf «OK» (exportwege); hier wird er weggetippt, damit keine
-// Bewegung weiterläuft, während die Prüfung auf das Lesen der Dateien wartet.
-q('#hinweisOk').click();
-ausbewegt();
 
 // Teilen: einmal angenommen, einmal abgebrochen.
 var geteilt = [], antwort = 'ja';
@@ -224,11 +220,11 @@ return Promise.resolve().then(function () { return new Promise(function (f) { se
   var d = geteilt[0], f = d && d.files && d.files[0];
   pruefe('A15 Teilen reicht eine .ics-Datei weiter', f && f.name === 'chillinal.ics' && /text\/calendar/.test(f.type));
   pruefe('A16 und merkt sich den Export', state.exportiert === zeitJetzt() && /Geteilt/.test(q('#meldung').textContent));
-  return f.text();
+  return blobText(f);
 }).then(function (text) {
   pruefe('A17 die geteilte Datei ist die gerechnete', text === erwartetTeilen &&
     /BEGIN:VEVENT/.test(text));
-  return blobDatei.text();
+  return blobText(blobDatei);
 }).then(function (text) {
   pruefe('A18 die geladene ebenso', text === erwartetLaden);
   antwort = 'nein';

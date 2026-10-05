@@ -22,6 +22,9 @@ Gilt für die Suiten. Ausführlich in `tools/pruefstand/README.md` und im Skill 
   ziehen sich auf (ADR 0007). Der Läufer rechnet in virtueller Zeit ohne Bilder:
   Animationen kommen nie von selbst an, auf ihr Ende wartet man mit `ausbewegt()` und
   einem kurzen `setTimeout`.
+- **Blobs über `blobText(b)` lesen, nie über `b.text()`** — echtes Lesen läßt die
+  virtuelle Uhr im Sekundentakt der App bis ans Budget laufen; die Suite kommt dann
+  gelegentlich ohne Urteil zurück.
 - **Übergänge abschalten, wenn eine Farbe gefragt ist** — der kopflose Browser läßt sie
   nicht zuverlässig ablaufen; gefragt ist das Ziel, nicht der Weg.
 - **Eine Prüfung zählt nicht auf, sie fragt nach allen.** Menüeinträge, Knöpfe,

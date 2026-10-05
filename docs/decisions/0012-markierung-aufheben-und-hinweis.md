@@ -52,6 +52,9 @@ Wechsel in eine andere App noch braucht, ist sie falsch.
 - Wer einem Teil ein eigenes `display` gibt, braucht dazu `[hidden] { display: none; }` —
   sonst schlägt die Klasse das Attribut, und Verborgenes bleibt zu sehen (`.ex-wege`).
   Prüfungen fragen darum `getClientRects()`, nicht nur `hidden`.
-- Suiten: `exportwege`; `exportmarken` B5 fragt die verborgenen Wege; `export` tippt den
-  Hinweis weg, bevor es auf das Lesen der Dateien wartet — eine laufende Bewegung zehrte
-  sonst gelegentlich das virtuelle Zeitbudget auf, und die Suite kam ohne Urteil zurück.
+- Suiten: `exportwege`; `exportmarken` B5 fragt die verborgenen Wege.
+- Nebenbefund, älter als diese Fassung: `export` kam etwa jeden fünfzehnten Lauf ohne
+  Urteil zurück. `Blob.text()` liest wirklich; solange der Läufer darauf wartet, läuft
+  seine virtuelle Uhr im Sekundentakt der App (`takt`) bis ans Budget. Die Suiten lesen
+  Blobs jetzt über `blobText(b)` aus `helfer.mjs`, ohne Wartezeit — 0 von 60 Läufen rot,
+  vorher 3 von 40. (Der Commit davor schob es fälschlich auf den offenen Hinweis.)

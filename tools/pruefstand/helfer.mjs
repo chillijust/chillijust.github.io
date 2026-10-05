@@ -72,6 +72,7 @@ export function testseite(html, test) {
 // Im Rumpf bereit: pruefe(name, bedingung, extra) · q(selektor) · alle(selektor)
 // · frisch() setzt die App auf den Anfang zurück.
 // · ausbewegt() bringt laufende Animationen ans Ziel, bevor gemessen wird.
+// · blobText(b) liest einen Blob ohne Wartezeit.
 export function suite(name, html, rumpf) {
   const test = String.raw`
 var log = [];
@@ -86,6 +87,19 @@ function ausbewegt() {
     try { if (a.effect && a.effect.getTiming().iterations !== Infinity) a.finish(); } catch (e) { /* weiter */ }
   });
 }
+// Jeder Blob merkt sich seinen Text; gelesen wird mit blobText(b), nie mit
+// b.text(). Das liest wirklich — und solange der Läufer darauf wartet, läuft
+// seine virtuelle Uhr im Sekundentakt der App bis ans Budget, und die Seite geht
+// ohne Urteil zurück (etwa jeder fünfzehnte Lauf von export).
+var BlobEcht = window.Blob, FileEcht = window.File;
+function textAus(teile) {
+  return (teile || []).map(function (t) { return typeof t === 'string' ? t : t && t.textGemerkt || ''; }).join('');
+}
+window.Blob = function (teile, opt) { var b = new BlobEcht(teile, opt); b.textGemerkt = textAus(teile); return b; };
+window.Blob.prototype = BlobEcht.prototype;
+window.File = function (teile, name, opt) { var f = new FileEcht(teile, name, opt); f.textGemerkt = textAus(teile); return f; };
+window.File.prototype = FileEcht.prototype;
+function blobText(b) { return Promise.resolve(b.textGemerkt); }
 function frisch() {
   menueSchliessen();
   state = grundStand();

@@ -49,7 +49,7 @@ pruefe('A4 eine kaputte Marke auch', tm({ imKalender: { am: 'gestern', abdruck: 
   tm({ imKalender: { am: 5, abdruck: '<script>' } }).imKalender === null);
 
 // ── B · Exportieren setzt Marken ────────────────────────────
-return dateiLaden().text().then(function (text) {
+return blobText(dateiLaden()).then(function (text) {
   pruefe('B1 die erste Datei trägt alles Neue', uids(text) === 'kino,arzt,lesen', uids(text));
   pruefe('B2 danach trägt jeder Eintrag seine Marke', ['kino', 'arzt'].every(function (id) {
     var t = terminNach(id); return t.imKalender && t.imKalender.am === zeitJetzt() && t.imKalender.abdruck === exAbdruck('t', t);
@@ -67,7 +67,7 @@ return dateiLaden().text().then(function (text) {
   state.termine.push(tm({ id: 'neu', titel: 'Neu', tag: '2026-10-25' }));
   render();
   pruefe('C1 ein neuer Termin zählt, der Rest nicht', q('#exZahl').textContent === '1' && !zeile('neu').classList.contains('ex-alt'));
-  return dateiLaden().text();
+  return blobText(dateiLaden());
 }).then(function (text) {
   pruefe('C2 die Datei trägt nur ihn', uids(text) === 'neu', uids(text));
 
@@ -115,7 +115,7 @@ return dateiLaden().text().then(function (text) {
   zeile('lesen').click();
   q('#exBearbeiten').click();
   pruefe('E6 «Fertig» behält die Auswahl', !exBearbeiten && q('#exZahl').textContent === '2' && !!q('[data-termin="kino"]'));
-  return dateiLaden().text();
+  return blobText(dateiLaden());
 }).then(function (text) {
   pruefe('E7 die Datei trägt genau das Dazugeholte', uids(text) === 'kino,lesen', uids(text));
   pruefe('E8 danach ist die Auswahl leer, alles wieder abgedunkelt', !Object.keys(exportWahl).length &&
