@@ -1031,7 +1031,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.5.0T10';
+var APP_VERSION = '0.5.0T11';
 var APP_STAND = '2026-10-05';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -1854,9 +1854,9 @@ function teilTropfen(el, an) {
 // Schließen (tropfenZu) in das Element `ziel`; ist es nicht (mehr) zu sehen,
 // dorthin zurück, woher er kam.
 // Eine eigene Mechanik lief gleich lang, sah aber gehetzt aus (ADR 0013).
-// Derselbe Tropfen, aber 30 % schneller als eine Ansicht — am Gerät so gewünscht:
+// Derselbe Tropfen, aber 60 % schneller als eine Ansicht — am Gerät so gewünscht:
 // Eine Karte ist kleiner als eine Ansicht, ihr Weg kürzer (ADR 0013).
-var HINWEIS_DAUER = Math.round(TROPFEN_DAUER * 0.7);
+var HINWEIS_DAUER = Math.round(TROPFEN_DAUER * 0.4);
 var hinweisQuelle = null, hinweisZiel = null;
 
 function zuSehen(el) { return !!el && document.contains(el) && el.getClientRects().length > 0; }

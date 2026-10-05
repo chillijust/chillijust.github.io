@@ -2,7 +2,7 @@
 // statt zu schnappen; unter «Bearbeiten» kommt «Markierung aufheben», wenn
 // allein Dazugeholtes gewählt ist, und setzt es auf neu zurück; nach «Als
 // Datei laden» steht ein Hinweis mittig, bis «OK» kommt. Er tropft wie die
-// Ansichten — derselbe Weg, 30 % schneller (0.5.0T10, ADR 0013).
+// Ansichten — derselbe Weg, 60 % schneller (0.5.0T11, ADR 0013).
 //
 // Die Uhr steht: «heute» ist Mittwoch, der 14. Oktober 2026, 8 Uhr.
 import { readFileSync } from 'node:fs';
@@ -50,7 +50,7 @@ pruefe('H1 statt der Meldung ein Hinweis, der wartet', offen() && q('#hinweisTit
   /Öffne sie/.test(q('#hinweisText').textContent) && karte.getAttribute('role') === 'alertdialog' &&
   !q('#meldung').classList.contains('zeigt'));
 pruefe('H2 er quillt mit dem Tropfen der Ansichten aus «Als Datei laden»', laeuft(huelle) &&
-  dauer(huelle) === HINWEIS_DAUER && HINWEIS_DAUER === Math.round(TROPFEN_DAUER * 0.7) && bilder(huelle).length === 5 && Number(erstes.opacity) === 0 &&
+  dauer(huelle) === HINWEIS_DAUER && HINWEIS_DAUER === Math.round(TROPFEN_DAUER * 0.4) && bilder(huelle).length === 5 && Number(erstes.opacity) === 0 &&
   erstes.borderRadius === TROPFEN_AUF && Math.abs(parseFloat(erstes.left) + parseFloat(erstes.width) / 2 -
   (vorher.left + vorher.width / 2)) < 2 && letztes.borderRadius === '18px' && karte.style.opacity === '0',
   JSON.stringify([erstes, letztes]));
