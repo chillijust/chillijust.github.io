@@ -1,6 +1,6 @@
 # 0007 · Tropfen statt Aufploppen
 
-*2026-10-05 · Ansicht von 0.4.0T · Version 0.4.0T2*
+*2026-10-05 · Ansicht von 0.4.0T · Version 0.4.0T2 · Menü und Schrumpfen in den Menüknopf abgelöst durch 0008*
 
 ## Ausgangslage
 

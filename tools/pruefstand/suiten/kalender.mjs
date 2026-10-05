@@ -132,6 +132,35 @@ pruefe('N16 Trefferflächen mit offener Leiste', zuKlein('#app').length === 0, z
 var siez = q('#app').innerText.match(/(^|[.!?:]\s+|\s)(Sie|Ihnen|Ihre?[mnrs]?)\b/g);
 pruefe('N17 auch der Kalender duzt', !siez, siez && siez.join(' | '));
 
+// ── U · Woche | Monat hält den Tag (ADR 0008) ───────────────
+aufbauen();
+tag(vor(1)).click();
+q('[data-kalender="monat"]').click();
+pruefe('U1 zum Monat: der gewählte Tag bleibt, mit seiner Liste', kalTag === vor(1) && !!q('#kalLeiste') &&
+  tag(vor(1)).classList.contains('gewaehlt') && q('#kalTitel').textContent === 'Oktober 2026');
+q('[data-kalender="woche"]').click();
+pruefe('U2 und zurück zur Woche ebenso', kalTag === vor(1) && !!q('#kalLeiste') &&
+  q('#kalTitel').textContent === 'KW 42 · 12.–18. Oktober');
+tag(vor(1)).click();
+q('#kalVor').click();
+q('#kalVor').click();
+q('#kalVor').click();
+q('[data-kalender="monat"]').click();
+pruefe('U3 ohne Tag zeigt der Monat, wo die Woche stand', kalVersatz === 1 && q('#kalHeute').textContent === 'November 2026',
+  kalVersatz + ' ' + (q('#kalHeute') || q('#kalTitel')).textContent);
+tag('2026-11-20').click();
+q('[data-kalender="woche"]').click();
+pruefe('U4 ein Tag im anderen Monat führt in seine Woche', kalTag === '2026-11-20' && kalVersatz === 5 &&
+  q('#kalHeute').textContent === 'KW 47 · 16.–22. November' && !!q('#kalLeiste'), (q('#kalHeute') || q('#kalTitel')).textContent);
+tag('2026-11-20').click();
+q('[data-kalender="monat"]').click();
+q('#kalHeute').click();
+q('[data-kalender="woche"]').click();
+pruefe('U5 ohne Tag und ohne Blättern bleibt es bei heute', kalVersatz === 0 && q('#kalTitel').textContent === 'KW 42 · 12.–18. Oktober');
+pruefe('U6 die Ankerrechnung', kalAnker(HEUTE) === HEUTE && versatzFuer('2026-12-31', HEUTE) === 11 &&
+  versatzFuer('2026-10-11', HEUTE) === -1);
+state.kalender = 'woche';
+
 // ── L · Langer Druck ────────────────────────────────────────
 aufbauen();
 pruefe('L1 der Pfeil ist weg', !q('[data-bearbeiten]') && !q('.gw-pfeil'));

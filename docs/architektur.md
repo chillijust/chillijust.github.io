@@ -135,8 +135,14 @@ der Umschalter (ADR 0007).
   ein anderer Tag, nach zehn Minuten im Hintergrund ist die Welle durch.
 - Der Kopf hat zwei Gestalten: auf dem Dashboard Titel, Datum, Sonne/Mond, Menüknopf;
   unterwegs Rückweg und Titel.
-- Das Menü ist ein Blatt über der Seite, gezeichnet beim Öffnen aus `MENUE`. Ein Eintrag
-  mit `ziel` öffnet die Ansicht, einer ohne meldet «kommt».
+- Das Menü klappt unter dem Menüknopf auf (`blattLegen`), über einem Schleier, gezeichnet
+  beim Öffnen aus `MENUE`; es quillt als Tropfen aus dem Knopf und fließt zurück. Ein
+  Eintrag mit `ziel` öffnet die Ansicht als Tropfen aus dem Eintrag und schließt das Menü
+  sofort (`menueSchliessen(true)`), einer ohne meldet «kommt» (ADR 0008).
+- **Tropfen** (`tropfenAuf`, `tropfenZu`): Wo die Quelle rund ist (`tropfenQuelle`), läuft
+  der Übergang in einer festen Hülle (`.tropfen-huelle`) mit einem Geist darin statt als
+  Zoom. Woche | Monat behalten `kalTag`; `kalAnker` und `versatzFuer` wählen, was zu sehen
+  ist, `kalFliessen` läßt den Monat aus der Woche quellen und zurück.
 
 ## Darstellung
 

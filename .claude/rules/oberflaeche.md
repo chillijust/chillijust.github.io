@@ -69,7 +69,12 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   verschwindet, zeigt `geist(el)`; nie den Zustand verzögern, um zu animieren.
 - **Formularteile über `teilZeigen(el, an)`**, nie `el.hidden = …`; eine neue `.wahl`
   bekommt ihre Marke von `wahlenSetzen()`, nach Änderung an Ort und Stelle aufrufen.
-- **Bewegt wird über `bewegt()` mit der `FEDER`**; CSS nimmt `var(--feder, ease)`.
+- **Bewegt wird über `bewegt()` mit der `FEDER`**; CSS nimmt `var(--feder, ease)`. Ausnahme: Tropfen
+  schwingen nicht über (ADR 0008).
+- **Was aus einem runden Knopf kommt oder in ihn geht, ist ein Tropfen** (`tropfenAuf`,
+  `tropfenZu`, `tropfenQuelle`) — Bauch voran, Spitze hinten. Kacheln und Zeilen zoomen.
+- **Das Menü klappt unter seinem Knopf auf** (`menueOeffnen`, `blattLegen`), nie als Blatt
+  von unten.
 - Animation nur, wo sie Rückmeldung gibt (Abhaken, Ring, Schalter, Blatt). Unter
   `prefers-reduced-motion: reduce` steht alles still; Abläufe, die auf das Ende einer
   Animation warten, fragen `bewegungAus()`.

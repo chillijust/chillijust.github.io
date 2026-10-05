@@ -148,6 +148,61 @@ return durch().then(function () {
 }).then(function () {
   pruefe('F8 am Ende ist alles aufgeräumt', geister().length === 0 && !q('.tropfen'));
 
+  // ── D · Tropfen: Menü, runde Knöpfe, Woche | Monat (ADR 0008) ──
+  menueOeffnen();
+  var bl = q('#menue .blatt'), kn = q('#menuKnopf').getBoundingClientRect();
+  var erst = laeuft(bl) ? bl.getAnimations()[0].effect.getKeyframes()[0] : {};
+  pruefe('D1 das Menü quillt als Tropfen aus dem Knopf', laeuft(bl) && erst.borderRadius === TROPFEN_AUF, erst.borderRadius);
+  ausbewegt();
+  var br = bl.getBoundingClientRect();
+  pruefe('D2 es hängt unter dem Knopf, rechtsbündig', br.top >= kn.bottom && br.top - kn.bottom < 16 &&
+    Math.abs(br.right - kn.right) < 1.5, br.top + ' ' + br.right + ' / ' + kn.bottom + ' ' + kn.right);
+  menueSchliessen();
+  pruefe('D3 zu fließt es zurück in den Knopf', laeuft(bl) && !q('#menue').classList.contains('offen') && !q('#menue').hidden);
+  return durch();
+}).then(function () {
+  pruefe('D4 danach ist es weg', q('#menue').hidden && !laeuft(q('#menue .blatt')));
+  menueOeffnen();
+  ausbewegt();
+  q('[data-menue="einstellungen"]').click();
+  var h = q('.tropfen-huelle');
+  pruefe('D5 die Einstellungen quellen als Tropfen aus dem Eintrag', ansicht === 'einstellungen' && !!h && laeuft(h) &&
+    q('#ansicht').style.opacity === '0');
+  pruefe('D6 das Menü ist im selben Augenblick weg', q('#menue').hidden);
+  pruefe('D7 Skripte sehen nur die echte Ansicht', alle('#swKnopf').length === 1);
+  return durch();
+}).then(function () {
+  pruefe('D8 danach ist die Hülle weg und die Ansicht sichtbar', !q('.tropfen-huelle') && q('#ansicht').style.opacity === '');
+  q('#zurueckKnopf').click();
+  var h = q('.tropfen-huelle'), bilder = h ? h.getAnimations()[0].effect.getKeyframes() : [], z = bilder[bilder.length - 2] || {};
+  var k = q('#menuKnopf').getBoundingClientRect();
+  pruefe('D9 zurück fließt die Ansicht als Tropfen in den Menüknopf', ansicht === 'home' && !!h && laeuft(h) &&
+    !!h.querySelector('.geist'));
+  pruefe('D10 mit dem Bauch voran, die Spitze unten links', z.borderRadius === TROPFEN_ZU, z.borderRadius);
+  pruefe('D11 und landet auf dem Knopf', Math.abs(parseFloat(z.left) + parseFloat(z.width) / 2 - (k.left + k.width / 2)) < 2 &&
+    Math.abs(parseFloat(z.top) + parseFloat(z.height) / 2 - (k.top + k.height / 2)) < 2);
+  pruefe('D12 Kacheln bleiben Rechtecke', !tropfenQuelle(q('[data-haken]')) && !tropfenQuelle(q('[data-termin]')) &&
+    tropfenQuelle(q('#menuKnopf')));
+  return durch();
+}).then(function () {
+  pruefe('D13 danach ist die Hülle weg', !q('.tropfen-huelle') && geister().length === 0);
+  aufbauen();
+  q('[data-kaltag="2026-10-16"]').click();
+  ausbewegt();
+  q('[data-kalender="monat"]').click();
+  var bild = laeuft(q('#kalRaster')) ? q('#kalRaster').getAnimations()[0].effect.getKeyframes()[0].clipPath : '';
+  pruefe('D14 zum Monat: der Tag bleibt, der Monat quillt aus seiner Woche', kalTag === '2026-10-16' && !!q('#kalLeiste') &&
+    /^inset\([1-9]/.test(bild), bild);
+  ausbewegt();
+  q('[data-kalender="woche"]').click();
+  var gk = geister();
+  pruefe('D15 zur Woche: der Monat zieht sich als Geist zusammen', kalTag === '2026-10-16' && !!q('#kalLeiste') &&
+    gk.length === 1 && laeuft(gk[0]) && !!gk[0].shadowRoot.querySelector('#kalRaster') && alle('#kalRaster').length === 1);
+  return durch();
+}).then(function () {
+  pruefe('D16 danach ist alles aufgeräumt', geister().length === 0 && !q('.tropfen-huelle'));
+  aufbauen();
+
   // ── R · Ohne Bewegung geschieht nichts davon ─────────────
   bewegungAus = function () { return true; };
   q('[data-kaltag="2026-10-16"]').click();
@@ -160,6 +215,13 @@ return durch().then(function () {
   pruefe('R4 Formularteile verschwinden ohne Geist', q('#tmZeiten').hidden && geister().length === 0);
   q('[data-wdh="taeglich"]').click();
   pruefe('R5 die Marke springt', !laeuft(q('.tm-wdh .wahl-marke')) && unter(q('.tm-wdh .wahl-marke'), q('[data-wdh="taeglich"]')));
+  zeige('home');
+  menueOeffnen();
+  pruefe('R6 das Menü steht sofort, ohne Tropfen', !q('#menue').hidden && !laeuft(q('#menue .blatt')));
+  q('[data-menue="einstellungen"]').click();
+  pruefe('R7 auch die Ansicht daraus', ansicht === 'einstellungen' && !q('.tropfen-huelle') && q('#ansicht').style.opacity === '');
+  q('#zurueckKnopf').click();
+  pruefe('R8 und zurück', ansicht === 'home' && !q('.tropfen-huelle') && geister().length === 0);
   bewegungAus = bewegungEcht;
   frisch();
   speichern();

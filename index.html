@@ -443,7 +443,8 @@ svg { display: block; }
   border-radius: 12px;
 }
 button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
-.kal-raster { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.kal-raster, .kal-wtage { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.kal-wtage { margin-bottom: 3px; }
 .kal-raster.neu { animation: kalNeu .3s ease; }
 @keyframes kalNeu { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 .kal-wt {
@@ -694,41 +695,44 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 .knopf.frage { box-shadow: inset 0 0 0 2px var(--akzent); }
 
 /* ── Menü ──────────────────────────────────────────────────── */
+/* Das Menü klappt unter seinem Knopf auf, wie bei Chillingo — als Tropfen,
+   der aus dem Knopf quillt (ADR 0008). Der Schleier dunkelt leicht ab; ein Tipp
+   darauf schließt. Lage und Bewegung setzt `menueOeffnen()`. */
 #menue {
   position: fixed;
   inset: 0;
   z-index: 20;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  background: rgba(20, 20, 19, .32);
+  background: rgba(20, 20, 19, .18);
   opacity: 0;
   transition: opacity .22s ease;
 }
 #menue[hidden] { display: none; }
 #menue.offen { opacity: 1; }
 .blatt {
-  width: 100%;
-  max-width: 560px;
+  position: absolute;
+  top: 72px;
+  right: 16px;
+  width: max-content;
+  min-width: 220px;
+  max-width: calc(100vw - 32px);
   background: var(--grund);
-  border-radius: 24px 24px 0 0;
-  padding: 10px 16px calc(env(safe-area-inset-bottom) + 16px);
-  transform: translateY(100%);
-  transition: transform .28s cubic-bezier(.2, .9, .3, 1);
+  border-radius: 18px;
+  padding: 6px;
+  box-shadow: 0 2px 6px rgba(20, 20, 19, .10), 0 16px 40px rgba(20, 20, 19, .18);
+  transform-origin: 100% 0;
+  overflow: hidden;
 }
-#menue.offen .blatt { transform: none; }
-.blatt-griff { width: 40px; height: 5px; border-radius: 3px; background: var(--linie); margin: 0 auto 10px; }
 .menue-liste { list-style: none; margin: 0; padding: 0; }
 .menue-eintrag {
   width: 100%;
   display: flex;
   align-items: center;
   gap: 14px;
-  min-height: 52px;
-  padding: 0 8px;
-  border-radius: 14px;
+  min-height: 48px;
+  padding: 0 14px 0 10px;
+  border-radius: 12px;
   text-align: left;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 500;
 }
 .menue-eintrag:active { background: var(--flaeche); }
@@ -811,6 +815,16 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 #ansicht { position: relative; z-index: 1; }
 .geist { pointer-events: none; }
 .tropfen { position: absolute; z-index: -1; background: var(--flaeche-2); pointer-events: none; }
+/* Die Hülle eines Tropfens zwischen Ansicht und rundem Knopf: Sie ändert Lage,
+   Größe und Ecken, ihr Inhalt (ein Geist) skaliert gleichmäßig mit. */
+.tropfen-huelle {
+  position: fixed;
+  z-index: 25;
+  overflow: hidden;
+  background: var(--grund);
+  pointer-events: none;
+  box-shadow: 0 10px 30px rgba(20, 20, 19, .16);
+}
 .wahl { position: relative; }
 .wahl button { position: relative; }
 .wahl-marke {
@@ -852,7 +866,6 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 </div>
 <div id="menue" hidden>
   <div class="blatt" role="dialog" aria-modal="true" aria-label="Menü">
-    <div class="blatt-griff" aria-hidden="true"></div>
     <ul class="menue-liste" id="menueListe"></ul>
   </div>
 </div>
@@ -866,7 +879,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.4.0T2';
+var APP_VERSION = '0.4.0T3';
 var APP_STAND = '2026-10-05';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -1310,6 +1323,102 @@ function zoomBild(q, n) {
 }
 var ZOOM_VOLL = { transform: 'translate(0px, 0px) scale(1)', clipPath: 'inset(0px 0px 0px 0px round 0px)' };
 
+// ── Tropfen: auf aus einem runden Knopf, zu in ihn hinein (ADR 0008) ──
+//
+// Rund heißt: alles, was keine Kachel und keine Zeile ist — der Menüknopf, die
+// Menüeinträge, runde und pillenförmige Knöpfe. Kacheln und Terminzeilen
+// wachsen weiter als Rechteck; ein Rechteck als Tropfen sähe aus wie ein Versehen.
+function tropfenQuelle(el) {
+  return !!el && !tippFlaeche(el).matches('.gw-kachel, [data-termin]');
+}
+
+// Ecken oben links, oben rechts, unten rechts, unten links. Der Tropfen fliegt
+// mit dem Bauch voran, die Spitze zieht hinterher: Zu läuft er nach oben rechts
+// in den Knopf, die Spitze unten links; auf fällt er aus dem Knopf, die Spitze
+// hängt noch oben rechts daran.
+var TROPFEN_ZU = '50% 50% 50% 0%';
+var TROPFEN_AUF = '50% 0% 50% 50%';
+var TROPFEN_KURVE = 'cubic-bezier(.45, 0, .2, 1)';
+
+function mischen(a, b, t) { return a + (b - a) * t; }
+
+// Nur, was zu sehen ist: Eine lange Ansicht wird am unteren Bildrand gekappt.
+function sichtbar(r) {
+  var h = Math.max(0, Math.min(r.height, (window.innerHeight || r.height) - r.top));
+  return { left: r.left, top: r.top, width: r.width, height: h || r.height };
+}
+
+// Die Hülle: feste Lage, Inhalt in voller Breite `breite`, von oben links skaliert.
+function tropfenHuelle(inhalt, breite) {
+  var h = document.createElement('div');
+  h.className = 'tropfen-huelle';
+  h.setAttribute('aria-hidden', 'true');
+  inhalt.style.cssText = 'position: absolute; left: 0; top: 0; margin: 0; width: ' + px(breite) +
+    '; transform-origin: 0 0;';
+  h.appendChild(inhalt);
+  document.body.appendChild(h);
+  return h;
+}
+
+// Vier Stationen zwischen der großen Fläche `gross` und dem Knopfkreis um `k`:
+// groß und eckig, halbwegs rund, ein deutlicher Tropfen kurz vor dem Knopf,
+// ein Tropfen von Knopfgröße. Die dritte hält die Form lange genug im Bild,
+// daß man sie als Tropfen sieht — sonst wäre es nur ein Schrumpfen.
+function tropfenWeg(gross, k) {
+  var d = Math.max(k.width, k.height, 40);
+  var kx = k.left + k.width / 2, ky = k.top + k.height / 2;
+  var gx = gross.left + gross.width / 2, gy = gross.top + gross.height / 2;
+  function station(t, b, h) {
+    var x = mischen(gx, kx, t), y = mischen(gy, ky, t);
+    return { left: x - b / 2, top: y - h / 2, width: b, height: h };
+  }
+  var mb = mischen(gross.width, d, 0.42), tb = Math.min(d * 2.6, mb * 0.8);
+  return { gross: gross, mitte: station(0.4, mb, Math.min(mischen(gross.height, d, 0.5), mb * 1.3)),
+    tropfen: station(0.8, tb, tb), klein: station(1, d, d) };
+}
+
+function huellenBild(r, rund, op, off) {
+  return { left: px(r.left), top: px(r.top), width: px(r.width), height: px(r.height), borderRadius: rund,
+    opacity: op, offset: off };
+}
+
+// Zu: der Geist `g` der Fläche `r` fließt als Tropfen in den Knopf `ziel`,
+// der ihn mit einem kleinen Nicken schluckt.
+function tropfenZu(g, r, ziel) {
+  var w = tropfenWeg(sichtbar(r), ziel.getBoundingClientRect()), h = tropfenHuelle(g, r.width);
+  var dauer = 640;
+  function sk(b, off) { return { transform: 'scale(' + (b.width / r.width).toFixed(4) + ')', offset: off }; }
+  bewegt(h, [huellenBild(w.gross, '20px', 1, 0), huellenBild(w.mitte, '40% 40% 40% 18%', 1, 0.38),
+    huellenBild(w.tropfen, TROPFEN_ZU, 1, 0.7), huellenBild(w.klein, TROPFEN_ZU, 1, 0.9),
+    huellenBild(w.klein, TROPFEN_ZU, 0, 1)],
+    { dauer: dauer, kurve: 'cubic-bezier(.35, 0, .4, 1)', fill: 'forwards' }, function () { weg(h); });
+  bewegt(g, [sk(w.gross, 0), sk(w.mitte, 0.38), sk(w.tropfen, 0.7), sk(w.klein, 0.9), sk(w.klein, 1)],
+    { dauer: dauer, kurve: 'cubic-bezier(.35, 0, .4, 1)', fill: 'forwards' });
+  bewegt(ziel, [{ transform: 'scale(1)' }, { transform: 'scale(1.14)', offset: 0.45 }, { transform: 'scale(1)' }],
+    { dauer: 320, warten: dauer * 0.8, kurve: 'ease-out' });
+  return h;
+}
+
+// Auf: die neue Ansicht `neu` quillt als Tropfen aus der Fläche `q`. Gezeigt
+// wird ihr Geist; die echte Ansicht steht derweil unsichtbar schon bereit.
+function tropfenAuf(neu, q) {
+  var g = geist(neu);
+  if (!g) return null;
+  var n = neu.getBoundingClientRect(), w = tropfenWeg(sichtbar(n), q), h = tropfenHuelle(g, n.width), dauer = 640;
+  function sk(b, off) { return { transform: 'scale(' + (b.width / n.width).toFixed(4) + ')', offset: off }; }
+  neu.style.opacity = '0';
+  bewegt(h, [huellenBild(w.klein, TROPFEN_AUF, 0, 0), huellenBild(w.klein, TROPFEN_AUF, 1, 0.08),
+    huellenBild(w.tropfen, TROPFEN_AUF, 1, 0.3), huellenBild(w.mitte, '40% 18% 40% 40%', 1, 0.62),
+    huellenBild(w.gross, '0px', 1, 1)],
+    { dauer: dauer, kurve: 'cubic-bezier(.3, 0, .25, 1)', fill: 'forwards' }, function () {
+      neu.style.opacity = '';
+      weg(h);
+    });
+  bewegt(g, [sk(w.klein, 0), sk(w.klein, 0.08), sk(w.tropfen, 0.3), sk(w.mitte, 0.62), sk(w.gross, 1)],
+    { dauer: dauer, kurve: 'cubic-bezier(.3, 0, .25, 1)', fill: 'forwards' });
+  return h;
+}
+
 // ── Ansichten wachsen aus dem Getippten ─────────────────────────
 var letzterTipp = null;   // { el, zeit } — der zuletzt berührte Knopf
 var herkunft = null;      // Selektor auf dem Dashboard, aus dem die Ansicht wuchs
@@ -1345,8 +1454,9 @@ function uebergangVorbereiten(von, nach) {
   }
   if (von === nach || bewegungAus()) return null;
   var alt = $('ansicht');
+  var mitTipp = nach !== 'home' && tipp && document.contains(tipp);
   return { zurueck: nach === 'home', altRect: alt.getBoundingClientRect(), geist: geist(alt),
-    quelle: nach !== 'home' && tipp && document.contains(tipp) ? tippFlaeche(tipp).getBoundingClientRect() : null };
+    quelle: mitTipp ? tippFlaeche(tipp).getBoundingClientRect() : null, rund: mitTipp && tropfenQuelle(tipp) };
 }
 
 // Nach dem Neuzeichnen: vorwärts wächst die neue Ansicht aus der Kachel, die
@@ -1363,6 +1473,7 @@ function uebergangAusfuehren(u) {
   if (!u.zurueck) {
     if (g) bewegt(g, [{ opacity: 1 }, { opacity: 0 }], { dauer: 360, kurve: 'ease-in', fill: 'forwards' },
       function () { weg(g); });
+    if (u.quelle && u.rund && tropfenAuf(neu, u.quelle)) return;
     if (u.quelle) {
       neu.style.transformOrigin = '0 0';
       neu.style.background = 'var(--grund)';
@@ -1379,7 +1490,9 @@ function uebergangAusfuehren(u) {
   herkunft = null;
   bewegt(neu, [{ opacity: 0.4, transform: 'scale(.98)' }, { opacity: 1, transform: 'none' }], { dauer: 420, kurve: 'ease-out' });
   if (!g) return;
-  if (ziel && ziel.getClientRects().length) {
+  if (ziel && ziel.getClientRects().length && tropfenQuelle(ziel)) {
+    tropfenZu(g, a, ziel);
+  } else if (ziel && ziel.getClientRects().length) {
     bewegt(g, [ZOOM_VOLL, zoomBild(tippFlaeche(ziel).getBoundingClientRect(), a)], { dauer: 520, fill: 'forwards' },
       function () { weg(g); });
     bewegt(g, [{ opacity: 1 }, { opacity: 0 }], { dauer: 220, warten: 220, kurve: 'ease-in', fill: 'both' });
@@ -2189,6 +2302,69 @@ function kalZeige(k) {
   kalTag = k;
 }
 
+// Der Tag, um den es beim Umschalten geht: der gewählte, sonst heute — oder,
+// wer weggeblättert hat, die Mitte des Gezeigten (der Donnerstag der Woche,
+// der Erste des Monats).
+function kalAnker(heute) {
+  if (kalTag) return kalTag;
+  if (!kalVersatz) return heute;
+  var b = kalBereich(heute);
+  if (b.monat === null) return tagPlus(b.von, 3);
+  for (var k = b.von; ausSchluessel(k).getDate() !== 1; k = tagPlus(k, 1)) { /* bis zum Ersten */ }
+  return k;
+}
+
+// Wie weit die gewählte Darstellung von heute aus blättern muß, damit `anker`
+// zu sehen ist.
+function versatzFuer(anker, heute) {
+  var a = ausSchluessel(anker), h = ausSchluessel(heute);
+  if (state.kalender === 'monat') return (a.getFullYear() - h.getFullYear()) * 12 + a.getMonth() - h.getMonth();
+  var von = wochenAnfang(heute), nach = wochenAnfang(anker), n = 0;
+  while (nach > von) { von = tagPlus(von, 7); n++; }
+  while (nach < von) { von = tagPlus(von, -7); n--; }
+  return n;
+}
+
+// Die Zeile des Rasters, in der `k` liegt: oben und unten, am Bildschirm.
+function reiheVon(k) {
+  var mo = wochenAnfang(k), so = tagPlus(mo, 6), r = null;
+  alleIn('#kalRaster [data-kaltag]').forEach(function (z) {
+    var t = z.getAttribute('data-kaltag');
+    if (t < mo || t > so) return;
+    var b = z.getBoundingClientRect();
+    r = r ? { top: Math.min(r.top, b.top), bottom: Math.max(r.bottom, b.bottom) } : { top: b.top, bottom: b.bottom };
+  });
+  return r;
+}
+
+// Auf: Der Monat quillt aus der Zeile der Woche, nach oben und unten, die
+// Ecken erst bauchig, dann glatt. Zu: Der Monat zieht sich als Geist in die
+// Zeile zusammen und legt sich auf die neue Woche; die blendet darunter auf.
+function kalFliessen(anker, vorher) {
+  var raster = $('kalRaster'), reihe = reiheVon(anker);
+  if (!raster || !reihe || bewegungAus()) return;
+  var r = raster.getBoundingClientRect();
+  if (!vorher) {
+    var oben = Math.max(0, reihe.top - r.top - 3), unten = Math.max(0, r.bottom - reihe.bottom - 3);
+    bewegt(raster, [{ clipPath: 'inset(' + px(oben) + ' 0px ' + px(unten) + ' 0px round 16px)' },
+      { clipPath: 'inset(' + px(oben * 0.35) + ' 0px ' + px(unten * 0.35) + ' 0px round 40px)', offset: 0.45 },
+      { clipPath: 'inset(0px 0px 0px 0px round 0px)' }], { dauer: 620, kurve: TROPFEN_KURVE });
+    return;
+  }
+  var g = vorher.geist, a = vorher.rect, alt = vorher.reihe;
+  bewegt(raster, [{ opacity: 0 }, { opacity: 1 }], { dauer: 260, warten: 300, kurve: 'ease-out', fill: 'backwards' });
+  if (!g || !alt) return;
+  g.style.cssText = 'position: fixed; margin: 0; left: ' + px(a.left) + '; top: ' + px(a.top) + '; width: ' +
+    px(a.width) + '; z-index: 2;';
+  document.body.appendChild(g);
+  var o = Math.max(0, alt.top - a.top - 3), u = Math.max(0, a.bottom - alt.bottom - 3), dy = reihe.top - alt.top;
+  bewegt(g, [{ clipPath: 'inset(0px 0px 0px 0px round 0px)', transform: 'none', opacity: 1 },
+    { clipPath: 'inset(' + px(o * 0.6) + ' 0px ' + px(u * 0.6) + ' 0px round 40px)', transform: 'translateY(' + px(dy * 0.5) + ')',
+      opacity: 1, offset: 0.5 },
+    { clipPath: 'inset(' + px(o) + ' 0px ' + px(u) + ' 0px round 16px)', transform: 'translateY(' + px(dy) + ')', opacity: 0 }],
+    { dauer: 560, kurve: TROPFEN_KURVE, fill: 'forwards' }, function () { weg(g); });
+}
+
 function zeichneKalender(heute) {
   var b = kalBereich(heute), woche = b.monat === null;
   var html = '<div class="kal-kopf">' +
@@ -2201,8 +2377,11 @@ function zeichneKalender(heute) {
       '<button type="button" class="rund" id="kalVor" aria-label="' + (woche ? 'Woche' : 'Monat') +
         ' danach">' + ICON.weiter + '</button>' +
     '</div>' +
-    '<div class="kal-raster ' + (woche ? 'woche' : 'monat') + (kalGewechselt ? ' neu' : '') + '" id="kalRaster">' +
-      WOCHE.map(function (t) { return '<span class="kal-wt" aria-hidden="true">' + WT_KURZ[t] + '</span>'; }).join('');
+    // Die Wochentage stehen über dem Raster, nicht in ihm: Wenn der Monat aus
+    // der Woche quillt, bleiben sie stehen.
+    '<div class="kal-wtage" aria-hidden="true">' +
+      WOCHE.map(function (t) { return '<span class="kal-wt">' + WT_KURZ[t] + '</span>'; }).join('') + '</div>' +
+    '<div class="kal-raster ' + (woche ? 'woche' : 'monat') + (kalGewechselt ? ' neu' : '') + '" id="kalRaster">';
   for (var k = b.von; k <= b.bis; k = tagPlus(k, 1)) {
     var d = ausSchluessel(k);
     if (!woche && d.getMonth() !== b.monat) { html += '<span class="kal-tag fremd"></span>'; continue; }
@@ -2969,14 +3148,19 @@ function langDruecken(el, beiLang) {
 function bindeKalender() {
   if (!$('kalRaster')) return;
   function neu() { kalTag = null; kalGewechselt = true; render(); kalGewechselt = false; }
+  // Woche | Monat: Der gewählte Tag bleibt, und mit ihm seine Liste. Der Monat
+  // quillt aus der Woche, die Woche zieht sich aus dem Monat zusammen (ADR 0008).
   alleIn('[data-kalender]').forEach(function (b) {
     b.addEventListener('click', function () {
       var wahl = this.getAttribute('data-kalender');
       if (wahl === state.kalender) return;
+      var heute = heuteSchluessel(), anker = kalAnker(heute), alt = $('kalRaster');
+      var vorher = wahl === 'woche' ? { geist: geist(alt), rect: alt.getBoundingClientRect(), reihe: reiheVon(anker) } : null;
       state.kalender = wahl;
-      kalVersatz = 0;
+      kalVersatz = versatzFuer(anker, heute);
       speichern();
-      neu();
+      render();
+      kalFliessen(anker, vorher);
     });
   });
   $('kalZurueck').addEventListener('click', function () { kalVersatz--; neu(); });
@@ -3019,31 +3203,79 @@ function menueZeichnen() {
   }
 }
 
+// Ein Eintrag mit Ziel: Die Ansicht quillt als Tropfen aus ihm, das Menü ist
+// im selben Augenblick weg — beides zugleich sähe aus wie zwei Tropfen.
 function menueWahl() {
   var id = this.getAttribute('data-menue');
   var eintrag = null;
   for (var i = 0; i < MENUE.length; i++) if (MENUE[i].id === id) eintrag = MENUE[i];
-  menueSchliessen();
-  if (eintrag && eintrag.ziel) zeige(eintrag.ziel);
-  else bald();
+  if (eintrag && eintrag.ziel) {
+    zeige(eintrag.ziel);
+    menueSchliessen(true);
+  } else {
+    menueSchliessen();
+    bald();
+  }
+}
+
+// Das Blatt hängt unter dem Knopf, rechtsbündig mit ihm.
+function blattLegen() {
+  var k = $('menuKnopf'), b = document.querySelector('#menue .blatt');
+  if (!k || !b) return;
+  var r = k.getBoundingClientRect();
+  b.style.top = px(r.bottom + 8);
+  b.style.right = px(Math.max(8, document.documentElement.clientWidth - r.right));
+}
+
+// Die Bilder des Blatts zwischen Knopf und voller Größe: von oben rechts
+// skaliert, die Ecken vom Tropfen zur Karte.
+function blattBilder(rund) {
+  var k = $('menuKnopf'), b = document.querySelector('#menue .blatt');
+  var kr = k ? k.getBoundingClientRect() : null, br = b.getBoundingClientRect();
+  if (!kr || !br.width || !br.height) return null;
+  var dy = kr.top - br.top;
+  function bild(sx, sy, y, r, off) {
+    return { transform: 'translateY(' + px(y) + ') scale(' + sx.toFixed(4) + ', ' + sy.toFixed(4) + ')', borderRadius: r, offset: off };
+  }
+  return [bild(kr.width / br.width, kr.height / br.height, dy, rund, 0),
+    bild(0.55, 0.42, dy * 0.4, rund === TROPFEN_AUF ? '40% 14% 40% 40%' : '40% 40% 40% 14%', 0.45),
+    bild(1, 1, 0, '18px', 1)];
 }
 
 function menueOeffnen() {
-  var huelle = $('menue');
+  var huelle = $('menue'), b = document.querySelector('#menue .blatt');
   menueZeichnen();
   huelle.hidden = false;
-  // Erst sichtbar, dann einblenden — sonst springt das Blatt ohne Übergang.
+  blattLegen();
+  // Erst sichtbar, dann einblenden — sonst springt der Schleier ohne Übergang.
   void huelle.offsetWidth;
   huelle.classList.add('offen');
+  var bilder = blattBilder(TROPFEN_AUF);
+  if (bilder) {
+    bewegt(b, bilder, { dauer: 520, kurve: TROPFEN_KURVE });
+    bewegt($('menueListe'), [{ opacity: 0 }, { opacity: 1 }], { dauer: 260, warten: 200, kurve: 'ease-out', fill: 'backwards' });
+  }
 }
 
-function menueSchliessen() {
-  var huelle = $('menue');
+// Zu fließt das Blatt als Tropfen zurück in den Knopf. `sofort`: ohne Bild,
+// wenn gerade eine Ansicht aus einem Eintrag quillt.
+function menueSchliessen(sofort) {
+  var huelle = $('menue'), b = document.querySelector('#menue .blatt');
   if (huelle.hidden) return;
   huelle.classList.remove('offen');
-  setTimeout(function () {
-    if (!huelle.classList.contains('offen')) huelle.hidden = true;
-  }, bewegungAus() ? 0 : 280);
+  function zu() { if (!huelle.classList.contains('offen')) huelle.hidden = true; }
+  var bilder = sofort ? null : blattBilder(TROPFEN_ZU);
+  if (!bilder || bewegungAus()) { zu(); return; }
+  // Nur die eigenen Bilder abräumen: Wer währenddessen wieder öffnet, behält
+  // seinen Tropfen.
+  var liste = bewegt($('menueListe'), [{ opacity: 1 }, { opacity: 0 }], { dauer: 140, kurve: 'ease-in', fill: 'forwards' });
+  var blatt = null;
+  blatt = bewegt(b, bilder.reverse().map(function (f, i) { f.offset = [0, 0.55, 1][i]; return f; }),
+    { dauer: 420, kurve: TROPFEN_KURVE, fill: 'forwards' }, function () {
+      zu();
+      if (blatt) blatt.cancel();
+      if (liste) liste.cancel();
+    });
 }
 
 // ════════════════════════════════════════════════════════════════
