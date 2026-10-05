@@ -25,5 +25,8 @@ Gilt für die Gewohnheiten in `index.html`. Begründungen in ADR 0002 und im Pfl
 - **Der Rekord schließt die laufende Strecke ein; die Stärke zählt heute frei, solange kein
   Rückfall kam.** Ein Rückfall geht nur über `rueckfallEintragen`, ein gewonnener Drang nur
   über `welleGewonnen` — es prüft, daß die zehn Minuten herum sind.
+- **Termine liegen über `terminAm(t, k)`**, nie über eigene Datumsrechnung: monatlich
+  fällt aus, wo der Monat den Tag nicht hat — wie in einer `RRULE`. Eine Reihe ändert sich
+  nur als Ganzes; `vorlauf` sind Minuten vor dem Beginn, ganztags vor Mitternacht (ADR 0006).
 - **Das Formular zeichnet sich beim Wählen nicht neu** — es ändert `entwurf` und die Knöpfe
   an Ort und Stelle, sonst ginge die Tastatur zu.

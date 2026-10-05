@@ -14,7 +14,7 @@ es wächst mit jedem Bauabschnitt.
 
 Im Skript, von oben: Version und Stand · `CHILI_BILD` · Hilfen (`esc`, `ICON`, Datum,
 `melden`, Tage) · Zustand und Speicher · Darstellung · Gewohnheiten (Rechnung) · Abgewöhnen
-(Rechnung, Welle) · Ansichten ·
+(Rechnung, Welle) · Termine · Ansichten ·
 Menü · Service Worker · Start.
 
 ## Zustand
@@ -41,6 +41,17 @@ state = {
     draenge: [1791200000000, …],         // gewonnene Dränge
     archiviert: null
   }],
+  termine: [{
+    id: 't…',
+    titel: 'Zahnarzt',                   // höchstens TITEL_MAX Zeichen
+    tag: '2026-10-16',                   // der erste Termin einer Reihe
+    ganztags: false,
+    von: '09:30', bis: '10:15',          // null ganztags; bis darf fehlen, liegt sonst nach von
+    wiederholung: 'keine',               // | 'taeglich' | 'woechentlich' | 'monatlich'
+    wiederholungBis: null,               // | Tag — nur bei einer Reihe
+    vorlauf: 15,                         // Minuten vor dem Beginn, aus VORLAUF_ZEIT / VORLAUF_GANZ, oder null
+    ort: '', notiz: ''
+  }],
   welle: null                            // | { id, start } — die laufende 10-Minuten-Welle
 }
 ```
@@ -55,6 +66,10 @@ state = {
 - **Abgewöhnen** (ADR 0004): `lasterAuswerten(a, nun)` liefert «frei seit», Rekord und
   Stärke; `zeitJetzt()` ist `jetzt()` in Millisekunden. Geändert wird nur über
   `rueckfallEintragen`, `welleBeginnen` und `welleGewonnen`.
+
+- **Termine** (ADR 0006): `terminAm(t, k)` sagt, ob ein Termin an einem Tag liegt,
+  `termineAm(k)` liefert sie sortiert (ganztags zuerst, dann Uhrzeit). Monatlich fällt in
+  Monaten ohne die Tageszahl aus. `terminLesen()` prüft jeden einzeln.
 
 - **Ein Schlüssel**: `chillinal_v1`. `laden()` liest, `stand(roh)` übernimmt nur bekannte
   Felder mit gültigen Werten und füllt den Rest aus `grundStand()`. Kaputtes JSON, ein
@@ -75,7 +90,9 @@ keine Teilaktualisierung — eine Ansicht ist schnell genug neu gezeichnet.
   landet ebenfalls beim Dashboard.
 - **Ansichten:** `home` (Dashboard), `neu` (Neue Gewohnheit, mit Umschalter Angewöhnen |
   Abgewöhnen), `bearbeiten` (Gewohnheit: Stand, Formular, Archivieren), `abgewoehnen`
-  (Stand, Formular, Rückfälle, Archivieren), `welle` (Drang), `rueckfall`, `einstellungen`.
+  (Stand, Formular, Rückfälle, Archivieren), `welle` (Drang), `rueckfall`, `terminNeu` und
+  `termin` (Formular, Löschen), `einstellungen`. `termin` braucht eine gültige `id`,
+  `terminNeu` nimmt statt dessen einen Tag; beide legen `terminEntwurf` an.
   `abgewoehnen` und `rueckfall` brauchen eine gültige `id`, `welle` eine laufende Welle —
   sonst geht es zum Dashboard.
 - **Der Takt:** `takt()` läuft jede Sekunde und schreibt «frei seit» (`[data-frei]`), die
@@ -94,9 +111,14 @@ keine Teilaktualisierung — eine Ansicht ist schnell genug neu gezeichnet.
 - **Kalender** (`zeichneKalender`, `bindeKalender`): `state.kalender` wählt Woche oder
   Monat; was zu sehen ist, halten `kalVersatz` (Wochen bzw. Monate von heute) und `kalTag`
   (der angetippte Tag) — beide nur im Speicher der Seite, nicht in `state`. Jeder Tag trägt
-  einen Punkt je Gewohnheit (`kalPunkte`); `kalStufe` aus `tagesStand(k)` färbt nur noch
-  die Zahl eines vollen Tags. Blättern und Umschalten setzen `kalGewechselt` für das
+  vorn einen blauen Punkt, wenn er Termine hat, dann einen je Gewohnheit (`kalPunkte`);
+  `kalStufe` aus `tagesStand(k)` färbt nur noch die Zahl eines vollen Tags. Die
+  Tagesliste (`zeichneTagesleiste`) zeigt Termine, Gewohnheiten und «Termin an diesem
+  Tag» (`[data-neutermin]`). `kalZeige(k)` stellt den Kalender auf einen Tag — nach dem
+  Speichern eines Termins. Blättern und Umschalten setzen `kalGewechselt` für das
   Einblenden des Rasters.
+- **Termine heute** stehen unter der Karte; eine Zeile (`zeichneTerminZeile`,
+  `[data-termin]`) öffnet den Termin — auf dem Dashboard wie in der Tagesliste.
 - **Ringe** werden mit dem Ziel gezeichnet und tragen in `data-von` den zuletzt gezeigten
   Wert (`ringZuletzt`); `ringeFuellen()` läßt sie nach jedem `render()` herüberlaufen.
 - `visibilitychange` zeichnet das Dashboard und die Welle ganz neu — nach Mitternacht ist es

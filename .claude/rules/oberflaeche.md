@@ -46,6 +46,9 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   öffnet die Gewohnheit. Ein zweites Ziel auf der Kachel gibt es nicht (ADR 0003).
 - **Die Abgewöhnen-Kachel** hat nichts abzuhaken: Antippen oder lange drücken öffnet sie;
   *Drang* und *Rückfall* sind eigene Knöpfe darunter (ADR 0004).
+- **Ein Termin ist eine Zeile mit blauem Strich** (`zeichneTerminZeile`), auf dem
+  Dashboard wie in der Tagesliste; im Kalender trägt sein Tag **einen** blauen Punkt, vorn
+  (ADR 0006). Die Tagesansicht ist die Liste unter dem Kalender, keine eigene Ansicht.
 - **Was live läuft, schreibt `takt()` an Ort und Stelle** (`[data-frei]`,
   `[data-wellerest]`, der Ring der Welle) — kein `render()` im Sekundentakt.
 - **Eine neue Ansicht** ist ein Eintrag in `ANSICHTEN` (`titel`, `zeichnen`), ihre Ereignisse

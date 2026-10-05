@@ -520,6 +520,120 @@ button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
 .kal-status { font-size: 13px; color: var(--text-2); }
 .kal-leiste .klein { margin: 6px 4px 0; }
 
+/* ── Termine ───────────────────────────────────────────────────
+   Eine Zeile je Termin: links die Zeit, rechts Titel und Ort. Blau heißt
+   Termin — als Strich und als Punkt, nie als Schriftgrund. */
+.tm-liste {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 6px;
+  border-radius: var(--rund);
+  background: var(--flaeche);
+  box-shadow: var(--schatten);
+}
+.tm-liste.flach { padding: 0; background: none; box-shadow: none; margin-bottom: 4px; }
+.tm-zeile {
+  width: 100%;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 8px;
+  border-radius: 14px;
+  text-align: left;
+  transition: transform .15s ease;
+}
+.tm-zeile:active { transform: scale(.98); }
+.tm-zeile + .tm-zeile { border-top: 1px solid var(--flaeche-2); border-radius: 0; }
+.tm-zeit {
+  flex: none;
+  width: 60px;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 10px;
+  border-left: 3px solid var(--termin);
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+  box-sizing: content-box;
+}
+.tm-zeit.ganz { font-size: 12px; font-weight: 500; color: var(--text-2); }
+.tm-bis { font-size: 13px; font-weight: 500; color: var(--text-2); }
+.tm-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.tm-titel { font-size: 17px; font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
+.tm-mehr { font-size: 13px; color: var(--text-2); overflow-wrap: anywhere; }
+.kp.termin { background: var(--termin); }
+.kal-neu {
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  padding: 4px 6px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-2);
+}
+.kal-neu svg { width: 18px; height: 18px; color: var(--termin); }
+.tm-schalterzeile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  margin: 10px 4px 0;
+  font-family: var(--sans);
+  font-size: 16px;
+}
+/* Ein Schalter wie in den iOS-Einstellungen; die Trefferfläche ist größer als
+   die Spur. */
+.schalter { flex: none; width: 64px; height: 44px; display: grid; place-items: center; }
+.schalter-spur {
+  position: relative;
+  width: 51px;
+  height: 31px;
+  border-radius: 16px;
+  background: var(--flaeche-2);
+  transition: background-color .2s ease;
+}
+.schalter-knauf {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: var(--grund);
+  box-shadow: var(--schatten);
+  transition: transform .25s cubic-bezier(.3, 1.4, .5, 1);
+}
+.schalter[aria-checked="true"] .schalter-spur { background: var(--knopf); }
+.schalter[aria-checked="true"] .schalter-knauf { transform: translateX(20px); }
+.tm-zeiten { margin-top: 6px; align-items: center; }
+.tm-zeiten[hidden], .klein[hidden] { display: none; }
+.tm-strich { flex: none; font-family: var(--sans); font-size: 14px; color: var(--text-2); }
+.tm-wdh button { font-size: 14px; min-width: 0; }
+.tm-etikett { display: block; font-family: var(--sans); font-size: 14px; color: var(--text-2); margin: 0 4px 6px; }
+.auswahl { position: relative; }
+.auswahl select { padding-right: 44px; }
+.auswahl svg {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  margin-top: -9px;
+  transform: rotate(90deg);
+  color: var(--text-2);
+  pointer-events: none;
+}
+
 /* ── Formular ──────────────────────────────────────────────── */
 /* 17 px: Unter 16 px zoomt Safari beim Antippen ins Feld. */
 .eingabe {
@@ -726,7 +840,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.3.0T2';
+var APP_VERSION = '0.4.0T';
 var APP_STAND = '2026-10-05';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -851,6 +965,7 @@ function grundStand() {
     kalender: 'woche',   // was der Kalender zuletzt zeigte: 'woche' oder 'monat'
     gewohnheiten: [],
     abgewoehnen: [],
+    termine: [],
     welle: null          // die laufende 10-Minuten-Welle: { id, start } oder null
   };
 }
@@ -872,6 +987,13 @@ function stand(roh) {
     roh.abgewoehnen.forEach(function (a) {
       var gut = lasterLesen(a);
       if (gut && !aids[gut.id]) { aids[gut.id] = true; s.abgewoehnen.push(gut); }
+    });
+  }
+  if (Array.isArray(roh.termine)) {
+    var tids = {};
+    roh.termine.forEach(function (t) {
+      var gut = terminLesen(t);
+      if (gut && !tids[gut.id]) { tids[gut.id] = true; s.termine.push(gut); }
     });
   }
   // Eine Welle gilt nur für etwas, das es noch gibt und das nicht archiviert ist.
@@ -943,6 +1065,47 @@ function lasterLesen(a) {
     rueckfaelle: rueckfaelle,
     draenge: draenge,
     archiviert: istSchluessel(a.archiviert) ? a.archiviert : null
+  };
+}
+
+// Ein Termin, wie er gespeichert wird:
+//   { id, titel, tag: Tag, ganztags, von: 'HH:MM' | null, bis: 'HH:MM' | null,
+//     wiederholung: 'keine' | 'taeglich' | 'woechentlich' | 'monatlich',
+//     wiederholungBis: Tag | null, vorlauf: Minuten | null, ort, notiz }
+// `tag` ist der erste Termin einer Reihe. Ganztags gibt es keine Uhrzeit; das
+// Ende ist frei, liegt aber nach dem Beginn. `vorlauf` zählt Minuten vor dem
+// Beginn — ganztags vor Mitternacht, darum ist «am Tag um 9» negativ (ADR 0006).
+var TITEL_MAX = 60;
+var ORT_MAX = 80;
+var WIEDERHOLUNGEN = ['keine', 'taeglich', 'woechentlich', 'monatlich'];
+var VORLAUF_ZEIT = [0, 5, 15, 30, 60, 120, 1440];
+var VORLAUF_GANZ = [-540, 900, 2340, 9540];
+
+function istUhr(u) { return typeof u === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(u); }
+function textFeld(t, max) { return typeof t === 'string' ? t.trim().slice(0, max) : ''; }
+
+function terminLesen(t) {
+  if (!t || typeof t !== 'object' || typeof t.id !== 'string' || !t.id) return null;
+  var titel = textFeld(t.titel, TITEL_MAX);
+  if (!titel || !istSchluessel(t.tag)) return null;
+  var ganztags = t.ganztags === true;
+  var von = !ganztags && istUhr(t.von) ? t.von : null;
+  if (!ganztags && !von) return null;
+  var wdh = WIEDERHOLUNGEN.indexOf(t.wiederholung) !== -1 ? t.wiederholung : 'keine';
+  var vorlauf = (ganztags ? VORLAUF_GANZ : VORLAUF_ZEIT).indexOf(t.vorlauf) !== -1 ? t.vorlauf : null;
+  return {
+    id: t.id,
+    titel: titel,
+    tag: t.tag,
+    ganztags: ganztags,
+    von: von,
+    bis: von && istUhr(t.bis) && t.bis > von ? t.bis : null,
+    wiederholung: wdh,
+    wiederholungBis: wdh !== 'keine' && istSchluessel(t.wiederholungBis) && t.wiederholungBis >= t.tag
+      ? t.wiederholungBis : null,
+    vorlauf: vorlauf,
+    ort: textFeld(t.ort, ORT_MAX),
+    notiz: textFeld(t.notiz, NOTIZ_MAX)
   };
 }
 
@@ -1318,6 +1481,53 @@ function welleBeginnen(id) {
 }
 
 // ════════════════════════════════════════════════════════════════
+//  Termine
+// ════════════════════════════════════════════════════════════════
+//
+// Einmal oder wiederkehrend: täglich, jede Woche am selben Wochentag, jeden
+// Monat am selben Tag. Gibt es den Tag in einem Monat nicht (31.), fällt der
+// Termin dort aus — so liest es auch der Kalender des iPhones aus der .ics.
+// Eine Reihe wird nur als Ganzes geändert oder gelöscht (ADR 0006).
+
+function terminNach(id) {
+  for (var i = 0; i < state.termine.length; i++) if (state.termine[i].id === id) return state.termine[i];
+  return null;
+}
+
+function terminAm(t, k) {
+  if (k < t.tag || (t.wiederholungBis && k > t.wiederholungBis)) return false;
+  if (t.wiederholung === 'taeglich') return true;
+  if (t.wiederholung === 'woechentlich') return ausSchluessel(k).getDay() === ausSchluessel(t.tag).getDay();
+  if (t.wiederholung === 'monatlich') return ausSchluessel(k).getDate() === ausSchluessel(t.tag).getDate();
+  return k === t.tag;
+}
+
+// Ganztägiges zuerst, dann nach Uhrzeit, dann nach Titel.
+function termineAm(k) {
+  return state.termine.filter(function (t) { return terminAm(t, k); }).sort(function (a, b) {
+    if (a.ganztags !== b.ganztags) return a.ganztags ? -1 : 1;
+    if (a.von !== b.von) return a.von < b.von ? -1 : 1;
+    return a.titel < b.titel ? -1 : a.titel > b.titel ? 1 : 0;
+  });
+}
+
+function terminZeitText(t) {
+  return t.ganztags ? 'ganztägig' : t.bis ? t.von + '–' + t.bis : t.von;
+}
+
+// «Fr, 16. Okt.»
+function tagKurz(k) {
+  var d = ausSchluessel(k);
+  return WT_KURZ[d.getDay()] + ', ' + d.getDate() + '. ' + MON_KURZ[d.getMonth()];
+}
+
+function wiederholungText(t) {
+  var w = { taeglich: 'täglich', woechentlich: 'jede Woche', monatlich: 'jeden Monat' }[t.wiederholung];
+  if (!w) return '';
+  return w + (t.wiederholungBis ? ' bis ' + tagKurz(t.wiederholungBis) : '');
+}
+
+// ════════════════════════════════════════════════════════════════
 //  Ansichten
 // ════════════════════════════════════════════════════════════════
 //
@@ -1333,6 +1543,8 @@ var ANSICHTEN = {
   abgewoehnen: { titel: 'Abgewöhnen', zeichnen: zeichneFormular },
   welle: { titel: 'Drang', zeichnen: zeichneWelle },
   rueckfall: { titel: 'Rückfall', zeichnen: zeichneRueckfall },
+  terminNeu: { titel: 'Neuer Termin', zeichnen: zeichneTerminFormular },
+  termin: { titel: 'Termin', zeichnen: zeichneTerminFormular },
   einstellungen: { titel: 'Einstellungen', zeichnen: zeichneEinstellungen }
 };
 
@@ -1340,7 +1552,7 @@ var ANSICHTEN = {
 // ohne Ziel ist der Eintrag angekündigt, aber noch nicht gebaut.
 var MENUE = [
   { id: 'gewohnheit', name: 'Neue Gewohnheit', icon: 'plus', ziel: 'neu' },
-  { id: 'termin', name: 'Neuer Termin', icon: 'termin' },
+  { id: 'termin', name: 'Neuer Termin', icon: 'termin', ziel: 'terminNeu' },
   { id: 'journal', name: 'Journal', icon: 'journal' },
   { id: 'export', name: 'Kalender-Export', icon: 'export' },
   { id: 'einstellungen', name: 'Einstellungen', icon: 'zahnrad', ziel: 'einstellungen' },
@@ -1349,15 +1561,19 @@ var MENUE = [
 ];
 
 // `id` sagt «bearbeiten» die Gewohnheit, «abgewoehnen» und «rueckfall», worum
-// es geht. Ohne eine gültige geht es nach Hause, nicht in ein leeres Formular;
-// «welle» ohne laufende Welle ebenso.
+// es geht, «termin» den Termin. Ohne eine gültige geht es nach Hause, nicht in
+// ein leeres Formular; «welle» ohne laufende Welle ebenso. «terminNeu» nimmt
+// statt einer id den Tag, an dem der Termin liegen soll.
 function zeige(name, id) {
   if (!ANSICHTEN[name]) name = 'home';
   if (name === 'bearbeiten' && !gewohnheitNach(id)) name = 'home';
+  if (name === 'termin' && !terminNach(id)) name = 'home';
   if ((name === 'abgewoehnen' || name === 'rueckfall') && !lasterNach(id)) name = 'home';
   if (name === 'welle' && !state.welle) name = 'home';
   entwurf = name === 'neu' ? entwurfAus(null) : name === 'bearbeiten' ? entwurfAus(gewohnheitNach(id))
     : name === 'abgewoehnen' ? entwurfAusLaster(lasterNach(id)) : null;
+  terminEntwurf = name === 'termin' ? terminEntwurfAus(terminNach(id))
+    : name === 'terminNeu' ? terminEntwurfAus(null, istSchluessel(id) ? id : null) : null;
   // Wer aus der Welle zum Rückfall kommt, kann zur Welle zurück.
   rueckfallFuer = name === 'rueckfall' ? { id: id, notiz: '',
     ausWelle: ansicht === 'welle' && !!state.welle && state.welle.id === id } : null;
@@ -1369,6 +1585,7 @@ function zeige(name, id) {
 function render() {
   if ((ansicht === 'neu' || ansicht === 'bearbeiten' || ansicht === 'abgewoehnen') && !entwurf) ansicht = 'home';
   if ((ansicht === 'rueckfall' && !rueckfallFuer) || (ansicht === 'welle' && !state.welle)) ansicht = 'home';
+  if ((ansicht === 'termin' || ansicht === 'terminNeu') && !terminEntwurf) ansicht = 'home';
   renderKopf();
   var feld = $('ansicht');
   feld.innerHTML = ANSICHTEN[ansicht].zeichnen();
@@ -1428,13 +1645,15 @@ var chiliFlammt = false;       // false, 'flammt' oder 'lodert' (Tag eben voll g
 
 function zeichneHome() {
   var aktiv = aktiveGewohnheiten(), laster = aktivesLaster();
-  if (!aktiv.length && !laster.length) return zeichneWillkommen();
-  var heute = heuteSchluessel();
+  if (!aktiv.length && !laster.length && !state.termine.length) return zeichneWillkommen();
+  var heute = heuteSchluessel(), termine = termineAm(heute);
   var liste = aktiv.map(function (g) { return { g: g, a: auswerten(g, heute) }; });
   var dran = liste.filter(function (e) { return e.a.faelligHeute; });
   var frei = liste.filter(function (e) { return !e.a.faelligHeute; });
   var fertig = dran.filter(function (e) { return e.a.erledigtHeute; }).length;
   return zeichneHeld(fertig, dran.length, heute) +
+    (termine.length ? '<section class="abschnitt"><h2>Termine heute</h2><div class="tm-liste">' +
+      termine.map(zeichneTerminZeile).join('') + '</div></section>' : '') +
     (dran.length ? '<section class="abschnitt"><h2>Gewohnheiten</h2><div class="gw-liste">' +
       dran.map(zeichneKachel).join('') + '</div></section>' : '') +
     (frei.length ? '<section class="abschnitt"><h2>Heute nicht dran</h2><div class="gw-liste gedimmt">' +
@@ -1535,6 +1754,19 @@ function zeichneLasterKachel(a) {
     '</div>';
 }
 
+// Ein Termin als Zeile: links die Zeit, rechts Titel, Ort und Wiederholung.
+// Antippen öffnet ihn. Der blaue Strich sagt «Termin».
+function zeichneTerminZeile(t) {
+  var mehr = [t.ort, wiederholungText(t)].filter(function (x) { return !!x; }).join(' · ');
+  return '<button type="button" class="tm-zeile" data-termin="' + esc(t.id) + '" aria-label="' +
+      esc(t.titel + ', ' + terminZeitText(t) + (mehr ? ', ' + mehr : '')) + '">' +
+    '<span class="tm-zeit' + (t.ganztags ? ' ganz' : '') + '">' + (t.ganztags ? 'ganztägig'
+      : esc(t.von) + (t.bis ? '<span class="tm-bis">' + esc(t.bis) + '</span>' : '')) + '</span>' +
+    '<span class="tm-text"><span class="tm-titel">' + esc(t.titel) + '</span>' +
+      (mehr ? '<span class="tm-mehr">' + esc(mehr) + '</span>' : '') + '</span>' +
+    '</button>';
+}
+
 function welleKnopfText(rest) { return rest ? 'Welle ' + restText(rest) : 'Welle vorbei'; }
 
 // Noch gibt es nichts abzuhaken: Die Chili begrüßt, ein Knopf führt zur
@@ -1551,10 +1783,10 @@ function zeichneWillkommen() {
 
 // ── Dashboard: Kalender ─────────────────────────────────────────
 //
-// Woche oder Monat, umschaltbar; die Wahl bleibt gespeichert. Jeder Tag ist
-// nach dem Anteil des Erledigten getönt. Ein angetippter Tag zeigt darunter
-// seine Gewohnheiten — bis NACHTRAG_TAGE zurück lassen sie sich nachtragen.
-// Termine kommen mit Bauabschnitt 4 als Punkt dazu.
+// Woche oder Monat, umschaltbar; die Wahl bleibt gespeichert. Jeder Tag trägt
+// einen Punkt je Gewohnheit und, wenn er Termine hat, vorn einen blauen. Ein
+// angetippter Tag zeigt darunter seine Termine und Gewohnheiten — bis
+// NACHTRAG_TAGE zurück lassen sich die Gewohnheiten nachtragen.
 var kalVersatz = 0;        // Wochen oder Monate von heute aus
 var kalTag = null;         // der angetippte Tag, null = keiner
 var kalGewechselt = false; // das Raster ist eben neu — es darf einblenden
@@ -1629,6 +1861,21 @@ function kalBereich(heute) {
   return { von: mo, bis: so, monat: null, titel: 'KW ' + kalenderwoche(mo) + ' · ' + spanne(mo, so) };
 }
 
+// Den Kalender auf einen Tag stellen und ihn aufschlagen — nach dem Speichern
+// eines Termins sieht man so, wo er liegt. Gezählt wird in Wochen bzw. Monaten.
+function kalZeige(k) {
+  var heute = heuteSchluessel(), n = 0;
+  if (state.kalender === 'monat') {
+    var a = ausSchluessel(heute), b = ausSchluessel(k);
+    n = (b.getFullYear() - a.getFullYear()) * 12 + b.getMonth() - a.getMonth();
+  } else {
+    var ziel = wochenAnfang(k), w = wochenAnfang(heute), schritt = ziel < w ? -7 : 7;
+    for (; w !== ziel; w = tagPlus(w, schritt)) n += schritt / 7;
+  }
+  kalVersatz = n;
+  kalTag = k;
+}
+
 function zeichneKalender(heute) {
   var b = kalBereich(heute), woche = b.monat === null;
   var html = '<div class="kal-kopf">' +
@@ -1647,12 +1894,14 @@ function zeichneKalender(heute) {
     var d = ausSchluessel(k);
     if (!woche && d.getMonth() !== b.monat) { html += '<span class="kal-tag fremd"></span>'; continue; }
     var t = tagesStand(k), stufe = kalStufe(t, k, heute), zaehlt = t.von && k <= heute;
+    var tn = termineAm(k).length;
     html += '<button type="button" class="kal-tag ' + stufe + (k === heute ? ' heute' : '') +
       (k === kalTag ? ' gewaehlt' : '') + '" data-kaltag="' + k + '" aria-pressed="' +
       (k === kalTag ? 'true' : 'false') + '" aria-label="' + esc(datumLang(d)) +
+      (tn ? ', ' + tn + (tn === 1 ? ' Termin' : ' Termine') : '') +
       (zaehlt ? ', ' + t.fertig + ' von ' + t.von + ' erledigt' : '') + '">' +
       '<span class="kal-zahl">' + d.getDate() + '</span>' +
-      '<span class="kal-punkte" aria-hidden="true">' + kalPunkte(k, heute).map(function (art) {
+      '<span class="kal-punkte" aria-hidden="true">' + (tn ? ['termin'] : []).concat(kalPunkte(k, heute)).map(function (art) {
         return '<span class="kp ' + art + '"></span>';
       }).join('') + '</span>' +
       '</button>';
@@ -1662,14 +1911,25 @@ function zeichneKalender(heute) {
   return html;
 }
 
-// Der angetippte Tag: seine Gewohnheiten, abhakbar, solange er nah genug ist.
+// Der angetippte Tag: oben seine Termine, darunter seine Gewohnheiten, abhakbar,
+// solange er nah genug ist. Zuletzt ein Knopf für einen Termin an diesem Tag.
 function zeichneTagesleiste(k, heute) {
-  var liste = aktiveGewohnheiten().filter(function (g) { return g.angelegt <= k; });
   var html = '<div class="kal-leiste" id="kalLeiste" aria-live="polite">' +
     '<div class="kal-leiste-kopf">' + esc(datumLang(ausSchluessel(k))) + '</div>';
-  if (k > heute) return html + '<p class="klein">Dieser Tag kommt noch.</p></div>';
-  if (!liste.length) return html + '<p class="klein">Da gab es noch keine Gewohnheit.</p></div>';
-  var zuAlt = false;
+  var termine = termineAm(k);
+  if (termine.length) html += '<div class="tm-liste flach">' + termine.map(zeichneTerminZeile).join('') + '</div>';
+  return html + zeichneTagesGewohnheiten(k, heute) +
+    '<button type="button" class="kal-neu" data-neutermin="' + k + '">' + ICON.plus +
+      '<span>Termin an diesem Tag</span></button></div>';
+}
+
+// Wer keine Gewohnheit hat, liest hier auch nichts darüber.
+function zeichneTagesGewohnheiten(k, heute) {
+  var liste = aktiveGewohnheiten().filter(function (g) { return g.angelegt <= k; });
+  if (!aktiveGewohnheiten().length) return '';
+  if (k > heute) return '<p class="klein">Dieser Tag kommt noch.</p>';
+  if (!liste.length) return '<p class="klein">Da gab es noch keine Gewohnheit.</p>';
+  var html = '', zuAlt = false;
   liste.forEach(function (g) {
     var erl = g.erledigt.indexOf(k) !== -1;
     // «x-mal pro Woche» verpaßt keinen Tag — gewertet wird die Woche.
@@ -1686,7 +1946,7 @@ function zeichneTagesleiste(k, heute) {
     }
   });
   if (zuAlt) html += '<p class="klein">Nachtragen geht bis ' + NACHTRAG_TAGE + ' Tage zurück.</p>';
-  return html + '</div>';
+  return html;
 }
 
 // ── Neue Gewohnheit · Gewohnheit ────────────────────────────────
@@ -2082,6 +2342,194 @@ function takt() {
   $('welleFuell').setAttribute('stroke-dashoffset', (u * (1 - rest / WELLE_MS)).toFixed(2));
 }
 
+// ── Termin: neu und bearbeiten ──────────────────────────────────
+//
+// Wie bei der Gewohnheit steht alles Getippte im Entwurf und das Formular
+// zeichnet sich beim Wählen nicht neu. Gespeichert wird mit dem Knopf; danach
+// zeigt der Kalender den Tag des Termins.
+var terminEntwurf = null;
+
+var WDH_WAHL = [['keine', 'Einmal'], ['taeglich', 'Täglich'], ['woechentlich', 'Wöchentlich'],
+  ['monatlich', 'Monatlich']];
+var VORLAUF_TEXT = {
+  '0': 'Zur Zeit des Termins', '5': '5 Minuten vorher', '15': '15 Minuten vorher',
+  '30': '30 Minuten vorher', '60': '1 Stunde vorher', '120': '2 Stunden vorher', '1440': '1 Tag vorher',
+  '-540': 'Am Tag um 9 Uhr', '900': '1 Tag vorher um 9 Uhr', '2340': '2 Tage vorher um 9 Uhr',
+  '9540': '1 Woche vorher um 9 Uhr'
+};
+
+// Ein neuer Termin beginnt zur nächsten vollen Stunde und erinnert eine
+// Viertelstunde vorher — beides ist mit einem Tipp geändert.
+function terminEntwurfAus(t, tag) {
+  if (t) {
+    return { id: t.id, titel: t.titel, tag: t.tag, ganztags: t.ganztags, von: t.von || '09:00',
+      bis: t.bis || '', wiederholung: t.wiederholung, wiederholungBis: t.wiederholungBis || '',
+      vorlauf: t.vorlauf, ort: t.ort, notiz: t.notiz, loeschFrage: false };
+  }
+  return { id: null, titel: '', tag: tag || heuteSchluessel(), ganztags: false,
+    von: zwei(Math.min(jetzt().getHours() + 1, 23)) + ':00', bis: '', wiederholung: 'keine',
+    wiederholungBis: '', vorlauf: 15, ort: '', notiz: '', loeschFrage: false };
+}
+
+function vorlaufOptionen(e) {
+  return [null].concat(e.ganztags ? VORLAUF_GANZ : VORLAUF_ZEIT).map(function (v) {
+    return '<option value="' + (v === null ? '' : v) + '"' + (v === e.vorlauf ? ' selected' : '') + '>' +
+      esc(v === null ? 'Keine Erinnerung' : VORLAUF_TEXT[v]) + '</option>';
+  }).join('');
+}
+
+function wiederholungErklaerung(e) {
+  if (!istSchluessel(e.tag)) return '';
+  var d = ausSchluessel(e.tag);
+  if (e.wiederholung === 'taeglich') return 'Jeden Tag.';
+  if (e.wiederholung === 'woechentlich') return 'Jeden ' + WOCHENTAGE[d.getDay()] + '.';
+  if (e.wiederholung === 'monatlich') {
+    return 'Jeden Monat am ' + d.getDate() + '.' +
+      (d.getDate() > 28 ? ' In Monaten ohne diesen Tag fällt er aus.' : '');
+  }
+  return 'Nur an diesem Tag.';
+}
+
+function zeichneTerminFormular() {
+  var e = terminEntwurf, wdh = e.wiederholung !== 'keine';
+  return '<section class="abschnitt"><h2><label for="tmTitel">Titel</label></h2>' +
+      '<input id="tmTitel" class="eingabe" type="text" maxlength="' + TITEL_MAX + '" autocomplete="off" ' +
+        'enterkeyhint="done" placeholder="Zum Beispiel: Zahnarzt" value="' + esc(e.titel) + '">' +
+    '</section>' +
+    '<section class="abschnitt"><h2><label for="tmTag">Wann</label></h2>' +
+      '<input id="tmTag" class="eingabe" type="date" value="' + esc(e.tag) + '">' +
+      '<div class="tm-schalterzeile"><span id="tmGanzName">Ganztägig</span>' +
+        '<button type="button" class="schalter" id="tmGanz" role="switch" aria-labelledby="tmGanzName" ' +
+          'aria-checked="' + (e.ganztags ? 'true' : 'false') + '"><span class="schalter-spur">' +
+          '<span class="schalter-knauf"></span></span></button></div>' +
+      '<div class="start-felder tm-zeiten" id="tmZeiten"' + (e.ganztags ? ' hidden' : '') + '>' +
+        '<input id="tmVon" class="eingabe" type="time" aria-label="Beginn" value="' + esc(e.von) + '">' +
+        '<span class="tm-strich" aria-hidden="true">bis</span>' +
+        '<input id="tmBis" class="eingabe" type="time" aria-label="Ende" value="' + esc(e.bis) + '">' +
+      '</div>' +
+      '<p class="klein" id="tmZeitText"' + (e.ganztags ? ' hidden' : '') + '>Das Ende darfst du frei lassen.</p>' +
+    '</section>' +
+    '<section class="abschnitt"><h2>Wiederholung</h2>' +
+      '<div class="wahl tm-wdh" role="group" aria-label="Wiederholung">' + WDH_WAHL.map(function (w) {
+        return '<button type="button" data-wdh="' + w[0] + '" aria-pressed="' +
+          (e.wiederholung === w[0] ? 'true' : 'false') + '">' + esc(w[1]) + '</button>';
+      }).join('') + '</div>' +
+      '<p class="klein" id="tmWdhText">' + esc(wiederholungErklaerung(e)) + '</p>' +
+      '<div class="rh-teil" id="tmEndeTeil"' + (wdh ? '' : ' hidden') + '>' +
+        '<label class="tm-etikett" for="tmWdhBis">Endet am</label>' +
+        '<input id="tmWdhBis" class="eingabe" type="date" min="' + esc(e.tag) + '" value="' +
+          esc(e.wiederholungBis) + '">' +
+        '<p class="klein">Leer gelassen, läuft die Reihe ohne Ende.</p>' +
+      '</div>' +
+    '</section>' +
+    '<section class="abschnitt"><h2><label for="tmVorlauf">Erinnerung</label></h2>' +
+      '<div class="auswahl"><select id="tmVorlauf" class="eingabe">' + vorlaufOptionen(e) + '</select>' +
+        ICON.weiter + '</div>' +
+      '<p class="klein">Erinnert wird über den Kalender-Export.</p>' +
+    '</section>' +
+    '<section class="abschnitt"><h2><label for="tmOrt">Ort</label></h2>' +
+      '<input id="tmOrt" class="eingabe" type="text" maxlength="' + ORT_MAX + '" autocomplete="off" ' +
+        'enterkeyhint="done" placeholder="Wo?" value="' + esc(e.ort) + '">' +
+    '</section>' +
+    '<section class="abschnitt"><h2><label for="tmNotiz">Notiz</label></h2>' +
+      '<textarea id="tmNotiz" class="eingabe" maxlength="' + NOTIZ_MAX + '" placeholder="Was du mitnehmen ' +
+        'oder wissen willst">' + esc(e.notiz) + '</textarea>' +
+    '</section>' +
+    '<div class="knopfreihe">' +
+      '<button type="button" class="knopf" id="tmSpeichern">' + (e.id ? 'Speichern' : 'Anlegen') + '</button>' +
+      (e.id ? '<button type="button" class="knopf zart" id="tmLoeschen">Löschen</button>' : '') +
+    '</div>';
+}
+
+function bindeTerminFormular() {
+  var e = terminEntwurf;
+  function feld(id, schluessel) {
+    $(id).addEventListener('input', function () { e[schluessel] = this.value; });
+  }
+  feld('tmTitel', 'titel');
+  feld('tmVon', 'von');
+  feld('tmBis', 'bis');
+  feld('tmWdhBis', 'wiederholungBis');
+  feld('tmOrt', 'ort');
+  feld('tmNotiz', 'notiz');
+  ['tmTitel', 'tmOrt'].forEach(function (id) {
+    $(id).addEventListener('keydown', function (ev) { if (ev.key === 'Enter') this.blur(); });
+  });
+  $('tmTag').addEventListener('input', function () {
+    e.tag = this.value;
+    $('tmWdhBis').setAttribute('min', this.value);
+    $('tmWdhText').textContent = wiederholungErklaerung(e);
+  });
+  $('tmGanz').addEventListener('click', function () {
+    e.ganztags = !e.ganztags;
+    // Die Erinnerung wechselt mit: Was ganztags gilt, gilt nicht zur Uhrzeit.
+    if (e.vorlauf !== null) e.vorlauf = e.ganztags ? VORLAUF_GANZ[0] : 15;
+    this.setAttribute('aria-checked', e.ganztags ? 'true' : 'false');
+    $('tmZeiten').hidden = e.ganztags;
+    $('tmZeitText').hidden = e.ganztags;
+    $('tmVorlauf').innerHTML = vorlaufOptionen(e);
+  });
+  alleIn('[data-wdh]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      e.wiederholung = this.getAttribute('data-wdh');
+      alleIn('[data-wdh]').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      $('tmEndeTeil').hidden = e.wiederholung === 'keine';
+      $('tmWdhText').textContent = wiederholungErklaerung(e);
+    });
+  });
+  $('tmVorlauf').addEventListener('change', function () {
+    e.vorlauf = this.value === '' ? null : +this.value;
+  });
+  $('tmSpeichern').addEventListener('click', terminSpeichern);
+  if ($('tmLoeschen')) $('tmLoeschen').addEventListener('click', terminLoeschenTippen);
+}
+
+// Was nicht stimmt, sagt eine Meldung; gespeichert wird erst, wenn alles paßt.
+function terminFehler(e) {
+  if (!e.titel.trim()) return ['Gib dem Termin noch einen Titel.', 'tmTitel'];
+  if (!istSchluessel(e.tag)) return ['Wähle einen Tag.', 'tmTag'];
+  if (!e.ganztags && !istUhr(e.von)) return ['Gib an, wann er beginnt.', 'tmVon'];
+  if (!e.ganztags && e.bis && (!istUhr(e.bis) || e.bis <= e.von)) return ['Das Ende liegt vor dem Beginn.', 'tmBis'];
+  if (e.wiederholung !== 'keine' && e.wiederholungBis &&
+    (!istSchluessel(e.wiederholungBis) || e.wiederholungBis < e.tag)) {
+    return ['Die Reihe endet vor ihrem ersten Termin.', 'tmWdhBis'];
+  }
+  return null;
+}
+
+function terminSpeichern() {
+  var e = terminEntwurf, fehler = terminFehler(e);
+  if (fehler) {
+    melden(fehler[0]);
+    if ($(fehler[1])) $(fehler[1]).focus();
+    return;
+  }
+  var t = terminLesen({ id: e.id || neueId('t'), titel: e.titel, tag: e.tag, ganztags: e.ganztags,
+    von: e.ganztags ? null : e.von, bis: e.ganztags ? null : e.bis, wiederholung: e.wiederholung,
+    wiederholungBis: e.wiederholungBis, vorlauf: e.vorlauf, ort: e.ort, notiz: e.notiz });
+  var alt = e.id ? terminNach(e.id) : null;
+  if (alt) state.termine[state.termine.indexOf(alt)] = t;
+  else state.termine.push(t);
+  if (speichern()) melden(alt ? 'Gespeichert.' : 'Angelegt für ' + tagKurz(t.tag));
+  kalZeige(t.tag);
+  zeige('home');
+}
+
+// Löschen will zwei Tipps. Eine Reihe geht als Ganzes.
+function terminLoeschenTippen() {
+  var e = terminEntwurf;
+  if (!e.loeschFrage) {
+    e.loeschFrage = true;
+    this.textContent = e.wiederholung !== 'keine' ? 'Ganze Reihe löschen?' : 'Wirklich löschen?';
+    this.classList.add('frage');
+    return;
+  }
+  var t = terminNach(e.id);
+  if (t) state.termine.splice(state.termine.indexOf(t), 1);
+  if (speichern()) melden('Gelöscht.');
+  zeige('home');
+}
+
 // ── Einstellungen ───────────────────────────────────────────────
 function zeichneEinstellungen() {
   var wahl = [['auto', 'Automatisch'], ['hell', 'Hell'], ['dunkel', 'Dunkel']];
@@ -2141,10 +2589,17 @@ function bindeAnsicht() {
   alleIn('[data-rueckfall]').forEach(function (b) {
     b.addEventListener('click', function () { zeige('rueckfall', this.getAttribute('data-rueckfall')); });
   });
+  alleIn('[data-termin]').forEach(function (b) {
+    b.addEventListener('click', function () { zeige('termin', this.getAttribute('data-termin')); });
+  });
+  alleIn('[data-neutermin]').forEach(function (b) {
+    b.addEventListener('click', function () { zeige('terminNeu', this.getAttribute('data-neutermin')); });
+  });
   bindeKalender();
   if ($('gwName')) bindeFormular();
   if ($('welle')) bindeWelle();
   if ($('rfNotiz')) bindeRueckfall();
+  if ($('tmTitel')) bindeTerminFormular();
 
   var knoepfe = document.querySelectorAll('.wahl [data-thema]');
   for (var i = 0; i < knoepfe.length; i++) {
