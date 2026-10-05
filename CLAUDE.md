@@ -51,7 +51,7 @@ die Chili.
 | --- | --- |
 | 1 · Umbau, Gerüst, Kopf, Farben, Schriften, Symbol, `sw.js` | fertig (0.1.0) |
 | 2 · Gewohnheiten: anlegen, Rhythmus, Abhaken, Stärke, nie zweimal; Kalender, Nachtragen, langer Druck | fertig (0.2.0) |
-| 3 · Abgewöhnen, 10-Minuten-Welle | gebaut, Abnahme offen (0.3.0T) |
+| 3 · Abgewöhnen, 10-Minuten-Welle; Chili und Kalender in einer Karte | gebaut, Abnahme offen (0.3.0T2) |
 | 4 · Termine im Kalender, Tagesansicht | offen |
 | 5 · Kalender-Export (`.ics`) | offen |
 | 6 · Rückblick: Heatmap, Detail, Journal | offen |

@@ -89,10 +89,13 @@ keine Teilaktualisierung — eine Ansicht ist schnell genug neu gezeichnet.
   danach ist gesperrt (`langGedrueckt`).
 - **Jede Änderung eines Tages** geht über `umschalten(id, tag)` — die Kachel für heute,
   der Kalender (`[data-nachtrag]`) für bis zu `NACHTRAG_TAGE` zurück.
+- **Oben steht eine Karte** (`zeichneHeld`, ADR 0005): Tagesring mit Chili und der
+  Umschalter Woche | Monat, darunter der Kalender.
 - **Kalender** (`zeichneKalender`, `bindeKalender`): `state.kalender` wählt Woche oder
   Monat; was zu sehen ist, halten `kalVersatz` (Wochen bzw. Monate von heute) und `kalTag`
-  (der angetippte Tag) — beide nur im Speicher der Seite, nicht in `state`. Getönt wird aus
-  `tagesStand(k)` über `kalStufe`; Blättern und Umschalten setzen `kalGewechselt` für das
+  (der angetippte Tag) — beide nur im Speicher der Seite, nicht in `state`. Jeder Tag trägt
+  einen Punkt je Gewohnheit (`kalPunkte`); `kalStufe` aus `tagesStand(k)` färbt nur noch
+  die Zahl eines vollen Tags. Blättern und Umschalten setzen `kalGewechselt` für das
   Einblenden des Rasters.
 - **Ringe** werden mit dem Ziel gezeichnet und tragen in `data-von` den zuletzt gezeigten
   Wert (`ringZuletzt`); `ringeFuellen()` läßt sie nach jedem `render()` herüberlaufen.

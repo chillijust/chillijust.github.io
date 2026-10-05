@@ -49,7 +49,19 @@ pruefe('K5 die Hälfte ist viel', tag(vor(2)).classList.contains('viel'));
 pruefe('K6 heute offen ist noch nicht null', tag(HEUTE).classList.contains('frei') && tag(HEUTE).classList.contains('heute'));
 pruefe('K7 morgen ist Zukunft', tag(tagPlus(HEUTE, 1)).classList.contains('zukunft'));
 pruefe('K8 ein ganz verpaßter Tag ist null', kalStufe(tagesStand(vor(3)), vor(3), HEUTE) === 'null');
-pruefe('K9 die Woche zeigt den Anteil', tag(vor(1)).textContent.indexOf('3/3') !== -1, tag(vor(1)).textContent);
+function punkte(k) {
+  return alle('[data-kaltag="' + k + '"] .kp').map(function (p) { return p.className.replace('kp ', ''); }).join();
+}
+pruefe('K9 ein Punkt je Gewohnheit, gefüllt wenn erledigt', punkte(vor(1)) === 'erledigt,erledigt,erledigt',
+  punkte(vor(1)));
+pruefe('K9a verpaßt ist ein Ring, pro Woche ohne Haken fehlt', punkte(vor(2)) === 'erledigt,verpasst', punkte(vor(2)));
+pruefe('K9b heute offen, morgen kommt es', punkte(HEUTE) === 'offen,offen' &&
+  punkte(tagPlus(HEUTE, 1)) === 'kommt,kommt', punkte(HEUTE) + ' / ' + punkte(tagPlus(HEUTE, 1)));
+pruefe('K9c Chili und Kalender sind eine Karte, ganz oben', !!q('.held .tagesring #chiliFigur') &&
+  !!q('.held #kalRaster') && q('#ansicht').firstElementChild === q('.held'));
+pruefe('K9d der Kalender trägt keine eigene Überschrift mehr', !alle('#ansicht h2').some(function (h) {
+  return h.textContent === 'Kalender';
+}));
 pruefe('K10 pro Woche zählt nur, wenn erledigt', tagesStand(vor(1)).von === 3 && tagesStand(vor(2)).von === 2);
 pruefe('K11 Trefferflächen in der Woche', zuKlein('#app').length === 0, zuKlein('#app').join(', '));
 

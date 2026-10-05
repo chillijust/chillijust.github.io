@@ -1,7 +1,7 @@
 # 0003 · Langer Druck statt Pfeil, Kalender auf dem Dashboard, Nachtragen
 
 *2026-10-05 · Abnahme von 0.2.0T · Version 0.2.0T2 · löst in 0002 den Pfeil und «Nachtragen
-gibt es nicht» ab*
+gibt es nicht» ab · Lage und Tönung des Kalenders abgelöst durch 0005*
 
 ## Ausgangslage
 

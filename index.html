@@ -255,15 +255,19 @@ svg { display: block; }
 .ring-fuell { stroke: var(--akzent); transition: stroke-dashoffset .7s cubic-bezier(.3, .8, .3, 1); }
 
 /* ── Dashboard: Tagesring ──────────────────────────────────── */
-.tagesring { display: flex; align-items: center; gap: 20px; padding: 18px 20px; margin-bottom: 22px; }
-.tr-bild { position: relative; width: 112px; height: 112px; flex: none; }
+.held { padding: 16px 14px 14px; margin-bottom: 22px; }
+.held-kopf { display: flex; align-items: center; gap: 10px; padding: 0 4px; }
+.held-kopf .wahl { flex: none; }
+.held-kopf .wahl button { flex: none; padding: 0 12px; font-size: 14px; }
+.tagesring { flex: 1; min-width: 0; display: flex; align-items: center; gap: 14px; }
+.tr-bild { position: relative; width: 88px; height: 88px; flex: none; }
 .tagesring #chiliFigur {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 70px;
-  height: 70px;
-  margin: -37px 0 0 -35px;
+  width: 56px;
+  height: 56px;
+  margin: -30px 0 0 -28px;
 }
 /* Abgehakt: Die Chili flammt kurz auf — sie reckt sich, glüht im Akzent und
    flackert aus. Danach wippt sie weiter wie zuvor; das Wippen wartet, bis das
@@ -295,7 +299,7 @@ svg { display: block; }
 }
 .tr-zahl {
   font-family: var(--sans);
-  font-size: 30px;
+  font-size: 26px;
   font-weight: 600;
   line-height: 1.2;
   font-variant-numeric: tabular-nums;
@@ -424,7 +428,6 @@ svg { display: block; }
 .rf-leer { margin: 0; }
 
 /* ── Dashboard: Kalender ───────────────────────────────────── */
-.kal { padding: 14px; }
 .kal-kopf { display: flex; align-items: center; gap: 4px; margin: 10px 0 6px; }
 .kal-kopf .rund { background: transparent; }
 .kal-titel {
@@ -462,15 +465,27 @@ button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
   font-variant-numeric: tabular-nums;
   transition: background-color .25s ease, box-shadow .2s ease;
 }
-.kal-raster.woche .kal-tag { min-height: 62px; }
+.kal-tag { gap: 4px; }
+.kal-raster.woche .kal-tag { min-height: 60px; }
 .kal-zahl { font-family: 'Poppins', system-ui, sans-serif; font-size: 15px; font-weight: 500; }
-.kal-quote { font-size: 12px; color: var(--text-2); min-height: 15px; }
-/* Getönt nach dem Anteil des Erledigten — Grün heißt erledigt. */
-.kal-tag.wenig { background: color-mix(in srgb, var(--erledigt) 22%, transparent); }
-.kal-tag.viel { background: color-mix(in srgb, var(--erledigt) 50%, transparent); }
-.kal-tag.voll { background: var(--erledigt); color: var(--grund); }
-.kal-tag.voll .kal-quote { color: var(--grund); }
-.kal-tag.null { box-shadow: inset 0 0 0 1.5px var(--flaeche-2); }
+/* Ein Punkt je Gewohnheit, wie im Monat beim iPhone: gefüllt = erledigt,
+   Ring = offen oder verpaßt, blasser Ring = kommt noch. Grün heißt erledigt. */
+.kal-punkte {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 3px;
+  max-width: 42px;
+  min-height: 6px;
+}
+.kp { width: 6px; height: 6px; border-radius: 50%; }
+.kal-raster.woche .kp { width: 8px; height: 8px; }
+.kp.erledigt { background: var(--erledigt); }
+.kp.offen { box-shadow: inset 0 0 0 1.5px var(--text-2); }
+.kp.verpasst { box-shadow: inset 0 0 0 1.5px var(--linie); }
+.kp.kommt { box-shadow: inset 0 0 0 1.5px var(--linie); opacity: .45; }
+/* Ein Tag, an dem alles erledigt ist, trägt seine Zahl in Grün. */
+.kal-tag.voll .kal-zahl { color: var(--erledigt); font-weight: 600; }
 .kal-tag.zukunft { color: var(--text-2); }
 .kal-tag.heute .kal-zahl { font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
 .kal-tag.gewaehlt { box-shadow: inset 0 0 0 2px var(--akzent); }
@@ -711,7 +726,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.3.0T';
+var APP_VERSION = '0.3.0T2';
 var APP_STAND = '2026-10-05';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -1419,14 +1434,26 @@ function zeichneHome() {
   var dran = liste.filter(function (e) { return e.a.faelligHeute; });
   var frei = liste.filter(function (e) { return !e.a.faelligHeute; });
   var fertig = dran.filter(function (e) { return e.a.erledigtHeute; }).length;
-  return zeichneTagesring(fertig, dran.length) +
+  return zeichneHeld(fertig, dran.length, heute) +
     (dran.length ? '<section class="abschnitt"><h2>Gewohnheiten</h2><div class="gw-liste">' +
       dran.map(zeichneKachel).join('') + '</div></section>' : '') +
     (frei.length ? '<section class="abschnitt"><h2>Heute nicht dran</h2><div class="gw-liste gedimmt">' +
       frei.map(zeichneKachel).join('') + '</div></section>' : '') +
     (laster.length ? '<section class="abschnitt"><h2>Abgewöhnen</h2><div class="gw-liste">' +
-      laster.map(zeichneLasterKachel).join('') + '</div></section>' : '') +
-    zeichneKalender(heute);
+      laster.map(zeichneLasterKachel).join('') + '</div></section>' : '');
+}
+
+// Oben eine Karte für heute und die Tage drumherum: die Chili im Tagesring,
+// daneben Woche oder Monat, darunter der Kalender.
+function zeichneHeld(fertig, von, heute) {
+  return '<section class="kachel held" aria-label="Heute und Kalender">' +
+    '<div class="held-kopf">' + zeichneTagesring(fertig, von) +
+      '<div class="wahl" role="group" aria-label="Kalender">' +
+        [['woche', 'Woche'], ['monat', 'Monat']].map(function (w) {
+          return '<button type="button" data-kalender="' + w[0] + '" aria-pressed="' +
+            (state.kalender === w[0] ? 'true' : 'false') + '">' + w[1] + '</button>';
+        }).join('') + '</div>' +
+    '</div>' + zeichneKalender(heute) + '</section>';
 }
 
 // Ein Ring: Spur und Füllung, gezeichnet mit dem Ziel. `schluessel` merkt sich
@@ -1449,13 +1476,13 @@ function zeichneTagesring(fertig, von) {
     zahl = fertig + ' von ' + von;
     text = fertig === von ? 'Alles erledigt.' : 'Noch ' + (von - fertig) + ' offen.';
   }
-  return '<section class="kachel tagesring" aria-label="Heute ' + esc(zahl) + '">' +
+  return '<div class="tagesring" role="group" aria-label="Heute ' + esc(zahl) + '">' +
     '<div class="tr-bild">' + ring(von ? fertig / von : 0, '#tag') +
       '<img id="chiliFigur"' + (chiliFlammt ? ' class="' + chiliFlammt + '"' : '') + ' src="' + CHILI_BILD + '" alt=""></div>' +
     '<div class="tr-text"><div class="etikett">Heute</div>' +
       '<div class="tr-zahl" id="tagesZahl">' + esc(zahl) + '</div>' +
       '<p>' + esc(text) + '</p></div>' +
-    '</section>';
+    '</div>';
 }
 
 function zeichneKachel(e) {
@@ -1558,6 +1585,21 @@ function kalStufe(t, k, heute) {
   return t.fertig / t.von >= 0.5 ? 'viel' : 'wenig';
 }
 
+// Ein Punkt je Gewohnheit, die an dem Tag zählt — in der Reihenfolge der
+// Kacheln. «x-mal pro Woche» zeigt sich nur, wenn sie erledigt ist; an einem
+// Tag ist sie weder offen noch verpaßt.
+function kalPunkte(k, heute) {
+  var p = [];
+  aktiveGewohnheiten().forEach(function (g) {
+    if (k < g.angelegt) return;
+    if (g.erledigt.indexOf(k) !== -1) p.push('erledigt');
+    else if (g.rhythmus.art !== 'proWoche' && faelligAm(g, k)) {
+      p.push(k > heute ? 'kommt' : k === heute ? 'offen' : 'verpasst');
+    }
+  });
+  return p;
+}
+
 // Kalenderwoche nach ISO: Woche 1 enthält den 4. Januar.
 function kalenderwoche(montag) {
   var jahr = ausSchluessel(tagPlus(montag, 3)).getFullYear();
@@ -1589,13 +1631,7 @@ function kalBereich(heute) {
 
 function zeichneKalender(heute) {
   var b = kalBereich(heute), woche = b.monat === null;
-  var html = '<section class="abschnitt" aria-label="Kalender"><h2>Kalender</h2><div class="kachel kal">' +
-    '<div class="wahl" role="group" aria-label="Ansicht">' +
-      [['woche', 'Woche'], ['monat', 'Monat']].map(function (w) {
-        return '<button type="button" data-kalender="' + w[0] + '" aria-pressed="' +
-          (state.kalender === w[0] ? 'true' : 'false') + '">' + w[1] + '</button>';
-      }).join('') + '</div>' +
-    '<div class="kal-kopf">' +
+  var html = '<div class="kal-kopf">' +
       '<button type="button" class="rund" id="kalZurueck" aria-label="' + (woche ? 'Woche' : 'Monat') +
         ' davor">' + ICON.zurueck + '</button>' +
       (kalVersatz
@@ -1616,12 +1652,14 @@ function zeichneKalender(heute) {
       (k === kalTag ? 'true' : 'false') + '" aria-label="' + esc(datumLang(d)) +
       (zaehlt ? ', ' + t.fertig + ' von ' + t.von + ' erledigt' : '') + '">' +
       '<span class="kal-zahl">' + d.getDate() + '</span>' +
-      (woche ? '<span class="kal-quote">' + (zaehlt ? t.fertig + '/' + t.von : '') + '</span>' : '') +
+      '<span class="kal-punkte" aria-hidden="true">' + kalPunkte(k, heute).map(function (art) {
+        return '<span class="kp ' + art + '"></span>';
+      }).join('') + '</span>' +
       '</button>';
   }
   html += '</div>';
   if (kalTag && kalTag >= b.von && kalTag <= b.bis) html += zeichneTagesleiste(kalTag, heute);
-  return html + '</div></section>';
+  return html;
 }
 
 // Der angetippte Tag: seine Gewohnheiten, abhakbar, solange er nah genug ist.
