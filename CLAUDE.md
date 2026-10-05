@@ -50,7 +50,7 @@ die Chili.
 | Bauabschnitt | Stand |
 | --- | --- |
 | 1 · Umbau, Gerüst, Kopf, Farben, Schriften, Symbol, `sw.js` | fertig (0.1.0) |
-| 2 · Gewohnheiten: anlegen, Rhythmus, Abhaken, Stärke, nie zweimal; Kalender, Nachtragen, langer Druck | fertig (0.2.0T2) |
+| 2 · Gewohnheiten: anlegen, Rhythmus, Abhaken, Stärke, nie zweimal; Kalender, Nachtragen, langer Druck | fertig (0.2.0) |
 | 3 · Abgewöhnen, 10-Minuten-Welle | offen |
 | 4 · Termine im Kalender, Tagesansicht | offen |
 | 5 · Kalender-Export (`.ics`) | offen |
