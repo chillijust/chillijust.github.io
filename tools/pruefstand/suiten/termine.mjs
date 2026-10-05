@@ -15,6 +15,7 @@ function tm(roh) {
   return terminLesen(t);
 }
 function zuKlein() {
+  ausbewegt();
   return alle('#app button, #app input, #app select').filter(function (k) {
     var r = k.getBoundingClientRect();
     if (r.width === 0 && r.height === 0) return false;

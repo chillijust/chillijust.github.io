@@ -44,6 +44,7 @@ pruefe('D1 die Einstellungen öffnen', ansicht === 'einstellungen' && !!q('#swKn
 pruefe('D2 der Kopf trägt den Rückweg', !!q('#zurueckKnopf'));
 pruefe('D3 und den Titel', q('#kopf h1').textContent === 'Einstellungen');
 pruefe('D4 unterwegs kein Schalter und kein Menü', !q('#themaKnopf') && !q('#menuKnopf'));
+ausbewegt();
 var zk = q('#zurueckKnopf').getBoundingClientRect(), tk = q('#kopf h1').getBoundingClientRect();
 pruefe('D5 der Rückweg steht links vom Titel', zk.right <= tk.left + 1);
 q('#zurueckKnopf').click();

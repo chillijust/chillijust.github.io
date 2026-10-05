@@ -255,7 +255,7 @@ svg { display: block; }
 .ring-fuell { stroke: var(--akzent); transition: stroke-dashoffset .7s cubic-bezier(.3, .8, .3, 1); }
 
 /* ── Dashboard: Tagesring ──────────────────────────────────── */
-.held { padding: 16px 14px 14px; margin-bottom: 22px; }
+.held { position: relative; z-index: 0; padding: 16px 14px 14px; margin-bottom: 22px; }
 .held-kopf { display: flex; align-items: center; gap: 10px; padding: 0 4px; }
 .held-kopf .wahl { flex: none; }
 .held-kopf .wahl button { flex: none; padding: 0 12px; font-size: 14px; }
@@ -805,6 +805,32 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 }
 #meldung.zeigt { opacity: 1; transform: translate(-50%, 0); }
 
+/* ── Bewegung: Tropfen ─────────────────────────────────────────
+   Nichts ploppt (ADR 0007). Die Ansicht liegt über dem Geist der alten; der
+   Tropfen liegt in der Karte hinter ihrem Inhalt. `--feder` setzt das Skript. */
+#ansicht { position: relative; z-index: 1; }
+.geist { pointer-events: none; }
+.tropfen { position: absolute; z-index: -1; background: var(--flaeche-2); pointer-events: none; }
+.wahl { position: relative; }
+.wahl button { position: relative; }
+.wahl-marke {
+  position: absolute;
+  border-radius: 12px;
+  background: var(--grund);
+  box-shadow: var(--schatten);
+  pointer-events: none;
+}
+.wahl.mit-marke button[aria-pressed="true"] { background: transparent; box-shadow: none; }
+/* Wer einen Schalter drückt, sieht den Knauf sich strecken — wie unter iOS. */
+.schalter-knauf { transition: transform .5s var(--feder, ease), width .3s var(--feder, ease); }
+.schalter:active .schalter-knauf { width: 33px; }
+.schalter[aria-checked="true"]:active .schalter-knauf { transform: translateX(14px); }
+.thema-schalter .knauf { transition: transform .5s var(--feder, ease), width .3s var(--feder, ease), background-color .3s ease; }
+.thema-schalter:active .knauf { width: 44px; }
+.thema-schalter[aria-checked="true"]:active .knauf { transform: translateX(32px); }
+.tage button { transition: background-color .2s ease, color .2s ease, transform .45s var(--feder, ease); }
+.tage button:active { transform: scale(.9); }
+
 /* Bewegung nur, wo sie erwünscht ist. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -840,7 +866,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.4.0T';
+var APP_VERSION = '0.4.0T2';
 var APP_STAND = '2026-10-05';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -1203,6 +1229,286 @@ function bewegungAus() {
   try {
     return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   } catch (e) { return false; }
+}
+
+// ════════════════════════════════════════════════════════════════
+//  Bewegung: Tropfen
+// ════════════════════════════════════════════════════════════════
+//
+// Nichts ploppt (ADR 0007). Was aufgeht, wächst wie ein Tropfen aus dem, was
+// getippt wurde, und fließt beim Schließen dorthin zurück; was verschwindet,
+// zieht sich zusammen, statt einfach zu fehlen. Gezeichnet wird trotzdem
+// sofort — der Zustand stimmt ohne Verzug, nur das Bild folgt weich. Was
+// verschwindet, steht dafür kurz als «Geist» da: eine Kopie im Schatten-DOM,
+// die kein Skript findet und kein Vorleser liest.
+
+// Eine Feder: schnell los, ein wenig über das Ziel, sanft zurück. Als
+// `linear()` mit Stützpunkten; wer das nicht kennt, bekommt eine Kurve.
+var FEDER = (function () {
+  var z = 0.7, w0 = 8, wd = w0 * Math.sqrt(1 - z * z), p = [];
+  for (var i = 0; i <= 32; i++) {
+    var t = i / 32;
+    p.push(i === 32 ? 1 : Math.round((1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) +
+      z * w0 / wd * Math.sin(wd * t))) * 1000) / 1000);
+  }
+  var f = 'linear(' + p.join(', ') + ')';
+  try { if (window.CSS && CSS.supports && CSS.supports('transition-timing-function', f)) return f; } catch (e) { /* weiter */ }
+  return 'cubic-bezier(.3, 1.25, .5, 1)';
+}());
+
+// Eine Animation, die sich selbst aufräumt. Ohne Bewegung (oder ohne
+// Animationen im Browser) gilt sofort der Endzustand.
+function bewegt(el, bilder, opt, fertig) {
+  var a = null, einmal = false;
+  function ende() { if (!einmal) { einmal = true; if (fertig) fertig(); } }
+  if (!el || bewegungAus() || typeof el.animate !== 'function') { ende(); return null; }
+  try {
+    a = el.animate(bilder, { duration: opt.dauer || 560, easing: opt.kurve || FEDER, delay: opt.warten || 0,
+      fill: opt.fill || 'none' });
+  } catch (e) { ende(); return null; }
+  // Über das Versprechen, nicht über das Ereignis: Es löst auch dann sofort,
+  // wenn die Animation von außen beendet wird.
+  if (a.finished && a.finished.then) a.finished.then(ende, ende);
+  else { a.onfinish = ende; a.oncancel = ende; }
+  return a;
+}
+
+function weg(el) { if (el && el.parentNode) el.parentNode.removeChild(el); }
+function px(n) { return Math.round(n * 10) / 10 + 'px'; }
+
+// Der Geist: eine Kopie von `el` hinter einer Schattenwurzel mit dem Stylesheet
+// der Seite (ohne die Schriften — die gelten ohnehin überall). Ids und
+// data-Attribute bleiben darin, ohne mit der lebenden Seite zu kollidieren.
+var geistStil = null;
+function geist(el) {
+  if (!el || bewegungAus() || !el.attachShadow) return null;
+  if (geistStil === null) {
+    var s = document.querySelector('style');
+    geistStil = (s ? s.textContent : '').replace(/\/\* == SCHRIFTEN:START[\s\S]*?SCHRIFTEN:ENDE == \*\//, '') +
+      ':host { display: block; pointer-events: none; }';
+  }
+  var wirt = document.createElement('div'), wurzel, stil = document.createElement('style'), kopie = el.cloneNode(true);
+  try { wurzel = wirt.attachShadow({ mode: 'open' }); } catch (e) { return null; }
+  wirt.className = 'geist';
+  wirt.setAttribute('aria-hidden', 'true');
+  stil.textContent = geistStil;
+  kopie.removeAttribute('hidden');
+  wurzel.appendChild(stil);
+  wurzel.appendChild(kopie);
+  return wirt;
+}
+
+// Eine Fläche `q` auf die Fläche `n` abbilden: verschoben, gleichmäßig
+// skaliert, unten so beschnitten, daß das Seitenverhältnis von `q` bleibt.
+// So wächst eine Ansicht aus einer Kachel, wie auf dem iPhone.
+function zoomBild(q, n) {
+  var s = q.width / n.width;
+  return {
+    transform: 'translate(' + px(q.left - n.left) + ', ' + px(q.top - n.top) + ') scale(' + s.toFixed(4) + ')',
+    clipPath: 'inset(0px 0px ' + px(Math.max(0, n.height - q.height / s)) + ' 0px round ' + px(20 / s) + ')'
+  };
+}
+var ZOOM_VOLL = { transform: 'translate(0px, 0px) scale(1)', clipPath: 'inset(0px 0px 0px 0px round 0px)' };
+
+// ── Ansichten wachsen aus dem Getippten ─────────────────────────
+var letzterTipp = null;   // { el, zeit } — der zuletzt berührte Knopf
+var herkunft = null;      // Selektor auf dem Dashboard, aus dem die Ansicht wuchs
+var homeScroll = 0;       // wie weit das Dashboard gerollt war
+var HERKUNFT = ['data-haken', 'data-ab', 'data-termin', 'data-drang', 'data-rueckfall', 'data-neutermin'];
+
+function tippMerken(e) {
+  var el = e.target && e.target.closest ? e.target.closest('button') : null;
+  if (el) letzterTipp = { el: el, zeit: Date.now() };
+}
+
+// Eine Kachel wächst als Ganzes, ein Knopf für sich.
+function tippFlaeche(el) {
+  return el.matches('[data-haken], [data-ab]') && el.closest('.gw-kachel') || el;
+}
+
+function selektorVon(el) {
+  if (el.closest('#menue')) return '#menuKnopf';
+  if (el.id) return '#' + el.id;
+  for (var i = 0; i < HERKUNFT.length; i++) {
+    if (el.hasAttribute(HERKUNFT[i])) return '[' + HERKUNFT[i] + '="' + el.getAttribute(HERKUNFT[i]) + '"]';
+  }
+  return null;
+}
+
+// Vor dem Neuzeichnen: die alte Ansicht als Geist, und woher die neue kommt.
+function uebergangVorbereiten(von, nach) {
+  var tipp = letzterTipp && Date.now() - letzterTipp.zeit < 1000 ? letzterTipp.el : null;
+  letzterTipp = null;
+  if (von === 'home' && nach !== 'home') {
+    homeScroll = window.pageYOffset || 0;
+    herkunft = tipp && document.contains(tipp) ? selektorVon(tipp) : null;
+  }
+  if (von === nach || bewegungAus()) return null;
+  var alt = $('ansicht');
+  return { zurueck: nach === 'home', altRect: alt.getBoundingClientRect(), geist: geist(alt),
+    quelle: nach !== 'home' && tipp && document.contains(tipp) ? tippFlaeche(tipp).getBoundingClientRect() : null };
+}
+
+// Nach dem Neuzeichnen: vorwärts wächst die neue Ansicht aus der Kachel, die
+// alte weicht zurück; zurück schrumpft die alte in ihre Kachel hinein.
+function uebergangAusfuehren(u) {
+  if (!u) return;
+  var neu = $('ansicht'), g = u.geist, a = u.altRect, n = neu.getBoundingClientRect();
+  bewegt($('kopf'), [{ opacity: 0 }, { opacity: 1 }], { dauer: 320, kurve: 'ease-out' });
+  if (g) {
+    g.style.cssText = 'position: fixed; margin: 0; left: ' + px(a.left) + '; top: ' + px(a.top) + '; width: ' +
+      px(a.width) + '; z-index: ' + (u.zurueck ? 5 : 0) + '; background: var(--grund); transform-origin: 0 0;';
+    document.body.appendChild(g);
+  }
+  if (!u.zurueck) {
+    if (g) bewegt(g, [{ opacity: 1 }, { opacity: 0 }], { dauer: 360, kurve: 'ease-in', fill: 'forwards' },
+      function () { weg(g); });
+    if (u.quelle) {
+      neu.style.transformOrigin = '0 0';
+      neu.style.background = 'var(--grund)';
+      bewegt(neu, [zoomBild(u.quelle, n), ZOOM_VOLL], { dauer: 620 }, function () {
+        neu.style.transformOrigin = '';
+        neu.style.background = '';
+      });
+    } else {
+      bewegt(neu, [{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }], { dauer: 480 });
+    }
+    return;
+  }
+  var ziel = herkunft ? document.querySelector(herkunft) : null;
+  herkunft = null;
+  bewegt(neu, [{ opacity: 0.4, transform: 'scale(.98)' }, { opacity: 1, transform: 'none' }], { dauer: 420, kurve: 'ease-out' });
+  if (!g) return;
+  if (ziel && ziel.getClientRects().length) {
+    bewegt(g, [ZOOM_VOLL, zoomBild(tippFlaeche(ziel).getBoundingClientRect(), a)], { dauer: 520, fill: 'forwards' },
+      function () { weg(g); });
+    bewegt(g, [{ opacity: 1 }, { opacity: 0 }], { dauer: 220, warten: 220, kurve: 'ease-in', fill: 'both' });
+  } else {
+    bewegt(g, [{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(.92)' }],
+      { dauer: 320, kurve: 'ease-in', fill: 'forwards' }, function () { weg(g); });
+  }
+}
+
+// ── Die Karte oben: Höhe nachziehen, Tropfen in die Tagesliste ──
+function heldHoehe() {
+  var h = document.querySelector('.held');
+  return h ? h.offsetHeight : 0;
+}
+
+// Die Karte springt nicht auf ihre neue Höhe, sie fließt hin — alles darunter
+// rückt mit.
+function heldNachziehen(h0) {
+  var h = document.querySelector('.held'), h1 = h ? h.offsetHeight : 0;
+  if (!h0 || !h1 || h0 === h1) return;
+  h.style.overflow = 'hidden';
+  bewegt(h, [{ height: px(h0) }, { height: px(h1) }], { dauer: 580 }, function () { h.style.overflow = ''; });
+}
+
+// Ein Tropfen löst sich vom getippten Tag, fällt, wird breit und ist die
+// Tagesliste; erst dann kommt ihr Inhalt.
+function tropfenFallen(von, ziel) {
+  var held = document.querySelector('.held');
+  if (!ziel || !held || bewegungAus()) return;
+  var h = held.getBoundingClientRect(), z = ziel.getBoundingClientRect();
+  var s = Math.min(von.width, von.height) * 0.5, cx = von.left + von.width / 2 - h.left, cy = von.top + von.height / 2 - h.top;
+  var zl = z.left - h.left, zt = z.top - h.top;
+  var t = document.createElement('div');
+  t.className = 'tropfen';
+  held.appendChild(t);
+  function form(l, o, b, hh, r, op, off) {
+    return { left: px(l), top: px(o), width: px(b), height: px(hh), borderRadius: px(r), opacity: op, offset: off };
+  }
+  bewegt(t, [
+    form(cx - s / 2, cy - s / 2, s, s, s / 2, 1, 0),
+    form(cx - s * 0.35, cy - s / 2, s * 0.7, zt - cy + s, s * 0.35, 1, 0.3),
+    form(zl, zt, z.width, z.height, 18, 0.9, 0.72),
+    form(zl, zt, z.width, z.height, 18, 0, 1)
+  ], { dauer: 680, kurve: 'cubic-bezier(.3, .7, .2, 1)', fill: 'forwards' }, function () { weg(t); });
+  bewegt(ziel, [{ opacity: 0, transform: 'translateY(-8px) scale(.98)' }, { opacity: 1, transform: 'none' }],
+    { dauer: 420, warten: 220, kurve: 'ease-out', fill: 'backwards' });
+}
+
+// Zu: Die Liste zieht sich als Tropfen in ihren Tag zurück.
+function leisteZurueck(g, r, tag) {
+  if (!g) return;
+  g.style.cssText = 'position: fixed; margin: 0; left: ' + px(r.left) + '; top: ' + px(r.top) + '; width: ' +
+    px(r.width) + '; z-index: 3; background: var(--flaeche); border-radius: 16px; transform-origin: 0 0;';
+  document.body.appendChild(g);
+  var sx = tag.width / r.width, sy = tag.height / r.height;
+  bewegt(g, [
+    { transform: 'none', borderRadius: '16px', opacity: 1 },
+    { transform: 'translate(' + px(tag.left - r.left) + ', ' + px(tag.top - r.top) + ') scale(' + sx.toFixed(4) + ', ' +
+      sy.toFixed(4) + ')', borderRadius: px(Math.min(r.width, r.height) / 2), opacity: 0 }
+  ], { dauer: 460, kurve: 'cubic-bezier(.5, 0, .3, 1)', fill: 'forwards' }, function () { weg(g); });
+}
+
+// ── Formularteile ziehen sich auf und zu ────────────────────────
+// Statt `el.hidden = …`. Das Attribut gilt sofort; zu sieht man einen Geist,
+// der sich zusammenzieht, auf wächst das Teil selbst in seine Höhe.
+function teilZeigen(el, an) {
+  if (!el || el.hidden === !an) return;
+  if (an) {
+    el.hidden = false;
+    if (bewegungAus()) return;
+    var cs = getComputedStyle(el), h = el.offsetHeight;
+    el.style.overflow = 'hidden';
+    bewegt(el, [
+      { height: '0px', marginTop: '0px', marginBottom: '0px', opacity: 0, transform: 'scale(.97)' },
+      { height: px(h), marginTop: cs.marginTop, marginBottom: cs.marginBottom, opacity: 1, transform: 'none' }
+    ], { dauer: 540 }, function () { el.style.overflow = ''; });
+    wahlenSetzen();
+    return;
+  }
+  var g = geist(el), voll = el.offsetHeight;
+  if (g) {
+    var c = getComputedStyle(el);
+    voll += parseFloat(c.marginTop) + parseFloat(c.marginBottom);
+  }
+  el.hidden = true;
+  if (!g) return;
+  g.style.cssText = 'overflow: hidden; margin: 0; height: ' + px(voll) + ';';
+  g.shadowRoot.lastChild.style.overflow = 'hidden';
+  el.parentNode.insertBefore(g, el);
+  bewegt(g, [{ height: px(voll), opacity: 1 }, { height: '0px', opacity: 0 }],
+    { dauer: 380, kurve: 'cubic-bezier(.4, 0, .2, 1)', fill: 'forwards' }, function () { weg(g); });
+}
+
+// ── Umschalter: die Markierung fließt hinüber ───────────────────
+// Jede `.wahl` trägt eine Marke unter dem gewählten Knopf. Wechselt die Wahl,
+// streckt sich die Marke wie ein Tropfen bis zum neuen Knopf und zieht dann
+// nach. Gemerkt wird je Gruppe (`aria-label`), was zuletzt gewählt war — auch
+// über ein Neuzeichnen hinweg, wie bei den Ringen.
+var wahlZuletzt = {};
+
+function wahlenSetzen() {
+  alleIn('#app .wahl').forEach(function (w) {
+    var knoepfe = Array.prototype.filter.call(w.children, function (c) { return c.tagName === 'BUTTON'; });
+    var i = -1;
+    knoepfe.forEach(function (b, j) { if (b.getAttribute('aria-pressed') === 'true') i = j; });
+    if (i < 0 || !knoepfe[i].offsetWidth) return;
+    var m = w.querySelector('.wahl-marke'), b = knoepfe[i], schluessel = w.getAttribute('aria-label');
+    if (!m) {
+      m = document.createElement('span');
+      m.className = 'wahl-marke';
+      w.insertBefore(m, w.firstChild);
+      w.classList.add('mit-marke');
+    }
+    m.style.left = px(b.offsetLeft);
+    m.style.top = px(b.offsetTop);
+    m.style.width = px(b.offsetWidth);
+    m.style.height = px(b.offsetHeight);
+    var alt = knoepfe[wahlZuletzt[schluessel]];
+    if (alt && alt !== b && alt.offsetWidth) {
+      var l = Math.min(alt.offsetLeft, b.offsetLeft);
+      var r = Math.max(alt.offsetLeft + alt.offsetWidth, b.offsetLeft + b.offsetWidth);
+      bewegt(m, [
+        { left: px(alt.offsetLeft), width: px(alt.offsetWidth), transform: 'scaleY(1)' },
+        { left: px(l), width: px(r - l), transform: 'scaleY(.84)', offset: 0.4 },
+        { left: px(b.offsetLeft), width: px(b.offsetWidth), transform: 'scaleY(1)' }
+      ], { dauer: 580 });
+    }
+    wahlZuletzt[schluessel] = i;
+  });
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -1577,9 +1883,14 @@ function zeige(name, id) {
   // Wer aus der Welle zum Rückfall kommt, kann zur Welle zurück.
   rueckfallFuer = name === 'rueckfall' ? { id: id, notiz: '',
     ausWelle: ansicht === 'welle' && !!state.welle && state.welle.id === id } : null;
+  // Das Bild folgt weich (Bewegung: Tropfen); das Dashboard kommt dorthin
+  // zurück, wo man es verlassen hat.
+  var uebergang = uebergangVorbereiten(ansicht, name), heim = name === 'home' && ansicht !== 'home';
+  if (ansicht !== name) wahlZuletzt = {};
   ansicht = name;
   render();
-  try { window.scrollTo(0, 0); } catch (e) { /* egal */ }
+  try { window.scrollTo(0, heim ? homeScroll : 0); } catch (e) { /* egal */ }
+  uebergangAusfuehren(uebergang);
 }
 
 function render() {
@@ -1587,10 +1898,12 @@ function render() {
   if ((ansicht === 'rueckfall' && !rueckfallFuer) || (ansicht === 'welle' && !state.welle)) ansicht = 'home';
   if ((ansicht === 'termin' || ansicht === 'terminNeu') && !terminEntwurf) ansicht = 'home';
   renderKopf();
-  var feld = $('ansicht');
+  var feld = $('ansicht'), h0 = ansicht === 'home' ? heldHoehe() : 0;
   feld.innerHTML = ANSICHTEN[ansicht].zeichnen();
   bindeAnsicht();
   ringeFuellen();
+  heldNachziehen(h0);
+  wahlenSetzen();
 }
 
 // Ringe füllen sich vom zuletzt gezeigten Wert zum neuen. Gezeichnet wird mit
@@ -2107,8 +2420,9 @@ function bindeFormular() {
       alleIn('[data-richtung]').forEach(function (x) {
         x.setAttribute('aria-pressed', x === b ? 'true' : 'false');
       });
-      $('rhAbschnitt').hidden = entwurf.richtung === 'ab';
-      $('abStart').hidden = entwurf.richtung !== 'ab';
+      teilZeigen($('rhAbschnitt'), entwurf.richtung !== 'ab');
+      teilZeigen($('abStart'), entwurf.richtung === 'ab');
+      wahlenSetzen();
       $('gwName').setAttribute('placeholder', BEISPIEL[entwurf.richtung]);
     });
   });
@@ -2118,8 +2432,9 @@ function bindeFormular() {
       alleIn('[data-art]').forEach(function (x) {
         x.setAttribute('aria-pressed', x === b ? 'true' : 'false');
       });
-      $('rhTage').hidden = entwurf.art !== 'wochentage';
-      $('rhAnzahl').hidden = entwurf.art !== 'proWoche';
+      teilZeigen($('rhTage'), entwurf.art === 'wochentage');
+      teilZeigen($('rhAnzahl'), entwurf.art === 'proWoche');
+      wahlenSetzen();
       $('rhText').textContent = rhythmusErklaerung(entwurf.art);
     });
   });
@@ -2465,15 +2780,16 @@ function bindeTerminFormular() {
     // Die Erinnerung wechselt mit: Was ganztags gilt, gilt nicht zur Uhrzeit.
     if (e.vorlauf !== null) e.vorlauf = e.ganztags ? VORLAUF_GANZ[0] : 15;
     this.setAttribute('aria-checked', e.ganztags ? 'true' : 'false');
-    $('tmZeiten').hidden = e.ganztags;
-    $('tmZeitText').hidden = e.ganztags;
+    teilZeigen($('tmZeiten'), !e.ganztags);
+    teilZeigen($('tmZeitText'), !e.ganztags);
     $('tmVorlauf').innerHTML = vorlaufOptionen(e);
   });
   alleIn('[data-wdh]').forEach(function (b) {
     b.addEventListener('click', function () {
       e.wiederholung = this.getAttribute('data-wdh');
       alleIn('[data-wdh]').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
-      $('tmEndeTeil').hidden = e.wiederholung === 'keine';
+      teilZeigen($('tmEndeTeil'), e.wiederholung !== 'keine');
+      wahlenSetzen();
       $('tmWdhText').textContent = wiederholungErklaerung(e);
     });
   });
@@ -2666,11 +2982,15 @@ function bindeKalender() {
   $('kalZurueck').addEventListener('click', function () { kalVersatz--; neu(); });
   $('kalVor').addEventListener('click', function () { kalVersatz++; neu(); });
   if ($('kalHeute')) $('kalHeute').addEventListener('click', function () { kalVersatz = 0; neu(); });
+  // Auf: ein Tropfen fällt vom Tag in die Liste. Zu: die Liste fließt zurück.
   alleIn('[data-kaltag]').forEach(function (b) {
     b.addEventListener('click', function () {
-      var k = this.getAttribute('data-kaltag');
-      kalTag = kalTag === k ? null : k;
+      var k = this.getAttribute('data-kaltag'), tag = this.getBoundingClientRect(), alt = $('kalLeiste');
+      var zu = kalTag === k && alt, g = zu ? geist(alt) : null, r = zu ? alt.getBoundingClientRect() : null;
+      kalTag = zu ? null : k;
       render();
+      if (kalTag) tropfenFallen(tag, $('kalLeiste'));
+      else leisteZurueck(g, r, tag);
     });
   });
   alleIn('[data-nachtrag]').forEach(function (b) {
@@ -2905,7 +3225,15 @@ function swAufraeumen(fertig) {
 
 function start() {
   themaAnwenden();
+  document.documentElement.style.setProperty('--feder', FEDER);
   render();
+
+  // Woher ein Tipp kam, damit die nächste Ansicht dort herauswachsen kann.
+  document.addEventListener('pointerdown', tippMerken, true);
+  document.addEventListener('click', tippMerken, true);
+  // Die Marken der Umschalter sitzen erst richtig, wenn die Schriften da sind.
+  window.addEventListener('resize', wahlenSetzen);
+  try { document.fonts.ready.then(wahlenSetzen); } catch (e) { /* ohne Schriftereignis bleibt es beim Start */ }
 
   $('swLaden').addEventListener('click', function () { swUebernehmen(); });
   $('swSpaeter').addEventListener('click', function () {

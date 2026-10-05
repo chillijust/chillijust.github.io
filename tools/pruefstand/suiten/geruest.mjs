@@ -37,6 +37,7 @@ pruefe('B6 kein Tutorial', !q('[class*="tut"]') && !q('[id*="tut"]'));
 // ── C · Trefferflächen: alles, was man antippt, ≥ 44 × 44 ───
 // Je Bereich gefragt: Das Menü blendet nach dem Schließen noch eine Weile aus.
 function zuKlein(wo) {
+  ausbewegt();
   return alle(wo + ' button').filter(function (b) {
     var r = b.getBoundingClientRect();
     if (r.width === 0 && r.height === 0) return false;   // nicht sichtbar

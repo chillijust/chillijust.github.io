@@ -17,6 +17,7 @@ function gw(id, rhythmus, angelegt, erledigt) {
 var TAEGLICH = { art: 'taeglich' };
 function tag(k) { return q('[data-kaltag="' + k + '"]'); }
 function zuKlein(wo) {
+  ausbewegt();
   return alle(wo + ' button').filter(function (k) {
     var r = k.getBoundingClientRect();
     if (r.width === 0 && r.height === 0) return false;

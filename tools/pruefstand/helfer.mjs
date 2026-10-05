@@ -71,12 +71,21 @@ export function testseite(html, test) {
 //
 // Im Rumpf bereit: pruefe(name, bedingung, extra) · q(selektor) · alle(selektor)
 // · frisch() setzt die App auf den Anfang zurück.
+// · ausbewegt() bringt laufende Animationen ans Ziel, bevor gemessen wird.
 export function suite(name, html, rumpf) {
   const test = String.raw`
 var log = [];
 function pruefe(n, c, e) { log.push((c ? 'PASS ' : 'FAIL ') + n + (e !== undefined && e !== '' ? ' [' + e + ']' : '')); }
 function q(s) { return document.querySelector(s); }
 function alle(s) { return Array.prototype.slice.call(document.querySelectorAll(s)); }
+// Laufende Bewegungen ans Ziel bringen — wer Lage und Größe mißt, fragt das
+// Ziel, nicht den Weg (ADR 0007). Endlose (die wippende Chili) bleiben.
+function ausbewegt() {
+  if (!document.getAnimations) return;
+  document.getAnimations().forEach(function (a) {
+    try { if (a.effect && a.effect.getTiming().iterations !== Infinity) a.finish(); } catch (e) { /* weiter */ }
+  });
+}
 function frisch() {
   menueSchliessen();
   state = grundStand();

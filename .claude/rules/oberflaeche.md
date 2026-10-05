@@ -64,6 +64,12 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 
 ## Bewegung
 
+- **Nichts ploppt** (ADR 0007). Was aufgeht, wächst aus dem Getippten, was geht, fließt
+  zurück — gezeichnet wird trotzdem sofort, die Bewegung legt sich darüber. Was
+  verschwindet, zeigt `geist(el)`; nie den Zustand verzögern, um zu animieren.
+- **Formularteile über `teilZeigen(el, an)`**, nie `el.hidden = …`; eine neue `.wahl`
+  bekommt ihre Marke von `wahlenSetzen()`, nach Änderung an Ort und Stelle aufrufen.
+- **Bewegt wird über `bewegt()` mit der `FEDER`**; CSS nimmt `var(--feder, ease)`.
 - Animation nur, wo sie Rückmeldung gibt (Abhaken, Ring, Schalter, Blatt). Unter
   `prefers-reduced-motion: reduce` steht alles still; Abläufe, die auf das Ende einer
   Animation warten, fragen `bewegungAus()`.

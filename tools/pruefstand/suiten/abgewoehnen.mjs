@@ -35,6 +35,7 @@ function eingeben(sel, text) {
 }
 function meldung() { return q('#meldung').textContent; }
 function zuKlein(wurzel) {
+  ausbewegt();
   return alle(wurzel + ' button, ' + wurzel + ' input, ' + wurzel + ' textarea').filter(function (b) {
     var r = b.getBoundingClientRect();
     return r.width && (r.width < 44 || r.height < 44);

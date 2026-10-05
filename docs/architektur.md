@@ -14,7 +14,7 @@ es wächst mit jedem Bauabschnitt.
 
 Im Skript, von oben: Version und Stand · `CHILI_BILD` · Hilfen (`esc`, `ICON`, Datum,
 `melden`, Tage) · Zustand und Speicher · Darstellung · Gewohnheiten (Rechnung) · Abgewöhnen
-(Rechnung, Welle) · Termine · Ansichten ·
+(Rechnung, Welle) · Termine · Bewegung (Tropfen) · Ansichten ·
 Menü · Service Worker · Start.
 
 ## Zustand
@@ -83,7 +83,17 @@ state = {
 
 `render()` zeichnet erst den Kopf (`renderKopf()`), dann die Ansicht: `ANSICHTEN[ansicht]
 .zeichnen()` liefert HTML, danach hängt `bindeAnsicht()` die Ereignisse an. Kein Diffing,
-keine Teilaktualisierung — eine Ansicht ist schnell genug neu gezeichnet.
+keine Teilaktualisierung — eine Ansicht ist schnell genug neu gezeichnet. Danach zieht
+`heldNachziehen()` die Höhe der Karte oben weich nach und `wahlenSetzen()` legt die Marken
+der Umschalter (ADR 0007).
+
+- **Bewegung legt sich über das Neuzeichnen, sie verzögert es nie** (ADR 0007).
+  `zeige()` nimmt vor `render()` die alte Ansicht als Geist (`uebergangVorbereiten`) und
+  läßt danach die neue aus dem getippten Element wachsen oder die alte in ihre Herkunft
+  schrumpfen (`uebergangAusfuehren`). Woher getippt wurde, merkt sich `tippMerken` (Erfassung
+  von `pointerdown` und `click`); `herkunft` hält den Selektor auf dem Dashboard,
+  `homeScroll` die Rollposition. Der Tag im Kalender öffnet mit `tropfenFallen`, schließt
+  mit `leisteZurueck`.
 
 - `zeige(name, id)` wechselt die Ansicht; ein unbekannter Name landet beim Dashboard.
   `neu` und `bearbeiten` legen dabei den `entwurf` an; `bearbeiten` ohne gültige `id`

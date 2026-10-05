@@ -18,6 +18,10 @@ Gilt für die Suiten. Ausführlich in `tools/pruefstand/README.md` und im Skill 
   Dokument: Ein Emoji im Suchmuster findet sich selbst, Chillingos Schlüssel im Klartext
   ließe `pruefen.mjs` anschlagen. Zeichen über `String.fromCharCode`, Schlüssel
   zusammengesetzt; gelesen wird `#app`, nicht `document.body`.
+- **Wer Lage oder Größe mißt, ruft vorher `ausbewegt()`** — Ansichten wachsen, Teile
+  ziehen sich auf (ADR 0007). Der Läufer rechnet in virtueller Zeit ohne Bilder:
+  Animationen kommen nie von selbst an, auf ihr Ende wartet man mit `ausbewegt()` und
+  einem kurzen `setTimeout`.
 - **Übergänge abschalten, wenn eine Farbe gefragt ist** — der kopflose Browser läßt sie
   nicht zuverlässig ablaufen; gefragt ist das Ziel, nicht der Weg.
 - **Eine Prüfung zählt nicht auf, sie fragt nach allen.** Menüeinträge, Knöpfe,

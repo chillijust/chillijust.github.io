@@ -187,6 +187,7 @@ pruefe('D12 jeder Ring hat Spur und Füllung', alle('.ring').every(function (r) 
   return !!r.querySelector('.ring-spur') && !!r.querySelector('.ring-fuell');
 }) && alle('.ring').length === 4);
 function zuKlein(wo) {
+  ausbewegt();
   return alle(wo + ' button').filter(function (k) {
     var r = k.getBoundingClientRect();
     if (r.width === 0 && r.height === 0) return false;
