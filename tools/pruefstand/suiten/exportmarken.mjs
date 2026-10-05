@@ -59,7 +59,8 @@ return dateiLaden().text().then(function (text) {
     laden().termine[0].imKalender.abdruck === terminNach('kino').imKalender.abdruck);
   pruefe('B4 alles Exportierte ist abgedunkelt und sagt seit wann', alle('.ex-alt').length === 3 &&
     /im Kalender seit/.test(zeile('kino').textContent) && !zeile('laufen').classList.contains('ex-alt'));
-  pruefe('B5 nichts mehr zu exportieren: keine Knöpfe, ein Satz', q('#exZahl').textContent === '0' && !q('#exLaden') && !!q('#exNichts'));
+  pruefe('B5 nichts mehr zu exportieren: keine Knöpfe, ein Satz', q('#exZahl').textContent === '0' && q('#exWege').hidden &&
+    !q('#exLaden').getClientRects().length && !q('#exNichts').hidden);
   pruefe('B6 jetzt gibt es «Bearbeiten»', !!q('#exBearbeiten') && /3 Einträge stehen schon/.test(q('.ex-leiste').textContent));
 
   // ── C · Neues geht immer mit, nur das ─────────────────────

@@ -77,6 +77,10 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   verschwindet, zeigt `geist(el)`; nie den Zustand verzögern, um zu animieren.
 - **Formularteile über `teilZeigen(el, an)`**, nie `el.hidden = …`; eine neue `.wahl`
   bekommt ihre Marke von `wahlenSetzen()`, nach Änderung an Ort und Stelle aufrufen.
+- **Knöpfe, die kommen und gehen, über `teilTropfen(el, an)`** (ADR 0012). Ein Teil mit
+  eigenem `display` braucht `[hidden] { display: none; }`, sonst bleibt es sichtbar.
+- **Was man lesen muß, bevor es weitergeht, ist ein Hinweis** (`hinweisZeigen`, wartet auf
+  «OK»), keine Meldung — die geht nach zwei Sekunden.
 - **Bewegt wird über `bewegt()` mit der `FEDER`**; CSS nimmt `var(--feder, ease)`. Ausnahme: Tropfen
   schwingen nicht über (ADR 0008).
 - **Was aus einem runden Knopf kommt oder in ihn geht, ist ein Tropfen** (`tropfenAuf`,

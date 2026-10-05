@@ -79,6 +79,9 @@ state = {
   `gewohnheitEreignis`, Zeiten schwebend in der Zeit des Geräts, Zeilen über `icsFalten`.
   Hinaus geht sie über `icsTeilen` (Teilen-Blatt, nur wo `kannTeilen()`) oder `icsLaden`
   (Blob, `<a download>`); beide setzen `exportiert`.
+  Die Kachel zeichnet ihre Wege immer mit, nur verborgen; `exTeileNachziehen()` (aus
+  `bindeExport`) vergleicht mit `exTeileZuvor` und läßt Geändertes über `teilTropfen`
+  auf- und zugehen. Außerhalb der Exportansicht ist `exTeileZuvor` `null` (ADR 0012).
 
 - **Ein Schlüssel**: `chillinal_v1`. `laden()` liest, `stand(roh)` übernimmt nur bekannte
   Felder mit gültigen Werten und füllt den Rest aus `grundStand()`. Kaputtes JSON, ein
@@ -103,6 +106,8 @@ der Umschalter (ADR 0007).
   von `pointerdown` und `click`); `herkunft` hält den Selektor auf dem Dashboard,
   `homeScroll` die Rollposition. Der Tag im Kalender öffnet mit `tropfenFallen`, schließt
   mit `leisteZurueck`.
+  Der Hinweis (`hinweisZeigen`/`hinweisSchliessen`) liegt außerhalb von `#app` in
+  `#hinweisBlatt` und überlebt darum jedes `render()`.
 
 - `zeige(name, id)` wechselt die Ansicht; ein unbekannter Name landet beim Dashboard.
   `neu` und `bearbeiten` legen dabei den `entwurf` an; `bearbeiten` ohne gültige `id`

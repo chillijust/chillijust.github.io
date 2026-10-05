@@ -198,6 +198,10 @@ pruefe('A11 Laden reicht chillinal.ics weiter', geklickt && geklickt.name === 'c
 pruefe('A12 und merkt sich den Export', state.exportiert === zeitJetzt() &&
   JSON.parse(localStorage.getItem(SPEICHER)).exportiert === zeitJetzt() && q('#exZuletzt').textContent !== 'noch nie');
 pruefe('A13 kein Link bleibt liegen', !document.querySelector('a[download]'));
+// Der Hinweis wartet auf «OK» (exportwege); hier wird er weggetippt, damit keine
+// Bewegung weiterläuft, während die Prüfung auf das Lesen der Dateien wartet.
+q('#hinweisOk').click();
+ausbewegt();
 
 // Teilen: einmal angenommen, einmal abgebrochen.
 var geteilt = [], antwort = 'ja';

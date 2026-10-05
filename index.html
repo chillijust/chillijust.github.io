@@ -654,6 +654,12 @@ button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
 }
 .ex-bearbeiten[aria-pressed="true"] { background: var(--knopf); color: var(--knopf-text); }
 .ex-zeile { transition: opacity .25s ease; }
+/* Die Wege hinaus kommen und gehen als Tropfen (teilTropfen). flow-root, damit
+   die Höhe, die sich aufzieht, den Rand der Knopfreihe mitzählt. */
+.ex-wege { display: flow-root; }
+.ex-wege[hidden] { display: none; }
+.ex-aufheben { margin-top: 10px; }
+.ex-aufheben .knopf { width: 100%; }
 .ex-zeile.ex-alt { opacity: .5; }
 .ex-zeile.ex-alt.ex-geaendert { opacity: .72; }
 .ex-zeile[aria-disabled="true"] { cursor: default; }
@@ -912,6 +918,39 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 }
 #meldung.zeigt { opacity: 1; transform: translate(-50%, 0); }
 
+/* ── Hinweis ───────────────────────────────────────────────── */
+/* Was man lesen muß, bevor es weitergeht: mittig, wartet auf «OK». Quillt als
+   Tropfen aus dem Getippten (hinweisZeigen); der Schleier wie beim Menü. */
+#hinweisBlatt {
+  position: fixed;
+  inset: 0;
+  z-index: 22;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
+  background: rgba(20, 20, 19, .18);
+  opacity: 0;
+  transition: opacity .22s ease;
+}
+#hinweisBlatt[hidden] { display: none; }
+#hinweisBlatt.offen { opacity: 1; }
+#hinweisBlatt:not(.offen) { pointer-events: none; }
+.hinweis-karte {
+  width: 100%;
+  max-width: 340px;
+  padding: 22px 20px 18px;
+  background: var(--grund);
+  border-radius: 18px;
+  box-shadow: 0 2px 6px rgba(20, 20, 19, .10), 0 16px 40px rgba(20, 20, 19, .18);
+  text-align: center;
+}
+.hinweis-karte h2 { margin: 0 0 6px; font-family: var(--sans); font-size: 18px; font-weight: 600; }
+.hinweis-karte p { margin: 0 0 18px; font-size: 16px; color: var(--text-2); }
+.hinweis-karte .knopf { width: 100%; }
+/* Den Fokus trägt die Karte, für Vorleser — ein Ring um «OK» sähe aus wie eine Wahl. */
+.hinweis-karte:focus { outline: none; }
+
 /* ── Bewegung: Tropfen ─────────────────────────────────────────
    Nichts ploppt (ADR 0007). Die Ansicht liegt über dem Geist der alten; der
    Tropfen liegt in der Karte hinter ihrem Inhalt. `--feder` setzt das Skript. */
@@ -973,6 +1012,16 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
   </div>
 </div>
 <div id="meldung" role="status" aria-live="polite"></div>
+<div id="hinweisBlatt" hidden>
+  <div class="hinweis-karte" id="hinweisKarte" tabindex="-1" role="alertdialog" aria-modal="true" aria-labelledby="hinweisTitel"
+    aria-describedby="hinweisText">
+    <div id="hinweisInhalt">
+      <h2 id="hinweisTitel"></h2>
+      <p id="hinweisText"></p>
+      <button type="button" class="knopf" id="hinweisOk">OK</button>
+    </div>
+  </div>
+</div>
 <script>
 'use strict';
 
@@ -982,7 +1031,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.5.0T7';
+var APP_VERSION = '0.5.0T8';
 var APP_STAND = '2026-10-05';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -1726,7 +1775,8 @@ function leisteZurueck(g, r, tag) {
 
 // ── Formularteile ziehen sich auf und zu ────────────────────────
 // Statt `el.hidden = …`. Das Attribut gilt sofort; zu sieht man einen Geist,
-// der sich zusammenzieht, auf wächst das Teil selbst in seine Höhe.
+// der sich zusammenzieht, auf wächst das Teil selbst in seine Höhe. Gibt
+// zurück, was sich bewegt — das Teil oder seinen Geist —, sonst nichts.
 function teilZeigen(el, an) {
   if (!el || el.hidden === !an) return;
   if (an) {
@@ -1739,7 +1789,7 @@ function teilZeigen(el, an) {
       { height: px(h), marginTop: cs.marginTop, marginBottom: cs.marginBottom, opacity: 1, transform: 'none' }
     ], { dauer: 540 }, function () { el.style.overflow = ''; });
     wahlenSetzen();
-    return;
+    return el;
   }
   var g = geist(el), voll = el.offsetHeight;
   if (g) {
@@ -1753,6 +1803,112 @@ function teilZeigen(el, an) {
   el.parentNode.insertBefore(g, el);
   bewegt(g, [{ height: px(voll), opacity: 1 }, { height: '0px', opacity: 0 }],
     { dauer: 380, kurve: 'cubic-bezier(.4, 0, .2, 1)', fill: 'forwards' }, function () { weg(g); });
+  return g;
+}
+
+// Knöpfe tropfen: Der Platz zieht sich auf wie jedes Teil, und jeder Knopf
+// darin hängt erst als Perle oben, längt sich zum Tropfen — die Spitze oben,
+// wo er sich löst — und wird breit. Zu dasselbe rückwärts, am Geist.
+function knopfTropfenBilder(k) {
+  var w = k.offsetWidth, h = k.offsetHeight;
+  if (!w || !h) return null;
+  var r = Math.min(parseFloat(getComputedStyle(k).borderTopLeftRadius) || h / 2, h / 2);
+  var d = Math.min(w, h * 0.62), s = Math.min(14, d);
+  function form(oben, seite, unten, rx, ry1, ry2) {
+    return 'inset(' + px(oben) + ' ' + px(seite) + ' ' + px(unten) + ' ' + px(seite) + ' round ' +
+      [rx, rx, rx, rx].map(px).join(' ') + ' / ' + [ry1, ry1, ry2, ry2].map(px).join(' ') + ')';
+  }
+  return [
+    { clipPath: form(0, (w - s) / 2, h - s, s / 2, s / 2, s / 2), opacity: 0, offset: 0 },
+    { clipPath: form(0, (w - s) / 2, h - s, s / 2, s / 2, s / 2), opacity: 1, offset: 0.12 },
+    { clipPath: form(0, (w - d) / 2, 0, d / 2, h * 0.62, h * 0.38), opacity: 1, offset: 0.45 },
+    { clipPath: form(0, 0, 0, r, r, r), opacity: 1, offset: 1 }
+  ];
+}
+
+function teilTropfen(el, an) {
+  var t = teilZeigen(el, an);
+  if (!t) return;
+  Array.prototype.forEach.call((an ? el : t.shadowRoot).querySelectorAll('.knopf'), function (k) {
+    var bilder = knopfTropfenBilder(k);
+    if (!bilder) return;
+    if (an) bewegt(k, bilder, { dauer: 540, kurve: TROPFEN_KURVE });
+    else bewegt(k, bilder.reverse().map(function (b) { b.offset = 1 - b.offset; return b; }),
+      { dauer: 380, kurve: TROPFEN_KURVE, fill: 'forwards' });
+  });
+}
+
+// ── Hinweis: wartet auf «OK» ────────────────────────────────────
+// Eine Meldung geht nach zwei Sekunden — zu schnell für das, was man lesen
+// muß, bevor es weitergeht. Der Hinweis steht mittig, bis «OK» kommt. Er
+// quillt als Tropfen aus der Fläche `quelle` und fließt beim Schließen in das
+// Element `ziel` — ist es nicht (mehr) zu sehen, dorthin zurück, woher er kam.
+var hinweisQuelle = null, hinweisZiel = null;
+
+// Die Spitze zeigt dorthin, woher der Tropfen kommt: gerade darüber oder
+// darunter mittig, sonst in die Ecke.
+function tropfenSpitze(dx, dy, breite) {
+  if (Math.abs(dx) < breite * 0.2) return dy > 0 ? '50% 50% 50% 50% / 35% 35% 65% 65%' : '50% 50% 50% 50% / 65% 65% 35% 35%';
+  if (dy < 0) return dx > 0 ? '50% 0% 50% 50%' : '0% 50% 50% 50%';
+  return dx > 0 ? '50% 50% 0% 50%' : '50% 50% 50% 0%';
+}
+
+// Wie das Menüblatt: von der Mitte der Karte zur Mitte von `q`, ein Kreis von
+// Knopfgröße, die Ecken vom Tropfen zur Karte.
+function hinweisBilder(q) {
+  var b = $('hinweisKarte').getBoundingClientRect();
+  if (!q || !q.width || !b.width || !b.height) return null;
+  var dx = q.left + q.width / 2 - (b.left + b.width / 2), dy = q.top + q.height / 2 - (b.top + b.height / 2);
+  var d = Math.max(Math.min(q.width, q.height), 40), spitze = tropfenSpitze(dx, dy, b.width);
+  function bild(t, sx, sy, r, op, off) {
+    return { transform: 'translate(' + px(dx * t) + ', ' + px(dy * t) + ') scale(' + sx.toFixed(4) + ', ' + sy.toFixed(4) + ')',
+      borderRadius: r, opacity: op, offset: off };
+  }
+  return [bild(1, d / b.width, d / b.height, spitze, 0, 0), bild(1, d / b.width, d / b.height, spitze, 1, 0.14),
+    bild(0.4, 0.55, 0.42, spitze, 1, 0.45), bild(0, 1, 1, '18px', 1, 1)];
+}
+
+function hinweisZeigen(titel, text, quelle, ziel) {
+  var blatt = $('hinweisBlatt'), offen = !blatt.hidden && blatt.classList.contains('offen');
+  $('hinweisTitel').textContent = titel;
+  $('hinweisText').textContent = text;
+  hinweisZiel = ziel || null;
+  if (offen) return;
+  hinweisQuelle = quelle || null;
+  blatt.hidden = false;
+  void blatt.offsetWidth;
+  blatt.classList.add('offen');
+  try { $('hinweisKarte').focus({ preventScroll: true }); } catch (e) { /* egal */ }
+  var bilder = hinweisBilder(hinweisQuelle);
+  if (!bilder) return;
+  bewegt($('hinweisKarte'), bilder, { dauer: TROPFEN_DAUER, kurve: TROPFEN_KURVE });
+  bewegt($('hinweisInhalt'), [{ opacity: 0 }, { opacity: 1 }], { dauer: TROPFEN_DAUER * 0.5, warten: TROPFEN_DAUER * 0.4,
+    kurve: 'ease-out', fill: 'backwards' });
+}
+
+// Schließen ist Öffnen rückwärts — gleiche Dauer, gespiegelte Bilder; das
+// Ziel nickt, wenn der Tropfen ankommt.
+function hinweisSchliessen() {
+  var blatt = $('hinweisBlatt'), karte = $('hinweisKarte'), inhalt = $('hinweisInhalt');
+  if (blatt.hidden || !blatt.classList.contains('offen')) return;
+  blatt.classList.remove('offen');
+  var el = hinweisZiel && document.contains(hinweisZiel) && hinweisZiel.getClientRects().length ? hinweisZiel : null;
+  var ziel = el ? el.getBoundingClientRect() : hinweisQuelle;
+  function zu() { if (!blatt.classList.contains('offen')) blatt.hidden = true; }
+  var bilder = bewegungAus() ? null : hinweisBilder(ziel);
+  if (!bilder) { zu(); return; }
+  var a = bewegt(inhalt, [{ opacity: 1 }, { opacity: 0 }], { dauer: TROPFEN_DAUER * 0.35, kurve: 'ease-in', fill: 'forwards' });
+  var b = null;
+  b = bewegt(karte, bilder.reverse().map(function (f) { f.offset = 1 - f.offset; return f; }),
+    { dauer: TROPFEN_DAUER, kurve: TROPFEN_KURVE, fill: 'forwards' }, function () {
+      zu();
+      if (b) b.cancel();
+      if (a) a.cancel();
+    });
+  if (el) {
+    bewegt(el, [{ transform: 'scale(1)' }, { transform: 'scale(1.14)', offset: 0.45 }, { transform: 'scale(1)' }],
+      { dauer: 320, warten: TROPFEN_DAUER * 0.8, kurve: 'ease-out' });
+  }
 }
 
 // ── Umschalter: die Markierung fließt hinüber ───────────────────
@@ -2313,7 +2469,8 @@ function icsTeilen() {
 }
 
 function icsLaden() {
-  var url, auswahl = exportAuswahl(heuteSchluessel());
+  var url, auswahl = exportAuswahl(heuteSchluessel()), knopf = $('exLaden');
+  var quelle = knopf && knopf.getClientRects().length ? knopf.getBoundingClientRect() : null;
   try { url = URL.createObjectURL(icsBlob(auswahl)); } catch (e) { melden('Die Datei ließ sich nicht anlegen.'); return; }
   var a = document.createElement('a');
   a.href = url;
@@ -2324,7 +2481,21 @@ function icsLaden() {
   document.body.removeChild(a);
   setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
   exportiertMerken(auswahl);
-  melden('Datei geladen. Öffne sie, um sie in den Kalender zu holen.');
+  // Kein Verschwinden nach Zeit: iOS legt gleichzeitig sein eigenes Blatt
+  // darüber, und wer zurückkommt, soll den Satz noch finden.
+  hinweisZeigen('Datei geladen', 'Öffne sie, um sie in den Kalender zu holen.', quelle, $('exZuletzt'));
+}
+
+// Markierung aufheben: Was unter «Bearbeiten» gewählt ist, vergißt, daß es im
+// Kalender steht, und gilt wieder als neu — ohne Export. Für Einträge, die im
+// Kalender von Hand gelöscht wurden und später wieder hinaus sollen.
+function exAufheben() {
+  var a = exportAuswahl(heuteSchluessel()), n = a.termine.length + a.gewohnheiten.length;
+  a.termine.concat(a.gewohnheiten).forEach(function (e) { e.imKalender = null; });
+  exportWahl = {};
+  exBearbeiten = false;
+  if (speichern()) melden(n === 1 ? 'Gilt wieder als neu.' : n + ' Einträge gelten wieder als neu.');
+  if (ansicht === 'export') render();
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -3552,15 +3723,23 @@ function zeichneExport() {
   }
   var auswahl = exportAuswahl(heute), teilen = kannTeilen();
   var zahl = auswahl.termine.length + auswahl.gewohnheiten.length;
+  // Aufheben nur, wenn allein Dazugeholtes gewählt ist — Neues hat keine Marke.
+  var aufheben = exBearbeiten && zahl > 0 && auswahl.termine.concat(auswahl.gewohnheiten).every(function (e) {
+    return !!e.imKalender;
+  });
+  // Die Wege und der Satz stehen immer da, nur verborgen: So tropfen sie auf
+  // und zu, statt zu schnappen (exTeileNachziehen).
   return html + '<section class="abschnitt"><h2>Exportieren</h2><div class="kachel">' +
       '<div class="zeile"><span>Einträge</span><span class="wert" id="exZahl">' + zahl + '</span></div>' +
       '<div class="zeile"><span>Zuletzt</span><span class="wert" id="exZuletzt">' +
         esc(state.exportiert ? zeitpunktText(state.exportiert) : 'noch nie') + '</span></div>' +
-      (zahl ? '<div class="knopfreihe">' +
+      '<div class="ex-wege" id="exWege"' + (zahl ? '' : ' hidden') + '><div class="knopfreihe">' +
         (teilen ? '<button type="button" class="knopf" id="exTeilen">' + ICON.export + 'Teilen</button>' : '') +
         '<button type="button" class="knopf' + (teilen ? ' zart' : '') + '" id="exLaden">Als Datei laden</button>' +
-      '</div>' : '<p class="klein" id="exNichts">Alles steht schon im Kalender. Unter «Bearbeiten» holst du etwas ' +
-        'noch einmal dazu.</p>') +
+      '</div><div class="ex-aufheben" id="exAufhebenTeil"' + (aufheben ? '' : ' hidden') + '>' +
+        '<button type="button" class="knopf zart" id="exAufheben">Markierung aufheben</button></div></div>' +
+      '<p class="klein" id="exNichts"' + (zahl ? ' hidden' : '') + '>Alles steht schon im Kalender. Unter «Bearbeiten» ' +
+        'holst du etwas noch einmal dazu.</p>' +
     '</div>' +
     '<p class="klein">Hinaus geht, was neu ist. Was schon im Kalender steht, ist abgedunkelt. Änderst du etwas ' +
       'davon, löschst du es im Kalender von Hand und holst es unter «Bearbeiten» noch einmal dazu. ' +
@@ -3568,9 +3747,37 @@ function zeichneExport() {
     '</section>';
 }
 
+// Nach jedem Zeichnen der Exportansicht: Was in der Kachel auf- oder zuging,
+// steht für einen Augenblick wieder wie zuvor und tropft dann in den neuen
+// Stand. Ein Teil in einem anderen, das selbst geht, geht mit ihm.
+var exTeileZuvor = null;   // { wege, auf, nichts } → offen?
+
+function exTeileNachziehen() {
+  var wege = $('exWege'), auf = $('exAufhebenTeil'), nichts = $('exNichts');
+  var jetzt = wege ? { wege: !wege.hidden, auf: !auf.hidden, nichts: !nichts.hidden } : null;
+  var zuvor = exTeileZuvor;
+  exTeileZuvor = jetzt;
+  if (!zuvor || !jetzt) return;
+  if (zuvor.wege !== jetzt.wege) {
+    wege.hidden = !zuvor.wege;
+    auf.hidden = !(jetzt.wege ? jetzt.auf : zuvor.auf);
+    teilTropfen(wege, jetzt.wege);
+    auf.hidden = !jetzt.auf;
+  } else if (zuvor.auf !== jetzt.auf) {
+    auf.hidden = !zuvor.auf;
+    teilTropfen(auf, jetzt.auf);
+  }
+  if (zuvor.nichts !== jetzt.nichts) {
+    nichts.hidden = !zuvor.nichts;
+    teilTropfen(nichts, jetzt.nichts);
+  }
+}
+
 function bindeExport() {
+  exTeileNachziehen();
   if ($('exTeilen')) $('exTeilen').addEventListener('click', icsTeilen);
   if ($('exLaden')) $('exLaden').addEventListener('click', icsLaden);
+  if ($('exAufheben')) $('exAufheben').addEventListener('click', exAufheben);
   if ($('exBearbeiten')) $('exBearbeiten').addEventListener('click', function () {
     exBearbeiten = !exBearbeiten;
     render();
@@ -3662,6 +3869,7 @@ function bindeAnsicht() {
   if ($('rfNotiz')) bindeRueckfall();
   if ($('tmTitel')) bindeTerminFormular();
   if (ansicht === 'export') bindeExport();
+  else exTeileZuvor = null;
 
   var knoepfe = document.querySelectorAll('.wahl [data-thema]');
   for (var i = 0; i < knoepfe.length; i++) {
@@ -4071,6 +4279,7 @@ function start() {
   try { document.fonts.ready.then(wahlenSetzen); } catch (e) { /* ohne Schriftereignis bleibt es beim Start */ }
 
   $('swLaden').addEventListener('click', function () { swUebernehmen(); });
+  $('hinweisOk').addEventListener('click', hinweisSchliessen);
   $('swSpaeter').addEventListener('click', function () {
     swStand.gemeldet = true;
     $('swNeu').hidden = true;
