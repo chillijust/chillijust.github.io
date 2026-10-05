@@ -133,8 +133,7 @@ svg { display: block; }
 }
 .kopf-titel { flex: 1; min-width: 0; }
 .kopf-titel h1 { font-size: 28px; line-height: 1.15; }
-/* «Chilli» ist die Marke und steht vorn; «Journal» sagt nur, welche App. Bis der
-   gezeichnete Schriftzug kommt, trägt das die Schrift allein (ADR 0010). */
+/* «Chilli» ist die Marke und steht vorn; «Journal» sagt nur, welche App (ADR 0010). */
 .kopf-heim {
   display: inline-flex;
   align-items: flex-end;
@@ -150,38 +149,22 @@ svg { display: block; }
 }
 .kopf-heim:active { transform: scale(.97); opacity: .75; }
 .kopf-unter .kopf-heim { align-items: center; }
-.marke { font-size: 30px; font-weight: 600; letter-spacing: -.01em; }
-.marke-zusatz { font-size: 19px; font-weight: 500; color: var(--text-2); margin-left: 7px; line-height: 1.6; }
-.marke-zusatz.kursiv { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 21px; margin-left: 5px; }
-
-/* Der gezeichnete Schriftzug (ADR 0010). Bewegt wird nur mit .wm-los, einmal. */
+/* Der Schriftzug (ADR 0010). Abgelaufen wird nur mit .wm-los, einmal; die Flammen lodern immer. */
 svg.wm { display: block; flex: none; color: var(--text); overflow: visible; }
 .wm * { transform-box: fill-box; transform-origin: center; }
-.wm-zug { fill: none; stroke: currentColor; stroke-width: 3.8; stroke-linecap: round; stroke-linejoin: round; }
-.wm-punkt { fill: currentColor; }
-.wm-glut { fill: var(--akzent); }
-.wm-stiel { fill: none; stroke: var(--text-2); stroke-width: 2.6; stroke-linecap: round; }
-.wm-satz { font-family: var(--sans); font-weight: 600; font-size: 40px; fill: currentColor; letter-spacing: -.5px; }
-.wm-linie { fill: none; stroke: var(--akzent); stroke-width: 2.6; stroke-linecap: round; }
-.wm-gesperrt { font-family: var(--sans); font-weight: 600; font-size: 10px; letter-spacing: .34em; fill: var(--text-2); }
-.wm-wachsen { transform-origin: 50% 100%; }
-.wm-los .wm-schreiben { stroke-dasharray: 1; animation: wmSchreiben 1.2s cubic-bezier(.45, 0, .25, 1) both; }
-.wm-los .wm-auf, .wm-los .wm-flamme { animation: wmAuf .6s cubic-bezier(.2, .8, .3, 1) both; }
-.wm-los .wm-funke { animation: wmFunke 1.1s ease-out both; }
-.wm-los .wm-wachsen { animation: wmWachsen .8s cubic-bezier(.2, .8, .3, 1) both; }
-.wm-los .wm-schwingen { animation: wmSchwingen .9s cubic-bezier(.2, .8, .3, 1) both; }
-.wm-los .wm-fallen { animation: wmFallen .7s cubic-bezier(.3, 1.25, .5, 1) both; animation-delay: var(--wm-v); }
-.wm-los .wm-f1 { animation-delay: var(--wm-v); }
-.wm-los .wm-f2 { animation-delay: calc(var(--wm-v) + .18s); }
-/* Breit gezogen: senkrechte Striche 4,2, waagrechte etwas feiner — wie mit der Feder. */
-.wm-dick { stroke-width: 4.2; }
 /* Gruppen, die nur verschieben und verkleinern, rechnen vom Nullpunkt aus. */
 .wm .wm-ort { transform-box: view-box; transform-origin: 0 0; }
-.wm-kursiv { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 17px; fill: var(--text-2); }
+/* Breit gezogen: senkrechte Striche 4,2, waagrechte etwas feiner — wie mit der Feder. */
+.wm-zug { fill: none; stroke: currentColor; stroke-width: 4.2; stroke-linecap: round; stroke-linejoin: round; }
+.wm-glut { fill: var(--akzent); }
+.wm-linie { fill: none; stroke: var(--akzent); stroke-width: 2.6; stroke-linecap: round; }
+.wm-journal { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 17px; fill: var(--text-2); }
 .wm-lodern { transform-origin: 50% 100%; animation: wmLodern 2.6s ease-in-out infinite; }
 .wm-lodern.wm-l2 { animation-duration: 3.1s; animation-delay: -1.2s; }
 .wm-schein { opacity: .18; animation: wmSchein 2.6s ease-in-out infinite; }
 .wm-l2 .wm-schein { animation-duration: 3.1s; animation-delay: -1.2s; }
+.wm-los .wm-schreiben { stroke-dasharray: 1; animation: wmSchreiben 1.2s cubic-bezier(.45, 0, .25, 1) both; }
+.wm-los .wm-auf { animation: wmAuf .6s cubic-bezier(.2, .8, .3, 1) both; }
 .wm-los .wm-aufflammen { transform-origin: 50% 100%; animation: wmAufflammen .9s cubic-bezier(.2, .8, .3, 1) both; }
 .wm-los .wm-a1 { animation-delay: var(--wm-v); }
 .wm-los .wm-a2 { animation-delay: calc(var(--wm-v) + .25s); }
@@ -202,37 +185,7 @@ svg.wm { display: block; flex: none; color: var(--text); overflow: visible; }
 @keyframes wmSchein { 0%, 100% { opacity: .1; } 45% { opacity: .26; } }
 @keyframes wmSchreiben { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
 @keyframes wmAuf { from { opacity: 0; transform: translateY(-5px) scale(.6); } to { opacity: 1; transform: none; } }
-@keyframes wmFallen { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
-@keyframes wmWachsen { from { transform: scaleY(0); } to { transform: none; } }
-@keyframes wmSchwingen { from { opacity: 0; transform: rotate(-28deg) scale(.8); } to { opacity: 1; transform: none; } }
-@keyframes wmFunke {
-  0% { opacity: 0; transform: scale(0); }
-  40% { opacity: 1; transform: scale(1.5); filter: drop-shadow(0 0 5px var(--akzent)); }
-  100% { opacity: 1; transform: none; filter: none; }
-}
 
-/* Die Auswahl unten auf dem Dashboard — nur, bis der Schriftzug entschieden ist. */
-.wm-hinweis { margin: 0 4px 10px; font-size: 15px; color: var(--text-2); }
-.wm-liste { display: grid; gap: 10px; }
-.wm-karte {
-  display: grid;
-  gap: 4px;
-  width: 100%;
-  padding: 14px 16px;
-  border: 0;
-  border-radius: 18px;
-  background: var(--flaeche);
-  color: var(--text);
-  text-align: left;
-  box-shadow: inset 0 0 0 2px transparent;
-  transition: box-shadow .25s ease, transform .2s var(--feder, ease);
-}
-.wm-karte:active { transform: scale(.98); }
-.wm-karte[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--akzent); }
-.wm-bild { display: flex; align-items: flex-end; min-height: 56px; margin-bottom: 4px; }
-.wm-name { font-family: var(--sans); font-weight: 600; font-size: 15px; }
-.wm-runde { font-weight: 500; font-size: 12px; color: var(--text-2); margin-left: 4px; }
-.wm-satz-text { font-family: var(--serif); font-size: 15px; line-height: 1.45; color: var(--text-2); }
 .kopf-titel .datum { font-style: italic; color: var(--text-2); font-size: 15px; }
 .kopf-unter h1 { font-size: 22px; }
 .kopf-unter .kopf-heim { font-size: 22px; font-weight: 600; }
@@ -996,7 +949,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.5.0T5';
+var APP_VERSION = '0.5.0T6';
 var APP_STAND = '2026-10-05';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -1123,8 +1076,7 @@ function grundStand() {
     abgewoehnen: [],
     termine: [],
     welle: null,         // die laufende 10-Minuten-Welle: { id, start } oder null
-    exportiert: null,    // wann zuletzt eine .ics hinausging, als Zeitpunkt
-    schriftzug: ''       // der gewählte Entwurf des Schriftzugs, '' = schlicht (ADR 0010)
+    exportiert: null     // wann zuletzt eine .ics hinausging, als Zeitpunkt
   };
 }
 
@@ -1133,7 +1085,6 @@ function stand(roh) {
   if (!roh || typeof roh !== 'object') return s;
   if (roh.thema === 'hell' || roh.thema === 'dunkel' || roh.thema === 'auto') s.thema = roh.thema;
   if (roh.kalender === 'woche' || roh.kalender === 'monat') s.kalender = roh.kalender;
-  if (typeof roh.schriftzug === 'string' && markeNach(roh.schriftzug)) s.schriftzug = roh.schriftzug;
   if (Array.isArray(roh.gewohnheiten)) {
     var ids = {};
     roh.gewohnheiten.forEach(function (g) {
@@ -1311,148 +1262,36 @@ function speichern() {
   }
 }
 
-// ── Schriftzug: Entwürfe zur Wahl ──────────────────────────────
+// ── Schriftzug ─────────────────────────────────────────────────
 //
-// Jeder Entwurf zeichnet «Chilli» als SVG in seiner eigenen Breite (Höhe 64);
-// «Journal» steht daneben als Text, außer der Entwurf trägt es selbst. `n`
-// macht IDs eindeutig — der Kopf und die Auswahl zeigen denselben Entwurf.
-// Bewegt wird nur mit der Klasse `wm-los`, einmal, nie im Kreis (ADR 0010).
+// «Chilli» in einem Zug geschrieben, breit gezogen und in der Höhe gestaucht;
+// die i-Punkte sind Flammen, die beim Ablauf von unten aufsteigen und danach
+// leise weiterlodern. Darunter «Journal» an einer Linie in Chili (ADR 0010).
+// Abgelaufen wird nur mit der Klasse `wm-los`, einmal; das Lodern läuft immer.
 var WM_ZUG = 'M40,24 C33,15 13,18 12,38 C11,56 30,61 43,50 C51,43 58,26 57,13 C56,4 48,6 49,18 L50,58 ' +
   'C51,46 56,38 62,38 C68,38 69,45 69,52 C69,56 71,58 75,57 C79,55 80,48 81,42 L81,52 C81,57 84,59 89,56 ' +
   'C95,50 99,30 99,14 C99,5 92,6 92,18 C92,40 93,58 99,58 C105,56 110,30 110,14 C110,5 103,6 103,18 ' +
   'C103,40 104,58 110,58 C114,57 116,50 117,42 L117,52 C117,57 120,59 126,55';
-var WM_HALLO = 'M24,30 C19,22 6,25 6,38 C6,49 16,52 25,46 C31,42 35,30 37,18 C38,8 35,3 32,4 C28,6 28,15 29,28 ' +
-  'L30,51 C31,40 36,32 43,32 C49,32 50,38 50,44 C50,49 53,51 57,49 C60,46 62,40 63,32 L63,44 C63,50 67,52 71,49 ' +
-  'C77,43 83,28 83,14 C83,6 80,2 77,4 C73,6 73,16 74,28 L75,44 C75,50 79,52 83,49 C89,43 95,28 95,14 ' +
-  'C95,6 92,2 89,4 C85,6 85,16 86,28 L87,44 C87,50 91,52 95,49 C98,46 100,40 101,32 L101,44 C101,50 105,52 111,47';
 var WM_FLAMME = 'M0,-10 C3,-6 6,-2 6,2 C6,6 3,9 0,9 C-3,9 -6,6 -6,2 C-6,-2 -3,-6 0,-10 Z';
-var WM_TROPFEN = 'M0,-6 C2.5,-3 4,-1 4,1.5 C4,4 2,5.5 0,5.5 C-2,5.5 -4,4 -4,1.5 C-4,-1 -2.5,-3 0,-6 Z';
+var WM_BREITE = 122;
+var WM_VOR = 1.0;   // Sekunden, bis die erste Flamme aufsteigt
 
-function wmFlamme(x, y, s, nr) {
-  return '<g transform="translate(' + x + ',' + y + ') scale(' + s + ')"><path class="wm-glut wm-flamme wm-f' + nr +
-    '" d="' + WM_FLAMME + '"/></g>';
-}
-// Eine Flamme, die aus dem i aufsteigt und danach weiterlodert — leise, mit
-// einem Schein dahinter. Das Lodern läuft auch ohne `wm-los` (ADR 0010).
-function wmFlammeLodernd(x, y, s, nr) {
-  return '<g class="wm-ort" transform="translate(' + x + ',' + y + ') scale(' + s + ')"><g class="wm-lodern wm-l' + nr + '">' +
+function wmFlamme(x, nr) {
+  return '<g class="wm-ort" transform="translate(' + x + ',24.6) scale(.74)"><g class="wm-lodern wm-l' + nr + '">' +
     '<g class="wm-aufflammen wm-a' + nr + '">' +
     '<path class="wm-glut wm-schein" transform="scale(1.35)" d="' + WM_FLAMME + '"/>' +
     '<path class="wm-glut" d="' + WM_FLAMME + '"/></g></g></g>';
 }
-function wmSchoteStehend(x, r, nr) {
-  return '<g transform="translate(' + x + ',52) rotate(' + r + ')"><g class="wm-wachsen wm-f' + nr + '">' +
-    '<path class="wm-glut" d="M0,0 C-4,0 -5,-6 -5,-14 C-5,-26 -3,-34 0,-38 C3,-34 5,-26 5,-14 C5,-6 4,0 0,0 Z"/>' +
-    '<path class="wm-stiel" d="M0,-38 C0,-42 2,-44 4,-45"/></g></g>';
-}
 
-var MARKEN = [
-  { id: 'lodern', vor: 1.0, name: 'Lodern', breite: 122, zusatz: null, runde: 2,
-    satz: 'Die Handschrift aus Glut; die Flammen steigen aus den i auf und lodern weiter. Darunter Journal an der Linie.',
-    svg: function () {
-      return '<g class="wm-ort" transform="translate(-8,0) scale(1,.78)"><path class="wm-zug wm-dick wm-schreiben" pathLength="1" d="' +
-          WM_ZUG + '"/></g>' +
-        wmFlammeLodernd(73, 24.6, .74, 1) + wmFlammeLodernd(109, 24.6, .74, 2) +
-        '<path class="wm-linie wm-schreiben wm-j1" pathLength="1" d="M5,57 L27,57"/>' +
-        '<text class="wm-kursiv wm-auf wm-j2" x="32" y="61">Journal</text>';
-    } },
-  { id: 'hallo', vor: 1.05, name: 'Hallo', breite: 112, zusatz: 'kursiv',
-    satz: 'Eine Linie, ohne abzusetzen, klein geschrieben. Der letzte Punkt ist ein Tropfen Chili.',
-    svg: function () {
-      return '<path class="wm-zug wm-schreiben" pathLength="1" d="' + WM_HALLO + '"/>' +
-        '<circle class="wm-punkt wm-auf wm-f1" cx="63" cy="21" r="3"/>' +
-        '<g transform="translate(101,20)"><path class="wm-glut wm-fallen" d="' + WM_TROPFEN + '"/></g>';
-    } },
-  { id: 'schotenC', vor: .35, name: 'Schoten-C', breite: 106, zusatz: '',
-    satz: 'Das C ist eine Schote. Es kann allein stehen, als Zeichen für alles, was Chilli heißt.',
-    svg: function () {
-      return '<g class="wm-schwingen"><path class="wm-glut" d="M36,14 C28,8 10,10 6,28 C2,46 16,60 34,56 ' +
-        'C38,55 40,52 38,50 C24,52 14,44 16,31 C18,19 28,16 34,19 C37,20 39,17 36,14 Z"/>' +
-        '<path class="wm-stiel" d="M34,16 C35,10 39,7 44,7"/><path class="wm-stiel" d="M30,14 C32,11 37,11 39,14"/></g>' +
-        '<text class="wm-satz wm-auf wm-f1" x="40" y="54">hilli</text>';
-    } },
-  { id: 'funken', vor: .1, name: 'Funken', breite: 98, zusatz: '',
-    satz: 'Klar gesetzt wie eine Systemschrift; nur die beiden i-Punkte glimmen in Chili.',
-    svg: function () {
-      return '<text class="wm-satz" x="2" y="52">Chıllı</text>' +
-        '<circle class="wm-glut wm-funke wm-f1" cx="57.2" cy="23" r="4.2"/>' +
-        '<circle class="wm-glut wm-funke wm-f2" cx="89" cy="23" r="4.2"/>';
-    } },
-  { id: 'doppelL', vor: .05, name: 'Doppel-L', breite: 100, zusatz: '',
-    satz: 'Die beiden l sind zwei schlanke Schoten, die aneinander lehnen. Der Rest bleibt ruhig.',
-    svg: function () {
-      return '<text class="wm-satz" x="2" y="52">Chi</text>' + wmSchoteStehend(70, -6, 1) + wmSchoteStehend(81, 5, 2) +
-        '<text class="wm-satz" x="87" y="52">i</text>';
-    } },
-  { id: 'etikett', vor: .35, name: 'Etikett', breite: 106, zusatz: null,
-    satz: 'Groß und ruhig, darunter gesperrt JOURNAL an einer feinen Linie in Chili. Wie eine Manufaktur.',
-    svg: function () {
-      return '<text class="wm-satz" x="2" y="42">Chilli</text>' +
-        '<path class="wm-linie wm-schreiben" pathLength="1" d="M4,54 L26,54"/>' +
-        '<text class="wm-gesperrt wm-auf wm-f1" x="31" y="57.5">JOURNAL</text>';
-    } },
-  { id: 'welle', vor: .1, name: 'Welle', breite: 104, zusatz: '',
-    satz: 'Die Buchstaben reiten entspannt auf einer sanften Welle, nie ganz gerade.',
-    svg: function (n) {
-      return '<defs><path id="wmBahn' + n + '" d="M2,48 C28,42 62,54 104,44"/></defs>' +
-        '<text class="wm-satz wm-auf wm-f1"><textPath href="#wmBahn' + n + '">Chilli</textPath></text>' +
-        '<path class="wm-linie wm-schreiben" pathLength="1" d="M4,58 C30,52 64,64 100,54"/>';
-    } },
-  { id: 'glut', vor: 1.15, name: 'Glut', breite: 130, zusatz: '', runde: 1,
-    satz: 'Aus der ersten Runde: Handschrift in einem Zug, die i-Punkte sind Flammen.',
-    svg: function () {
-      return '<path class="wm-zug wm-schreiben" pathLength="1" d="' + WM_ZUG + '"/>' +
-        wmFlamme(81, 31, 1, 1) + wmFlamme(117, 31, 1, 2);
-    } },
-  { id: 'schote', vor: 1.15, name: 'Schote', breite: 130, zusatz: 'kursiv', runde: 1,
-    satz: 'Aus der ersten Runde: dieselbe Handschrift, das letzte i trägt eine kleine Schote.',
-    svg: function () {
-      return '<path class="wm-zug wm-schreiben" pathLength="1" d="' + WM_ZUG + '"/>' +
-        '<circle class="wm-punkt wm-auf wm-f1" cx="81" cy="31" r="3.2"/>' +
-        '<g transform="translate(118,30) rotate(18)"><g class="wm-fallen">' +
-        '<path class="wm-glut" d="M0,-6 C6,-6 8,0 7,7 C6,13 2,18 -1,20 C-2,14 -5,8 -5,2 C-5,-3 -3,-6 0,-6 Z"/>' +
-        '<path class="wm-stiel" d="M0,-6 C0,-10 2,-12 5,-13"/></g></g>';
-    } },
-  { id: 'schwung', vor: .9, name: 'Schwung', breite: 122, zusatz: 'kursiv', runde: 1,
-    satz: 'Aus der ersten Runde: gesetzt, darunter ein Schwung, der in einer Flamme endet.',
-    svg: function () {
-      return '<text class="wm-satz" x="2" y="44">Chilli</text>' +
-        '<path class="wm-linie wm-schreiben" pathLength="1" d="M6,54 C38,62 78,60 102,52 C110,49 114,44 112,40"/>' +
-        wmFlamme(112, 36, 0.7, 1);
-    } }
-];
-
-function markeNach(id) {
-  for (var i = 0; i < MARKEN.length; i++) if (MARKEN[i].id === id) return MARKEN[i];
-  return null;
-}
-
-// Der Schriftzug, wie er im Kopf und in der Auswahl steht. Ohne Wahl: schlicht
-// gesetzt. `los` läßt ihn einmal ablaufen.
-function zeichneMarke(id, n, los) {
-  var m = markeNach(id);
-  if (!m) return '<span class="marke">Chilli</span><span class="marke-zusatz">Journal</span>';
-  return '<svg class="wm marke' + (los ? ' wm-los' : '') + '" viewBox="0 0 ' + m.breite + ' 64" width="' +
-      Math.round(m.breite * 56 / 64) + '" height="56" style="--wm-v: ' + m.vor + 's" aria-hidden="true">' +
-      m.svg(n) + '</svg>' +
-    (m.zusatz === null ? '' : '<span class="marke-zusatz' + (m.zusatz ? ' ' + m.zusatz : '') + '">Journal</span>');
-}
-
-function zeichneSchriftzugWahl() {
-  // Der jüngste Entwurf steht ganz oben, noch vor «Schlicht».
-  var wahl = [MARKEN[0], { id: '', name: 'Schlicht', satz: 'So, wie es jetzt ist: nur gesetzt, ohne Zeichnung.' }]
-    .concat(MARKEN.slice(1));
-  return '<section class="abschnitt" id="schriftzugWahl"><h2>Schriftzug wählen</h2>' +
-    '<p class="wm-hinweis">Vorschau, bis du dich entschieden hast. Tippe einen an: Er spielt sich hier ab und steht ' +
-    'sofort oben im Kopf. Tippst du oben auf den Schriftzug, läuft er dort noch einmal.</p>' +
-    '<div class="wm-liste">' + wahl.map(function (m, i) {
-      var an = (state.schriftzug || '') === m.id;
-      return '<button type="button" class="wm-karte" data-marke="' + esc(m.id) + '" aria-pressed="' + (an ? 'true' : 'false') +
-        '" aria-label="' + esc('Schriftzug ' + m.name) + '">' +
-        '<span class="wm-bild">' + zeichneMarke(m.id, 'w' + i, false) + '</span>' +
-        '<span class="wm-name">' + esc(m.name) + (m.runde ? ' <span class="wm-runde">Runde ' + m.runde + '</span>' : '') + '</span>' +
-        '<span class="wm-satz-text">' + esc(m.satz) + '</span></button>';
-    }).join('') + '</div></section>';
+// Der Schriftzug im Kopf. `los` läßt ihn einmal ablaufen.
+function zeichneMarke(los) {
+  return '<svg class="wm marke' + (los ? ' wm-los' : '') + '" viewBox="0 0 ' + WM_BREITE + ' 64" width="' +
+      Math.round(WM_BREITE * 56 / 64) + '" height="56" style="--wm-v: ' + WM_VOR + 's" aria-hidden="true">' +
+    '<g class="wm-ort" transform="translate(-8,0) scale(1,.78)"><path class="wm-zug wm-schreiben" pathLength="1" d="' +
+      WM_ZUG + '"/></g>' +
+    wmFlamme(73, 1) + wmFlamme(109, 2) +
+    '<path class="wm-linie wm-schreiben wm-j1" pathLength="1" d="M5,57 L27,57"/>' +
+    '<text class="wm-journal wm-auf wm-j2" x="32" y="61">Journal</text></svg>';
 }
 
 // Einmal ablaufen lassen: Klasse weg, neu messen, Klasse dran.
@@ -1461,21 +1300,6 @@ function markeAbspielen(svg) {
   svg.classList.remove('wm-los');
   void svg.getBoundingClientRect();
   svg.classList.add('wm-los');
-}
-
-function bindeSchriftzugWahl() {
-  alleIn('[data-marke]').forEach(function (b) {
-    b.addEventListener('click', function () {
-      var id = this.getAttribute('data-marke');
-      state.schriftzug = id;
-      speichern();
-      renderKopf();
-      alleIn('[data-marke]').forEach(function (k) {
-        k.setAttribute('aria-pressed', k.getAttribute('data-marke') === id ? 'true' : 'false');
-      });
-      markeAbspielen(this.querySelector('svg.wm'));
-    });
-  });
 }
 
 var state = laden();
@@ -2529,7 +2353,7 @@ function renderKopf() {
     var dunkel = themaWirksam() === 'dunkel';
     kopf.innerHTML =
       '<div class="kopf-titel"><h1><button type="button" class="kopf-heim" id="markeKnopf" aria-label="Chilli Journal">' +
-        zeichneMarke(state.schriftzug, 'k', markeLos) + '</button></h1>' +
+        zeichneMarke(markeLos) + '</button></h1>' +
       '<div class="datum">' + esc(datumLang(jetzt())) + '</div></div>' +
       '<button type="button" class="thema-schalter" id="themaKnopf" role="switch" ' +
         'aria-checked="' + (dunkel ? 'true' : 'false') + '" aria-label="Dunkle Darstellung">' +
@@ -2567,7 +2391,7 @@ var chiliFlammt = false;       // false, 'flammt' oder 'lodert' (Tag eben voll g
 
 function zeichneHome() {
   var aktiv = aktiveGewohnheiten(), laster = aktivesLaster();
-  if (!aktiv.length && !laster.length && !state.termine.length) return zeichneWillkommen() + zeichneSchriftzugWahl();
+  if (!aktiv.length && !laster.length && !state.termine.length) return zeichneWillkommen();
   var heute = heuteSchluessel(), termine = termineAm(heute);
   var liste = aktiv.map(function (g) { return { g: g, a: auswerten(g, heute) }; });
   var dran = liste.filter(function (e) { return e.a.faelligHeute; });
@@ -2581,8 +2405,7 @@ function zeichneHome() {
     (frei.length ? '<section class="abschnitt"><h2>Heute nicht dran</h2><div class="gw-liste gedimmt">' +
       frei.map(zeichneKachel).join('') + '</div></section>' : '') +
     (laster.length ? '<section class="abschnitt"><h2>Abgewöhnen</h2><div class="gw-liste">' +
-      laster.map(zeichneLasterKachel).join('') + '</div></section>' : '') +
-    zeichneSchriftzugWahl();
+      laster.map(zeichneLasterKachel).join('') + '</div></section>' : '');
 }
 
 // Oben eine Karte für heute und die Tage drumherum: die Chili im Tagesring,
@@ -3652,7 +3475,6 @@ function zeichneEinstellungen() {
 
 // Ereignisse erst nach dem Setzen von innerHTML, nie als Attribut.
 function bindeAnsicht() {
-  bindeSchriftzugWahl();
   var erste = $('ersteGewohnheit');
   if (erste) erste.addEventListener('click', function () { zeige('neu'); });
 

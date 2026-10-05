@@ -1,6 +1,6 @@
 # 0010 · Der Name heißt «Chilli Journal», «Heute» führt den Kalender nach Hause
 
-*2026-10-05 · Ansicht von 0.5.0T · Version 0.5.0T2, Auswahl des Schriftzugs und Heimweg 0.5.0T3, Entwurf «Lodern» 0.5.0T4, breiter 0.5.0T5*
+*2026-10-05 · Ansicht von 0.5.0T · Version 0.5.0T2, Auswahl des Schriftzugs und Heimweg 0.5.0T3, Entwurf «Lodern» 0.5.0T4, breiter 0.5.0T5, freigegeben 0.5.0T6*
 
 ## Ausgangslage
 
@@ -27,17 +27,15 @@ heute.
   der immer zum Dashboard geht — auch wo der Rückweg einen Schritt zurück führt (aus dem
   Export). Auf dem Dashboard ist der Schriftzug selbst der Knopf (`#markeKnopf`): Er rollt
   nach oben und läßt den Schriftzug einmal ablaufen.
-- **Der Schriftzug wird am Gerät gewählt.** Unten auf dem Dashboard stehen die Entwürfe
-  (`MARKEN`, `zeichneSchriftzugWahl`) neben «Schlicht»; ein Tipp spielt den Entwurf ab und
-  setzt ihn in den Kopf, gespeichert als `schriftzug`. Jeder Entwurf ist ein SVG aus
-  eigenen Linien oder Poppins, Farben nur über Tokens. **Die Stiele sind grau, nicht grün**
-  — Grün heißt erledigt. Bewegt wird einmal, beim Start und auf Wunsch (`wm-los`), nie
-  im Kreis; unter «Bewegung reduzieren» steht alles still. **Ausnahme auf Ansage: «Lodern»**
-  (Runde 2, ganz oben in der Auswahl) — die Handschrift aus «Glut», «Journal» kursiv in
-  Lora an der Linie wie bei «Etikett». Die Flammen der i steigen beim Ablauf von unten auf
-  (`wmAufflammen`) und lodern danach leise weiter (`wmLodern`, ein Schein dahinter), die
-  beiden nicht im Gleichtakt. Das ist das einzige, was im Schriftzug im Kreis läuft. Ist der Entwurf entschieden,
-  fliegen Auswahl und die übrigen Entwürfe wieder hinaus.
+- **Der Schriftzug ist «Lodern»** (`zeichneMarke`), am Gerät aus neun Entwürfen gewählt
+  und freigegeben: «Chilli» in einem Zug geschrieben, breit gezogen und in der Höhe
+  gestaucht; darunter «Journal» kursiv in Lora an einer kurzen Linie in Chili. Die
+  i-Punkte sind Flammen. Beim Start und auf Tipp läuft er einmal ab (`wm-los`): erst die
+  Schrift, dann steigen die Flammen von unten aus den i auf (`wmAufflammen`), dann Linie
+  und «Journal». **Danach lodern die Flammen leise weiter** (`wmLodern`, ein Schein
+  dahinter), die beiden nicht im Gleichtakt — auf Ansage die einzige Bewegung im
+  Schriftzug, die im Kreis läuft. Unter «Bewegung reduzieren» steht alles still. Farben nur
+  über Tokens; Grün kommt nicht vor, Grün heißt erledigt.
 
 ## Begründung
 
@@ -48,6 +46,6 @@ dem Wort «Heute» kostet keinen Platz und steht genau dort, wo man nach heute s
 
 - Wer die Verknüpfung auf dem Home-Bildschirm behält, sieht dort weiter den alten Namen,
   bis er sie neu anlegt — iOS liest den Titel nur beim Anlegen.
-- Die Auswahl ist ein Gerüst auf Zeit: Mit der Entscheidung bleibt ein Entwurf, der Rest
-  und das Feld `schriftzug` gehen (oder es bleibt, falls mehrere bleiben sollen).
-- Suiten: `geruest` A1/A1a, `kalender` H1–H5, `export` (`PRODID`), `schriftzug` (C7a–C7c: «Lodern»).
+- Die Auswahl war ein Gerüst auf Zeit und ist mit der Entscheidung gegangen, samt der
+  übrigen Entwürfe und dem Feld `schriftzug`. Ein gespeicherter alter Wert wird überlesen.
+- Suiten: `geruest` A1/A1a, `kalender` H1–H5, `export` (`PRODID`), `schriftzug`.

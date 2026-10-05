@@ -9,8 +9,9 @@ frisch();
 
 // ── A · Kopf ────────────────────────────────────────────────
 pruefe('A1 der Kopf nennt die App, «Chilli» vorn und größer', q('#kopf h1') &&
-  q('#markeKnopf').getAttribute('aria-label') === 'Chilli Journal' && q('#kopf .marke').textContent === 'Chilli' &&
-  parseFloat(getComputedStyle(q('#kopf .marke')).fontSize) > parseFloat(getComputedStyle(q('#kopf .marke-zusatz')).fontSize));
+  q('#markeKnopf').getAttribute('aria-label') === 'Chilli Journal' && !!q('#kopf svg.wm .wm-zug') &&
+  q('#kopf .wm-zug').getBoundingClientRect().height > q('#kopf .wm-journal').getBoundingClientRect().height &&
+  q('#kopf .wm-zug').getBoundingClientRect().width > 1.5 * q('#kopf .wm-journal').getBoundingClientRect().width);
 pruefe('A1a Titel «Chilli Journal», unter dem Symbol nur «Chilli»', document.title === 'Chilli Journal' &&
   q('meta[name="apple-mobile-web-app-title"]').content === 'Chilli');
 var heute = new Date();
