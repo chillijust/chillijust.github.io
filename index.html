@@ -1434,7 +1434,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.10.0T';
+var APP_VERSION = '0.10.0T2';
 var APP_STAND = '2026-10-06';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -1955,6 +1955,10 @@ function themaSetzen(wert, quelle) {
     anwenden();
     aus();
   }, 400);
+  // Läuft er an, meldet aber sein Ende nie (App im Hintergrund, kein Bild
+  // gezeichnet), bliebe die Klasse hängen — und mit ihr ruhten alle Übergänge
+  // der App. Spätestens nach dem Tropfen ist sie fort (ADR 0030).
+  setTimeout(aus, THEMA_TROPFEN + 400);
 }
 
 // Der Schalter im Kopf: immer ins Gegenteil dessen, was man gerade sieht. Er

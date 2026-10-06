@@ -124,6 +124,25 @@ return warte(340).then(function () {
   ausbewegt();
   pruefe('C13 der Knauf ist zurück auf der Sonne', knaufAuf() === 'sonne', knaufAuf());
 
+  // Ein Übergang, der anläuft, aber sein Ende nie meldet (App im Hintergrund,
+  // kein Bild gezeichnet): Die Klasse darf nicht hängen bleiben, sonst ruhen
+  // alle Übergänge der App für immer (ADR 0030).
+  var echt = document.startViewTransition;
+  document.startViewTransition = function (f) {
+    f();
+    return { finished: new Promise(function () {}), skipTransition: function () {} };
+  };
+  themaUmschalten();
+  var haengt = document.documentElement.classList.contains('thema-tropft');
+  return warte(THEMA_TROPFEN + 500).then(function () {
+    document.startViewTransition = echt;
+    pruefe('C14 meldet der Übergang sein Ende nie, löst sich die Klasse trotzdem', haengt &&
+      !document.documentElement.classList.contains('thema-tropft'));
+    themaUmschalten();
+    return warte(1800);
+  });
+}).then(function () {
+
   // ── D · Die Wahl in den Einstellungen ─────────────────────
   zeige('einstellungen');
   var wahl = alle('.wahl [data-thema]');

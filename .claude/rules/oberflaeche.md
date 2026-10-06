@@ -49,7 +49,8 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   unter dem, was gilt. Mit dem Druck tropft die neue Darstellung als runde Scheibe aus ihm
   (`themaSetzen(wert, quelle)`, `startViewTransition`, 910 ms), ihr Kontrast steigt dabei
   von durchsichtig auf voll; der Knauf gleitet derweil im neuen Bild hinüber
-  (`knaufGleiten`, ADR 0025, 0026, 0027).
+  (`knaufGleiten`, ADR 0025, 0026, 0027). `thema-tropft` nimmt spätestens ein Zeitgeber
+  wieder weg, auch wenn der Übergang sein Ende nie meldet (ADR 0030).
 - **Das Menü** folgt dem Pflichtenheft in Reihenfolge und Wortlaut. Ein Eintrag ohne `ziel`
   trägt «bald»; wer ihn baut, setzt `ziel` und trägt die Ansicht in `ANSICHTEN` ein.
 - **Die Kachel kennt zwei Gesten**: kurz tippen hakt ab, lange drücken (`langDruecken`)
