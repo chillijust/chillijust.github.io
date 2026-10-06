@@ -1434,7 +1434,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.10.0T2';
+var APP_VERSION = '0.11.0T';
 var APP_STAND = '2026-10-06';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -6062,8 +6062,7 @@ function bindeKalender() {
   // quillt aus der Woche, die Woche zieht sich aus dem Monat zusammen (ADR 0008).
   alleIn('[data-kalender]').forEach(function (b) {
     b.addEventListener('click', function () {
-      var wahl = this.getAttribute('data-kalender');
-      if (wahl === state.kalender) return;
+      var wahl = state.kalender === 'woche' ? 'monat' : 'woche';
       var heute = heuteSchluessel(), anker = kalAnker(heute), alt = $('kalRaster');
       var vorher = wahl === 'woche' ? { geist: geist(alt), rect: alt.getBoundingClientRect(), reihe: reiheVon(anker) } : null;
       var leiste = $('kalLeiste'), leisteOben = leiste ? leiste.getBoundingClientRect().top : null;
@@ -6078,6 +6077,8 @@ function bindeKalender() {
   });
   $('kalZurueck').addEventListener('click', function () { kalBlaettern(kalVersatz - 1); });
   $('kalVor').addEventListener('click', function () { kalBlaettern(kalVersatz + 1); });
+  // Ein Schalter, kein Wahlfeld: Wer das Gewählte trifft, will trotzdem
+  // wechseln — am Gerät traf man es ständig (ADR 0031).
   if ($('kalHeute')) $('kalHeute').addEventListener('click', function () { kalBlaettern(0); });
   // Auf: ein Tropfen fällt vom Tag in die Liste. Zu: die Liste fließt zurück.
   alleIn('[data-kaltag]').forEach(function (b) {

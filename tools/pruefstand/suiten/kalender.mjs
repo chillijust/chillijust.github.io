@@ -82,7 +82,14 @@ pruefe('K18 ein Monat davor', q('#kalHeute') && q('#kalHeute').textContent === '
   alle('#kalRaster [data-kaltag]').length === 30);
 q('#kalHeute').click();
 pruefe('K19 der Titel führt zurück zu heute', q('#kalTitel').textContent === 'Oktober 2026' && kalVersatz === 0);
+// Der Schalter schaltet, wohin man auch tippt: auf das Gewählte wie auf das
+// andere (Ticket 0.11.0, ADR 0031).
+q('[data-kalender="monat"]').click();
+pruefe('K19a ein Tipp auf «Monat» im Monat schaltet zur Woche', state.kalender === 'woche', state.kalender);
 q('[data-kalender="woche"]').click();
+pruefe('K19b ein Tipp auf «Woche» in der Woche schaltet zum Monat', state.kalender === 'monat', state.kalender);
+q('[data-kalender="woche"]').click();
+pruefe('K19c und auf das andere wie bisher', state.kalender === 'woche', state.kalender);
 q('#kalVor').click();
 q('#kalVor').click();
 pruefe('K20 eine Woche über die Monatsgrenze', q('#kalHeute').textContent === 'KW 44 · 26. Okt. – 1. Nov.',
