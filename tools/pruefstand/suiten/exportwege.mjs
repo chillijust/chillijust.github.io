@@ -173,8 +173,10 @@ return durch().then(function () {
     terminNach('arzt').imKalender === null && exStatus('t', terminNach('kino')) === 'neu' &&
     gespeichert.termine.every(function (t) { return !t.imKalender; }));
   pruefe('A7 ohne Export, «Bearbeiten» ist zu, die Meldung sagt es', !exBearbeiten && !Object.keys(exportWahl).length &&
-    /2 Einträge gelten wieder als neu/.test(q('#meldung').textContent) && !offen() && q('#exZahl').textContent === '2' &&
-    !q('.ex-alt') && !q('#exBearbeiten'));
+    q('#hinweisTitel').textContent === '2 Einträge gelten wieder als neu' && offen() &&
+    q('#hinweisKarte').classList.contains('bestaetigung') && !q('#hinweisHaken').classList.contains('neutral') &&
+    q('#exZahl').textContent === '2' && !q('.ex-alt') && !q('#exBearbeiten'));
+  hinweisSchliessen();
   return durch();
 }).then(function () {
   // ── O · Ohne Bewegung ─────────────────────────────────────

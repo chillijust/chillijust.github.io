@@ -137,6 +137,10 @@ eingeben('#abTag', '2026-10-15');
 q('#gwSpeichern').click();
 pruefe('C11 ein Start in der Zukunft wird abgewiesen',
   ansicht === 'neu' && state.abgewoehnen.length === 2 && /Zukunft/.test(meldung()));
+pruefe('C11a ein Fehler kommt im Glas, mit neutralem Zeichen (ADR 0019)', !q('#hinweisBlatt').hidden &&
+  q('#hinweisKarte').classList.contains('glas') && q('#hinweisHaken').classList.contains('neutral') &&
+  q('#hinweisTitel').textContent === 'Der Start liegt in der Zukunft' && q('#hinweisOk').hidden);
+hinweisSchliessen();
 q('[data-richtung="an"]').click();
 q('#gwSpeichern').click();
 pruefe('C12 zurück auf Angewöhnen wird es eine Gewohnheit',
@@ -175,6 +179,10 @@ pruefe('E4 Eintragen: mit Zeit und Notiz', a1.rueckfaelle.length === 1 && a1.rue
   a1.rueckfaelle[0].notiz === 'Stress im Büro');
 pruefe('E5 zurück auf dem Dashboard, frei ab jetzt', ansicht === 'home' &&
   q('[data-frei="' + a1.id + '"]').textContent === '0 min 00 s' && /neu/.test(meldung()));
+pruefe('E5a «Eingetragen» kommt im Glas, mit Haken, Satz für Satz', !q('#hinweisBlatt').hidden &&
+  q('#hinweisKarte').classList.contains('bestaetigung') && !q('#hinweisHaken').classList.contains('neutral') &&
+  q('#hinweisTitel').textContent === 'Eingetragen' && q('#hinweisText').textContent === 'Ab jetzt zählt es neu.');
+hinweisSchliessen();
 pruefe('E6 der Rekord steht auf der Kachel', /Rekord 3 h 1 min/.test(q('[data-ab="' + a1.id + '"]').textContent));
 pruefe('E7 gespeichert', JSON.parse(localStorage.getItem(SPEICHER)).abgewoehnen[0].rueckfaelle.length === 1);
 

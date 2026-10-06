@@ -1019,25 +1019,9 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 .klein { font-size: 14px; color: var(--text-2); margin: 10px 4px 0; }
 
 /* ── Meldung ───────────────────────────────────────────────── */
-#meldung {
-  position: fixed;
-  left: 50%;
-  bottom: calc(env(safe-area-inset-bottom) + 24px);
-  z-index: 30;
-  max-width: calc(100% - 32px);
-  padding: 12px 18px;
-  border-radius: 16px;
-  background: var(--knopf);
-  color: var(--knopf-text);
-  font-family: var(--sans);
-  font-size: 15px;
-  text-align: center;
-  pointer-events: none;
-  opacity: 0;
-  transform: translate(-50%, 12px);
-  transition: opacity .2s ease, transform .2s ease;
-}
-#meldung.zeigt { opacity: 1; transform: translate(-50%, 0); }
+/* Gezeigt wird jede Meldung im Glas (ADR 0019). #meldung hält nur den letzten
+   Wortlaut fest, unsichtbar; vorgelesen wird die Karte (role="status"). */
+#meldung { display: none; }
 
 /* ── Hinweis ───────────────────────────────────────────────── */
 /* Was man lesen muß, bevor es weitergeht: mittig, wartet auf «OK». Quillt als
@@ -1168,7 +1152,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
     <ul class="menue-liste" id="menueListe"></ul>
   </div>
 </div>
-<div id="meldung" role="status" aria-live="polite"></div>
+<div id="meldung" hidden></div>
 <div id="hinweisBlatt" hidden>
   <div class="hinweis-karte glas" id="hinweisKarte" tabindex="-1" role="alertdialog" aria-modal="true" aria-labelledby="hinweisTitel"
     aria-describedby="hinweisText">
@@ -1189,7 +1173,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.7.0';
+var APP_VERSION = '0.7.1T';
 var APP_STAND = '2026-10-06';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -1284,15 +1268,16 @@ function wochenAnfang(k) {
   return tagPlus(k, -((ausSchluessel(k).getDay() + 6) % 7));
 }
 
-// Eine kurze Meldung unten. Eine zur Zeit; die nächste ersetzt die vorige.
-var meldungUhr = null;
-function melden(text) {
+// Eine Meldung. Eine zur Zeit; die nächste ersetzt die vorige.
+function melden(text, zeichen) {
   var feld = $('meldung');
-  if (!feld) return;
-  feld.textContent = text;
-  feld.classList.add('zeigt');
-  if (meldungUhr) clearTimeout(meldungUhr);
-  meldungUhr = setTimeout(function () { feld.classList.remove('zeigt'); }, 2600);
+  if (feld) feld.textContent = text;
+  // Jede Meldung erscheint im Glas, wie die Bestätigung (ADR 0019): der erste
+  // Satz als Titel, der Rest darunter; sie quillt aus dem, was gerade getippt
+  // wurde. `zeichen` 'haken' nur für Gelungenes, sonst das neutrale.
+  var teil = String(text).match(/^(.*?[.!?])\s+(.+)$/), titel = teil ? teil[1] : String(text), rest = teil ? teil[2] : '';
+  var knopf = document.activeElement && document.activeElement !== document.body ? document.activeElement : null;
+  bestaetigen(titel.replace(/\.$/, ''), rest, knopf, null, zeichen === 'haken' ? 'haken' : 'hinweis');
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -2695,7 +2680,7 @@ function exAufheben() {
   a.termine.concat(a.gewohnheiten).forEach(function (e) { e.imKalender = null; });
   exportWahl = {};
   exBearbeiten = false;
-  if (speichern()) melden(n === 1 ? 'Gilt wieder als neu.' : n + ' Einträge gelten wieder als neu.');
+  if (speichern()) melden(n === 1 ? 'Gilt wieder als neu.' : n + ' Einträge gelten wieder als neu.', 'haken');
   if (ansicht === 'export') render();
 }
 
@@ -3805,7 +3790,7 @@ function archivierenTippen() {
   var g = entwurf.richtung === 'ab' ? lasterNach(entwurf.id) : gewohnheitNach(entwurf.id);
   if (g) g.archiviert = heuteSchluessel();
   if (state.welle && state.welle.id === entwurf.id) state.welle = null;
-  if (speichern()) melden('Archiviert. Deine Einträge bleiben erhalten.');
+  if (speichern()) melden('Archiviert. Deine Einträge bleiben erhalten.', 'haken');
   zeige('home');
 }
 
@@ -3822,7 +3807,7 @@ function rueckfallLoeschenTippen() {
   entwurf.loeschFrage = -1;
   if (!l || !l.rueckfaelle[i]) return;
   l.rueckfaelle.splice(i, 1);
-  if (speichern()) melden('Gelöscht.');
+  if (speichern()) melden('Gelöscht.', 'haken');
   render();
 }
 
@@ -3867,7 +3852,7 @@ function bindeWelle() {
   if ($('welleGewonnen')) {
     $('welleGewonnen').addEventListener('click', function () {
       if (!welleGewonnen()) return;
-      melden('Gewonnen. Die Welle ist durch.');
+      melden('Gewonnen. Die Welle ist durch.', 'haken');
       chiliFlammt = 'flammt';
       zeige('home');
       chiliFlammt = false;
@@ -3905,7 +3890,7 @@ function zeichneRueckfall() {
 function bindeRueckfall() {
   $('rfNotiz').addEventListener('input', function () { rueckfallFuer.notiz = this.value; });
   $('rfEintragen').addEventListener('click', function () {
-    if (rueckfallEintragen(rueckfallFuer.id, rueckfallFuer.notiz)) melden('Eingetragen. Ab jetzt zählt es neu.');
+    if (rueckfallEintragen(rueckfallFuer.id, rueckfallFuer.notiz)) melden('Eingetragen. Ab jetzt zählt es neu.', 'haken');
     zeige('home');
   });
   $('rfAbbrechen').addEventListener('click', function () {
@@ -4333,7 +4318,7 @@ function terminLoeschenTippen() {
   }
   var t = terminNach(e.id);
   if (t) state.termine.splice(state.termine.indexOf(t), 1);
-  if (speichern()) melden('Gelöscht.');
+  if (speichern()) melden('Gelöscht.', 'haken');
   zeige('home');
 }
 

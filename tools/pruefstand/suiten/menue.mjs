@@ -33,8 +33,10 @@ pruefe('B4 jedes Ziel ist eine Ansicht', gebaut.every(function (id) {
 // ── C · Ein angekündigter Eintrag sagt es und schließt ──────
 q('[data-menue="sicherung"]').click();
 pruefe('C1 das Menü geht zu', !huelle.classList.contains('offen'));
-pruefe('C2 die Meldung sagt, dass es kommt', /nächsten Fassung/.test(q('#meldung').textContent) &&
-  q('#meldung').classList.contains('zeigt'));
+pruefe('C2 die Meldung sagt im Glas, dass es kommt', /nächsten Fassung/.test(q('#hinweisTitel').textContent) &&
+  !q('#hinweisBlatt').hidden && q('#hinweisKarte').classList.contains('glas') &&
+  q('#hinweisHaken').classList.contains('neutral') && getComputedStyle(q('#meldung')).display === 'none');
+hinweisSchliessen();
 pruefe('C3 die Ansicht bleibt', ansicht === 'home');
 
 // ── D · Einstellungen und zurück ────────────────────────────

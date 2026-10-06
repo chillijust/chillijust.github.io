@@ -26,3 +26,4 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0016](0016-vom-rand-wischen.md) | Vom linken Rand wischen heißt zurück | gilt |
 | [0017](0017-journal-wochenreflexion.md) | Journal: eine Wochenreflexion je Woche, sonntags auf dem Dashboard | gilt; Lesen, Löschen und Nachholen geändert durch 0018 |
 | [0018](0018-bestaetigung-lesen-woche-waehlen.md) | Bestätigung im Glas, Reflexion lesen, Woche wählen | gilt |
+| [0019](0019-alle-meldungen-im-glas.md) | Alle Meldungen im Glas | gilt |
