@@ -57,7 +57,7 @@ die Chili.
 | 5 · Kalender-Export (`.ics`), Erinnerung je Gewohnheit; «Heute» als Rückweg, Name «Chilli Journal», Schriftzug «Lodern» (frei); Exportiertes merken, Markierung aufheben, Hinweis aus Glas; nur Laden | fertig (0.5.0) |
 | 6 · Rückblick: Heatmap, Detail, Journal; Wisch vom Rand, Lesen, Woche wählen, Bestätigung im Glas | fertig (0.7.0); alle Meldungen im Glas (0.7.1) |
 | 7 · Sicherung (Code kopieren, Einlesen mit Rückgängig, Kachel nach 30 Tagen), Einstellungen (Hinweis ab 3, Bewegung, alles löschen), Tickets (Knopf unten rechts, Blatt als Tropfen); langer Druck tropft | fertig (0.8.0); Ticketblatt unten, «Alle Tickets» |
-| 8 · Feinschliff: Leerzustände als Wegweiser, Jubel bei 50 %/90 %, «nie zweimal» und neuem Rekord, Ende der Welle, gelöschte Zeilen als Geist | fertig (0.9.0); Ticketblatt aus Glas, Kalendertag, «Hinzufügen» im Glas, KW-Linien, Wisch von rechts, Hell/Dunkel als Tropfen, Tickets im Blatt |
+| 8 · Feinschliff: Leerzustände als Wegweiser, Jubel bei 50 %/90 %, «nie zweimal» und neuem Rekord, Ende der Welle, gelöschte Zeilen als Geist | fertig (0.9.0); Ticketblatt aus Glas, Kalendertag, «Hinzufügen» im Glas, KW-Linien, Wisch von rechts, Hell/Dunkel als Tropfen, Tickets im Blatt; 0.9.1T (kein Zoom beim Tippen, Woche tropft zur Seite, Ticketliste so hoch wie das Ticket), Abnahme offen |
 
 Im Menü stehen alle Einträge des Pflichtenhefts von Anfang an; was noch nicht gebaut ist,
 trägt «bald» und meldet sich mit einer Zeile. **Wer einen Abschnitt baut, gibt dem
@@ -101,7 +101,8 @@ steht — nicht zusätzlich hier.
   `localStorage.clear()` gibt es nicht** — `pruefen.mjs` bricht über beides ab.
 - **Mobile-first**: Touch-Ziele ≥ 44 × 44 px, keine Hover-abhängige Bedienung,
   `-webkit-tap-highlight-color: transparent`, `env(safe-area-inset-*)` für Notch und
-  Home-Indicator.
+  Home-Indicator. **Eingabefelder mit Schrift ≥ 16 px** — darunter zoomt iOS beim Tippen
+  heran (Suite `zoom`, ADR 0028).
 - **Die App duzt.** Jeder Text, der den Nutzer anspricht, sagt «du». Die Suite `geruest`
   liest den gerenderten Text und schlägt bei «Sie»/«Ihnen» an.
 - **Kein Name und kein Logo von Anthropic** — nur Farben und Typografie.
@@ -222,4 +223,5 @@ Skill `ticket`.
 
 ## Offen
 
-Nichts. Alle Bauabschnitte des Pflichtenhefts sind gebaut und am Gerät abgenommen (0.9.0).
+- Abnahme von 0.9.1T (ADR 0028) am Gerät — Zoom beim Sicherungscode und den Wochentropfen
+  zeigt nur das Gerät.

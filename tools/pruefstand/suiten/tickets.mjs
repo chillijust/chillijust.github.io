@@ -229,7 +229,9 @@ return durch().then(function () {
     ticketLesen({ id: 'k2', art: 'wunsch', titel: 'Zwei', erstellt: 2 }),
     ticketLesen({ id: 'k3', art: 'wunsch', titel: 'Drei', erstellt: 3, abgegeben: 5 })];
   ausbewegt();
+  var formHoehe = q('#ticketKarte').getBoundingClientRect().height;
   q('#tkAlle').click();
+  var listeHoehe = q('#ticketKarte').getBoundingClientRect().height;
   var zeilen = alle('#ticketKarte .tk-zeile'), warten = zeilen.map(function (z) {
     var a = z.getAnimations()[0]; return a ? a.effect.getTiming().delay : -1;
   });
@@ -243,10 +245,13 @@ return durch().then(function () {
   // sichtbar nacheinander — vor ihrem Einsatz ist eine Zeile noch nicht da.
   var hoehe = q('#ticketKarte').getAnimations().filter(function (a) {
     return a.effect.getKeyframes().some(function (k) { return !!k.height; }); })[0];
-  pruefe('U9a erst nach dem Wechsel, deutlich gestaffelt, vor dem Einsatz unsichtbar', !!hoehe &&
-    warten[0] >= hoehe.effect.getTiming().duration && warten[1] - warten[0] >= 150 && warten[2] - warten[1] >= 150 &&
+  pruefe('U9a erst nach dem Wechsel, deutlich gestaffelt, vor dem Einsatz unsichtbar',
+    (hoehe ? warten[0] >= hoehe.effect.getTiming().duration : warten[0] === 0) && warten[1] - warten[0] >= 150 && warten[2] - warten[1] >= 150 &&
     zeilen.every(function (z) { var a = z.getAnimations()[0]; return a && a.effect.getTiming().fill === 'backwards' &&
       a.effect.getTiming().duration >= 800; }), warten.join());
+  // ADR 0028: Die Liste ist genau so hoch wie das Ticket davor, ohne Wachsen.
+  pruefe('U9d «Alle Tickets» ist genau so hoch wie die Ticketerstellung', Math.abs(listeHoehe - formHoehe) < 1 && !hoehe,
+    [formHoehe, listeHoehe].join());
   var seite = q('#tkZurSeite');
   pruefe('U9b im Kopf der Liste führt «Ticketseite» zur Seite Tickets, groß genug', !!seite &&
     seite.textContent === 'Ticketseite' && seite.getBoundingClientRect().height >= 44 &&
@@ -261,6 +266,22 @@ return durch().then(function () {
 }).then(function () {
   zeige('home');
   ticketBlattOeffnen(knopf);
+  ausbewegt();
+  q('#tkAlle').click();
+  return durch();
+}).then(function () {
+  var formHoehe = q('#ticketKarte').getBoundingClientRect().height, viele = [];
+  for (var i = 0; i < 14; i++) viele.push(ticketLesen({ id: 'v' + i, art: 'wunsch', titel: 'Viele ' + i, erstellt: 10 + i }));
+  var vorher = state.tickets;
+  state.tickets = vorher.concat(viele);
+  ticketBlattWechseln(true);
+  var karte = q('#ticketKarte');
+  pruefe('U9e auch bei vielen Tickets bleibt die Höhe, die Liste rollt darin',
+    Math.abs(karte.getBoundingClientRect().height - formHoehe) < 1 && karte.scrollHeight > karte.clientHeight + 20,
+    [formHoehe, karte.getBoundingClientRect().height, karte.scrollHeight].join());
+  q('#tkListeZurueck').click();
+  pruefe('U9f zurück im Ticket hat das Blatt wieder seine eigene Höhe', karte.style.height === '');
+  state.tickets = vorher;
   ausbewegt();
   q('#tkAlle').click();
   return durch();

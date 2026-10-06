@@ -1356,9 +1356,10 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 .tm-liste.gedimmt .tk-zeile { opacity: .6; }
 .abschnitt > .knopf { width: 100%; }
 .kachel > p:first-child { margin-top: 0; }
+/* 16 px, nicht kleiner: Darunter zoomt iOS beim Tippen heran (ADR 0028). */
 textarea.eingabe.code {
   min-height: 110px;
-  font: 13px/1.35 ui-monospace, Menlo, monospace;
+  font: 16px/1.35 ui-monospace, Menlo, monospace;
   overflow-wrap: anywhere;
 }
 .sc-scheibe { inset: 7px; color: var(--akzent); }
@@ -1426,7 +1427,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.9.0';
+var APP_VERSION = '0.9.1T';
 var APP_STAND = '2026-10-06';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -3718,6 +3719,51 @@ function kalFliessen(anker, vorher) {
     { dauer: KAL_TAKT.dauer, kurve: KAL_TAKT.kurve, fill: 'forwards' }, function () { weg(g); });
 }
 
+// Woche vor oder zurück: Die alte Woche zieht sich zur Perle zusammen und
+// tropft zur Seite ab, die neue quillt von der anderen Seite als Perle herein
+// und streckt sich zur Zeile — vor nach links, zurück nach rechts (ADR 0028).
+// `vorher`: Geist und Lage der alten Woche, vor dem Neuzeichnen genommen.
+function kalSeitlich(richtung, vorher) {
+  var raster = $('kalRaster');
+  if (!raster || !vorher || bewegungAus()) return;
+  var ab = richtung > 0 ? -1 : 1, her = -ab, r = raster.getBoundingClientRect(), a = vorher.rect, g = vorher.geist;
+  // Eine Perle am Rand der Seite `seite` (-1 links, 1 rechts), so hoch wie die Zeile erlaubt.
+  function perle(w, h, seite) {
+    var d = Math.min(h, 44), rand = px((h - d) / 2);
+    return 'inset(' + rand + ' ' + (seite < 0 ? px(w - d) + ' ' + rand + ' 0px' : '0px ' + rand + ' ' + px(w - d)) +
+      ' round ' + px(d / 2) + ')';
+  }
+  function bauch(seite) { return 'inset(4px ' + (seite < 0 ? '38% 4px 0px' : '0px 4px 38%') + ' round 40px)'; }
+  function schub(w, seite, t) { return 'translateX(' + px(seite * Math.min(48, w * 0.12) * t) + ')'; }
+  var voll = 'inset(0px 0px 0px 0px round 0px)';
+  if (g) {
+    g.style.cssText = 'position: fixed; margin: 0; left: ' + px(a.left) + '; top: ' + px(a.top) + '; width: ' +
+      px(a.width) + '; z-index: 2;';
+    document.body.appendChild(g);
+    bewegt(g, [{ clipPath: voll, transform: 'none', opacity: 1 },
+      { clipPath: bauch(ab), transform: schub(a.width, ab, 0.4), opacity: 1, offset: 0.5 },
+      { clipPath: perle(a.width, a.height, ab), transform: schub(a.width, ab, 1), opacity: 0 }],
+      { dauer: KAL_TAKT.dauer, kurve: KAL_TAKT.kurve, fill: 'forwards' }, function () { weg(g); });
+  }
+  bewegt(raster, [{ clipPath: perle(r.width, r.height, her), transform: schub(r.width, her, 1), opacity: 0 },
+    { clipPath: bauch(her), transform: schub(r.width, her, 0.4), opacity: 1, offset: 0.5 },
+    { clipPath: voll, transform: 'none', opacity: 1 }],
+    { dauer: KAL_TAKT.dauer, warten: Math.round(KAL_TAKT.dauer * 0.3), kurve: KAL_TAKT.kurve, fill: 'backwards' });
+}
+
+// Vor, zurück oder zu «diese Woche»: In der Woche tropft es zur Seite, der
+// Monat blendet wie bisher ein.
+function kalBlaettern(ziel) {
+  var richtung = ziel > kalVersatz ? 1 : ziel < kalVersatz ? -1 : 0, alt = $('kalRaster');
+  var vorher = richtung && state.kalender === 'woche' && alt ? { geist: geist(alt), rect: alt.getBoundingClientRect() } : null;
+  kalVersatz = ziel;
+  kalTag = null;
+  kalGewechselt = !vorher;
+  render();
+  kalGewechselt = false;
+  if (vorher) kalSeitlich(richtung, vorher);
+}
+
 // Die Tagesliste springt nicht an ihren neuen Platz, sie gleitet im selben
 // Takt wie Raster und Karte dorthin.
 function leisteGleiten(obenVorher) {
@@ -5354,6 +5400,7 @@ function bindeSicherung() {
 // Ticketblatt, das sich über die Ansicht legt — aus dem schwebenden Knopf
 // unten rechts oder aus der Ticketliste (ADR 0020).
 var ticketEntwurf = null;   // { id, art, titel, text, ort, grund } — überlebt das Zuklappen
+var ticketHoehe = 0;       // so hoch war das Ticket, als «Alle Tickets» kam (ADR 0028)
 var ticketQuelle = null;    // das Element, aus dem das Blatt quoll — dorthin fließt es zurück
 var ticketListe = false;    // das Blatt zeigt alle Tickets statt des Formulars (ADR 0025)
 var tkAusgabe = '';         // der gebündelte Text zum Kopieren von Hand
@@ -5450,10 +5497,14 @@ function zeichneTicketListe() {
 
 // Wechselt der Inhalt des Blatts, wächst oder schrumpft es weich in die neue
 // Höhe; erst danach tropfen die Zeilen der Liste nacheinander auf (ADR 0027).
+// Die Liste ist genau so hoch wie das Ticket, aus dem sie kam; reicht das
+// nicht, rollt sie darin (ADR 0028).
 var TK_WECHSEL = 380, TK_ZEILE = 820, TK_STAFFEL = 160;
 function ticketBlattWechseln(liste) {
   var karte = $('ticketKarte'), h0 = karte.offsetHeight;
+  if (liste && !ticketListe) ticketHoehe = h0;
   ticketListe = liste;
+  karte.style.height = liste && ticketHoehe ? px(ticketHoehe) : '';
   karte.innerHTML = zeichneTicketBlatt();
   bindeTicketBlatt();
   wahlenSetzen();
@@ -5612,6 +5663,7 @@ function ticketBlattOeffnen(quelle, id, flaeche) {
   ticketQuelle = quelle || null;
   ticketListe = false;
   var blatt = $('ticketBlatt'), karte = $('ticketKarte');
+  karte.style.height = '';
   karte.innerHTML = zeichneTicketBlatt();
   bindeTicketBlatt();
   blatt.hidden = false;
@@ -5973,13 +6025,15 @@ function zuHeute() {
   var heute = heuteSchluessel();
   if (kalVersatz === 0 && kalTag === heute) return;
   var leiste = $('kalLeiste'), oben = leiste ? leiste.getBoundingClientRect().top : null;
-  var blaettern = kalVersatz !== 0;
+  var blaettern = kalVersatz !== 0, richtung = kalVersatz > 0 ? -1 : 1, alt = $('kalRaster');
+  var vorher = blaettern && state.kalender === 'woche' && alt ? { geist: geist(alt), rect: alt.getBoundingClientRect() } : null;
   kalVersatz = 0;
   kalTag = heute;
   heldTakt = KAL_TAKT;
-  kalGewechselt = blaettern;
+  kalGewechselt = blaettern && !vorher;
   render();
   kalGewechselt = false;
+  if (vorher) kalSeitlich(richtung, vorher);
   var tag = document.querySelector('[data-kaltag="' + heute + '"]');
   if (!leiste && tag) tropfenFallen(tag.getBoundingClientRect(), $('kalLeiste'));
   else leisteGleiten(oben);
@@ -5988,7 +6042,6 @@ function zuHeute() {
 function bindeKalender() {
   if (!$('kalRaster')) return;
   if ($('heuteKnopf')) $('heuteKnopf').addEventListener('click', zuHeute);
-  function neu() { kalTag = null; kalGewechselt = true; render(); kalGewechselt = false; }
   // Woche | Monat: Der gewählte Tag bleibt, und mit ihm seine Liste. Der Monat
   // quillt aus der Woche, die Woche zieht sich aus dem Monat zusammen (ADR 0008).
   alleIn('[data-kalender]').forEach(function (b) {
@@ -6007,9 +6060,9 @@ function bindeKalender() {
       leisteGleiten(leisteOben);
     });
   });
-  $('kalZurueck').addEventListener('click', function () { kalVersatz--; neu(); });
-  $('kalVor').addEventListener('click', function () { kalVersatz++; neu(); });
-  if ($('kalHeute')) $('kalHeute').addEventListener('click', function () { kalVersatz = 0; neu(); });
+  $('kalZurueck').addEventListener('click', function () { kalBlaettern(kalVersatz - 1); });
+  $('kalVor').addEventListener('click', function () { kalBlaettern(kalVersatz + 1); });
+  if ($('kalHeute')) $('kalHeute').addEventListener('click', function () { kalBlaettern(0); });
   // Auf: ein Tropfen fällt vom Tag in die Liste. Zu: die Liste fließt zurück.
   alleIn('[data-kaltag]').forEach(function (b) {
     b.addEventListener('click', function () {

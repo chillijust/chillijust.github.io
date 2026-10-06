@@ -20,6 +20,12 @@ function farbe(c) { var d = document.createElement('div'); d.style.color = c; do
 var AKZENT = farbe('var(--akzent)');
 function mitte(r) { return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
 function nah(a, b) { return Math.abs(a.x - b.x) < 2 && Math.abs(a.y - b.y) < 2; }
+function geistDa() { return alle('body > .geist').pop(); }
+// Wo die Perle eines Seitentropfens sitzt: links großer Einzug rechts, keiner links — und umgekehrt.
+function seite(clip) {
+  var m = /inset\(([\d.]+)px ([\d.]+)px ([\d.]+)px ([\d.]+)px round/.exec(clip || '');
+  return !m ? '?' : +m[2] > 100 && +m[4] === 0 ? 'links' : +m[4] > 100 && +m[2] === 0 ? 'rechts' : 'mitte';
+}
 function letzteHuelle() { return alle('body > .tropfen-huelle').pop(); }
 function bilder(el) { var a = el && el.getAnimations()[0]; return a ? a.effect.getKeyframes() : []; }
 function zuKlein(wo) {
@@ -277,6 +283,57 @@ return durch().then(function () {
   pruefe('R6 ein Knopf, der tropft, ist rund: waagerecht wie senkrecht derselbe Halbmesser', halb.length === 2 &&
     halb[0] === halb[1], form);
   frisch();
+  return durch();
+}).then(function () {
+  // ── S · Woche blättern tropft zur Seite (ADR 0028) ─────────
+  aufbauen();
+  state.kalender = 'woche';
+  zeige('home');
+  ausbewegt();
+  q('#kalVor').click();
+  var g = geistDa(), gb = bilder(g), nb = bilder(q('#kalRaster')), na = q('#kalRaster').getAnimations()[0];
+  pruefe('S1 vor: die alte Woche tropft nach links ab', !!g && seite(gb[gb.length - 1].clipPath) === 'links' &&
+    gb[gb.length - 1].opacity === '0' && /translateX\(-/.test(gb[gb.length - 1].transform), gb.length ? gb[gb.length - 1].clipPath : 'kein Geist');
+  pruefe('S2 die neue tropft von rechts auf, kurz danach', seite((nb[0] || {}).clipPath) === 'rechts' && nb[0].opacity === '0' &&
+    /^inset\(0px( 0px)*( round 0px)?\)$/.test(nb[nb.length - 1].clipPath) && !!na && na.effect.getTiming().delay > 0 &&
+    na.effect.getTiming().fill === 'backwards' && kalVersatz === 1, nb.length ? nb[0].clipPath : 'keine');
+  pruefe('S3 ohne das alte Einblenden', !q('#kalRaster').classList.contains('neu'));
+  return durch();
+}).then(function () {
+  var g, gb, nb;
+  pruefe('S4 der Geist ist danach fort', !geistDa());
+  q('#kalZurueck').click();
+  g = geistDa(); gb = bilder(g); nb = bilder(q('#kalRaster'));
+  pruefe('S5 zurück: die alte nach rechts ab, die neue von links auf', !!g && seite(gb[gb.length - 1].clipPath) === 'rechts' &&
+    seite((nb[0] || {}).clipPath) === 'links' && kalVersatz === 0);
+  return durch();
+}).then(function () {
+  q('#kalVor').click();
+  return durch();
+}).then(function () {
+  q('#kalVor').click();
+  return durch();
+}).then(function () {
+  var g, gb, nb;
+  zuHeute();
+  g = geistDa(); gb = bilder(g); nb = bilder(q('#kalRaster'));
+  pruefe('S6 «Heute» aus einer späteren Woche blättert zurück: nach rechts ab, von links auf', !!g &&
+    seite(gb[gb.length - 1].clipPath) === 'rechts' && seite((nb[0] || {}).clipPath) === 'links' && kalVersatz === 0);
+  return durch();
+}).then(function () {
+  state.kalender = 'monat';
+  render();
+  ausbewegt();
+  q('#kalVor').click();
+  pruefe('S7 der Monat blendet wie bisher ein, ohne Seitentropfen', !geistDa() && q('#kalRaster').classList.contains('neu'));
+  return durch();
+}).then(function () {
+  state.bewegung = 'aus';
+  state.kalender = 'woche';
+  render();
+  q('#kalVor').click();
+  pruefe('S8 bei abgeschalteter Bewegung tropft nichts', !geistDa() && !q('#kalRaster').getAnimations().length);
+  state.bewegung = 'auto';
   return durch();
 }).then(function () {
   frisch();

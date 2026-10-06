@@ -60,7 +60,9 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   kommender Tag zeigt dort, was dran ist, ohne Haken; «Hinzufügen» fragt in einem Fenster
   aus Glas — Termin, Gewohnheit, Abgewöhnen (`opt.wahl`, ADR 0025); ein Tipp daneben bricht
   ab wie «Abbrechen» (ADR 0026). Im Monat läuft über jeder Woche ein Strich quer bis an den
-  Kartenrand, die KW links außen darauf; eine KW-Spalte gibt es nicht.
+  Kartenrand, die KW links außen darauf; eine KW-Spalte gibt es nicht. In der Woche tropft
+  Blättern zur Seite: vor tropft die alte nach links ab und die neue von rechts auf, zurück
+  umgekehrt (`kalBlaettern`, `kalSeitlich`, ADR 0028); der Monat blendet ein.
 - **Der Kalender-Export** hat einen Weg, «Als Datei laden» — Teilen kam am Gerät nicht im
   Kalender an (ADR 0013); eine Gewohnheit trägt dort einen grauen Strich, keinen blauen. Was aus dem Export geöffnet
   wird, kehrt über `rueckZiel` dorthin zurück (ADR 0009).
@@ -86,9 +88,10 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   es ersetzt sie nie** — ein halbes Formular darunter bleibt stehen. Nur «Verwerfen» wirft
   einen Entwurf weg (ADR 0020). `#app` hält dem Knopf unten Platz frei. Das Blatt steht
   **unten** und rückt mit der Tastatur hoch (`ticketTastatur`); «Alle Tickets» im Kopf
-  zeigt die Liste im selben Blatt, mit Zurück, ohne den Entwurf zu verlieren; ihre Zeilen
-  tropfen erst nach dem Höhenwechsel des Blatts auf, langsam und je 160 ms später; im Kopf
-  führt «Ticketseite» zur Seite Tickets (ADR 0021, 0025–0027). Der Fließtext ist leer so
+  zeigt die Liste im selben Blatt, mit Zurück, ohne den Entwurf zu verlieren — genau so hoch
+  wie das Ticket davor, mehr rollt darin (`ticketHoehe`, ADR 0028); ihre Zeilen tropfen
+  langsam und je 160 ms später auf; im Kopf führt «Ticketseite» zur Seite Tickets
+  (ADR 0021, 0025–0027). Der Fließtext ist leer so
   hoch wie der Titel und wächst bis drei Zeilen; gemessen wird erst, wenn das Blatt steht. Es ist aus Glas, wie Hinweis
   und Meldung, auch im Tropfen (ADR 0024).
 - **Was alles ersetzt oder löscht, fragt im Glas** (`hinweisZeigen` mit `frage`) und läßt
