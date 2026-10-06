@@ -60,6 +60,9 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   noch einmal hinaus; Neues geht immer mit, Geändertes trägt einen Vermerk (ADR 0011).
 - **Was live läuft, schreibt `takt()` an Ort und Stelle** (`[data-frei]`,
   `[data-wellerest]`, der Ring der Welle) — kein `render()` im Sekundentakt.
+- **Der Rückblick** (`zeichneHeatmap`) steht über «Stand» in der Gewohnheit und im Abgewöhnen:
+  26 Wochen, getönt nach dem Zustand des Tages; das Raster ist **ein** Ziel, ein Tipp nennt
+  den Tag und ändert nichts (ADR 0015).
 - **Eine neue Ansicht** ist ein Eintrag in `ANSICHTEN` (`titel`, `zeichnen`), ihre Ereignisse
   hängen in `bindeAnsicht()` — nie als Attribut.
 

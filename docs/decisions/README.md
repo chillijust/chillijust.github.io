@@ -22,3 +22,4 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0012](0012-markierung-aufheben-und-hinweis.md) | Markierung aufheben, Knöpfe tropfen, ein Hinweis wartet auf «OK» | gilt; Tropfen des Hinweises ersetzt durch 0013 |
 | [0013](0013-nur-laden-hinweis-tropft-wie-ansichten.md) | Nur «Als Datei laden»; der Hinweis tropft wie die Ansichten | gilt |
 | [0014](0014-hinweis-aus-glas.md) | Der Hinweis ist aus Glas | gilt |
+| [0015](0015-heatmap-im-rueckblick.md) | Heatmap: sechs Monate, Tageszustand, Antippen nennt den Tag | gilt |

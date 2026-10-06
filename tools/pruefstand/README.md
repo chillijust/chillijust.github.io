@@ -42,6 +42,7 @@ meldet der Läufer das als Fehler statt sie zu übergehen.
 | `termine` | Lesen, Wiederholung, «Termine heute», blauer Punkt, Tagesliste, Formular, Löschen |
 | `export` | `.ics`-Rechnung (Faltung, Maskierung, RRULE, VALARM), Erinnerung der Gewohnheit, Ansicht, Laden, Rückweg |
 | `bewegung` | Tropfen in die Tagesliste, Geister, Zoom aus dem Getippten, Marke der Umschalter, Formularteile, ohne Bewegung |
+| `rueckblick` | Heatmap: Raster, Monate, Tönung, Summe, Antippen, Streichen, pro Woche, Abgewöhnen |
 | `offline` | `sw.js` von außen, App ohne Worker, Hinweis, Knopf, Notausgang |
 
 ## Eine Suite schreiben

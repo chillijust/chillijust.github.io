@@ -114,8 +114,8 @@ der Umschalter (ADR 0007).
   `neu` und `bearbeiten` legen dabei den `entwurf` an; `bearbeiten` ohne gültige `id`
   landet ebenfalls beim Dashboard.
 - **Ansichten:** `home` (Dashboard), `neu` (Neue Gewohnheit, mit Umschalter Angewöhnen |
-  Abgewöhnen), `bearbeiten` (Gewohnheit: Stand, Formular, Archivieren), `abgewoehnen`
-  (Stand, Formular, Rückfälle, Archivieren), `welle` (Drang), `rueckfall`, `terminNeu` und
+  Abgewöhnen), `bearbeiten` (Gewohnheit: Rückblick, Stand, Formular, Archivieren), `abgewoehnen`
+  (Rückblick, Stand, Formular, Rückfälle, Archivieren), `welle` (Drang), `rueckfall`, `terminNeu` und
   `termin` (Formular, Löschen), `export` (Kalender-Export), `einstellungen`. Wer aus `export` eine
   Gewohnheit oder einen Termin öffnet, kommt über `rueckZiel` dorthin zurück — mit dem
   Rückweg wie nach dem Speichern. `termin` braucht eine gültige `id`,
