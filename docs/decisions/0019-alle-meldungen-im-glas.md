@@ -1,6 +1,6 @@
 # 0019 · Alle Meldungen im Glas
 
-*2026-10-06 · nach 0.7.0 · Version 0.7.1T · ergänzt 0018*
+*2026-10-06 · nach 0.7.0 · Version 0.7.1T, frei mit 0.7.1 · ergänzt 0018*
 
 ## Ausgangslage
 
