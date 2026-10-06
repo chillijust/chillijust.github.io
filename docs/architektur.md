@@ -120,7 +120,9 @@ state = {
   `ticketEntwurf` (bleibt beim Zuklappen) und tropft aus der Quelle; `ticketBlattSchliessen`
   fließt zurück, sonst in `#ticketKnopf`. `ticketSichern` legt an oder ändert (dann wieder
   offen) und bestätigt erst, wenn das Blatt angekommen ist. `ticketsAlsText` bündelt;
-  `ticketsKopieren` setzt `abgegeben`.
+  `ticketsKopieren` setzt `abgegeben`. Das Blatt steht unten; `ticketTastatur()` hebt es
+  über `--tastatur` um die Höhe der Tastatur (`visualViewport`), «Alle Tickets» (`#tkAlle`)
+  klappt zu und öffnet die Liste (ADR 0021).
 
 ## Render-Zyklus
 

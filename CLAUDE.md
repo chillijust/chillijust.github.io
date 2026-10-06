@@ -56,7 +56,7 @@ die Chili.
 | 4 · Termine im Kalender, Tagesansicht; Tropfen statt Aufploppen, Tropfenform, Menü unter dem Knopf | fertig (0.4.0) |
 | 5 · Kalender-Export (`.ics`), Erinnerung je Gewohnheit; «Heute» als Rückweg, Name «Chilli Journal», Schriftzug «Lodern» (frei); Exportiertes merken, Markierung aufheben, Hinweis aus Glas; nur Laden | fertig (0.5.0) |
 | 6 · Rückblick: Heatmap, Detail, Journal; Wisch vom Rand, Lesen, Woche wählen, Bestätigung im Glas | fertig (0.7.0); alle Meldungen im Glas (0.7.1) |
-| 7 · Sicherung (Code kopieren, Einlesen mit Rückgängig, Kachel nach 30 Tagen), Einstellungen (Hinweis ab 3, Bewegung, alles löschen), Tickets (Knopf unten rechts, Blatt als Tropfen); langer Druck tropft | Ansicht 0.8.0T |
+| 7 · Sicherung (Code kopieren, Einlesen mit Rückgängig, Kachel nach 30 Tagen), Einstellungen (Hinweis ab 3, Bewegung, alles löschen), Tickets (Knopf unten rechts, Blatt als Tropfen); langer Druck tropft | Ansicht 0.8.0T2 (Ticketblatt unten, «Alle Tickets») |
 | 8 · Feinschliff | offen |
 
 Im Menü stehen alle Einträge des Pflichtenhefts von Anfang an; was noch nicht gebaut ist,
@@ -222,6 +222,6 @@ Skill `ticket`.
 
 ## Offen
 
-- Bauabschnitt 7 am Gerät abnehmen (0.8.0T): Ticketblatt mit Tastatur, Kopieren in der
-  Home-Bildschirm-App.
+- Bauabschnitt 7 am Gerät abnehmen (0.8.0T2): Ticketblatt unten mit Tastatur, «Alle
+  Tickets», Kopieren in der Home-Bildschirm-App.
 - Bauabschnitt 8 · Feinschliff.

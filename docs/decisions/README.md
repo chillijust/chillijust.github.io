@@ -27,4 +27,5 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0017](0017-journal-wochenreflexion.md) | Journal: eine Wochenreflexion je Woche, sonntags auf dem Dashboard | gilt; Lesen, Löschen und Nachholen geändert durch 0018 |
 | [0018](0018-bestaetigung-lesen-woche-waehlen.md) | Bestätigung im Glas, Reflexion lesen, Woche wählen | gilt |
 | [0019](0019-alle-meldungen-im-glas.md) | Alle Meldungen im Glas | gilt |
-| [0020](0020-sicherung-einstellungen-tickets.md) | Sicherung, Einstellungen, Tickets; langer Druck als Tropfen | gilt |
+| [0020](0020-sicherung-einstellungen-tickets.md) | Sicherung, Einstellungen, Tickets; langer Druck als Tropfen | gilt; Lage des Ticketblatts geändert durch 0021 |
+| [0021](0021-ticketblatt-unten-alle-tickets.md) | Das Ticketblatt steht unten, mit «Alle Tickets» | gilt |

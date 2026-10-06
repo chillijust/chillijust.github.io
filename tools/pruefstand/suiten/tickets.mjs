@@ -186,6 +186,42 @@ return durch().then(function () {
   pruefe('E2 Unbekanntes fällt auf das Übliche zurück', t.art === 'fehler' && t.ort === 'anderswo' && t.grund === '');
   var s = stand({ tickets: [{ id: 'b', titel: 'B', erstellt: 9 }, { id: 'a', titel: 'A', erstellt: 3 }, { id: 'a', titel: 'C', erstellt: 4 }] });
   pruefe('E3 der Speicher sortiert und nimmt jede id einmal', s.tickets.map(function (x) { return x.id; }).join() === 'a,b');
+  // ── U · Unten, alle Tickets, untereinander (ADR 0021) ─────
+  frisch();
+  zeige('home');
+  knopf.click();
+  return durch();
+}).then(function () {
+  var r = q('#ticketKarte').getBoundingClientRect(), k2 = knopf.getBoundingClientRect();
+  pruefe('U1 das Blatt steht unten, beim Knopf', Math.abs(innerHeight - 12 - r.bottom) < 2 && r.top > 0,
+    [r.top, r.bottom, innerHeight].join());
+  var ort = q('#tkOrt').getBoundingClientRect(), grund = q('#tkGrund').getBoundingClientRect();
+  pruefe('U2 «Wo» und «Was» stehen untereinander, volle Breite', grund.top >= ort.bottom &&
+    Math.abs(grund.left - ort.left) < 1 && Math.abs(grund.width - ort.width) < 1, [ort.top, ort.bottom, grund.top].join());
+  pruefe('U3 im Kopf steht «Alle Tickets», groß genug', q('#tkAlle').textContent === 'Alle Tickets' &&
+    q('#tkAlle').getBoundingClientRect().height >= 44 && q('.tk-kopf #tkKopf') !== null);
+  var vvWar = Object.getOwnPropertyDescriptor(window, 'visualViewport');
+  Object.defineProperty(window, 'visualViewport', { value: { height: innerHeight - 300, offsetTop: 0 }, configurable: true });
+  ticketTastatur();
+  var r2 = q('#ticketKarte').getBoundingClientRect();
+  pruefe('U4 geht die Tastatur auf, rückt das Blatt um ihre Höhe hoch', blatt.style.getPropertyValue('--tastatur') === '300px' &&
+    r2.bottom <= innerHeight - 312 + 1 && r2.bottom < r.bottom, [r2.top, r2.bottom].join());
+  Object.defineProperty(window, 'visualViewport', { value: { height: innerHeight, offsetTop: 0 }, configurable: true });
+  ticketTastatur();
+  pruefe('U5 und wieder hinunter, wenn sie geht', blatt.style.getPropertyValue('--tastatur') === '0px');
+  if (vvWar) Object.defineProperty(window, 'visualViewport', vvWar); else delete window.visualViewport;
+  tippen(q('#tkTitel'), 'Halb geschrieben');
+  q('#tkAlle').click();
+  pruefe('U6 «Alle Tickets» klappt zu und öffnet die Liste, der Entwurf bleibt', !blatt.classList.contains('offen') &&
+    ansicht === 'tickets' && !!ticketEntwurf && ticketEntwurf.titel === 'Halb geschrieben' && knopf.classList.contains('hat-entwurf'));
+  return durch();
+}).then(function () {
+  q('#tkNeu').click();
+  pruefe('U7 und der Entwurf geht weiter', q('#tkTitel').value === 'Halb geschrieben');
+  q('#tkAlle').click();
+  pruefe('U8 aus der Liste heraus bleibt man in der Liste', ansicht === 'tickets' && !blatt.classList.contains('offen'));
+  return durch();
+}).then(function () {
   frisch();
   speichern();
 });

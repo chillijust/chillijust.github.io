@@ -1169,9 +1169,11 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
   z-index: 21;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  /* Unten, beim Knopf, aus dem es tropft (ADR 0021). Die Tastatur legt iOS über
+     Fixiertes; `--tastatur` hebt das Blatt um ihre Höhe (ticketTastatur). */
+  align-items: flex-end;
   padding: calc(env(safe-area-inset-top) + 12px) calc(env(safe-area-inset-right) + 12px)
-    calc(env(safe-area-inset-bottom) + 12px) calc(env(safe-area-inset-left) + 12px);
+    calc(env(safe-area-inset-bottom) + 12px + var(--tastatur, 0px)) calc(env(safe-area-inset-left) + 12px);
 }
 #ticketBlatt::before {
   content: '';
@@ -1196,11 +1198,24 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
   background: var(--grund);
   box-shadow: 0 2px 6px rgba(20, 20, 19, .10), 0 16px 40px rgba(20, 20, 19, .18);
 }
-.ticket-karte h2 { margin: 0 4px 12px; font-family: var(--sans); font-size: 18px; font-weight: 600; }
+.ticket-karte h2 { margin: 0; font-family: var(--sans); font-size: 18px; font-weight: 600; }
+.tk-kopf { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: -4px 0 8px 4px; }
+.tk-alle {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 22px;
+  background: var(--flaeche-2);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 500;
+  flex: none;
+}
 .ticket-karte .wahl, .ticket-karte .eingabe { margin-bottom: 10px; }
 .ticket-karte textarea.eingabe { min-height: 88px; }
-.tk-wahlen { display: flex; gap: 8px; }
-.tk-wahlen > div { flex: 1; min-width: 0; }
+.tk-wahlen { display: flex; flex-direction: column; gap: 0; }
+.tk-wahlen > div { min-width: 0; }
 .tk-wahlen select { font-size: 16px; }
 .tk-knoepfe { display: flex; gap: 8px; margin-top: 4px; }
 .tk-knoepfe .knopf { flex: 1; padding: 0 12px; }
@@ -1294,7 +1309,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.8.0T';
+var APP_VERSION = '0.8.0T2';
 var APP_STAND = '2026-10-06';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -5027,7 +5042,8 @@ function grundOptionen(e) {
 
 function zeichneTicketBlatt() {
   var e = ticketEntwurf;
-  return '<h2 id="tkKopf">' + (e.id ? 'Ticket' : 'Neues Ticket') + '</h2>' +
+  return '<div class="tk-kopf"><h2 id="tkKopf">' + (e.id ? 'Ticket' : 'Neues Ticket') + '</h2>' +
+      '<button type="button" class="tk-alle" id="tkAlle">Alle Tickets</button></div>' +
     '<div class="wahl" role="group" aria-label="Ticketart">' + [['fehler', 'Fehler'], ['wunsch', 'Wunsch']].map(function (a) {
       return '<button type="button" data-tkart="' + a[0] + '" aria-pressed="' + (e.art === a[0] ? 'true' : 'false') +
         '">' + a[1] + '</button>';
@@ -5071,6 +5087,12 @@ function bindeTicketBlatt() {
   $('tkOrt').addEventListener('change', function () { e.ort = this.value; });
   $('tkGrund').addEventListener('change', function () { e.grund = this.value; });
   $('tkSichern').addEventListener('click', ticketSichern);
+  // Zu allen Tickets: Das Blatt klappt zu wie beim Danebentippen — ein
+  // Entwurf bleibt liegen —, dann öffnet sich die Liste (ADR 0021).
+  $('tkAlle').addEventListener('click', function () {
+    ticketBlattSchliessen();
+    if (ansicht !== 'tickets') zeige('tickets');
+  });
   // Der einzige Weg, einen Entwurf loszuwerden. Danebentippen klappt nur zu —
   // ein halb geschriebenes Ticket durch eine Handbewegung zu verlieren wäre
   // der schlechtere Tausch.
@@ -5093,6 +5115,16 @@ function bindeTicketBlatt() {
     if (ansicht === 'tickets') render();
     if (gut) melden('Gelöscht.', 'haken');
   });
+}
+
+// Das Blatt steht unten. Geht die Tastatur auf, schiebt iOS sie über das
+// Fixierte, statt den Rahmen zu verkleinern; `visualViewport` sagt, wie viel
+// davon verdeckt ist — um so viel rückt das Blatt hoch.
+function ticketTastatur() {
+  var v = window.visualViewport, blatt = $('ticketBlatt');
+  if (!blatt) return;
+  var verdeckt = v ? Math.max(0, Math.round(window.innerHeight - v.height - v.offsetTop)) : 0;
+  blatt.style.setProperty('--tastatur', verdeckt + 'px');
 }
 
 // Auf: als Tropfen aus `quelle` (dem Knopf oder der getippten Zeile). `id`
@@ -5831,6 +5863,10 @@ function start() {
   });
   $('ticketKnopf').innerHTML = ICON.melden;
   $('ticketKnopf').addEventListener('click', function () { ticketBlattOeffnen(this); });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', ticketTastatur);
+    window.visualViewport.addEventListener('scroll', ticketTastatur);
+  }
   // Danebentippen klappt das Blatt zu; der Entwurf bleibt liegen.
   $('ticketBlatt').addEventListener('click', function (e) {
     if (e.target === this) ticketBlattSchliessen();

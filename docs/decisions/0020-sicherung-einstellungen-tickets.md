@@ -1,7 +1,7 @@
 # 0020 · Sicherung, Einstellungen, Tickets; langer Druck als Tropfen
 
 *2026-10-06 · Bauabschnitt 7 · Version 0.8.0T · ergänzt 0008 (Kacheln und Zeilen tropfen beim
-langen Druck), 0013 (der Hinweis kann fragen)*
+langen Druck), 0013 (der Hinweis kann fragen) · Lage des Ticketblatts geändert durch 0021*
 
 ## Ausgangslage
 
