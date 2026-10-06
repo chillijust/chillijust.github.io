@@ -44,8 +44,9 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 - **Runde Knöpfe** (`.rund`) sind 44 × 44 und tragen ein Symbol aus `ICON` mit `aria-label`.
 - **Der Sonne/Mond-Schalter ist ein Schieber** (`.thema-schalter`, `role="switch"`,
   `aria-checked` = dunkel): Sonne links, Mond rechts, beide immer sichtbar, der Knauf liegt
-  unter dem, was gilt. Er fährt erst hinüber, dann tropft die neue Darstellung als runde
-  Scheibe aus ihm (`themaSetzen(wert, quelle)`, `startViewTransition`, ADR 0025).
+  unter dem, was gilt. Mit dem Druck tropft die neue Darstellung als runde Scheibe aus ihm
+  (`themaSetzen(wert, quelle)`, `startViewTransition`, 910 ms); der Knauf gleitet derweil
+  im neuen Bild hinüber (`knaufGleiten`, ADR 0025, 0026).
 - **Das Menü** folgt dem Pflichtenheft in Reihenfolge und Wortlaut. Ein Eintrag ohne `ziel`
   trägt «bald»; wer ihn baut, setzt `ziel` und trägt die Ansicht in `ANSICHTEN` ein.
 - **Die Kachel kennt zwei Gesten**: kurz tippen hakt ab, lange drücken (`langDruecken`)
@@ -56,8 +57,9 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   Dashboard wie in der Tagesliste; im Kalender trägt sein Tag **einen** blauen Punkt, vorn
   (ADR 0006). Die Tagesansicht ist die Liste unter dem Kalender, keine eigene Ansicht. Ein
   kommender Tag zeigt dort, was dran ist, ohne Haken; «Hinzufügen» fragt in einem Fenster
-  aus Glas — Termin, Gewohnheit, Abgewöhnen (`opt.wahl`, ADR 0025). Im Monat läuft über
-  jeder Woche ein Strich quer, die KW vorn darauf; eine KW-Spalte gibt es nicht.
+  aus Glas — Termin, Gewohnheit, Abgewöhnen (`opt.wahl`, ADR 0025); ein Tipp daneben bricht
+  ab wie «Abbrechen» (ADR 0026). Im Monat läuft über jeder Woche ein Strich quer bis an den
+  Kartenrand, die KW links außen darauf; eine KW-Spalte gibt es nicht.
 - **Der Kalender-Export** hat einen Weg, «Als Datei laden» — Teilen kam am Gerät nicht im
   Kalender an (ADR 0013); eine Gewohnheit trägt dort einen grauen Strich, keinen blauen. Was aus dem Export geöffnet
   wird, kehrt über `rueckZiel` dorthin zurück (ADR 0009).
@@ -84,7 +86,8 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   einen Entwurf weg (ADR 0020). `#app` hält dem Knopf unten Platz frei. Das Blatt steht
   **unten** und rückt mit der Tastatur hoch (`ticketTastatur`); «Alle Tickets» im Kopf
   zeigt die Liste im selben Blatt, mit Zurück, ohne den Entwurf zu verlieren; ihre Zeilen
-  tropfen nacheinander auf (ADR 0021, 0025). Der Fließtext wächst bis drei Zeilen. Es ist aus Glas, wie Hinweis
+  tropfen sichtbar nacheinander auf, je 110 ms später (ADR 0021, 0025, 0026). Der Fließtext
+  ist leer so hoch wie der Titel und wächst bis drei Zeilen. Es ist aus Glas, wie Hinweis
   und Meldung, auch im Tropfen (ADR 0024).
 - **Was alles ersetzt oder löscht, fragt im Glas** (`hinweisZeigen` mit `frage`) und läßt
   sich bis zum Neuladen rückgängig machen (`rueckgaengig`); Einzelnes fragt mit zweitem Tipp

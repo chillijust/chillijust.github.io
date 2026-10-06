@@ -233,7 +233,8 @@ der Umschalter (ADR 0007).
   der Übergang in einer festen Hülle (`.tropfen-huelle`) mit einem Geist darin statt als
   Zoom. Woche | Monat behalten `kalTag`; `kalAnker` und `versatzFuer` wählen, was zu sehen
   ist, `kalFliessen` läßt den Monat aus der Woche quellen und zurück; Kartenhöhe (`heldTakt`) und
-  Tagesliste (`leisteGleiten`) laufen dabei im selben `KAL_TAKT`.
+  Tagesliste (`leisteGleiten`) laufen dabei im selben `KAL_TAKT` — 640 ms auf einer gleichmäßigen
+  Kurve, damit der Tropfen über die ganze Dauer sichtbar wandert (ADR 0026).
 
 ## Darstellung
 

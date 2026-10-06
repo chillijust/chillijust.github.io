@@ -238,6 +238,10 @@ return durch().then(function () {
   pruefe('U9 sie tropfen nacheinander auf', warten.length === 3 && warten[0] === 0 && warten[1] > warten[0] && warten[2] > warten[1] &&
     zeilen.every(function (z) { var a = z.getAnimations()[0]; return a && /round/.test(a.effect.getKeyframes()[0].clipPath); }),
     warten.join());
+  // ADR 0026: sichtbar nacheinander — vor ihrem Einsatz ist eine Zeile noch nicht da.
+  pruefe('U9a deutlich gestaffelt, und vor dem Einsatz unsichtbar', warten[1] >= 100 && warten[2] - warten[1] >= 100 &&
+    zeilen.every(function (z) { var a = z.getAnimations()[0]; return a && a.effect.getTiming().fill === 'backwards'; }),
+    warten.join());
   return durch();
 }).then(function () {
   q('#ticketKarte [data-ticket="k2"]').click();
@@ -247,6 +251,10 @@ return durch().then(function () {
 }).then(function () {
   // Der Fließtext wächst mit, höchstens drei Zeilen.
   var feld = q('#tkText'), eine;
+  tippen(feld, '');
+  var leer = feld.getBoundingClientRect().height, titel = q('#tkTitel').getBoundingClientRect().height;
+  pruefe('U13 leer ist der Fließtext so hoch wie der Titel, nicht dünner', Math.abs(leer - titel) < 1.5,
+    [leer, titel].join());
   tippen(feld, 'kurz');
   eine = feld.getBoundingClientRect().height;
   tippen(feld, 'eins\nzwei');

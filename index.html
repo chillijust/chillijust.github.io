@@ -606,7 +606,9 @@ button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
   align-items: center;
   gap: 6px;
   height: 14px;
-  margin: 2px 2px 0;
+  /* Bis an den Rand der Karte, die KW ganz außen, der Strich entsprechend
+     länger (ADR 0026). */
+  margin: 2px -8px 0 -10px;
   font-family: var(--sans);
   font-size: 10px;
   font-weight: 500;
@@ -688,6 +690,8 @@ button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
 }
 .kal-tag.heute .kal-zahl { z-index: 0; isolation: isolate; }
 .kal-tag.gewaehlt { box-shadow: inset 0 0 0 2px var(--akzent); }
+/* Im Monat steht der Rahmen nicht knapp unter den Punkten (ADR 0026). */
+.kal-raster.monat .kal-tag { padding: 5px 0 9px; }
 .kal-tag.fremd { visibility: hidden; }
 .kal-leiste { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--flaeche-2); }
 .kal-leiste-kopf { font-family: 'Poppins', system-ui, sans-serif; font-weight: 600; font-size: 15px; margin: 0 4px 6px; }
@@ -1309,11 +1313,15 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
   flex: none;
 }
 .ticket-karte .wahl, .ticket-karte .eingabe { margin-bottom: 10px; }
-.ticket-karte textarea.eingabe { min-height: 0; resize: none; overflow-y: hidden; }
+/* Leer ist der Fließtext so hoch wie das Titelfeld darüber, nie dünner (ADR 0026). */
+.ticket-karte textarea.eingabe { min-height: 50px; resize: none; overflow-y: hidden; }
 .tk-wahlen { display: flex; flex-direction: column; gap: 0; }
 .tk-kopf-liste { justify-content: flex-start; gap: 4px; margin-left: -6px; }
 .tk-kopf-liste .rund { background: transparent; }
-.tk-liste-blatt { display: flex; flex-direction: column; border-radius: 14px; background: var(--flaeche); }
+.tk-liste-blatt { display: flex; flex-direction: column; gap: 6px; }
+/* Jede Zeile ist eine eigene Fläche — so sieht man sie einzeln auftropfen (ADR 0026). */
+.tk-liste-blatt .tk-zeile { background: var(--flaeche); border-radius: 14px; }
+.tk-liste-blatt .tk-zeile + .tk-zeile { border-top: 0; border-radius: 14px; }
 .tk-liste-blatt.gedimmt { opacity: .6; }
 .tk-etikett { margin: 14px 6px 6px; font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--text-2); }
 .tk-leer { margin: 4px 6px 8px; }
@@ -1415,7 +1423,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.9.0T4';
+var APP_VERSION = '0.9.0T5';
 var APP_STAND = '2026-10-06';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -1897,9 +1905,18 @@ function themaAnwenden() {
   else wurzel.removeAttribute('data-bewegung');
 }
 
+// Der Kopf wird neu gezeichnet, der Knauf stünde sofort am Ziel. Er gleitet
+// statt dessen von der alten Seite herüber — sichtbar im wachsenden Tropfen.
+function knaufGleiten(wert) {
+  var k = document.querySelector('#themaKnopf .knauf');
+  if (!k) return;
+  var weg = wert === 'dunkel' ? 'translateX(0px)' : 'translateX(40px)';
+  bewegt(k, [{ transform: weg }, { transform: getComputedStyle(k).transform }], { dauer: 750 });
+}
+
 // `quelle`: der Schalter. Kann der Browser Ansichtsübergänge, wächst die neue
 // Darstellung als runder Tropfen aus ihm über den Bildschirm (ADR 0025).
-var THEMA_TROPFEN = 700;
+var THEMA_TROPFEN = 910;   // 700 ms + 30 % (ADR 0026)
 function themaSetzen(wert, quelle) {
   state.thema = wert;
   speichern();
@@ -1914,7 +1931,7 @@ function themaSetzen(wert, quelle) {
   wurzel.classList.add('thema-tropft');
   var gemacht = false, t = null;
   function aus() { wurzel.classList.remove('thema-tropft'); }
-  function anwenden() { if (gemacht) return; gemacht = true; themaAnwenden(); render(); }
+  function anwenden() { if (gemacht) return; gemacht = true; themaAnwenden(); render(); knaufGleiten(wert); }
   try {
     t = document.startViewTransition(anwenden);
     t.finished.then(aus, aus);
@@ -1930,15 +1947,14 @@ function themaSetzen(wert, quelle) {
 }
 
 // Der Schalter im Kopf: immer ins Gegenteil dessen, was man gerade sieht. Er
-// legt fest — zurück zu «Automatisch» geht es in den Einstellungen. Der Knauf
-// fährt zuerst hinüber; erst danach zeichnet der Kopf neu, sonst risse das
-// Neuzeichnen ihn mitten im Weg ab.
+// legt fest — zurück zu «Automatisch» geht es in den Einstellungen.
 function themaUmschalten() {
   var knopf = $('themaKnopf');
   var ziel = themaWirksam() === 'dunkel' ? 'hell' : 'dunkel';
   if (knopf) knopf.setAttribute('aria-checked', ziel === 'dunkel' ? 'true' : 'false');
-  // Der Knauf fährt erst hinüber (50 % gemächlicher als bisher), dann tropft es.
-  setTimeout(function () { themaSetzen(ziel, $('themaKnopf')); }, bewegungAus() ? 0 : 330);
+  // Der Tropfen entsteht mit dem Druck, nicht danach (ADR 0026); der Knauf
+  // gleitet derweil im neuen Bild hinüber (knaufGleiten).
+  themaSetzen(ziel, $('themaKnopf'));
 }
 
 function bewegungAus() {
@@ -2045,7 +2061,9 @@ var TROPFEN_DAUER = Math.round(640 * 0.65);
 var MENUE_DAUER = Math.round(520 * 0.65);
 // Woche | Monat: Raster, Kartenhöhe und Tagesliste laufen in einem Takt, ohne
 // Überschwingen — wer zwei Takte sieht, sieht es schnappen.
-var KAL_TAKT = { dauer: 520, kurve: 'cubic-bezier(.32, .72, 0, 1)' };
+// Ein Tropfen braucht Zeit, um gesehen zu werden: Die alte Kurve war nach
+// 40 % der Zeit zu 90 % fertig (ADR 0026).
+var KAL_TAKT = { dauer: 640, kurve: 'cubic-bezier(.45, 0, .25, 1)' };
 
 function mischen(a, b, t) { return a + (b - a) * t; }
 
@@ -5445,7 +5463,7 @@ function ticketBlattWechseln(liste) {
       { clipPath: 'inset(' + px((h - d) / 2) + ' ' + px(w - d - 8) + ' ' + px((h - d) / 2) + ' 8px round ' + px(d / 2) + ')', opacity: 0 },
       { clipPath: 'inset(' + px((h - d) / 2) + ' ' + px(w - d - 8) + ' ' + px((h - d) / 2) + ' 8px round ' + px(d / 2) + ')', opacity: 1, offset: 0.15 },
       { clipPath: 'inset(0px 0px 0px 0px round 14px)', opacity: 1 }
-    ], { dauer: 420, warten: 70 * i, kurve: TROPFEN_KURVE, fill: 'backwards' });
+    ], { dauer: 560, warten: 110 * i, kurve: TROPFEN_KURVE, fill: 'backwards' });
   });
 }
 
@@ -6311,8 +6329,10 @@ function start() {
     hinweisSchliessen();
   });
   // Eine Bestätigung geht auch mit einem Tipp irgendwohin.
-  $('hinweisBlatt').addEventListener('click', function () {
-    if ($('hinweisKarte').classList.contains('bestaetigung')) hinweisSchliessen();
+  // Eine Wahl («Hinzufügen») bricht ab, wer danebentippt (ADR 0026).
+  $('hinweisBlatt').addEventListener('click', function (e) {
+    if ($('hinweisKarte').classList.contains('bestaetigung')) { hinweisSchliessen(); return; }
+    if (hinweisWahl && e.target === this) { hinweisWahl = null; hinweisSchliessen(); }
   });
   $('swSpaeter').addEventListener('click', function () {
     swStand.gemeldet = true;

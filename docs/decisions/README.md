@@ -32,4 +32,5 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0022](0022-feinschliff-leer-jubel-geist.md) | Feinschliff: Leerzustände, Jubel über den Haken hinaus, Zeilen gehen als Geist | gilt |
 | [0023](0023-kalendertag-hinzufuegen-runder-tropfen.md) | Kalender: Heute als Pille, heute im Kreis, Kalenderwochen, kommende Tage, «Hinzufügen» fragt; Welle abbrechen; Wisch öffnet das Menü; «Allgemein»; der Tropfen ist rund | gilt |
 | [0024](0024-ticketblatt-aus-glas.md) | Das Ticketblatt ist aus Glas | gilt |
-| [0025](0025-nachtrag-tickets-kalender-thema.md) | Nachtrag: Wisch von rechts, schmale Bestätigung, Tickets im Blatt, Kalender, Hell/Dunkel als Tropfen | gilt |
+| [0025](0025-nachtrag-tickets-kalender-thema.md) | Nachtrag: Wisch von rechts, schmale Bestätigung, Tickets im Blatt, Kalender, Hell/Dunkel als Tropfen | gilt; Hell/Dunkel, Ticketzeilen, KW, Takt seit 0026 |
+| [0026](0026-nachtrag-tropfen-mit-dem-druck.md) | Nachtrag: Hell/Dunkel tropft mit dem Druck, Ticketfeld, Kalender | gilt |

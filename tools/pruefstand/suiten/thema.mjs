@@ -78,10 +78,14 @@ pruefe('B4 eine gewählte helle Darstellung sticht das dunkle Gerät',
     function (r) { return r.cssText; }).join(' ')));
 
 // ── C · Der Schalter im Kopf ────────────────────────────────
-// Der Knauf fährt 330 ms, dann tropft die neue Darstellung 700 ms aus dem
-// Schalter (ADR 0025) — gewartet wird auf beides.
+// Die neue Darstellung tropft mit dem Druck aus dem Schalter, 910 ms lang
+// (ADR 0025, 0026); der Knauf gleitet derweil hinüber.
 var sk = q('#themaKnopf').getBoundingClientRect(), tropfAn = null;
 themaUmschalten();
+pruefe('C0a der Tropfen beginnt mit dem Druck, nicht danach',
+  document.documentElement.classList.contains('thema-tropft') &&
+  document.documentElement.style.getPropertyValue('--thema-dauer') === '910ms',
+  document.documentElement.style.getPropertyValue('--thema-dauer'));
 return warte(340).then(function () {
   tropfAn = { klasse: document.documentElement.classList.contains('thema-tropft'),
     x: parseFloat(document.documentElement.style.getPropertyValue('--thema-x')),
@@ -96,6 +100,9 @@ return warte(340).then(function () {
   pruefe('C3 der Grund wird dunkel', grund() === 'rgb(20, 20, 19)', grund());
   pruefe('C4 die Statusleiste folgt', meta() === '#141413', meta());
   pruefe('C5 der Schalter steht auf «dunkel»', q('#themaKnopf').getAttribute('aria-checked') === 'true');
+  pruefe('C5b der Knauf gleitet hinüber, statt zu springen',
+    q('#themaKnopf .knauf').getAnimations().length === 1);
+  ausbewegt();
   pruefe('C5a der Knauf liegt auf dem Mond', knaufAuf() === 'mond', knaufAuf());
   pruefe('C6 die Wahl ist gemerkt', gespeichert() === 'dunkel', gespeichert());
   pruefe('C7 und übersteht das Laden', laden().thema === 'dunkel');
@@ -107,6 +114,7 @@ return warte(340).then(function () {
   pruefe('C10 der zweite Tipp schaltet hell — fest, nicht zurück auf auto', state.thema === 'hell');
   pruefe('C11 <html> trägt «hell»', document.documentElement.getAttribute('data-thema') === 'hell');
   pruefe('C12 der Grund ist wieder Elfenbein', grund() === 'rgb(250, 249, 245)', grund());
+  ausbewegt();
   pruefe('C13 der Knauf ist zurück auf der Sonne', knaufAuf() === 'sonne', knaufAuf());
 
   // ── D · Die Wahl in den Einstellungen ─────────────────────

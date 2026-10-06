@@ -107,6 +107,18 @@ q('#hinweisNein').click();
 pruefe('A5 «Abbrechen» schließt es, nichts geschieht', !q('#hinweisBlatt').classList.contains('offen') && ansicht === 'home');
 ausbewegt();
 neu.click();
+ausbewegt();
+q('#hinweisBlatt').click();
+pruefe('A5a ein Tipp daneben bricht ebenso ab (ADR 0026)', !q('#hinweisBlatt').classList.contains('offen') &&
+  ansicht === 'home');
+ausbewegt();
+neu.click();
+ausbewegt();
+q('#hinweisKarte').click();
+pruefe('A5b ein Tipp ins Fenster selbst schließt es nicht', q('#hinweisBlatt').classList.contains('offen'));
+q('#hinweisNein').click();
+ausbewegt();
+neu.click();
 q('#hinweisWahl [data-neugw="an"]').click();
 pruefe('A6 «Gewohnheit» öffnet das Formular zum Angewöhnen', ansicht === 'neu' && entwurf.richtung === 'an' &&
   q('[data-richtung="an"]').getAttribute('aria-pressed') === 'true');
@@ -173,8 +185,16 @@ return durch().then(function () {
   var mo = tag('2026-10-05').getBoundingClientRect(), so = tag('2026-10-11').getBoundingClientRect(),
     k41 = kw[1].getBoundingClientRect(), k42 = kw[2].getBoundingClientRect();
   pruefe('K2 klein, zwischen den Wochen: über ihrem Montag, unter der Woche davor', k41.bottom <= mo.top + 1 &&
-    k42.top >= mo.bottom - 1 && Math.abs(k41.left - mo.left) < 4 && parseFloat(getComputedStyle(kw[1]).fontSize) <= 11,
+    k42.top >= mo.bottom - 1 && parseFloat(getComputedStyle(kw[1]).fontSize) <= 11,
     [k41.bottom, mo.top, k42.top, mo.bottom].join());
+  // ADR 0026: die KW weiter außen, links vor dem Montag; der Strich reicht entsprechend weiter.
+  var gew = getComputedStyle(tag('2026-10-05'));
+  pruefe('K2b unter dem Tag mehr Luft als darüber, der Rahmen sitzt nicht knapp', parseFloat(gew.paddingBottom) >
+    parseFloat(gew.paddingTop) && parseFloat(gew.paddingBottom) >= 8, gew.paddingTop + ' ' + gew.paddingBottom);
+  pruefe('K2c Woche und Monat fließen gleichmäßig, nicht am Anfang schon fast fertig', KAL_TAKT.dauer >= 600 &&
+    KAL_TAKT.kurve === 'cubic-bezier(.45, 0, .25, 1)', JSON.stringify(KAL_TAKT));
+  pruefe('K2a die KW steht links vor dem Montag, weiter außen', k41.left <= mo.left - 6 && k41.left >= mo.left - 16 &&
+    k41.right >= so.right + 4, [k41.left, mo.left, k41.right, so.right].join());
   var st = getComputedStyle(kw[1], '::after'), strich = kw[1].querySelector('span').getBoundingClientRect();
   pruefe('K3 der Strich läuft waagrecht durch den ganzen Kalender', st.content !== 'none' && parseFloat(st.height) === 1 &&
     k41.right >= so.right - 4 && k41.width > mo.width * 6, [st.content, st.height, k41.right, so.right].join(' '));
