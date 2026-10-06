@@ -1,6 +1,6 @@
 # 0022 · Feinschliff: Leerzustände, Jubel über den Haken hinaus, Zeilen gehen als Geist
 
-*2026-10-06 · Bauabschnitt 8 · Version 0.9.0T*
+*2026-10-06 · Bauabschnitt 8 · Version 0.9.0T, frei mit 0.9.0*
 
 ## Ausgangslage
 

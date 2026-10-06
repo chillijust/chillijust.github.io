@@ -1,6 +1,6 @@
 # 0027 · Nachtrag: Kontrast im Tropfen, Ticketzeilen nach dem Wechsel, Ticketseite
 
-*2026-10-06 · Ticket vom Gerät (App-Stand 0.9.0T5) · Version 0.9.0T6 · ändert 0026
+*2026-10-06 · Ticket vom Gerät (App-Stand 0.9.0T5) · Version 0.9.0T6, frei mit 0.9.0 · ändert 0026
 (Hell ↔ Dunkel, Ticketzeilen); ergänzt 0025 («Alle Tickets» im Blatt)*
 
 ## Ausgangslage
