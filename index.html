@@ -809,6 +809,9 @@ button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
   font-size: 15px;
   flex: none;
 }
+.ex-kopf { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.ex-kopf h2 { flex: 1; min-width: 0; margin: 0; }
+.ex-alle-text { font-family: var(--sans); font-size: 14px; color: var(--text-2); }
 .ex-bearbeiten[aria-pressed="true"] { background: var(--knopf); color: var(--knopf-text); }
 .ex-zeile { transition: opacity .25s ease; }
 /* Die Wege hinaus kommen und gehen als Tropfen (teilTropfen). flow-root, damit
@@ -1602,6 +1605,7 @@ function grundStand() {
     tickets: [],         // Fehler und Wünsche, bis sie kopiert sind — nicht im Sicherungscode
     gesichert: null,     // wann zuletzt ein Sicherungscode kopiert wurde, als Zeitpunkt
     gefeiert: {},        // Abgewöhnen: id → der Rückfall, nach dem der neue Rekord schon gefeiert ist
+    exportOhne: {},      // Export: 't:id' / 'g:id' → true — Neues, das bewußt draußen bleibt (ADR 0034)
     schwachHinweis: true,   // der sanfte Hinweis ab drei ungefestigten Gewohnheiten
     bewegung: 'auto'     // 'auto' folgt dem Gerät, 'aus' stellt alles still
   };
@@ -1645,6 +1649,11 @@ function stand(roh) {
   if (istZeit(roh.gesichert)) s.gesichert = roh.gesichert;
   if (roh.gefeiert && typeof roh.gefeiert === 'object') {
     s.abgewoehnen.forEach(function (a) { if (istZeit(roh.gefeiert[a.id])) s.gefeiert[a.id] = roh.gefeiert[a.id]; });
+  }
+  // Nur für Einträge, die es gibt — ein gelöschter nimmt seine Wahl mit.
+  if (roh.exportOhne && typeof roh.exportOhne === 'object') {
+    s.termine.forEach(function (t) { if (roh.exportOhne['t:' + t.id] === true) s.exportOhne['t:' + t.id] = true; });
+    s.gewohnheiten.forEach(function (g) { if (roh.exportOhne['g:' + g.id] === true) s.exportOhne['g:' + g.id] = true; });
   }
   if (roh.schwachHinweis === false) s.schwachHinweis = false;
   if (roh.bewegung === 'aus') s.bewegung = 'aus';
@@ -3226,7 +3235,30 @@ function exStatus(art, e) {
   return e.imKalender.abdruck === exAbdruck(art, e) ? 'drin' : 'geaendert';
 }
 
-function exMit(art, e) { return exStatus(art, e) === 'neu' || !!exportWahl[art + ':' + e.id]; }
+// Neues geht mit, außer es ist bewußt abgewählt (`state.exportOhne`, gemerkt);
+// was schon im Kalender steht, nur wenn es dazugeholt ist (`exportWahl`, bis
+// zum Export) — ADR 0011, 0034.
+function exMit(art, e) {
+  var k = art + ':' + e.id;
+  return exStatus(art, e) === 'neu' ? !state.exportOhne[k] : !!exportWahl[k];
+}
+
+// Ein Eintrag hin oder her: Neues über die gemerkte Abwahl, Dagewesenes über
+// die Wahl bis zum Export.
+function exUmschalten(art, e, an) {
+  var k = art + ':' + e.id;
+  if (exStatus(art, e) === 'neu') { if (an) delete state.exportOhne[k]; else state.exportOhne[k] = true; }
+  else if (an) exportWahl[k] = true;
+  else delete exportWahl[k];
+}
+
+// «Alle» eines Abschnitts: Geht etwas davon mit, geht alles heraus. Sonst kommt
+// alles Neue mit — und gibt es nichts Neues, alles noch einmal.
+function exAlle(art, liste) {
+  var an = !liste.some(function (e) { return exMit(art, e); });
+  var neu = liste.filter(function (e) { return exStatus(art, e) === 'neu'; });
+  (an && neu.length ? neu : liste).forEach(function (e) { exUmschalten(art, e, an); });
+}
 
 function exportAuswahl(heute) {
   return {
@@ -5116,10 +5148,21 @@ function terminLoeschenTippen() {
 // geht immer mit (ADR 0011). Eine Gewohnheit ohne Erinnerung steht mit da und
 // führt mit einem Tipp dorthin, wo man ihr eine Uhrzeit gibt.
 function exStatusText(status, e, gewaehlt) {
-  if (status === 'neu') return exBearbeiten ? 'neu, geht ohnehin mit' : '';
+  if (status === 'neu') return gewaehlt ? (exBearbeiten ? 'neu, geht mit' : '') : 'neu, bleibt draußen';
   if (exBearbeiten && gewaehlt) return 'geht noch einmal mit';
   if (status === 'geaendert') return 'geändert seit dem Export';
   return 'im Kalender seit ' + tagKurz(tagSchluessel(new Date(e.imKalender.am)));
+}
+
+// Der Kopf eines Abschnitts; unter «Bearbeiten» mit dem Schalter «alle»: an,
+// solange etwas daraus mitgeht (ADR 0034).
+function exKopf(art, titel, liste) {
+  if (!exBearbeiten) return '<h2>' + titel + '</h2>';
+  var an = liste.some(function (e) { return exMit(art, e); });
+  return '<div class="ex-kopf"><h2 id="exKopf' + art + '">' + titel + '</h2><span class="ex-alle-text">alle</span>' +
+    '<button type="button" class="schalter" data-exalle="' + art + '" role="switch" aria-labelledby="exKopf' + art + '" ' +
+      'aria-checked="' + (an ? 'true' : 'false') + '"><span class="schalter-spur"><span class="schalter-knauf"></span></span>' +
+    '</button></div>';
 }
 
 function zeichneExZeile(art, e, zeit, ganz, mehr) {
@@ -5129,7 +5172,6 @@ function zeichneExZeile(art, e, zeit, ganz, mehr) {
   var klassen = 'tm-zeile ex-zeile' + (art === 'g' ? ' ex-gw' : '') + (gewaehlt ? '' : ' ex-alt') +
     (status === 'geaendert' ? ' ex-geaendert' : '') + (exBearbeiten ? ' ex-wahl' : '');
   var ziel = !exBearbeiten ? (art === 't' ? ' data-termin="' : ' data-exgw="') + esc(e.id) + '"'
-    : status === 'neu' ? ' aria-disabled="true"'
     : ' data-exwahl="' + esc(schluessel) + '" aria-pressed="' + (gewaehlt ? 'true' : 'false') + '"';
   return '<button type="button" class="' + klassen + '"' + ziel + ' aria-label="' +
       esc((art === 't' ? e.titel : e.name) + ', ' + zeit + (unter ? ', ' + unter : '')) + '">' +
@@ -5147,23 +5189,27 @@ function zeichneExport() {
   var mitUhr = exportGewohnheiten(), mit = mitUhr.length, html = '';
   var draussen = termine.filter(function (t) { return !!t.imKalender; }).length +
     mitUhr.filter(function (g) { return !!g.imKalender; }).length;
-  if (!draussen) exBearbeiten = false;
-  if (draussen) {
-    html += '<div class="ex-leiste"><span>' + esc(exBearbeiten
-        ? 'Tipp an, was noch einmal mit soll.'
-        : draussen + (draussen === 1 ? ' Eintrag steht' : ' Einträge stehen') + ' schon im Kalender.') + '</span>' +
+  var ohne = termine.filter(function (t) { return exStatus('t', t) === 'neu' && !exMit('t', t); }).length +
+    mitUhr.filter(function (g) { return exStatus('g', g) === 'neu' && !exMit('g', g); }).length;
+  var wahl = termine.length + mitUhr.length;
+  if (!wahl) exBearbeiten = false;
+  if (wahl) {
+    var satz = [draussen ? draussen + (draussen === 1 ? ' Eintrag steht' : ' Einträge stehen') + ' schon im Kalender' : '',
+      ohne ? ohne + (ohne === 1 ? ' bleibt' : ' bleiben') + ' draußen' : ''].filter(function (x) { return !!x; }).join(', ');
+    html += '<div class="ex-leiste"><span>' + esc(exBearbeiten ? 'Tipp an, was mit soll.'
+        : satz ? satz + '.' : 'Alles Neue geht mit.') + '</span>' +
       '<button type="button" class="ex-bearbeiten" id="exBearbeiten" aria-pressed="' + (exBearbeiten ? 'true' : 'false') +
         '">' + (exBearbeiten ? 'Fertig' : 'Bearbeiten') + '</button></div>';
   }
   if (termine.length) {
-    html += '<section class="abschnitt"><h2>Termine</h2><div class="tm-liste">' +
+    html += '<section class="abschnitt">' + exKopf('t', 'Termine', termine) + '<div class="tm-liste">' +
       termine.map(function (t) {
         return zeichneExZeile('t', t, t.ganztags ? 'ganztägig' : t.von + (t.bis ? '–' + t.bis : ''), t.ganztags,
           [t.ort, wiederholungText(t)].filter(function (x) { return !!x; }).join(' · '));
       }).join('') + '</div></section>';
   }
   if (gewohnheiten.length) {
-    html += '<section class="abschnitt"><h2>Gewohnheiten</h2><div class="tm-liste">' +
+    html += '<section class="abschnitt">' + exKopf('g', 'Gewohnheiten', mitUhr) + '<div class="tm-liste">' +
       gewohnheiten.map(function (g) {
         if (g.erinnerung) return zeichneExZeile('g', g, g.erinnerung, false, rhythmusText(g.rhythmus));
         var text = 'ohne Erinnerung, bleibt draußen';
@@ -5205,13 +5251,49 @@ function zeichneExport() {
         '<button type="button" class="knopf" id="exLaden">Als Datei laden</button>' +
       '</div><div class="ex-aufheben" id="exAufhebenTeil"' + (aufheben ? '' : ' hidden') + '>' +
         '<button type="button" class="knopf zart" id="exAufheben">Markierung aufheben</button></div></div>' +
-      '<p class="klein" id="exNichts"' + (zahl ? ' hidden' : '') + '>Alles steht schon im Kalender. Unter «Bearbeiten» ' +
-        'holst du etwas noch einmal dazu.</p>' +
+      '<p class="klein" id="exNichts"' + (zahl ? ' hidden' : '') + '>' + (ohne ? 'Nichts ist gewählt. Unter «Bearbeiten» ' +
+        'wählst du, was mitgeht.' : 'Alles steht schon im Kalender. Unter «Bearbeiten» holst du etwas noch einmal dazu.') + '</p>' +
     '</div>' +
-    '<p class="klein">Hinaus geht, was neu ist. Was schon im Kalender steht, ist abgedunkelt. Änderst du etwas ' +
+    '<p class="klein">Hinaus geht, was neu ist — außer du wählst es unter «Bearbeiten» ab. Was schon im Kalender steht, ' +
+      'ist abgedunkelt. Änderst du etwas ' +
       'davon, löschst du es im Kalender von Hand und holst es unter «Bearbeiten» noch einmal dazu. ' +
       'Vergangene Termine bleiben draußen.</p>' +
     '</section>';
+}
+
+// Kleine Teile — Häkchen, Schalter — tropfen als Perlen aus einem Knopf: Sie
+// beginnen klein auf ihm und rollen an ihren Platz, eins nach dem andern.
+// Zurück fließen ihre Geister in den Knopf (ADR 0032).
+function perlenAus(els, knopf) {
+  if (!zuSehen(knopf) || bewegungAus()) return;
+  var k = knopf.getBoundingClientRect(), kx = k.left + k.width / 2, ky = k.top + k.height / 2;
+  els.forEach(function (el, i) {
+    var r = el.getBoundingClientRect();
+    var bahn = 'translate(' + px(kx - (r.left + r.width / 2)) + ', ' + px(ky - (r.top + r.height / 2)) + ') scale(.3)';
+    bewegt(el, [{ transform: bahn, opacity: 0 }, { transform: bahn, opacity: 1, offset: 0.1 }, { transform: 'none', opacity: 1 }],
+      { dauer: TROPFEN_DAUER + 120, warten: Math.min(i, 8) * 45, kurve: TROPFEN_KURVE, fill: 'backwards' });
+  });
+}
+
+function exPerlen() {
+  if (bewegungAus()) return null;
+  return alleIn('#ansicht .ex-haken, #ansicht [data-exalle]').map(function (el) {
+    return { geist: geist(el), rect: el.getBoundingClientRect() };
+  }).filter(function (p) { return !!p.geist; });
+}
+
+function perlenZu(perlen, knopf) {
+  if (!perlen || !zuSehen(knopf)) return;
+  var k = knopf.getBoundingClientRect(), kx = k.left + k.width / 2, ky = k.top + k.height / 2;
+  perlen.forEach(function (p, i) {
+    var g = p.geist, r = p.rect;
+    g.style.cssText = 'position: fixed; margin: 0; z-index: 25; left: ' + px(r.left) + '; top: ' + px(r.top) + '; width: ' +
+      px(r.width) + '; height: ' + px(r.height) + ';';
+    document.body.appendChild(g);
+    var bahn = 'translate(' + px(kx - (r.left + r.width / 2)) + ', ' + px(ky - (r.top + r.height / 2)) + ') scale(.3)';
+    bewegt(g, [{ transform: 'none', opacity: 1 }, { transform: bahn, opacity: 1, offset: 0.88 }, { transform: bahn, opacity: 0 }],
+      { dauer: TROPFEN_DAUER, warten: Math.min(i, 8) * 30, kurve: TROPFEN_KURVE, fill: 'both' }, function () { weg(g); });
+  });
 }
 
 // Nach jedem Zeichnen der Exportansicht: Was in der Kachel auf- oder zuging,
@@ -5246,9 +5328,26 @@ function bindeExport() {
   if ($('exTerminNeu')) $('exTerminNeu').addEventListener('click', function () { zeige('terminNeu'); });
   if ($('exGewohnheitNeu')) $('exGewohnheitNeu').addEventListener('click', function () { zeige('neu'); });
   if ($('exAufheben')) $('exAufheben').addEventListener('click', exAufheben);
+  // Häkchen und Schalter tropfen aus «Bearbeiten» und mit «Fertig» zurück
+  // hinein (ADR 0032, 0034).
   if ($('exBearbeiten')) $('exBearbeiten').addEventListener('click', function () {
+    var zu = exBearbeiten ? exPerlen() : null;
     exBearbeiten = !exBearbeiten;
+    var y = window.scrollY;
     render();
+    try { window.scrollTo(0, y); } catch (e) { /* egal */ }
+    if (exBearbeiten) perlenAus(alleIn('#ansicht .ex-haken, #ansicht [data-exalle]'), $('exBearbeiten'));
+    else perlenZu(zu, $('exBearbeiten'));
+  });
+  alleIn('[data-exalle]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var art = this.getAttribute('data-exalle'), heute = heuteSchluessel();
+      exAlle(art, art === 't' ? exportTermine(heute) : exportGewohnheiten());
+      speichern();
+      var y = window.scrollY;
+      render();
+      try { window.scrollTo(0, y); } catch (e) { /* egal */ }
+    });
   });
   alleIn('[data-exgw]').forEach(function (b) {
     b.addEventListener('click', function () { zeige('bearbeiten', this.getAttribute('data-exgw')); });
@@ -5256,9 +5355,10 @@ function bindeExport() {
   // Bearbeiten: an Ort und Stelle umschalten, die Liste springt nicht.
   alleIn('[data-exwahl]').forEach(function (b) {
     b.addEventListener('click', function () {
-      var k = this.getAttribute('data-exwahl');
-      if (exportWahl[k]) delete exportWahl[k];
-      else exportWahl[k] = true;
+      var k = this.getAttribute('data-exwahl'), art = k.charAt(0), id = k.slice(2);
+      var e = art === 't' ? terminNach(id) : gewohnheitNach(id);
+      if (e) exUmschalten(art, e, !exMit(art, e));
+      speichern();
       var y = window.scrollY;
       render();
       try { window.scrollTo(0, y); } catch (e) { /* egal */ }

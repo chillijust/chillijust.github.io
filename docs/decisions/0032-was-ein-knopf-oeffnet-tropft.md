@@ -1,6 +1,6 @@
 # 0032 · Was ein Knopf öffnet, tropft aus ihm; Glas im Tropfen ist deutlich
 
-*2026-10-06 · Ticket «Hinzufügen tropfen» · Version 0.11.0T · ergänzt 0007, 0013, 0014, 0026*
+*2026-10-06 · Ticket «Hinzufügen tropfen» · Version 0.11.0T · ergänzt 0007, 0013, 0014, 0026 · Export: ADR 0034*
 
 ## Ausgangslage
 

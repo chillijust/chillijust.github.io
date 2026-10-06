@@ -71,6 +71,7 @@ state = {
   }],
   gesichert: null,                       // | Zeitpunkt in ms — wann zuletzt ein Sicherungscode kopiert wurde
   gefeiert: { 'a…': 1791200000000 },     // Abgewöhnen: der Rückfall, nach dem der neue Rekord gefeiert ist
+  exportOhne: { 't:…': true },          // Export: Neues, das bewußt draußen bleibt (ADR 0034)
   schwachHinweis: true,                  // der Hinweis ab drei ungefestigten Gewohnheiten
   bewegung: 'auto'                       // | 'aus' — Bewegung reduzieren
 }

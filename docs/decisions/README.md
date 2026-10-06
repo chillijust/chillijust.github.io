@@ -41,3 +41,4 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0031](0031-kalenderschalter-ticketliste-rollt-innen.md) | Woche \| Monat schaltet bei jedem Tipp; das Ticketblatt rollt innen, die Glaskante bleibt frei | gilt |
 | [0032](0032-was-ein-knopf-oeffnet-tropft.md) | Was ein Knopf öffnet, tropft aus ihm (Formularteile, Heatmap-Woche, Alle Tickets); Glas im Tropfen dicht und gefaßt | gilt |
 | [0033](0033-beginn-zurueckstellen.md) | Der Beginn einer Gewohnheit läßt sich zurückstellen; fällige Tage seitdem gelten als erledigt | gilt |
+| [0034](0034-export-auswaehlen.md) | Im Export wählen: «Bearbeiten» immer, Häkchen je Eintrag, «alle» je Abschnitt; Abwahl von Neuem gemerkt | gilt |

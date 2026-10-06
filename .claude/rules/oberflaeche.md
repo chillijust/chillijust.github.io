@@ -73,7 +73,9 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   Kalender an (ADR 0013); eine Gewohnheit trägt dort einen grauen Strich, keinen blauen. Was aus dem Export geöffnet
   wird, kehrt über `rueckZiel` dorthin zurück (ADR 0009).
 - **Was schon im Kalender steht, tritt zurück** (`.ex-alt`) und geht nur über «Bearbeiten»
-  noch einmal hinaus; Neues geht immer mit, Geändertes trägt einen Vermerk (ADR 0011).
+  noch einmal hinaus; Neues geht mit, außer es ist dort abgewählt, Geändertes trägt einen Vermerk (ADR 0011).
+  «Bearbeiten» gibt es immer: Häkchen je Eintrag, «alle» je Abschnitt; beides tropft als Perlen aus dem
+  Knopf (`perlenAus`/`perlenZu`, ADR 0034).
 - **Was live läuft, schreibt `takt()` an Ort und Stelle** (`[data-frei]`,
   `[data-wellerest]`, der Ring der Welle) — kein `render()` im Sekundentakt.
 - **Der Rückblick** (`zeichneHeatmap`) steht über «Stand» in der Gewohnheit und im Abgewöhnen:

@@ -42,7 +42,9 @@ zeige('export');
 // ── A · Der Bestand ist offen ───────────────────────────────
 pruefe('A1 ohne Marke ist alles neu und geht mit', exStatus('t', terminNach('kino')) === 'neu' &&
   q('#exZahl').textContent === '3' && !q('.ex-alt'));
-pruefe('A2 nichts exportiert, kein «Bearbeiten»', !q('#exBearbeiten'));
+// Seit ADR 0034 gibt es «Bearbeiten» immer: auch Neues läßt sich abwählen.
+pruefe('A2 nichts exportiert: «Bearbeiten» steht trotzdem da, alles Neue geht mit', !!q('#exBearbeiten') &&
+  /Alles Neue geht mit/.test(q('.ex-leiste').textContent) && !q('.ex-alt'));
 pruefe('A3 ein alter Stand ohne Feld liest sich als neu', terminLesen({ id: 'x', titel: 'X', tag: HEUTE, von: '10:00' }).imKalender === null &&
   gw({ id: 'y' }).imKalender === null);
 pruefe('A4 eine kaputte Marke auch', tm({ imKalender: { am: 'gestern', abdruck: 'ab' } }).imKalender === null &&

@@ -36,7 +36,8 @@ Gilt für die Gewohnheiten in `index.html`. Begründungen in ADR 0002 und im Pfl
 - **Die `.ics` entsteht nur in `kalenderDatei`**, aus `terminEreignis` und `gewohnheitEreignis`:
   Zeiten schwebend (ohne Zeitzone), Zeilen mit CRLF und über `icsFalten`, Text über `icsText`,
   UID = `id@chillinal`. Vergangenes und Gewohnheiten ohne `erinnerung` bleiben draußen (ADR 0009).
-- **Hinaus geht `exportAuswahl`**: alles ohne `imKalender` und, was `exportWahl` dazuholt.
+- **Hinaus geht `exportAuswahl`**: alles ohne `imKalender`, außer es steht in `state.exportOhne` (gemerkt,
+  ADR 0034), und, was `exportWahl` dazuholt. Umgeschaltet wird nur über `exUmschalten` und `exAlle`.
   `imKalender` setzt nur `exportiertMerken`, mit dem Abdruck aus `exAbdruck`; wer einen
   Eintrag neu baut (`terminSpeichern`), trägt die Marke hinüber (ADR 0011).
 - **Eine Reflexion je Woche, unter ihrem Montag**; geändert nur über `reflexionSpeichern`,
