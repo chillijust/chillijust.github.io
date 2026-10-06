@@ -21,6 +21,8 @@ Gilt für die Suiten. Ausführlich in `tools/pruefstand/README.md` und im Skill 
   Dokument: Ein Emoji im Suchmuster findet sich selbst, Chillingos Schlüssel im Klartext
   ließe `pruefen.mjs` anschlagen. Zeichen über `String.fromCharCode`, Schlüssel
   zusammengesetzt; gelesen wird `#app`, nicht `document.body`.
+- **Der Auftritt beim Kaltstart ist vor jeder Suite still beendet** (`helfer.mjs`, ebenso
+  `bild.mjs`). Ob er lief, sagt `auftrittBeimStart`; wer ihn sehen will, ruft `auftritt()`.
 - **Wer Lage oder Größe mißt, ruft vorher `ausbewegt()`** — Ansichten wachsen, Teile
   ziehen sich auf (ADR 0007). Der Läufer rechnet in virtueller Zeit ohne Bilder:
   Animationen kommen nie von selbst an, auf ihr Ende wartet man mit `ausbewegt()` und

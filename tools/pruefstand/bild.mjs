@@ -25,10 +25,11 @@ export const GERAET = { width: 430, height: 932 };
 // damit der Startlauf der App durch ist.
 export function baue(name, code) {
   const html = readFileSync(APP, 'utf8');
-  const skript = code
-    ? '\n<script>setTimeout(function () { try {' + code +
-      '} catch (e) { document.title = "FEHLER: " + e.message; } }, 150);</scr' + 'ipt>\n'
-    : '';
+  // Den Auftritt beim Kaltstart (ADR 0029) still beenden — fotografiert wird
+  // das Dashboard. Wer den Auftritt sehen will, ruft in der Szene auftritt().
+  const skript = '\n<script>if (window.auftrittEnde) auftrittEnde(true);' +
+    (code ? 'setTimeout(function () { try {' + code +
+      '} catch (e) { document.title = "FEHLER: " + e.message; } }, 150);' : '') + '</scr' + 'ipt>\n';
   const ziel = join(BAU, 'b-' + name + '.html');
   writeFileSync(ziel, html.replace('</body>', skript + '</body>'));
   return ziel;

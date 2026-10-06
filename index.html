@@ -182,6 +182,13 @@ svg { display: block; }
 }
 .kopf-heim:active { transform: scale(.97); opacity: .75; }
 .kopf-unter .kopf-heim { align-items: center; }
+/* Der Auftritt beim Kaltstart (ADR 0029): Solange er läuft, steht nur der
+   Schriftzug da; der Rest wartet unsichtbar und nimmt keinen Tipp an — ein Tipp
+   irgendwohin überspringt ihn. */
+html.auftritt #ansicht, html.auftritt .kopf-titel .datum, html.auftritt #themaKnopf,
+html.auftritt #menuKnopf, html.auftritt #ticketKnopf { opacity: 0; }
+html.auftritt body { pointer-events: none; }
+html.auftritt #markeKnopf svg.wm { position: relative; z-index: 5; }
 /* Der Schriftzug (ADR 0010). Abgelaufen wird nur mit .wm-los, einmal; die Flammen lodern immer. */
 svg.wm { display: block; flex: none; color: var(--text); overflow: visible; }
 .wm * { transform-box: fill-box; transform-origin: center; }
@@ -1427,7 +1434,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.9.1T';
+var APP_VERSION = '0.10.0T';
 var APP_STAND = '2026-10-06';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -3276,6 +3283,7 @@ function zeige(name, id) {
 }
 
 function render() {
+  if (auftrittLaeuft) auftrittEnde(true);
   if ((ansicht === 'neu' || ansicht === 'bearbeiten' || ansicht === 'abgewoehnen') && !entwurf) ansicht = 'home';
   if ((ansicht === 'rueckfall' && !rueckfallFuer) || (ansicht === 'welle' && !state.welle)) ansicht = 'home';
   if ((ansicht === 'termin' || ansicht === 'terminNeu') && !terminEntwurf) ansicht = 'home';
@@ -6367,6 +6375,80 @@ function swAufraeumen(fertig) {
 }
 
 // ════════════════════════════════════════════════════════════════
+//  Auftritt
+// ════════════════════════════════════════════════════════════════
+//
+// Beim Kaltstart steht erst nur der Schriftzug groß in der Mitte und schreibt
+// sich; dann wandert er, kleiner werdend, an seinen Platz oben links, und das
+// Dashboard tropft Karte für Karte auf (ADR 0029). Ein Tipp überspringt das;
+// kommt die App nur aus dem Hintergrund zurück, gibt es keinen Auftritt.
+
+var AUFTRITT_SCHRIFT = 2300;   // so lange schreibt sich der Schriftzug (Flammen bis 2,15 s)
+var AUFTRITT_WEG = 700;        // so lange wandert er an seinen Platz
+var AUFTRITT_GROESSE = 2;      // so viel größer steht er in der Mitte
+var auftrittLaeuft = false, auftrittBewegung = null;
+
+function auftritt() {
+  var svg = document.querySelector('#markeKnopf svg.wm');
+  if (!svg || ansicht !== 'home' || bewegungAus()) return;
+  auftrittLaeuft = true;
+  document.documentElement.classList.add('auftritt');
+  markeAbspielen(svg);
+  var r = svg.getBoundingClientRect();
+  var mitte = 'translate(' + px(window.innerWidth / 2 - r.left - r.width / 2) + ', ' +
+    px(window.innerHeight / 2 - r.top - r.height / 2) + ') scale(' + AUFTRITT_GROESSE + ')';
+  var ganz = AUFTRITT_SCHRIFT + AUFTRITT_WEG;
+  auftrittBewegung = bewegt(svg, [{ transform: mitte },
+    { transform: mitte, offset: AUFTRITT_SCHRIFT / ganz, easing: KAL_TAKT.kurve },
+    { transform: 'none' }], { dauer: ganz, kurve: 'linear' }, function () { auftrittEnde(); });
+  if (!auftrittBewegung) auftrittEnde(true);
+}
+
+// `still`: ohne Auftropfen — wenn neu gezeichnet wird oder der Prüfstand
+// das Bild gleich braucht.
+function auftrittEnde(still) {
+  if (!auftrittLaeuft) return;
+  auftrittLaeuft = false;
+  var a = auftrittBewegung;
+  auftrittBewegung = null;
+  if (a) { try { a.cancel(); } catch (e) { /* schon fort */ } }
+  document.documentElement.classList.remove('auftritt');
+  if (!still) dashboardAuftropfen();
+}
+
+// Datum, Schalter und Knöpfe blenden auf; die Karten tropfen von oben nach
+// unten einzeln auf, je als Perle, die sich zur Karte streckt. Was unter dem
+// Bildrand liegt, ist einfach da.
+function dashboardAuftropfen() {
+  if (bewegungAus()) return;
+  alleIn('#kopf .datum, #themaKnopf, #menuKnopf, #ticketKnopf').forEach(function (el) {
+    bewegt(el, [{ opacity: 0 }, { opacity: 1 }], { dauer: 420, kurve: 'ease-out', fill: 'backwards' });
+  });
+  var teile = [];
+  alleIn('#ansicht > *').forEach(function (el) {
+    if (el.classList.contains('abschnitt')) {
+      Array.prototype.forEach.call(el.children, function (k) {
+        if (k.tagName === 'H2') teile.push(k);
+        else if (k.children.length) Array.prototype.forEach.call(k.children, function (z) { teile.push(z); });
+        else teile.push(k);
+      });
+    } else teile.push(el);
+  });
+  var i = 0;
+  teile.forEach(function (el) {
+    var b = el.getBoundingClientRect();
+    if (!b.width || !b.height || b.top > window.innerHeight) return;
+    var d = Math.min(b.width, b.height, 44), seite = px((b.width - d) / 2);
+    bewegt(el, [
+      { clipPath: 'inset(0px ' + seite + ' ' + px(b.height - d) + ' ' + seite + ' round ' + px(d / 2) + ')', opacity: 0 },
+      { clipPath: 'inset(0px ' + seite + ' ' + px(b.height - d) + ' ' + seite + ' round ' + px(d / 2) + ')', opacity: 1, offset: 0.15 },
+      { clipPath: 'inset(-40px -40px -40px -40px round 0px)', opacity: 1 }
+    ], { dauer: 620, warten: 110 * i, kurve: TROPFEN_KURVE, fill: 'backwards' });
+    i++;
+  });
+}
+
+// ════════════════════════════════════════════════════════════════
 //  Start
 // ════════════════════════════════════════════════════════════════
 
@@ -6374,6 +6456,9 @@ function start() {
   themaAnwenden();
   document.documentElement.style.setProperty('--feder', FEDER);
   render();
+  auftritt();
+  // Ein Tipp irgendwohin überspringt den Auftritt.
+  document.addEventListener('pointerdown', function () { if (auftrittLaeuft) auftrittEnde(); }, true);
 
   // Woher ein Tipp kam, damit die nächste Ansicht dort herauswachsen kann.
   document.addEventListener('pointerdown', tippMerken, true);

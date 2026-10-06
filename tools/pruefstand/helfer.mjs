@@ -75,6 +75,10 @@ export function testseite(html, test) {
 // · blobText(b) liest einen Blob ohne Wartezeit.
 export function suite(name, html, rumpf) {
   const test = String.raw`
+// Der Auftritt beim Kaltstart (ADR 0029) läuft hier nie von selbst zu Ende —
+// der Läufer zeichnet keine Bilder. Gemerkt wird, ob er lief; dann still beendet.
+var auftrittBeimStart = typeof auftrittLaeuft !== 'undefined' && auftrittLaeuft;
+if (typeof auftrittEnde === 'function') auftrittEnde(true);
 var log = [];
 function pruefe(n, c, e) { log.push((c ? 'PASS ' : 'FAIL ') + n + (e !== undefined && e !== '' ? ' [' + e + ']' : '')); }
 function q(s) { return document.querySelector(s); }

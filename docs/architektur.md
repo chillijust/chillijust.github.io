@@ -244,6 +244,15 @@ Die Palette steht als CSS-Variablen: hell im `:root`, dunkel zweimal gleich — 
 `themaAnwenden()` setzt nur das Attribut und `theme-color`; ohne Wahl tut das Stylesheet
 die Arbeit allein.
 
+## Auftritt
+
+`start()` zeichnet das Dashboard und ruft `auftritt()`: `html.auftritt` macht alles außer
+dem Schriftzug unsichtbar und nimmt Tipps aus; der Schriftzug steht per Transform groß in
+der Mitte, schreibt sich (`wm-los`) und wandert an seinen Platz. Danach entfernt
+`auftrittEnde()` die Klasse, und `dashboardAuftropfen()` läßt die Karten gestaffelt
+auftropfen. Ein `pointerdown` überspringt das, `render()` beendet es still
+(`auftrittEnde(true)`). Prüfstand und Bildbau beenden es still, bevor sie messen (ADR 0029).
+
 ## Service Worker
 
 `swAnmelden()` beim Start. Wartet eine neue Fassung und läuft schon eine, erscheint

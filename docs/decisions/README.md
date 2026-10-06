@@ -35,4 +35,5 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0025](0025-nachtrag-tickets-kalender-thema.md) | Nachtrag: Wisch von rechts, schmale Bestätigung, Tickets im Blatt, Kalender, Hell/Dunkel als Tropfen | gilt; Hell/Dunkel, Ticketzeilen, KW, Takt seit 0026 |
 | [0026](0026-nachtrag-tropfen-mit-dem-druck.md) | Nachtrag: Hell/Dunkel tropft mit dem Druck, Ticketfeld, Kalender | gilt; Kontrast und Ticketzeilen seit 0027 |
 | [0027](0027-kontrast-ticketzeilen-ticketseite.md) | Nachtrag: Kontrast im Tropfen, Ticketzeilen nach dem Wechsel, Ticketseite | gilt; Listenhöhe seit 0028 |
-| [0028](0028-kein-zoom-wochentropfen-listenhoehe.md) | Kein Heranzoomen beim Tippen, die Woche tropft zur Seite, «Alle Tickets» so hoch wie das Ticket | gilt |
+| [0028](0028-kein-zoom-wochentropfen-listenhoehe.md) | Kein Heranzoomen beim Tippen, die Woche tropft zur Seite, «Alle Tickets» so hoch wie das Ticket | gilt; Seitentropfen ohne Verschiebung seit 0029 |
+| [0029](0029-auftritt-beim-kaltstart.md) | Der Auftritt beim Kaltstart; die Woche rückt nicht über den Rand | gilt |

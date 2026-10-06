@@ -41,6 +41,8 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 - **Die Überschrift führt zur Übersicht** (`#titelHeim`, `#markeKnopf`), immer — auch wo der
   Rückweg zum Export geht. Der Schriftzug «Lodern» kommt aus `zeichneMarke`, «Chilli» steht
   vorn und am größten; Ablauf nur mit `wm-los`, einmal — nur die Flammen lodern immer (ADR 0010).
+  Beim Kaltstart schreibt er sich groß in der Mitte, wandert an seinen Platz, dann tropft das
+  Dashboard Karte für Karte auf (`auftritt`, ADR 0029); ein Tipp überspringt das.
 - **Runde Knöpfe** (`.rund`) sind 44 × 44 und tragen ein Symbol aus `ICON` mit `aria-label`.
 - **Der Sonne/Mond-Schalter ist ein Schieber** (`.thema-schalter`, `role="switch"`,
   `aria-checked` = dunkel): Sonne links, Mond rechts, beide immer sichtbar, der Knauf liegt
@@ -62,7 +64,9 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   ab wie «Abbrechen» (ADR 0026). Im Monat läuft über jeder Woche ein Strich quer bis an den
   Kartenrand, die KW links außen darauf; eine KW-Spalte gibt es nicht. In der Woche tropft
   Blättern zur Seite: vor tropft die alte nach links ab und die neue von rechts auf, zurück
-  umgekehrt (`kalBlaettern`, `kalSeitlich`, ADR 0028); der Monat blendet ein.
+  umgekehrt (`kalBlaettern`, `kalSeitlich`, ADR 0028); der Monat blendet ein. Was im Fluß
+  steht, rückt dabei nie über den Rand — sonst wird die Seite breiter, und iOS verkleinert
+  die ganze Ansicht (ADR 0029).
 - **Der Kalender-Export** hat einen Weg, «Als Datei laden» — Teilen kam am Gerät nicht im
   Kalender an (ADR 0013); eine Gewohnheit trägt dort einen grauen Strich, keinen blauen. Was aus dem Export geöffnet
   wird, kehrt über `rueckZiel` dorthin zurück (ADR 0009).
