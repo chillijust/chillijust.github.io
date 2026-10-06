@@ -60,6 +60,10 @@
   --glas-kante: rgba(255, 255, 255, .75);
   --glas-licht: rgba(255, 255, 255, .95);
   --glas-schleier: rgba(20, 20, 19, .10);
+  /* Im Tropfen ist das Glas dichter und gefaßt, sonst sieht man es auf dem
+     kurzen Weg nicht (ADR 0032). */
+  --glas-tropfen: rgba(250, 249, 245, .86);
+  --glas-rand: rgba(20, 20, 19, .16);
   --rund: 20px;
   --serif: 'Lora', Georgia, 'Times New Roman', serif;
   --sans: 'Poppins', -apple-system, 'Helvetica Neue', Arial, sans-serif;
@@ -83,6 +87,8 @@
     --glas-kante: rgba(255, 255, 255, .22);
     --glas-licht: rgba(255, 255, 255, .38);
     --glas-schleier: rgba(0, 0, 0, .38);
+    --glas-tropfen: rgba(43, 43, 40, .9);
+    --glas-rand: rgba(255, 255, 255, .2);
     color-scheme: dark;
   }
 }
@@ -103,6 +109,8 @@
   --glas-kante: rgba(255, 255, 255, .22);
   --glas-licht: rgba(255, 255, 255, .38);
   --glas-schleier: rgba(0, 0, 0, .38);
+  --glas-tropfen: rgba(43, 43, 40, .9);
+  --glas-rand: rgba(255, 255, 255, .2);
   color-scheme: dark;
 }
 
@@ -1176,6 +1184,14 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
   box-shadow: inset 0 1px 0 var(--glas-licht), inset 0 0 0 1px var(--glas-kante),
     0 2px 6px rgba(20, 20, 19, .08), 0 18px 44px rgba(20, 20, 19, .20);
 }
+/* Unterwegs dichter, mit Rand und tieferem Schatten: Ein Glastropfen von 166 ms
+   war am Gerät nicht als Tropfen zu sehen, nur als etwas, das wegging. Am Ziel
+   blendet die Hülle zur Tönung der Karte über (`glasFarben`, ADR 0032). */
+.tropfen-huelle.glas {
+  background: var(--glas-tropfen);
+  box-shadow: inset 0 1px 0 var(--glas-licht), inset 0 0 0 1.5px var(--glas-kante), 0 0 0 1px var(--glas-rand),
+    0 4px 10px rgba(20, 20, 19, .14), 0 14px 32px rgba(20, 20, 19, .28);
+}
 .glas.im-tropfen { background: none; -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none; }
 .hinweis-karte h2 { margin: 0 0 6px; font-family: var(--sans); font-size: 18px; font-weight: 600; }
 .hinweis-karte p { margin: 0 0 18px; font-size: 16px; color: var(--text-2); }
@@ -2136,9 +2152,29 @@ function tropfenWeg(gross, k) {
     tropfen: station(0.8, tb, tb), klein: station(1, d, d) };
 }
 
-function huellenBild(r, rund, op, off) {
-  return { left: px(r.left), top: px(r.top), width: px(r.width), height: px(r.height), borderRadius: rund,
+function huellenBild(r, rund, op, off, farbe) {
+  var b = { left: px(r.left), top: px(r.top), width: px(r.width), height: px(r.height), borderRadius: rund,
     opacity: op, offset: off };
+  if (farbe) b.backgroundColor = farbe;
+  return b;
+}
+
+// Glas im Tropfen: unterwegs dicht, am Rand der Fläche die Tönung der Karte —
+// so geht die Hülle ohne Sprung in die Karte über (ADR 0032).
+function glasFarben(glas) {
+  if (!glas) return { dicht: null, duenn: null };
+  var cs = getComputedStyle(document.documentElement);
+  return { dicht: cs.getPropertyValue('--glas-tropfen').trim() || null, duenn: cs.getPropertyValue('--glas').trim() || null };
+}
+
+// Was hinter einem Teil liegt: der erste Grund, der nicht durchsichtig ist.
+// Eine Hülle in dieser Farbe geht ohne Kante in ihre Umgebung über.
+function grundUnter(el) {
+  for (; el && el.nodeType === 1; el = el.parentNode) {
+    var b = getComputedStyle(el).backgroundColor;
+    if (b && b !== 'transparent' && !/rgba\(.*,\s*0\)$/.test(b)) return b;
+  }
+  return '';
 }
 
 // Wann die Stationen erreicht sind: halbwegs rund, Tropfen, Knopfgröße. Eine
@@ -2156,11 +2192,12 @@ var TROPFEN_ZU_FRUEH = [0.18, 0.4, 0.86];
 function tropfenZu(g, r, ziel, opt) {
   opt = opt || {};
   var k = ziel.getBoundingClientRect(), w = tropfenWeg(sichtbar(r), k), h = tropfenHuelle(g, r.width, opt.glas);
-  var dauer = opt.dauer || TROPFEN_DAUER, t = opt.frueh ? TROPFEN_ZU_FRUEH : TROPFEN_ZU_TAKT;
+  var dauer = opt.dauer || TROPFEN_DAUER, t = opt.frueh ? TROPFEN_ZU_FRUEH : TROPFEN_ZU_TAKT, f = glasFarben(opt.glas);
   function sk(b, off) { return { transform: 'scale(' + (b.width / r.width).toFixed(4) + ')', offset: off }; }
-  bewegt(h, [huellenBild(w.gross, opt.rund || '20px', 1, 0), huellenBild(w.mitte, '40%', 1, t[0]),
-    huellenBild(w.tropfen, TROPFEN, 1, t[1]), huellenBild(w.klein, TROPFEN, 1, t[2]),
-    huellenBild(w.klein, TROPFEN, 0, 1)],
+  if (opt.grund) h.style.background = opt.grund;
+  bewegt(h, [huellenBild(w.gross, opt.rund || '20px', 1, 0, f.duenn), huellenBild(w.mitte, '40%', 1, t[0], f.dicht),
+    huellenBild(w.tropfen, TROPFEN, 1, t[1], f.dicht), huellenBild(w.klein, TROPFEN, 1, t[2], f.dicht),
+    huellenBild(w.klein, TROPFEN, 0, 1, f.dicht)],
     { dauer: dauer, kurve: 'cubic-bezier(.35, 0, .4, 1)', fill: 'forwards' }, function () {
       weg(h);
       if (opt.fertig) opt.fertig();
@@ -2175,18 +2212,20 @@ function tropfenZu(g, r, ziel, opt) {
 // Auf: die neue Ansicht `neu` quillt als Tropfen aus der Fläche `q`. Gezeigt
 // wird ihr Geist; die echte Ansicht steht derweil unsichtbar schon bereit.
 // `opt` ist frei: `rund` die Ecken, in denen er ankommt (eine Ansicht hat
-// keine), `dauer` die eigene Dauer, `glas` die Hülle aus Glas.
+// keine), `dauer` die eigene Dauer, `glas` die Hülle aus Glas, `grund` die
+// Farbe der Hülle, wenn sie nicht der Grund der Seite ist.
 function tropfenAuf(neu, q, opt) {
   opt = opt || {};
   var g = geist(neu);
   if (!g) return null;
   var n = neu.getBoundingClientRect(), w = tropfenWeg(sichtbar(n), q), h = tropfenHuelle(g, n.width, opt.glas);
-  var dauer = opt.dauer || TROPFEN_DAUER;
+  var dauer = opt.dauer || TROPFEN_DAUER, f = glasFarben(opt.glas);
   function sk(b, off) { return { transform: 'scale(' + (b.width / n.width).toFixed(4) + ')', offset: off }; }
+  if (opt.grund) h.style.background = opt.grund;
   neu.style.opacity = '0';
-  bewegt(h, [huellenBild(w.klein, TROPFEN, 0, 0), huellenBild(w.klein, TROPFEN, 1, 0.08),
-    huellenBild(w.tropfen, TROPFEN, 1, 0.3), huellenBild(w.mitte, '40%', 1, 0.62),
-    huellenBild(w.gross, opt.rund || '0px', 1, 1)],
+  bewegt(h, [huellenBild(w.klein, TROPFEN, 0, 0, f.dicht), huellenBild(w.klein, TROPFEN, 1, 0.08, f.dicht),
+    huellenBild(w.tropfen, TROPFEN, 1, 0.3, f.dicht), huellenBild(w.mitte, '40%', 1, 0.62, f.dicht),
+    huellenBild(w.gross, opt.rund || '0px', 1, 1, f.duenn)],
     { dauer: dauer, kurve: 'cubic-bezier(.3, 0, .25, 1)', fill: 'forwards' }, function () {
       neu.style.opacity = '';
       weg(h);
@@ -2379,30 +2418,43 @@ function leisteZurueck(g, r, tag) {
 // Statt `el.hidden = …`. Das Attribut gilt sofort; zu sieht man einen Geist,
 // der sich zusammenzieht, auf wächst das Teil selbst in seine Höhe. Gibt
 // zurück, was sich bewegt — das Teil oder seinen Geist —, sonst nichts.
-function teilZeigen(el, an) {
+// Mit `quelle`, dem Knopf, der es öffnet oder schließt, tropft das Teil aus
+// ihm und in ihn zurück; der Platz zieht sich derweil im selben Takt auf und
+// zu (ADR 0032).
+function teilZeigen(el, an, quelle) {
   if (!el || el.hidden === !an) return;
+  var aus = zuSehen(quelle) ? quelle : null;
   if (an) {
     el.hidden = false;
     if (bewegungAus()) return;
     var cs = getComputedStyle(el), h = el.offsetHeight;
+    if (aus) tropfenAuf(el, aus.getBoundingClientRect(), { grund: grundUnter(el.parentNode), rund: cs.borderTopLeftRadius });
     el.style.overflow = 'hidden';
-    bewegt(el, [
+    bewegt(el, aus ? [
+      { height: '0px', marginTop: '0px', marginBottom: '0px' },
+      { height: px(h), marginTop: cs.marginTop, marginBottom: cs.marginBottom }
+    ] : [
       { height: '0px', marginTop: '0px', marginBottom: '0px', opacity: 0, transform: 'scale(.97)' },
       { height: px(h), marginTop: cs.marginTop, marginBottom: cs.marginBottom, opacity: 1, transform: 'none' }
-    ], { dauer: 540 }, function () { el.style.overflow = ''; });
+    ], aus ? { dauer: TROPFEN_DAUER, kurve: 'cubic-bezier(.3, 0, .25, 1)' } : { dauer: 540 }, function () { el.style.overflow = ''; });
     wahlenSetzen();
     return el;
   }
-  var g = geist(el), voll = el.offsetHeight;
-  if (g) {
-    var c = getComputedStyle(el);
-    voll += parseFloat(c.marginTop) + parseFloat(c.marginBottom);
-  }
+  var g = geist(el), voll = el.offsetHeight, r = el.getBoundingClientRect();
+  var c = getComputedStyle(el), tropfen = aus && g ? geist(el) : null;
+  if (g) voll += parseFloat(c.marginTop) + parseFloat(c.marginBottom);
   el.hidden = true;
   if (!g) return;
   g.style.cssText = 'overflow: hidden; margin: 0; height: ' + px(voll) + ';';
   g.shadowRoot.lastChild.style.overflow = 'hidden';
   el.parentNode.insertBefore(g, el);
+  if (tropfen) {
+    // Der Platz schließt sich leer; was darin stand, tropft in den Knopf.
+    tropfenZu(tropfen, r, aus, { grund: grundUnter(el.parentNode), rund: c.borderTopLeftRadius });
+    bewegt(g, [{ height: px(voll), opacity: 0 }, { height: '0px', opacity: 0 }],
+      { dauer: TROPFEN_DAUER, kurve: 'cubic-bezier(.35, 0, .4, 1)', fill: 'forwards' }, function () { weg(g); });
+    return g;
+  }
   bewegt(g, [{ height: px(voll), opacity: 1 }, { height: '0px', opacity: 0 }],
     { dauer: 380, kurve: 'cubic-bezier(.4, 0, .2, 1)', fill: 'forwards' }, function () { weg(g); });
   return g;
@@ -4057,7 +4109,9 @@ function hmRahmenSetzen(weich) {
 
 // Die Woche wechselt an Ort und Stelle — das Formular darunter bleibt, wie es
 // ist. Ein gewählter Tag wandert als derselbe Wochentag mit.
-function hmWocheWaehlen(w) {
+// `aus`: die Fläche, aus der die Tage tropfen — der Punkt im Raster, den der
+// Finger traf (ADR 0032). Blättern mit den Pfeilen wechselt ohne Tropfen.
+function hmWocheWaehlen(w, aus) {
   w = Math.max(0, Math.min(HM_WOCHEN - 1, w));
   if (w === hm.woche) return;
   if (hm.tag) {
@@ -4067,6 +4121,7 @@ function hmWocheWaehlen(w) {
   hm.woche = w;
   $('hmWoche').innerHTML = zeichneHmWoche();
   bindeHmWoche();
+  if (aus && !bewegungAus()) tropfenAuf($('hmWoche'), aus, { grund: grundUnter($('hmWoche').parentNode), rund: '14px' });
   hmTagZeigen();
   hmRahmenSetzen(true);
 }
@@ -4110,7 +4165,7 @@ function hmSpalteBei(x) {
 function bindeHeatmap() {
   $('hmRaster').addEventListener('click', function (e) {
     var w = hmSpalteBei(e.clientX);
-    if (w !== null) hmWocheWaehlen(w);
+    if (w !== null) hmWocheWaehlen(w, punktFlaeche(e.clientX, e.clientY));
   });
   bindeHmWoche();
   hmRahmenSetzen(false);
@@ -4312,9 +4367,9 @@ function bindeFormular() {
       alleIn('[data-richtung]').forEach(function (x) {
         x.setAttribute('aria-pressed', x === b ? 'true' : 'false');
       });
-      teilZeigen($('rhAbschnitt'), entwurf.richtung !== 'ab');
-      teilZeigen($('gwErinnerung'), entwurf.richtung !== 'ab');
-      teilZeigen($('abStart'), entwurf.richtung === 'ab');
+      teilZeigen($('rhAbschnitt'), entwurf.richtung !== 'ab', b);
+      teilZeigen($('gwErinnerung'), entwurf.richtung !== 'ab', b);
+      teilZeigen($('abStart'), entwurf.richtung === 'ab', b);
       wahlenSetzen();
       $('gwName').setAttribute('placeholder', BEISPIEL[entwurf.richtung]);
     });
@@ -4325,8 +4380,8 @@ function bindeFormular() {
       alleIn('[data-art]').forEach(function (x) {
         x.setAttribute('aria-pressed', x === b ? 'true' : 'false');
       });
-      teilZeigen($('rhTage'), entwurf.art === 'wochentage');
-      teilZeigen($('rhAnzahl'), entwurf.art === 'proWoche');
+      teilZeigen($('rhTage'), entwurf.art === 'wochentage', b);
+      teilZeigen($('rhAnzahl'), entwurf.art === 'proWoche', b);
       wahlenSetzen();
       $('rhText').textContent = rhythmusErklaerung(entwurf.art);
       $('gwErText').textContent = erinnerungErklaerung(entwurf);
@@ -4346,7 +4401,7 @@ function bindeFormular() {
   $('gwErinnern').addEventListener('click', function () {
     entwurf.erinnern = !entwurf.erinnern;
     this.setAttribute('aria-checked', entwurf.erinnern ? 'true' : 'false');
-    teilZeigen($('gwUhrTeil'), entwurf.erinnern);
+    teilZeigen($('gwUhrTeil'), entwurf.erinnern, this);
     $('gwErText').textContent = erinnerungErklaerung(entwurf);
   });
   $('gwUhr').addEventListener('input', function () { entwurf.erinnerung = this.value; });
@@ -4932,15 +4987,15 @@ function bindeTerminFormular() {
     // Die Erinnerung wechselt mit: Was ganztags gilt, gilt nicht zur Uhrzeit.
     if (e.vorlauf !== null) e.vorlauf = e.ganztags ? VORLAUF_GANZ[0] : 15;
     this.setAttribute('aria-checked', e.ganztags ? 'true' : 'false');
-    teilZeigen($('tmZeiten'), !e.ganztags);
-    teilZeigen($('tmZeitText'), !e.ganztags);
+    teilZeigen($('tmZeiten'), !e.ganztags, this);
+    teilZeigen($('tmZeitText'), !e.ganztags, this);
     $('tmVorlauf').innerHTML = vorlaufOptionen(e);
   });
   alleIn('[data-wdh]').forEach(function (b) {
     b.addEventListener('click', function () {
       e.wiederholung = this.getAttribute('data-wdh');
       alleIn('[data-wdh]').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
-      teilZeigen($('tmEndeTeil'), e.wiederholung !== 'keine');
+      teilZeigen($('tmEndeTeil'), e.wiederholung !== 'keine', b);
       wahlenSetzen();
       $('tmWdhText').textContent = wiederholungErklaerung(e);
     });
@@ -5531,9 +5586,11 @@ function zeichneTicketListe() {
 // Wechselt der Inhalt des Blatts, wächst oder schrumpft es weich in die neue
 // Höhe; erst danach tropfen die Zeilen der Liste nacheinander auf (ADR 0027).
 // Die Liste ist genau so hoch wie das Ticket, aus dem sie kam; reicht das
-// nicht, rollt sie darin (ADR 0028).
+// nicht, rollt sie darin (ADR 0028). Kommt sie über «Alle Tickets» (`aus`,
+// die Fläche des Knopfs), tropft jede Zeile aus ihm: als Perle unter dem Knopf,
+// die an ihren Platz rollt und dort breit wird (ADR 0032).
 var TK_WECHSEL = 380, TK_ZEILE = 820, TK_STAFFEL = 160;
-function ticketBlattWechseln(liste) {
+function ticketBlattWechseln(liste, aus) {
   var karte = $('ticketKarte'), h0 = karte.offsetHeight;
   if (liste && !ticketListe) ticketHoehe = h0;
   ticketListe = liste;
@@ -5545,13 +5602,25 @@ function ticketBlattWechseln(liste) {
   var h1 = karte.offsetHeight;
   var wechselt = Math.abs(h1 - h0) > 1;
   if (wechselt) bewegt(karte, [{ height: px(h0) }, { height: px(h1) }], { dauer: TK_WECHSEL, kurve: TROPFEN_KURVE });
+  var rolle = karte.querySelector('.tk-rolle').getBoundingClientRect();
   if (liste) alleIn('#ticketKarte .tk-zeile').forEach(function (z, i) {
     var w = z.offsetWidth, h = z.offsetHeight;
     if (!w || !h) return;
-    var d = Math.min(h, 44);
-    bewegt(z, [
-      { clipPath: 'inset(' + px((h - d) / 2) + ' ' + px(w - d - 8) + ' ' + px((h - d) / 2) + ' 8px round ' + px(d / 2) + ')', opacity: 0 },
-      { clipPath: 'inset(' + px((h - d) / 2) + ' ' + px(w - d - 8) + ' ' + px((h - d) / 2) + ' 8px round ' + px(d / 2) + ')', opacity: 1, offset: 0.15 },
+    var d = Math.min(h, 44), perle = 'inset(' + px((h - d) / 2) + ' ' + px(w - d - 8) + ' ' + px((h - d) / 2) + ' 8px round ' + px(d / 2) + ')';
+    var zr = z.getBoundingClientRect(), weg = 'none';
+    if (aus && aus.width) {
+      // Die Perle beginnt unter dem Knopf, nie über dem Rand dessen, was rollt.
+      var x = Math.min(aus.left + aus.width / 2, rolle.right - d / 2 - 4), y = rolle.top + d / 2 + 2;
+      weg = 'translate(' + px(x - (zr.left + 8 + d / 2)) + ', ' + px(Math.min(0, y - (zr.top + h / 2))) + ')';
+    }
+    bewegt(z, aus && aus.width ? [
+      { clipPath: perle, opacity: 0, transform: weg },
+      { clipPath: perle, opacity: 1, transform: weg, offset: 0.12 },
+      { clipPath: perle, opacity: 1, transform: 'none', offset: 0.5 },
+      { clipPath: 'inset(0px 0px 0px 0px round 14px)', opacity: 1, transform: 'none' }
+    ] : [
+      { clipPath: perle, opacity: 0 },
+      { clipPath: perle, opacity: 1, offset: 0.15 },
       { clipPath: 'inset(0px 0px 0px 0px round 14px)', opacity: 1 }
     ], { dauer: TK_ZEILE, warten: (wechselt ? TK_WECHSEL : 0) + TK_STAFFEL * i, kurve: TROPFEN_KURVE, fill: 'backwards' });
   });
@@ -5646,7 +5715,7 @@ function bindeTicketBlatt() {
   $('tkSichern').addEventListener('click', ticketSichern);
   // Zu allen Tickets — im selben Blatt, mit Zurück; der Entwurf bleibt liegen
   // (ADR 0025, ändert 0021).
-  $('tkAlle').addEventListener('click', function () { ticketBlattWechseln(true); });
+  $('tkAlle').addEventListener('click', function () { ticketBlattWechseln(true, this.getBoundingClientRect()); });
   // Der einzige Weg, einen Entwurf loszuwerden. Danebentippen klappt nur zu —
   // ein halb geschriebenes Ticket durch eine Handbewegung zu verlieren wäre
   // der schlechtere Tausch.

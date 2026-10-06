@@ -11,7 +11,7 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 
 - **Farben nur über Tokens** (`--grund`, `--text`, `--text-2`, `--flaeche`, `--flaeche-2`,
   `--linie`, `--akzent`, `--auf-akzent`, `--erledigt`, `--termin`, `--knopf`, `--knopf-text`, für Glas
-  `--glas`, `--glas-kante`, `--glas-licht`, `--glas-schleier`). Keine Hexzahl
+  `--glas`, `--glas-kante`, `--glas-licht`, `--glas-schleier`, `--glas-tropfen`, `--glas-rand`). Keine Hexzahl
   außerhalb der drei Paletten-Blöcke und `GRUND` im Skript.
 - **Die dunkle Palette steht zweimal gleich**: unter `prefers-color-scheme: dark` für
   `:root:not([data-thema="hell"])` und unter `:root[data-thema="dunkel"]`. Wer einen Wert
@@ -125,7 +125,8 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   zurück — gezeichnet wird trotzdem sofort, die Bewegung legt sich darüber. Was
   verschwindet, zeigt `geist(el)`; nie den Zustand verzögern, um zu animieren. Eine Zeile,
   die aus einer Liste gelöscht wird, geht über `zeileGeht(el, liste, ersatz)` (ADR 0022).
-- **Formularteile über `teilZeigen(el, an)`**, nie `el.hidden = …`; eine neue `.wahl`
+- **Formularteile über `teilZeigen(el, an, quelle)`**, nie `el.hidden = …`; öffnet ein Knopf das
+  Teil, ist er die `quelle` — es tropft aus ihm und in ihn zurück (ADR 0032); eine neue `.wahl`
   bekommt ihre Marke von `wahlenSetzen()`, nach Änderung an Ort und Stelle aufrufen.
 - **Knöpfe, die kommen und gehen, über `teilTropfen(el, an)`** (ADR 0012). Ein Teil mit
   eigenem `display` braucht `[hidden] { display: none; }`, sonst bleibt es sichtbar.
@@ -144,7 +145,8 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   schwingen nicht über (ADR 0008).
 - **Was aus einem runden Knopf kommt oder in ihn geht, ist ein Tropfen** (`tropfenAuf`,
   `tropfenZu`, `tropfenQuelle`) — rund (`TROPFEN`), ohne Spitze; zurück fließt er, ist die
-  Herkunft fort, in den Menüknopf (ADR 0023). Kacheln und Zeilen zoomen —
+  Herkunft fort, in den Menüknopf (ADR 0023). Glas ist im Tropfen dicht und gefaßt (`--glas-tropfen`, `--glas-rand`), am Ziel so
+  getönt wie die Karte (ADR 0032). Kacheln und Zeilen zoomen —
   außer beim langen Druck: dann tropft es aus dem Fingerpunkt (`punktFlaeche`, ADR 0020).
 - **Das Menü klappt unter seinem Knopf auf** (`menueOeffnen`, `blattLegen`), nie als Blatt
   von unten. Schließen ist Öffnen rückwärts — gleiche Dauer, gespiegelte Bilder.

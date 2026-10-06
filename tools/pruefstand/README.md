@@ -51,6 +51,7 @@ meldet der Läufer das als Fehler statt sie zu übergehen.
 | `langdruck` | langer Druck auf Gewohnheit, Abgewöhnen, Termin: Tropfen aus dem Fingerpunkt und zurück |
 | `feinschliff` | Leerzustände, Jubel bei 50 %/90 % und «nie zweimal», neuer Rekord, Ende der Welle, gelöschte Zeilen als Geist |
 | `nachschliff` | «Heute» als Pille, heute im Kreis, kommender Tag, «Hinzufügen» fragt, Welle abbrechen, Kalenderwochen, «Allgemein», runder Tropfen, Rückweg ohne Herkunft |
+| `tropfen` | was ein Knopf öffnet, tropft aus ihm: Formularteile, Heatmap-Woche, «Alle Tickets»; Glas im Tropfen dicht und gefaßt |
 
 ## Eine Suite schreiben
 
