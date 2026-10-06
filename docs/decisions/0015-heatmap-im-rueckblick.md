@@ -47,5 +47,5 @@ Ein Tipp, der nur anzeigt, macht das Durchsehen gefahrlos.
 
 - Die Spaltenzahl steht zweimal: `HM_WOCHEN` im Skript, `repeat(26, …)` im Stylesheet.
 - Archivierte Gewohnheiten lassen sich nicht öffnen, haben also auch keinen Rückblick.
-- Offen in Abschnitt 6: Journal mit Wochenreflexion.
+- Das Journal mit Wochenreflexion folgt in ADR 0017.
 - Suite: `rueckblick`.

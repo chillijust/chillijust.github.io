@@ -31,7 +31,7 @@ pruefe('B4 jedes Ziel ist eine Ansicht', gebaut.every(function (id) {
 }));
 
 // ── C · Ein angekündigter Eintrag sagt es und schließt ──────
-q('[data-menue="journal"]').click();
+q('[data-menue="sicherung"]').click();
 pruefe('C1 das Menü geht zu', !huelle.classList.contains('offen'));
 pruefe('C2 die Meldung sagt, dass es kommt', /nächsten Fassung/.test(q('#meldung').textContent) &&
   q('#meldung').classList.contains('zeigt'));

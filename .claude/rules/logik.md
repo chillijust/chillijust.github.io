@@ -34,5 +34,7 @@ Gilt für die Gewohnheiten in `index.html`. Begründungen in ADR 0002 und im Pfl
 - **Hinaus geht `exportAuswahl`**: alles ohne `imKalender` und, was `exportWahl` dazuholt.
   `imKalender` setzt nur `exportiertMerken`, mit dem Abdruck aus `exAbdruck`; wer einen
   Eintrag neu baut (`terminSpeichern`), trägt die Marke hinüber (ADR 0011).
+- **Eine Reflexion je Woche, unter ihrem Montag**; geändert nur über `reflexionSpeichern`,
+  zwei leere Antworten entfernen sie (ADR 0017).
 - **Das Formular zeichnet sich beim Wählen nicht neu** — es ändert `entwurf` und die Knöpfe
   an Ort und Stelle, sonst ginge die Tastatur zu.

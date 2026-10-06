@@ -66,6 +66,9 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 - **Vom linken Rand wischen ist der Rückweg** (`wischBeginnen`/`wischEnden`): nur aus den
   äußersten 26 px, wirkt beim Loslassen über `zurueckGehen()`, schweigt bei offenem Menü
   oder Hinweis (ADR 0016). Wer den Rückweg ändert, ändert `zurueckGehen()`.
+- **Die Wochenreflexion steht nur sonntags auf dem Dashboard**, unter den fälligen
+  Gewohnheiten; geschrieben wird außerdem jederzeit über das Journal, nie für eine
+  kommende Woche (ADR 0017).
 - **Eine neue Ansicht** ist ein Eintrag in `ANSICHTEN` (`titel`, `zeichnen`), ihre Ereignisse
   hängen in `bindeAnsicht()` — nie als Attribut.
 

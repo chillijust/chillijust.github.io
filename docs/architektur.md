@@ -53,6 +53,11 @@ state = {
     vorlauf: 15,                         // Minuten vor dem Beginn, aus VORLAUF_ZEIT / VORLAUF_GANZ, oder null
     ort: '', notiz: ''
   }],
+  journal: [{
+    woche: '2026-10-05',                 // Montag der Woche, eine Reflexion je Woche
+    gut: '', stoerte: '',                // höchstens JOURNAL_MAX Zeichen, nicht beide leer
+    zeit: 1791700000000                  // zuletzt geschrieben, oder null
+  }],
   welle: null,                           // | { id, start } — die laufende 10-Minuten-Welle
   exportiert: null                       // | Zeitpunkt in ms — wann zuletzt eine .ics hinausging
 }
@@ -115,11 +120,14 @@ der Umschalter (ADR 0007).
   landet ebenfalls beim Dashboard.
 - **Ansichten:** `home` (Dashboard), `neu` (Neue Gewohnheit, mit Umschalter Angewöhnen |
   Abgewöhnen), `bearbeiten` (Gewohnheit: Rückblick, Stand, Formular, Archivieren), `abgewoehnen`
-  (Rückblick, Stand, Formular, Rückfälle, Archivieren), `welle` (Drang), `rueckfall`, `terminNeu` und
+  (Rückblick, Stand, Formular, Rückfälle, Archivieren), `welle` (Drang), `rueckfall`, `journal`, `reflexion`, `terminNeu` und
   `termin` (Formular, Löschen), `export` (Kalender-Export), `einstellungen`. Wer aus `export` eine
   Gewohnheit oder einen Termin öffnet, kommt über `rueckZiel` dorthin zurück — mit dem
   Rückweg wie nach dem Speichern. `termin` braucht eine gültige `id`,
   `terminNeu` nimmt statt dessen einen Tag; beide legen `terminEntwurf` an.
+  `journal` (Liste) und `reflexion` (zwei Fragen; `id` ist der Montag, nicht in der
+  Zukunft — sonst Dashboard) legen `reflexionEntwurf` an; aus dem Journal geöffnet, führt
+  `rueckZiel` dorthin zurück.
   `abgewoehnen` und `rueckfall` brauchen eine gültige `id`, `welle` eine laufende Welle —
   sonst geht es zum Dashboard.
 - **Der Takt:** `takt()` läuft jede Sekunde und schreibt «frei seit» (`[data-frei]`), die
@@ -148,6 +156,10 @@ der Umschalter (ADR 0007).
   `[data-termin]`) öffnet den Termin — auf dem Dashboard wie in der Tagesliste.
 - **Ringe** werden mit dem Ziel gezeichnet und tragen in `data-von` den zuletzt gezeigten
   Wert (`ringZuletzt`); `ringeFuellen()` läßt sie nach jedem `render()` herüberlaufen.
+- **Journal** (ADR 0017): sonntags setzt `zeichneHome` die Kachel `zeichneReflexionKachel`
+  unter die fälligen Gewohnheiten; `[data-reflexion]` öffnet die Woche. Geändert wird nur
+  über `reflexionSpeichern` — leer gespeichert entfernt. `wochenZahlen` rechnet die Haken
+  der Woche aus `tagesStand`, nichts davon wird gespeichert.
 - `visibilitychange` zeichnet das Dashboard und die Welle ganz neu — nach Mitternacht ist es
   ein anderer Tag, nach zehn Minuten im Hintergrund ist die Welle durch.
 - Der Kopf hat zwei Gestalten: auf dem Dashboard Titel, Datum, Sonne/Mond, Menüknopf;

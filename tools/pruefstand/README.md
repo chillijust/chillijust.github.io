@@ -43,6 +43,7 @@ meldet der Läufer das als Fehler statt sie zu übergehen.
 | `export` | `.ics`-Rechnung (Faltung, Maskierung, RRULE, VALARM), Erinnerung der Gewohnheit, Ansicht, Laden, Rückweg |
 | `bewegung` | Tropfen in die Tagesliste, Geister, Zoom aus dem Getippten, Marke der Umschalter, Formularteile, ohne Bewegung |
 | `rueckblick` | Heatmap: Raster, Monate, Tönung, Summe, Woche wählen, Wochenstreifen, Tag, pro Woche, Abgewöhnen |
+| `journal` | Wochenreflexion: Lesen, Kachel nur sonntags, Schreiben, Ändern, Leeren, Journal-Liste, Rückweg, welche Woche, Ausgabe |
 | `offline` | `sw.js` von außen, App ohne Worker, Hinweis, Knopf, Notausgang |
 
 ## Eine Suite schreiben

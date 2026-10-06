@@ -492,6 +492,31 @@ svg.wm { display: block; flex: none; color: var(--text); overflow: visible; }
 .rf-satz { margin: 4px 0 0; }
 .rf-zeile { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 6px 0; }
 .rf-zeile + .rf-zeile { border-top: 1px solid var(--flaeche-2); }
+
+/* ── Journal ───────────────────────────────────────────────────
+   Sonntags eine Kachel auf dem Dashboard, gebaut wie die der Gewohnheit; im
+   Journal die Wochen untereinander, die neueste oben. Antworten behalten ihre
+   Absätze. */
+.jr-scheibe { inset: 7px; color: var(--akzent); }
+.jr-kachel.erledigt .jr-scheibe { background: var(--erledigt); color: var(--grund); }
+.jr-liste { display: flex; flex-direction: column; gap: 10px; }
+.jr-eintrag {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 16px 18px;
+  border-radius: var(--rund);
+  background: var(--flaeche);
+  box-shadow: var(--schatten);
+  transition: transform .15s ease;
+}
+.jr-eintrag:active { transform: scale(.98); }
+.jr-woche { font-family: var(--sans); font-size: 15px; font-weight: 600; }
+.jr-frage { display: block; margin: 10px 0 2px; font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--text-2); }
+.jr-antwort { display: block; margin: 0; font: 17px/1.45 var(--serif); white-space: pre-line; overflow-wrap: anywhere; }
+.jr-antwort.leer { color: var(--text-2); font-style: italic; }
+.jr-zahlen, .jr-satz { margin: 4px 0 0; color: var(--text-2); font-size: 15px; }
+.jr-leer { margin: 0; color: var(--text-2); }
 .rf-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .rf-wann { font-family: var(--sans); font-size: 15px; font-variant-numeric: tabular-nums; }
 .rf-notiz { font-size: 14px; font-style: italic; color: var(--text-2); overflow-wrap: anywhere; }
@@ -1141,7 +1166,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.6.0';
+var APP_VERSION = '0.7.0T';
 var APP_STAND = '2026-10-06';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -1267,6 +1292,7 @@ function grundStand() {
     gewohnheiten: [],
     abgewoehnen: [],
     termine: [],
+    journal: [],         // Wochenreflexionen, nach Woche sortiert
     welle: null,         // die laufende 10-Minuten-Welle: { id, start } oder null
     exportiert: null     // wann zuletzt eine .ics hinausging, als Zeitpunkt
   };
@@ -1297,6 +1323,14 @@ function stand(roh) {
       var gut = terminLesen(t);
       if (gut && !tids[gut.id]) { tids[gut.id] = true; s.termine.push(gut); }
     });
+  }
+  if (Array.isArray(roh.journal)) {
+    var wochen = {};
+    roh.journal.forEach(function (r) {
+      var gut = reflexionLesen(r);
+      if (gut && !wochen[gut.woche]) { wochen[gut.woche] = true; s.journal.push(gut); }
+    });
+    s.journal.sort(function (x, y) { return x.woche < y.woche ? -1 : 1; });
   }
   if (istZeit(roh.exportiert)) s.exportiert = roh.exportiert;
   // Eine Welle gilt nur für etwas, das es noch gibt und das nicht archiviert ist.
@@ -1358,6 +1392,10 @@ function imKalenderLesen(k) {
 // Zeiten sind Millisekunden seit 1970 — «frei seit» ist eine Dauer, kein Tag.
 // Ein Rückfall vor dem Start kann es nicht geben; er fällt weg.
 var NOTIZ_MAX = 200;
+// Eine Wochenreflexion, wie sie gespeichert wird:
+//   { woche: Montag als Tag, gut: '', stoerte: '', zeit: Zeit }
+// Eine je Woche; zwei leere Antworten sind keine Reflexion und fallen weg.
+var JOURNAL_MAX = 1000;
 
 function istZeit(t) { return typeof t === 'number' && isFinite(t) && t > 0; }
 
@@ -1382,6 +1420,13 @@ function lasterLesen(a) {
     draenge: draenge,
     archiviert: istSchluessel(a.archiviert) ? a.archiviert : null
   };
+}
+
+function reflexionLesen(r) {
+  if (!r || typeof r !== 'object' || !istSchluessel(r.woche) || wochenAnfang(r.woche) !== r.woche) return null;
+  var gut = textFeld(r.gut, JOURNAL_MAX), stoerte = textFeld(r.stoerte, JOURNAL_MAX);
+  if (!gut && !stoerte) return null;
+  return { woche: r.woche, gut: gut, stoerte: stoerte, zeit: istZeit(r.zeit) ? r.zeit : null };
 }
 
 // Ein Termin, wie er gespeichert wird:
@@ -1776,7 +1821,8 @@ function tropfenAuf(neu, q, opt) {
 var letzterTipp = null;   // { el, zeit } — der zuletzt berührte Knopf
 var herkunft = null;      // Selektor auf dem Dashboard, aus dem die Ansicht wuchs
 var homeScroll = 0;       // wie weit das Dashboard gerollt war
-var HERKUNFT = ['data-haken', 'data-ab', 'data-termin', 'data-drang', 'data-rueckfall', 'data-neutermin'];
+var HERKUNFT = ['data-haken', 'data-ab', 'data-termin', 'data-drang', 'data-rueckfall', 'data-neutermin',
+  'data-reflexion'];
 
 function tippMerken(e) {
   var el = e.target && e.target.closest ? e.target.closest('button') : null;
@@ -1785,7 +1831,7 @@ function tippMerken(e) {
 
 // Eine Kachel wächst als Ganzes, ein Knopf für sich.
 function tippFlaeche(el) {
-  return el.matches('[data-haken], [data-ab]') && el.closest('.gw-kachel') || el;
+  return el.matches('[data-haken], [data-ab], [data-reflexion]') && el.closest('.gw-kachel') || el;
 }
 
 function selektorVon(el) {
@@ -2610,6 +2656,8 @@ var ANSICHTEN = {
   rueckfall: { titel: 'Rückfall', zeichnen: zeichneRueckfall },
   terminNeu: { titel: 'Neuer Termin', zeichnen: zeichneTerminFormular },
   termin: { titel: 'Termin', zeichnen: zeichneTerminFormular },
+  journal: { titel: 'Journal', zeichnen: zeichneJournal },
+  reflexion: { titel: 'Wochenreflexion', zeichnen: zeichneReflexion },
   export: { titel: 'Kalender-Export', zeichnen: zeichneExport },
   einstellungen: { titel: 'Einstellungen', zeichnen: zeichneEinstellungen }
 };
@@ -2619,7 +2667,7 @@ var ANSICHTEN = {
 var MENUE = [
   { id: 'gewohnheit', name: 'Neue Gewohnheit', icon: 'plus', ziel: 'neu' },
   { id: 'termin', name: 'Neuer Termin', icon: 'termin', ziel: 'terminNeu' },
-  { id: 'journal', name: 'Journal', icon: 'journal' },
+  { id: 'journal', name: 'Journal', icon: 'journal', ziel: 'journal' },
   { id: 'export', name: 'Kalender-Export', icon: 'export', ziel: 'export' },
   { id: 'einstellungen', name: 'Einstellungen', icon: 'zahnrad', ziel: 'einstellungen' },
   { id: 'sicherung', name: 'Sicherung', icon: 'sicherung' },
@@ -2631,17 +2679,21 @@ var MENUE = [
 // ein leeres Formular; «welle» ohne laufende Welle ebenso. «terminNeu» nimmt
 // statt einer id den Tag, an dem der Termin liegen soll.
 // Wer aus dem Export eine Gewohnheit oder einen Termin öffnet, kommt dorthin
-// zurück — mit dem Rückweg wie nach dem Speichern.
+// zurück — mit dem Rückweg wie nach dem Speichern; ebenso aus dem Journal in
+// eine Reflexion. «reflexion» nimmt den Montag ihrer Woche.
 var rueckZiel = null;
 
 function zeige(name, id) {
   if (name === 'home' && rueckZiel && ansicht !== 'home') name = rueckZiel;
-  rueckZiel = ansicht === 'export' && (name === 'bearbeiten' || name === 'termin') ? 'export' : null;
+  rueckZiel = ansicht === 'export' && (name === 'bearbeiten' || name === 'termin') ? 'export'
+    : ansicht === 'journal' && name === 'reflexion' ? 'journal' : null;
   if (!ANSICHTEN[name]) name = 'home';
   if (name === 'bearbeiten' && !gewohnheitNach(id)) name = 'home';
   if (name === 'termin' && !terminNach(id)) name = 'home';
   if ((name === 'abgewoehnen' || name === 'rueckfall') && !lasterNach(id)) name = 'home';
   if (name === 'welle' && !state.welle) name = 'home';
+  if (name === 'reflexion' && !reflexionMoeglich(id)) name = 'home';
+  reflexionEntwurf = name === 'reflexion' ? reflexionEntwurfAus(id) : null;
   entwurf = name === 'neu' ? entwurfAus(null) : name === 'bearbeiten' ? entwurfAus(gewohnheitNach(id))
     : name === 'abgewoehnen' ? entwurfAusLaster(lasterNach(id)) : null;
   terminEntwurf = name === 'termin' ? terminEntwurfAus(terminNach(id))
@@ -2665,6 +2717,7 @@ function render() {
   if ((ansicht === 'neu' || ansicht === 'bearbeiten' || ansicht === 'abgewoehnen') && !entwurf) ansicht = 'home';
   if ((ansicht === 'rueckfall' && !rueckfallFuer) || (ansicht === 'welle' && !state.welle)) ansicht = 'home';
   if ((ansicht === 'termin' || ansicht === 'terminNeu') && !terminEntwurf) ansicht = 'home';
+  if (ansicht === 'reflexion' && !reflexionEntwurf) ansicht = 'home';
   renderKopf();
   var feld = $('ansicht'), h0 = ansicht === 'home' ? heldHoehe() : 0;
   feld.innerHTML = ANSICHTEN[ansicht].zeichnen();
@@ -2784,6 +2837,7 @@ function zeichneHome() {
       termine.map(zeichneTerminZeile).join('') + '</div></section>' : '') +
     (dran.length ? '<section class="abschnitt"><h2>Gewohnheiten</h2><div class="gw-liste">' +
       dran.map(zeichneKachel).join('') + '</div></section>' : '') +
+    (ausSchluessel(heute).getDay() === 0 ? zeichneReflexionKachel(heute) : '') +
     (frei.length ? '<section class="abschnitt"><h2>Heute nicht dran</h2><div class="gw-liste gedimmt">' +
       frei.map(zeichneKachel).join('') + '</div></section>' : '') +
     (laster.length ? '<section class="abschnitt"><h2>Abgewöhnen</h2><div class="gw-liste">' +
@@ -3776,6 +3830,140 @@ function bindeRueckfall() {
   });
 }
 
+// ── Journal: die Wochenreflexion ────────────────────────────────
+//
+// Sonntags fragt das Dashboard zwei Dinge: Was lief gut? Was hat gestört?
+// Gespeichert wird eine Reflexion je Woche, unter ihrem Montag; im Journal
+// stehen sie untereinander und lassen sich nachlesen und ändern (ADR 0017).
+// Geschrieben werden kann jede Woche bis zur laufenden — die Zukunft nicht.
+// Wie beim Rückfall eine eigene Ansicht, kein Blatt: Die Tastatur schiebt ein
+// festes Blatt auf iOS aus dem Bild.
+var reflexionEntwurf = null;   // { woche, gut, stoerte, neu }
+
+function reflexionNach(woche) {
+  for (var i = 0; i < state.journal.length; i++) if (state.journal[i].woche === woche) return state.journal[i];
+  return null;
+}
+
+function reflexionMoeglich(woche) {
+  return istSchluessel(woche) && wochenAnfang(woche) === woche && woche <= wochenAnfang(heuteSchluessel());
+}
+
+function reflexionEntwurfAus(woche) {
+  var r = reflexionNach(woche);
+  return { woche: woche, gut: r ? r.gut : '', stoerte: r ? r.stoerte : '', neu: !r };
+}
+
+// Trägt ein, ändert oder entfernt — zwei leere Antworten sind keine Reflexion.
+// Antwortet mit dem, was geschah: 'gespeichert', 'entfernt', 'nichts' oder
+// false, wenn die Woche nicht in Frage kommt.
+function reflexionSpeichern(woche, gut, stoerte) {
+  if (!reflexionMoeglich(woche)) return false;
+  var r = reflexionLesen({ woche: woche, gut: gut, stoerte: stoerte, zeit: zeitJetzt() });
+  var alt = reflexionNach(woche);
+  state.journal = state.journal.filter(function (x) { return x.woche !== woche; });
+  if (r) {
+    state.journal.push(r);
+    state.journal.sort(function (x, y) { return x.woche < y.woche ? -1 : 1; });
+  }
+  speichern();
+  return r ? 'gespeichert' : alt ? 'entfernt' : 'nichts';
+}
+
+function wochenTitel(mo) {
+  return 'KW ' + kalenderwoche(mo) + ' · ' + spanne(mo, tagPlus(mo, 6));
+}
+
+// Die Woche in Zahlen, als Anstoß zum Nachdenken: Haken gesetzt von fälligen.
+// Heute zählt erst, wenn es erledigt ist — wie bei der Stärke.
+function wochenZahlen(mo, heute) {
+  var von = 0, fertig = 0;
+  for (var k = mo; k <= tagPlus(mo, 6) && k <= heute; k = tagPlus(k, 1)) {
+    var t = tagesStand(k);
+    fertig += t.fertig;
+    von += k === heute ? t.fertig : t.von;
+  }
+  if (!von) return '';
+  return (mo === wochenAnfang(heute) ? 'Diese Woche bisher: ' : 'In dieser Woche: ') +
+    fertig + ' von ' + von + ' Haken gesetzt.';
+}
+
+// Die Kachel auf dem Dashboard, nur sonntags. Gebaut wie die der Gewohnheit;
+// steht die Reflexion schon, trägt sie den Haken.
+function zeichneReflexionKachel(heute) {
+  var mo = wochenAnfang(heute), r = reflexionNach(mo);
+  return '<section class="abschnitt"><h2>Journal</h2><div class="gw-liste">' +
+    '<div class="gw-kachel jr-kachel' + (r ? ' erledigt' : '') + '">' +
+      '<button type="button" class="gw-haken" data-reflexion="' + esc(mo) + '">' +
+        '<span class="gw-ring"><span class="gw-scheibe jr-scheibe">' + (r ? ICON.haken : ICON.journal) + '</span></span>' +
+        '<span class="gw-text"><span class="gw-name">Wochenreflexion</span>' +
+          '<span class="gw-info">' + (r ? 'Geschrieben · antippen zum Nachlesen' : 'Zwei Fragen zu deiner Woche') +
+          '</span></span>' +
+      '</button>' +
+    '</div></div></section>';
+}
+
+function zeichneJournal() {
+  var heute = heuteSchluessel(), mo = wochenAnfang(heute), sonntag = ausSchluessel(heute).getDay() === 0;
+  var liste = state.journal.slice().reverse();
+  return (reflexionNach(mo) ? '' : '<section class="abschnitt"><div class="kachel">' +
+      '<div class="etikett">Diese Woche</div>' +
+      '<p class="jr-zahlen">' + esc(wochenTitel(mo)) + '</p>' +
+      '<p class="jr-satz">' + (sonntag ? 'Heute ist Sonntag — Zeit für zwei Fragen.'
+        : 'Sonntags fragt dich das Dashboard. Du kannst auch jetzt schon schreiben.') + '</p>' +
+      '<div class="knopfreihe"><button type="button" class="knopf" data-reflexion="' + esc(mo) + '">' +
+        ICON.journal + '<span>Woche reflektieren</span></button></div>' +
+    '</div></section>') +
+    '<section class="abschnitt"><h2>Bisher</h2>' +
+    (liste.length ? '<div class="jr-liste">' + liste.map(function (r) {
+      return '<button type="button" class="jr-eintrag" data-reflexion="' + esc(r.woche) + '">' +
+        '<span class="jr-woche">' + esc(wochenTitel(r.woche)) + '</span>' +
+        zeichneAntwort('Was lief gut?', r.gut) + zeichneAntwort('Was hat gestört?', r.stoerte) +
+        '</button>';
+    }).join('') + '</div>'
+      : '<div class="kachel"><p class="jr-leer">Noch keine Reflexion. Deine erste steht dann hier.</p></div>') +
+    '</section>';
+}
+
+function zeichneAntwort(frage, text) {
+  return '<span class="jr-frage">' + esc(frage) + '</span>' +
+    '<span class="jr-antwort' + (text ? '' : ' leer') + '">' + esc(text || 'Nichts notiert.') + '</span>';
+}
+
+function zeichneReflexion() {
+  var e = reflexionEntwurf, zahlen = wochenZahlen(e.woche, heuteSchluessel());
+  return '<section class="abschnitt"><div class="kachel">' +
+      '<div class="etikett">' + esc(wochenTitel(e.woche)) + '</div>' +
+      (zahlen ? '<p class="jr-zahlen">' + esc(zahlen) + '</p>' : '') +
+    '</div></section>' +
+    '<section class="abschnitt"><h2><label for="jrGut">Was lief gut?</label></h2>' +
+      '<textarea id="jrGut" class="eingabe" rows="4" maxlength="' + JOURNAL_MAX + '" ' +
+        'placeholder="Was dir gelungen ist, was dir gutgetan hat">' + esc(e.gut) + '</textarea>' +
+    '</section>' +
+    '<section class="abschnitt"><h2><label for="jrStoerte">Was hat gestört?</label></h2>' +
+      '<textarea id="jrStoerte" class="eingabe" rows="4" maxlength="' + JOURNAL_MAX + '" ' +
+        'placeholder="Was dazwischenkam, was du ändern willst">' + esc(e.stoerte) + '</textarea>' +
+    '</section>' +
+    '<div class="knopfreihe">' +
+      '<button type="button" class="knopf" id="jrSpeichern">Speichern</button>' +
+      '<button type="button" class="knopf zart" id="jrAbbrechen">Abbrechen</button>' +
+    '</div>' +
+    (e.neu ? '' : '<p class="klein">Leer gespeichert, verschwindet die Reflexion aus dem Journal.</p>');
+}
+
+function bindeReflexion() {
+  $('jrGut').addEventListener('input', function () { reflexionEntwurf.gut = this.value; });
+  $('jrStoerte').addEventListener('input', function () { reflexionEntwurf.stoerte = this.value; });
+  $('jrSpeichern').addEventListener('click', function () {
+    var e = reflexionEntwurf, was = reflexionSpeichern(e.woche, e.gut, e.stoerte);
+    if (was === 'gespeichert') melden('Gespeichert. Nachzulesen im Journal.');
+    else if (was === 'entfernt') melden('Die Reflexion ist entfernt.');
+    else if (was === 'nichts') melden('Nichts geschrieben, nichts gespeichert.');
+    zeige('home');
+  });
+  $('jrAbbrechen').addEventListener('click', function () { zeige('home'); });
+}
+
 // Was live läuft, jede Sekunde: «frei seit», die Restzeit auf dem Drang-Knopf
 // und der Ring der Welle. Nur Text und Ring ändern sich — neu gezeichnet wird
 // erst, wenn die Welle durch ist und das Urteil braucht.
@@ -4203,6 +4391,10 @@ function bindeAnsicht() {
   if ($('hmRaster')) bindeHeatmap();
   if ($('welle')) bindeWelle();
   if ($('rfNotiz')) bindeRueckfall();
+  alleIn('[data-reflexion]').forEach(function (b) {
+    b.addEventListener('click', function () { zeige('reflexion', this.getAttribute('data-reflexion')); });
+  });
+  if ($('jrGut')) bindeReflexion();
   if ($('tmTitel')) bindeTerminFormular();
   if (ansicht === 'export') bindeExport();
   else exTeileZuvor = null;

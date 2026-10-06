@@ -55,7 +55,7 @@ die Chili.
 | 3 · Abgewöhnen, 10-Minuten-Welle; Chili und Kalender in einer Karte | fertig (0.3.0T2, frei mit 0.4.0) |
 | 4 · Termine im Kalender, Tagesansicht; Tropfen statt Aufploppen, Tropfenform, Menü unter dem Knopf | fertig (0.4.0) |
 | 5 · Kalender-Export (`.ics`), Erinnerung je Gewohnheit; «Heute» als Rückweg, Name «Chilli Journal», Schriftzug «Lodern» (frei); Exportiertes merken, Markierung aufheben, Hinweis aus Glas; nur Laden | fertig (0.5.0) |
-| 6 · Rückblick: Heatmap, Detail, Journal | Heatmap mit Wochenstreifen, Wisch vom Rand fertig (0.6.0); Journal offen |
+| 6 · Rückblick: Heatmap, Detail, Journal | Heatmap mit Wochenstreifen, Wisch vom Rand fertig (0.6.0); Journal mit Wochenreflexion zur Abnahme (0.7.0T) |
 | 7 · Sicherung, Einstellungen, Tickets | offen |
 | 8 · Feinschliff | offen |
 
@@ -222,4 +222,5 @@ Skill `ticket`.
 
 ## Offen
 
-- Bauabschnitt 6 · Rückblick: Journal mit Wochenreflexion.
+- Bauabschnitt 6 · Journal (0.7.0T) am Gerät abnehmen.
+- Bauabschnitt 7 · Sicherung, Einstellungen, Tickets.
