@@ -1183,7 +1183,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(20, 20, 19, .18);
+  background: var(--glas-schleier);
   opacity: 0;
   transition: opacity .22s ease;
 }
@@ -1199,8 +1199,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
   -webkit-overflow-scrolling: touch;
   padding: 18px 16px 16px;
   border-radius: 18px;
-  background: var(--grund);
-  box-shadow: 0 2px 6px rgba(20, 20, 19, .10), 0 16px 40px rgba(20, 20, 19, .18);
+  /* Glas wie Hinweis und Meldung (ADR 0022): Tönung, Unschärfe und Kante setzt .glas. */
 }
 .ticket-karte h2 { margin: 0; font-family: var(--sans); font-size: 18px; font-weight: 600; }
 .tk-kopf { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: -4px 0 8px 4px; }
@@ -1302,7 +1301,7 @@ textarea.eingabe.code {
 </div>
 <button type="button" id="ticketKnopf" aria-label="Ticket schreiben" aria-haspopup="dialog"></button>
 <div id="ticketBlatt" hidden>
-  <div class="ticket-karte" id="ticketKarte" role="dialog" aria-modal="true" aria-labelledby="tkKopf"></div>
+  <div class="ticket-karte glas" id="ticketKarte" role="dialog" aria-modal="true" aria-labelledby="tkKopf"></div>
 </div>
 <script>
 'use strict';
@@ -1313,7 +1312,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.9.0T';
+var APP_VERSION = '0.9.0T2';
 var APP_STAND = '2026-10-06';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -5296,7 +5295,7 @@ function ticketBlattOeffnen(quelle, id, flaeche) {
   $('ticketKnopf').setAttribute('aria-expanded', 'true');
   wahlenSetzen();
   var r = flaeche || (quelle && zuSehen(quelle) ? quelle.getBoundingClientRect() : null);
-  if (r && r.width) tropfenAuf(karte, r, { rund: '18px' });
+  if (r && r.width) tropfenAuf(karte, r, { rund: '18px', glas: true });
 }
 
 // Zu: in die Quelle zurück, ist sie fort, in den Knopf. `fertig` kommt, wenn
@@ -5319,7 +5318,7 @@ function ticketBlattSchliessen(fertig) {
   if (!g) { zu(); return; }
   var r = karte.getBoundingClientRect();
   karte.style.opacity = '0';
-  tropfenZu(g, r, ziel, { rund: '18px', fertig: zu });
+  tropfenZu(g, r, ziel, { rund: '18px', glas: true, fertig: zu });
 }
 
 function ticketSichern() {

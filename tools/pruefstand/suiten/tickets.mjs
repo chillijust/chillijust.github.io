@@ -190,8 +190,13 @@ return durch().then(function () {
   frisch();
   zeige('home');
   knopf.click();
+  var auf = q('body > .tropfen-huelle');
+  pruefe('U0 das Blatt tropft als Glas auf (ADR 0022)', !!auf && auf.classList.contains('glas'));
   return durch();
 }).then(function () {
+  var kst = getComputedStyle(q('#ticketKarte')), filter = kst.backdropFilter || kst.webkitBackdropFilter || '';
+  pruefe('U0a das Blatt ist aus Glas, wie Hinweis und Meldung', q('#ticketKarte').classList.contains('glas') &&
+    /blur\(/.test(filter) && /inset/.test(kst.boxShadow) && Number(getComputedStyle(blatt).opacity) === 1, filter);
   var r = q('#ticketKarte').getBoundingClientRect(), k2 = knopf.getBoundingClientRect();
   pruefe('U1 das Blatt steht unten, beim Knopf', Math.abs(innerHeight - 12 - r.bottom) < 2 && r.top > 0,
     [r.top, r.bottom, innerHeight].join());
