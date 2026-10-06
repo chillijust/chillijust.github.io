@@ -29,7 +29,7 @@ state = {
     name: 'Lesen',                       // höchstens NAME_MAX Zeichen
     rhythmus: { art: 'taeglich' }        // | { art: 'wochentage', tage: [1, 4] }  (0 = Sonntag)
                                          // | { art: 'proWoche', anzahl: 3 }      (1–6)
-    angelegt: '2026-10-05',              // Tagesschlüssel, lokale Zeit
+    angelegt: '2026-10-05',              // der Beginn, Tagesschlüssel; rückt nur zurück (beginnVorziehen)
     erledigt: ['2026-10-05', …],         // sortiert, einmalig
     archiviert: null,                    // | Tagesschlüssel
     erinnerung: null                     // | 'HH:MM' — nur für den Kalender-Export

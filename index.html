@@ -2423,12 +2423,14 @@ function leisteZurueck(g, r, tag) {
 // zu (ADR 0032).
 function teilZeigen(el, an, quelle) {
   if (!el || el.hidden === !an) return;
-  var aus = zuSehen(quelle) ? quelle : null;
+  // Der Knopf wird gemessen, bevor das Teil Platz nimmt — danach kann er
+  // schon woanders stehen.
+  var aus = zuSehen(quelle) ? quelle : null, ar = aus ? aus.getBoundingClientRect() : null;
   if (an) {
     el.hidden = false;
     if (bewegungAus()) return;
     var cs = getComputedStyle(el), h = el.offsetHeight;
-    if (aus) tropfenAuf(el, aus.getBoundingClientRect(), { grund: grundUnter(el.parentNode), rund: cs.borderTopLeftRadius });
+    if (aus) tropfenAuf(el, ar, { grund: grundUnter(el.parentNode), rund: cs.borderTopLeftRadius });
     el.style.overflow = 'hidden';
     bewegt(el, aus ? [
       { height: '0px', marginTop: '0px', marginBottom: '0px' },
@@ -2686,6 +2688,34 @@ function gewohnheitNach(id) {
     if (state.gewohnheiten[i].id === id) return state.gewohnheiten[i];
   }
   return null;
+}
+
+// Der Beginn rückt vor: Wer eine Gewohnheit schon geübt hat, bevor er sie
+// eintrug, bekommt jeden fälligen Tag zwischen dem neuen Beginn und dem alten
+// (höchstens bis gestern) als erledigt. Bei x-mal pro Woche sind es je Woche x
+// Tage, gleichmäßig über die verfügbaren verteilt (ADR 0033). Heute bleibt
+// offen — heute zählt erst, wenn es erledigt ist.
+function beginnVorziehen(g, beginn) {
+  if (!g || !istSchluessel(beginn) || beginn >= g.angelegt) return;
+  var bis = tagPlus(g.angelegt, -1), gestern = tagPlus(heuteSchluessel(), -1);
+  if (bis > gestern) bis = gestern;
+  var neu = [];
+  if (g.rhythmus.art === 'proWoche') {
+    for (var mo = wochenAnfang(beginn); mo <= bis; mo = tagPlus(mo, 7)) {
+      var frei = [];
+      for (var i = 0; i < 7; i++) {
+        var k = tagPlus(mo, i);
+        if (k >= beginn && k <= bis) frei.push(k);
+      }
+      var x = Math.min(g.rhythmus.anzahl, frei.length);
+      for (var j = 0; j < x; j++) neu.push(frei[Math.floor((j + 0.5) * frei.length / x)]);
+    }
+  } else {
+    for (var t = beginn; t <= bis; t = tagPlus(t, 1)) if (faelligAm(g, t)) neu.push(t);
+  }
+  neu.forEach(function (k) { if (g.erledigt.indexOf(k) === -1) g.erledigt.push(k); });
+  g.erledigt.sort();
+  g.angelegt = beginn;
 }
 
 function faelligAm(g, k) {
@@ -4192,6 +4222,7 @@ function entwurfAus(g) {
     anzahl: r.anzahl || 3,
     erinnern: !!(g && g.erinnerung),
     erinnerung: g && g.erinnerung ? g.erinnerung : '08:00',
+    beginn: g ? g.angelegt : tagSchluessel(nun),
     startTag: tagSchluessel(nun),
     startUhr: zwei(nun.getHours()) + ':' + zwei(nun.getMinutes()),
     startGeaendert: false,
@@ -4202,10 +4233,12 @@ function entwurfAus(g) {
 
 // Ein neuer Entwurf aus dem Kalender: `wahl` ist { richtung, tag }. Abgewöhnen
 // von einem vergangenen Tag aus heißt «frei seit diesem Tag» — die Uhrzeit
-// bleibt die von jetzt. Eine Gewohnheit beginnt wie immer heute.
+// bleibt die von jetzt. Eine Gewohnheit von einem vergangenen Tag aus heißt
+// «begonnen an diesem Tag» (ADR 0033).
 function entwurfNeu(wahl) {
   var e = entwurfAus(null);
   if (!wahl || typeof wahl !== 'object') return e;
+  if (wahl.richtung !== 'ab' && istSchluessel(wahl.tag) && wahl.tag < tagSchluessel(jetzt())) e.beginn = wahl.tag;
   if (wahl.richtung === 'ab') {
     e.richtung = 'ab';
     if (istSchluessel(wahl.tag) && wahl.tag < tagSchluessel(jetzt())) {
@@ -4279,6 +4312,15 @@ function zeichneFormular() {
         '<button type="button" class="rund" id="anzMehr" aria-label="Öfter">' + ICON.plus + '</button>' +
       '</div>' +
       '<p class="klein" id="rhText">' + esc(rhythmusErklaerung(entwurf.art)) + '</p>' +
+    '</section>' +
+    // Schon länger dabei, nur nicht eingetragen: Der Beginn darf zurück, nie
+    // vor — sonst ginge Gespeichertes verloren (ADR 0033).
+    '<section class="abschnitt" id="gwBeginnAbschnitt"' + (ab ? ' hidden' : '') + '><h2><label for="gwBeginn">' +
+        'Begonnen am</label></h2>' +
+      '<input id="gwBeginn" class="eingabe" type="date" max="' + esc(g ? g.angelegt : heute) + '" value="' +
+        esc(entwurf.beginn) + '">' +
+      '<p class="klein">' + (g ? 'Früher angefangen? Stell den Tag zurück — jeder fällige Tag davor zählt als erledigt.'
+        : 'Schon länger dabei? Stell den Tag zurück — jeder fällige Tag seitdem zählt als erledigt.') + '</p>' +
     '</section>' +
     '<section class="abschnitt" id="gwErinnerung"' + (ab ? ' hidden' : '') + '><h2>Erinnerung</h2>' +
       '<div class="tm-schalterzeile"><span id="gwErinnernName">Im Kalender erinnern</span>' +
@@ -4368,6 +4410,7 @@ function bindeFormular() {
         x.setAttribute('aria-pressed', x === b ? 'true' : 'false');
       });
       teilZeigen($('rhAbschnitt'), entwurf.richtung !== 'ab', b);
+      teilZeigen($('gwBeginnAbschnitt'), entwurf.richtung !== 'ab', b);
       teilZeigen($('gwErinnerung'), entwurf.richtung !== 'ab', b);
       teilZeigen($('abStart'), entwurf.richtung === 'ab', b);
       wahlenSetzen();
@@ -4408,6 +4451,7 @@ function bindeFormular() {
   $('anzWeniger').addEventListener('click', function () { anzahl(-1); });
   $('anzMehr').addEventListener('click', function () { anzahl(1); });
 
+  $('gwBeginn').addEventListener('input', function () { entwurf.beginn = this.value; });
   $('abTag').addEventListener('input', function () { entwurf.startTag = this.value; entwurf.startGeaendert = true; });
   $('abUhr').addEventListener('input', function () { entwurf.startUhr = this.value; entwurf.startGeaendert = true; });
   alleIn('[data-rf-loeschen]').forEach(function (b) {
@@ -4438,14 +4482,23 @@ function entwurfSpeichern() {
   var r = entwurf.art === 'wochentage' ? { art: 'wochentage', tage: entwurf.tage.slice() }
     : entwurf.art === 'proWoche' ? { art: 'proWoche', anzahl: entwurf.anzahl } : { art: 'taeglich' };
   var g = entwurf.id ? gewohnheitNach(entwurf.id) : null, uhr = entwurf.erinnern ? entwurf.erinnerung : null;
+  var bisher = g ? g.angelegt : heuteSchluessel();
+  if (!istSchluessel(entwurf.beginn) || entwurf.beginn > bisher) {
+    melden(g ? 'Der Beginn kann nur früher liegen.' : 'Der Beginn liegt höchstens heute.');
+    $('gwBeginn').focus();
+    return;
+  }
   if (g) {
     g.name = name.slice(0, NAME_MAX);
     g.rhythmus = rhythmusLesen(r);
     g.erinnerung = uhr;
   } else {
-    state.gewohnheiten.push({ id: neueId('g'), name: name.slice(0, NAME_MAX), rhythmus: rhythmusLesen(r),
-      angelegt: heuteSchluessel(), erledigt: [], archiviert: null, erinnerung: uhr, imKalender: null });
+    g = { id: neueId('g'), name: name.slice(0, NAME_MAX), rhythmus: rhythmusLesen(r),
+      angelegt: bisher, erledigt: [], archiviert: null, erinnerung: uhr, imKalender: null };
+    state.gewohnheiten.push(g);
+    g = null;
   }
+  beginnVorziehen(g || state.gewohnheiten[state.gewohnheiten.length - 1], entwurf.beginn);
   var id = g ? g.id : state.gewohnheiten[state.gewohnheiten.length - 1].id;
   if (speichern()) {
     bestaetigen(g ? 'Gespeichert' : 'Angelegt', g ? '' : 'Antippen heißt erledigt, lange drücken öffnet sie.',

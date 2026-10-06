@@ -19,6 +19,8 @@ Gilt für die Gewohnheiten in `index.html`. Begründungen in ADR 0002 und im Pfl
   Start undefined und Gültiges fällt still aus dem Speicher. Die Suite `gewohnheiten` prüft es.
 - **Geändert wird ein Tag nur über `umschalten(id, tag)`** — es prüft mit `aenderbarAm`: nicht
   in der Zukunft, nicht vor dem Anlegen, höchstens `NACHTRAG_TAGE` zurück (ADR 0003).
+- **Der Beginn rückt nur zurück, nur über `beginnVorziehen`**: `angelegt` wandert auf den Beginn, jeder
+  fällige Tag dazwischen (bis gestern) wird erledigt, bei x-mal pro Woche x je Woche (ADR 0033).
 - **Abgewöhnen rechnet Dauern in Millisekunden über `zeitJetzt()`**, Tage weiter über
   Schlüssel. Gespeichert sind nur Start, Rückfälle und gewonnene Dränge; «frei seit», Rekord
   und Stärke entstehen in `lasterAuswerten(a, nun)` (ADR 0004).
