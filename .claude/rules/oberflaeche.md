@@ -81,7 +81,7 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   einen Entwurf weg (ADR 0020). `#app` hält dem Knopf unten Platz frei. Das Blatt steht
   **unten** und rückt mit der Tastatur hoch (`ticketTastatur`); «Alle Tickets» im Kopf
   führt zur Liste, ohne den Entwurf zu verlieren (ADR 0021). Es ist aus Glas, wie Hinweis
-  und Meldung, auch im Tropfen (ADR 0022).
+  und Meldung, auch im Tropfen (ADR 0024).
 - **Was alles ersetzt oder löscht, fragt im Glas** (`hinweisZeigen` mit `frage`) und läßt
   sich bis zum Neuladen rückgängig machen (`rueckgaengig`); Einzelnes fragt mit zweitem Tipp
   (`.frage`).

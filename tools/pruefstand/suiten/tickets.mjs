@@ -192,7 +192,7 @@ return durch().then(function () {
   knopf.click();
   // Der Rückweg von eben tropft vielleicht noch in den Menüknopf — gemeint ist der neueste.
   var auf = alle('body > .tropfen-huelle').pop();
-  pruefe('U0 das Blatt tropft als Glas auf (ADR 0022)', !!auf && auf.classList.contains('glas'));
+  pruefe('U0 das Blatt tropft als Glas auf (ADR 0024)', !!auf && auf.classList.contains('glas'));
   return durch();
 }).then(function () {
   var kst = getComputedStyle(q('#ticketKarte')), filter = kst.backdropFilter || kst.webkitBackdropFilter || '';

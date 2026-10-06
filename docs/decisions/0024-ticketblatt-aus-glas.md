@@ -1,6 +1,6 @@
-# 0022 · Das Ticketblatt ist aus Glas
+# 0024 · Das Ticketblatt ist aus Glas
 
-*2026-10-06 · Ansicht von 0.9.0T · Version 0.9.0T2 · ergänzt 0014, 0021*
+*2026-10-06 · Ansicht von 0.9.0T · Version 0.9.0T2 · ergänzt 0014, 0021 · zuerst irrtümlich als 0022 abgelegt, die Nummer trug schon der Feinschliff*
 
 ## Ausgangslage
 
