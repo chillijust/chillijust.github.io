@@ -218,14 +218,45 @@ return durch().then(function () {
   if (vvWar) Object.defineProperty(window, 'visualViewport', vvWar); else delete window.visualViewport;
   tippen(q('#tkTitel'), 'Halb geschrieben');
   q('#tkAlle').click();
-  pruefe('U6 «Alle Tickets» klappt zu und öffnet die Liste, der Entwurf bleibt', !blatt.classList.contains('offen') &&
-    ansicht === 'tickets' && !!ticketEntwurf && ticketEntwurf.titel === 'Halb geschrieben' && knopf.classList.contains('hat-entwurf'));
+  pruefe('U6 «Alle Tickets» zeigt die Liste im selben Blatt, mit Zurück (ADR 0025)', blatt.classList.contains('offen') &&
+    ansicht === 'home' && q('#tkKopf').textContent === 'Alle Tickets' && !!q('#tkListeZurueck') &&
+    q('#tkListeZurueck').getBoundingClientRect().height >= 44 && !!ticketEntwurf && ticketEntwurf.titel === 'Halb geschrieben');
   return durch();
 }).then(function () {
-  q('#tkNeu').click();
-  pruefe('U7 und der Entwurf geht weiter', q('#tkTitel').value === 'Halb geschrieben');
+  q('#tkListeZurueck').click();
+  pruefe('U7 zurück steht der Entwurf wieder da', q('#tkTitel').value === 'Halb geschrieben' && !q('#tkListeZurueck'));
+  state.tickets = [ticketLesen({ id: 'k1', art: 'fehler', titel: 'Eins', erstellt: 1 }),
+    ticketLesen({ id: 'k2', art: 'wunsch', titel: 'Zwei', erstellt: 2 }),
+    ticketLesen({ id: 'k3', art: 'wunsch', titel: 'Drei', erstellt: 3, abgegeben: 5 })];
   q('#tkAlle').click();
-  pruefe('U8 aus der Liste heraus bleibt man in der Liste', ansicht === 'tickets' && !blatt.classList.contains('offen'));
+  var zeilen = alle('#ticketKarte .tk-zeile'), warten = zeilen.map(function (z) {
+    var a = z.getAnimations()[0]; return a ? a.effect.getTiming().delay : -1;
+  });
+  pruefe('U8 alle Tickets, offen vorn, abgegeben gedimmt dahinter', zeilen.map(function (z) {
+    return z.getAttribute('data-ticket'); }).join() === 'k1,k2,k3' && !!q('#ticketKarte .tk-liste-blatt.gedimmt [data-ticket="k3"]') &&
+    /Alle 2 kopieren/.test(q('#tkListeKopieren').textContent));
+  pruefe('U9 sie tropfen nacheinander auf', warten.length === 3 && warten[0] === 0 && warten[1] > warten[0] && warten[2] > warten[1] &&
+    zeilen.every(function (z) { var a = z.getAnimations()[0]; return a && /round/.test(a.effect.getKeyframes()[0].clipPath); }),
+    warten.join());
+  return durch();
+}).then(function () {
+  q('#ticketKarte [data-ticket="k2"]').click();
+  pruefe('U10 ein Ticket aus der Liste öffnet sich im selben Blatt', blatt.classList.contains('offen') &&
+    q('#tkTitel').value === 'Zwei' && q('#tkKopf').textContent === 'Ticket');
+  return durch();
+}).then(function () {
+  // Der Fließtext wächst mit, höchstens drei Zeilen.
+  var feld = q('#tkText'), eine;
+  tippen(feld, 'kurz');
+  eine = feld.getBoundingClientRect().height;
+  tippen(feld, 'eins\nzwei');
+  var zwei = feld.getBoundingClientRect().height;
+  tippen(feld, 'eins\nzwei\ndrei\nvier\nfünf\nsechs');
+  var viele = feld.getBoundingClientRect().height, lh = parseFloat(getComputedStyle(feld).lineHeight);
+  pruefe('U11 der Fließtext beginnt mit einer Zeile und wächst mit', zwei > eine + lh * 0.8, [eine, zwei].join());
+  pruefe('U12 höchstens drei Zeilen, dann rollt er', viele < eine + lh * 2.3 && viele > eine + lh * 1.7 &&
+    getComputedStyle(feld).overflowY === 'auto', [eine, viele, lh].join());
+  q('#tkAbbrechen').click();
   return durch();
 }).then(function () {
   frisch();

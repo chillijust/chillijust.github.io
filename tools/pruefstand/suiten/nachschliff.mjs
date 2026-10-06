@@ -51,9 +51,11 @@ pruefe('H1 «Heute» ist eine Pille in Orange', !!pille && pille.textContent ===
   ps.backgroundColor !== 'rgba(0, 0, 0, 0)' && parseFloat(ps.borderTopLeftRadius) >= 10 && ps.display === 'inline-block',
   ps && [ps.color, ps.backgroundColor, ps.borderTopLeftRadius].join(' '));
 var zahl = tag(HEUTE).querySelector('.kal-zahl'), zs = getComputedStyle(zahl), zr = zahl.getBoundingClientRect();
-pruefe('H2 die Zahl von heute steht in einem Kreis aus dem Akzent', zs.backgroundColor === AKZENT &&
-  zs.borderTopLeftRadius === '50%' && Math.abs(zr.width - zr.height) < 1 && zr.width >= 26 &&
-  zs.textDecorationLine === 'none', [zs.backgroundColor, zs.borderTopLeftRadius, zr.width, zr.height].join(' '));
+var kreis = getComputedStyle(zahl, '::before');
+pruefe('H2 die Zahl von heute steht in einem Kreis aus dem Akzent, 30 % kleiner (ADR 0025)', kreis.backgroundColor === AKZENT &&
+  kreis.borderTopLeftRadius === '50%' && kreis.transform !== 'none' && /0\.7/.test(kreis.transform) &&
+  Math.abs(zr.width - zr.height) < 1 && zr.width >= 26 && zs.textDecorationLine === 'none',
+  [kreis.backgroundColor, kreis.transform, zr.width, zr.height].join(' '));
 pruefe('H3 die anderen Tage nicht', getComputedStyle(tag('2026-10-15').querySelector('.kal-zahl')).backgroundColor ===
   'rgba(0, 0, 0, 0)');
 pruefe('H4 die Schrift im Kreis ist dunkel, nicht weiß (3,1 : 1)', zs.color === farbe('var(--auf-akzent)') &&
@@ -88,22 +90,24 @@ pruefe('V7 vergangene Tage bleiben, wie sie waren', (tag('2026-10-12').click(), 
 // ── A · «Hinzufügen» fragt erst (Ticket 2) ──────────────────
 aufbauen();
 tag('2026-10-12').click();
-var neu = q('#kalNeu'), wahl = q('#kalNeuWahl');
-pruefe('A1 der Knopf heißt «Hinzufügen», die Frage ist zu', !!neu && neu.textContent === 'Hinzufügen' && wahl.hidden &&
-  neu.getAttribute('aria-expanded') === 'false' && !/Termin an diesem Tag/.test(q('#kalLeiste').textContent));
+var neu = q('#kalNeu');
+pruefe('A1 der Knopf heißt «Hinzufügen», zu ist nichts offen', !!neu && neu.textContent === 'Hinzufügen' &&
+  q('#hinweisBlatt').hidden && !/Termin an diesem Tag/.test(q('#kalLeiste').textContent));
 neu.click();
-var knoepfe = alle('#kalNeuWahl .knopf');
-pruefe('A2 ein Tipp stellt die Frage: Termin, Gewohnheit, Abgewöhnen', !wahl.hidden &&
-  neu.getAttribute('aria-expanded') === 'true' && /Was möchtest du hinzufügen\?/.test(wahl.textContent) &&
-  knoepfe.map(function (k) { return k.textContent; }).join() === 'Termin,Gewohnheit,Abgewöhnen');
-pruefe('A3 die Knöpfe tropfen heraus (ADR 0012)', knoepfe.every(function (k) { return k.getAnimations().length > 0; }));
-pruefe('A4 groß genug, nebeneinander', zuKlein('#kalLeiste').length === 0 &&
-  Math.abs(knoepfe[0].getBoundingClientRect().top - knoepfe[2].getBoundingClientRect().top) < 1, zuKlein('#kalLeiste').join());
-neu.click();
-pruefe('A5 ein zweiter Tipp zieht sie zurück', wahl.hidden && neu.getAttribute('aria-expanded') === 'false');
+var knoepfe = alle('#hinweisWahl .knopf'), auf = letzteHuelle();
+pruefe('A2 ein Tipp öffnet ein Fenster: Termin, Gewohnheit, Abgewöhnen (ADR 0025)', !q('#hinweisBlatt').hidden &&
+  q('#hinweisKarte').classList.contains('glas') && q('#hinweisTitel').textContent === 'Hinzufügen' &&
+  knoepfe.map(function (k) { return k.textContent; }).join() === 'Termin,Gewohnheit,Abgewöhnen' &&
+  q('#hinweisOk').hidden && !q('#hinweisNein').hidden);
+pruefe('A3 es tropft aus «Hinzufügen»', !!auf && auf.classList.contains('glas'));
+ausbewegt();
+pruefe('A4 groß genug, untereinander', knoepfe.every(function (k) { return k.getBoundingClientRect().height >= 44; }) &&
+  knoepfe[2].getBoundingClientRect().top > knoepfe[0].getBoundingClientRect().bottom);
+q('#hinweisNein').click();
+pruefe('A5 «Abbrechen» schließt es, nichts geschieht', !q('#hinweisBlatt').classList.contains('offen') && ansicht === 'home');
 ausbewegt();
 neu.click();
-q('#kalNeuWahl [data-neugw="an"]').click();
+q('#hinweisWahl [data-neugw="an"]').click();
 pruefe('A6 «Gewohnheit» öffnet das Formular zum Angewöhnen', ansicht === 'neu' && entwurf.richtung === 'an' &&
   q('[data-richtung="an"]').getAttribute('aria-pressed') === 'true');
 pruefe('A6a es wuchs als Tropfen aus dem Knopf', !!letzteHuelle());
@@ -115,7 +119,7 @@ pruefe('A8 und die Ansicht fließt als Tropfen in «Hinzufügen» zurück', !!h 
     mitte(q('#kalNeu').getBoundingClientRect())), JSON.stringify(z));
 return durch().then(function () {
   q('#kalNeu').click();
-  q('#kalNeuWahl [data-neugw="ab"]').click();
+  q('#hinweisWahl [data-neugw="ab"]').click();
   pruefe('A9 «Abgewöhnen» von einem vergangenen Tag: frei seit diesem Tag', ansicht === 'neu' && entwurf.richtung === 'ab' &&
     !q('#abStart').hidden && q('#abTag').value === '2026-10-12' && entwurf.startGeaendert === true);
   q('#gwName').value = 'Zucker';
@@ -130,7 +134,7 @@ return durch().then(function () {
   kalZeige('2026-10-20');
   render();
   q('#kalNeu').click();
-  q('#kalNeuWahl [data-neugw="ab"]').click();
+  q('#hinweisWahl [data-neugw="ab"]').click();
   pruefe('A11 von einem kommenden Tag aus beginnt es jetzt — der Start liegt nie in der Zukunft',
     entwurf.richtung === 'ab' && q('#abTag').value === HEUTE && !entwurf.startGeaendert);
   pruefe('A12 ohne Wahl bleibt «Neue Gewohnheit», wie sie war', (zeige('neu'), entwurf.richtung === 'an' &&
@@ -162,25 +166,29 @@ return durch().then(function () {
   aufbauen();
   q('[data-kalender="monat"]').click();
   ausbewegt();
-  var kw = alle('#kalRaster .kal-kw');
-  pruefe('K1 vorn steht je Zeile die Kalenderwoche', kw.map(function (k) { return k.textContent; }).join() === '40,41,42,43,44',
-    kw.map(function (k) { return k.textContent; }).join());
-  var mo = tag('2026-10-05').getBoundingClientRect(), k41 = kw[1].getBoundingClientRect();
-  pruefe('K2 klein und links vom Montag, auf seiner Höhe', k41.right <= mo.left && Math.abs(mitte(k41).y - mitte(mo).y) < 1 &&
-    parseFloat(getComputedStyle(kw[1]).fontSize) <= 11);
-  var raster = q('#kalRaster'), st = getComputedStyle(raster, '::before'), rr = raster.getBoundingClientRect();
-  var links = rr.left + parseFloat(st.left);
-  pruefe('K3 ein Strich rechts daneben, durch das ganze Raster', st.content !== 'none' && parseFloat(st.width) === 1 &&
-    links > k41.right - 1 && links < mo.left && parseFloat(st.top) + parseFloat(st.bottom) <= 10,
-    [st.content, st.left, st.width, links, k41.right, mo.left].join(' '));
-  pruefe('K4 die Wochentage stehen über ihren Tagen', alle('.kal-wtage .kal-wt').length === 8 &&
-    Math.abs(mitte(alle('.kal-wtage .kal-wt')[1].getBoundingClientRect()).x - mitte(mo).x) < 1);
+  // Seit ADR 0025: über jeder Woche ein Strich quer durch, die KW vorn darauf.
+  var kw = alle('#kalRaster .kal-kw-zeile');
+  pruefe('K1 über jeder Woche steht ihre Kalenderwoche', kw.map(function (k) { return k.textContent; }).join() ===
+    'KW 40,KW 41,KW 42,KW 43,KW 44', kw.map(function (k) { return k.textContent; }).join());
+  var mo = tag('2026-10-05').getBoundingClientRect(), so = tag('2026-10-11').getBoundingClientRect(),
+    k41 = kw[1].getBoundingClientRect(), k42 = kw[2].getBoundingClientRect();
+  pruefe('K2 klein, zwischen den Wochen: über ihrem Montag, unter der Woche davor', k41.bottom <= mo.top + 1 &&
+    k42.top >= mo.bottom - 1 && Math.abs(k41.left - mo.left) < 4 && parseFloat(getComputedStyle(kw[1]).fontSize) <= 11,
+    [k41.bottom, mo.top, k42.top, mo.bottom].join());
+  var st = getComputedStyle(kw[1], '::after'), strich = kw[1].querySelector('span').getBoundingClientRect();
+  pruefe('K3 der Strich läuft waagrecht durch den ganzen Kalender', st.content !== 'none' && parseFloat(st.height) === 1 &&
+    k41.right >= so.right - 4 && k41.width > mo.width * 6, [st.content, st.height, k41.right, so.right].join(' '));
+  pruefe('K4 die Wochentage stehen über ihren Tagen, ohne Spalte davor', alle('.kal-wtage .kal-wt').length === 7 &&
+    Math.abs(mitte(alle('.kal-wtage .kal-wt')[0].getBoundingClientRect()).x - mitte(mo).x) < 1);
   pruefe('K5 Trefferflächen im Monat', zuKlein('#app').length === 0, zuKlein('#app').join());
-  pruefe('K6 die Woche trägt sie auch — der Monat quillt genau aus ihrer Zeile', (q('[data-kalender="woche"]').click(),
-    alle('#kalRaster .kal-kw').map(function (k) { return k.textContent; }).join() === '42'));
-  pruefe('K7 die Kalenderwoche ist kein Tag', alle('#kalRaster .kal-kw').every(function (k) {
+  pruefe('K6 die Woche nennt die KW im Titel, nicht im Raster', (q('[data-kalender="woche"]').click(),
+    !q('#kalRaster .kal-kw-zeile') && /KW 42/.test(q('#kalTitel, #kalHeute').textContent)));
+  pruefe('K7 die Kalenderwoche ist kein Tag', alle('#kalRaster .kal-kw-zeile').every(function (k) {
     return !k.hasAttribute('data-kaltag') && k.getAttribute('aria-hidden') === 'true';
   }));
+  q('[data-kalender="monat"]').click();
+  var r = q('#kalRaster').getAnimations()[0], b0 = r ? r.effect.getKeyframes()[0].clipPath : '';
+  pruefe('K8 der Monat tropft aus der Woche: erst eine runde Perle (ADR 0025)', /round 999px/.test(b0) && /22%/.test(b0), b0);
   return durch();
 }).then(function () {
   // ── O · «Allgemein» als Ort (Ticket 5) ────────────────────
@@ -198,10 +206,16 @@ return durch().then(function () {
   q('#ticketKnopf').click();
   return durch();
 }).then(function () {
+  // «Alle Tickets» bleibt seit ADR 0025 im Blatt; was trotzdem aus dem Blatt
+  // heraus eine Ansicht öffnet, fließt zurück in den Ticketknopf.
   q('#tkAlle').click();
+  pruefe('R0 «Alle Tickets» bleibt im Blatt', ansicht === 'home' && q('#tkKopf').textContent === 'Alle Tickets');
+  letzterTipp = { el: q('#tkListeZurueck'), zeit: Date.now() };
+  ticketBlattSchliessen();
+  zeige('tickets');
   return durch();
 }).then(function () {
-  pruefe('R1 «Alle Tickets» ist offen', ansicht === 'tickets');
+  pruefe('R1 die Ticketliste ist offen', ansicht === 'tickets');
   q('#zurueckKnopf').click();
   var h = letzteHuelle(), b = bilder(h), z = b.slice(-2)[0] || {};
   var kn = mitte(q('#ticketKnopf').getBoundingClientRect());

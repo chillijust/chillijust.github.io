@@ -129,19 +129,20 @@ pruefe('K4 der Tag zeigt seine Termine, nach Uhrzeit', alle('#kalLeiste [data-te
   return z.getAttribute('data-termin');
 }).join() === 'y,x');
 pruefe('K5 und darunter die Gewohnheiten, die kommen', alle('#kalLeiste .kal-zeile.kommt').length > 0);
-pruefe('K6 und «Hinzufügen» mit einem Termin darin', !!q('#kalNeu') && !!q('#kalNeuWahl [data-neutermin="2026-10-16"]'));
+pruefe('K6 und «Hinzufügen» für diesen Tag', !!q('#kalNeu') && q('#kalNeu').getAttribute('data-tag') === '2026-10-16');
 pruefe('K7 Trefferflächen mit offener Leiste', zuKlein().length === 0, zuKlein().join(', '));
 q('#kalLeiste [data-termin="x"]').click();
 pruefe('K8 ein Termin in der Leiste öffnet ihn', ansicht === 'termin' && q('#tmTitel').value === 'Kino');
 zeige('home');
-q('[data-neutermin="2026-10-16"]').click();
+q('#kalNeu').click();
+q('#hinweisWahl [data-neutermin="2026-10-16"]').click();
 pruefe('K9 «Hinzufügen» · Termin legt ihn dort an', ansicht === 'terminNeu' && q('#tmTag').value === '2026-10-16' &&
   q('#kopf h1').textContent === 'Neuer Termin');
 state.gewohnheiten = [];
 kalTag = HEUTE;
 zeige('home');
 pruefe('K10 ohne Gewohnheit kein Wort darüber', !q('#kalLeiste .kal-zeile') && !q('#kalLeiste .kal-voraus') &&
-  !/Gewohnheit/.test(q('#kalLeiste').textContent.replace(q('#kalNeuWahl').textContent, '')));
+  !/Gewohnheit/.test(q('#kalLeiste').textContent));
 
 // ── F · Das Formular ────────────────────────────────────────
 frisch();

@@ -1,6 +1,6 @@
 # 0021 · Das Ticketblatt steht unten, mit «Alle Tickets»
 
-*2026-10-06 · Abnahme von 0.8.0T · Version 0.8.0T2, frei mit 0.8.0 · ändert 0020*
+*2026-10-06 · Abnahme von 0.8.0T · Version 0.8.0T2, frei mit 0.8.0 · ändert 0020 · «Alle Tickets» zeigt seit 0025 die Liste im Blatt*
 
 ## Ausgangslage
 

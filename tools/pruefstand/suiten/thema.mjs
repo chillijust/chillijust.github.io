@@ -78,8 +78,19 @@ pruefe('B4 eine gewählte helle Darstellung sticht das dunkle Gerät',
     function (r) { return r.cssText; }).join(' ')));
 
 // ── C · Der Schalter im Kopf ────────────────────────────────
+// Der Knauf fährt 330 ms, dann tropft die neue Darstellung 700 ms aus dem
+// Schalter (ADR 0025) — gewartet wird auf beides.
+var sk = q('#themaKnopf').getBoundingClientRect(), tropfAn = null;
 themaUmschalten();
-return warte(400).then(function () {
+return warte(340).then(function () {
+  tropfAn = { klasse: document.documentElement.classList.contains('thema-tropft'),
+    x: parseFloat(document.documentElement.style.getPropertyValue('--thema-x')),
+    y: parseFloat(document.documentElement.style.getPropertyValue('--thema-y')) };
+  return warte(1400);
+}).then(function () {
+  pruefe('C0 sie tropft aus dem Schalter und ist danach fertig', !!document.startViewTransition && tropfAn.klasse &&
+    Math.abs(tropfAn.x - (sk.left + sk.width / 2)) < 2 && Math.abs(tropfAn.y - (sk.top + sk.height / 2)) < 2 &&
+    !document.documentElement.classList.contains('thema-tropft'), JSON.stringify(tropfAn));
   pruefe('C1 ein Tipp schaltet dunkel', state.thema === 'dunkel');
   pruefe('C2 <html> trägt es', document.documentElement.getAttribute('data-thema') === 'dunkel');
   pruefe('C3 der Grund wird dunkel', grund() === 'rgb(20, 20, 19)', grund());
@@ -91,7 +102,7 @@ return warte(400).then(function () {
   pruefe('C8 der Akzent bleibt die Chili', token('--akzent') === '#D97757', token('--akzent'));
   pruefe('C9 «erledigt» ist im Dunkeln aufgehellt', token('--erledigt') !== '#788C5D' && token('--erledigt') !== '');
   themaUmschalten();
-  return warte(400);
+  return warte(1800);
 }).then(function () {
   pruefe('C10 der zweite Tipp schaltet hell — fest, nicht zurück auf auto', state.thema === 'hell');
   pruefe('C11 <html> trägt «hell»', document.documentElement.getAttribute('data-thema') === 'hell');

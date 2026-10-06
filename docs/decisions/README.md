@@ -28,7 +28,8 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0018](0018-bestaetigung-lesen-woche-waehlen.md) | Bestätigung im Glas, Reflexion lesen, Woche wählen | gilt |
 | [0019](0019-alle-meldungen-im-glas.md) | Alle Meldungen im Glas | gilt |
 | [0020](0020-sicherung-einstellungen-tickets.md) | Sicherung, Einstellungen, Tickets; langer Druck als Tropfen | gilt; Lage des Ticketblatts geändert durch 0021 |
-| [0021](0021-ticketblatt-unten-alle-tickets.md) | Das Ticketblatt steht unten, mit «Alle Tickets» | gilt |
+| [0021](0021-ticketblatt-unten-alle-tickets.md) | Das Ticketblatt steht unten, mit «Alle Tickets» | gilt; «Alle Tickets» im Blatt seit 0025 |
 | [0022](0022-feinschliff-leer-jubel-geist.md) | Feinschliff: Leerzustände, Jubel über den Haken hinaus, Zeilen gehen als Geist | gilt |
 | [0023](0023-kalendertag-hinzufuegen-runder-tropfen.md) | Kalender: Heute als Pille, heute im Kreis, Kalenderwochen, kommende Tage, «Hinzufügen» fragt; Welle abbrechen; Wisch öffnet das Menü; «Allgemein»; der Tropfen ist rund | gilt |
 | [0024](0024-ticketblatt-aus-glas.md) | Das Ticketblatt ist aus Glas | gilt |
+| [0025](0025-nachtrag-tickets-kalender-thema.md) | Nachtrag: Wisch von rechts, schmale Bestätigung, Tickets im Blatt, Kalender, Hell/Dunkel als Tropfen | gilt |

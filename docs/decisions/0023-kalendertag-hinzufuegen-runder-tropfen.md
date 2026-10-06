@@ -1,7 +1,7 @@
 # 0023 · Kalendertag und «Hinzufügen», Welle abbrechen, der Tropfen ist rund
 
 *2026-10-06 · sechs Tickets vom Gerät (App-Stand 0.8.0T2) · Version 0.9.0T3 · löst in 0008
-die Spitze des Tropfens ab · ergänzt 0016 (Wisch auf dem Dashboard), 0006 (Tagesliste)*
+die Spitze des Tropfens ab · ergänzt 0016 (Wisch auf dem Dashboard), 0006 (Tagesliste) · «Hinzufügen», Kalenderwochen und Wisch geändert durch 0025*
 
 ## Ausgangslage
 

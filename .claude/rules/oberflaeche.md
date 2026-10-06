@@ -44,7 +44,8 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 - **Runde Knöpfe** (`.rund`) sind 44 × 44 und tragen ein Symbol aus `ICON` mit `aria-label`.
 - **Der Sonne/Mond-Schalter ist ein Schieber** (`.thema-schalter`, `role="switch"`,
   `aria-checked` = dunkel): Sonne links, Mond rechts, beide immer sichtbar, der Knauf liegt
-  unter dem, was gilt. Er fährt erst hinüber, dann zeichnet der Kopf neu.
+  unter dem, was gilt. Er fährt erst hinüber, dann tropft die neue Darstellung als runde
+  Scheibe aus ihm (`themaSetzen(wert, quelle)`, `startViewTransition`, ADR 0025).
 - **Das Menü** folgt dem Pflichtenheft in Reihenfolge und Wortlaut. Ein Eintrag ohne `ziel`
   trägt «bald»; wer ihn baut, setzt `ziel` und trägt die Ansicht in `ANSICHTEN` ein.
 - **Die Kachel kennt zwei Gesten**: kurz tippen hakt ab, lange drücken (`langDruecken`)
@@ -54,8 +55,9 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 - **Ein Termin ist eine Zeile mit blauem Strich** (`zeichneTerminZeile`), auf dem
   Dashboard wie in der Tagesliste; im Kalender trägt sein Tag **einen** blauen Punkt, vorn
   (ADR 0006). Die Tagesansicht ist die Liste unter dem Kalender, keine eigene Ansicht. Ein
-  kommender Tag zeigt dort, was dran ist, ohne Haken; «Hinzufügen» fragt erst — Termin,
-  Gewohnheit, Abgewöhnen (ADR 0023). Vorn steht in Woche und Monat die Kalenderwoche.
+  kommender Tag zeigt dort, was dran ist, ohne Haken; «Hinzufügen» fragt in einem Fenster
+  aus Glas — Termin, Gewohnheit, Abgewöhnen (`opt.wahl`, ADR 0025). Im Monat läuft über
+  jeder Woche ein Strich quer, die KW vorn darauf; eine KW-Spalte gibt es nicht.
 - **Der Kalender-Export** hat einen Weg, «Als Datei laden» — Teilen kam am Gerät nicht im
   Kalender an (ADR 0013); eine Gewohnheit trägt dort einen grauen Strich, keinen blauen. Was aus dem Export geöffnet
   wird, kehrt über `rueckZiel` dorthin zurück (ADR 0009).
@@ -69,7 +71,8 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 - **Vom linken Rand wischen ist der Rückweg** (`wischBeginnen`/`wischEnden`): nur aus den
   äußersten 26 px, wirkt beim Loslassen über `zurueckGehen()`, schweigt bei offenem Menü
   oder Hinweis (ADR 0016). Wer den Rückweg ändert, ändert `zurueckGehen()`. Auf dem
-  Dashboard öffnet derselbe Wisch das Menü (ADR 0023).
+  Dashboard öffnet derselbe Wisch das Menü (ADR 0023); vom **rechten** Rand nach links
+  öffnet er es überall (ADR 0025).
 - **Die Wochenreflexion steht nur sonntags auf dem Dashboard**, unter den fälligen
   Gewohnheiten; geschrieben wird außerdem jederzeit über das Journal, auch für vergangene
   Wochen, nie für eine kommende (ADR 0017, 0018). Fertiges öffnet zum Lesen (`data-lesen`),
@@ -80,7 +83,8 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   es ersetzt sie nie** — ein halbes Formular darunter bleibt stehen. Nur «Verwerfen» wirft
   einen Entwurf weg (ADR 0020). `#app` hält dem Knopf unten Platz frei. Das Blatt steht
   **unten** und rückt mit der Tastatur hoch (`ticketTastatur`); «Alle Tickets» im Kopf
-  führt zur Liste, ohne den Entwurf zu verlieren (ADR 0021). Es ist aus Glas, wie Hinweis
+  zeigt die Liste im selben Blatt, mit Zurück, ohne den Entwurf zu verlieren; ihre Zeilen
+  tropfen nacheinander auf (ADR 0021, 0025). Der Fließtext wächst bis drei Zeilen. Es ist aus Glas, wie Hinweis
   und Meldung, auch im Tropfen (ADR 0024).
 - **Was alles ersetzt oder löscht, fragt im Glas** (`hinweisZeigen` mit `frage`) und läßt
   sich bis zum Neuladen rückgängig machen (`rueckgaengig`); Einzelnes fragt mit zweitem Tipp

@@ -122,8 +122,9 @@ state = {
   fließt zurück, sonst in `#ticketKnopf`. `ticketSichern` legt an oder ändert (dann wieder
   offen) und bestätigt erst, wenn das Blatt angekommen ist. `ticketsAlsText` bündelt;
   `ticketsKopieren` setzt `abgegeben`. Das Blatt steht unten; `ticketTastatur()` hebt es
-  über `--tastatur` um die Höhe der Tastatur (`visualViewport`), «Alle Tickets» (`#tkAlle`)
-  klappt zu und öffnet die Liste (ADR 0021).
+  über `--tastatur` um die Höhe der Tastatur (`visualViewport`). «Alle Tickets» (`#tkAlle`)
+  setzt `ticketListe` und zeichnet die Liste ins Blatt (`ticketBlattWechseln`); Zurück
+  zeichnet das Formular mit dem liegenden Entwurf (ADR 0025).
 
 ## Render-Zyklus
 
@@ -218,7 +219,8 @@ der Umschalter (ADR 0007).
 - Der Kopf hat zwei Gestalten: auf dem Dashboard Titel, Datum, Sonne/Mond, Menüknopf;
   unterwegs Rückweg und Titel.
 - **Der Rückweg ist `zurueckGehen()`** — der Knopf ruft ihn, ebenso der Wisch vom linken
-  Rand (`wischBeginnen`/`wischEnden` an `document`, passiv; ADR 0016).
+  Rand (`wischBeginnen`/`wischEnden` an `document`, passiv; ADR 0016). Vom rechten Rand
+  öffnet derselbe Wisch das Menü (ADR 0025).
 - **Die Heatmap** (`zeichneHeatmap`, ADR 0015) hält ihre Wahl in `hm` (`fuer`, `woche`,
   `tag`, dazu `wie` für den Zustand eines Tages). Woche und Tag wechseln an Ort und Stelle
   (`hmWocheWaehlen`, `hmTagZeigen`), ohne `render()`; `zeige()` in eine andere Ansicht

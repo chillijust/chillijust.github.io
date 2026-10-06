@@ -111,5 +111,36 @@ pruefe('W6 auf dem Dashboard öffnet der Wisch das Menü (ADR 0023)', ansicht ==
   q('#menue').classList.contains('offen'));
 wisch(10, 400, 200, 400);
 pruefe('W6a bei offenem Menü schweigt er', ansicht === 'home' && q('#menue').classList.contains('offen'));
+// Vom rechten Rand nach links, zum Menüknopf hin (ADR 0025). Das Menü blendet
+// nach dem Schließen noch aus — erst danach ist es zu.
+function ganzZu() { frisch(); menueSchliessen(true); ausbewegt(); q('#menue').hidden = true; }
+ganzZu();
+var B = innerWidth;
+wisch(B - 10, 400, B - 200, 400);
+pruefe('W7 vom rechten Rand nach links öffnet das Menü', ansicht === 'home' && !q('#menue').hidden &&
+  q('#menue').classList.contains('offen'));
+ganzZu();
+wisch(B - 10, 300, B - 110, 500);
+pruefe('W8 schräg vom rechten Rand: nichts', q('#menue').hidden);
+wisch(B - 10, 400, B + 0, 400);
+wisch(B - 60, 400, B - 260, 400);
+pruefe('W9 zu kurz oder nicht vom Rand: nichts', q('#menue').hidden && ansicht === 'home');
+zeige('einstellungen');
+wisch(B - 10, 400, B - 200, 400);
+pruefe('W10 unterwegs führt er nach Hause — dort ist der Menüknopf', ansicht === 'home');
+frisch();
+
+// ── B · Eine Bestätigung ist so breit wie ihr Text (ADR 0025) ─
+bestaetigen('Gelöscht', '', null);
+var kurz = q('#hinweisKarte').getBoundingClientRect().width;
+hinweisSchliessen();
+bestaetigen('Angelegt', 'Antippen heißt erledigt, lange drücken öffnet sie.', null);
+var lang = q('#hinweisKarte').getBoundingClientRect().width;
+hinweisSchliessen();
+hinweisZeigen('Datei geladen', 'Öffne sie.', null, null);
+var mitOk = q('#hinweisKarte').getBoundingClientRect().width;
+hinweisSchliessen();
+pruefe('B1 kurz ist schmal, lang breiter, höchstens wie ein Hinweis mit «OK»', kurz >= 180 && kurz < 260 && lang > kurz &&
+  lang <= mitOk + 0.5 && mitOk >= 300, [kurz, lang, mitOk].join());
 frisch();
 `);
