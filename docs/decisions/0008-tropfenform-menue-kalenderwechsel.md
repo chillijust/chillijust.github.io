@@ -1,7 +1,8 @@
 # 0008 · Tropfenform, Menü unter dem Knopf, Woche | Monat hält den Tag
 
 *2026-10-05 · Ansicht von 0.4.0T2 · Version 0.4.0T3 · löst in 0007 «Das Menü bleibt das
-Blatt von unten» und das bloße Schrumpfen in den Menüknopf ab*
+Blatt von unten» und das bloße Schrumpfen in den Menüknopf ab · ergänzt durch 0020: ein langer Druck
+öffnet auch aus Kacheln und Terminzeilen als Tropfen*
 
 ## Ausgangslage
 

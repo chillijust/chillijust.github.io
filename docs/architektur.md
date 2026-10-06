@@ -9,13 +9,13 @@ es wächst mit jedem Bauabschnitt.
 | --- | --- |
 | `<head>` | Meta für iOS, CSP, App-Symbol (Daten-URI), `theme-color` |
 | `<style>` | Schriftblock (generiert), Farbtokens hell/dunkel, Bausteine |
-| `<body>` | `#app` mit `#kopf`, `#swNeu`, `#ansicht`; daneben `#menue` und `#meldung` |
+| `<body>` | `#app` mit `#kopf`, `#swNeu`, `#ansicht`; daneben `#menue`, `#meldung`, `#hinweisBlatt`, `#ticketKnopf`, `#ticketBlatt` |
 | `<script>` | genau einer, `'use strict'`, ES5-nah |
 
 Im Skript, von oben: Version und Stand · `CHILI_BILD` · Hilfen (`esc`, `ICON`, Datum,
 `melden`, Tage) · Zustand und Speicher · Darstellung · Bewegung (Tropfen) · Gewohnheiten
 (Rechnung) · Abgewöhnen (Rechnung, Welle) · Termine · Kalender-Export (`.ics`) · Ansichten ·
-Menü · Service Worker · Start.
+Sicherung · Tickets · Einstellungen · Menü · Service Worker · Start.
 
 ## Zustand
 
@@ -59,7 +59,19 @@ state = {
     zeit: 1791700000000                  // zuletzt geschrieben, oder null
   }],
   welle: null,                           // | { id, start } — die laufende 10-Minuten-Welle
-  exportiert: null                       // | Zeitpunkt in ms — wann zuletzt eine .ics hinausging
+  exportiert: null,                      // | Zeitpunkt in ms — wann zuletzt eine .ics hinausging
+  tickets: [{
+    id: 'k…',
+    art: 'fehler',                       // | 'wunsch'
+    titel: '', text: '',                 // höchstens TICKET_TITEL_MAX / TICKET_TEXT_MAX
+    ort: 'kalender', grund: '',          // Kennungen aus TICKET_ORTE / TICKET_GRUENDE[art], grund darf leer sein
+    erstellt: 1791000000000,             // streng steigend
+    stand: '0.8.0 · 2026-10-06',         // APP_VERSION · APP_STAND beim Anlegen
+    abgegeben: null                      // | Zeitpunkt in ms — kopiert
+  }],
+  gesichert: null,                       // | Zeitpunkt in ms — wann zuletzt ein Sicherungscode kopiert wurde
+  schwachHinweis: true,                  // der Hinweis ab drei ungefestigten Gewohnheiten
+  bewegung: 'auto'                       // | 'aus' — Bewegung reduzieren
 }
 ```
 
@@ -96,6 +108,20 @@ state = {
   `stand()`. Erst wenn ein vorhandener Stand **anders gelesen** werden muß, steigt das
   Schema — mit neuem Schlüssel und Migration — und die erste Ziffer der Version.
 
+- **Sicherung** (ADR 0020): `sicherungsCode(nun)` schreibt `CHJ1~<pruefsumme>~<base64>` aus dem
+  Zustand ohne `tickets` und `welle`, die Tage einer Gewohnheit verdichtet (`tageVerdichten`,
+  Feld `e`). `codeLesen(text)` prüft und entfaltet zum Rohstand für `stand()`.
+  `standErsetzen(neu)` legt den alten Stand in `rueckgaengig` (nur im Speicher der Seite),
+  behält die Tickets und speichert; `sicherungZurueck()` holt ihn wieder. Die Kachel auf der
+  Übersicht zeigt `sicherungFaellig()`. Kopiert wird über `kopieren(text, fertig)` —
+  Zwischenablage, sonst verborgenes Feld, sonst sieht man den Text.
+- **Tickets** (ADR 0020): Das Ticketblatt (`#ticketBlatt`) liegt außerhalb von `#app` und
+  überlebt jedes `render()`. `ticketBlattOeffnen(quelle, id, flaeche)` füllt es aus
+  `ticketEntwurf` (bleibt beim Zuklappen) und tropft aus der Quelle; `ticketBlattSchliessen`
+  fließt zurück, sonst in `#ticketKnopf`. `ticketSichern` legt an oder ändert (dann wieder
+  offen) und bestätigt erst, wenn das Blatt angekommen ist. `ticketsAlsText` bündelt;
+  `ticketsKopieren` setzt `abgegeben`.
+
 ## Render-Zyklus
 
 `render()` zeichnet erst den Kopf (`renderKopf()`), dann die Ansicht: `ANSICHTEN[ansicht]
@@ -121,7 +147,8 @@ der Umschalter (ADR 0007).
 - **Ansichten:** `home` (Dashboard), `neu` (Neue Gewohnheit, mit Umschalter Angewöhnen |
   Abgewöhnen), `bearbeiten` (Gewohnheit: Rückblick, Stand, Formular, Archivieren), `abgewoehnen`
   (Rückblick, Stand, Formular, Rückfälle, Archivieren), `welle` (Drang), `rueckfall`, `journal`, `reflexion`, `terminNeu` und
-  `termin` (Formular, Löschen), `export` (Kalender-Export), `einstellungen`. Wer aus `export` eine
+  `termin` (Formular, Löschen), `export` (Kalender-Export), `einstellungen`, `sicherung`,
+  `tickets`. Wer aus `export` eine
   Gewohnheit oder einen Termin öffnet, kommt über `rueckZiel` dorthin zurück — mit dem
   Rückweg wie nach dem Speichern. `termin` braucht eine gültige `id`,
   `terminNeu` nimmt statt dessen einen Tag; beide legen `terminEntwurf` an.
@@ -140,7 +167,9 @@ der Umschalter (ADR 0007).
 - **Abhaken** (`[data-haken]`) ändert `erledigt`, speichert und zeichnet neu; die eben
   getippte Kachel trägt dabei `gerade` für ihre Animation. Kacheln bleiben, wo sie sind.
   **Lange drücken** (`langDruecken`, 500 ms) öffnet statt dessen `bearbeiten`; der Klick
-  danach ist gesperrt (`langGedrueckt`).
+  danach ist gesperrt (`langGedrueckt`). Der Punkt des Drucks (`langPunkt`) wird zur Quelle
+  des Tropfens (`punktFlaeche`); `herkunftPunkt` merkt ihn relativ zur Kachel für den
+  Rückweg (ADR 0020). Ebenso Abgewöhnen-Kacheln und Terminzeilen.
 - **Jede Änderung eines Tages** geht über `umschalten(id, tag)` — die Kachel für heute,
   der Kalender (`[data-nachtrag]`) für bis zu `NACHTRAG_TAGE` zurück.
 - **Oben steht eine Karte** (`zeichneHeld`, ADR 0005): Tagesring mit Chili und der
@@ -163,6 +192,9 @@ der Umschalter (ADR 0007).
   das Lesen. Geändert wird nur über `reflexionSpeichern` — leer gespeichert entfernt —,
   gelöscht über `reflexionLoeschen`. Eine neue Reflexion wählt ihre Woche mit
   `reflexionWocheWaehlen`, an Ort und Stelle (ADR 0018).
+- **Frage** (ADR 0020): `hinweisZeigen(…, { frage: { ja, beiJa } })` zeigt «Abbrechen»
+  (`#hinweisNein`) und `ja` (`#hinweisOk`); meldet `beiJa` etwas, wird die Karte an Ort und
+  Stelle zur Bestätigung.
 - **Bestätigung** (ADR 0018): `bestaetigen()` öffnet den Hinweis mit `bestaetigung`;
   `hinweisUhr` schließt ihn, ein Tipp aufs Blatt früher. Das Ziel darf ein Selektor sein. `wochenZahlen` rechnet die Haken
   der Woche aus `tagesStand`, nichts davon wird gespeichert.

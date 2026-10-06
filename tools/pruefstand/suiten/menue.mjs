@@ -31,7 +31,13 @@ pruefe('B4 jedes Ziel ist eine Ansicht', gebaut.every(function (id) {
 }));
 
 // ── C · Ein angekündigter Eintrag sagt es und schließt ──────
-q('[data-menue="sicherung"]').click();
+// Seit 0.8.0 ist alles gebaut; ein Probe-Eintrag hält den Weg für «bald» geprüft.
+pruefe('C0 seit Abschnitt 7 ist nichts mehr «bald»', MENUE.every(function (m) { return !!m.ziel; }));
+menueSchliessen(true);
+MENUE.push({ id: 'probe', name: 'Probe', icon: 'plus' });
+menueOeffnen();
+q('[data-menue="probe"]').click();
+MENUE.pop();
 pruefe('C1 das Menü geht zu', !huelle.classList.contains('offen'));
 pruefe('C2 die Meldung sagt im Glas, dass es kommt', /nächsten Fassung/.test(q('#hinweisTitel').textContent) &&
   !q('#hinweisBlatt').hidden && q('#hinweisKarte').classList.contains('glas') &&

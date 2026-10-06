@@ -45,6 +45,10 @@ meldet der Läufer das als Fehler statt sie zu übergehen.
 | `rueckblick` | Heatmap: Raster, Monate, Tönung, Summe, Woche wählen, Wochenstreifen, Tag, pro Woche, Abgewöhnen |
 | `journal` | Wochenreflexion: Lesen, Kachel nur sonntags, Schreiben, Ändern, Leeren, Journal-Liste, Rückweg, welche Woche, Ausgabe |
 | `offline` | `sw.js` von außen, App ohne Worker, Hinweis, Knopf, Notausgang |
+| `sicherung` | Tage verdichten, Code hin und zurück, Prüfsumme, Kachel nach 30 Tagen, Kopieren, Einlesen mit Frage, Rückgängig |
+| `tickets` | Knopf unten rechts, Blatt über der Ansicht als Tropfen, Entwurf, Ort und Grund, Liste, gebündelter Text, abgegeben, Löschen |
+| `einstellungen` | Hinweis ab drei abschaltbar, Bewegung reduzieren, alle Daten löschen und zurück |
+| `langdruck` | langer Druck auf Gewohnheit, Abgewöhnen, Termin: Tropfen aus dem Fingerpunkt und zurück |
 
 ## Eine Suite schreiben
 

@@ -134,7 +134,7 @@ svg { display: block; }
   margin: 0 auto;
   min-height: 100vh;
   padding: calc(env(safe-area-inset-top) + 12px) calc(env(safe-area-inset-right) + 16px)
-    calc(env(safe-area-inset-bottom) + 32px) calc(env(safe-area-inset-left) + 16px);
+    calc(env(safe-area-inset-bottom) + 88px) calc(env(safe-area-inset-left) + 16px);
 }
 
 /* ── Kopf ──────────────────────────────────────────────────── */
@@ -1129,11 +1129,125 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 .tage button:active { transform: scale(.9); }
 
 /* Bewegung nur, wo sie erwünscht ist. */
+/* ── Ticketknopf und Ticketblatt ───────────────────────────────
+   Der Knopf schwebt unten rechts, von überall erreichbar; der Fußabstand von
+   #app hält ihm den Platz frei. Das Blatt legt sich über die Ansicht, statt
+   sie zu ersetzen — ein halb ausgefülltes Formular darunter bleibt stehen.
+   Es quillt als Tropfen aus dem Knopf und fließt dorthin zurück (ADR 0020). */
+#ticketKnopf {
+  position: fixed;
+  z-index: 15;
+  right: calc(16px + env(safe-area-inset-right));
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--flaeche);
+  color: var(--text-2);
+  box-shadow: 0 2px 6px rgba(20, 20, 19, .10), 0 10px 24px rgba(20, 20, 19, .16);
+  transition: transform .15s ease, color .2s ease;
+}
+#ticketKnopf svg { width: 24px; height: 24px; }
+#ticketKnopf:active { transform: scale(.92); }
+/* Ein angefangenes Ticket zeigt sich am Knopf — sonst wäre es vergessen. */
+#ticketKnopf.hat-entwurf { color: var(--akzent); }
+#ticketKnopf.hat-entwurf::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--akzent);
+}
+#ticketBlatt {
+  position: fixed;
+  inset: 0;
+  z-index: 21;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: calc(env(safe-area-inset-top) + 12px) calc(env(safe-area-inset-right) + 12px)
+    calc(env(safe-area-inset-bottom) + 12px) calc(env(safe-area-inset-left) + 12px);
+}
+#ticketBlatt::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 20, 19, .18);
+  opacity: 0;
+  transition: opacity .22s ease;
+}
+#ticketBlatt[hidden] { display: none; }
+#ticketBlatt.offen::before { opacity: 1; }
+#ticketBlatt:not(.offen) { pointer-events: none; }
+.ticket-karte {
+  position: relative;
+  width: 100%;
+  max-width: 536px;
+  max-height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 18px 16px 16px;
+  border-radius: 18px;
+  background: var(--grund);
+  box-shadow: 0 2px 6px rgba(20, 20, 19, .10), 0 16px 40px rgba(20, 20, 19, .18);
+}
+.ticket-karte h2 { margin: 0 4px 12px; font-family: var(--sans); font-size: 18px; font-weight: 600; }
+.ticket-karte .wahl, .ticket-karte .eingabe { margin-bottom: 10px; }
+.ticket-karte textarea.eingabe { min-height: 88px; }
+.tk-wahlen { display: flex; gap: 8px; }
+.tk-wahlen > div { flex: 1; min-width: 0; }
+.tk-wahlen select { font-size: 16px; }
+.tk-knoepfe { display: flex; gap: 8px; margin-top: 4px; }
+.tk-knoepfe .knopf { flex: 1; padding: 0 12px; }
+.ticket-karte .knopfreihe { margin-top: 10px; }
+
+/* ── Tickets und Sicherung ─────────────────────────────────── */
+.tk-zeile {
+  width: 100%;
+  min-height: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  text-align: left;
+  transition: transform .15s ease;
+}
+.tk-zeile:active { transform: scale(.98); }
+.tk-zeile + .tk-zeile { border-top: 1px solid var(--flaeche-2); border-radius: 0; }
+.tk-titel { font-family: var(--sans); font-size: 16px; font-weight: 500; overflow-wrap: anywhere; }
+.tk-mehr { font-size: 14px; color: var(--text-2); }
+.tk-art { font-family: var(--sans); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em;
+  color: var(--akzent); }
+.tm-liste.gedimmt .tk-zeile { opacity: .6; }
+.abschnitt > .knopf { width: 100%; }
+.kachel > p:first-child { margin-top: 0; }
+textarea.eingabe.code {
+  min-height: 110px;
+  font: 13px/1.35 ui-monospace, Menlo, monospace;
+  overflow-wrap: anywhere;
+}
+.sc-scheibe { inset: 7px; color: var(--akzent); }
+.hinweis-knoepfe { display: flex; gap: 8px; }
+.hinweis-knoepfe .knopf { flex: 1; }
+.hinweis-knoepfe .knopf[hidden] { display: none; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation: none !important;
     transition: none !important;
   }
+}
+/* Dasselbe, wenn es in den Einstellungen abgeschaltet ist. */
+:root[data-bewegung="aus"] *, :root[data-bewegung="aus"] *::before, :root[data-bewegung="aus"] *::after {
+  animation: none !important;
+  transition: none !important;
 }
 </style>
 </head>
@@ -1160,9 +1274,16 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
       <span class="hinweis-haken" id="hinweisHaken" aria-hidden="true" hidden></span>
       <h2 id="hinweisTitel"></h2>
       <p id="hinweisText"></p>
-      <button type="button" class="knopf" id="hinweisOk">OK</button>
+      <div class="hinweis-knoepfe">
+        <button type="button" class="knopf zart" id="hinweisNein" hidden>Abbrechen</button>
+        <button type="button" class="knopf" id="hinweisOk">OK</button>
+      </div>
     </div>
   </div>
+</div>
+<button type="button" id="ticketKnopf" aria-label="Ticket schreiben" aria-haspopup="dialog"></button>
+<div id="ticketBlatt" hidden>
+  <div class="ticket-karte" id="ticketKarte" role="dialog" aria-modal="true" aria-labelledby="tkKopf"></div>
 </div>
 <script>
 'use strict';
@@ -1173,7 +1294,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.7.1';
+var APP_VERSION = '0.8.0T';
 var APP_STAND = '2026-10-06';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -1223,7 +1344,9 @@ var ICON = {
   hinweis: svg('<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.01"/>'),
   frei: svg('<circle cx="12" cy="12" r="8"/><path d="M6.4 6.4l11.2 11.2"/>'),
   welle: svg('<path d="M2 9c2.5 0 2.5-3 5-3s2.5 3 5 3 2.5-3 5-3 2.5 3 5 3"/>' +
-    '<path d="M2 16c2.5 0 2.5-3 5-3s2.5 3 5 3 2.5-3 5-3 2.5 3 5 3"/>')
+    '<path d="M2 16c2.5 0 2.5-3 5-3s2.5 3 5 3 2.5-3 5-3 2.5 3 5 3"/>'),
+  melden: svg('<path d="M5 4.5h14a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5 1.5H10l-5 4v-4H5A1.5 1.5 0 0 1 ' +
+    '3.5 15V6A1.5 1.5 0 0 1 5 4.5z"/><path d="M12 8v3.5M12 14v.01"/>')
 };
 
 var WOCHENTAGE = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
@@ -1302,7 +1425,11 @@ function grundStand() {
     termine: [],
     journal: [],         // Wochenreflexionen, nach Woche sortiert
     welle: null,         // die laufende 10-Minuten-Welle: { id, start } oder null
-    exportiert: null     // wann zuletzt eine .ics hinausging, als Zeitpunkt
+    exportiert: null,    // wann zuletzt eine .ics hinausging, als Zeitpunkt
+    tickets: [],         // Fehler und Wünsche, bis sie kopiert sind — nicht im Sicherungscode
+    gesichert: null,     // wann zuletzt ein Sicherungscode kopiert wurde, als Zeitpunkt
+    schwachHinweis: true,   // der sanfte Hinweis ab drei ungefestigten Gewohnheiten
+    bewegung: 'auto'     // 'auto' folgt dem Gerät, 'aus' stellt alles still
   };
 }
 
@@ -1341,6 +1468,17 @@ function stand(roh) {
     s.journal.sort(function (x, y) { return x.woche < y.woche ? -1 : 1; });
   }
   if (istZeit(roh.exportiert)) s.exportiert = roh.exportiert;
+  if (istZeit(roh.gesichert)) s.gesichert = roh.gesichert;
+  if (roh.schwachHinweis === false) s.schwachHinweis = false;
+  if (roh.bewegung === 'aus') s.bewegung = 'aus';
+  if (Array.isArray(roh.tickets)) {
+    var tkids = {};
+    roh.tickets.forEach(function (t) {
+      var gut = ticketLesen(t);
+      if (gut && !tkids[gut.id]) { tkids[gut.id] = true; s.tickets.push(gut); }
+    });
+    s.tickets.sort(function (x, y) { return x.erstellt - y.erstellt; });
+  }
   // Eine Welle gilt nur für etwas, das es noch gibt und das nicht archiviert ist.
   var w = roh.welle;
   if (w && typeof w === 'object' && istZeit(w.start)) {
@@ -1480,6 +1618,44 @@ function terminLesen(t) {
 }
 
 // täglich · bestimmte Wochentage (0 = Sonntag) · x-mal pro Woche (1–6)
+// Ein Ticket, wie es gespeichert wird:
+//   { id, art: 'fehler' | 'wunsch', titel, text, ort, grund, erstellt: Zeitpunkt,
+//     stand: 'Version · Stand', abgegeben: Zeitpunkt | null }
+// Ort und Grund sind Kennungen aus TICKET_ORTE und TICKET_GRUENDE; eine
+// unbekannte fällt auf «anderswo» bzw. «ohne Angabe» zurück.
+var TICKET_TITEL_MAX = 120;
+var TICKET_TEXT_MAX = 4000;
+var TICKET_ORTE = [['uebersicht', 'Übersicht'], ['kalender', 'Kalender'], ['gewohnheit', 'Gewohnheit'],
+  ['abgewoehnen', 'Abgewöhnen und Drang'], ['termin', 'Termin'], ['journal', 'Journal'],
+  ['export', 'Kalender-Export'], ['einstellungen', 'Einstellungen'], ['sicherung', 'Sicherung'],
+  ['tickets', 'Tickets'], ['menue', 'Menü'], ['anderswo', 'Anderswo']];
+// «Wo» und «was» sind zwei Fragen (wie Chillingo, ADR 0078 dort): zusammen-
+// gelegt könnte man nur eines von beidem sagen. Ein Wunsch hat andere Gründe
+// als ein Fehler — «Stürzt ab» wäre bei ihm Unsinn.
+var TICKET_GRUENDE = {
+  fehler: [['anzeige', 'Anzeige oder Darstellung'], ['bedienung', 'Bedienung'],
+    ['rechnung', 'Falsch gerechnet oder gespeichert'], ['bewegung', 'Bewegung'],
+    ['haengt', 'Stürzt ab oder hängt'], ['sonst', 'Sonstiges']],
+  wunsch: [['neu', 'Neue Funktion'], ['besser', 'Verbesserung'], ['bedienung', 'Bedienung'],
+    ['anzeige', 'Darstellung'], ['sonst', 'Sonstiges']]
+};
+
+function wahlName(liste, id) {
+  for (var i = 0; i < liste.length; i++) if (liste[i][0] === id) return liste[i][1];
+  return '';
+}
+
+function ticketLesen(t) {
+  if (!t || typeof t !== 'object' || typeof t.id !== 'string' || !t.id) return null;
+  var art = t.art === 'wunsch' ? 'wunsch' : 'fehler', titel = textFeld(t.titel, TICKET_TITEL_MAX);
+  if (!titel || !istZeit(t.erstellt)) return null;
+  return { id: t.id, art: art, titel: titel,
+    text: typeof t.text === 'string' ? t.text.replace(/\s+$/, '').slice(0, TICKET_TEXT_MAX) : '',
+    ort: wahlName(TICKET_ORTE, t.ort) ? t.ort : 'anderswo',
+    grund: wahlName(TICKET_GRUENDE[art], t.grund) ? t.grund : '',
+    erstellt: t.erstellt, stand: textFeld(t.stand, 60), abgegeben: istZeit(t.abgegeben) ? t.abgegeben : null };
+}
+
 function rhythmusLesen(r) {
   if (!r || typeof r !== 'object') return null;
   if (r.art === 'taeglich') return { art: 'taeglich' };
@@ -1589,6 +1765,10 @@ function themaAnwenden() {
   // Medienabfrage — also als Zahl.
   var meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute('content', GRUND[themaWirksam()]);
+  // Bewegung gehört zur Darstellung: Abgeschaltet hält dasselbe Stylesheet
+  // alles still wie unter `prefers-reduced-motion`.
+  if (state.bewegung === 'aus') wurzel.setAttribute('data-bewegung', 'aus');
+  else wurzel.removeAttribute('data-bewegung');
 }
 
 function themaSetzen(wert) {
@@ -1610,6 +1790,7 @@ function themaUmschalten() {
 }
 
 function bewegungAus() {
+  if (state && state.bewegung === 'aus') return true;
   try {
     return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   } catch (e) { return false; }
@@ -1829,17 +2010,25 @@ function tropfenAuf(neu, q, opt) {
 var letzterTipp = null;   // { el, zeit } — der zuletzt berührte Knopf
 var herkunft = null;      // Selektor auf dem Dashboard, aus dem die Ansicht wuchs
 var homeScroll = 0;       // wie weit das Dashboard gerollt war
+var herkunftPunkt = null; // wo in der Kachel der Finger lange lag: { dx, dy }
 var HERKUNFT = ['data-haken', 'data-ab', 'data-termin', 'data-drang', 'data-rueckfall', 'data-neutermin',
-  'data-reflexion'];
+  'data-reflexion', 'data-sicherung'];
 
 function tippMerken(e) {
   var el = e.target && e.target.closest ? e.target.closest('button') : null;
-  if (el) letzterTipp = { el: el, zeit: Date.now() };
+  if (el) letzterTipp = { el: el, zeit: Date.now(), x: e.clientX, y: e.clientY };
+}
+
+// Ein Knopfkreis um einen Punkt: Woraus ein Tropfen quillt, wenn die Quelle
+// eine Kachel ist — ein Tropfen von Kachelbreite sähe aus wie ein Versehen.
+function punktFlaeche(x, y) {
+  var d = 44;
+  return { left: x - d / 2, top: y - d / 2, width: d, height: d, right: x + d / 2, bottom: y + d / 2 };
 }
 
 // Eine Kachel wächst als Ganzes, ein Knopf für sich.
 function tippFlaeche(el) {
-  return el.matches('[data-haken], [data-ab], [data-reflexion]') && el.closest('.gw-kachel') || el;
+  return el.matches('[data-haken], [data-ab], [data-reflexion], [data-sicherung]') && el.closest('.gw-kachel') || el;
 }
 
 function selektorVon(el) {
@@ -1852,18 +2041,25 @@ function selektorVon(el) {
 }
 
 // Vor dem Neuzeichnen: die alte Ansicht als Geist, und woher die neue kommt.
+// Wer lange drückt, öffnet als Tropfen aus der Stelle unter dem Finger — auch
+// aus einer Kachel oder Terminzeile (ADR 0020); der Rückweg fließt dorthin.
 function uebergangVorbereiten(von, nach) {
   var tipp = letzterTipp && Date.now() - letzterTipp.zeit < 1000 ? letzterTipp.el : null;
+  var punkt = langPunkt && Date.now() - langGedrueckt < 1000 ? langPunkt : null;
   letzterTipp = null;
+  langPunkt = null;
+  var mitTipp = nach !== 'home' && tipp && document.contains(tipp);
+  var flaeche = mitTipp ? tippFlaeche(tipp).getBoundingClientRect() : null;
+  if (!flaeche) punkt = null;
   if (von === 'home' && nach !== 'home') {
     homeScroll = window.pageYOffset || 0;
     herkunft = tipp && document.contains(tipp) ? selektorVon(tipp) : null;
+    herkunftPunkt = punkt && herkunft ? { dx: punkt.x - flaeche.left, dy: punkt.y - flaeche.top } : null;
   }
   if (von === nach || bewegungAus()) return null;
   var alt = $('ansicht');
-  var mitTipp = nach !== 'home' && tipp && document.contains(tipp);
   return { zurueck: nach === 'home', altRect: alt.getBoundingClientRect(), geist: geist(alt),
-    quelle: mitTipp ? tippFlaeche(tipp).getBoundingClientRect() : null, rund: mitTipp && tropfenQuelle(tipp) };
+    quelle: punkt ? punktFlaeche(punkt.x, punkt.y) : flaeche, rund: !!punkt || (mitTipp && tropfenQuelle(tipp)) };
 }
 
 // Nach dem Neuzeichnen: vorwärts wächst die neue Ansicht aus der Kachel, die
@@ -1893,11 +2089,20 @@ function uebergangAusfuehren(u) {
     }
     return;
   }
-  var ziel = herkunft ? document.querySelector(herkunft) : null;
+  var ziel = herkunft ? document.querySelector(herkunft) : null, hp = herkunftPunkt;
   herkunft = null;
+  herkunftPunkt = null;
+  // Gemessen, bevor die Übersicht heranwächst — sonst zielt der Tropfen auf
+  // die verkleinerte Kachel.
+  var fl = ziel && hp && ziel.getClientRects().length ? tippFlaeche(ziel).getBoundingClientRect() : null;
   bewegt(neu, [{ opacity: 0.4, transform: 'scale(.98)' }, { opacity: 1, transform: 'none' }], { dauer: 420, kurve: 'ease-out' });
   if (!g) return;
-  if (ziel && ziel.getClientRects().length && tropfenQuelle(ziel)) {
+  if (fl) {
+    // Zurück an die Stelle, an der der Finger lag. Die Kachel nickt nicht —
+    // sie nimmt nur auf.
+    var stelle = punktFlaeche(fl.left + hp.dx, fl.top + hp.dy);
+    tropfenZu(g, a, { getBoundingClientRect: function () { return stelle; } });
+  } else if (ziel && ziel.getClientRects().length && tropfenQuelle(ziel)) {
     tropfenZu(g, a, ziel);
   } else if (ziel && ziel.getClientRects().length) {
     bewegt(g, [ZOOM_VOLL, zoomBild(tippFlaeche(ziel).getBoundingClientRect(), a)], { dauer: 520, fill: 'forwards' },
@@ -2043,6 +2248,7 @@ function teilTropfen(el, an) {
 // Eine Karte ist kleiner als eine Ansicht, ihr Weg kürzer (ADR 0013).
 var HINWEIS_DAUER = Math.round(TROPFEN_DAUER * 0.4);
 var hinweisQuelle = null, hinweisZiel = null, hinweisUhr = null;
+var hinweisFrage = null;   // { ja, beiJa } — der Hinweis fragt, statt nur zu sagen
 
 function zuSehen(el) { return !!el && document.contains(el) && el.getClientRects().length > 0; }
 
@@ -2050,6 +2256,9 @@ function zuSehen(el) { return !!el && document.contains(el) && el.getClientRects
 // einer Zeit, die mit dem Text wächst; ein Tipp irgendwohin schließt früher.
 // `ziel` darf ein Selektor sein: Er wird erst beim Schließen gesucht, wenn die
 // neue Ansicht steht (ADR 0018).
+// `opt.frage` ({ ja, beiJa }): Statt «OK» stehen «Abbrechen» und `ja` da; nur
+// `ja` führt `beiJa` aus. Meldet `beiJa` etwas, wird aus der Frage an Ort und
+// Stelle die Antwort — kein zweiter Tropfen (ADR 0020).
 function hinweisZeigen(titel, text, quelle, ziel, opt) {
   opt = opt || {};
   var blatt = $('hinweisBlatt'), karte = $('hinweisKarte'), offen = !blatt.hidden && blatt.classList.contains('offen');
@@ -2065,7 +2274,10 @@ function hinweisZeigen(titel, text, quelle, ziel, opt) {
   }
   $('hinweisHaken').classList.toggle('neutral', zeichen !== 'haken');
   $('hinweisHaken').hidden = !best;
+  hinweisFrage = !best && opt.frage ? opt.frage : null;
+  $('hinweisOk').textContent = hinweisFrage ? hinweisFrage.ja : 'OK';
   $('hinweisOk').hidden = best;
+  $('hinweisNein').hidden = best || !hinweisFrage;
   karte.classList.toggle('bestaetigung', best);
   karte.setAttribute('role', best ? 'status' : 'alertdialog');
   if (hinweisUhr) { clearTimeout(hinweisUhr); hinweisUhr = null; }
@@ -2125,7 +2337,7 @@ function bestaetigen(titel, text, knopf, ziel, zeichen) {
 var wahlZuletzt = {};
 
 function wahlenSetzen() {
-  alleIn('#app .wahl').forEach(function (w) {
+  alleIn('#app .wahl, #ticketKarte .wahl').forEach(function (w) {
     var knoepfe = Array.prototype.filter.call(w.children, function (c) { return c.tagName === 'BUTTON'; });
     var i = -1;
     knoepfe.forEach(function (b, j) { if (b.getAttribute('aria-pressed') === 'true') i = j; });
@@ -2706,7 +2918,9 @@ var ANSICHTEN = {
   reflexion: { titel: 'Wochenreflexion', zeichnen: zeichneReflexion },
   lesen: { titel: 'Wochenreflexion', zeichnen: zeichneLesen },
   export: { titel: 'Kalender-Export', zeichnen: zeichneExport },
-  einstellungen: { titel: 'Einstellungen', zeichnen: zeichneEinstellungen }
+  einstellungen: { titel: 'Einstellungen', zeichnen: zeichneEinstellungen },
+  sicherung: { titel: 'Sicherung', zeichnen: zeichneSicherung },
+  tickets: { titel: 'Tickets', zeichnen: zeichneTickets }
 };
 
 // Das Menü in der Reihenfolge des Pflichtenhefts. `ziel` ist eine Ansicht;
@@ -2717,8 +2931,8 @@ var MENUE = [
   { id: 'journal', name: 'Journal', icon: 'journal', ziel: 'journal' },
   { id: 'export', name: 'Kalender-Export', icon: 'export', ziel: 'export' },
   { id: 'einstellungen', name: 'Einstellungen', icon: 'zahnrad', ziel: 'einstellungen' },
-  { id: 'sicherung', name: 'Sicherung', icon: 'sicherung' },
-  { id: 'tickets', name: 'Tickets', icon: 'ticket' }
+  { id: 'sicherung', name: 'Sicherung', icon: 'sicherung', ziel: 'sicherung' },
+  { id: 'tickets', name: 'Tickets', icon: 'ticket', ziel: 'tickets' }
 ];
 
 // `id` sagt «bearbeiten» die Gewohnheit, «abgewoehnen» und «rueckfall», worum
@@ -2856,7 +3070,7 @@ var WISCH_WEG = 70;    // px, die der Finger mindestens waagerecht zurücklegt
 var wischVon = null;
 
 function blattOffen() {
-  return !$('menue').hidden || !$('hinweisBlatt').hidden;
+  return !$('menue').hidden || !$('hinweisBlatt').hidden || !$('ticketBlatt').hidden;
 }
 
 function wischBeginnen(e) {
@@ -2898,6 +3112,7 @@ function zeichneHome() {
     (dran.length ? '<section class="abschnitt"><h2>Gewohnheiten</h2><div class="gw-liste">' +
       dran.map(zeichneKachel).join('') + '</div></section>' : '') +
     (ausSchluessel(heute).getDay() === 0 ? zeichneReflexionKachel(heute) : '') +
+    (sicherungFaellig() ? zeichneSicherungKachel() : '') +
     (frei.length ? '<section class="abschnitt"><h2>Heute nicht dran</h2><div class="gw-liste gedimmt">' +
       frei.map(zeichneKachel).join('') + '</div></section>' : '') +
     (laster.length ? '<section class="abschnitt"><h2>Abgewöhnen</h2><div class="gw-liste">' +
@@ -3537,7 +3752,7 @@ function zeichneFormular() {
   } else if (l) {
     html += zeichneHeatmap(null, l) + zeichneLasterStand(l);
   } else {
-    if (schwacheZahl(heute) >= HINWEIS_AB) {
+    if (state.schwachHinweis && schwacheZahl(heute) >= HINWEIS_AB) {
       html += '<p class="hinweis" id="gwHinweis">' + ICON.hinweis + '<span>Du baust gerade an ' +
         schwacheZahl(heute) + ' Gewohnheiten, die noch nicht sitzen. Mehr auf einmal macht alle ' +
         'schwächer — vielleicht erst eine festigen?</span></p>';
@@ -4471,7 +4686,608 @@ function bindeExport() {
   });
 }
 
+// ── Kopieren ────────────────────────────────────────────────────
+// In die Zwischenablage, und `fertig(ok)` sagt, ob es ging. Erst über die
+// Zwischenablage des Browsers, sonst über ein verborgenes Feld — scheitert
+// beides, zeigt die Ansicht den Text zum Kopieren von Hand.
+function kopieren(text, fertig) {
+  function vonHand() {
+    var f = document.createElement('textarea'), ok = false;
+    f.value = text;
+    f.setAttribute('readonly', '');
+    f.style.cssText = 'position: fixed; top: 0; left: 0; opacity: 0; font-size: 16px;';
+    document.body.appendChild(f);
+    try {
+      f.select();
+      f.setSelectionRange(0, text.length);
+      ok = document.execCommand('copy');
+    } catch (e) { ok = false; }
+    weg(f);
+    fertig(!!ok);
+  }
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { fertig(true); }, vonHand);
+      return;
+    }
+  } catch (e) { /* weiter von Hand */ }
+  vonHand();
+}
+
+// ════════════════════════════════════════════════════════════════
+//  Sicherung: der Sicherungscode
+// ════════════════════════════════════════════════════════════════
+//
+// Die Daten liegen nur auf dem Gerät. Der Code nimmt sie als Text mit — zum
+// Kopieren in eine Notiz, zum Einlesen auf einem neuen Gerät (Pflichtenheft:
+// «nur Sicherungscode, wie Chillingo»). Er trägt alles außer den Tickets und
+// der laufenden Welle: Tickets sind Werkstattzettel des Geräts (ADR 0020).
+//
+// Aufbau: «CHJ1~<Prüfsumme>~<Base64 von JSON>». Die Prüfsumme fängt einen
+// abgeschnittenen oder verstümmelten Code ab, bevor er etwas ersetzt. Die Tage
+// einer Gewohnheit stehen verdichtet als Lücken und Läufe — ein Jahr lang
+// täglich ist dann eine Handvoll Zeichen statt viereinhalbtausend.
+var CODE_KOPF = 'CHJ1';
+var SICHERUNG_FRIST = 30;    // Tage, nach denen die Kachel ans Sichern erinnert
+var SICHERUNG_AB = 30;       // so viele Einträge, dann gibt es etwas zu verlieren
+var TAG_MS = 24 * 60 * 60 * 1000;
+var rueckgaengig = null;     // der Stand vor dem letzten Einlesen oder Löschen, bis die Seite neu lädt
+var scZeigen = '';           // der Code zum Kopieren von Hand, wenn die Zwischenablage nicht wollte
+
+// «2026-01-01.1*a1.3.1*5»: der erste Tag, dann Lücke (in Tagen) und wie oft
+// sie hintereinander vorkommt, beides zur Basis 36. Gegangen wird mit tagPlus,
+// nie mit Millisekunden. Was sich nicht verdichten läßt, bleibt null.
+function tageVerdichten(tage) {
+  if (!tage.length) return '';
+  var teile = [tage[0]], k = tage[0], luecke = 0, lauf = 0;
+  function abschliessen() {
+    if (lauf) teile.push(luecke.toString(36) + (lauf > 1 ? '*' + lauf.toString(36) : ''));
+  }
+  for (var i = 1; i < tage.length; i++) {
+    var n = 0;
+    while (k < tage[i] && n <= 4000) { k = tagPlus(k, 1); n++; }
+    if (k !== tage[i]) return null;
+    if (n === luecke) lauf++;
+    else { abschliessen(); luecke = n; lauf = 1; }
+  }
+  abschliessen();
+  return teile.join('.');
+}
+
+function tageEntfalten(z) {
+  if (typeof z !== 'string' || !z) return [];
+  var teile = z.split('.'), k = teile[0], raus = [k];
+  if (!istSchluessel(k)) return [];
+  for (var i = 1; i < teile.length; i++) {
+    var m = /^([0-9a-z]+)(?:\*([0-9a-z]+))?$/.exec(teile[i]);
+    if (!m) return [];
+    var l = parseInt(m[1], 36), n = m[2] ? parseInt(m[2], 36) : 1;
+    if (!(l >= 1) || !(n >= 1) || raus.length + n > 40000) return [];
+    for (var j = 0; j < n; j++) { k = tagPlus(k, l); raus.push(k); }
+  }
+  return raus;
+}
+
+function pruefsumme(text) {
+  var h = 2166136261;
+  for (var i = 0; i < text.length; i++) { h ^= text.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+  return h.toString(36);
+}
+
+function zuBase64(text) {
+  var b = new TextEncoder().encode(text), s = '';
+  for (var i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000));
+  return btoa(s);
+}
+
+function ausBase64(b64) {
+  var s = atob(b64), b = new Uint8Array(s.length);
+  for (var i = 0; i < s.length; i++) b[i] = s.charCodeAt(i);
+  return new TextDecoder().decode(b);
+}
+
+function sicherungsCode(nun) {
+  var d = JSON.parse(JSON.stringify(state));
+  delete d.tickets;
+  delete d.welle;
+  d.gesichert = nun;
+  d.gewohnheiten.forEach(function (g) {
+    var z = tageVerdichten(g.erledigt);
+    if (z !== null) { g.e = z; delete g.erledigt; }
+  });
+  var json = JSON.stringify(d);
+  return CODE_KOPF + '~' + pruefsumme(json) + '~' + zuBase64(json);
+}
+
+// Ein Code als Rohstand für `stand()`, oder null. Leerraum zählt nicht — eine
+// Notiz bricht lange Zeilen gern um.
+function codeLesen(text) {
+  var m = /^CHJ1~([0-9a-z]+)~([A-Za-z0-9+\/]+=*)$/.exec(String(text || '').replace(/\s+/g, ''));
+  if (!m) return null;
+  try {
+    var json = ausBase64(m[2]);
+    if (pruefsumme(json) !== m[1]) return null;
+    var roh = JSON.parse(json);
+    if (!roh || typeof roh !== 'object') return null;
+    if (Array.isArray(roh.gewohnheiten)) {
+      roh.gewohnheiten.forEach(function (g) {
+        if (g && typeof g === 'object' && typeof g.e === 'string') { g.erledigt = tageEntfalten(g.e); delete g.e; }
+      });
+    }
+    return roh;
+  } catch (e) { return null; }
+}
+
+function anzahl(n, eins, viele) { return n + ' ' + (n === 1 ? eins : viele); }
+
+// Was ein Stand enthält, in einem Satz — für die Frage vor dem Einlesen.
+function standText(s) {
+  var teile = [anzahl(s.gewohnheiten.length, 'Gewohnheit', 'Gewohnheiten'),
+    anzahl(s.abgewoehnen.length, 'Abgewöhnen', 'Abgewöhnen'),
+    anzahl(s.termine.length, 'Termin', 'Termine'),
+    anzahl(s.journal.length, 'Reflexion', 'Reflexionen')];
+  return teile.join(', ');
+}
+
+// Was es zu verlieren gibt: jeder Haken, Rückfall, Drang, Termin, jede Reflexion.
+function eintragZahl() {
+  var n = state.termine.length + state.journal.length;
+  state.gewohnheiten.forEach(function (g) { n += 1 + g.erledigt.length; });
+  state.abgewoehnen.forEach(function (a) { n += 1 + a.rueckfaelle.length + a.draenge.length; });
+  return n;
+}
+
+// Tage seit der letzten Sicherung, -1 für noch nie. Eine Dauer, darum in
+// Millisekunden über zeitJetzt() — wie «frei seit».
+function sicherungAlter() {
+  if (!state.gesichert) return -1;
+  return Math.max(0, Math.floor((zeitJetzt() - state.gesichert) / TAG_MS));
+}
+
+// Erinnert wird erst, wenn es etwas zu verlieren gibt, und dann alle 30 Tage.
+function sicherungFaellig() {
+  if (eintragZahl() < SICHERUNG_AB) return false;
+  var alter = sicherungAlter();
+  return alter === -1 || alter >= SICHERUNG_FRIST;
+}
+
+function sicherungAlterText() {
+  var alter = sicherungAlter();
+  return alter === -1 ? 'noch nie' : alter === 0 ? 'heute' : alter === 1 ? 'gestern' : 'vor ' + alter + ' Tagen';
+}
+
+function zeichneSicherungKachel() {
+  var alter = sicherungAlter();
+  return '<section class="abschnitt"><h2>Sicherung</h2><div class="gw-liste">' +
+    '<div class="gw-kachel">' +
+      '<button type="button" class="gw-haken" data-sicherung="ja">' +
+        '<span class="gw-ring"><span class="gw-scheibe sc-scheibe">' + ICON.sicherung + '</span></span>' +
+        '<span class="gw-text"><span class="gw-name">Zeit für eine Sicherung</span>' +
+          '<span class="gw-info">' + (alter === -1 ? 'Deine Daten liegen nur auf diesem Gerät.'
+            : 'Zuletzt ' + esc(sicherungAlterText()) + ' gesichert.') + '</span></span>' +
+      '</button>' +
+    '</div></div></section>';
+}
+
+function zeichneSicherung() {
+  return '<section class="abschnitt"><h2>Sichern</h2><div class="kachel">' +
+      '<p>Deine Daten liegen nur auf diesem Gerät. Der Sicherungscode nimmt alles mit — Gewohnheiten, ' +
+        'Abgewöhnen, Termine, Journal und Einstellungen. Leg ihn in eine Notiz oder schick ihn dir selbst.</p>' +
+      '<div class="zeile"><span>Zuletzt gesichert</span><span class="wert" id="scAlter">' +
+        esc(sicherungAlterText()) + '</span></div>' +
+      '<div class="knopfreihe"><button type="button" class="knopf" id="scKopieren">Code kopieren</button></div>' +
+      (scZeigen ? '<p class="klein">Kopieren ging nicht. Markier den Code und kopier ihn von Hand.</p>' +
+        '<textarea id="scCode" class="eingabe code" readonly rows="4">' + esc(scZeigen) + '</textarea>' : '') +
+      '<p class="klein">Tickets fahren nicht mit — sie gehören zum Gerät.</p>' +
+    '</div></section>' +
+    '<section class="abschnitt"><h2><label for="scEingabe">Einlesen</label></h2>' +
+      '<textarea id="scEingabe" class="eingabe code" rows="4" autocomplete="off" autocapitalize="off" ' +
+        'spellcheck="false" placeholder="Sicherungscode hier einfügen"></textarea>' +
+      '<div class="knopfreihe"><button type="button" class="knopf zart" id="scEinlesen">Einlesen</button>' +
+        (rueckgaengig ? '<button type="button" class="knopf zart" id="scRueck">Rückgängig machen</button>' : '') +
+      '</div>' +
+      '<p class="klein">Einlesen ersetzt, was jetzt auf dem Gerät steht. Bis die App neu lädt, kannst du ' +
+        'es rückgängig machen.</p>' +
+    '</section>';
+}
+
+// Den Stand ersetzen — beim Einlesen wie beim Löschen. Der alte bleibt für
+// «Rückgängig», bis die Seite neu lädt; die Tickets bleiben, sie gehören zum Gerät.
+function standErsetzen(neu) {
+  rueckgaengig = JSON.stringify(state);
+  neu.tickets = state.tickets;
+  state = neu;
+  entwurf = null;
+  terminEntwurf = null;
+  reflexionEntwurf = null;
+  kalTag = null;
+  kalVersatz = 0;
+  themaAnwenden();
+  return speichern();
+}
+
+function sicherungKopieren() {
+  var nun = zeitJetzt(), code = sicherungsCode(nun), knopf = this;
+  kopieren(code, function (ok) {
+    scZeigen = ok ? '' : code;
+    if (ok) {
+      state.gesichert = nun;
+      if (speichern()) bestaetigen('Kopiert', 'Leg den Code an einen sicheren Ort.', knopf, '#scAlter');
+    }
+    if (ansicht === 'sicherung') render();
+    if (!ok && $('scCode')) { try { $('scCode').focus(); $('scCode').select(); } catch (e) { /* egal */ } }
+  });
+}
+
+function sicherungEinlesen() {
+  var roh = codeLesen($('scEingabe').value);
+  if (!roh) {
+    melden('Das ist kein gültiger Sicherungscode. Kopier ihn noch einmal ganz.');
+    return;
+  }
+  var neu = stand(roh), wann = istZeit(roh.gesichert) ? datumLang(new Date(roh.gesichert)) : '';
+  hinweisZeigen('Diesen Stand einlesen?', standText(neu) + (wann ? ', gesichert am ' + wann : '') +
+    '. Was jetzt auf dem Gerät steht, wird ersetzt.', this.getBoundingClientRect(), null,
+    { frage: { ja: 'Ersetzen', beiJa: function () {
+      var ok = standErsetzen(neu);
+      render();
+      if (ok) melden('Eingelesen. Bis die App neu lädt, kannst du es rückgängig machen.', 'haken');
+    } } });
+}
+
+function sicherungZurueck() {
+  if (!rueckgaengig) return;
+  var alt = stand(JSON.parse(rueckgaengig));
+  alt.tickets = state.tickets;
+  state = alt;
+  rueckgaengig = null;
+  themaAnwenden();
+  render();
+  if (speichern()) melden('Rückgängig gemacht. Der vorige Stand ist zurück.', 'haken');
+}
+
+function bindeSicherung() {
+  $('scKopieren').addEventListener('click', sicherungKopieren);
+  $('scEinlesen').addEventListener('click', sicherungEinlesen);
+  if ($('scRueck')) $('scRueck').addEventListener('click', sicherungZurueck);
+}
+
+// ════════════════════════════════════════════════════════════════
+//  Tickets: Fehler und Wünsche
+// ════════════════════════════════════════════════════════════════
+//
+// Gesammelt auf dem Gerät, gebündelt als Text «# Chillinal · N Tickets» zum
+// Kopieren und Vorlegen. Nichts wird verschickt. Geschrieben wird im
+// Ticketblatt, das sich über die Ansicht legt — aus dem schwebenden Knopf
+// unten rechts oder aus der Ticketliste (ADR 0020).
+var ticketEntwurf = null;   // { id, art, titel, text, ort, grund } — überlebt das Zuklappen
+var ticketQuelle = null;    // das Element, aus dem das Blatt quoll — dorthin fließt es zurück
+var tkAusgabe = '';         // der gebündelte Text zum Kopieren von Hand
+var tkAufraeumFrage = false;
+
+// Woher ein neues Ticket kommt: die Ansicht, über der man steht.
+var ORT_VON = { home: 'uebersicht', neu: 'gewohnheit', bearbeiten: 'gewohnheit', abgewoehnen: 'abgewoehnen',
+  welle: 'abgewoehnen', rueckfall: 'abgewoehnen', terminNeu: 'termin', termin: 'termin', journal: 'journal',
+  reflexion: 'journal', lesen: 'journal', export: 'export', einstellungen: 'einstellungen',
+  sicherung: 'sicherung', tickets: 'tickets' };
+
+function ortHier() {
+  if (ansicht === 'home' && kalTag) return 'kalender';
+  return ORT_VON[ansicht] || 'anderswo';
+}
+
+function ticketNach(id) {
+  for (var i = 0; i < state.tickets.length; i++) if (state.tickets[i].id === id) return state.tickets[i];
+  return null;
+}
+
+function ticketStand() { return APP_VERSION + ' · ' + APP_STAND; }
+
+function ticketEntwurfDa() {
+  return !!ticketEntwurf && !ticketEntwurf.id && !!(ticketEntwurf.titel.trim() || ticketEntwurf.text.trim());
+}
+
+function ticketKnopfZeigen() {
+  var k = $('ticketKnopf'), da = ticketEntwurfDa();
+  k.classList.toggle('hat-entwurf', da);
+  k.setAttribute('aria-label', da ? 'Angefangenes Ticket weiterschreiben' : 'Ticket schreiben');
+}
+
+// Ein Ticket als Abschnitt. Der App-Stand steht einmal am Ende; nur wenn sich
+// zwischendurch etwas geändert hat, an jedem Ticket — dann sagt er, gegen welche
+// Fassung sich die Meldung richtet.
+function ticketAbschnitt(t, nr, standZeigen) {
+  return '## ' + nr + ' · ' + (t.art === 'wunsch' ? 'Wunsch' : 'Fehler') + ': ' + t.titel + '\n\n' +
+    (t.text ? t.text + '\n\n' : '') +
+    '- Ort: ' + wahlName(TICKET_ORTE, t.ort) + '\n' +
+    (t.grund ? '- Art: ' + wahlName(TICKET_GRUENDE[t.art], t.grund) + '\n' : '') +
+    (standZeigen ? '- App-Stand: ' + t.stand + '\n' : '');
+}
+
+function ticketsAlsText(liste) {
+  if (!liste.length) return '';
+  var reihe = liste.slice().sort(function (a, b) { return a.erstellt - b.erstellt; }), staende = [];
+  reihe.forEach(function (t) { if (staende.indexOf(t.stand) === -1) staende.push(t.stand); });
+  var jeTicket = staende.length > 1;
+  return '# Chillinal · ' + anzahl(reihe.length, 'Ticket', 'Tickets') + '\n\n' +
+    reihe.map(function (t, i) { return ticketAbschnitt(t, i + 1, jeTicket); }).join('\n') +
+    '\n---\n' + (jeTicket ? '' : 'App-Stand: ' + staende[0] + '\n');
+}
+
+function offeneTickets() { return state.tickets.filter(function (t) { return !t.abgegeben; }); }
+
+// ── Das Ticketblatt ─────────────────────────────────────────────
+function ticketBlattOffen() { return !$('ticketBlatt').hidden && $('ticketBlatt').classList.contains('offen'); }
+
+function grundOptionen(e) {
+  return '<option value="">Ohne Angabe</option>' + TICKET_GRUENDE[e.art].map(function (g) {
+    return '<option value="' + g[0] + '"' + (e.grund === g[0] ? ' selected' : '') + '>' + esc(g[1]) + '</option>';
+  }).join('');
+}
+
+function zeichneTicketBlatt() {
+  var e = ticketEntwurf;
+  return '<h2 id="tkKopf">' + (e.id ? 'Ticket' : 'Neues Ticket') + '</h2>' +
+    '<div class="wahl" role="group" aria-label="Ticketart">' + [['fehler', 'Fehler'], ['wunsch', 'Wunsch']].map(function (a) {
+      return '<button type="button" data-tkart="' + a[0] + '" aria-pressed="' + (e.art === a[0] ? 'true' : 'false') +
+        '">' + a[1] + '</button>';
+    }).join('') + '</div>' +
+    '<input id="tkTitel" class="eingabe" type="text" maxlength="' + TICKET_TITEL_MAX + '" autocomplete="off" ' +
+      'aria-label="Titel" placeholder="Worum geht es? Kurz und knapp." value="' + esc(e.titel) + '">' +
+    '<textarea id="tkText" class="eingabe" rows="3" maxlength="' + TICKET_TEXT_MAX + '" aria-label="Beschreibung" ' +
+      'placeholder="Was ist passiert, was hast du erwartet?">' + esc(e.text) + '</textarea>' +
+    '<div class="tk-wahlen">' +
+      '<div><label class="tm-etikett" for="tkOrt">Wo</label><div class="auswahl"><select id="tkOrt" class="eingabe">' +
+        TICKET_ORTE.map(function (o) {
+          return '<option value="' + o[0] + '"' + (e.ort === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>';
+        }).join('') + '</select>' + ICON.weiter + '</div></div>' +
+      '<div><label class="tm-etikett" for="tkGrund">Was</label><div class="auswahl"><select id="tkGrund" class="eingabe">' +
+        grundOptionen(e) + '</select>' + ICON.weiter + '</div></div>' +
+    '</div>' +
+    '<div class="tk-knoepfe">' +
+      '<button type="button" class="knopf zart" id="tkAbbrechen">' + (e.id ? 'Zurück' : 'Verwerfen') + '</button>' +
+      '<button type="button" class="knopf" id="tkSichern">Sichern</button>' +
+    '</div>' +
+    (e.id ? '<div class="knopfreihe"><button type="button" class="knopf zart" id="tkLoeschen">Ticket löschen</button></div>' : '');
+}
+
+function bindeTicketBlatt() {
+  var e = ticketEntwurf;
+  alleIn('[data-tkart]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var art = this.getAttribute('data-tkart');
+      if (art === e.art) return;
+      e.art = art;
+      e.grund = '';
+      alleIn('[data-tkart]').forEach(function (x) {
+        x.setAttribute('aria-pressed', x.getAttribute('data-tkart') === art ? 'true' : 'false');
+      });
+      $('tkGrund').innerHTML = grundOptionen(e);
+      wahlenSetzen();
+    });
+  });
+  $('tkTitel').addEventListener('input', function () { e.titel = this.value; ticketKnopfZeigen(); });
+  $('tkText').addEventListener('input', function () { e.text = this.value; ticketKnopfZeigen(); });
+  $('tkOrt').addEventListener('change', function () { e.ort = this.value; });
+  $('tkGrund').addEventListener('change', function () { e.grund = this.value; });
+  $('tkSichern').addEventListener('click', ticketSichern);
+  // Der einzige Weg, einen Entwurf loszuwerden. Danebentippen klappt nur zu —
+  // ein halb geschriebenes Ticket durch eine Handbewegung zu verlieren wäre
+  // der schlechtere Tausch.
+  $('tkAbbrechen').addEventListener('click', function () {
+    ticketEntwurf = null;
+    ticketBlattSchliessen();
+  });
+  if ($('tkLoeschen')) $('tkLoeschen').addEventListener('click', function () {
+    if (!e.loeschFrage) {
+      e.loeschFrage = true;
+      this.textContent = 'Wirklich löschen?';
+      this.classList.add('frage');
+      return;
+    }
+    var t = ticketNach(e.id);
+    if (t) state.tickets.splice(state.tickets.indexOf(t), 1);
+    ticketEntwurf = null;
+    var gut = speichern();
+    ticketBlattSchliessen();
+    if (ansicht === 'tickets') render();
+    if (gut) melden('Gelöscht.', 'haken');
+  });
+}
+
+// Auf: als Tropfen aus `quelle` (dem Knopf oder der getippten Zeile). `id`
+// öffnet ein vorhandenes Ticket; ohne sie geht ein angefangener Entwurf weiter.
+function ticketBlattOeffnen(quelle, id, flaeche) {
+  var t = id ? ticketNach(id) : null;
+  if (t) ticketEntwurf = { id: t.id, art: t.art, titel: t.titel, text: t.text, ort: t.ort, grund: t.grund };
+  else if (!ticketEntwurf || ticketEntwurf.id) {
+    ticketEntwurf = { id: null, art: 'fehler', titel: '', text: '', ort: ortHier(), grund: '' };
+  }
+  menueSchliessen(true);
+  ticketQuelle = quelle || null;
+  var blatt = $('ticketBlatt'), karte = $('ticketKarte');
+  karte.innerHTML = zeichneTicketBlatt();
+  bindeTicketBlatt();
+  blatt.hidden = false;
+  void blatt.offsetWidth;
+  blatt.classList.add('offen');
+  karte.scrollTop = 0;
+  $('ticketKnopf').setAttribute('aria-expanded', 'true');
+  wahlenSetzen();
+  var r = flaeche || (quelle && zuSehen(quelle) ? quelle.getBoundingClientRect() : null);
+  if (r && r.width) tropfenAuf(karte, r, { rund: '18px' });
+}
+
+// Zu: in die Quelle zurück, ist sie fort, in den Knopf. `fertig` kommt, wenn
+// der Tropfen angekommen ist.
+function ticketBlattSchliessen(fertig) {
+  var blatt = $('ticketBlatt'), karte = $('ticketKarte');
+  ticketKnopfZeigen();
+  $('ticketKnopf').setAttribute('aria-expanded', 'false');
+  if (blatt.hidden || !blatt.classList.contains('offen')) { if (fertig) fertig(); return; }
+  blatt.classList.remove('offen');
+  var ziel = zuSehen(ticketQuelle) ? ticketQuelle : $('ticketKnopf');
+  ticketQuelle = null;
+  try { if (document.activeElement && karte.contains(document.activeElement)) document.activeElement.blur(); } catch (e) { /* egal */ }
+  var g = bewegungAus() ? null : geist(karte);
+  function zu() {
+    karte.style.opacity = '';
+    if (!blatt.classList.contains('offen')) blatt.hidden = true;
+    if (fertig) fertig();
+  }
+  if (!g) { zu(); return; }
+  var r = karte.getBoundingClientRect();
+  karte.style.opacity = '0';
+  tropfenZu(g, r, ziel, { rund: '18px', fertig: zu });
+}
+
+function ticketSichern() {
+  var e = ticketEntwurf;
+  e.titel = $('tkTitel').value.trim().slice(0, TICKET_TITEL_MAX);
+  e.text = $('tkText').value.replace(/\s+$/, '').slice(0, TICKET_TEXT_MAX);
+  if (!e.titel) {
+    $('tkTitel').focus();
+    melden('Gib dem Ticket einen Titel.');
+    return;
+  }
+  var t = e.id ? ticketNach(e.id) : null;
+  if (t) {
+    // Ein geändertes Ticket ist wieder offen: Was abgegeben war, stimmt so nicht mehr.
+    t.art = e.art; t.titel = e.titel; t.text = e.text; t.ort = e.ort; t.grund = e.grund;
+    t.abgegeben = null;
+  } else {
+    // Streng steigend, damit die Reihenfolge eindeutig bleibt.
+    var nun = zeitJetzt();
+    state.tickets.forEach(function (x) { if (x.erstellt >= nun) nun = x.erstellt + 1; });
+    t = { id: neueId('k'), art: e.art, titel: e.titel, text: e.text, ort: e.ort, grund: e.grund,
+      erstellt: nun, stand: ticketStand(), abgegeben: null };
+    state.tickets.push(t);
+  }
+  ticketEntwurf = null;
+  var gut = speichern(), neu = !e.id;
+  if (ansicht === 'tickets') render();
+  // Erst fließt das Blatt zurück, dann quillt die Bestätigung aus dem Knopf —
+  // zwei Tropfen zugleich sähen aus wie einer, der sich verdoppelt.
+  ticketBlattSchliessen(function () {
+    if (!gut) return;
+    var k = $('ticketKnopf');
+    bestaetigen(neu ? 'Ticket gesichert' : 'Gespeichert', neu ? 'Es bleibt auf dem Gerät, bis du es kopierst.' : '',
+      k, ansicht === 'tickets' ? '[data-ticket="' + t.id + '"]' : k);
+  });
+}
+
+// ── Die Ticketliste ─────────────────────────────────────────────
+function zeichneTicketZeile(t) {
+  var mehr = [wahlName(TICKET_ORTE, t.ort), t.grund ? wahlName(TICKET_GRUENDE[t.art], t.grund) : '',
+    tagKurz(tagSchluessel(new Date(t.erstellt)))].filter(function (x) { return !!x; }).join(' · ');
+  return '<button type="button" class="tk-zeile" data-ticket="' + esc(t.id) + '">' +
+    '<span class="tk-art">' + (t.art === 'wunsch' ? 'Wunsch' : 'Fehler') + '</span>' +
+    '<span class="tk-titel">' + esc(t.titel) + '</span>' +
+    '<span class="tk-mehr">' + esc(mehr) + '</span></button>';
+}
+
+function zeichneTickets() {
+  var offen = offeneTickets(), ab = state.tickets.filter(function (t) { return !!t.abgegeben; }).reverse();
+  return '<section class="abschnitt"><button type="button" class="knopf" id="tkNeu">' + ICON.plus +
+      '<span>Neues Ticket</span></button></section>' +
+    '<section class="abschnitt"><h2>Offen</h2>' +
+      (offen.length ? '<div class="tm-liste">' + offen.map(zeichneTicketZeile).join('') + '</div>' +
+        '<div class="knopfreihe"><button type="button" class="knopf zart" id="tkKopieren">' +
+          (offen.length === 1 ? 'Ticket kopieren' : 'Alle ' + offen.length + ' kopieren') + '</button></div>' +
+        (tkAusgabe ? '<p class="klein">Kopieren ging nicht. Markier den Text und kopier ihn von Hand.</p>' +
+          '<textarea id="tkAusgabe" class="eingabe code" readonly rows="6">' + esc(tkAusgabe) + '</textarea>' : '') +
+        '<p class="klein">Kopiert gelten sie als abgegeben. Leg den Text Claude Code vor.</p>'
+      : '<p class="klein">Nichts offen. Stört dich etwas oder fehlt dir etwas, tipp unten rechts auf den Knopf.</p>') +
+    '</section>' +
+    (ab.length ? '<section class="abschnitt"><h2>Abgegeben</h2>' +
+      '<div class="tm-liste gedimmt">' + ab.map(zeichneTicketZeile).join('') + '</div>' +
+      '<div class="knopfreihe"><button type="button" class="knopf zart' + (tkAufraeumFrage ? ' frage' : '') +
+        '" id="tkAufraeumen">' + (tkAufraeumFrage ? 'Wirklich löschen?' : 'Abgegebene löschen') + '</button></div>' +
+    '</section>' : '');
+}
+
+function ticketsKopieren() {
+  var offen = offeneTickets(), text = ticketsAlsText(offen);
+  kopieren(text, function (ok) {
+    tkAusgabe = ok ? '' : text;
+    if (ok) {
+      var nun = zeitJetzt();
+      offen.forEach(function (t) { t.abgegeben = nun; });
+      var gut = speichern();
+      if (gut) melden('Kopiert. ' + anzahl(offen.length, 'Ticket liegt', 'Tickets liegen') + ' in der Zwischenablage.', 'haken');
+    }
+    if (ansicht === 'tickets') render();
+    if (!ok && $('tkAusgabe')) { try { $('tkAusgabe').focus(); $('tkAusgabe').select(); } catch (e) { /* egal */ } }
+  });
+}
+
+function bindeTickets() {
+  $('tkNeu').addEventListener('click', function () {
+    if (ticketEntwurf && ticketEntwurf.id) ticketEntwurf = null;
+    ticketBlattOeffnen(this);
+  });
+  alleIn('[data-ticket]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var p = letzterTipp && letzterTipp.el === this && letzterTipp.x ? punktFlaeche(letzterTipp.x, letzterTipp.y) : null;
+      ticketBlattOeffnen(this, this.getAttribute('data-ticket'), p);
+    });
+  });
+  if ($('tkKopieren')) $('tkKopieren').addEventListener('click', ticketsKopieren);
+  if ($('tkAufraeumen')) $('tkAufraeumen').addEventListener('click', function () {
+    if (!tkAufraeumFrage) {
+      tkAufraeumFrage = true;
+      this.textContent = 'Wirklich löschen?';
+      this.classList.add('frage');
+      return;
+    }
+    tkAufraeumFrage = false;
+    state.tickets = offeneTickets();
+    var gut = speichern();
+    render();
+    if (gut) melden('Gelöscht.', 'haken');
+  });
+}
+
 // ── Einstellungen ───────────────────────────────────────────────
+function schalterZeile(id, name, an) {
+  return '<div class="tm-schalterzeile"><span id="' + id + 'Name">' + esc(name) + '</span>' +
+    '<button type="button" class="schalter" id="' + id + '" role="switch" aria-labelledby="' + id + 'Name" ' +
+      'aria-checked="' + (an ? 'true' : 'false') + '"><span class="schalter-spur">' +
+      '<span class="schalter-knauf"></span></span></button></div>';
+}
+
+// Alles löschen fragt im Glas; der alte Stand bleibt für «Rückgängig» in der
+// Sicherung, bis die App neu lädt. Chillingos Speicher bleibt unberührt — es
+// wird nur der eigene Schlüssel neu geschrieben.
+function allesLoeschenTippen() {
+  var nie = sicherungAlter() === -1;
+  hinweisZeigen('Alle Daten löschen?', 'Gewohnheiten, Abgewöhnen, Termine und Journal sind danach weg. ' +
+    (nie ? 'Du hast noch nie gesichert.' : 'Zuletzt gesichert: ' + sicherungAlterText() + '.'),
+    this.getBoundingClientRect(), null, { frage: { ja: 'Löschen', beiJa: function () {
+      var neu = grundStand();
+      neu.thema = state.thema;
+      neu.bewegung = state.bewegung;
+      var ok = standErsetzen(neu);
+      render();
+      if (ok) melden('Gelöscht. Unter Sicherung kannst du es rückgängig machen, bis die App neu lädt.', 'haken');
+    } } });
+}
+
+function bindeEinstellungen() {
+  $('esHinweis').addEventListener('click', function () {
+    state.schwachHinweis = !state.schwachHinweis;
+    this.setAttribute('aria-checked', state.schwachHinweis ? 'true' : 'false');
+    speichern();
+  });
+  $('esBewegung').addEventListener('click', function () {
+    state.bewegung = state.bewegung === 'aus' ? 'auto' : 'aus';
+    this.setAttribute('aria-checked', state.bewegung === 'aus' ? 'true' : 'false');
+    themaAnwenden();
+    speichern();
+  });
+  $('esLoeschen').addEventListener('click', allesLoeschenTippen);
+}
+
 function zeichneEinstellungen() {
   var wahl = [['auto', 'Automatisch'], ['hell', 'Hell'], ['dunkel', 'Dunkel']];
   return '<section class="abschnitt"><h2>Darstellung</h2><div class="wahl" role="group" ' +
@@ -4480,6 +5296,14 @@ function zeichneEinstellungen() {
         return '<button type="button" data-thema="' + w[0] + '" aria-pressed="' +
           (state.thema === w[0] ? 'true' : 'false') + '">' + esc(w[1]) + '</button>';
       }).join('') +
+    '</div></section>' +
+    '<section class="abschnitt"><h2>Gewohnheiten</h2><div class="kachel">' +
+      schalterZeile('esHinweis', 'Hinweis bei vielen neuen', state.schwachHinweis) +
+      '<p class="klein">Ab drei Gewohnheiten unter 50 % Stärke rät die Chili, erst eine zu festigen.</p>' +
+    '</div></section>' +
+    '<section class="abschnitt"><h2>Bewegung</h2><div class="kachel">' +
+      schalterZeile('esBewegung', 'Bewegung reduzieren', state.bewegung === 'aus') +
+      '<p class="klein">Tropfen und Animationen stehen still. Ist es am Gerät eingestellt, gilt es hier ohnehin.</p>' +
     '</div></section>' +
     '<section class="abschnitt"><h2>App</h2><div class="kachel">' +
       '<div class="zeile"><span>Version</span><span class="wert">' + esc(APP_VERSION) + '</span></div>' +
@@ -4492,6 +5316,10 @@ function zeichneEinstellungen() {
       '</div>' +
       '<p class="klein">Neu einrichten holt die App frisch aus dem Netz, falls etwas klemmt. ' +
         'Deine Daten bleiben dabei auf dem Gerät.</p>' +
+    '</div></section>' +
+    '<section class="abschnitt"><h2>Daten</h2><div class="kachel">' +
+      '<p>Alles, was du eingetragen hast, auf einmal löschen. Vorher lieber einen Sicherungscode kopieren.</p>' +
+      '<div class="knopfreihe"><button type="button" class="knopf zart" id="esLoeschen">Alle Daten löschen</button></div>' +
     '</div></section>';
 }
 
@@ -4531,7 +5359,12 @@ function bindeAnsicht() {
     b.addEventListener('click', function () { zeige('rueckfall', this.getAttribute('data-rueckfall')); });
   });
   alleIn('[data-termin]').forEach(function (b) {
-    b.addEventListener('click', function () { zeige('termin', this.getAttribute('data-termin')); });
+    var id = b.getAttribute('data-termin');
+    b.addEventListener('click', function () {
+      if (langGedrueckt && Date.now() - langGedrueckt < 1000) return;
+      zeige('termin', id);
+    });
+    langDruecken(b, function () { zeige('termin', id); });
   });
   alleIn('[data-neutermin]').forEach(function (b) {
     b.addEventListener('click', function () { zeige('terminNeu', this.getAttribute('data-neutermin')); });
@@ -4548,6 +5381,12 @@ function bindeAnsicht() {
     b.addEventListener('click', function () { zeige('lesen', this.getAttribute('data-lesen')); });
   });
   if ($('jrGut')) bindeReflexion();
+  alleIn('[data-sicherung]').forEach(function (b) {
+    b.addEventListener('click', function () { zeige('sicherung'); });
+  });
+  if (ansicht === 'sicherung') bindeSicherung();
+  if (ansicht === 'tickets') bindeTickets();
+  if ($('esLoeschen')) bindeEinstellungen();
   if ($('tmTitel')) bindeTerminFormular();
   if (ansicht === 'export') bindeExport();
   else exTeileZuvor = null;
@@ -4573,6 +5412,7 @@ function bindeAnsicht() {
 // eigener langer Druck) tut dasselbe.
 var LANG_MS = 500;
 var langGedrueckt = 0;   // wann der letzte lange Druck auslöste
+var langPunkt = null;    // wo: { x, y } — dort quillt die Ansicht heraus
 
 function langDruecken(el, beiLang) {
   var uhr = null, x = 0, y = 0;
@@ -4583,6 +5423,7 @@ function langDruecken(el, beiLang) {
   function los() {
     aus();
     langGedrueckt = Date.now();
+    langPunkt = { x: x, y: y };
     beiLang();
   }
   el.addEventListener('pointerdown', function (e) {
@@ -4597,7 +5438,7 @@ function langDruecken(el, beiLang) {
   ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (n) { el.addEventListener(n, aus); });
   el.addEventListener('contextmenu', function (e) {
     e.preventDefault();
-    if (Date.now() - langGedrueckt > LANG_MS) los();
+    if (Date.now() - langGedrueckt > LANG_MS) { x = e.clientX; y = e.clientY; los(); }
   });
 }
 
@@ -4967,7 +5808,16 @@ function start() {
   document.addEventListener('touchcancel', function () { wischVon = null; }, { passive: true });
 
   $('swLaden').addEventListener('click', function () { swUebernehmen(); });
-  $('hinweisOk').addEventListener('click', hinweisSchliessen);
+  $('hinweisOk').addEventListener('click', function () {
+    var f = hinweisFrage;
+    hinweisFrage = null;
+    if (f) f.beiJa();
+    if (!$('hinweisKarte').classList.contains('bestaetigung')) hinweisSchliessen();
+  });
+  $('hinweisNein').addEventListener('click', function () {
+    hinweisFrage = null;
+    hinweisSchliessen();
+  });
   // Eine Bestätigung geht auch mit einem Tipp irgendwohin.
   $('hinweisBlatt').addEventListener('click', function () {
     if ($('hinweisKarte').classList.contains('bestaetigung')) hinweisSchliessen();
@@ -4979,8 +5829,17 @@ function start() {
   $('menue').addEventListener('click', function (e) {
     if (e.target === this) menueSchliessen();
   });
+  $('ticketKnopf').innerHTML = ICON.melden;
+  $('ticketKnopf').addEventListener('click', function () { ticketBlattOeffnen(this); });
+  // Danebentippen klappt das Blatt zu; der Entwurf bleibt liegen.
+  $('ticketBlatt').addEventListener('click', function (e) {
+    if (e.target === this) ticketBlattSchliessen();
+  });
+  ticketKnopfZeigen();
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') menueSchliessen();
+    if (e.key !== 'Escape') return;
+    menueSchliessen();
+    if (ticketBlattOffen()) ticketBlattSchliessen();
   });
 
   // Folgt die App dem Gerät, folgt auch die Statusleiste und der Schalter.

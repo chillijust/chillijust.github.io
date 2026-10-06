@@ -72,6 +72,12 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   geändert und gelöscht wird erst über «Bearbeiten».
 - **Eine neue Ansicht** ist ein Eintrag in `ANSICHTEN` (`titel`, `zeichnen`), ihre Ereignisse
   hängen in `bindeAnsicht()` — nie als Attribut.
+- **Der Ticketknopf schwebt unten rechts auf jeder Ansicht; das Ticketblatt legt sich darüber,
+  es ersetzt sie nie** — ein halbes Formular darunter bleibt stehen. Nur «Verwerfen» wirft
+  einen Entwurf weg (ADR 0020). `#app` hält dem Knopf unten Platz frei.
+- **Was alles ersetzt oder löscht, fragt im Glas** (`hinweisZeigen` mit `frage`) und läßt
+  sich bis zum Neuladen rückgängig machen (`rueckgaengig`); Einzelnes fragt mit zweitem Tipp
+  (`.frage`).
 
 ## Chili
 
@@ -104,15 +110,17 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 - **Bewegt wird über `bewegt()` mit der `FEDER`**; CSS nimmt `var(--feder, ease)`. Ausnahme: Tropfen
   schwingen nicht über (ADR 0008).
 - **Was aus einem runden Knopf kommt oder in ihn geht, ist ein Tropfen** (`tropfenAuf`,
-  `tropfenZu`, `tropfenQuelle`) — Bauch voran, Spitze hinten. Kacheln und Zeilen zoomen.
+  `tropfenZu`, `tropfenQuelle`) — Bauch voran, Spitze hinten. Kacheln und Zeilen zoomen —
+  außer beim langen Druck: dann tropft es aus dem Fingerpunkt (`punktFlaeche`, ADR 0020).
 - **Das Menü klappt unter seinem Knopf auf** (`menueOeffnen`, `blattLegen`), nie als Blatt
   von unten. Schließen ist Öffnen rückwärts — gleiche Dauer, gespiegelte Bilder.
 - **Was zusammen geht, geht in einem Takt**: Wer Raster, Karte und Liste zugleich bewegt,
   gibt allen dieselbe Dauer und Kurve (`KAL_TAKT`, `heldTakt`) — zwei Takte sehen aus wie
   Schnappen (ADR 0008).
 - Animation nur, wo sie Rückmeldung gibt (Abhaken, Ring, Schalter, Blatt). Unter
-  `prefers-reduced-motion: reduce` steht alles still; Abläufe, die auf das Ende einer
-  Animation warten, fragen `bewegungAus()`.
+  `prefers-reduced-motion: reduce` steht alles still, ebenso mit `bewegung: 'aus'` aus den
+  Einstellungen (`data-bewegung`); Abläufe, die auf das Ende einer Animation warten, fragen
+  `bewegungAus()`.
 
 ## Speicher
 

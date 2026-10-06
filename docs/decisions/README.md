@@ -15,7 +15,7 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0005](0005-chili-und-kalender-eine-karte.md) | Chili und Kalender in einer Karte, Punkte statt Tönung | gilt |
 | [0006](0006-termine-im-einzelnen.md) | Termine: Felder, Wiederholung, Erinnerung, Tagesliste | gilt |
 | [0007](0007-tropfen-statt-aufploppen.md) | Tropfen statt Aufploppen: Geist, Feder, Zoom aus dem Getippten | gilt; Menü und Schrumpfen in den Menüknopf abgelöst durch 0008 |
-| [0008](0008-tropfenform-menue-kalenderwechsel.md) | Tropfenform, Menü unter dem Knopf, Woche \| Monat hält den Tag | gilt |
+| [0008](0008-tropfenform-menue-kalenderwechsel.md) | Tropfenform, Menü unter dem Knopf, Woche \| Monat hält den Tag | gilt; langer Druck tropft auch aus Kacheln (0020) |
 | [0009](0009-kalender-export-im-einzelnen.md) | Kalender-Export: schwebende Zeiten, Teilen und Laden, Erinnerung der Gewohnheit | gilt; Teilen entfällt mit 0013 |
 | [0010](0010-chilli-journal-und-heute.md) | Der Name heißt «Chilli Journal», «Heute» führt den Kalender nach Hause | gilt |
 | [0011](0011-was-schon-im-kalender-steht.md) | Was schon im Kalender steht, geht nicht noch einmal hinaus | gilt; ergänzt durch 0012 |
@@ -27,3 +27,4 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0017](0017-journal-wochenreflexion.md) | Journal: eine Wochenreflexion je Woche, sonntags auf dem Dashboard | gilt; Lesen, Löschen und Nachholen geändert durch 0018 |
 | [0018](0018-bestaetigung-lesen-woche-waehlen.md) | Bestätigung im Glas, Reflexion lesen, Woche wählen | gilt |
 | [0019](0019-alle-meldungen-im-glas.md) | Alle Meldungen im Glas | gilt |
+| [0020](0020-sicherung-einstellungen-tickets.md) | Sicherung, Einstellungen, Tickets; langer Druck als Tropfen | gilt |

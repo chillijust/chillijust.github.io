@@ -102,6 +102,9 @@ window.File.prototype = FileEcht.prototype;
 function blobText(b) { return Promise.resolve(b.textGemerkt); }
 function frisch() {
   menueSchliessen();
+  // Das Ticketblatt hart zu, samt Entwurf — es liegt außerhalb von #app.
+  var tb = document.getElementById('ticketBlatt');
+  if (tb) { tb.classList.remove('offen'); tb.hidden = true; ticketEntwurf = null; ticketKnopfZeigen(); }
   state = grundStand();
   themaAnwenden();
   zeige('home');
