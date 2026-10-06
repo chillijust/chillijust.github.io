@@ -49,6 +49,7 @@ meldet der Läufer das als Fehler statt sie zu übergehen.
 | `tickets` | Knopf unten rechts, Blatt über der Ansicht als Tropfen, Entwurf, Ort und Grund, Liste, gebündelter Text, abgegeben, Löschen |
 | `einstellungen` | Hinweis ab drei abschaltbar, Bewegung reduzieren, alle Daten löschen und zurück |
 | `langdruck` | langer Druck auf Gewohnheit, Abgewöhnen, Termin: Tropfen aus dem Fingerpunkt und zurück |
+| `feinschliff` | Leerzustände, Jubel bei 50 %/90 % und «nie zweimal», neuer Rekord, Ende der Welle, gelöschte Zeilen als Geist |
 
 ## Eine Suite schreiben
 

@@ -70,6 +70,7 @@ state = {
     abgegeben: null                      // | Zeitpunkt in ms — kopiert
   }],
   gesichert: null,                       // | Zeitpunkt in ms — wann zuletzt ein Sicherungscode kopiert wurde
+  gefeiert: { 'a…': 1791200000000 },     // Abgewöhnen: der Rückfall, nach dem der neue Rekord gefeiert ist
   schwachHinweis: true,                  // der Hinweis ab drei ungefestigten Gewohnheiten
   bewegung: 'auto'                       // | 'aus' — Bewegung reduzieren
 }
@@ -81,7 +82,7 @@ state = {
   `tagPlus`, `wochenAnfang`).
 - `gewohnheitLesen()` prüft jede Gewohnheit einzeln; was nicht paßt, fällt weg.
   `lasterLesen()` ebenso fürs Abgewöhnen; eine Welle gilt nur für etwas, das es gibt und
-  das nicht archiviert ist.
+  das nicht archiviert ist. `gefeiert` behält nur Zeitpunkte für Laster, die es gibt.
 - **Abgewöhnen** (ADR 0004): `lasterAuswerten(a, nun)` liefert «frei seit», Rekord und
   Stärke; `zeitJetzt()` ist `jetzt()` in Millisekunden. Geändert wird nur über
   `rueckfallEintragen`, `welleBeginnen` und `welleGewonnen`.
@@ -187,6 +188,18 @@ der Umschalter (ADR 0007).
   Einblenden des Rasters.
 - **Termine heute** stehen unter der Karte; eine Zeile (`zeichneTerminZeile`,
   `[data-termin]`) öffnet den Termin — auf dem Dashboard wie in der Tagesliste.
+- **Jubel** (ADR 0022): `umschaltenUndZeichnen` vergleicht die Auswertung vor und nach dem
+  Haken; `hakenJubel` meldet Stufen (50 %, 90 % nach `prozent`) und «nie zweimal», einmal je
+  Sitzung (`jubelGehabt`), `jubeln` zeigt das Glas aus Zeile oder Kachel. Den Rekord prüft
+  `render()` auf dem Dashboard über `rekordFeiern` (merkt in `gefeiert`), der Takt zeichnet
+  neu, sobald `rekordFaellig` etwas findet. Ist die Welle durch, setzt der Takt
+  `chiliFlammt` und läßt `#welleUrteil` tropfen.
+- **Leer**: Ohne aktive Gewohnheit, aber mit Abgewöhnen oder Terminen, steht
+  `zeichneGewohnheitLeer` (`#gwAnlegen`); ohne alles `zeichneWillkommen`, nach Archivieren
+  mit anderem Gruß. Aus dem leeren Export führen `#exTerminNeu` und `#exGewohnheitNeu`,
+  zurück über `rueckZiel`.
+- **Zeilen, die gelöscht werden** (Rückfall, Ticket), gehen über `zeileGeht`: Geist vor dem
+  Neuzeichnen, danach an der alten Stelle eingesetzt und zusammengezogen.
 - **Ringe** werden mit dem Ziel gezeichnet und tragen in `data-von` den zuletzt gezeigten
   Wert (`ringZuletzt`); `ringeFuellen()` läßt sie nach jedem `render()` herüberlaufen.
 - **Journal** (ADR 0017): sonntags setzt `zeichneHome` die Kachel `zeichneReflexionKachel`

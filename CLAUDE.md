@@ -57,7 +57,7 @@ die Chili.
 | 5 · Kalender-Export (`.ics`), Erinnerung je Gewohnheit; «Heute» als Rückweg, Name «Chilli Journal», Schriftzug «Lodern» (frei); Exportiertes merken, Markierung aufheben, Hinweis aus Glas; nur Laden | fertig (0.5.0) |
 | 6 · Rückblick: Heatmap, Detail, Journal; Wisch vom Rand, Lesen, Woche wählen, Bestätigung im Glas | fertig (0.7.0); alle Meldungen im Glas (0.7.1) |
 | 7 · Sicherung (Code kopieren, Einlesen mit Rückgängig, Kachel nach 30 Tagen), Einstellungen (Hinweis ab 3, Bewegung, alles löschen), Tickets (Knopf unten rechts, Blatt als Tropfen); langer Druck tropft | fertig (0.8.0); Ticketblatt unten, «Alle Tickets» |
-| 8 · Feinschliff | offen |
+| 8 · Feinschliff: Leerzustände als Wegweiser, Jubel bei 50 %/90 %, «nie zweimal» und neuem Rekord, Ende der Welle, gelöschte Zeilen als Geist | 0.9.0T, Abnahme offen |
 
 Im Menü stehen alle Einträge des Pflichtenhefts von Anfang an; was noch nicht gebaut ist,
 trägt «bald» und meldet sich mit einer Zeile. **Wer einen Abschnitt baut, gibt dem
@@ -222,4 +222,4 @@ Skill `ticket`.
 
 ## Offen
 
-- Bauabschnitt 8 · Feinschliff.
+- Abnahme von 0.9.0T (Bauabschnitt 8) am Gerät.

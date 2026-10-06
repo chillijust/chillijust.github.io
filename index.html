@@ -314,6 +314,9 @@ svg.wm { display: block; flex: none; color: var(--text); overflow: visible; }
 }
 .willkommen h2 { font-size: 22px; margin-bottom: 8px; }
 .willkommen p { margin: 0 auto 22px; max-width: 30ch; color: var(--text-2); }
+/* Ein Abschnitt ohne Inhalt: ein Satz, darunter der erste Schritt. */
+.kachel.leer p { margin: 0 0 14px; color: var(--text-2); }
+.kachel.leer .knopf { width: 100%; }
 
 /* ── Ringe ─────────────────────────────────────────────────────
    Eine Spur und eine Füllung im Akzent. Die Füllung beginnt oben und läuft
@@ -1016,6 +1019,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 #swBereit.bereit { color: var(--erledigt); }
 .knopfreihe { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
 .knopfreihe .knopf { width: 100%; }
+.ex-leer-wege { margin-top: -8px; }
 .klein { font-size: 14px; color: var(--text-2); margin: 10px 4px 0; }
 
 /* ── Meldung ───────────────────────────────────────────────── */
@@ -1309,7 +1313,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.8.0';
+var APP_VERSION = '0.9.0T';
 var APP_STAND = '2026-10-06';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -1443,6 +1447,7 @@ function grundStand() {
     exportiert: null,    // wann zuletzt eine .ics hinausging, als Zeitpunkt
     tickets: [],         // Fehler und Wünsche, bis sie kopiert sind — nicht im Sicherungscode
     gesichert: null,     // wann zuletzt ein Sicherungscode kopiert wurde, als Zeitpunkt
+    gefeiert: {},        // Abgewöhnen: id → der Rückfall, nach dem der neue Rekord schon gefeiert ist
     schwachHinweis: true,   // der sanfte Hinweis ab drei ungefestigten Gewohnheiten
     bewegung: 'auto'     // 'auto' folgt dem Gerät, 'aus' stellt alles still
   };
@@ -1484,6 +1489,9 @@ function stand(roh) {
   }
   if (istZeit(roh.exportiert)) s.exportiert = roh.exportiert;
   if (istZeit(roh.gesichert)) s.gesichert = roh.gesichert;
+  if (roh.gefeiert && typeof roh.gefeiert === 'object') {
+    s.abgewoehnen.forEach(function (a) { if (istZeit(roh.gefeiert[a.id])) s.gefeiert[a.id] = roh.gefeiert[a.id]; });
+  }
   if (roh.schwachHinweis === false) s.schwachHinweis = false;
   if (roh.bewegung === 'aus') s.bewegung = 'aus';
   if (Array.isArray(roh.tickets)) {
@@ -2251,6 +2259,26 @@ function teilTropfen(el, an) {
   });
 }
 
+// Eine Zeile verläßt ihre Liste: Gezeichnet wird sofort ohne sie, an ihrer
+// Stelle steht ihr Geist und zieht sich zusammen — was darunter steht, rückt
+// nach, statt zu springen. Vor dem Neuzeichnen rufen, das Ergebnis danach.
+// `liste` findet den Behälter in der neuen Ansicht, `ersatz` das, was ihn
+// ersetzt, wenn die Liste leer wurde; `warten` hält den Geist, bis etwas
+// anderes angekommen ist.
+function zeileGeht(el, liste, ersatz) {
+  var g = geist(el);
+  if (!g) return function () {};
+  var stelle = Array.prototype.indexOf.call(el.parentNode.children, el), h = el.offsetHeight;
+  return function (warten) {
+    var neu = document.querySelector(liste), vor = neu ? neu.children[stelle] || null : document.querySelector(ersatz);
+    if (!neu && !vor) return;
+    g.style.cssText = 'overflow: hidden; margin: 0; height: ' + px(h) + ';';
+    (neu || vor.parentNode).insertBefore(g, vor);
+    bewegt(g, [{ height: px(h), opacity: 1 }, { height: '0px', opacity: 0 }],
+      { dauer: 380, kurve: 'cubic-bezier(.4, 0, .2, 1)', warten: warten || 0, fill: 'both' }, function () { weg(g); });
+  };
+}
+
 // ── Hinweis: wartet auf «OK» ────────────────────────────────────
 // Eine Meldung geht nach zwei Sekunden — zu schnell für das, was man lesen
 // muß, bevor es weitergeht. Der Hinweis steht mittig, bis «OK» kommt. Er
@@ -2544,13 +2572,52 @@ function tagVoll() {
 // Hakt ab oder zurück und zeichnet neu. Nur wer einen Haken setzt, läßt die
 // Chili aufflammen — wer ihn zurücknimmt, bekommt keinen Jubel. Macht der
 // Haken den Tag voll, lodert sie; ein Haken neben einem schon vollen Tag
-// (Gedimmtes, Nachgetragenes) flammt nur.
+// (Gedimmtes, Nachgetragenes) flammt nur. Hebt der Haken die Stärke über
+// eine Stufe, lodert sie auch, und das Glas sagt, warum (`hakenJubel`).
 function umschaltenUndZeichnen(id, k) {
-  var vollVorher = tagVoll();
+  var vollVorher = tagVoll(), g = gewohnheitNach(id), heute = heuteSchluessel();
+  var vorher = g ? auswerten(g, heute) : null, jubel = null;
   if (!umschalten(id, k)) return;
-  if (erledigtAm(id, k)) chiliFlammt = !vollVorher && tagVoll() ? 'lodert' : 'flammt';
+  if (erledigtAm(id, k)) {
+    jubel = hakenJubel(g, vorher, auswerten(g, heute), k === heute);
+    chiliFlammt = (!vollVorher && tagVoll()) || (jubel && jubel.lodert) ? 'lodert' : 'flammt';
+  }
   render();
   chiliFlammt = false;
+  if (jubel) jubeln(jubel.titel, jubel.text, id);
+}
+
+// Jubel über den Haken hinaus: Die Stärke erreicht die Hälfte oder 90 %
+// (nach etwa 20 und 65 lückenlosen Gelegenheiten; gezählt wird, was die
+// Kachel zeigt), oder ein Aussetzer bleibt einer («nie zweimal»). Jeder Anlaß
+// einmal je Sitzung, der Aussetzer je Tag: Wer zurücknimmt und wieder setzt,
+// hört ihn nicht zweimal. Gemerkt wird nichts — es ist nur ein Gruß, die
+// Zahl steht in der Gewohnheit.
+var STUFEN = [[90, 'Gefestigt', ' hat 90 % Stärke. Ab hier trägt sie sich fast von selbst.'],
+  [50, 'Halb gefestigt', ' hat 50 % Stärke. Weiter so.']];
+var jubelGehabt = {};
+
+function hakenJubel(g, vorher, nachher, heute) {
+  for (var i = 0; i < STUFEN.length; i++) {
+    var st = STUFEN[i], schluessel = g.id + ':' + st[0];
+    if (prozent(vorher.staerke) < st[0] && prozent(nachher.staerke) >= st[0] && !jubelGehabt[schluessel]) {
+      jubelGehabt[schluessel] = true;
+      return { lodert: true, titel: st[1], text: '«' + g.name + '»' + st[2] };
+    }
+  }
+  if (heute && vorher.warnen && !nachher.warnen && !jubelGehabt[g.id + ':' + heuteSchluessel()]) {
+    jubelGehabt[g.id + ':' + heuteSchluessel()] = true;
+    return { lodert: false, titel: 'Nicht zweimal', text: 'Der Aussetzer bleibt einer.' };
+  }
+  return null;
+}
+
+// Das Glas mit Haken, aus dem, was den Jubel ausgelöst hat, und dorthin zurück:
+// die Zeile der Tagesliste, sonst die Kachel.
+function jubeln(titel, text, id) {
+  var el = ['[data-nachtrag="' + id + '"]', '[data-haken="' + id + '"]', '[data-ab="' + id + '"]']
+    .map(function (s) { return document.querySelector(s); }).filter(zuSehen)[0] || null;
+  bestaetigen(titel, text, el, el, 'haken');
 }
 
 function neueId(art) {
@@ -2584,7 +2651,8 @@ function zeitJetzt() { return jetzt().getTime(); }
 
 // frei (ms seit dem letzten Rückfall oder dem Start), rekord (die längste
 // freie Strecke, die laufende eingeschlossen), rekordLaeuft (die laufende ist
-// die längste), staerke (0–1), rueckfaelle, draenge (gewonnene).
+// die längste), staerke (0–1), rueckfaelle, draenge (gewonnene), vorher (die
+// längste Strecke vor der laufenden) und seit (wo die laufende begann).
 // Was nach `nun` liegt, gibt es noch nicht — die Uhr des Geräts kann springen.
 function lasterAuswerten(a, nun) {
   var zuletzt = a.start, rekord = 0, rueckTage = {}, zahl = 0;
@@ -2604,6 +2672,8 @@ function lasterAuswerten(a, nun) {
     frei: frei,
     rekord: Math.max(rekord, frei),
     rekordLaeuft: frei >= rekord,
+    vorher: rekord,
+    seit: zuletzt,
     staerke: freiTage / STAERKE_TAGE,
     rueckfaelle: zahl,
     draenge: a.draenge.length
@@ -2636,6 +2706,28 @@ function rueckfallEintragen(id, notiz) {
   a.rueckfaelle.push({ zeit: nun, notiz: String(notiz || '').trim().slice(0, NOTIZ_MAX) });
   if (state.welle && state.welle.id === id) state.welle = null;
   return speichern();
+}
+
+// Ein neuer Rekord: Die laufende Strecke ist eben länger geworden als jede
+// davor. Gefeiert wird einmal je Strecke — `gefeiert` merkt sich den Rückfall,
+// nach dem sie begann. Ohne Rückfall gibt es keinen alten Rekord, und eine
+// Strecke unter einer Stunde ist noch keiner, den man feiert.
+var REKORD_AB = 60 * 60 * 1000;
+
+function rekordFaellig(nun) {
+  return aktivesLaster().filter(function (a) {
+    var e = lasterAuswerten(a, nun);
+    return e.rueckfaelle > 0 && e.vorher >= REKORD_AB && e.frei > e.vorher && state.gefeiert[a.id] !== e.seit;
+  });
+}
+
+// Merkt die fälligen Rekorde als gefeiert und gibt den ersten zurück, oder null.
+function rekordFeiern(nun) {
+  var neu = rekordFaellig(nun);
+  if (!neu.length) return null;
+  neu.forEach(function (a) { state.gefeiert[a.id] = lasterAuswerten(a, nun).seit; });
+  speichern();
+  return neu[0];
 }
 
 // Gewonnen zählt erst, wenn die zehn Minuten herum sind.
@@ -2955,10 +3047,11 @@ var MENUE = [
 // ein leeres Formular; «welle» ohne laufende Welle ebenso. «terminNeu» nimmt
 // statt einer id den Tag, an dem der Termin liegen soll.
 // Wer aus dem Export eine Gewohnheit oder einen Termin öffnet, kommt dorthin
-// zurück — mit dem Rückweg wie nach dem Speichern; ebenso aus dem Journal in
-// eine Reflexion. «reflexion» und «lesen» nehmen den Montag ihrer Woche; wer
-// aus dem Lesen bearbeitet, kommt ins Lesen zurück, und das Lesen dorthin,
-// woher es geöffnet wurde (ADR 0018).
+// zurück — mit dem Rückweg wie nach dem Speichern; ebenso, wer aus dem leeren
+// Export etwas anlegt; ebenso aus dem Journal in eine Reflexion. «reflexion»
+// und «lesen» nehmen den Montag ihrer Woche; wer aus dem Lesen bearbeitet,
+// kommt ins Lesen zurück, und das Lesen dorthin, woher es geöffnet wurde
+// (ADR 0018).
 var rueckZiel = null;
 var lesenWoche = null, lesenZurueck = null;
 
@@ -2968,7 +3061,8 @@ function zeige(name, id) {
   if (name === 'lesen' && !(ansicht === 'reflexion' && rueckZiel === 'lesen')) {
     lesenZurueck = ansicht === 'journal' ? 'journal' : ansicht === 'reflexion' ? rueckZiel : null;
   }
-  rueckZiel = ansicht === 'export' && (name === 'bearbeiten' || name === 'termin') ? 'export'
+  rueckZiel = ansicht === 'export' && (name === 'bearbeiten' || name === 'termin' || name === 'terminNeu' ||
+      name === 'neu') ? 'export'
     : ansicht === 'journal' && name === 'reflexion' ? 'journal'
     : ansicht === 'lesen' && name === 'reflexion' ? 'lesen'
     : name === 'lesen' ? lesenZurueck : null;
@@ -3008,12 +3102,20 @@ function render() {
   if (ansicht === 'reflexion' && !reflexionEntwurf) ansicht = 'home';
   if (ansicht === 'lesen' && !reflexionNach(lesenWoche)) ansicht = 'journal';
   renderKopf();
+  // Ein neuer Rekord wird auf dem Dashboard gefeiert, sobald es ihn sieht —
+  // ob er eben im Takt fiel oder während die App zu war.
+  var rekord = ansicht === 'home' ? rekordFeiern(zeitJetzt()) : null;
+  if (rekord) chiliFlammt = 'lodert';
   var feld = $('ansicht'), h0 = ansicht === 'home' ? heldHoehe() : 0;
   feld.innerHTML = ANSICHTEN[ansicht].zeichnen();
   bindeAnsicht();
   ringeFuellen();
   heldNachziehen(h0);
   wahlenSetzen();
+  if (rekord) {
+    chiliFlammt = false;
+    jubeln('Neuer Rekord', '«' + rekord.name + '» — so lange frei wie noch nie.', rekord.id);
+  }
 }
 
 // Ringe füllen sich vom zuletzt gezeigten Wert zum neuen. Gezeichnet wird mit
@@ -3126,6 +3228,7 @@ function zeichneHome() {
       termine.map(zeichneTerminZeile).join('') + '</div></section>' : '') +
     (dran.length ? '<section class="abschnitt"><h2>Gewohnheiten</h2><div class="gw-liste">' +
       dran.map(zeichneKachel).join('') + '</div></section>' : '') +
+    (aktiv.length ? '' : zeichneGewohnheitLeer()) +
     (ausSchluessel(heute).getDay() === 0 ? zeichneReflexionKachel(heute) : '') +
     (sicherungFaellig() ? zeichneSicherungKachel() : '') +
     (frei.length ? '<section class="abschnitt"><h2>Heute nicht dran</h2><div class="gw-liste gedimmt">' +
@@ -3243,15 +3346,29 @@ function zeichneTerminZeile(t) {
 function welleKnopfText(rest) { return rest ? 'Welle ' + restText(rest) : 'Welle vorbei'; }
 
 // Noch gibt es nichts abzuhaken: Die Chili begrüßt, ein Knopf führt zur
-// ersten Gewohnheit. Kein Tutorial — der Knopf ist die Anleitung.
+// ersten Gewohnheit. Kein Tutorial — der Knopf ist die Anleitung. Wer schon
+// alles archiviert hat, fängt nicht zum ersten Mal an; sie sagt es anders.
 function zeichneWillkommen() {
+  var wieder = state.gewohnheiten.length + state.abgewoehnen.length > 0;
   return '<section class="kachel willkommen">' +
     '<img id="chiliFigur" src="' + CHILI_BILD + '" alt="Die Chili winkt">' +
-    '<h2>Hallo, ich bin die Chili.</h2>' +
-    '<p>Hier wächst bald deine erste Gewohnheit. Fang mit einer an — das reicht.</p>' +
+    (wieder
+      ? '<h2>Alles ruht gerade.</h2>' +
+        '<p>Was du archiviert hast, bleibt gespeichert. Fang etwas Neues an — eins reicht.</p>'
+      : '<h2>Hallo, ich bin die Chili.</h2>' +
+        '<p>Hier wächst bald deine erste Gewohnheit. Fang mit einer an — das reicht.</p>') +
     '<button type="button" class="knopf" id="ersteGewohnheit">' + ICON.plus +
-    '<span>Erste Gewohnheit anlegen</span></button>' +
+    '<span>' + (wieder ? 'Neue Gewohnheit anlegen' : 'Erste Gewohnheit anlegen') + '</span></button>' +
     '</section>';
+}
+
+// Abgewöhnen oder Termine, aber nichts anzugewöhnen: Wo die Gewohnheiten
+// stünden, steht der Weg dorthin — leise, ohne Chili, die sitzt oben im Ring.
+function zeichneGewohnheitLeer() {
+  return '<section class="abschnitt"><h2>Gewohnheiten</h2><div class="kachel leer">' +
+    '<p>Noch keine Gewohnheit. Eine reicht für den Anfang.</p>' +
+    '<button type="button" class="knopf zart" id="gwAnlegen">' + ICON.plus +
+    '<span>Gewohnheit anlegen</span></button></div></section>';
 }
 
 // ── Dashboard: Kalender ─────────────────────────────────────────
@@ -3550,8 +3667,11 @@ function hmSumme(zahl, g) {
     return zahl.sauber + (zahl.sauber === 1 ? ' Tag' : ' Tage') + ' frei' +
       (zahl.rueckfall ? ', ' + zahl.rueckfall + ' mit Rückfall' : '') + '.';
   }
-  if (g.rhythmus.art === 'proWoche') return zahl.erledigt + '-mal erledigt.';
+  // Eine frische Gewohnheit hat noch nichts hinter sich — «0 von 0» sagt das
+  // schlechter als ein Satz.
+  if (g.rhythmus.art === 'proWoche') return zahl.erledigt ? zahl.erledigt + '-mal erledigt.' : 'Noch nichts erledigt.';
   var faellig = zahl.erledigt - zahl.extra + zahl.verpasst;
+  if (!faellig) return zahl.extra ? zahl.extra + '-mal erledigt, an freien Tagen.' : 'Noch kein fälliger Tag vorbei.';
   return (zahl.erledigt - zahl.extra) + ' von ' + faellig + ' fälligen Tagen erledigt.';
 }
 
@@ -4037,8 +4157,10 @@ function rueckfallLoeschenTippen() {
   entwurf.loeschFrage = -1;
   if (!l || !l.rueckfaelle[i]) return;
   l.rueckfaelle.splice(i, 1);
+  var geht = zeileGeht(this.closest('.rf-zeile'), '.rf-liste');
   if (speichern()) melden('Gelöscht.', 'haken');
   render();
+  geht();
 }
 
 // ── Drang: die 10-Minuten-Welle ─────────────────────────────────
@@ -4065,13 +4187,13 @@ function zeichneWelle() {
         '<circle class="ring-fuell welle-fuell" id="welleFuell" cx="18" cy="18" r="15.5" stroke-dasharray="' +
           u.toFixed(2) + '" stroke-dashoffset="' + (u * (1 - rest / WELLE_MS)).toFixed(2) + '"/>' +
       '</svg>' +
-      '<img id="chiliFigur" src="' + CHILI_BILD + '" alt="">' +
+      '<img id="chiliFigur"' + (chiliFlammt ? ' class="' + chiliFlammt + '"' : '') + ' src="' + CHILI_BILD + '" alt="">' +
     '</div>' +
     '<div class="welle-zeit" id="welleZeit" role="timer">' + esc(restText(rest)) + '</div>' +
     '<p class="welle-satz">' + esc(durch ? 'Die Welle ist durch. Wie ist es ausgegangen?'
       : WELLE_SAETZE[Math.floor(w.start / 1000) % WELLE_SAETZE.length]) + '</p>' +
     '<div class="knopfreihe">' +
-      (durch ? '<button type="button" class="knopf" id="welleGewonnen">Gewonnen</button>' : '') +
+      (durch ? '<div id="welleUrteil"><button type="button" class="knopf" id="welleGewonnen">Gewonnen</button></div>' : '') +
       '<button type="button" class="knopf zart" id="welleNachgegeben">Nachgegeben</button>' +
     '</div>' +
     (durch ? '' : '<p class="klein">Die Welle läuft weiter, auch wenn du die App schließt.</p>') +
@@ -4326,7 +4448,11 @@ function bindeReflexion() {
     if (was === 'gespeichert') bestaetigen('Gespeichert', 'Nachzulesen im Journal.', this, '[data-lesen="' + e.woche + '"]');
     else if (was === 'entfernt') bestaetigen('Gelöscht', 'Die Reflexion ist entfernt.', this);
     else if (was === 'nichts') bestaetigen('Nichts gespeichert', 'Du hast nichts geschrieben.', this, null, 'hinweis');
+    // Eine Woche angesehen und aufgeschrieben: Geht es aufs Dashboard, flammt
+    // die Chili — wie beim Haken.
+    if (was === 'gespeichert' && !rueckZiel) chiliFlammt = 'flammt';
     zeige('home');
+    chiliFlammt = false;
   });
   $('jrAbbrechen').addEventListener('click', function () { zeige('home'); });
   // Löschen will zwei Tipps, wie beim Termin.
@@ -4345,7 +4471,8 @@ function bindeReflexion() {
 
 // Was live läuft, jede Sekunde: «frei seit», die Restzeit auf dem Drang-Knopf
 // und der Ring der Welle. Nur Text und Ring ändern sich — neu gezeichnet wird
-// erst, wenn die Welle durch ist und das Urteil braucht.
+// erst, wenn die Welle durch ist und das Urteil braucht, oder wenn «frei seit»
+// eben den alten Rekord überholt hat.
 function takt() {
   var nun = zeitJetzt(), rest = welleRest(nun);
   alleIn('[data-frei]').forEach(function (el) {
@@ -4353,9 +4480,18 @@ function takt() {
     if (a) el.textContent = dauer(lasterAuswerten(a, nun).frei);
   });
   alleIn('[data-wellerest]').forEach(function (el) { el.textContent = welleKnopfText(rest); });
+  if (ansicht === 'home' && rekordFaellig(nun).length) { render(); return; }
   var welle = ansicht === 'welle' && $('welle');
   if (!welle) return;
-  if ((rest === 0) !== welle.classList.contains('durch')) { render(); return; }
+  if ((rest === 0) !== welle.classList.contains('durch')) {
+    // Durch: Die Chili flammt, «Gewonnen» tropft herein, statt dazustehen.
+    if (rest === 0) chiliFlammt = 'flammt';
+    render();
+    chiliFlammt = false;
+    var urteil = $('welleUrteil');
+    if (urteil && !bewegungAus()) { urteil.hidden = true; teilTropfen(urteil, true); }
+    return;
+  }
   $('welleZeit').textContent = restText(rest);
   var u = 2 * Math.PI * 15.5;
   $('welleFuell').setAttribute('stroke-dashoffset', (u * (1 - rest / WELLE_MS)).toFixed(2));
@@ -4621,10 +4757,17 @@ function zeichneExport() {
       (mit < gewohnheiten.length && !exBearbeiten ? '<p class="klein">Tipp eine an, um ihr eine Uhrzeit zu geben.</p>' : '') +
       '</section>';
   }
+  // Leer: Der Satz sagt, was fehlt, die Knöpfe führen hin — und nach dem
+  // Speichern hierher zurück (`rueckZiel`).
   if (!termine.length && !mit) {
     return html + '<section class="abschnitt"><p class="hinweis" id="exLeer">' + ICON.hinweis + '<span>Noch ' +
-      'nichts für den Kalender. Leg einen Termin an oder gib einer Gewohnheit eine Erinnerung.</span></p>' +
-      '</section>';
+      'nichts für den Kalender. ' + (gewohnheiten.length ? 'Leg einen Termin an oder gib einer Gewohnheit oben eine Erinnerung.'
+        : 'Leg einen Termin an oder eine Gewohnheit mit Erinnerung.') + '</span></p>' +
+      '<div class="knopfreihe ex-leer-wege"><button type="button" class="knopf zart" id="exTerminNeu">' + ICON.termin +
+        '<span>Neuer Termin</span></button>' +
+      (gewohnheiten.length ? '' : '<button type="button" class="knopf zart" id="exGewohnheitNeu">' + ICON.plus +
+        '<span>Neue Gewohnheit</span></button>') +
+      '</div></section>';
   }
   var auswahl = exportAuswahl(heute);
   var zahl = auswahl.termine.length + auswahl.gewohnheiten.length;
@@ -4680,6 +4823,8 @@ function exTeileNachziehen() {
 function bindeExport() {
   exTeileNachziehen();
   if ($('exLaden')) $('exLaden').addEventListener('click', icsLaden);
+  if ($('exTerminNeu')) $('exTerminNeu').addEventListener('click', function () { zeige('terminNeu'); });
+  if ($('exGewohnheitNeu')) $('exGewohnheitNeu').addEventListener('click', function () { zeige('neu'); });
   if ($('exAufheben')) $('exAufheben').addEventListener('click', exAufheben);
   if ($('exBearbeiten')) $('exBearbeiten').addEventListener('click', function () {
     exBearbeiten = !exBearbeiten;
@@ -5107,12 +5252,16 @@ function bindeTicketBlatt() {
       this.classList.add('frage');
       return;
     }
-    var t = ticketNach(e.id);
+    var t = ticketNach(e.id), zeile = document.querySelector('#app [data-ticket="' + e.id + '"]');
     if (t) state.tickets.splice(state.tickets.indexOf(t), 1);
     ticketEntwurf = null;
     var gut = speichern();
+    // Das Blatt fließt in seine Zeile; erst wenn es dort ist, geht sie.
+    var geht = ansicht === 'tickets' && zeile ? zeileGeht(zeile, '#' + zeile.closest('section').id + ' .tm-liste',
+      '#' + zeile.closest('section').id + ' .klein') : null;
     ticketBlattSchliessen();
     if (ansicht === 'tickets') render();
+    if (geht) geht(TROPFEN_DAUER);
     if (gut) melden('Gelöscht.', 'haken');
   });
 }
@@ -5222,7 +5371,7 @@ function zeichneTickets() {
   var offen = offeneTickets(), ab = state.tickets.filter(function (t) { return !!t.abgegeben; }).reverse();
   return '<section class="abschnitt"><button type="button" class="knopf" id="tkNeu">' + ICON.plus +
       '<span>Neues Ticket</span></button></section>' +
-    '<section class="abschnitt"><h2>Offen</h2>' +
+    '<section class="abschnitt" id="tkOffen"><h2>Offen</h2>' +
       (offen.length ? '<div class="tm-liste">' + offen.map(zeichneTicketZeile).join('') + '</div>' +
         '<div class="knopfreihe"><button type="button" class="knopf zart" id="tkKopieren">' +
           (offen.length === 1 ? 'Ticket kopieren' : 'Alle ' + offen.length + ' kopieren') + '</button></div>' +
@@ -5231,7 +5380,7 @@ function zeichneTickets() {
         '<p class="klein">Kopiert gelten sie als abgegeben. Leg den Text Claude Code vor.</p>'
       : '<p class="klein">Nichts offen. Stört dich etwas oder fehlt dir etwas, tipp unten rechts auf den Knopf.</p>') +
     '</section>' +
-    (ab.length ? '<section class="abschnitt"><h2>Abgegeben</h2>' +
+    (ab.length ? '<section class="abschnitt" id="tkAbgegeben"><h2>Abgegeben</h2>' +
       '<div class="tm-liste gedimmt">' + ab.map(zeichneTicketZeile).join('') + '</div>' +
       '<div class="knopfreihe"><button type="button" class="knopf zart' + (tkAufraeumFrage ? ' frage' : '') +
         '" id="tkAufraeumen">' + (tkAufraeumFrage ? 'Wirklich löschen?' : 'Abgegebene löschen') + '</button></div>' +
@@ -5357,7 +5506,7 @@ function zeichneEinstellungen() {
 
 // Ereignisse erst nach dem Setzen von innerHTML, nie als Attribut.
 function bindeAnsicht() {
-  var erste = $('ersteGewohnheit');
+  var erste = $('ersteGewohnheit') || $('gwAnlegen');
   if (erste) erste.addEventListener('click', function () { zeige('neu'); });
 
   alleIn('[data-haken]').forEach(function (b) {

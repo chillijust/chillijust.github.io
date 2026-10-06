@@ -25,6 +25,8 @@ Gilt für die Gewohnheiten in `index.html`. Begründungen in ADR 0002 und im Pfl
 - **Der Rekord schließt die laufende Strecke ein; die Stärke zählt heute frei, solange kein
   Rückfall kam.** Ein Rückfall geht nur über `rueckfallEintragen`, ein gewonnener Drang nur
   über `welleGewonnen` — es prüft, daß die zehn Minuten herum sind.
+- **`gefeiert` ist ein Merkzettel, keine Rechnung**: je Laster der Rückfall, nach dem der
+  neue Rekord schon gefeiert ist; gesetzt nur in `rekordFeiern` (ADR 0022).
 - **Termine liegen über `terminAm(t, k)`**, nie über eigene Datumsrechnung: monatlich
   fällt aus, wo der Monat den Tag nicht hat — wie in einer `RRULE`. Eine Reihe ändert sich
   nur als Ganzes; `vorlauf` sind Minuten vor dem Beginn, ganztags vor Mitternacht (ADR 0006).

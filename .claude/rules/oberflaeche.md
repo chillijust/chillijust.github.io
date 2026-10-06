@@ -88,12 +88,19 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 - **Ein gesetzter Haken läßt sie einmal aufflammen** (`chiliFlammt`, Klasse `flammt`) —
   auf der Kachel wie beim Nachtragen; Zurücknehmen ist kein Jubel. Macht der Haken den Tag
   voll, **lodert** sie statt dessen (`lodert`). Danach wippt sie weiter.
+- **Wegmarken jubeln im Glas** (`jubeln`, ADR 0022): Stärke 50 % und 90 % nach der Anzeige
+  (`hakenJubel`, die Chili lodert), «Nicht zweimal» (sie flammt), ein neuer Rekord beim
+  Abgewöhnen (`rekordFeiern`, nur auf dem Dashboard). Jeder Anlaß nur einmal — kein Jubel
+  für jede Zahl.
+- **Ein Leerzustand ist ein Wegweiser**: ein Satz, was fehlt, und ein Knopf, der hinführt
+  (`.kachel.leer`); wer schon etwas hatte, wird nicht begrüßt wie beim ersten Start.
 
 ## Bewegung
 
 - **Nichts ploppt** (ADR 0007). Was aufgeht, wächst aus dem Getippten, was geht, fließt
   zurück — gezeichnet wird trotzdem sofort, die Bewegung legt sich darüber. Was
-  verschwindet, zeigt `geist(el)`; nie den Zustand verzögern, um zu animieren.
+  verschwindet, zeigt `geist(el)`; nie den Zustand verzögern, um zu animieren. Eine Zeile,
+  die aus einer Liste gelöscht wird, geht über `zeileGeht(el, liste, ersatz)` (ADR 0022).
 - **Formularteile über `teilZeigen(el, an)`**, nie `el.hidden = …`; eine neue `.wahl`
   bekommt ihre Marke von `wahlenSetzen()`, nach Änderung an Ort und Stelle aufrufen.
 - **Knöpfe, die kommen und gehen, über `teilTropfen(el, an)`** (ADR 0012). Ein Teil mit

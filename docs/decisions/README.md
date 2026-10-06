@@ -29,3 +29,4 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0019](0019-alle-meldungen-im-glas.md) | Alle Meldungen im Glas | gilt |
 | [0020](0020-sicherung-einstellungen-tickets.md) | Sicherung, Einstellungen, Tickets; langer Druck als Tropfen | gilt; Lage des Ticketblatts geändert durch 0021 |
 | [0021](0021-ticketblatt-unten-alle-tickets.md) | Das Ticketblatt steht unten, mit «Alle Tickets» | gilt |
+| [0022](0022-feinschliff-leer-jubel-geist.md) | Feinschliff: Leerzustände, Jubel über den Haken hinaus, Zeilen gehen als Geist | gilt |
