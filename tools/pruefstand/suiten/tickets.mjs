@@ -228,6 +228,7 @@ return durch().then(function () {
   state.tickets = [ticketLesen({ id: 'k1', art: 'fehler', titel: 'Eins', erstellt: 1 }),
     ticketLesen({ id: 'k2', art: 'wunsch', titel: 'Zwei', erstellt: 2 }),
     ticketLesen({ id: 'k3', art: 'wunsch', titel: 'Drei', erstellt: 3, abgegeben: 5 })];
+  ausbewegt();
   q('#tkAlle').click();
   var zeilen = alle('#ticketKarte .tk-zeile'), warten = zeilen.map(function (z) {
     var a = z.getAnimations()[0]; return a ? a.effect.getTiming().delay : -1;
@@ -235,13 +236,33 @@ return durch().then(function () {
   pruefe('U8 alle Tickets, offen vorn, abgegeben gedimmt dahinter', zeilen.map(function (z) {
     return z.getAttribute('data-ticket'); }).join() === 'k1,k2,k3' && !!q('#ticketKarte .tk-liste-blatt.gedimmt [data-ticket="k3"]') &&
     /Alle 2 kopieren/.test(q('#tkListeKopieren').textContent));
-  pruefe('U9 sie tropfen nacheinander auf', warten.length === 3 && warten[0] === 0 && warten[1] > warten[0] && warten[2] > warten[1] &&
+  pruefe('U9 sie tropfen nacheinander auf', warten.length === 3 && warten[1] > warten[0] && warten[2] > warten[1] &&
     zeilen.every(function (z) { var a = z.getAnimations()[0]; return a && /round/.test(a.effect.getKeyframes()[0].clipPath); }),
     warten.join());
-  // ADR 0026: sichtbar nacheinander — vor ihrem Einsatz ist eine Zeile noch nicht da.
-  pruefe('U9a deutlich gestaffelt, und vor dem Einsatz unsichtbar', warten[1] >= 100 && warten[2] - warten[1] >= 100 &&
-    zeilen.every(function (z) { var a = z.getAnimations()[0]; return a && a.effect.getTiming().fill === 'backwards'; }),
-    warten.join());
+  // ADR 0026, 0027: erst wenn das Blatt seine neue Höhe hat, dann langsam und
+  // sichtbar nacheinander — vor ihrem Einsatz ist eine Zeile noch nicht da.
+  var hoehe = q('#ticketKarte').getAnimations().filter(function (a) {
+    return a.effect.getKeyframes().some(function (k) { return !!k.height; }); })[0];
+  pruefe('U9a erst nach dem Wechsel, deutlich gestaffelt, vor dem Einsatz unsichtbar', !!hoehe &&
+    warten[0] >= hoehe.effect.getTiming().duration && warten[1] - warten[0] >= 150 && warten[2] - warten[1] >= 150 &&
+    zeilen.every(function (z) { var a = z.getAnimations()[0]; return a && a.effect.getTiming().fill === 'backwards' &&
+      a.effect.getTiming().duration >= 800; }), warten.join());
+  var seite = q('#tkZurSeite');
+  pruefe('U9b im Kopf der Liste führt «Ticketseite» zur Seite Tickets, groß genug', !!seite &&
+    seite.textContent === 'Ticketseite' && seite.getBoundingClientRect().height >= 44 &&
+    seite.getBoundingClientRect().right <= q('#ticketKarte').getBoundingClientRect().right);
+  return durch();
+}).then(function () {
+  q('#tkZurSeite').click();
+  pruefe('U9c ein Tipp: die Seite Tickets, das Blatt geht zu, der Entwurf bleibt', ansicht === 'tickets' &&
+    !blatt.classList.contains('offen') && !!ticketEntwurf && ticketEntwurf.titel === 'Halb geschrieben' &&
+    !!q('#app #tkOffen'));
+  return durch();
+}).then(function () {
+  zeige('home');
+  ticketBlattOeffnen(knopf);
+  ausbewegt();
+  q('#tkAlle').click();
   return durch();
 }).then(function () {
   q('#ticketKarte [data-ticket="k2"]').click();
@@ -264,6 +285,20 @@ return durch().then(function () {
   pruefe('U11 der Fließtext beginnt mit einer Zeile und wächst mit', zwei > eine + lh * 0.8, [eine, zwei].join());
   pruefe('U12 höchstens drei Zeilen, dann rollt er', viele < eine + lh * 2.3 && viele > eine + lh * 1.7 &&
     getComputedStyle(feld).overflowY === 'auto', [eine, viele, lh].join());
+  q('#tkAbbrechen').click();
+  return durch();
+}).then(function () {
+  // ADR 0027: Ein Ticket mit Text, von der Ticketseite geöffnet, zeigt seinen
+  // Text — gemessen wurde früher, solange das Blatt noch verborgen war.
+  state.tickets = [ticketLesen({ id: 'm1', art: 'fehler', titel: 'Mit Text', text: 'eins\nzwei\ndrei', erstellt: 1 })];
+  zeige('tickets');
+  var mz = q('#app [data-ticket="m1"]');
+  mz.click();
+  ausbewegt();
+  var feld = q('#tkText'), lh = parseFloat(getComputedStyle(feld).lineHeight),
+    titel = q('#tkTitel').getBoundingClientRect().height, h = feld.getBoundingClientRect().height;
+  pruefe('U14 von der Ticketseite geöffnet zeigt der Fließtext alle drei Zeilen', h > titel + lh * 1.7,
+    [h, titel, lh].join());
   q('#tkAbbrechen').click();
   return durch();
 }).then(function () {

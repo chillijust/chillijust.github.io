@@ -86,6 +86,13 @@ pruefe('C0a der Tropfen beginnt mit dem Druck, nicht danach',
   document.documentElement.classList.contains('thema-tropft') &&
   document.documentElement.style.getPropertyValue('--thema-dauer') === '910ms',
   document.documentElement.style.getPropertyValue('--thema-dauer'));
+// ADR 0027: In der Scheibe steigt der Kontrast langsam — die neue Darstellung
+// blendet von durchsichtig auf voll, während sie wächst.
+var tropfen = regelWerte(function (r) { return r.name === 'thema-tropfen' ? r : null; });
+var bildA = tropfen && tropfen.cssRules[0].style, bildZ = tropfen && tropfen.cssRules[tropfen.cssRules.length - 1].style;
+pruefe('C0b der Kontrast steigt mit dem Tropfen, nicht schlagartig', !!tropfen &&
+  bildA.opacity === '0' && bildZ.opacity === '1' && /circle/.test(bildA.clipPath) && /circle/.test(bildZ.clipPath),
+  tropfen ? bildA.opacity + ' ' + bildZ.opacity : 'keine Regel');
 return warte(340).then(function () {
   tropfAn = { klasse: document.documentElement.classList.contains('thema-tropft'),
     x: parseFloat(document.documentElement.style.getPropertyValue('--thema-x')),

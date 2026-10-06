@@ -119,8 +119,10 @@ body {
   transition: background-color .45s ease, color .45s ease;
 }
 /* Hell ↔ Dunkel tropft aus dem Schalter (ADR 0025): Die neue Darstellung ist
-   eine runde Scheibe, die von dort über den Bildschirm wächst. Währenddessen
-   ruhen alle Übergänge, sonst blendete es doppelt. */
+   eine runde Scheibe, die von dort über den Bildschirm wächst. Ihr Kontrast
+   steigt dabei langsam — sie blendet in der Scheibe von durchsichtig auf voll,
+   statt hart gegen die alte zu stehen (ADR 0027). Währenddessen ruhen alle
+   Übergänge, sonst blendete es doppelt. */
 html.thema-tropft *, html.thema-tropft *::before, html.thema-tropft *::after { transition: none !important; }
 html.thema-tropft::view-transition-old(root),
 html.thema-tropft::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
@@ -128,8 +130,8 @@ html.thema-tropft::view-transition-new(root) {
   animation: thema-tropfen var(--thema-dauer, 700ms) cubic-bezier(.45, 0, .2, 1) both;
 }
 @keyframes thema-tropfen {
-  from { clip-path: circle(0px at var(--thema-x, 100%) var(--thema-y, 0px)); }
-  to { clip-path: circle(var(--thema-r, 150vmax) at var(--thema-x, 100%) var(--thema-y, 0px)); }
+  from { clip-path: circle(0px at var(--thema-x, 100%) var(--thema-y, 0px)); opacity: 0; }
+  to { clip-path: circle(var(--thema-r, 150vmax) at var(--thema-x, 100%) var(--thema-y, 0px)); opacity: 1; }
 }
 h1, h2, h3, button, .etikett { font-family: var(--sans); }
 h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -.01em; }
@@ -1318,6 +1320,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 .tk-wahlen { display: flex; flex-direction: column; gap: 0; }
 .tk-kopf-liste { justify-content: flex-start; gap: 4px; margin-left: -6px; }
 .tk-kopf-liste .rund { background: transparent; }
+.tk-kopf-liste .tk-alle { margin-left: auto; }
 .tk-liste-blatt { display: flex; flex-direction: column; gap: 6px; }
 /* Jede Zeile ist eine eigene Fläche — so sieht man sie einzeln auftropfen (ADR 0026). */
 .tk-liste-blatt .tk-zeile { background: var(--flaeche); border-radius: 14px; }
@@ -1423,7 +1426,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.9.0T5';
+var APP_VERSION = '0.9.0T6';
 var APP_STAND = '2026-10-06';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -5435,7 +5438,8 @@ function grundOptionen(e) {
 function zeichneTicketListe() {
   var offen = offeneTickets(), ab = state.tickets.filter(function (t) { return !!t.abgegeben; }).reverse();
   return '<div class="tk-kopf tk-kopf-liste"><button type="button" class="rund" id="tkListeZurueck" aria-label="Zurück">' +
-      ICON.zurueck + '</button><h2 id="tkKopf">Alle Tickets</h2></div>' +
+      ICON.zurueck + '</button><h2 id="tkKopf">Alle Tickets</h2>' +
+      '<button type="button" class="tk-alle" id="tkZurSeite">Ticketseite</button></div>' +
     (offen.length ? '<div class="tk-liste-blatt">' + offen.map(zeichneTicketZeile).join('') + '</div>' +
       '<div class="knopfreihe"><button type="button" class="knopf zart" id="tkListeKopieren">' +
         (offen.length === 1 ? 'Ticket kopieren' : 'Alle ' + offen.length + ' kopieren') + '</button></div>'
@@ -5445,7 +5449,8 @@ function zeichneTicketListe() {
 }
 
 // Wechselt der Inhalt des Blatts, wächst oder schrumpft es weich in die neue
-// Höhe; die Zeilen der Liste tropfen nacheinander auf.
+// Höhe; erst danach tropfen die Zeilen der Liste nacheinander auf (ADR 0027).
+var TK_WECHSEL = 380, TK_ZEILE = 820, TK_STAFFEL = 160;
 function ticketBlattWechseln(liste) {
   var karte = $('ticketKarte'), h0 = karte.offsetHeight;
   ticketListe = liste;
@@ -5454,7 +5459,8 @@ function ticketBlattWechseln(liste) {
   wahlenSetzen();
   karte.scrollTop = 0;
   var h1 = karte.offsetHeight;
-  if (Math.abs(h1 - h0) > 1) bewegt(karte, [{ height: px(h0) }, { height: px(h1) }], { dauer: 380, kurve: TROPFEN_KURVE });
+  var wechselt = Math.abs(h1 - h0) > 1;
+  if (wechselt) bewegt(karte, [{ height: px(h0) }, { height: px(h1) }], { dauer: TK_WECHSEL, kurve: TROPFEN_KURVE });
   if (liste) alleIn('#ticketKarte .tk-zeile').forEach(function (z, i) {
     var w = z.offsetWidth, h = z.offsetHeight;
     if (!w || !h) return;
@@ -5463,7 +5469,7 @@ function ticketBlattWechseln(liste) {
       { clipPath: 'inset(' + px((h - d) / 2) + ' ' + px(w - d - 8) + ' ' + px((h - d) / 2) + ' 8px round ' + px(d / 2) + ')', opacity: 0 },
       { clipPath: 'inset(' + px((h - d) / 2) + ' ' + px(w - d - 8) + ' ' + px((h - d) / 2) + ' 8px round ' + px(d / 2) + ')', opacity: 1, offset: 0.15 },
       { clipPath: 'inset(0px 0px 0px 0px round 14px)', opacity: 1 }
-    ], { dauer: 560, warten: 110 * i, kurve: TROPFEN_KURVE, fill: 'backwards' });
+    ], { dauer: TK_ZEILE, warten: (wechselt ? TK_WECHSEL : 0) + TK_STAFFEL * i, kurve: TROPFEN_KURVE, fill: 'backwards' });
   });
 }
 
@@ -5496,6 +5502,13 @@ function zeichneTicketBlatt() {
 }
 
 function bindeTicketListe() {
+  // Zur Seite «Tickets» (ADR 0027): Sie öffnet sich unter dem Blatt, das Blatt
+  // fließt in den Knopf zurück; ein Entwurf bleibt liegen.
+  $('tkZurSeite').addEventListener('click', function () {
+    ticketQuelle = null;
+    zeige('tickets');
+    ticketBlattSchliessen();
+  });
   $('tkListeZurueck').addEventListener('click', function () {
     if (!ticketEntwurf) ticketEntwurf = { id: null, art: 'fehler', titel: '', text: '', ort: ortHier(), grund: '' };
     ticketBlattWechseln(false);
@@ -5605,6 +5618,8 @@ function ticketBlattOeffnen(quelle, id, flaeche) {
   void blatt.offsetWidth;
   blatt.classList.add('offen');
   karte.scrollTop = 0;
+  // Verborgen hat das Feld keine Höhe zu messen; also erst jetzt (ADR 0027).
+  textWachsen($('tkText'));
   $('ticketKnopf').setAttribute('aria-expanded', 'true');
   wahlenSetzen();
   var r = flaeche || (quelle && zuSehen(quelle) ? quelle.getBoundingClientRect() : null);

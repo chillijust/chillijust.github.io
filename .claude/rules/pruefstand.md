@@ -14,6 +14,9 @@ Gilt für die Suiten. Ausführlich in `tools/pruefstand/README.md` und im Skill 
   beendet den Läufer selbst, ohne Ausgabe und ohne Grund.
 - **Backticks brechen `String.raw`** — auch im Kommentar. Symptom: «SUITE BRICHT AB —
   Unexpected identifier». Statt dessen «» oder Klartext.
+- **Ein Syntaxfehler im Rumpf meldet sich nur als Seitentitel** («Chilli Journal», null
+  Prüfungen). Häufigste Ursache: Wer eine Suite per Skript ändert, verwandelt ein `\n` im
+  Suchtext in einen echten Zeilenumbruch — im String-Literal ist das ein Syntaxfehler.
 - **Was die Prüfung sucht, steht nicht wörtlich in ihr.** Das Prüfskript hängt im selben
   Dokument: Ein Emoji im Suchmuster findet sich selbst, Chillingos Schlüssel im Klartext
   ließe `pruefen.mjs` anschlagen. Zeichen über `String.fromCharCode`, Schlüssel

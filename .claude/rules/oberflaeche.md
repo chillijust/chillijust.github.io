@@ -45,8 +45,9 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 - **Der Sonne/Mond-Schalter ist ein Schieber** (`.thema-schalter`, `role="switch"`,
   `aria-checked` = dunkel): Sonne links, Mond rechts, beide immer sichtbar, der Knauf liegt
   unter dem, was gilt. Mit dem Druck tropft die neue Darstellung als runde Scheibe aus ihm
-  (`themaSetzen(wert, quelle)`, `startViewTransition`, 910 ms); der Knauf gleitet derweil
-  im neuen Bild hinüber (`knaufGleiten`, ADR 0025, 0026).
+  (`themaSetzen(wert, quelle)`, `startViewTransition`, 910 ms), ihr Kontrast steigt dabei
+  von durchsichtig auf voll; der Knauf gleitet derweil im neuen Bild hinüber
+  (`knaufGleiten`, ADR 0025, 0026, 0027).
 - **Das Menü** folgt dem Pflichtenheft in Reihenfolge und Wortlaut. Ein Eintrag ohne `ziel`
   trägt «bald»; wer ihn baut, setzt `ziel` und trägt die Ansicht in `ANSICHTEN` ein.
 - **Die Kachel kennt zwei Gesten**: kurz tippen hakt ab, lange drücken (`langDruecken`)
@@ -86,8 +87,9 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   einen Entwurf weg (ADR 0020). `#app` hält dem Knopf unten Platz frei. Das Blatt steht
   **unten** und rückt mit der Tastatur hoch (`ticketTastatur`); «Alle Tickets» im Kopf
   zeigt die Liste im selben Blatt, mit Zurück, ohne den Entwurf zu verlieren; ihre Zeilen
-  tropfen sichtbar nacheinander auf, je 110 ms später (ADR 0021, 0025, 0026). Der Fließtext
-  ist leer so hoch wie der Titel und wächst bis drei Zeilen. Es ist aus Glas, wie Hinweis
+  tropfen erst nach dem Höhenwechsel des Blatts auf, langsam und je 160 ms später; im Kopf
+  führt «Ticketseite» zur Seite Tickets (ADR 0021, 0025–0027). Der Fließtext ist leer so
+  hoch wie der Titel und wächst bis drei Zeilen; gemessen wird erst, wenn das Blatt steht. Es ist aus Glas, wie Hinweis
   und Meldung, auch im Tropfen (ADR 0024).
 - **Was alles ersetzt oder löscht, fragt im Glas** (`hinweisZeigen` mit `frage`) und läßt
   sich bis zum Neuladen rückgängig machen (`rueckgaengig`); Einzelnes fragt mit zweitem Tipp
