@@ -1215,6 +1215,31 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 .hinweis-haken[hidden] { display: none; }
 .hinweis-haken.neutral { background: var(--flaeche-2); color: var(--text-2); }
 .hinweis-haken svg { width: 24px; height: 24px; }
+/* Die Zeichen bewegen sich einmal, wenn sie erscheinen (ADR 0035): Der Haken
+   zeichnet sich, beim Hinweis fällt der Punkt als Tropfen und der Strich wächst,
+   der Pfeil fällt in die Schale, das zweite Blatt schiebt sich aus dem ersten. */
+.zeichnet .z-strich, .gw-kachel.gerade.erledigt .gw-scheibe .z-strich {
+  stroke-dasharray: 1;
+  animation: z-zeichnen .42s .14s cubic-bezier(.4, 0, .2, 1) both;
+}
+.zeichnet .z-punkt { animation: z-fallen .34s cubic-bezier(.5, 0, .7, .4) both; }
+.zeichnet[data-zeichen="hinweis"] .z-strich { animation-delay: .3s; }
+.z-punkt { transform-box: fill-box; transform-origin: center; }
+.zeichnet .z-pfeil { animation: z-pfeil .62s .1s cubic-bezier(.45, 0, .2, 1) both; }
+.zeichnet .z-blatt { animation: z-blatt .5s .12s cubic-bezier(.3, 0, .2, 1) both; }
+@keyframes z-zeichnen { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes z-fallen {
+  0% { transform: translateY(-7px) scale(.6); opacity: 0; }
+  60% { opacity: 1; }
+  100% { transform: none; opacity: 1; }
+}
+@keyframes z-pfeil {
+  0% { transform: translateY(-9px); opacity: 0; }
+  35% { opacity: 1; }
+  75% { transform: translateY(1.5px); }
+  100% { transform: none; opacity: 1; }
+}
+@keyframes z-blatt { from { transform: translate(-5px, -5px); } to { transform: none; } }
 .hinweis-karte.bestaetigung p { margin-bottom: 4px; }
 /* Eine Bestätigung ist so breit wie ihr Text, nicht wie der Bildschirm (ADR 0025). */
 .hinweis-karte.bestaetigung { width: auto; min-width: 180px; padding-left: 28px; padding-right: 28px; }
@@ -1514,10 +1539,17 @@ var ICON = {
     '2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'),
   sicherung: svg('<path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/>'),
   ticket: svg('<path d="M4 6h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4z"/><path d="M10 9h4M10 15h4"/>'),
-  haken: svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>'),
+  // Die Teile mit `z-…` bewegen sich, wo ein Zeichen erscheint (`zeichenZeichnen`,
+  // ADR 0035); `pathLength` macht den Strich unabhängig von seiner Länge.
+  haken: svg('<path class="z-strich" pathLength="1" d="M5 12.5l4.5 4.5L19 7.5"/>'),
   weiter: svg('<path d="M9 5l7 7-7 7"/>'),
   minus: svg('<path d="M5 12h14"/>'),
-  hinweis: svg('<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.01"/>'),
+  hinweis: svg('<circle cx="12" cy="12" r="9"/><path class="z-strich" pathLength="1" d="M12 11v5"/>' +
+    '<path class="z-punkt" d="M12 7.5v.01"/>'),
+  laden: svg('<g class="z-pfeil"><path d="M12 3v11"/><path d="M7.5 9.5l4.5 4.5 4.5-4.5"/></g>' +
+    '<path d="M5 15v3.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V15"/>'),
+  kopie: svg('<path d="M15 9V5.5A1.5 1.5 0 0 0 13.5 4h-8A1.5 1.5 0 0 0 4 5.5v8A1.5 1.5 0 0 0 5.5 15H9"/>' +
+    '<rect class="z-blatt" x="9" y="9" width="11" height="11" rx="2"/>'),
   frei: svg('<circle cx="12" cy="12" r="8"/><path d="M6.4 6.4l11.2 11.2"/>'),
   welle: svg('<path d="M2 9c2.5 0 2.5-3 5-3s2.5 3 5 3 2.5-3 5-3 2.5 3 5 3"/>' +
     '<path d="M2 16c2.5 0 2.5-3 5-3s2.5 3 5 3 2.5-3 5-3 2.5 3 5 3"/>'),
@@ -1576,7 +1608,7 @@ function melden(text, zeichen) {
   // wurde. `zeichen` 'haken' nur für Gelungenes, sonst das neutrale.
   var teil = String(text).match(/^(.*?[.!?])\s+(.+)$/), titel = teil ? teil[1] : String(text), rest = teil ? teil[2] : '';
   var knopf = document.activeElement && document.activeElement !== document.body ? document.activeElement : null;
-  bestaetigen(titel.replace(/\.$/, ''), rest, knopf, null, zeichen === 'haken' ? 'haken' : 'hinweis');
+  bestaetigen(titel.replace(/\.$/, ''), rest, knopf, null, zeichen === 'haken' || zeichen === 'kopie' ? zeichen : 'hinweis');
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -2549,6 +2581,17 @@ function zuSehen(el) { return !!el && document.contains(el) && el.getClientRects
 // Stelle die Antwort — kein zweiter Tropfen (ADR 0020).
 // `opt.wahl` ({ herkunft, knoepfe }): untereinander die Knöpfe zur Wahl, darunter
 // «Abbrechen». Ein Knopf schließt und tut, was er sagt (ADR 0025).
+var ZEICHEN = ['haken', 'hinweis', 'kopie', 'laden'];
+
+// Ein Zeichen bewegt sich einmal, jedes Mal, wenn es erscheint: Die Klasse
+// geht weg und kommt nach einem Umbruch wieder, damit die Animation neu läuft.
+function zeichenZeichnen(el) {
+  if (!el) return;
+  el.classList.remove('zeichnet');
+  void el.offsetWidth;
+  el.classList.add('zeichnet');
+}
+
 function hinweisZeigen(titel, text, quelle, ziel, opt) {
   opt = opt || {};
   var blatt = $('hinweisBlatt'), karte = $('hinweisKarte'), offen = !blatt.hidden && blatt.classList.contains('offen');
@@ -2556,14 +2599,17 @@ function hinweisZeigen(titel, text, quelle, ziel, opt) {
   $('hinweisTitel').textContent = titel;
   $('hinweisText').textContent = text || '';
   // Der grüne Haken heißt «gespeichert»; ist nichts geschehen, steht ein
-  // neutrales Zeichen da (`opt.zeichen`).
-  var zeichen = opt.zeichen === 'hinweis' ? 'hinweis' : 'haken';
-  if (best && $('hinweisHaken').getAttribute('data-zeichen') !== zeichen) {
+  // neutrales Zeichen da (`opt.zeichen`). Kopiert und Geladen sind gelungen und
+  // tragen ihr eigenes Zeichen, grün wie der Haken; ein Hinweis mit «OK» trägt
+  // eins nur, wenn er es nennt (ADR 0035).
+  var zeichen = ZEICHEN.indexOf(opt.zeichen) !== -1 ? opt.zeichen : 'haken', mitZeichen = best || !!opt.zeichen;
+  if (mitZeichen && $('hinweisHaken').getAttribute('data-zeichen') !== zeichen) {
     $('hinweisHaken').innerHTML = ICON[zeichen];
     $('hinweisHaken').setAttribute('data-zeichen', zeichen);
   }
-  $('hinweisHaken').classList.toggle('neutral', zeichen !== 'haken');
-  $('hinweisHaken').hidden = !best;
+  $('hinweisHaken').classList.toggle('neutral', zeichen === 'hinweis');
+  $('hinweisHaken').hidden = !mitZeichen;
+  if (mitZeichen) zeichenZeichnen($('hinweisHaken'));
   hinweisFrage = !best && opt.frage ? opt.frage : null;
   hinweisWahl = !best && opt.wahl ? opt.wahl : null;
   var wahlFeld = $('hinweisWahl');
@@ -3310,7 +3356,7 @@ function icsLaden() {
   exportiertMerken(auswahl);
   // Kein Verschwinden nach Zeit: iOS legt gleichzeitig sein eigenes Blatt
   // darüber, und wer zurückkommt, soll den Satz noch finden.
-  hinweisZeigen('Datei geladen', 'Öffne sie, um sie in den Kalender zu holen.', quelle, $('exZuletzt'));
+  hinweisZeigen('Datei geladen', 'Öffne sie, um sie in den Kalender zu holen.', quelle, $('exZuletzt'), { zeichen: 'laden' });
 }
 
 // Markierung aufheben: Was unter «Bearbeiten» gewählt ist, vergißt, daß es im
@@ -5592,7 +5638,7 @@ function sicherungKopieren() {
     scZeigen = ok ? '' : code;
     if (ok) {
       state.gesichert = nun;
-      if (speichern()) bestaetigen('Kopiert', 'Leg den Code an einen sicheren Ort.', knopf, '#scAlter');
+      if (speichern()) bestaetigen('Kopiert', 'Leg den Code an einen sicheren Ort.', knopf, '#scAlter', 'kopie');
     }
     if (ansicht === 'sicherung') render();
     if (!ok && $('scCode')) { try { $('scCode').focus(); $('scCode').select(); } catch (e) { /* egal */ } }
@@ -5834,7 +5880,7 @@ function bindeTicketListe() {
       if (ok) {
         var nun = zeitJetzt();
         offen.forEach(function (t) { t.abgegeben = nun; });
-        if (speichern()) melden('Kopiert. ' + anzahl(offen.length, 'Ticket liegt', 'Tickets liegen') + ' in der Zwischenablage.', 'haken');
+        if (speichern()) melden('Kopiert. ' + anzahl(offen.length, 'Ticket liegt', 'Tickets liegen') + ' in der Zwischenablage.', 'kopie');
         if (ticketListe) ticketBlattWechseln(true);
         if (ansicht === 'tickets') render();
       } else {
@@ -6030,7 +6076,7 @@ function ticketsKopieren() {
       var nun = zeitJetzt();
       offen.forEach(function (t) { t.abgegeben = nun; });
       var gut = speichern();
-      if (gut) melden('Kopiert. ' + anzahl(offen.length, 'Ticket liegt', 'Tickets liegen') + ' in der Zwischenablage.', 'haken');
+      if (gut) melden('Kopiert. ' + anzahl(offen.length, 'Ticket liegt', 'Tickets liegen') + ' in der Zwischenablage.', 'kopie');
     }
     if (ansicht === 'tickets') render();
     if (!ok && $('tkAusgabe')) { try { $('tkAusgabe').focus(); $('tkAusgabe').select(); } catch (e) { /* egal */ } }

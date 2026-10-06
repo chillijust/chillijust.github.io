@@ -1,6 +1,6 @@
 # 0011 · Was schon im Kalender steht, geht nicht noch einmal hinaus
 
-*2026-10-05 · Ansicht von 0.5.0T6 · Version 0.5.0T7 · ergänzt 0009 · ergänzt durch 0012 (Markierung aufheben)*
+*2026-10-05 · Ansicht von 0.5.0T6 · Version 0.5.0T7 · ergänzt 0009 · ergänzt durch 0012 (Markierung aufheben), 0034 (Neues abwählen)*
 
 ## Ausgangslage
 

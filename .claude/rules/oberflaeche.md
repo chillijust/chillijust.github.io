@@ -135,6 +135,8 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 - **Gespeichert und Angelegt bestätigt `bestaetigen()`**, nie `melden()`: der Hinweis aus Glas
   mit Haken, ohne «OK», geht von selbst und fließt ins Gespeicherte (ADR 0018). Wurde nichts
   gespeichert, dasselbe Glas mit neutralem Zeichen (`'hinweis'`), nie der grüne Haken.
+- **Zeichen bewegen sich einmal, wenn sie erscheinen** (`zeichenZeichnen`, Klassen `z-…`): Haken zeichnet
+  sich, «i» läßt den Punkt fallen, `laden` den Pfeil, `kopie` das Blatt; grün ist alles außer «i» (ADR 0035).
 - **Jede andere Meldung über `melden(text, zeichen)`** — auch sie erscheint im Glas, eine
   Zeile unten gibt es nicht mehr; `'haken'` nur, wenn etwas gelang (ADR 0019).
 - **Was man lesen muß, bevor es weitergeht, ist ein Hinweis** (`hinweisZeigen`, wartet auf
