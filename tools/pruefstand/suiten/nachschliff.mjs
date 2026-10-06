@@ -298,6 +298,14 @@ return durch().then(function () {
     /^inset\(0px( 0px)*( round 0px)?\)$/.test(nb[nb.length - 1].clipPath) && !!na && na.effect.getTiming().delay > 0 &&
     na.effect.getTiming().fill === 'backwards' && kalVersatz === 1, nb.length ? nb[0].clipPath : 'keine');
   pruefe('S3 ohne das alte Einblenden', !q('#kalRaster').classList.contains('neu'));
+  // Ticket zu 0.9.1T: Ragt etwas über den Rand, wird die Seite breiter, und iOS
+  // verkleinert die ganze Ansicht, solange es dauert (ADR 0029).
+  var breiten = [0, 0.25, 0.5, 0.75].map(function (t) {
+    document.getAnimations().forEach(function (an) { try { an.currentTime = t * 900; } catch (e) { /* egal */ } });
+    return document.documentElement.scrollWidth;
+  });
+  pruefe('S9 beim Blättern wird die Seite nie breiter als der Bildschirm', breiten.every(function (b) {
+    return b <= innerWidth; }), breiten.join() + ' / ' + innerWidth);
   return durch();
 }).then(function () {
   var g, gb, nb;
