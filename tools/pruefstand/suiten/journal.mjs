@@ -123,7 +123,14 @@ pruefe('F10a die Kachel ist wieder offen', !q('.jr-kachel.erledigt') && kachel()
 kachel().click();
 pruefe('F11a neu: kein «Löschen»', !q('#jrLoeschen'));
 q('#jrSpeichern').click();
-pruefe('F11 leer und neu: nichts gespeichert', !state.journal.length && /Nichts geschrieben/.test(meldung()));
+pruefe('F11a2 auch «nichts gespeichert» kommt im Glas, ohne grünen Haken', q('#hinweisKarte').classList.contains('bestaetigung') &&
+  q('#hinweisKarte').classList.contains('glas') && q('#hinweisHaken').classList.contains('neutral') &&
+  q('#hinweisHaken').getAttribute('data-zeichen') === 'hinweis' && !/Nichts/.test(q('#meldung').textContent));
+pruefe('F11 leer und neu: nichts gespeichert', !state.journal.length && /Nichts gespeichert/.test(meldung()));
+bestaetigen('Gespeichert', '', null);
+pruefe('F11b danach trägt eine echte Bestätigung wieder den Haken', !q('#hinweisHaken').classList.contains('neutral') &&
+  q('#hinweisHaken').getAttribute('data-zeichen') === 'haken');
+hinweisSchliessen();
 state.journal = [reflexionLesen({ woche: MO, gut: 'Weg damit', stoerte: '' })];
 zeige('lesen', MO);
 q('#jrBearbeiten').click();

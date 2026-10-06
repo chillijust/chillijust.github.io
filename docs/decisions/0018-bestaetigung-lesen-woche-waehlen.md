@@ -1,6 +1,6 @@
 # 0018 · Bestätigung im Glas, Reflexion lesen, Woche wählen
 
-*2026-10-06 · Abnahme von 0.7.0T · Version 0.7.0T2 · ändert 0013, 0017*
+*2026-10-06 · Abnahme von 0.7.0T · Version 0.7.0T2, nachgebessert 0.7.0T3 · ändert 0013, 0017*
 
 ## Ausgangslage
 
@@ -23,6 +23,9 @@ Drei Wünsche aus der Abnahme des Journals:
 - **Überall beim Speichern**, auf Ansage: Gewohnheit, Abgewöhnen, Termin, Reflexion —
   jedes «Gespeichert» und «Angelegt». Löschen einer Reflexion bestätigt ebenso.
   Fehlermeldungen, Archivieren, Löschen von Gewohnheit und Termin bleiben die Zeile unten.
+- **Nichts gespeichert** (0.7.0T3): Wer eine neue Reflexion leer speichert, sieht dasselbe
+  Glas — aber mit neutralem Zeichen statt grünem Haken (`zeichen: 'hinweis'`), denn der
+  Haken heißt «gespeichert». Am Gerät bemerkt: Diese Meldung kam noch als Zeile.
 - **Lesen** (Ansicht `lesen`, `id` = Montag): Woche, Zahlen, beide Antworten, wann
   geschrieben, «Bearbeiten». Journal-Einträge und die Sonntagskachel mit fertiger
   Reflexion öffnen hierhin (`data-lesen`). Zurück geht es dorthin, woher das Lesen kam;
@@ -48,4 +51,4 @@ Liste fehlender Wochen zu führen, hält das Journal kurz, auch nach langen Paus
 - ADR 0017: «vergangene Wochen lassen sich nicht nachholen» und «ein eigener Löschknopf
   entfällt» gelten nicht mehr; ein Eintrag öffnet zum Lesen, nicht zum Ändern.
 - `hinweisZeigen` nimmt ein `opt` (`bestaetigung`); ein Hinweis mit «OK» bleibt, wie er war.
-- Suiten: `journal` (F8–F13, W5–W12, B1–B7), `termine` F17/F21 lesen die Bestätigung.
+- Suiten: `journal` (F8–F13, F11a2, F11b, W5–W12, B1–B7), `termine` F17/F21 lesen die Bestätigung.

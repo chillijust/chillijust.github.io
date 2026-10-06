@@ -1102,6 +1102,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
   color: var(--grund);
 }
 .hinweis-haken[hidden] { display: none; }
+.hinweis-haken.neutral { background: var(--flaeche-2); color: var(--text-2); }
 .hinweis-haken svg { width: 24px; height: 24px; }
 .hinweis-karte.bestaetigung p { margin-bottom: 4px; }
 .hinweis-karte.bestaetigung p:empty { display: none; }
@@ -1188,7 +1189,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.7.0T2';
+var APP_VERSION = '0.7.0T3';
 var APP_STAND = '2026-10-06';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -2070,7 +2071,14 @@ function hinweisZeigen(titel, text, quelle, ziel, opt) {
   var best = !!opt.bestaetigung;
   $('hinweisTitel').textContent = titel;
   $('hinweisText').textContent = text || '';
-  if (best && !$('hinweisHaken').firstChild) $('hinweisHaken').innerHTML = ICON.haken;
+  // Der grüne Haken heißt «gespeichert»; ist nichts geschehen, steht ein
+  // neutrales Zeichen da (`opt.zeichen`).
+  var zeichen = opt.zeichen === 'hinweis' ? 'hinweis' : 'haken';
+  if (best && $('hinweisHaken').getAttribute('data-zeichen') !== zeichen) {
+    $('hinweisHaken').innerHTML = ICON[zeichen];
+    $('hinweisHaken').setAttribute('data-zeichen', zeichen);
+  }
+  $('hinweisHaken').classList.toggle('neutral', zeichen !== 'haken');
   $('hinweisHaken').hidden = !best;
   $('hinweisOk').hidden = best;
   karte.classList.toggle('bestaetigung', best);
@@ -2119,9 +2127,9 @@ function bestaetigungDauer(titel, text) {
   return Math.min(4000, BESTAETIGUNG_MS + 45 * ((titel || '').length + (text || '').length));
 }
 
-function bestaetigen(titel, text, knopf, ziel) {
+function bestaetigen(titel, text, knopf, ziel, zeichen) {
   var quelle = zuSehen(knopf) ? knopf.getBoundingClientRect() : null;
-  hinweisZeigen(titel, text, quelle, ziel, { bestaetigung: true });
+  hinweisZeigen(titel, text, quelle, ziel, { bestaetigung: true, zeichen: zeichen });
 }
 
 // ── Umschalter: die Markierung fließt hinüber ───────────────────
@@ -4102,7 +4110,7 @@ function bindeReflexion() {
     var e = reflexionEntwurf, was = reflexionSpeichern(e.woche, e.gut, e.stoerte);
     if (was === 'gespeichert') bestaetigen('Gespeichert', 'Nachzulesen im Journal.', this, '[data-lesen="' + e.woche + '"]');
     else if (was === 'entfernt') bestaetigen('Gelöscht', 'Die Reflexion ist entfernt.', this);
-    else if (was === 'nichts') melden('Nichts geschrieben, nichts gespeichert.');
+    else if (was === 'nichts') bestaetigen('Nichts gespeichert', 'Du hast nichts geschrieben.', this, null, 'hinweis');
     zeige('home');
   });
   $('jrAbbrechen').addEventListener('click', function () { zeige('home'); });
