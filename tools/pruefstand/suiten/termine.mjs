@@ -192,7 +192,10 @@ pruefe('F15 angelegt', state.termine.length === 1 && neu.titel === 'Laufen' && n
   neu.von === '18:00' && neu.bis === '19:00' && neu.wiederholung === 'woechentlich' && neu.wiederholungBis === null &&
   neu.vorlauf === 60 && neu.ort === 'Park' && /^t/.test(neu.id), JSON.stringify(neu));
 pruefe('F16 und gespeichert', gespeichert().length === 1 && gespeichert()[0].id === neu.id);
-pruefe('F17 die Meldung nennt den Tag', q('#meldung').textContent === 'Angelegt für Mi, 4. Nov.', q('#meldung').textContent);
+pruefe('F17 die Bestätigung nennt den Tag', q('#hinweisKarte').classList.contains('bestaetigung') &&
+  q('#hinweisTitel').textContent === 'Angelegt' && q('#hinweisText').textContent === 'Für Mi, 4. Nov.',
+  q('#hinweisTitel').textContent + ' | ' + q('#hinweisText').textContent);
+hinweisSchliessen();
 pruefe('F18 der Kalender springt zum Tag', ansicht === 'home' && kalTag === '2026-11-04' && kalVersatz === 3 &&
   !!q('#kalLeiste [data-termin="' + neu.id + '"]'));
 pruefe('F19 auch im Monat', (function () {
@@ -210,7 +213,8 @@ tippe('tmTitel', 'Laufen im Park');
 tippe('tmBis', '');
 q('#tmSpeichern').click();
 pruefe('F21 gespeichert unter derselben id', state.termine.length === 1 && state.termine[0].id === neu.id &&
-  state.termine[0].titel === 'Laufen im Park' && state.termine[0].bis === null && q('#meldung').textContent === 'Gespeichert.');
+  state.termine[0].titel === 'Laufen im Park' && state.termine[0].bis === null && q('#hinweisTitel').textContent === 'Gespeichert');
+hinweisSchliessen();
 zeige('termin', neu.id);
 q('#tmLoeschen').click();
 pruefe('F22 der erste Tipp fragt nach der ganzen Reihe', state.termine.length === 1 &&

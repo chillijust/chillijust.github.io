@@ -127,7 +127,9 @@ der Umschalter (ADR 0007).
   `terminNeu` nimmt statt dessen einen Tag; beide legen `terminEntwurf` an.
   `journal` (Liste) und `reflexion` (zwei Fragen; `id` ist der Montag, nicht in der
   Zukunft — sonst Dashboard) legen `reflexionEntwurf` an; aus dem Journal geöffnet, führt
-  `rueckZiel` dorthin zurück.
+  `rueckZiel` dorthin zurück. `lesen` zeigt die Reflexion der Woche `lesenWoche`; zurück
+  geht es nach `lesenZurueck`, aus `reflexion` zurück ins Lesen (ADR 0018). Gibt es die
+  Woche nicht (mehr), führt `lesen` ins Journal.
   `abgewoehnen` und `rueckfall` brauchen eine gültige `id`, `welle` eine laufende Welle —
   sonst geht es zum Dashboard.
 - **Der Takt:** `takt()` läuft jede Sekunde und schreibt «frei seit» (`[data-frei]`), die
@@ -157,8 +159,12 @@ der Umschalter (ADR 0007).
 - **Ringe** werden mit dem Ziel gezeichnet und tragen in `data-von` den zuletzt gezeigten
   Wert (`ringZuletzt`); `ringeFuellen()` läßt sie nach jedem `render()` herüberlaufen.
 - **Journal** (ADR 0017): sonntags setzt `zeichneHome` die Kachel `zeichneReflexionKachel`
-  unter die fälligen Gewohnheiten; `[data-reflexion]` öffnet die Woche. Geändert wird nur
-  über `reflexionSpeichern` — leer gespeichert entfernt. `wochenZahlen` rechnet die Haken
+  unter die fälligen Gewohnheiten; `[data-reflexion]` öffnet das Formular, `[data-lesen]`
+  das Lesen. Geändert wird nur über `reflexionSpeichern` — leer gespeichert entfernt —,
+  gelöscht über `reflexionLoeschen`. Eine neue Reflexion wählt ihre Woche mit
+  `reflexionWocheWaehlen`, an Ort und Stelle (ADR 0018).
+- **Bestätigung** (ADR 0018): `bestaetigen()` öffnet den Hinweis mit `bestaetigung`;
+  `hinweisUhr` schließt ihn, ein Tipp aufs Blatt früher. Das Ziel darf ein Selektor sein. `wochenZahlen` rechnet die Haken
   der Woche aus `tagesStand`, nichts davon wird gespeichert.
 - `visibilitychange` zeichnet das Dashboard und die Welle ganz neu — nach Mitternacht ist es
   ein anderer Tag, nach zehn Minuten im Hintergrund ist die Welle durch.

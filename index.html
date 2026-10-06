@@ -517,6 +517,11 @@ svg.wm { display: block; flex: none; color: var(--text); overflow: visible; }
 .jr-antwort.leer { color: var(--text-2); font-style: italic; }
 .jr-zahlen, .jr-satz { margin: 4px 0 0; color: var(--text-2); font-size: 15px; }
 .jr-leer { margin: 0; color: var(--text-2); }
+.jr-lesen .jr-frage:first-child { margin-top: 0; }
+.kal-kopf.jr-wahl { margin: -8px -8px 4px; }
+.jr-wahl .rund:disabled { opacity: .3; }
+.jr-vergeben { margin-top: 8px; }
+#jrSpeichern:disabled { opacity: .4; }
 .rf-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .rf-wann { font-family: var(--sans); font-size: 15px; font-variant-numeric: tabular-nums; }
 .rf-notiz { font-size: 14px; font-style: italic; color: var(--text-2); overflow-wrap: anywhere; }
@@ -1085,6 +1090,22 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 .hinweis-karte .knopf { width: 100%; }
 /* Den Fokus trägt die Karte, für Vorleser — ein Ring um «OK» sähe aus wie eine Wahl. */
 .hinweis-karte:focus { outline: none; }
+/* Die Bestätigung: dasselbe Glas, ein grüner Haken statt «OK» (ADR 0018). */
+.hinweis-haken {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 10px;
+  border-radius: 50%;
+  background: var(--erledigt);
+  color: var(--grund);
+}
+.hinweis-haken[hidden] { display: none; }
+.hinweis-haken svg { width: 24px; height: 24px; }
+.hinweis-karte.bestaetigung p { margin-bottom: 4px; }
+.hinweis-karte.bestaetigung p:empty { display: none; }
+.hinweis-karte .knopf[hidden] { display: none; }
 
 /* ── Bewegung: Tropfen ─────────────────────────────────────────
    Nichts ploppt (ADR 0007). Die Ansicht liegt über dem Geist der alten; der
@@ -1151,6 +1172,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
   <div class="hinweis-karte glas" id="hinweisKarte" tabindex="-1" role="alertdialog" aria-modal="true" aria-labelledby="hinweisTitel"
     aria-describedby="hinweisText">
     <div id="hinweisInhalt">
+      <span class="hinweis-haken" id="hinweisHaken" aria-hidden="true" hidden></span>
       <h2 id="hinweisTitel"></h2>
       <p id="hinweisText"></p>
       <button type="button" class="knopf" id="hinweisOk">OK</button>
@@ -1166,7 +1188,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.7.0T';
+var APP_VERSION = '0.7.0T2';
 var APP_STAND = '2026-10-06';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -2034,14 +2056,27 @@ function teilTropfen(el, an) {
 // Derselbe Tropfen, aber 60 % schneller als eine Ansicht — am Gerät so gewünscht:
 // Eine Karte ist kleiner als eine Ansicht, ihr Weg kürzer (ADR 0013).
 var HINWEIS_DAUER = Math.round(TROPFEN_DAUER * 0.4);
-var hinweisQuelle = null, hinweisZiel = null;
+var hinweisQuelle = null, hinweisZiel = null, hinweisUhr = null;
 
 function zuSehen(el) { return !!el && document.contains(el) && el.getClientRects().length > 0; }
 
-function hinweisZeigen(titel, text, quelle, ziel) {
-  var blatt = $('hinweisBlatt'), offen = !blatt.hidden && blatt.classList.contains('offen');
+// `opt.bestaetigung`: ein Haken statt «OK», und er geht von selbst — nach
+// einer Zeit, die mit dem Text wächst; ein Tipp irgendwohin schließt früher.
+// `ziel` darf ein Selektor sein: Er wird erst beim Schließen gesucht, wenn die
+// neue Ansicht steht (ADR 0018).
+function hinweisZeigen(titel, text, quelle, ziel, opt) {
+  opt = opt || {};
+  var blatt = $('hinweisBlatt'), karte = $('hinweisKarte'), offen = !blatt.hidden && blatt.classList.contains('offen');
+  var best = !!opt.bestaetigung;
   $('hinweisTitel').textContent = titel;
-  $('hinweisText').textContent = text;
+  $('hinweisText').textContent = text || '';
+  if (best && !$('hinweisHaken').firstChild) $('hinweisHaken').innerHTML = ICON.haken;
+  $('hinweisHaken').hidden = !best;
+  $('hinweisOk').hidden = best;
+  karte.classList.toggle('bestaetigung', best);
+  karte.setAttribute('role', best ? 'status' : 'alertdialog');
+  if (hinweisUhr) { clearTimeout(hinweisUhr); hinweisUhr = null; }
+  if (best) hinweisUhr = setTimeout(hinweisSchliessen, bestaetigungDauer(titel, text));
   hinweisZiel = ziel || null;
   if (offen) return;
   hinweisQuelle = quelle || null;
@@ -2056,8 +2091,10 @@ function hinweisZeigen(titel, text, quelle, ziel) {
 // Tropfen; das Blatt verschwindet, wenn er angekommen ist.
 function hinweisSchliessen() {
   var blatt = $('hinweisBlatt'), karte = $('hinweisKarte');
+  if (hinweisUhr) { clearTimeout(hinweisUhr); hinweisUhr = null; }
   if (blatt.hidden || !blatt.classList.contains('offen')) return;
   blatt.classList.remove('offen');
+  if (typeof hinweisZiel === 'string') hinweisZiel = document.querySelector(hinweisZiel);
   // Die Quelle ist nur eine Fläche: Sie nickt nicht, sie nimmt nur auf.
   var q = hinweisQuelle, ziel = zuSehen(hinweisZiel) ? hinweisZiel
     : q && q.width ? { getBoundingClientRect: function () { return q; } } : null;
@@ -2069,6 +2106,22 @@ function hinweisSchliessen() {
     karte.style.opacity = '';
     if (!blatt.classList.contains('offen')) blatt.hidden = true;
   } });
+}
+
+// ── Bestätigung: Gespeichertes meldet sich im Glas ───────────────
+// Wie der Hinweis nach dem Laden, nur ohne «OK» (ADR 0018): Wer speichert,
+// sieht einen Haken, der aus dem getippten Knopf quillt und nach kurzer Zeit
+// in das fließt, was gespeichert wurde. Der Knopf wird gemessen, bevor die
+// Ansicht wechselt — danach gibt es ihn nicht mehr.
+var BESTAETIGUNG_MS = 1400;
+
+function bestaetigungDauer(titel, text) {
+  return Math.min(4000, BESTAETIGUNG_MS + 45 * ((titel || '').length + (text || '').length));
+}
+
+function bestaetigen(titel, text, knopf, ziel) {
+  var quelle = zuSehen(knopf) ? knopf.getBoundingClientRect() : null;
+  hinweisZeigen(titel, text, quelle, ziel, { bestaetigung: true });
 }
 
 // ── Umschalter: die Markierung fließt hinüber ───────────────────
@@ -2658,6 +2711,7 @@ var ANSICHTEN = {
   termin: { titel: 'Termin', zeichnen: zeichneTerminFormular },
   journal: { titel: 'Journal', zeichnen: zeichneJournal },
   reflexion: { titel: 'Wochenreflexion', zeichnen: zeichneReflexion },
+  lesen: { titel: 'Wochenreflexion', zeichnen: zeichneLesen },
   export: { titel: 'Kalender-Export', zeichnen: zeichneExport },
   einstellungen: { titel: 'Einstellungen', zeichnen: zeichneEinstellungen }
 };
@@ -2680,13 +2734,25 @@ var MENUE = [
 // statt einer id den Tag, an dem der Termin liegen soll.
 // Wer aus dem Export eine Gewohnheit oder einen Termin öffnet, kommt dorthin
 // zurück — mit dem Rückweg wie nach dem Speichern; ebenso aus dem Journal in
-// eine Reflexion. «reflexion» nimmt den Montag ihrer Woche.
+// eine Reflexion. «reflexion» und «lesen» nehmen den Montag ihrer Woche; wer
+// aus dem Lesen bearbeitet, kommt ins Lesen zurück, und das Lesen dorthin,
+// woher es geöffnet wurde (ADR 0018).
 var rueckZiel = null;
+var lesenWoche = null, lesenZurueck = null;
 
 function zeige(name, id) {
   if (name === 'home' && rueckZiel && ansicht !== 'home') name = rueckZiel;
+  if (name === 'lesen' && id === undefined) id = lesenWoche;
+  if (name === 'lesen' && !(ansicht === 'reflexion' && rueckZiel === 'lesen')) {
+    lesenZurueck = ansicht === 'journal' ? 'journal' : ansicht === 'reflexion' ? rueckZiel : null;
+  }
   rueckZiel = ansicht === 'export' && (name === 'bearbeiten' || name === 'termin') ? 'export'
-    : ansicht === 'journal' && name === 'reflexion' ? 'journal' : null;
+    : ansicht === 'journal' && name === 'reflexion' ? 'journal'
+    : ansicht === 'lesen' && name === 'reflexion' ? 'lesen'
+    : name === 'lesen' ? lesenZurueck : null;
+  // Eine gelöschte Reflexion gibt es nicht zu lesen: dann ins Journal.
+  if (name === 'lesen' && !reflexionNach(id)) { name = 'journal'; rueckZiel = null; }
+  if (name === 'lesen') lesenWoche = id;
   if (!ANSICHTEN[name]) name = 'home';
   if (name === 'bearbeiten' && !gewohnheitNach(id)) name = 'home';
   if (name === 'termin' && !terminNach(id)) name = 'home';
@@ -2718,6 +2784,7 @@ function render() {
   if ((ansicht === 'rueckfall' && !rueckfallFuer) || (ansicht === 'welle' && !state.welle)) ansicht = 'home';
   if ((ansicht === 'termin' || ansicht === 'terminNeu') && !terminEntwurf) ansicht = 'home';
   if (ansicht === 'reflexion' && !reflexionEntwurf) ansicht = 'home';
+  if (ansicht === 'lesen' && !reflexionNach(lesenWoche)) ansicht = 'journal';
   renderKopf();
   var feld = $('ansicht'), h0 = ansicht === 'home' ? heldHoehe() : 0;
   feld.innerHTML = ANSICHTEN[ansicht].zeichnen();
@@ -3675,7 +3742,11 @@ function entwurfSpeichern() {
     state.gewohnheiten.push({ id: neueId('g'), name: name.slice(0, NAME_MAX), rhythmus: rhythmusLesen(r),
       angelegt: heuteSchluessel(), erledigt: [], archiviert: null, erinnerung: uhr, imKalender: null });
   }
-  if (speichern()) melden(g ? 'Gespeichert.' : 'Angelegt. Antippen heißt erledigt, lange drücken öffnet sie.');
+  var id = g ? g.id : state.gewohnheiten[state.gewohnheiten.length - 1].id;
+  if (speichern()) {
+    bestaetigen(g ? 'Gespeichert' : 'Angelegt', g ? '' : 'Antippen heißt erledigt, lange drücken öffnet sie.',
+      $('gwSpeichern'), '[data-haken="' + id + '"]');
+  }
   zeige('home');
 }
 
@@ -3706,7 +3777,11 @@ function lasterSpeichern(name) {
     state.abgewoehnen.push({ id: neueId('a'), name: name.slice(0, NAME_MAX), start: start, rueckfaelle: [],
       draenge: [], archiviert: null });
   }
-  if (speichern()) melden(l ? 'Gespeichert.' : 'Angelegt. Kommt ein Drang, tipp auf «Drang».');
+  var id = l ? l.id : state.abgewoehnen[state.abgewoehnen.length - 1].id;
+  if (speichern()) {
+    bestaetigen(l ? 'Gespeichert' : 'Angelegt', l ? '' : 'Kommt ein Drang, tipp auf «Drang».',
+      $('gwSpeichern'), '[data-ab="' + id + '"]');
+  }
   zeige('home');
 }
 
@@ -3834,8 +3909,9 @@ function bindeRueckfall() {
 //
 // Sonntags fragt das Dashboard zwei Dinge: Was lief gut? Was hat gestört?
 // Gespeichert wird eine Reflexion je Woche, unter ihrem Montag; im Journal
-// stehen sie untereinander und lassen sich nachlesen und ändern (ADR 0017).
-// Geschrieben werden kann jede Woche bis zur laufenden — die Zukunft nicht.
+// stehen sie untereinander. Ein Tipp öffnet sie zum Lesen, «Bearbeiten» zum
+// Ändern oder Löschen (ADR 0017, 0018). Geschrieben werden kann jede Woche bis
+// zur laufenden, auch nachträglich — die Zukunft nicht.
 // Wie beim Rückfall eine eigene Ansicht, kein Blatt: Die Tastatur schiebt ein
 // festes Blatt auf iOS aus dem Bild.
 var reflexionEntwurf = null;   // { woche, gut, stoerte, neu }
@@ -3851,7 +3927,21 @@ function reflexionMoeglich(woche) {
 
 function reflexionEntwurfAus(woche) {
   var r = reflexionNach(woche);
-  return { woche: woche, gut: r ? r.gut : '', stoerte: r ? r.stoerte : '', neu: !r };
+  return { woche: woche, gut: r ? r.gut : '', stoerte: r ? r.stoerte : '', neu: !r, loeschFrage: false };
+}
+
+// Die jüngste Woche ohne Reflexion, von der laufenden zurück — dort beginnt,
+// wer schreiben will. Die Grenze hält nur die Schleife endlich.
+function offeneWoche() {
+  var mo = wochenAnfang(heuteSchluessel());
+  for (var i = 0; i < 520 && reflexionNach(mo); i++) mo = tagPlus(mo, -7);
+  return mo;
+}
+
+function reflexionLoeschen(woche) {
+  var vorher = state.journal.length;
+  state.journal = state.journal.filter(function (x) { return x.woche !== woche; });
+  return state.journal.length < vorher && speichern();
 }
 
 // Trägt ein, ändert oder entfernt — zwei leere Antworten sind keine Reflexion.
@@ -3894,7 +3984,7 @@ function zeichneReflexionKachel(heute) {
   var mo = wochenAnfang(heute), r = reflexionNach(mo);
   return '<section class="abschnitt"><h2>Journal</h2><div class="gw-liste">' +
     '<div class="gw-kachel jr-kachel' + (r ? ' erledigt' : '') + '">' +
-      '<button type="button" class="gw-haken" data-reflexion="' + esc(mo) + '">' +
+      '<button type="button" class="gw-haken" ' + (r ? 'data-lesen' : 'data-reflexion') + '="' + esc(mo) + '">' +
         '<span class="gw-ring"><span class="gw-scheibe jr-scheibe">' + (r ? ICON.haken : ICON.journal) + '</span></span>' +
         '<span class="gw-text"><span class="gw-name">Wochenreflexion</span>' +
           '<span class="gw-info">' + (r ? 'Geschrieben · antippen zum Nachlesen' : 'Zwei Fragen zu deiner Woche') +
@@ -3903,20 +3993,25 @@ function zeichneReflexionKachel(heute) {
     '</div></div></section>';
 }
 
+// Oben steht immer ein Weg zum Schreiben: die laufende Woche, solange sie
+// offen ist, sonst die jüngste, die fehlt — welche, läßt sich im Formular
+// wählen (ADR 0018).
 function zeichneJournal() {
   var heute = heuteSchluessel(), mo = wochenAnfang(heute), sonntag = ausSchluessel(heute).getDay() === 0;
-  var liste = state.journal.slice().reverse();
-  return (reflexionNach(mo) ? '' : '<section class="abschnitt"><div class="kachel">' +
-      '<div class="etikett">Diese Woche</div>' +
-      '<p class="jr-zahlen">' + esc(wochenTitel(mo)) + '</p>' +
-      '<p class="jr-satz">' + (sonntag ? 'Heute ist Sonntag — Zeit für zwei Fragen.'
+  var liste = state.journal.slice().reverse(), offen = offeneWoche(), diese = offen === mo;
+  return '<section class="abschnitt"><div class="kachel">' +
+      '<div class="etikett">' + (diese ? 'Diese Woche' : 'Nachholen') + '</div>' +
+      '<p class="jr-zahlen">' + esc(wochenTitel(offen)) + '</p>' +
+      '<p class="jr-satz">' + (!diese ? 'Diese Woche steht schon. Hast du eine frühere vergessen? Die Woche wählst du beim Schreiben.'
+        : sonntag ? 'Heute ist Sonntag — Zeit für zwei Fragen.'
         : 'Sonntags fragt dich das Dashboard. Du kannst auch jetzt schon schreiben.') + '</p>' +
-      '<div class="knopfreihe"><button type="button" class="knopf" data-reflexion="' + esc(mo) + '">' +
-        ICON.journal + '<span>Woche reflektieren</span></button></div>' +
-    '</div></section>') +
+      '<div class="knopfreihe"><button type="button" class="knopf' + (diese ? '' : ' zart') + '" data-reflexion="' +
+        esc(offen) + '" id="jrNeu">' + ICON.journal + '<span>' + (diese ? 'Woche reflektieren' : 'Woche nachholen') +
+        '</span></button></div>' +
+    '</div></section>' +
     '<section class="abschnitt"><h2>Bisher</h2>' +
     (liste.length ? '<div class="jr-liste">' + liste.map(function (r) {
-      return '<button type="button" class="jr-eintrag" data-reflexion="' + esc(r.woche) + '">' +
+      return '<button type="button" class="jr-eintrag" data-lesen="' + esc(r.woche) + '">' +
         '<span class="jr-woche">' + esc(wochenTitel(r.woche)) + '</span>' +
         zeichneAntwort('Was lief gut?', r.gut) + zeichneAntwort('Was hat gestört?', r.stoerte) +
         '</button>';
@@ -3930,11 +4025,38 @@ function zeichneAntwort(frage, text) {
     '<span class="jr-antwort' + (text ? '' : ' leer') + '">' + esc(text || 'Nichts notiert.') + '</span>';
 }
 
+// Lesen: die Woche, ihre Zahlen, beide Antworten — und «Bearbeiten».
+function zeichneLesen() {
+  var r = reflexionNach(lesenWoche), zahlen = wochenZahlen(r.woche, heuteSchluessel());
+  return '<section class="abschnitt"><div class="kachel">' +
+      '<div class="etikett">' + esc(wochenTitel(r.woche)) + '</div>' +
+      (zahlen ? '<p class="jr-zahlen">' + esc(zahlen) + '</p>' : '') +
+    '</div></section>' +
+    '<section class="abschnitt"><div class="kachel jr-lesen">' +
+      zeichneAntwort('Was lief gut?', r.gut) + zeichneAntwort('Was hat gestört?', r.stoerte) +
+    '</div>' +
+    '<p class="klein">Geschrieben ' + esc(zeitpunktText(r.zeit)) + '</p></section>' +
+    '<div class="knopfreihe"><button type="button" class="knopf" data-reflexion="' + esc(r.woche) + '" id="jrBearbeiten">' +
+      'Bearbeiten</button></div>';
+}
+
+// Schreiben: Eine neue Reflexion wählt ihre Woche mit den Pfeilen — zurück
+// beliebig weit, vor bis zur laufenden. Die Wahl ändert das Formular an Ort
+// und Stelle, sonst ginge die Tastatur zu (ADR 0018).
 function zeichneReflexion() {
   var e = reflexionEntwurf, zahlen = wochenZahlen(e.woche, heuteSchluessel());
   return '<section class="abschnitt"><div class="kachel">' +
-      '<div class="etikett">' + esc(wochenTitel(e.woche)) + '</div>' +
-      (zahlen ? '<p class="jr-zahlen">' + esc(zahlen) + '</p>' : '') +
+      (e.neu ? '<div class="kal-kopf jr-wahl">' +
+        '<button type="button" class="rund" id="jrFrueher" aria-label="Woche davor">' + ICON.zurueck + '</button>' +
+        '<div class="kal-titel" id="jrWoche">' + esc(wochenTitel(e.woche)) + '</div>' +
+        '<button type="button" class="rund" id="jrSpaeter" aria-label="Woche danach"' +
+          (e.woche < wochenAnfang(heuteSchluessel()) ? '' : ' disabled') + '>' + ICON.weiter + '</button>' +
+      '</div>' : '<div class="etikett" id="jrWoche">' + esc(wochenTitel(e.woche)) + '</div>') +
+      '<p class="jr-zahlen" id="jrZahlen"' + (zahlen ? '' : ' hidden') + '>' + esc(zahlen) + '</p>' +
+      '<div class="jr-vergeben" id="jrVergeben"' + (e.neu && reflexionNach(e.woche) ? '' : ' hidden') + '>' +
+        '<p class="jr-satz">Für diese Woche hast du schon geschrieben.</p>' +
+        '<div class="knopfreihe"><button type="button" class="knopf zart" id="jrAnsehen">Ansehen</button></div>' +
+      '</div>' +
     '</div></section>' +
     '<section class="abschnitt"><h2><label for="jrGut">Was lief gut?</label></h2>' +
       '<textarea id="jrGut" class="eingabe" rows="4" maxlength="' + JOURNAL_MAX + '" ' +
@@ -3945,23 +4067,57 @@ function zeichneReflexion() {
         'placeholder="Was dazwischenkam, was du ändern willst">' + esc(e.stoerte) + '</textarea>' +
     '</section>' +
     '<div class="knopfreihe">' +
-      '<button type="button" class="knopf" id="jrSpeichern">Speichern</button>' +
+      '<button type="button" class="knopf" id="jrSpeichern"' + (e.neu && reflexionNach(e.woche) ? ' disabled' : '') +
+        '>Speichern</button>' +
       '<button type="button" class="knopf zart" id="jrAbbrechen">Abbrechen</button>' +
     '</div>' +
-    (e.neu ? '' : '<p class="klein">Leer gespeichert, verschwindet die Reflexion aus dem Journal.</p>');
+    (e.neu ? '' : '<div class="knopfreihe"><button type="button" class="knopf zart" id="jrLoeschen">Löschen</button></div>');
+}
+
+// Die Woche wechseln, ohne neu zu zeichnen. Was schon geschrieben ist, bleibt
+// im Entwurf; steht für die neue Woche schon eine Reflexion, sperrt
+// «Speichern» und «Ansehen» führt hin.
+function reflexionWocheWaehlen(schritt) {
+  var e = reflexionEntwurf, ziel = tagPlus(e.woche, 7 * schritt), jetzt = wochenAnfang(heuteSchluessel());
+  if (!e.neu || ziel > jetzt) return;
+  e.woche = ziel;
+  var zahlen = wochenZahlen(ziel, heuteSchluessel()), vergeben = !!reflexionNach(ziel);
+  $('jrWoche').textContent = wochenTitel(ziel);
+  $('jrZahlen').textContent = zahlen;
+  teilZeigen($('jrZahlen'), !!zahlen);
+  teilZeigen($('jrVergeben'), vergeben);
+  $('jrSpeichern').disabled = vergeben;
+  $('jrSpaeter').disabled = ziel >= jetzt;
 }
 
 function bindeReflexion() {
   $('jrGut').addEventListener('input', function () { reflexionEntwurf.gut = this.value; });
   $('jrStoerte').addEventListener('input', function () { reflexionEntwurf.stoerte = this.value; });
+  if ($('jrFrueher')) {
+    $('jrFrueher').addEventListener('click', function () { reflexionWocheWaehlen(-1); });
+    $('jrSpaeter').addEventListener('click', function () { reflexionWocheWaehlen(1); });
+  }
+  $('jrAnsehen').addEventListener('click', function () { zeige('lesen', reflexionEntwurf.woche); });
   $('jrSpeichern').addEventListener('click', function () {
     var e = reflexionEntwurf, was = reflexionSpeichern(e.woche, e.gut, e.stoerte);
-    if (was === 'gespeichert') melden('Gespeichert. Nachzulesen im Journal.');
-    else if (was === 'entfernt') melden('Die Reflexion ist entfernt.');
+    if (was === 'gespeichert') bestaetigen('Gespeichert', 'Nachzulesen im Journal.', this, '[data-lesen="' + e.woche + '"]');
+    else if (was === 'entfernt') bestaetigen('Gelöscht', 'Die Reflexion ist entfernt.', this);
     else if (was === 'nichts') melden('Nichts geschrieben, nichts gespeichert.');
     zeige('home');
   });
   $('jrAbbrechen').addEventListener('click', function () { zeige('home'); });
+  // Löschen will zwei Tipps, wie beim Termin.
+  if ($('jrLoeschen')) $('jrLoeschen').addEventListener('click', function () {
+    var e = reflexionEntwurf;
+    if (!e.loeschFrage) {
+      e.loeschFrage = true;
+      this.textContent = 'Wirklich löschen?';
+      this.classList.add('frage');
+      return;
+    }
+    if (reflexionLoeschen(e.woche)) bestaetigen('Gelöscht', 'Die Reflexion ist entfernt.', this);
+    zeige('journal');
+  });
 }
 
 // Was live läuft, jede Sekunde: «frei seit», die Restzeit auf dem Drang-Knopf
@@ -4152,7 +4308,8 @@ function terminSpeichern() {
   var alt = e.id ? terminNach(e.id) : null;
   if (alt) state.termine[state.termine.indexOf(alt)] = t;
   else state.termine.push(t);
-  if (speichern()) melden(alt ? 'Gespeichert.' : 'Angelegt für ' + tagKurz(t.tag));
+  if (speichern()) bestaetigen(alt ? 'Gespeichert' : 'Angelegt', alt ? '' : 'Für ' + tagKurz(t.tag), $('tmSpeichern'),
+    '[data-termin="' + t.id + '"]');
   kalZeige(t.tag);
   zeige('home');
 }
@@ -4393,6 +4550,9 @@ function bindeAnsicht() {
   if ($('rfNotiz')) bindeRueckfall();
   alleIn('[data-reflexion]').forEach(function (b) {
     b.addEventListener('click', function () { zeige('reflexion', this.getAttribute('data-reflexion')); });
+  });
+  alleIn('[data-lesen]').forEach(function (b) {
+    b.addEventListener('click', function () { zeige('lesen', this.getAttribute('data-lesen')); });
   });
   if ($('jrGut')) bindeReflexion();
   if ($('tmTitel')) bindeTerminFormular();
@@ -4815,6 +4975,10 @@ function start() {
 
   $('swLaden').addEventListener('click', function () { swUebernehmen(); });
   $('hinweisOk').addEventListener('click', hinweisSchliessen);
+  // Eine Bestätigung geht auch mit einem Tipp irgendwohin.
+  $('hinweisBlatt').addEventListener('click', function () {
+    if ($('hinweisKarte').classList.contains('bestaetigung')) hinweisSchliessen();
+  });
   $('swSpaeter').addEventListener('click', function () {
     swStand.gemeldet = true;
     $('swNeu').hidden = true;

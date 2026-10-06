@@ -67,8 +67,9 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   äußersten 26 px, wirkt beim Loslassen über `zurueckGehen()`, schweigt bei offenem Menü
   oder Hinweis (ADR 0016). Wer den Rückweg ändert, ändert `zurueckGehen()`.
 - **Die Wochenreflexion steht nur sonntags auf dem Dashboard**, unter den fälligen
-  Gewohnheiten; geschrieben wird außerdem jederzeit über das Journal, nie für eine
-  kommende Woche (ADR 0017).
+  Gewohnheiten; geschrieben wird außerdem jederzeit über das Journal, auch für vergangene
+  Wochen, nie für eine kommende (ADR 0017, 0018). Fertiges öffnet zum Lesen (`data-lesen`),
+  geändert und gelöscht wird erst über «Bearbeiten».
 - **Eine neue Ansicht** ist ein Eintrag in `ANSICHTEN` (`titel`, `zeichnen`), ihre Ereignisse
   hängen in `bindeAnsicht()` — nie als Attribut.
 
@@ -89,6 +90,9 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   bekommt ihre Marke von `wahlenSetzen()`, nach Änderung an Ort und Stelle aufrufen.
 - **Knöpfe, die kommen und gehen, über `teilTropfen(el, an)`** (ADR 0012). Ein Teil mit
   eigenem `display` braucht `[hidden] { display: none; }`, sonst bleibt es sichtbar.
+- **Gespeichert und Angelegt bestätigt `bestaetigen()`**, nie `melden()`: der Hinweis aus Glas
+  mit Haken, ohne «OK», geht von selbst und fließt ins Gespeicherte (ADR 0018). Fehler und
+  Archivieren bleiben `melden()`.
 - **Was man lesen muß, bevor es weitergeht, ist ein Hinweis** (`hinweisZeigen`, wartet auf
   «OK»), keine Meldung — die geht nach zwei Sekunden. Er tropft mit `tropfenAuf`/`tropfenZu`
   wie eine Ansicht, nur mit `HINWEIS_DAUER` (60 % schneller) und beim Schließen früh als

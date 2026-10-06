@@ -1,6 +1,6 @@
 # 0017 · Journal: eine Wochenreflexion je Woche, sonntags auf dem Dashboard
 
-*2026-10-06 · Bauabschnitt 6, zweiter Teil · Version 0.7.0T*
+*2026-10-06 · Bauabschnitt 6, zweiter Teil · Version 0.7.0T · Lesen, Löschen und Nachholen geändert durch 0018*
 
 ## Ausgangslage
 

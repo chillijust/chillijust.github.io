@@ -1,6 +1,8 @@
 // Journal (0.7.0T): sonntags eine Kachel «Wochenreflexion» auf dem Dashboard,
 // zwei Fragen, eine Reflexion je Woche unter ihrem Montag; im Journal
-// nachzulesen und zu ändern (ADR 0017).
+// nachzulesen und zu ändern (ADR 0017). Seit 0.7.0T2: Lesen, dann
+// «Bearbeiten» mit «Löschen»; die Woche wählbar; Speichern bestätigt im Glas
+// (ADR 0018).
 //
 // Die Uhr steht meist auf Sonntag, dem 11. Oktober 2026 (KW 41, 5.–11.).
 import { readFileSync } from 'node:fs';
@@ -23,8 +25,13 @@ function tippe(id, text) {
   el.value = text;
   el.dispatchEvent(new Event('input', { bubbles: true }));
 }
-function meldung() { return q('#meldung').textContent; }
-function kachel() { return q('.jr-kachel [data-reflexion]'); }
+function bestaetigt() {
+  return !q('#hinweisBlatt').hidden && q('#hinweisKarte').classList.contains('bestaetigung')
+    ? q('#hinweisTitel').textContent + ' ' + q('#hinweisText').textContent : '';
+}
+function meldung() { var m = q('#meldung').textContent + ' ' + bestaetigt(); hinweisSchliessen(); return m; }
+function kachel() { return q('.jr-kachel [data-reflexion], .jr-kachel [data-lesen]'); }
+function warten(ms) { return new Promise(function (f) { setTimeout(f, ms); }); }
 
 // ── L · Lesen und Speicher ──────────────────────────────────
 uhr(2026, 9, 11);
@@ -71,7 +78,7 @@ pruefe('D6 ein leeres Dashboard begrüßt nur', !kachel() && !!q('#ersteGewohnhe
 mitGewohnheit();
 kachel().click();
 pruefe('F1 die Kachel öffnet die Reflexion ihrer Woche', ansicht === 'reflexion' &&
-  q('#kopf h1').textContent === 'Wochenreflexion' && q('#ansicht .etikett').textContent === 'KW 41 · 5.–11. Oktober');
+  q('#kopf h1').textContent === 'Wochenreflexion' && q('#jrWoche').textContent === 'KW 41 · 5.–11. Oktober');
 pruefe('F2 zwei Fragen', q('label[for="jrGut"]').textContent === 'Was lief gut?' &&
   q('label[for="jrStoerte"]').textContent === 'Was hat gestört?' &&
   +q('#jrGut').getAttribute('maxlength') === JOURNAL_MAX && +q('#jrStoerte').getAttribute('maxlength') === JOURNAL_MAX);
@@ -88,20 +95,44 @@ pruefe('F5 Speichern trägt ein und geht zurück', ansicht === 'home' && !!r && 
 pruefe('F6 gespeichert im Gerät', JSON.parse(localStorage.getItem(SPEICHER)).journal.length === 1);
 pruefe('F7 die Kachel trägt den Haken', !!q('.jr-kachel.erledigt') && /Geschrieben/.test(kachel().textContent));
 kachel().click();
-pruefe('F8 wieder geöffnet steht das Geschriebene da', q('#jrGut').value === r.gut && q('#jrStoerte').value === r.stoerte &&
-  /Leer gespeichert/.test(q('#ansicht').textContent));
+pruefe('F8 wieder geöffnet ist sie zu lesen, nicht zu ändern', ansicht === 'lesen' && !q('#jrGut') &&
+  /Drei Tage gelesen/.test(q('#ansicht').textContent) && /Handy/.test(q('#ansicht').textContent) &&
+  q('#jrBearbeiten').textContent === 'Bearbeiten' && /Geschrieben/.test(q('#ansicht').textContent));
+q('#jrBearbeiten').click();
+pruefe('F8a «Bearbeiten» öffnet das Geschriebene, mit «Löschen», ohne Wochenwahl', ansicht === 'reflexion' &&
+  q('#jrGut').value === r.gut && q('#jrStoerte').value === r.stoerte && !!q('#jrLoeschen') && !q('#jrFrueher'));
 tippe('jrGut', 'Geändert');
 q('#jrAbbrechen').click();
-pruefe('F9 Abbrechen ändert nichts', ansicht === 'home' && reflexionNach(MO).gut === r.gut);
+pruefe('F9 Abbrechen ändert nichts und führt ins Lesen zurück', ansicht === 'lesen' && reflexionNach(MO).gut === r.gut);
+q('#zurueckKnopf').click();
+pruefe('F9a vom Lesen zurück nach Hause, woher es kam', ansicht === 'home');
 kachel().click();
+q('#jrBearbeiten').click();
+tippe('jrGut', 'Geändert');
+q('#jrSpeichern').click();
+pruefe('F9b Speichern führt ins Lesen, die Bestätigung fließt dorthin', ansicht === 'lesen' &&
+  reflexionNach(MO).gut === 'Geändert' && /Gespeichert/.test(meldung()));
+q('#jrBearbeiten').click();
 tippe('jrGut', '  ');
 tippe('jrStoerte', '');
 q('#jrSpeichern').click();
-pruefe('F10 leer gespeichert ist sie fort', !reflexionNach(MO) && /entfernt/.test(meldung()) && !q('.jr-kachel.erledigt'));
+pruefe('F10 leer gespeichert ist sie fort, weiter ins Journal', !reflexionNach(MO) && /entfernt/.test(meldung()) &&
+  ansicht === 'journal');
+zeige('home');
+pruefe('F10a die Kachel ist wieder offen', !q('.jr-kachel.erledigt') && kachel().hasAttribute('data-reflexion'));
 kachel().click();
+pruefe('F11a neu: kein «Löschen»', !q('#jrLoeschen'));
 q('#jrSpeichern').click();
-pruefe('F11 leer und neu: nichts gespeichert', !state.journal.length && /Nichts geschrieben/.test(meldung()) &&
-  !/Leer gespeichert/.test(q('#ansicht').textContent || ''));
+pruefe('F11 leer und neu: nichts gespeichert', !state.journal.length && /Nichts geschrieben/.test(meldung()));
+state.journal = [reflexionLesen({ woche: MO, gut: 'Weg damit', stoerte: '' })];
+zeige('lesen', MO);
+q('#jrBearbeiten').click();
+q('#jrLoeschen').click();
+pruefe('F12 «Löschen» fragt erst', !!reflexionNach(MO) && q('#jrLoeschen').textContent === 'Wirklich löschen?' &&
+  q('#jrLoeschen').classList.contains('frage'));
+q('#jrLoeschen').click();
+pruefe('F13 der zweite Tipp löscht, bestätigt und führt ins Journal', !reflexionNach(MO) && ansicht === 'journal' &&
+  !JSON.parse(localStorage.getItem(SPEICHER)).journal.length && /Gelöscht/.test(meldung()));
 
 // ── J · Das Journal im Menü ─────────────────────────────────
 mitGewohnheit();
@@ -114,26 +145,31 @@ pruefe('J3 leer: ein Satz und der Weg zur laufenden Woche', /Noch keine Reflexio
 state.journal = [reflexionLesen({ woche: VORHER, gut: 'Ruhig', stoerte: '' }), reflexionLesen({ woche: MO, gut: '', stoerte: 'Stress' })];
 zeige('journal');
 var eintraege = alle('.jr-eintrag');
-pruefe('J4 die neueste Woche oben', eintraege.length === 2 && eintraege[0].getAttribute('data-reflexion') === MO &&
+pruefe('J4 die neueste Woche oben', eintraege.length === 2 && eintraege[0].getAttribute('data-lesen') === MO &&
   /KW 41/.test(eintraege[0].textContent) && /KW 40/.test(eintraege[1].textContent));
 pruefe('J5 beide Antworten zu lesen, Leeres sagt es', /Stress/.test(eintraege[0].textContent) &&
   eintraege[0].querySelector('.jr-antwort.leer').textContent === 'Nichts notiert.' && /Ruhig/.test(eintraege[1].textContent));
-pruefe('J6 steht die Woche schon, fehlt der Knopf', !q('#ansicht .knopf[data-reflexion]'));
+pruefe('J6 steht die Woche schon, holt der Knopf die jüngste fehlende nach',
+  q('#jrNeu').getAttribute('data-reflexion') === '2026-09-21' && /Woche nachholen/.test(q('#jrNeu').textContent));
 ausbewegt();
 pruefe('J7 jeder Eintrag groß genug', eintraege.every(function (e) { return e.getBoundingClientRect().height >= 44; }));
 eintraege[1].click();
-pruefe('J8 ein Eintrag öffnet seine Woche', ansicht === 'reflexion' && reflexionEntwurf.woche === VORHER &&
-  q('#jrGut').value === 'Ruhig' && /In dieser Woche/.test(q('.jr-zahlen').textContent));
+pruefe('J8 ein Eintrag öffnet seine Woche zum Lesen', ansicht === 'lesen' && lesenWoche === VORHER &&
+  /Ruhig/.test(q('#ansicht').textContent) && /In dieser Woche/.test(q('.jr-zahlen').textContent));
+q('#jrBearbeiten').click();
 q('#jrAbbrechen').click();
-pruefe('J9 Abbrechen führt ins Journal zurück', ansicht === 'journal');
-q('[data-reflexion="' + VORHER + '"]').click();
+q('#zurueckKnopf').click();
+pruefe('J9 Abbrechen, dann zurück: ins Journal', ansicht === 'journal');
+q('[data-lesen="' + VORHER + '"]').click();
+q('#jrBearbeiten').click();
 tippe('jrStoerte', 'Nichts');
 q('#jrSpeichern').click();
-pruefe('J10 Speichern auch', ansicht === 'journal' && reflexionNach(VORHER).stoerte === 'Nichts');
-q('[data-reflexion="' + VORHER + '"]').click();
+pruefe('J10 Speichern führt ins Lesen', ansicht === 'lesen' && reflexionNach(VORHER).stoerte === 'Nichts' &&
+  /Nichts/.test(q('#ansicht').textContent));
+hinweisSchliessen();
 q('#zurueckKnopf').click();
-pruefe('J11 der Pfeil auch', ansicht === 'journal');
-q('[data-reflexion="' + VORHER + '"]').click();
+pruefe('J11 und von dort ins Journal', ansicht === 'journal');
+q('[data-lesen="' + VORHER + '"]').click();
 q('#titelHeim').click();
 pruefe('J12 die Überschrift führt nach Hause', ansicht === 'home');
 zeige('journal');
@@ -152,6 +188,39 @@ zeige('reflexion', '2026-10-13');
 pruefe('W3 nur ein Montag ist eine Woche', ansicht === 'home');
 zeige('reflexion');
 pruefe('W4 ohne Woche nach Hause', ansicht === 'home');
+zeige('lesen', '2026-09-07');
+pruefe('W4a ungeschriebenes ist nicht zu lesen: ins Journal', ansicht === 'journal');
+
+// Die Woche wählen: zurück beliebig weit, vor bis zur laufenden.
+state.journal = [reflexionLesen({ woche: '2026-09-28', gut: 'Da', stoerte: '' })];
+zeige('journal');
+q('#jrNeu').click();
+var gutFeld = q('#jrGut');
+tippe('jrGut', 'Vergessen');
+pruefe('W5 eine neue Reflexion hat Pfeile, vor ist gesperrt', reflexionEntwurf.woche === '2026-10-12' &&
+  !!q('#jrFrueher') && q('#jrSpaeter').disabled && !q('#jrSpeichern').disabled);
+q('#jrFrueher').click();
+pruefe('W6 eine Woche zurück, an Ort und Stelle', reflexionEntwurf.woche === '2026-10-05' && q('#jrGut') === gutFeld &&
+  q('#jrGut').value === 'Vergessen' && q('#jrWoche').textContent === 'KW 41 · 5.–11. Oktober' &&
+  /In dieser Woche: 3 von 7/.test(q('#jrZahlen').textContent) && !q('#jrSpaeter').disabled, q('#jrZahlen').textContent);
+q('#jrFrueher').click();
+pruefe('W7 steht die Woche schon: gesagt, Speichern gesperrt, Text bleibt', reflexionEntwurf.woche === '2026-09-28' &&
+  !q('#jrVergeben').hidden && q('#jrSpeichern').disabled && q('#jrGut').value === 'Vergessen');
+q('#jrSpeichern').click();
+pruefe('W8 gesperrt heißt gesperrt', reflexionNach('2026-09-28').gut === 'Da');
+q('#jrSpaeter').click();
+pruefe('W9 weiter: wieder frei', reflexionEntwurf.woche === '2026-10-05' && q('#jrVergeben').hidden && !q('#jrSpeichern').disabled);
+for (var i = 0; i < 60; i++) q('#jrFrueher').click();
+pruefe('W10 zurück ohne Grenze', reflexionEntwurf.woche === tagPlus('2026-10-05', -420), reflexionEntwurf.woche);
+for (i = 0; i < 60; i++) q('#jrSpaeter').click();
+q('#jrSpeichern').click();
+pruefe('W11 gespeichert unter der gewählten Woche', !!reflexionNach('2026-10-05') && reflexionNach('2026-10-05').gut === 'Vergessen' &&
+  !reflexionNach('2026-10-12') && ansicht === 'journal');
+hinweisSchliessen();
+zeige('reflexion', '2026-10-12');
+q('#jrFrueher').click();
+q('#jrAnsehen').click();
+pruefe('W12 «Ansehen» öffnet die geschriebene Woche', ansicht === 'lesen' && lesenWoche === '2026-10-05');
 
 // ── S · Ausgabe ─────────────────────────────────────────────
 uhr(2026, 9, 11);
@@ -161,8 +230,43 @@ zeige('journal');
 pruefe('S1 Geschriebenes bleibt Text', !q('.jr-eintrag img') && !q('.jr-eintrag b') && /<b>fett<\/b>/.test(q('.jr-eintrag').textContent));
 var texte = '';
 ['journal', 'home'].forEach(function (a) { zeige(a); texte += q('#app').textContent; });
+zeige('lesen', MO);
+texte += q('#app').textContent;
+pruefe('S1a auch beim Lesen bleibt es Text', !q('#ansicht img') && /<img src=x>/.test(q('#ansicht').textContent));
 zeige('reflexion', MO);
 texte += q('#app').textContent + alle('textarea').map(function (t) { return t.placeholder; }).join(' ');
 pruefe('S2 auch das Journal duzt', !/\bSie\b|\bIhnen\b|\bIhr(e|en)?\b/.test(texte));
-frisch();
+
+// ── B · Die Bestätigung im Glas ─────────────────────────────
+mitGewohnheit();
+kachel().click();
+tippe('jrGut', 'Gut');
+var knopfFlaeche = q('#jrSpeichern').getBoundingClientRect();
+q('#jrSpeichern').click();
+var huelle = q('body > .tropfen-huelle.glas');
+pruefe('B1 gespeichert: das Glasfenster mit Haken, ohne «OK»', !q('#hinweisBlatt').hidden &&
+  q('#hinweisKarte').classList.contains('bestaetigung') && q('#hinweisKarte').classList.contains('glas') &&
+  !q('#hinweisHaken').hidden && !!q('#hinweisHaken svg') && q('#hinweisOk').hidden &&
+  q('#hinweisKarte').getAttribute('role') === 'status' && q('#hinweisTitel').textContent === 'Gespeichert' &&
+  !/Gespeichert/.test(q('#meldung').textContent));
+pruefe('B2 er quillt aus «Speichern»', !!huelle && knopfFlaeche.width > 0);
+return warten(bestaetigungDauer('Gespeichert', 'Nachzulesen im Journal.') + 100).then(function () {
+  pruefe('B3 und geht von selbst', !q('#hinweisBlatt').classList.contains('offen'));
+  ausbewegt();
+  return warten(30);
+}).then(function () {
+  pruefe('B4 ganz', q('#hinweisBlatt').hidden && !q('body > .tropfen-huelle'));
+  bestaetigen('Gespeichert', '', null);
+  q('#hinweisBlatt').click();
+  pruefe('B5 ein Tipp irgendwohin schließt früher', !q('#hinweisBlatt').classList.contains('offen'));
+  hinweisZeigen('Datei geladen', 'Text', null, null);
+  q('#hinweisBlatt').click();
+  pruefe('B6 ein Hinweis mit «OK» wartet weiter auf «OK»', q('#hinweisBlatt').classList.contains('offen') &&
+    !q('#hinweisOk').hidden && q('#hinweisHaken').hidden && q('#hinweisKarte').getAttribute('role') === 'alertdialog');
+  hinweisSchliessen();
+  pruefe('B7 die Zeit wächst mit dem Text, höchstens vier Sekunden', bestaetigungDauer('Gespeichert', '') < 2000 &&
+    bestaetigungDauer('Angelegt', 'Antippen heißt erledigt, lange drücken öffnet sie.') > 3000 &&
+    bestaetigungDauer('x', new Array(200).join('y')) === 4000);
+  frisch();
+});
 `);
