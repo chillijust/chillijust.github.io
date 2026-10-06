@@ -1,6 +1,6 @@
 # 0006 · Termine im Einzelnen
 
-*2026-10-05 · Bauabschnitt 4 · Version 0.4.0T*
+*2026-10-05 · Bauabschnitt 4 · Version 0.4.0T · ergänzt durch 0023: «Termin an diesem Tag» wird «Hinzufügen»*
 
 ## Ausgangslage
 

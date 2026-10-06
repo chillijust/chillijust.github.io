@@ -152,7 +152,7 @@ return durch().then(function () {
   menueOeffnen();
   var bl = q('#menue .blatt'), kn = q('#menuKnopf').getBoundingClientRect();
   var erst = laeuft(bl) ? bl.getAnimations()[0].effect.getKeyframes()[0] : {};
-  pruefe('D1 das Menü quillt als Tropfen aus dem Knopf', laeuft(bl) && erst.borderRadius === TROPFEN_AUF, erst.borderRadius);
+  pruefe('D1 das Menü quillt als Tropfen aus dem Knopf', laeuft(bl) && erst.borderRadius === TROPFEN && TROPFEN === '50%', erst.borderRadius);
   ausbewegt();
   var br = bl.getBoundingClientRect();
   pruefe('D2 es hängt unter dem Knopf, rechtsbündig', br.top >= kn.bottom && br.top - kn.bottom < 16 &&
@@ -162,7 +162,7 @@ return durch().then(function () {
   var zuBild = bl.getAnimations()[0], zuEnde = zuBild.effect.getKeyframes().slice(-1)[0];
   pruefe('D3a zu ist auf an Dauer gleich und blendet am Knopf aus, statt zu verschwinden',
     zuBild.effect.getTiming().duration === MENUE_DAUER && MENUE_DAUER === 338 && String(zuEnde.opacity) === '0' &&
-    zuEnde.borderRadius === TROPFEN_ZU, zuBild.effect.getTiming().duration + ' ' + zuEnde.opacity);
+    zuEnde.borderRadius === TROPFEN, zuBild.effect.getTiming().duration + ' ' + zuEnde.opacity);
   return durch();
 }).then(function () {
   pruefe('D4 danach ist es weg', q('#menue').hidden && !laeuft(q('#menue .blatt')));
@@ -183,7 +183,7 @@ return durch().then(function () {
   var k = q('#menuKnopf').getBoundingClientRect();
   pruefe('D9 zurück fließt die Ansicht als Tropfen in den Menüknopf', ansicht === 'home' && !!h && laeuft(h) &&
     !!h.querySelector('.geist'));
-  pruefe('D10 mit dem Bauch voran, die Spitze unten links', z.borderRadius === TROPFEN_ZU, z.borderRadius);
+  pruefe('D10 der Tropfen ist rund, ohne Spitze (ADR 0023)', z.borderRadius === '50%', z.borderRadius);
   pruefe('D10a um 35 % schneller als zuerst', h.getAnimations()[0].effect.getTiming().duration === 416);
   pruefe('D11 und landet auf dem Knopf', Math.abs(parseFloat(z.left) + parseFloat(z.width) / 2 - (k.left + k.width / 2)) < 2 &&
     Math.abs(parseFloat(z.top) + parseFloat(z.height) / 2 - (k.top + k.height / 2)) < 2);

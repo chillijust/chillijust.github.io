@@ -113,8 +113,9 @@ tag(HEUTE).click();
 q('[data-nachtrag="A"]').click();
 pruefe('N8 heute nachgetragen ist wie abgehakt', q('[data-haken="A"]').getAttribute('aria-pressed') === 'true');
 tag(tagPlus(HEUTE, 1)).click();
-pruefe('N9 ein künftiger Tag läßt sich nicht abhaken', !q('[data-nachtrag]') &&
-  /kommt noch/.test(q('#kalLeiste').textContent));
+pruefe('N9 ein künftiger Tag läßt sich nicht abhaken, zeigt aber, was kommt (ADR 0023)', !q('[data-nachtrag]') &&
+  alle('#kalLeiste .kal-zeile.kommt').length === 3 && /2 Gewohnheiten sind an diesem Tag dran/.test(q('#kalLeiste').textContent),
+  q('#kalLeiste').textContent);
 pruefe('N10 auch nicht von Hand', umschalten('A', tagPlus(HEUTE, 1)) === false);
 pruefe('N11 sieben Tage zurück geht', umschalten('B', vor(7)) === true && umschalten('B', vor(7)) === true);
 pruefe('N12 acht nicht', umschalten('B', vor(8)) === false);

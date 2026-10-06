@@ -190,7 +190,8 @@ return durch().then(function () {
   frisch();
   zeige('home');
   knopf.click();
-  var auf = q('body > .tropfen-huelle');
+  // Der Rückweg von eben tropft vielleicht noch in den Menüknopf — gemeint ist der neueste.
+  var auf = alle('body > .tropfen-huelle').pop();
   pruefe('U0 das Blatt tropft als Glas auf (ADR 0022)', !!auf && auf.classList.contains('glas'));
   return durch();
 }).then(function () {

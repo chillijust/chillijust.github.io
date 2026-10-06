@@ -13,9 +13,9 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0003](0003-langer-druck-kalender-nachtragen.md) | Langer Druck statt Pfeil, Kalender auf dem Dashboard, Nachtragen | gilt; Lage und Tönung des Kalenders abgelöst durch 0005 |
 | [0004](0004-abgewoehnen-im-einzelnen.md) | Abgewöhnen: frei seit, Rekord, Stärke, Rückfall und die Welle im Einzelnen | gilt |
 | [0005](0005-chili-und-kalender-eine-karte.md) | Chili und Kalender in einer Karte, Punkte statt Tönung | gilt |
-| [0006](0006-termine-im-einzelnen.md) | Termine: Felder, Wiederholung, Erinnerung, Tagesliste | gilt |
+| [0006](0006-termine-im-einzelnen.md) | Termine: Felder, Wiederholung, Erinnerung, Tagesliste | gilt; «Hinzufügen» statt «Termin an diesem Tag» (0023) |
 | [0007](0007-tropfen-statt-aufploppen.md) | Tropfen statt Aufploppen: Geist, Feder, Zoom aus dem Getippten | gilt; Menü und Schrumpfen in den Menüknopf abgelöst durch 0008 |
-| [0008](0008-tropfenform-menue-kalenderwechsel.md) | Tropfenform, Menü unter dem Knopf, Woche \| Monat hält den Tag | gilt; langer Druck tropft auch aus Kacheln (0020) |
+| [0008](0008-tropfenform-menue-kalenderwechsel.md) | Tropfenform, Menü unter dem Knopf, Woche \| Monat hält den Tag | gilt; langer Druck tropft auch aus Kacheln (0020); Spitze abgelöst durch 0023 |
 | [0009](0009-kalender-export-im-einzelnen.md) | Kalender-Export: schwebende Zeiten, Teilen und Laden, Erinnerung der Gewohnheit | gilt; Teilen entfällt mit 0013 |
 | [0010](0010-chilli-journal-und-heute.md) | Der Name heißt «Chilli Journal», «Heute» führt den Kalender nach Hause | gilt |
 | [0011](0011-was-schon-im-kalender-steht.md) | Was schon im Kalender steht, geht nicht noch einmal hinaus | gilt; ergänzt durch 0012 |
@@ -23,7 +23,7 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0013](0013-nur-laden-hinweis-tropft-wie-ansichten.md) | Nur «Als Datei laden»; der Hinweis tropft wie die Ansichten | gilt |
 | [0014](0014-hinweis-aus-glas.md) | Der Hinweis ist aus Glas | gilt |
 | [0015](0015-heatmap-im-rueckblick.md) | Heatmap: sechs Monate, Tageszustand; Raster wählt die Woche, Streifen den Tag | gilt |
-| [0016](0016-vom-rand-wischen.md) | Vom linken Rand wischen heißt zurück | gilt |
+| [0016](0016-vom-rand-wischen.md) | Vom linken Rand wischen heißt zurück | gilt; auf dem Dashboard öffnet er das Menü (0023) |
 | [0017](0017-journal-wochenreflexion.md) | Journal: eine Wochenreflexion je Woche, sonntags auf dem Dashboard | gilt; Lesen, Löschen und Nachholen geändert durch 0018 |
 | [0018](0018-bestaetigung-lesen-woche-waehlen.md) | Bestätigung im Glas, Reflexion lesen, Woche wählen | gilt |
 | [0019](0019-alle-meldungen-im-glas.md) | Alle Meldungen im Glas | gilt |
@@ -31,3 +31,4 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0021](0021-ticketblatt-unten-alle-tickets.md) | Das Ticketblatt steht unten, mit «Alle Tickets» | gilt |
 | [0022](0022-feinschliff-leer-jubel-geist.md) | Feinschliff: Leerzustände, Jubel über den Haken hinaus, Zeilen gehen als Geist | gilt |
 | [0022](0022-ticketblatt-aus-glas.md) | Das Ticketblatt ist aus Glas | gilt |
+| [0023](0023-kalendertag-hinzufuegen-runder-tropfen.md) | Kalender: Heute als Pille, heute im Kreis, Kalenderwochen, kommende Tage, «Hinzufügen» fragt; Welle abbrechen; Wisch öffnet das Menü; «Allgemein»; der Tropfen ist rund | gilt |

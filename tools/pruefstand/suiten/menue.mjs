@@ -104,7 +104,12 @@ wisch(10, 400, 200, 400);
 pruefe('W5 bei offenem Hinweis schweigt die Geste', ansicht === 'einstellungen');
 hinweisSchliessen();
 frisch();
+wisch(10, 300, 110, 500);
+pruefe('W6b schräg auf dem Dashboard: kein Menü', q('#menue').hidden);
 wisch(10, 400, 200, 400);
-pruefe('W6 auf dem Dashboard bleibt alles, wie es ist', ansicht === 'home');
+pruefe('W6 auf dem Dashboard öffnet der Wisch das Menü (ADR 0023)', ansicht === 'home' && !q('#menue').hidden &&
+  q('#menue').classList.contains('offen'));
+wisch(10, 400, 200, 400);
+pruefe('W6a bei offenem Menü schweigt er', ansicht === 'home' && q('#menue').classList.contains('offen'));
 frisch();
 `);

@@ -26,7 +26,6 @@ function laden() {
   URL.createObjectURL = urlWar;
 }
 // Der Browser kürzt Ecken («0% 50% 50% 50%» wird «0% 50% 50%»): so vergleichen.
-function ecken(r) { var d = document.createElement('div'); d.style.borderRadius = r; return d.style.borderRadius; }
 function token(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
 function offen() { return !q('#hinweisBlatt').hidden && q('#hinweisBlatt').classList.contains('offen'); }
 function clips(el) {
@@ -59,7 +58,7 @@ pruefe('H2a auch der Tropfen ist Glas, der Geist darin klar', !!huelle && huelle
   /rgba\(0, 0, 0, 0\)|transparent/.test(getComputedStyle(innen).backgroundColor));
 pruefe('H2 er quillt mit dem Tropfen der Ansichten aus «Als Datei laden»', laeuft(huelle) &&
   dauer(huelle) === HINWEIS_DAUER && HINWEIS_DAUER === Math.round(TROPFEN_DAUER * 0.4) && bilder(huelle).length === 5 && Number(erstes.opacity) === 0 &&
-  erstes.borderRadius === TROPFEN_AUF && Math.abs(parseFloat(erstes.left) + parseFloat(erstes.width) / 2 -
+  erstes.borderRadius === TROPFEN && Math.abs(parseFloat(erstes.left) + parseFloat(erstes.width) / 2 -
   (vorher.left + vorher.width / 2)) < 2 && letztes.borderRadius === '18px' && karte.style.opacity === '0',
   JSON.stringify([erstes, letztes]));
 pruefe('H3 die Kachel hat ihre Knöpfe schon zugetropft', q('#exWege').hidden && !q('#exLaden').getClientRects().length &&
@@ -90,18 +89,18 @@ return durch().then(function () {
   q('#hinweisOk').click();
   var zu = q('body > .tropfen-huelle'), z = q('#exZuletzt').getBoundingClientRect(), ende = bilder(zu)[3] || {};
   pruefe('H8 «OK» schließt sofort, der Tropfen fließt in «Zuletzt»', !offen() && laeuft(zu) &&
-    dauer(zu) === HINWEIS_DAUER && (bilder(zu)[0] || {}).borderRadius === '18px' && ende.borderRadius === ecken(tropfenSpitzeZu(r0, z)) &&
+    dauer(zu) === HINWEIS_DAUER && (bilder(zu)[0] || {}).borderRadius === '18px' && ende.borderRadius === '50%' &&
     Math.abs(parseFloat(ende.top) + parseFloat(ende.height) / 2 - (z.top + z.height / 2)) < 2 &&
     karte.style.opacity === '0' && laeuft(q('#exZuletzt')) &&
     getComputedStyle(q('#hinweisBlatt')).pointerEvents === 'none', JSON.stringify(ende));
   var st = bilder(zu), form = (st[2] || {}).borderRadius;
   pruefe('H8a kurz vor dem Ziel ist er schon ein Tropfen und bleibt es', st.length === 5 &&
-    st[2].offset === 0.4 && /0%/.test(form) && form === st[3].borderRadius && form === st[4].borderRadius &&
+    st[2].offset === 0.4 && form === '50%' && form === st[3].borderRadius && form === st[4].borderRadius &&
     st[3].offset === 0.86 && parseFloat(st[2].width) < r0.width * 0.65, JSON.stringify(st.map(function (b) {
       return [b.offset, b.borderRadius, b.width]; })));
-  pruefe('H8b die Spitze zeigt vom Ziel weg', form === ecken(tropfenSpitzeZu(r0, z)) &&
-    tropfenSpitzeZu({ left: 0, top: 0, width: 10, height: 10 }, { left: 100, top: -100, width: 10, height: 10 }) === TROPFEN_ZU &&
-    tropfenSpitzeZu({ left: 0, top: 0, width: 10, height: 10 }, { left: -100, top: 100, width: 10, height: 10 }) === '50% 0% 50% 50%');
+  pruefe('H8b der Tropfen ist rund, keine Spitze zeigt irgendwohin (ADR 0023)', st.every(function (b) {
+    return !/(^|\s)0%/.test(b.borderRadius);
+  }) && typeof tropfenSpitzeZu === 'undefined');
   pruefe('H8c die Ansichten behalten ihren Takt', TROPFEN_ZU_TAKT.join() === '0.38,0.7,0.9');
   pruefe('H8d auch zurück tropft er als Glas', zu.classList.contains('glas'));
   return durch();

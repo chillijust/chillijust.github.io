@@ -50,7 +50,7 @@ function fall(name, sel, ziel) {
       var b = bilder(), erst = b[0] || {};
       pruefe(name + '1 lange drücken öffnet', ansicht === ziel, ansicht);
       pruefe(name + '2 als Tropfen aus der Stelle unter dem Finger', !!b.length && nah(mitte(erst), p) &&
-        parseFloat(erst.width) === 44 && erst.borderRadius === TROPFEN_AUF, JSON.stringify(erst) + ' ' + JSON.stringify(p));
+        parseFloat(erst.width) === 44 && erst.borderRadius === TROPFEN, JSON.stringify(erst) + ' ' + JSON.stringify(p));
       return durch();
     }).then(function () {
       zurueckGehen();

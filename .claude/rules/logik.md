@@ -24,7 +24,8 @@ Gilt für die Gewohnheiten in `index.html`. Begründungen in ADR 0002 und im Pfl
   und Stärke entstehen in `lasterAuswerten(a, nun)` (ADR 0004).
 - **Der Rekord schließt die laufende Strecke ein; die Stärke zählt heute frei, solange kein
   Rückfall kam.** Ein Rückfall geht nur über `rueckfallEintragen`, ein gewonnener Drang nur
-  über `welleGewonnen` — es prüft, daß die zehn Minuten herum sind.
+  über `welleGewonnen` — es prüft, daß die zehn Minuten herum sind. `welleAbbrechen` beendet
+  sie, ohne etwas zu zählen (ADR 0023).
 - **`gefeiert` ist ein Merkzettel, keine Rechnung**: je Laster der Rückfall, nach dem der
   neue Rekord schon gefeiert ist; gesetzt nur in `rekordFeiern` (ADR 0022).
 - **Termine liegen über `terminAm(t, k)`**, nie über eigene Datumsrechnung: monatlich

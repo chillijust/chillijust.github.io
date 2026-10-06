@@ -10,7 +10,7 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 ## Farben und Darstellung
 
 - **Farben nur über Tokens** (`--grund`, `--text`, `--text-2`, `--flaeche`, `--flaeche-2`,
-  `--linie`, `--akzent`, `--erledigt`, `--termin`, `--knopf`, `--knopf-text`, für Glas
+  `--linie`, `--akzent`, `--auf-akzent`, `--erledigt`, `--termin`, `--knopf`, `--knopf-text`, für Glas
   `--glas`, `--glas-kante`, `--glas-licht`, `--glas-schleier`). Keine Hexzahl
   außerhalb der drei Paletten-Blöcke und `GRUND` im Skript.
 - **Die dunkle Palette steht zweimal gleich**: unter `prefers-color-scheme: dark` für
@@ -21,7 +21,8 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   das Attribut und `theme-color`. Der Sonne/Mond-Schalter legt fest; zurück zu
   «Automatisch» nur über die Einstellungen.
 - **Akzent (Chili, `#D97757`) ist kein Schriftgrund** — weiße Schrift darauf hat 3,1 : 1.
-  Hauptknöpfe nehmen `--knopf`. Der Akzent gehört Symbolen, Fokus, Ring und Jubel.
+  Hauptknöpfe nehmen `--knopf`. Der Akzent gehört Symbolen, Fokus, Ring und Jubel — und, auf
+  Wunsch, der Pille «Heute» und dem Kreis um den heutigen Tag; Schrift darin `--auf-akzent` (ADR 0023).
 - **Grün heißt erledigt, Blau heißt Termin** — die beiden Signalfarben tragen keine
   andere Bedeutung.
 
@@ -52,7 +53,9 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   *Drang* und *Rückfall* sind eigene Knöpfe darunter (ADR 0004).
 - **Ein Termin ist eine Zeile mit blauem Strich** (`zeichneTerminZeile`), auf dem
   Dashboard wie in der Tagesliste; im Kalender trägt sein Tag **einen** blauen Punkt, vorn
-  (ADR 0006). Die Tagesansicht ist die Liste unter dem Kalender, keine eigene Ansicht.
+  (ADR 0006). Die Tagesansicht ist die Liste unter dem Kalender, keine eigene Ansicht. Ein
+  kommender Tag zeigt dort, was dran ist, ohne Haken; «Hinzufügen» fragt erst — Termin,
+  Gewohnheit, Abgewöhnen (ADR 0023). Vorn steht in Woche und Monat die Kalenderwoche.
 - **Der Kalender-Export** hat einen Weg, «Als Datei laden» — Teilen kam am Gerät nicht im
   Kalender an (ADR 0013); eine Gewohnheit trägt dort einen grauen Strich, keinen blauen. Was aus dem Export geöffnet
   wird, kehrt über `rueckZiel` dorthin zurück (ADR 0009).
@@ -65,7 +68,8 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   stehen darunter groß; ein Tag nennt sich und ändert nichts (ADR 0015).
 - **Vom linken Rand wischen ist der Rückweg** (`wischBeginnen`/`wischEnden`): nur aus den
   äußersten 26 px, wirkt beim Loslassen über `zurueckGehen()`, schweigt bei offenem Menü
-  oder Hinweis (ADR 0016). Wer den Rückweg ändert, ändert `zurueckGehen()`.
+  oder Hinweis (ADR 0016). Wer den Rückweg ändert, ändert `zurueckGehen()`. Auf dem
+  Dashboard öffnet derselbe Wisch das Menü (ADR 0023).
 - **Die Wochenreflexion steht nur sonntags auf dem Dashboard**, unter den fälligen
   Gewohnheiten; geschrieben wird außerdem jederzeit über das Journal, auch für vergangene
   Wochen, nie für eine kommende (ADR 0017, 0018). Fertiges öffnet zum Lesen (`data-lesen`),
@@ -120,7 +124,8 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 - **Bewegt wird über `bewegt()` mit der `FEDER`**; CSS nimmt `var(--feder, ease)`. Ausnahme: Tropfen
   schwingen nicht über (ADR 0008).
 - **Was aus einem runden Knopf kommt oder in ihn geht, ist ein Tropfen** (`tropfenAuf`,
-  `tropfenZu`, `tropfenQuelle`) — Bauch voran, Spitze hinten. Kacheln und Zeilen zoomen —
+  `tropfenZu`, `tropfenQuelle`) — rund (`TROPFEN`), ohne Spitze; zurück fließt er, ist die
+  Herkunft fort, in den Menüknopf (ADR 0023). Kacheln und Zeilen zoomen —
   außer beim langen Druck: dann tropft es aus dem Fingerpunkt (`punktFlaeche`, ADR 0020).
 - **Das Menü klappt unter seinem Knopf auf** (`menueOeffnen`, `blattLegen`), nie als Blatt
   von unten. Schließen ist Öffnen rückwärts — gleiche Dauer, gespiegelte Bilder.
