@@ -1,6 +1,6 @@
 # 0018 · Bestätigung im Glas, Reflexion lesen, Woche wählen
 
-*2026-10-06 · Abnahme von 0.7.0T · Version 0.7.0T2, nachgebessert 0.7.0T3 · ändert 0013, 0017*
+*2026-10-06 · Abnahme von 0.7.0T · Version 0.7.0T2, nachgebessert 0.7.0T3, frei mit 0.7.0 · ändert 0013, 0017*
 
 ## Ausgangslage
 
