@@ -53,6 +53,7 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   wieder weg, auch wenn der Übergang sein Ende nie meldet (ADR 0030).
 - **Das Menü** folgt dem Pflichtenheft in Reihenfolge und Wortlaut. Ein Eintrag ohne `ziel`
   trägt «bald»; wer ihn baut, setzt `ziel` und trägt die Ansicht in `ANSICHTEN` ein.
+- **Woche | Monat ist ein Schalter**: Jeder Tipp wechselt, auch auf das Gewählte (ADR 0031).
 - **Die Kachel kennt zwei Gesten**: kurz tippen hakt ab, lange drücken (`langDruecken`)
   öffnet die Gewohnheit. Ein zweites Ziel auf der Kachel gibt es nicht (ADR 0003).
 - **Die Abgewöhnen-Kachel** hat nichts abzuhaken: Antippen oder lange drücken öffnet sie;
@@ -94,7 +95,8 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   einen Entwurf weg (ADR 0020). `#app` hält dem Knopf unten Platz frei. Das Blatt steht
   **unten** und rückt mit der Tastatur hoch (`ticketTastatur`); «Alle Tickets» im Kopf
   zeigt die Liste im selben Blatt, mit Zurück, ohne den Entwurf zu verlieren — genau so hoch
-  wie das Ticket davor, mehr rollt darin (`ticketHoehe`, ADR 0028); ihre Zeilen tropfen
+  wie das Ticket davor, mehr rollt darin (`ticketHoehe`, ADR 0028) — nie die Karte selbst: Der Kopf steht, nur
+  `.tk-rolle` rollt, sonst schiebt sich der Inhalt über die Glaskante (ADR 0031); ihre Zeilen tropfen
   langsam und je 160 ms später auf; im Kopf führt «Ticketseite» zur Seite Tickets
   (ADR 0021, 0025–0027). Der Fließtext ist leer so
   hoch wie der Titel und wächst bis drei Zeilen; gemessen wird erst, wenn das Blatt steht. Es ist aus Glas, wie Hinweis

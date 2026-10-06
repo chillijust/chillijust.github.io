@@ -1301,11 +1301,28 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
   width: 100%;
   max-width: 536px;
   max-height: 100%;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding: 18px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   border-radius: 18px;
   /* Glas wie Hinweis und Meldung (ADR 0024): Tönung, Unschärfe und Kante setzt .glas. */
+}
+/* Die Kante des Glases ist ein innerer Schatten, und der liegt unter allem, was
+   in der Karte steht: Rollte die Karte selbst, schöbe sich ihr Inhalt über die
+   Kante. Darum steht der Kopf, und nur was darunter liegt, rollt — mit Abstand
+   zur Kante und an ihr ausgeblendet (ADR 0031). */
+.ticket-karte > .tk-kopf { flex: none; margin: 14px 16px 0 20px; padding-bottom: 8px; }
+.ticket-karte > .tk-kopf-liste { margin-left: 10px; }
+.tk-rolle {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0 2px 2px;
+  padding: 10px 14px 14px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 0 0 16px 16px;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 12px, black calc(100% - 12px), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, black 12px, black calc(100% - 12px), transparent 100%);
 }
 .ticket-karte h2 { margin: 0; font-family: var(--sans); font-size: 18px; font-weight: 600; }
 .tk-kopf { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: -4px 0 8px 4px; }
@@ -5503,12 +5520,12 @@ function zeichneTicketListe() {
   return '<div class="tk-kopf tk-kopf-liste"><button type="button" class="rund" id="tkListeZurueck" aria-label="Zurück">' +
       ICON.zurueck + '</button><h2 id="tkKopf">Alle Tickets</h2>' +
       '<button type="button" class="tk-alle" id="tkZurSeite">Ticketseite</button></div>' +
-    (offen.length ? '<div class="tk-liste-blatt">' + offen.map(zeichneTicketZeile).join('') + '</div>' +
+    '<div class="tk-rolle">' + (offen.length ? '<div class="tk-liste-blatt">' + offen.map(zeichneTicketZeile).join('') + '</div>' +
       '<div class="knopfreihe"><button type="button" class="knopf zart" id="tkListeKopieren">' +
         (offen.length === 1 ? 'Ticket kopieren' : 'Alle ' + offen.length + ' kopieren') + '</button></div>'
       : '<p class="klein tk-leer">Nichts offen.</p>') +
     (ab.length ? '<p class="tk-etikett">Abgegeben</p><div class="tk-liste-blatt gedimmt">' +
-      ab.map(zeichneTicketZeile).join('') + '</div>' : '');
+      ab.map(zeichneTicketZeile).join('') + '</div>' : '') + '</div>';
 }
 
 // Wechselt der Inhalt des Blatts, wächst oder schrumpft es weich in die neue
@@ -5524,7 +5541,7 @@ function ticketBlattWechseln(liste) {
   karte.innerHTML = zeichneTicketBlatt();
   bindeTicketBlatt();
   wahlenSetzen();
-  karte.scrollTop = 0;
+  karte.querySelector('.tk-rolle').scrollTop = 0;
   var h1 = karte.offsetHeight;
   var wechselt = Math.abs(h1 - h0) > 1;
   if (wechselt) bewegt(karte, [{ height: px(h0) }, { height: px(h1) }], { dauer: TK_WECHSEL, kurve: TROPFEN_KURVE });
@@ -5545,7 +5562,7 @@ function zeichneTicketBlatt() {
   var e = ticketEntwurf;
   return '<div class="tk-kopf"><h2 id="tkKopf">' + (e.id ? 'Ticket' : 'Neues Ticket') + '</h2>' +
       '<button type="button" class="tk-alle" id="tkAlle">Alle Tickets</button></div>' +
-    '<div class="wahl" role="group" aria-label="Ticketart">' + [['fehler', 'Fehler'], ['wunsch', 'Wunsch']].map(function (a) {
+    '<div class="tk-rolle"><div class="wahl" role="group" aria-label="Ticketart">' + [['fehler', 'Fehler'], ['wunsch', 'Wunsch']].map(function (a) {
       return '<button type="button" data-tkart="' + a[0] + '" aria-pressed="' + (e.art === a[0] ? 'true' : 'false') +
         '">' + a[1] + '</button>';
     }).join('') + '</div>' +
@@ -5565,7 +5582,8 @@ function zeichneTicketBlatt() {
       '<button type="button" class="knopf zart" id="tkAbbrechen">' + (e.id ? 'Zurück' : 'Verwerfen') + '</button>' +
       '<button type="button" class="knopf" id="tkSichern">Sichern</button>' +
     '</div>' +
-    (e.id ? '<div class="knopfreihe"><button type="button" class="knopf zart" id="tkLoeschen">Ticket löschen</button></div>' : '');
+    (e.id ? '<div class="knopfreihe"><button type="button" class="knopf zart" id="tkLoeschen">Ticket löschen</button></div>' : '') +
+    '</div>';
 }
 
 function bindeTicketListe() {
@@ -5685,7 +5703,7 @@ function ticketBlattOeffnen(quelle, id, flaeche) {
   blatt.hidden = false;
   void blatt.offsetWidth;
   blatt.classList.add('offen');
-  karte.scrollTop = 0;
+  karte.querySelector('.tk-rolle').scrollTop = 0;
   // Verborgen hat das Feld keine Höhe zu messen; also erst jetzt (ADR 0027).
   textWachsen($('tkText'));
   $('ticketKnopf').setAttribute('aria-expanded', 'true');
@@ -6060,6 +6078,8 @@ function bindeKalender() {
   if ($('heuteKnopf')) $('heuteKnopf').addEventListener('click', zuHeute);
   // Woche | Monat: Der gewählte Tag bleibt, und mit ihm seine Liste. Der Monat
   // quillt aus der Woche, die Woche zieht sich aus dem Monat zusammen (ADR 0008).
+  // Ein Schalter, kein Wahlfeld: Wer das Gewählte trifft, will trotzdem
+  // wechseln — am Gerät traf man es ständig (ADR 0031).
   alleIn('[data-kalender]').forEach(function (b) {
     b.addEventListener('click', function () {
       var wahl = state.kalender === 'woche' ? 'monat' : 'woche';
@@ -6077,8 +6097,6 @@ function bindeKalender() {
   });
   $('kalZurueck').addEventListener('click', function () { kalBlaettern(kalVersatz - 1); });
   $('kalVor').addEventListener('click', function () { kalBlaettern(kalVersatz + 1); });
-  // Ein Schalter, kein Wahlfeld: Wer das Gewählte trifft, will trotzdem
-  // wechseln — am Gerät traf man es ständig (ADR 0031).
   if ($('kalHeute')) $('kalHeute').addEventListener('click', function () { kalBlaettern(0); });
   // Auf: ein Tropfen fällt vom Tag in die Liste. Zu: die Liste fließt zurück.
   alleIn('[data-kaltag]').forEach(function (b) {

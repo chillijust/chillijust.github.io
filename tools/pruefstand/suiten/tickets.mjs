@@ -252,6 +252,28 @@ return durch().then(function () {
   // ADR 0028: Die Liste ist genau so hoch wie das Ticket davor, ohne Wachsen.
   pruefe('U9d «Alle Tickets» ist genau so hoch wie die Ticketerstellung', Math.abs(listeHoehe - formHoehe) < 1 && !hoehe,
     [formHoehe, listeHoehe].join());
+  // ADR 0031: Die Glaskante ist ein innerer Schatten — er liegt unter allem,
+  // was in der Karte steht. Rollt die Karte selbst, schiebt sich der Inhalt
+  // über ihre Kante. Gerollt wird darum innen, der Kopf steht, und was rollt,
+  // bleibt mit Abstand innerhalb der Kante und blendet an ihr aus.
+  for (var n = 4; n < 30; n++) state.tickets.push(ticketLesen({ id: 'x' + n, art: 'fehler', titel: 'Viel ' + n, erstellt: 10 + n }));
+  ticketBlattWechseln(true);
+  ausbewegt();
+  var karte = q('#ticketKarte'), rolle = q('#ticketKarte .tk-rolle'), kr = karte.getBoundingClientRect();
+  pruefe('U9h die Karte selbst rollt nicht, ihr Inneres schon', karte.scrollHeight <= karte.clientHeight + 1 &&
+    !!rolle && rolle.scrollHeight > rolle.clientHeight, [karte.scrollHeight, karte.clientHeight].join());
+  var kopfVor = q('#tkListeZurueck').getBoundingClientRect().top;
+  rolle.scrollTop = 200;
+  var rr = rolle.getBoundingClientRect();
+  pruefe('U9i gerollt bleibt der Kopf mit Zurück stehen', q('#tkListeZurueck').getBoundingClientRect().top === kopfVor &&
+    !rolle.contains(q('#tkListeZurueck')), kopfVor);
+  pruefe('U9j was rollt, bleibt innerhalb der Kante', rr.left >= kr.left + 1 && rr.right <= kr.right - 1 &&
+    rr.bottom <= kr.bottom - 1 && rr.top > kr.top + 1, [rr.left - kr.left, kr.right - rr.right, kr.bottom - rr.bottom].join());
+  pruefe('U9k und blendet an ihr aus, statt sie zu überdecken', /gradient/.test(getComputedStyle(rolle).webkitMaskImage ||
+    getComputedStyle(rolle).maskImage || ''));
+  state.tickets = state.tickets.slice(0, 3);
+  ticketBlattWechseln(true);
+  ausbewegt();
   var seite = q('#tkZurSeite');
   pruefe('U9b im Kopf der Liste führt «Ticketseite» zur Seite Tickets, groß genug', !!seite &&
     seite.textContent === 'Ticketseite' && seite.getBoundingClientRect().height >= 44 &&
@@ -275,10 +297,10 @@ return durch().then(function () {
   var vorher = state.tickets;
   state.tickets = vorher.concat(viele);
   ticketBlattWechseln(true);
-  var karte = q('#ticketKarte');
+  var karte = q('#ticketKarte'), rolle = q('#ticketKarte .tk-rolle');
   pruefe('U9e auch bei vielen Tickets bleibt die Höhe, die Liste rollt darin',
-    Math.abs(karte.getBoundingClientRect().height - formHoehe) < 1 && karte.scrollHeight > karte.clientHeight + 20,
-    [formHoehe, karte.getBoundingClientRect().height, karte.scrollHeight].join());
+    Math.abs(karte.getBoundingClientRect().height - formHoehe) < 1 && rolle.scrollHeight > rolle.clientHeight + 20,
+    [formHoehe, karte.getBoundingClientRect().height, rolle.scrollHeight].join());
   q('#tkListeZurueck').click();
   pruefe('U9f zurück im Ticket hat das Blatt wieder seine eigene Höhe', karte.style.height === '');
   state.tickets = vorher;
