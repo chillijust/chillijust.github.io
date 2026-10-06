@@ -61,8 +61,11 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 - **Was live läuft, schreibt `takt()` an Ort und Stelle** (`[data-frei]`,
   `[data-wellerest]`, der Ring der Welle) — kein `render()` im Sekundentakt.
 - **Der Rückblick** (`zeichneHeatmap`) steht über «Stand» in der Gewohnheit und im Abgewöhnen:
-  26 Wochen, getönt nach dem Zustand des Tages; das Raster ist **ein** Ziel, ein Tipp nennt
-  den Tag und ändert nichts (ADR 0015).
+  26 Wochen, getönt nach dem Zustand des Tages. Das Raster wählt nur die Woche, die Tage
+  stehen darunter groß; ein Tag nennt sich und ändert nichts (ADR 0015).
+- **Vom linken Rand wischen ist der Rückweg** (`wischBeginnen`/`wischEnden`): nur aus den
+  äußersten 26 px, wirkt beim Loslassen über `zurueckGehen()`, schweigt bei offenem Menü
+  oder Hinweis (ADR 0016). Wer den Rückweg ändert, ändert `zurueckGehen()`.
 - **Eine neue Ansicht** ist ein Eintrag in `ANSICHTEN` (`titel`, `zeichnen`), ihre Ereignisse
   hängen in `bindeAnsicht()` — nie als Attribut.
 

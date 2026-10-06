@@ -1,6 +1,6 @@
 # 0015 · Die Heatmap: sechs Monate, Tageszustand, nur ansehen
 
-*2026-10-06 · Bauabschnitt 6, erster Teil · Version 0.6.0T*
+*2026-10-06 · Bauabschnitt 6, erster Teil · Version 0.6.0T, Wochenstreifen 0.6.0T2*
 
 ## Ausgangslage
 
@@ -20,20 +20,28 @@ Gewohnheit mit Stand, Rhythmus, Erinnerung und Archivieren (ADR 0003).
   verpaßt blasse Chili (wie die Warnung «Heute nicht wieder»), nicht dran Fläche, heute
   offen ein Ring, vor dem Anlegen blaß, Zukunft unsichtbar. «x-mal pro Woche» verpaßt
   keinen Tag. Abgewöhnen: frei grün, Tag mit Rückfall blasse Chili, vor dem Start blaß.
-- **Antippen nennt den Tag**, ändert nichts: «Mo, 12. Okt. · verpasst» in der Zeile unter
-  der Legende. Ohne Wahl steht dort die Summe («12 von 15 fälligen Tagen erledigt.»,
-  «43 Tage frei, 1 mit Rückfall.»). Nachgetragen wird weiter im Kalender des Dashboards.
-- **Das ganze Raster ist ein Ziel**, kein Feld einzeln: Ein Tag ist rund 11 px breit, weit
-  unter 44 px. Der Finger darf waagerecht darüberstreichen (`touch-action: pan-y`,
-  `elementFromPoint`), senkrecht blättert die Seite.
+- **Das Raster wählt die Woche, der Streifen den Tag** (0.6.0T2). Ein Tag ist im Raster
+  rund 11 px breit, weit unter 44 px. Ein Tipp ins Raster trifft darum die Spalte, deren
+  Mitte am nächsten liegt; ein Rahmen fährt um sie. Darunter steht die Woche als Streifen
+  mit sieben Tagen (≥ 44 px, Wochentag, Zahl, Farbfeld), ‹ › blättern wochenweise, ein
+  gewählter Tag wandert als derselbe Wochentag mit. Geöffnet wird bei der laufenden Woche.
+- **Ein Tag nennt sich**, ändert nichts: «Mo, 12. Okt. · verpasst» in der Zeile darunter,
+  nochmal getippt steht wieder die Summe («12 von 15 fälligen Tagen erledigt.», «43 Tage
+  frei, 1 mit Rückfall.»). Nachgetragen wird weiter im Kalender des Dashboards.
+- **Die Woche wechselt an Ort und Stelle** (`hmWocheWaehlen`), ohne `render()` — das
+  Formular darunter bleibt, wie es ist.
+
+**Verworfen (0.6.0T):** Felder einzeln antippen und mit dem Finger über das Raster
+streichen (`touch-action: pan-y`). Am Gerät traf der Finger das gewünschte Feld nicht, und
+Streichen und Blättern kamen sich in die Quere.
 
 ## Begründung
 
 Der Zustand ist ehrlicher als eine Stärke-Intensität und auf einen Blick lesbar; die
 Stärke steht ohnehin als Zahl darunter. Sechs Monate reichen, um die 66 Gelegenheiten bis
-zur Automatik zu sehen, und kommen ohne waagerechtes Wischen aus. Ein Tipp, der nur
-anzeigt, macht das Durchsehen gefahrlos — eine versehentliche Änderung in einem Raster
-aus 11-px-Feldern wäre kaum zu bemerken.
+zur Automatik zu sehen, und kommen ohne waagerechtes Wischen aus. Raster und Streifen
+halten beides: den Überblick über das Halbjahr und Ziele, die die 44-px-Regel einhalten.
+Ein Tipp, der nur anzeigt, macht das Durchsehen gefahrlos.
 
 ## Folgen
 

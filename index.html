@@ -760,7 +760,9 @@ button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
 
 /* ── Rückblick: Heatmap ────────────────────────────────────────
    Spalten sind Wochen, Zeilen Mo–So. Grün heißt erledigt (beim Abgewöhnen:
-   frei), blasse Chili verpaßt (Rückfall) — wie die Warnung der Kachel. */
+   frei), blasse Chili verpaßt (Rückfall) — wie die Warnung der Kachel.
+   Das Raster ist Überblick und wählt nur die Woche; die Tage darunter sind
+   die Ziele für den Finger (ADR 0015). */
 .kachel.hm { padding: 16px 14px 12px; }
 .hm-raster {
   display: grid;
@@ -768,7 +770,8 @@ button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
   grid-template-rows: auto repeat(7, auto);
   grid-template-columns: auto repeat(26, minmax(0, 1fr));   /* 26 = HM_WOCHEN */
   gap: 2px;
-  touch-action: pan-y;
+  position: relative;
+  cursor: pointer;
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
@@ -789,6 +792,15 @@ button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
 .hm-z.zukunft { visibility: hidden; }
 .hm-z.offen { background: transparent; box-shadow: inset 0 0 0 1.5px var(--text-2); }
 .hm-z.gewaehlt { outline: 2px solid var(--akzent); outline-offset: 1px; opacity: 1; }
+.hm-rahmen {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 4px;
+  box-shadow: 0 0 0 1.5px var(--text-2);
+  pointer-events: none;
+  transition: transform .3s var(--feder, ease);
+}
 .hm-legende {
   display: flex;
   flex-wrap: wrap;
@@ -800,7 +812,28 @@ button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
 }
 .hm-legende > span { display: inline-flex; align-items: center; gap: 6px; }
 .hm-legende .hm-z { width: 10px; }
-.hm-zeile { margin: 8px 0 0; font-size: 15px; min-height: 1.4em; font-variant-numeric: tabular-nums; }
+.hm-kopf { margin: 14px 0 8px; }
+.hm-kopf .rund:disabled { opacity: .3; }
+.hm-tage { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.hm-tag {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: 64px;
+  border-radius: 12px;
+  background: var(--grund);
+  font-family: var(--sans);
+  transition: box-shadow .2s ease;
+}
+.hm-tag-wt { font-size: 11px; color: var(--text-2); }
+.hm-tag-zahl { font-size: 15px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.hm-tag .hm-z { width: 12px; }
+.hm-tag.heute .hm-tag-zahl { font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.hm-tag.gewaehlt { box-shadow: inset 0 0 0 2px var(--akzent); }
+.hm-tag:disabled { color: var(--text-2); opacity: .5; }
+.hm-zeile { margin: 10px 0 0; font-size: 15px; min-height: 1.4em; font-variant-numeric: tabular-nums; }
 
 /* ── Formular ──────────────────────────────────────────────── */
 /* 17 px: Unter 16 px zoomt Safari beim Antippen ins Feld. */
@@ -1108,7 +1141,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.6.0T';
+var APP_VERSION = '0.6.0T2';
 var APP_STAND = '2026-10-06';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -2620,6 +2653,7 @@ function zeige(name, id) {
   // zurück, wo man es verlassen hat.
   var uebergang = uebergangVorbereiten(ansicht, name), heim = name === 'home' && ansicht !== 'home';
   if (ansicht !== name) wahlZuletzt = {};
+  if (ansicht !== name) hm.fuer = null;   // eine Heatmap beginnt bei der laufenden Woche
   if (name !== 'export') exBearbeiten = false;
   ansicht = name;
   render();
@@ -2686,11 +2720,46 @@ function renderKopf() {
       '<button type="button" class="rund" id="zurueckKnopf" aria-label="Zurück">' + ICON.zurueck +
       '</button><div class="kopf-titel kopf-unter"><h1><button type="button" class="kopf-heim" id="titelHeim">' +
         esc(ANSICHTEN[ansicht].titel) + '</button></h1></div>';
-    $('zurueckKnopf').addEventListener('click', function () { zeige('home'); });
+    $('zurueckKnopf').addEventListener('click', zurueckGehen);
     // Die Überschrift führt immer zur Übersicht — auch dort, wo der Rückweg
     // einen Schritt zurück geht (aus dem Export).
     $('titelHeim').addEventListener('click', function () { rueckZiel = null; zeige('home'); });
   }
+}
+
+// Der Rückweg: nach Hause, oder über `rueckZiel` dorthin, woher man kam.
+function zurueckGehen() {
+  if (ansicht !== 'home') zeige('home');
+}
+
+// ── Vom Rand wischen ───────────────────────────────────────────
+// Im Vollbild der Home-Bildschirm-Verknüpfung gibt es keine Zurück-Geste des
+// Browsers. Wie in Chillingo nimmt ein Wisch vom linken Rand dem Pfeil oben
+// links die Arbeit ab (ADR 0016): Er beginnt nur am äußersten Rand — dort
+// liegt kein Bedienelement —, wirkt erst beim Loslassen und schweigt, solange
+// Menü oder Hinweis offen sind; die schließen sich auf ihre eigene Art.
+var WISCH_RAND = 26;   // px vom linken Rand, in denen die Geste beginnen darf
+var WISCH_WEG = 70;    // px, die der Finger mindestens waagerecht zurücklegt
+var wischVon = null;
+
+function blattOffen() {
+  return !$('menue').hidden || !$('hinweisBlatt').hidden;
+}
+
+function wischBeginnen(e) {
+  wischVon = null;
+  if (e.touches.length !== 1 || ansicht === 'home' || blattOffen()) return;
+  var t = e.touches[0];
+  if (t.clientX <= WISCH_RAND) wischVon = { x: t.clientX, y: t.clientY };
+}
+
+function wischEnden(e) {
+  var von = wischVon, t = e.changedTouches && e.changedTouches[0];
+  wischVon = null;
+  if (!von || !t || blattOffen()) return;
+  var quer = t.clientX - von.x, hoch = Math.abs(t.clientY - von.y);
+  // Waagerecht muß deutlich überwiegen, sonst war es ein Blättern.
+  if (quer >= WISCH_WEG && hoch <= quer * 0.7) zurueckGehen();
 }
 
 // ── Dashboard ───────────────────────────────────────────────────
@@ -3089,15 +3158,20 @@ function zeichneTagesGewohnheiten(k, heute) {
 
 // ── Rückblick: Heatmap ─────────────────────────────────────────
 // Die letzten HM_WOCHEN Wochen einer Gewohnheit oder eines Lasters: Spalten
-// sind Wochen (Mo–So), die laufende steht rechts. Antippen oder darüber
-// streichen nennt den Tag in der Zeile darunter — geändert wird hier nichts,
-// nachgetragen wird im Kalender (ADR 0015).
+// sind Wochen (Mo–So), die laufende steht rechts. Ein Tag ist dort rund 11 px
+// breit — zu klein für einen Finger. Das Raster ist darum Überblick: Ein Tipp
+// wählt die Woche, darunter stehen ihre sieben Tage groß, erst dort den Tag.
+// Geändert wird nichts, nachgetragen wird im Kalender (ADR 0015).
 var HM_WOCHEN = 26;
 
 var HM_TEXT = {
   erledigt: 'erledigt', verpasst: 'verpasst', offen: 'offen', frei: 'nicht dran',
   vorher: 'noch nicht angelegt', sauber: 'frei', rueckfall: 'Rückfall', start: 'vor dem Start'
 };
+
+// Was gerade gewählt ist. `fuer` ist die Gewohnheit oder das Laster; wer eine
+// andere öffnet, beginnt wieder bei der laufenden Woche.
+var hm = { fuer: null, woche: HM_WOCHEN - 1, tag: null, wie: null, erster: null, summe: '' };
 
 // Der Zustand eines Tages, wie in der Tagesliste des Kalenders: «x-mal pro
 // Woche» verpaßt keinen Tag, heute offen ist kein Aussetzer.
@@ -3140,7 +3214,8 @@ function hmSumme(zahl, g) {
 // `g` ist die Gewohnheit, ohne sie ist es das Laster `l`.
 function zeichneHeatmap(g, l) {
   var heute = heuteSchluessel(), wie = g ? hmGewohnheit(g, heute) : hmLaster(l, zeitJetzt());
-  var erster = tagPlus(wochenAnfang(heute), -7 * (HM_WOCHEN - 1));
+  var erster = tagPlus(wochenAnfang(heute), -7 * (HM_WOCHEN - 1)), id = (g || l).id;
+  if (hm.fuer !== id) { hm.fuer = id; hm.woche = HM_WOCHEN - 1; hm.tag = null; }
   var zahl = { erledigt: 0, extra: 0, verpasst: 0, sauber: 0, rueckfall: 0 };
   var zellen = '<span></span>';
   for (var r = 0; r < 7; r++) zellen += '<span class="hm-wt">' + (r % 2 ? '' : WT_KURZ[WOCHE[r]]) + '</span>';
@@ -3161,53 +3236,130 @@ function zeichneHeatmap(g, l) {
       var k = tagPlus(erster, 7 * w + i), z = wie(k);
       if (zahl[z] !== undefined) zahl[z]++;
       if (z === 'erledigt' && g && g.rhythmus.art !== 'proWoche' && !faelligAm(g, k)) zahl.extra++;
-      zellen += '<span class="hm-z ' + z + (k === heute ? ' heute' : '') + '" data-hm-tag="' + k +
-        '" data-hm="' + z + '"></span>';
+      zellen += '<span class="hm-z ' + z + (k === heute ? ' heute' : '') + (k === hm.tag ? ' gewaehlt' : '') +
+        '" data-hm-tag="' + k + '" data-hm="' + z + '"' + (i ? '' : ' data-hm-mo="' + w + '"') + '></span>';
     }
   }
-  var summe = hmSumme(zahl, g);
+  hm.wie = wie;
+  hm.erster = erster;
+  hm.summe = hmSumme(zahl, g);
   var legende = g
     ? [['erledigt', 'erledigt'], ['verpasst', 'verpasst'], ['frei', 'nicht dran']]
     : [['sauber', 'frei'], ['rueckfall', 'Rückfall']];
   return '<section class="abschnitt"><h2>Rückblick</h2><div class="kachel hm">' +
-    '<div class="hm-raster" id="hmRaster" role="img" aria-label="' + esc('Die letzten sechs Monate: ' + summe) +
-      '">' + zellen + '</div>' +
+    '<div class="hm-raster" id="hmRaster" role="img" aria-label="' + esc('Die letzten sechs Monate: ' + hm.summe) +
+      '">' + zellen + '<span class="hm-rahmen" id="hmRahmen"></span></div>' +
     '<div class="hm-legende" aria-hidden="true">' + legende.map(function (e) {
       return '<span><span class="hm-z ' + e[0] + '"></span>' + e[1] + '</span>';
     }).join('') + '</div>' +
-    '<p class="hm-zeile" id="hmZeile" data-summe="' + esc(summe) + '">' + esc(summe) + '</p>' +
+    '<div id="hmWoche">' + zeichneHmWoche() + '</div>' +
+    '<p class="hm-zeile" id="hmZeile">' + esc(hmZeile()) + '</p>' +
     '</div></section>';
 }
 
-// «Di, 13. Okt. · erledigt», heute «Heute, 14. Okt. · offen»
-function hmTagText(k, z) {
-  var d = ausSchluessel(k);
-  return (k === heuteSchluessel() ? 'Heute' : WT_KURZ[d.getDay()]) + ', ' + d.getDate() + '. ' +
-    MON_KURZ[d.getMonth()] + ' · ' + HM_TEXT[z];
+// Die gewählte Woche, Tag für Tag groß genug für einen Finger.
+function zeichneHmWoche() {
+  var mo = tagPlus(hm.erster, 7 * hm.woche), heute = heuteSchluessel();
+  var html = '<div class="kal-kopf hm-kopf">' +
+    '<button type="button" class="rund" data-hm-schritt="-1" aria-label="Woche davor"' +
+      (hm.woche > 0 ? '' : ' disabled') + '>' + ICON.zurueck + '</button>' +
+    '<div class="kal-titel" id="hmTitel">' + esc('KW ' + kalenderwoche(mo) + ' · ' + spanne(mo, tagPlus(mo, 6))) + '</div>' +
+    '<button type="button" class="rund" data-hm-schritt="1" aria-label="Woche danach"' +
+      (hm.woche < HM_WOCHEN - 1 ? '' : ' disabled') + '>' + ICON.weiter + '</button>' +
+    '</div><div class="hm-tage">';
+  for (var i = 0; i < 7; i++) {
+    var k = tagPlus(mo, i), z = hm.wie(k), d = ausSchluessel(k);
+    html += '<button type="button" class="hm-tag' + (k === heute ? ' heute' : '') + (k === hm.tag ? ' gewaehlt' : '') +
+      '" data-hm-wahl="' + k + '" aria-pressed="' + (k === hm.tag ? 'true' : 'false') + '"' +
+      (z === 'zukunft' ? ' disabled' : '') + '>' +
+      '<span class="hm-tag-wt">' + WT_KURZ[d.getDay()] + '</span>' +
+      '<span class="hm-tag-zahl">' + d.getDate() + '</span>' +
+      '<span class="hm-z ' + z + '"></span></button>';
+  }
+  return html + '</div>';
 }
 
-// Ein Tag ist zu klein für einen Finger: Das ganze Raster ist das Ziel, der
-// Finger darf darüber streichen. Waagerecht gehört die Geste dem Raster,
-// senkrecht dem Blättern (`touch-action: pan-y`).
-function bindeHeatmap() {
-  var raster = $('hmRaster'), zeile = $('hmZeile'), gewaehlt = null, unten = false;
-  function waehle(el) {
-    var z = el && el.closest ? el.closest('[data-hm-tag]') : null;
-    if (!z || !raster.contains(z) || z.getAttribute('data-hm') === 'zukunft') return;
-    if (gewaehlt === z) return;
-    if (gewaehlt) gewaehlt.classList.remove('gewaehlt');
-    gewaehlt = z;
-    z.classList.add('gewaehlt');
-    zeile.textContent = hmTagText(z.getAttribute('data-hm-tag'), z.getAttribute('data-hm'));
+// Ohne gewählten Tag die Summe, sonst «Di, 13. Okt. · erledigt», heute
+// «Heute, 14. Okt. · offen».
+function hmZeile() {
+  if (!hm.tag) return hm.summe;
+  var d = ausSchluessel(hm.tag);
+  return (hm.tag === heuteSchluessel() ? 'Heute' : WT_KURZ[d.getDay()]) + ', ' + d.getDate() + '. ' +
+    MON_KURZ[d.getMonth()] + ' · ' + HM_TEXT[hm.wie(hm.tag)];
+}
+
+// Der Rahmen um die gewählte Spalte. Er sitzt im Raster und fährt hinüber,
+// wenn die Woche wechselt.
+function hmRahmenSetzen(weich) {
+  var rahmen = $('hmRahmen'), mo = document.querySelector('#hmRaster [data-hm-mo="' + hm.woche + '"]');
+  if (!rahmen || !mo) return;
+  var so = document.querySelector('#hmRaster [data-hm-tag="' + tagPlus(mo.getAttribute('data-hm-tag'), 6) + '"]');
+  rahmen.style.transition = weich && !bewegungAus() ? '' : 'none';
+  rahmen.style.top = (mo.offsetTop - 2) + 'px';
+  rahmen.style.width = (mo.offsetWidth + 4) + 'px';
+  rahmen.style.height = (so.offsetTop + so.offsetHeight - mo.offsetTop + 4) + 'px';
+  rahmen.style.transform = 'translateX(' + (mo.offsetLeft - 2) + 'px)';
+}
+
+// Die Woche wechselt an Ort und Stelle — das Formular darunter bleibt, wie es
+// ist. Ein gewählter Tag wandert als derselbe Wochentag mit.
+function hmWocheWaehlen(w) {
+  w = Math.max(0, Math.min(HM_WOCHEN - 1, w));
+  if (w === hm.woche) return;
+  if (hm.tag) {
+    var t = tagPlus(hm.tag, 7 * (w - hm.woche));
+    hm.tag = hm.wie(t) === 'zukunft' ? null : t;
   }
-  raster.addEventListener('pointerdown', function (e) { unten = true; waehle(e.target); });
-  raster.addEventListener('pointermove', function (e) {
-    if (unten) waehle(document.elementFromPoint(e.clientX, e.clientY));
+  hm.woche = w;
+  $('hmWoche').innerHTML = zeichneHmWoche();
+  bindeHmWoche();
+  hmTagZeigen();
+  hmRahmenSetzen(true);
+}
+
+function hmTagZeigen() {
+  alleIn('#hmRaster .gewaehlt').forEach(function (z) { z.classList.remove('gewaehlt'); });
+  if (hm.tag) document.querySelector('#hmRaster [data-hm-tag="' + hm.tag + '"]').classList.add('gewaehlt');
+  alleIn('#hmWoche [data-hm-wahl]').forEach(function (b) {
+    var an = b.getAttribute('data-hm-wahl') === hm.tag;
+    b.classList.toggle('gewaehlt', an);
+    b.setAttribute('aria-pressed', an ? 'true' : 'false');
   });
-  ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (n) {
-    raster.addEventListener(n, function () { unten = false; });
+  $('hmZeile').textContent = hmZeile();
+}
+
+function bindeHmWoche() {
+  alleIn('#hmWoche [data-hm-schritt]').forEach(function (b) {
+    b.addEventListener('click', function () { hmWocheWaehlen(hm.woche + Number(this.getAttribute('data-hm-schritt'))); });
   });
-  raster.addEventListener('click', function (e) { waehle(e.target); });
+  // Nochmal getippt, und die Zeile zeigt wieder die Summe.
+  alleIn('#hmWoche [data-hm-wahl]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var k = this.getAttribute('data-hm-wahl');
+      hm.tag = hm.tag === k ? null : k;
+      hmTagZeigen();
+    });
+  });
+}
+
+// Ein Tipp ins Raster trifft die Spalte, deren Mitte am nächsten liegt —
+// auch zwischen zwei Feldern, auch über der Monatszeile.
+function hmSpalteBei(x) {
+  var beste = null, abstand = Infinity;
+  alleIn('#hmRaster [data-hm-mo]').forEach(function (z) {
+    var r = z.getBoundingClientRect(), a = Math.abs(r.left + r.width / 2 - x);
+    if (a < abstand) { abstand = a; beste = Number(z.getAttribute('data-hm-mo')); }
+  });
+  return beste;
+}
+
+function bindeHeatmap() {
+  $('hmRaster').addEventListener('click', function (e) {
+    var w = hmSpalteBei(e.clientX);
+    if (w !== null) hmWocheWaehlen(w);
+  });
+  bindeHmWoche();
+  hmRahmenSetzen(false);
 }
 
 // ── Neue Gewohnheit · Gewohnheit ────────────────────────────────
@@ -4461,6 +4613,13 @@ function start() {
   // Die Marken der Umschalter sitzen erst richtig, wenn die Schriften da sind.
   window.addEventListener('resize', wahlenSetzen);
   try { document.fonts.ready.then(wahlenSetzen); } catch (e) { /* ohne Schriftereignis bleibt es beim Start */ }
+  // Der Rahmen der Heatmap mißt das Raster; ändert sich die Breite, mißt er neu.
+  window.addEventListener('resize', function () { hmRahmenSetzen(false); });
+  try { document.fonts.ready.then(function () { hmRahmenSetzen(false); }); } catch (e) { /* wie oben */ }
+
+  document.addEventListener('touchstart', wischBeginnen, { passive: true });
+  document.addEventListener('touchend', wischEnden, { passive: true });
+  document.addEventListener('touchcancel', function () { wischVon = null; }, { passive: true });
 
   $('swLaden').addEventListener('click', function () { swUebernehmen(); });
   $('hinweisOk').addEventListener('click', hinweisSchliessen);

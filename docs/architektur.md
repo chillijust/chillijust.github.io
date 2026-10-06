@@ -152,6 +152,12 @@ der Umschalter (ADR 0007).
   ein anderer Tag, nach zehn Minuten im Hintergrund ist die Welle durch.
 - Der Kopf hat zwei Gestalten: auf dem Dashboard Titel, Datum, Sonne/Mond, Menüknopf;
   unterwegs Rückweg und Titel.
+- **Der Rückweg ist `zurueckGehen()`** — der Knopf ruft ihn, ebenso der Wisch vom linken
+  Rand (`wischBeginnen`/`wischEnden` an `document`, passiv; ADR 0016).
+- **Die Heatmap** (`zeichneHeatmap`, ADR 0015) hält ihre Wahl in `hm` (`fuer`, `woche`,
+  `tag`, dazu `wie` für den Zustand eines Tages). Woche und Tag wechseln an Ort und Stelle
+  (`hmWocheWaehlen`, `hmTagZeigen`), ohne `render()`; `zeige()` in eine andere Ansicht
+  setzt `hm.fuer` zurück. Den Rahmen um die Woche mißt `hmRahmenSetzen()` am Raster.
 - Das Menü klappt unter dem Menüknopf auf (`blattLegen`), über einem Schleier, gezeichnet
   beim Öffnen aus `MENUE`; es quillt als Tropfen aus dem Knopf und fließt zurück. Ein
   Eintrag mit `ziel` öffnet die Ansicht als Tropfen aus dem Eintrag und schließt das Menü

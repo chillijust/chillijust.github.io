@@ -34,7 +34,7 @@ meldet der Läufer das als Fehler statt sie zu übergehen.
 | --- | --- |
 | `geruest` | Kopf, leeres Dashboard, Chili, Trefferflächen, Duzen, Emoji, Schriften |
 | `thema` | hell/dunkel/automatisch, Schalter, beide dunklen Paletten gleich, Chillingos Speicher unberührt |
-| `menue` | Reihenfolge, «bald» gegen Gebautes, Rückweg, Schließen, «Neue Gewohnheit» |
+| `menue` | Reihenfolge, «bald» gegen Gebautes, Rückweg, Wisch vom Rand, Schließen, «Neue Gewohnheit» |
 | `speicher` | Lesen, Kaputtes, werfender Speicher |
 | `gewohnheiten` | Stärke, Serie, nie zweimal, Anlegen, Abhaken, Bearbeiten, Archiv, Hinweis ab 3, Speicher |
 | `kalender` | langer Druck, Woche und Monat, Tönung, Tag antippen, Nachtragen |
@@ -42,7 +42,7 @@ meldet der Läufer das als Fehler statt sie zu übergehen.
 | `termine` | Lesen, Wiederholung, «Termine heute», blauer Punkt, Tagesliste, Formular, Löschen |
 | `export` | `.ics`-Rechnung (Faltung, Maskierung, RRULE, VALARM), Erinnerung der Gewohnheit, Ansicht, Laden, Rückweg |
 | `bewegung` | Tropfen in die Tagesliste, Geister, Zoom aus dem Getippten, Marke der Umschalter, Formularteile, ohne Bewegung |
-| `rueckblick` | Heatmap: Raster, Monate, Tönung, Summe, Antippen, Streichen, pro Woche, Abgewöhnen |
+| `rueckblick` | Heatmap: Raster, Monate, Tönung, Summe, Woche wählen, Wochenstreifen, Tag, pro Woche, Abgewöhnen |
 | `offline` | `sw.js` von außen, App ohne Worker, Hinweis, Knopf, Notausgang |
 
 ## Eine Suite schreiben

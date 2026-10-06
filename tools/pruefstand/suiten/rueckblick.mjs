@@ -1,6 +1,7 @@
-// Rückblick (0.6.0T): die Heatmap in der Gewohnheit und im Abgewöhnen —
-// 26 Wochen, Spalten Mo–So, getönt nach dem Zustand des Tages; Antippen oder
-// darüber streichen nennt den Tag, ändert aber nichts (ADR 0015).
+// Rückblick (0.6.0T2): die Heatmap in der Gewohnheit und im Abgewöhnen —
+// 26 Wochen, Spalten Mo–So, getönt nach dem Zustand des Tages. Ein Tipp ins
+// Raster wählt die Woche, ihre Tage stehen darunter groß; ein Tag nennt sich
+// in der Zeile, geändert wird nichts (ADR 0015).
 //
 // Die Uhr steht: «heute» ist Mittwoch, der 14. Oktober 2026 (KW 42, 12.–18.).
 import { readFileSync } from 'node:fs';
@@ -63,35 +64,66 @@ var raster = q('#hmRaster').getBoundingClientRect(), kachel = q('.kachel.hm').ge
 pruefe('R9 das Raster paßt in die Kachel', raster.right <= kachel.right && raster.left >= kachel.left,
   raster.right + ' > ' + kachel.right);
 
-// ── T · Antippen ────────────────────────────────────────────
+// ── T · Woche und Tag ───────────────────────────────────────
 var vorhin = JSON.stringify(state);
-zelle(vor(2)).click();
-pruefe('T1 Antippen nennt den Tag', q('#hmZeile').textContent === 'Mo, 12. Okt. · verpasst' &&
-  zelle(vor(2)).classList.contains('gewaehlt'), q('#hmZeile').textContent);
-zelle(HEUTE).click();
-pruefe('T2 heute heißt «Heute», die alte Wahl geht', q('#hmZeile').textContent === 'Heute, 14. Okt. · offen' &&
-  alle('#hmRaster .gewaehlt').length === 1, q('#hmZeile').textContent);
-zelle(tagPlus(HEUTE, 2)).click();
-pruefe('T3 die Zukunft läßt sich nicht wählen', q('#hmZeile').textContent === 'Heute, 14. Okt. · offen');
-zelle(vor(3)).click();
-pruefe('T4 nicht dran heißt so', q('#hmZeile').textContent === 'So, 11. Okt. · nicht dran', q('#hmZeile').textContent);
-pruefe('T5 geändert wird hier nichts', JSON.stringify(state) === vorhin);
-ausbewegt();
-var von = zelle(vor(9)).getBoundingClientRect(), nach = zelle(vor(1)).getBoundingClientRect();
-function zeiger(art, r) {
-  var ziel = art === 'pointerdown' ? document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2) : q('#hmRaster');
-  ziel.dispatchEvent(new PointerEvent(art, { bubbles: true, clientX: r.left + r.width / 2, clientY: r.top + r.height / 2,
-    pointerType: 'touch' }));
+function titel() { return q('#hmTitel').textContent; }
+function tagKnopf(k) { return q('#hmWoche [data-hm-wahl="' + k + '"]'); }
+function spalteMitte(w) {
+  var r = q('#hmRaster [data-hm-mo="' + w + '"]').getBoundingClientRect();
+  return { x: r.left + r.width / 2, y: r.top + r.height / 2, breite: r.width };
 }
-zeiger('pointerdown', von);
-var erst = q('#hmZeile').textContent;
-zeiger('pointermove', nach);
-var dann = q('#hmZeile').textContent;
-zeiger('pointerup', nach);
-zeiger('pointermove', von);
-pruefe('T6 der Finger streicht über das Raster', erst === 'Mo, 5. Okt. · erledigt' &&
-  dann === 'Di, 13. Okt. · erledigt' && q('#hmZeile').textContent === dann, erst + ' / ' + dann);
-pruefe('T7 senkrecht gehört die Geste dem Blättern', getComputedStyle(q('#hmRaster')).touchAction === 'pan-y');
+function rasterTipp(x, y) {
+  q('#hmRaster').dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: x, clientY: y }));
+}
+ausbewegt();
+pruefe('T1 die laufende Woche steht offen', titel() === 'KW 42 · 12.–18. Oktober' &&
+  alle('#hmWoche [data-hm-wahl]').length === 7 && tagKnopf(HEUTE).classList.contains('heute') &&
+  tagKnopf(tagPlus(HEUTE, 1)).disabled && !tagKnopf(HEUTE).disabled, titel());
+pruefe('T2 jeder Tag ist groß genug für den Finger', alle('#hmWoche button').every(function (b) {
+  var r = b.getBoundingClientRect();
+  return r.width >= 44 && r.height >= 44;
+}), alle('#hmWoche button').map(function (b) { var r = b.getBoundingClientRect(); return Math.round(r.width) + 'x' + Math.round(r.height); }).join());
+var rahmen = q('#hmRahmen').getBoundingClientRect(), montag = zelle(wochenAnfang(HEUTE)).getBoundingClientRect();
+pruefe('T3 der Rahmen steht um die laufende Woche', Math.abs(rahmen.left - (montag.left - 2)) < 1.5 &&
+  rahmen.width > montag.width && rahmen.height > montag.height * 7, rahmen.left + ' / ' + montag.left);
+tagKnopf(vor(2)).click();
+pruefe('T4 ein Tag nennt sich in der Zeile', q('#hmZeile').textContent === 'Mo, 12. Okt. · verpasst' &&
+  tagKnopf(vor(2)).getAttribute('aria-pressed') === 'true' && zelle(vor(2)).classList.contains('gewaehlt'),
+  q('#hmZeile').textContent);
+tagKnopf(vor(2)).click();
+pruefe('T5 nochmal getippt, und es steht wieder die Summe', /fälligen Tagen erledigt\.$/.test(q('#hmZeile').textContent) &&
+  !q('#hmRaster .gewaehlt') && !q('#hmWoche .gewaehlt'), q('#hmZeile').textContent);
+tagKnopf(HEUTE).click();
+pruefe('T6 heute heißt «Heute»', q('#hmZeile').textContent === 'Heute, 14. Okt. · offen', q('#hmZeile').textContent);
+var name = q('#gwName');
+name.value = 'Lesen am Abend';
+q('#hmWoche [data-hm-schritt="-1"]').click();
+pruefe('T7 ‹ blättert zurück, der Wochentag wandert mit', titel() === 'KW 41 · 5.–11. Oktober' &&
+  q('#hmZeile').textContent === 'Mi, 7. Okt. · verpasst' && tagKnopf(vor(7)).classList.contains('gewaehlt') &&
+  alle('#hmRaster .gewaehlt').length === 1, titel() + ' / ' + q('#hmZeile').textContent);
+pruefe('T8 das Formular bleibt stehen', q('#gwName') === name && name.value === 'Lesen am Abend');
+q('#hmWoche [data-hm-schritt="1"]').click();
+pruefe('T9 › zurück zur laufenden, dann ist Schluß', titel() === 'KW 42 · 12.–18. Oktober' &&
+  q('#hmWoche [data-hm-schritt="1"]').disabled && !q('#hmWoche [data-hm-schritt="-1"]').disabled);
+var m = spalteMitte(10);
+rasterTipp(m.x, m.y);
+pruefe('T10 ein Tipp ins Raster wählt die Woche', hm.woche === 10 &&
+  titel().indexOf('KW ' + kalenderwoche(tagPlus(ERSTER, 70))) === 0, titel());
+m = spalteMitte(3);
+rasterTipp(m.x + m.breite * 0.45, q('#hmRaster').getBoundingClientRect().top + 2);
+pruefe('T11 auch knapp daneben, auch über der Monatszeile', hm.woche === 3, hm.woche);
+pruefe('T12 vor dem Anlegen heißt es so', (tagKnopf(tagPlus(ERSTER, 21)).click(), q('#hmZeile').textContent) ===
+  WT_KURZ[1] + ', ' + ausSchluessel(tagPlus(ERSTER, 21)).getDate() + '. ' + MON_KURZ[ausSchluessel(tagPlus(ERSTER, 21)).getMonth()] +
+  ' · noch nicht angelegt', q('#hmZeile').textContent);
+rasterTipp(spalteMitte(0).x - 40, spalteMitte(0).y);
+pruefe('T13 ganz vorn ist ‹ aus', hm.woche === 0 && q('#hmWoche [data-hm-schritt="-1"]').disabled);
+name.value = 'A';
+pruefe('T14 geändert wird hier nichts', JSON.stringify(state) === vorhin);
+pruefe('T15 das Raster läßt das Blättern in Ruhe', getComputedStyle(q('#hmRaster')).touchAction === 'auto');
+zeige('home');
+zeige('bearbeiten', 'A');
+pruefe('T16 wer wiederkommt, beginnt bei der laufenden Woche', titel() === 'KW 42 · 12.–18. Oktober' &&
+  q('#hmZeile').textContent.indexOf('fälligen') !== -1);
 
 // ── W · x-mal pro Woche ─────────────────────────────────────
 zeige('home');
@@ -110,6 +142,8 @@ pruefe('L2 frei, Rückfall, vor dem Start', wie('2026-09-19') === 'sauber' && wi
   ['2026-09-19', '2026-09-20', '2026-08-31', '2026-09-01', HEUTE].map(wie).join());
 pruefe('L3 zwei Rückfälle an einem Tag sind ein Tag', q('#hmZeile').textContent === '43 Tage frei, 1 mit Rückfall.',
   q('#hmZeile').textContent);
-zelle('2026-09-20').click();
-pruefe('L4 Antippen nennt den Rückfall', q('#hmZeile').textContent === 'So, 20. Sep. · Rückfall', q('#hmZeile').textContent);
+q('#hmRaster').dispatchEvent(new MouseEvent('click', { bubbles: true,
+  clientX: zelle('2026-09-14').getBoundingClientRect().left + 3, clientY: zelle('2026-09-14').getBoundingClientRect().top + 3 }));
+q('#hmWoche [data-hm-wahl="2026-09-20"]').click();
+pruefe('L4 Woche gewählt, Tag getippt: der Rückfall', q('#hmZeile').textContent === 'So, 20. Sep. · Rückfall', q('#hmZeile').textContent);
 `);

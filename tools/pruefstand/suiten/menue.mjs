@@ -73,4 +73,30 @@ q('[data-menue="gewohnheit"]').click();
 pruefe('G1 öffnet das Formular', ansicht === 'neu' && !!q('#gwName'));
 pruefe('G2 mit Titel im Kopf', q('#kopf h1').textContent === 'Neue Gewohnheit');
 frisch();
+
+// ── W · Vom Rand wischen (ADR 0016) ─────────────────────────
+function wisch(x0, y0, x1, y1) {
+  var ziel = q('#ansicht');
+  function punkt(x, y) { return new Touch({ identifier: 7, target: ziel, clientX: x, clientY: y }); }
+  ziel.dispatchEvent(new TouchEvent('touchstart', { bubbles: true, touches: [punkt(x0, y0)], changedTouches: [punkt(x0, y0)] }));
+  ziel.dispatchEvent(new TouchEvent('touchend', { bubbles: true, touches: [], changedTouches: [punkt(x1, y1)] }));
+}
+zeige('einstellungen');
+wisch(10, 400, 200, 420);
+pruefe('W1 vom linken Rand zur Mitte heißt zurück', ansicht === 'home', ansicht);
+zeige('einstellungen');
+wisch(60, 400, 300, 400);
+pruefe('W2 nicht vom Rand: nichts', ansicht === 'einstellungen');
+wisch(10, 400, 50, 400);
+pruefe('W3 zu kurz: nichts', ansicht === 'einstellungen');
+wisch(10, 300, 110, 500);
+pruefe('W4 schräg ist Blättern: nichts', ansicht === 'einstellungen');
+hinweisZeigen('Probe');
+wisch(10, 400, 200, 400);
+pruefe('W5 bei offenem Hinweis schweigt die Geste', ansicht === 'einstellungen');
+hinweisSchliessen();
+frisch();
+wisch(10, 400, 200, 400);
+pruefe('W6 auf dem Dashboard bleibt alles, wie es ist', ansicht === 'home');
+frisch();
 `);
