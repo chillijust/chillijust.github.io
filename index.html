@@ -141,6 +141,27 @@ html.thema-tropft::view-transition-new(root) {
   from { clip-path: circle(0px at var(--thema-x, 100%) var(--thema-y, 0px)); opacity: 0; }
   to { clip-path: circle(var(--thema-r, 150vmax) at var(--thema-x, 100%) var(--thema-y, 0px)); opacity: 1; }
 }
+/* Der Tropfen folgt seinem Träger (ADR 0037): dem Knauf im Kopf, der Markierung in
+   den Einstellungen. Der Träger ist eine eigene Ebene über beiden Bildern und
+   gleitet im ersten Drittel hinüber; hinter ihm färbt sich, was er überstreicht
+   (eine Spur, so breit wie er, `--spur-1`). Danach läuft die Spur nach allen
+   Seiten über den Bildschirm aus (`--spur-2`). Die Spur ist die Fläche um den Weg
+   des Trägers, darum bleibt sie rund, während sie wächst. */
+html.thema-tropft.thema-folgt::view-transition-new(root) {
+  animation: thema-spur var(--thema-dauer, 1560ms) linear both;
+}
+@keyframes thema-spur {
+  0% { clip-path: var(--spur-0); opacity: 0; animation-timing-function: cubic-bezier(.45, 0, .25, 1); }
+  33.333% { clip-path: var(--spur-1); opacity: .5; animation-timing-function: cubic-bezier(.35, 0, .25, 1); }
+  100% { clip-path: var(--spur-2); opacity: 1; }
+}
+html.thema-folgt::view-transition-group(thema-traeger),
+html.thema-folgt::view-transition-group(thema-oben-0),
+html.thema-folgt::view-transition-group(thema-oben-1),
+html.thema-folgt::view-transition-group(thema-oben-2) {
+  animation-duration: calc(var(--thema-dauer, 1560ms) / 3);
+  animation-timing-function: cubic-bezier(.45, 0, .25, 1);
+}
 h1, h2, h3, button, .etikett { font-family: var(--sans); }
 h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -.01em; }
 button {
@@ -1218,16 +1239,17 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 /* Die Zeichen bewegen sich einmal, wenn sie erscheinen (ADR 0035): Der Haken
    zeichnet sich, beim Hinweis fällt der Punkt als Tropfen und der Strich wächst,
    der Pfeil fällt in die Schale, das zweite Blatt schiebt sich aus dem ersten.
-   Langsam und weich, ohne Ruck (ADR 0036) — fertig, bevor die Bestätigung geht. */
+   Weich, ohne Ruck (ADR 0036), ein Viertel flotter als dort (ADR 0037) — fertig,
+   bevor die Bestätigung geht. */
 .zeichnet .z-strich, .gw-kachel.gerade.erledigt .gw-scheibe .z-strich {
   stroke-dasharray: 1;
-  animation: z-zeichnen .7s .2s cubic-bezier(.45, 0, .25, 1) both;
+  animation: z-zeichnen .53s .15s cubic-bezier(.45, 0, .25, 1) both;
 }
-.zeichnet .z-punkt { animation: z-fallen .55s cubic-bezier(.35, 0, .3, 1) both; }
-.zeichnet[data-zeichen="hinweis"] .z-strich { animation-delay: .45s; }
+.zeichnet .z-punkt { animation: z-fallen .41s cubic-bezier(.35, 0, .3, 1) both; }
+.zeichnet[data-zeichen="hinweis"] .z-strich { animation-delay: .34s; }
 .z-punkt { transform-box: fill-box; transform-origin: center; }
-.zeichnet .z-pfeil { animation: z-pfeil .95s .12s cubic-bezier(.4, 0, .25, 1) both; }
-.zeichnet .z-blatt { animation: z-blatt .8s .15s cubic-bezier(.35, 0, .25, 1) both; }
+.zeichnet .z-pfeil { animation: z-pfeil .71s .09s cubic-bezier(.4, 0, .25, 1) both; }
+.zeichnet .z-blatt { animation: z-blatt .6s .11s cubic-bezier(.35, 0, .25, 1) both; }
 @keyframes z-zeichnen { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
 @keyframes z-fallen {
   0% { transform: translateY(-7px) scale(.6); opacity: 0; }
@@ -1496,7 +1518,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.11.0T2';
+var APP_VERSION = '0.11.0T3';
 var APP_STAND = '2026-10-07';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -1991,50 +2013,76 @@ function themaAnwenden() {
   else wurzel.removeAttribute('data-bewegung');
 }
 
-// Der Kopf wird neu gezeichnet, der Knauf stünde sofort am Ziel. Er gleitet
-// statt dessen von der alten Seite herüber — sichtbar im wachsenden Tropfen.
-function knaufGleiten(wert) {
-  var k = document.querySelector('#themaKnopf .knauf');
-  if (!k) return;
-  var weg = wert === 'dunkel' ? 'translateX(0px)' : 'translateX(40px)';
-  bewegt(k, [{ transform: weg }, { transform: getComputedStyle(k).transform }], { dauer: 1000 });
+// Die Spur des Trägers als `inset()`: die Fläche um den Weg von `von` nach
+// `nach`, um `mehr` nach allen Seiten erweitert, die Ecken so rund wie der
+// Träger plus `mehr` — so bleibt sie beim Wachsen rund (ADR 0037).
+function themaSpur(von, nach, rund, mehr) {
+  var l = Math.min(von.left, nach.left) - mehr, r = Math.max(von.right, nach.right) + mehr;
+  var o = Math.min(von.top, nach.top) - mehr, u = Math.max(von.bottom, nach.bottom) + mehr;
+  return 'inset(' + px(o) + ' ' + px(window.innerWidth - r) + ' ' + px(window.innerHeight - u) + ' ' +
+    px(l) + ' round ' + px(rund + mehr) + ')';
+}
+
+// Der Träger bekommt für die Dauer des Tropfens einen eigenen Namen: Der
+// Ansichtsübergang hebt ihn aus beiden Bildern und läßt ihn hinübergleiten,
+// voll sichtbar über der wachsenden Spur (ADR 0037). Was im Schalter über ihm
+// liegt (`oben`: Sonne und Mond, die Beschriftungen der Wahl), wird mitgehoben
+// und kommt im Dokument nach ihm — sonst deckte er es zu, bis alles fertig ist.
+function traegerBenennen(traeger, an) {
+  alleIn(traeger.sel).forEach(function (el) { el.style.viewTransitionName = an ? 'thema-traeger' : ''; });
+  alleIn(traeger.oben).forEach(function (el, i) { el.style.viewTransitionName = an ? 'thema-oben-' + i : ''; });
 }
 
 // `quelle`: der Knopf, der umschaltet — im Kopf oder in den Einstellungen.
-// Kann der Browser Ansichtsübergänge, wächst die neue Darstellung als runder
-// Tropfen aus ihm über den Bildschirm (ADR 0025, 0036).
-var THEMA_TROPFEN = 1300;  // langsamer und weicher als zuvor, 910 ms (ADR 0036)
+// Kann der Browser Ansichtsübergänge, wächst die neue Darstellung aus ihm über
+// den Bildschirm (ADR 0025, 0036). `traeger` (`sel`, `von`, `nach`, `rund`):
+// was dabei hinübergleitet — der Tropfen folgt ihm (ADR 0037). Ohne ihn wächst
+// er als runde Scheibe aus der Mitte von `quelle`. `oben`: siehe traegerBenennen.
+var THEMA_TROPFEN = 1560;  // ein Drittel gleitet der Träger, dann läuft es aus (ADR 0037)
 var themaLauf = 0;         // zählt die Drücke: Nur der letzte räumt auf (ADR 0036)
-function themaSetzen(wert, quelle) {
+function themaSetzen(wert, quelle, traeger) {
   var vorher = themaWirksam();
   state.thema = wert;
   speichern();
   var wurzel = document.documentElement, lauf = ++themaLauf;
   // Ein früherer Druck räumt nur auf, solange kein späterer gekommen ist —
   // sonst nähme er dem laufenden Tropfen die Klasse, und der blendete hart.
-  function aus() { if (lauf === themaLauf) wurzel.classList.remove('thema-tropft'); }
+  function aus() {
+    if (lauf !== themaLauf) return;
+    wurzel.classList.remove('thema-tropft', 'thema-folgt');
+    if (traeger) traegerBenennen(traeger, false);
+  }
   // Ändert sich nichts, was man sieht (etwa «Automatisch» auf dasselbe), tropft
   // auch nichts.
   if (!quelle || !document.startViewTransition || bewegungAus() || themaWirksam() === vorher) {
-    wurzel.classList.remove('thema-tropft');
+    wurzel.classList.remove('thema-tropft', 'thema-folgt');
     themaAnwenden();
     render();
     return;
   }
   var r = quelle.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
   var b = window.innerWidth, h = window.innerHeight;
+  var weit = Math.sqrt(Math.pow(Math.max(x, b - x), 2) + Math.pow(Math.max(y, h - y), 2)) + 2;
   wurzel.style.setProperty('--thema-x', px(x));
   wurzel.style.setProperty('--thema-y', px(y));
-  wurzel.style.setProperty('--thema-r', px(Math.sqrt(Math.pow(Math.max(x, b - x), 2) + Math.pow(Math.max(y, h - y), 2)) + 2));
+  wurzel.style.setProperty('--thema-r', px(weit));
   wurzel.style.setProperty('--thema-dauer', THEMA_TROPFEN + 'ms');
+  if (traeger) {
+    wurzel.style.setProperty('--spur-0', themaSpur(traeger.von, traeger.von, traeger.rund, 0));
+    wurzel.style.setProperty('--spur-1', themaSpur(traeger.von, traeger.nach, traeger.rund, 0));
+    wurzel.style.setProperty('--spur-2', themaSpur(traeger.von, traeger.nach, traeger.rund, weit));
+    traegerBenennen(traeger, true);
+  }
   wurzel.classList.add('thema-tropft');
+  wurzel.classList.toggle('thema-folgt', !!traeger);
   var gemacht = false, t = null;
   function anwenden() {
     if (gemacht) return;
     gemacht = true;
     themaAnwenden();
     render();
-    if (lauf === themaLauf) knaufGleiten(wert);
+    // Neu gezeichnet ist es ein neues Element — es trägt denselben Namen.
+    if (traeger) traegerBenennen(traeger, true);
   }
   // Ein neuer Übergang überspringt den laufenden: Der alte steht sofort am
   // Ziel, der neue tropft darüber.
@@ -2056,15 +2104,36 @@ function themaSetzen(wert, quelle) {
   setTimeout(aus, THEMA_TROPFEN + 400);
 }
 
+function flaeche(el) {
+  var r = el.getBoundingClientRect();
+  return { left: r.left, top: r.top, right: r.right, bottom: r.bottom };
+}
+
 // Der Schalter im Kopf: immer ins Gegenteil dessen, was man gerade sieht. Er
 // legt fest — zurück zu «Automatisch» geht es in den Einstellungen.
 function themaUmschalten() {
   var knopf = $('themaKnopf');
   var ziel = themaWirksam() === 'dunkel' ? 'hell' : 'dunkel';
-  if (knopf) knopf.setAttribute('aria-checked', ziel === 'dunkel' ? 'true' : 'false');
-  // Der Tropfen entsteht mit dem Druck, nicht danach (ADR 0026); der Knauf
-  // gleitet derweil im neuen Bild hinüber (knaufGleiten).
-  themaSetzen(ziel, $('themaKnopf'));
+  if (!knopf) { themaSetzen(ziel, null); return; }
+  // `aria-checked` setzt erst das Neuzeichnen des Kopfs: Vorher gesetzt, stünde
+  // der Knauf schon im alten Bild am Ziel — er spränge, statt zu gleiten.
+  // Der Tropfen entsteht mit dem Druck (ADR 0026) und folgt dem Knauf von der
+  // Seite, auf der er lag, zur anderen (ADR 0037). Der Knauf liegt genau über
+  // Sonne oder Mond.
+  var von = knopf.querySelector(ziel === 'dunkel' ? '.seite.hell' : '.seite.dunkel');
+  var nach = knopf.querySelector(ziel === 'dunkel' ? '.seite.dunkel' : '.seite.hell');
+  themaSetzen(ziel, knopf, { sel: '#themaKnopf .knauf', oben: '#themaKnopf .seite',
+    von: flaeche(von), nach: flaeche(nach), rund: 18 });
+}
+
+// In den Einstellungen folgt der Tropfen der Markierung vom alten zum neuen
+// Knopf (ADR 0037).
+function themaWaehlen(knopf) {
+  var alt = knopf.parentNode.querySelector('[aria-pressed="true"]');
+  var traeger = alt && alt !== knopf ?
+    { sel: '.wahl[aria-label="Darstellung"] .wahl-marke', oben: '.wahl[aria-label="Darstellung"] button',
+      von: flaeche(alt), nach: flaeche(knopf), rund: 12 } : null;
+  themaSetzen(knopf.getAttribute('data-thema'), knopf, traeger);
 }
 
 function bewegungAus() {
@@ -2727,7 +2796,9 @@ function wahlenSetzen() {
     m.style.width = px(b.offsetWidth);
     m.style.height = px(b.offsetHeight);
     var alt = knoepfe[wahlZuletzt[schluessel]];
-    if (alt && alt !== b && alt.offsetWidth) {
+    // Folgt ihr gerade der Hell/Dunkel-Tropfen, gleitet sie als eigene Ebene
+    // des Ansichtsübergangs — eine zweite Bewegung darin liefe doppelt (ADR 0037).
+    if (alt && alt !== b && alt.offsetWidth && !document.documentElement.classList.contains('thema-folgt')) {
       var l = Math.min(alt.offsetLeft, b.offsetLeft);
       var r = Math.max(alt.offsetLeft + alt.offsetWidth, b.offsetLeft + b.offsetWidth);
       bewegt(m, [
@@ -6312,8 +6383,9 @@ function bindeAnsicht() {
   var knoepfe = document.querySelectorAll('.wahl [data-thema]');
   for (var i = 0; i < knoepfe.length; i++) {
     knoepfe[i].addEventListener('click', function () {
-      // Auch hier tropft die neue Darstellung aus dem Knopf (ADR 0036).
-      themaSetzen(this.getAttribute('data-thema'), this);
+      // Auch hier tropft die neue Darstellung aus dem Knopf (ADR 0036) und folgt
+      // der Markierung (ADR 0037).
+      themaWaehlen(this);
     });
   }
   if ($('swKnopf')) {

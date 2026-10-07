@@ -33,7 +33,7 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0023](0023-kalendertag-hinzufuegen-runder-tropfen.md) | Kalender: Heute als Pille, heute im Kreis, Kalenderwochen, kommende Tage, «Hinzufügen» fragt; Welle abbrechen; Wisch öffnet das Menü; «Allgemein»; der Tropfen ist rund | gilt |
 | [0024](0024-ticketblatt-aus-glas.md) | Das Ticketblatt ist aus Glas | gilt |
 | [0025](0025-nachtrag-tickets-kalender-thema.md) | Nachtrag: Wisch von rechts, schmale Bestätigung, Tickets im Blatt, Kalender, Hell/Dunkel als Tropfen | gilt; Hell/Dunkel, Ticketzeilen, KW, Takt seit 0026 |
-| [0026](0026-nachtrag-tropfen-mit-dem-druck.md) | Nachtrag: Hell/Dunkel tropft mit dem Druck, Ticketfeld, Kalender | gilt; Kontrast und Ticketzeilen seit 0027 |
+| [0026](0026-nachtrag-tropfen-mit-dem-druck.md) | Nachtrag: Hell/Dunkel tropft mit dem Druck, Ticketfeld, Kalender | gilt; Kontrast und Ticketzeilen seit 0027, `knaufGleiten` seit 0037 |
 | [0027](0027-kontrast-ticketzeilen-ticketseite.md) | Nachtrag: Kontrast im Tropfen, Ticketzeilen nach dem Wechsel, Ticketseite | gilt; Listenhöhe seit 0028 |
 | [0028](0028-kein-zoom-wochentropfen-listenhoehe.md) | Kein Heranzoomen beim Tippen, die Woche tropft zur Seite, «Alle Tickets» so hoch wie das Ticket | gilt; Seitentropfen ohne Verschiebung seit 0029 |
 | [0029](0029-auftritt-beim-kaltstart.md) | Der Auftritt beim Kaltstart; die Woche rückt nicht über den Rand | gilt |
@@ -43,4 +43,5 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0033](0033-beginn-zurueckstellen.md) | Der Beginn einer Gewohnheit läßt sich zurückstellen; fällige Tage seitdem gelten als erledigt | gilt |
 | [0034](0034-export-auswaehlen.md) | Im Export wählen: «Bearbeiten» immer, Häkchen je Eintrag, «alle» je Abschnitt; Abwahl von Neuem gemerkt | gilt |
 | [0035](0035-zeichen-bewegen-sich.md) | Zeichen bewegen sich: Haken zeichnet sich, Hinweis-Punkt fällt, Pfeil fällt in die Schale, Blatt schiebt sich heraus | gilt |
-| [0036](0036-tropfen-weicher-mehrmals-alle.md) | Hell/Dunkel tropft weicher, auch mehrmals hintereinander und aus den Einstellungen; «alle» im Export tropft; Zeichen langsamer | gilt |
+| [0036](0036-tropfen-weicher-mehrmals-alle.md) | Hell/Dunkel tropft weicher, auch mehrmals hintereinander und aus den Einstellungen; «alle» im Export tropft; Zeichen langsamer | gilt; Dauer des Tropfens und Zeiten der Zeichen seit 0037 |
+| [0037](0037-tropfen-folgt-dem-traeger.md) | Der Hell/Dunkel-Tropfen folgt dem Knauf und der Markierung; Zeichen einen Tick flotter | gilt |

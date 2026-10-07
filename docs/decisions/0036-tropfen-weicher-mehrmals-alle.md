@@ -1,6 +1,6 @@
 # 0036 · Hell/Dunkel tropft weicher, auch mehrmals und aus den Einstellungen; «alle» tropft; Zeichen langsamer
 
-*2026-10-07 · Abnahme 0.11.0T (Punkt 2), Tickets «Helldunkel Umschaltung», «Button für alle» · Version 0.11.0T2 · ergänzt 0025, 0026, 0030, 0034, 0035*
+*2026-10-07 · Abnahme 0.11.0T (Punkt 2), Tickets «Helldunkel Umschaltung», «Button für alle» · Version 0.11.0T2 · ergänzt 0025, 0026, 0030, 0034, 0035 · Dauer des Tropfens und Zeiten der Zeichen geändert durch 0037*
 
 ## Ausgangslage
 

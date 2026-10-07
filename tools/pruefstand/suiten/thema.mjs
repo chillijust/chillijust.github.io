@@ -79,9 +79,42 @@ pruefe('B4 eine gewählte helle Darstellung sticht das dunkle Gerät',
 
 // ── C · Der Schalter im Kopf ────────────────────────────────
 // Die neue Darstellung tropft mit dem Druck aus dem Schalter, THEMA_TROPFEN
-// lang (ADR 0025, 0026, 0036); der Knauf gleitet derweil hinüber.
+// lang (ADR 0025, 0026, 0036), und folgt dem Knauf (ADR 0037).
 var sk = q('#themaKnopf').getBoundingClientRect(), tropfAn = null;
+var sonne = q('#themaKnopf .hell').getBoundingClientRect(), mond = q('#themaKnopf .dunkel').getBoundingClientRect();
+function spur(n) { return document.documentElement.style.getPropertyValue('--spur-' + n); }
+// inset(o r u l round k) → die Fläche, die es freilässt
+function ausSpur(t) {
+  var z = (t.match(/-?[0-9.]+px/g) || []).map(parseFloat);
+  return z.length === 5 ? { left: z[3], right: innerWidth - z[1], top: z[0], bottom: innerHeight - z[2], rund: z[4] } : null;
+}
+function gleich(a, b) { return !!a && Math.abs(a.left - b.left) < 1 && Math.abs(a.right - b.right) < 1 &&
+  Math.abs(a.top - b.top) < 1 && Math.abs(a.bottom - b.bottom) < 1; }
 themaUmschalten();
+// ADR 0037: Der Knauf sprang, weil der Schalter schon vor dem Übergang auf
+// «dunkel» stand — das alte Bild zeigte ihn bereits am Ziel.
+pruefe('C5b im alten Bild liegt der Knauf noch auf der Sonne',
+  q('#themaKnopf').getAttribute('aria-checked') === 'false' && knaufAuf() === 'sonne', knaufAuf());
+pruefe('C5c der Knauf gleitet als eigene Ebene über dem Tropfen',
+  q('#themaKnopf .knauf').style.viewTransitionName === 'thema-traeger' &&
+  document.documentElement.classList.contains('thema-folgt'));
+// Sonne und Mond liegen über dem Knauf; gehoben werden sie mit, sonst deckte er sie zu.
+pruefe('C5h Sonne und Mond bleiben über ihm sichtbar', alle('#themaKnopf .seite').map(function (el) {
+  return el.style.viewTransitionName; }).join(',') === 'thema-oben-0,thema-oben-1');
+var s0 = ausSpur(spur(0)), s1 = ausSpur(spur(1)), s2 = ausSpur(spur(2));
+pruefe('C5d der Tropfen beginnt im Knauf, rund wie er', gleich(s0, sonne) && s0.rund === 18, spur(0));
+pruefe('C5e und färbt, was der Knauf überstreicht', gleich(s1, { left: sonne.left, right: mond.right,
+  top: sonne.top, bottom: sonne.bottom }) && s1.rund === 18, spur(1));
+// Bedeckt ist eine Ecke, wenn sie nicht weiter als «rund» vom Kern (der Fläche
+// ohne die Rundung) liegt.
+function deckt(f, x, y) {
+  var dx = Math.max(f.left + f.rund - x, 0, x - (f.right - f.rund));
+  var dy = Math.max(f.top + f.rund - y, 0, y - (f.bottom - f.rund));
+  return Math.sqrt(dx * dx + dy * dy) <= f.rund;
+}
+pruefe('C5f dann läuft er über den ganzen Bildschirm aus, rund', !!s2 && deckt(s2, 0, 0) &&
+  deckt(s2, innerWidth, 0) && deckt(s2, 0, innerHeight) && deckt(s2, innerWidth, innerHeight) &&
+  Math.abs((s2.rund - 18) - (s1.left - s2.left)) < 0.2, spur(2));
 pruefe('C0a der Tropfen beginnt mit dem Druck, nicht danach',
   document.documentElement.classList.contains('thema-tropft') &&
   document.documentElement.style.getPropertyValue('--thema-dauer') === THEMA_TROPFEN + 'ms' && THEMA_TROPFEN >= 1200,
@@ -93,6 +126,11 @@ var bildA = tropfen && tropfen.cssRules[0].style, bildZ = tropfen && tropfen.css
 pruefe('C0b der Kontrast steigt mit dem Tropfen, nicht schlagartig', !!tropfen &&
   bildA.opacity === '0' && bildZ.opacity === '1' && /circle/.test(bildA.clipPath) && /circle/.test(bildZ.clipPath),
   tropfen ? bildA.opacity + ' ' + bildZ.opacity : 'keine Regel');
+// Folgt er einem Träger, gleitet der im ersten Drittel, dann läuft es aus.
+var spurRegel = regelWerte(function (r) { return r.name === 'thema-spur' ? r : null; });
+var spurBilder = spurRegel ? Array.prototype.map.call(spurRegel.cssRules, function (r) { return r.keyText + ' ' + r.style.opacity; }) : [];
+pruefe('C0c mit Träger: erst die Spur, dann aus, der Kontrast steigt', spurBilder.join(',') ===
+  '0% 0,33.333% 0.5,100% 1', spurBilder.join(','));
 return warte(340).then(function () {
   tropfAn = { klasse: document.documentElement.classList.contains('thema-tropft'),
     x: parseFloat(document.documentElement.style.getPropertyValue('--thema-x')),
@@ -107,8 +145,8 @@ return warte(340).then(function () {
   pruefe('C3 der Grund wird dunkel', grund() === 'rgb(20, 20, 19)', grund());
   pruefe('C4 die Statusleiste folgt', meta() === '#141413', meta());
   pruefe('C5 der Schalter steht auf «dunkel»', q('#themaKnopf').getAttribute('aria-checked') === 'true');
-  pruefe('C5b der Knauf gleitet hinüber, statt zu springen',
-    q('#themaKnopf .knauf').getAnimations().length === 1);
+  pruefe('C5g danach trägt der Knauf keinen Namen mehr', !q('#themaKnopf .knauf').style.viewTransitionName &&
+    !document.documentElement.classList.contains('thema-folgt'));
   ausbewegt();
   pruefe('C5a der Knauf liegt auf dem Mond', knaufAuf() === 'mond', knaufAuf());
   pruefe('C6 die Wahl ist gemerkt', gespeichert() === 'dunkel', gespeichert());
@@ -157,12 +195,22 @@ return warte(340).then(function () {
   pruefe('D4a was nichts sichtbar ändert, tropft nicht', !document.documentElement.classList.contains('thema-tropft'));
   // Auch aus den Einstellungen tropft die neue Darstellung aus dem Knopf (ADR 0036).
   var dk = q('.wahl [data-thema="dunkel"]'), dr = dk.getBoundingClientRect();
+  var ak = q('.wahl [data-thema="auto"]').getBoundingClientRect();
   dk.click();
   pruefe('D4b «Dunkel» tropft aus seinem Knopf', document.documentElement.classList.contains('thema-tropft') &&
     Math.abs(parseFloat(document.documentElement.style.getPropertyValue('--thema-x')) - (dr.left + dr.width / 2)) < 2 &&
     Math.abs(parseFloat(document.documentElement.style.getPropertyValue('--thema-y')) - (dr.top + dr.height / 2)) < 2);
+  // ADR 0037: Die Markierung gleitet von «Automatisch» zu «Dunkel», der Tropfen folgt ihr.
+  var d0 = ausSpur(spur(0)), d1 = ausSpur(spur(1));
+  pruefe('D4c der Tropfen folgt der Markierung', q('.wahl .wahl-marke').style.viewTransitionName === 'thema-traeger' &&
+    alle('.wahl button').map(function (el) { return el.style.viewTransitionName; }).join(',') ===
+      'thema-oben-0,thema-oben-1,thema-oben-2' && gleich(d0, ak) && gleich(d1, { left: ak.left, right: dr.right, top: dr.top, bottom: dr.bottom }) && d0.rund === 12,
+    spur(0) + ' ' + spur(1));
   return warte(THEMA_TROPFEN + 500);
 }).then(function () {
+  pruefe('D4d die Markierung gleitet nicht doppelt und trägt danach keinen Namen',
+    q('.wahl .wahl-marke').getAnimations().length === 0 && !q('.wahl .wahl-marke').style.viewTransitionName &&
+    alle('.wahl button').every(function (el) { return !el.style.viewTransitionName; }));
   pruefe('D5 «Dunkel» wirkt', grund() === 'rgb(20, 20, 19)' &&
     q('.wahl [aria-pressed="true"]').getAttribute('data-thema') === 'dunkel' &&
     !document.documentElement.classList.contains('thema-tropft'));

@@ -36,9 +36,10 @@ bestaetigen('Gespeichert', '', null, null);
 pruefe('G3 jedes Mal von vorn', erst && zeichen().classList.contains('zeichnet'));
 hinweisSchliessen();
 
-// ── W · langsam und weich (ADR 0036) ────────────────────────
-// Am Gerät zu flink: Jede Bewegung dauert länger als zuvor, läuft ohne Ruck
-// an — und ist doch fertig, bevor die kürzeste Bestätigung geht.
+// ── W · weich, nicht zu flink und nicht zu träge (ADR 0036, 0037) ─
+// 0.11.0T war am Gerät zu flink, 0.11.0T2 einen Tick zu träge: Jede Bewegung
+// liegt dazwischen, läuft ohne Ruck an — und ist fertig, bevor die kürzeste
+// Bestätigung geht.
 function zeit(sel) {
   var el = q(sel), st = el && getComputedStyle(el);
   return st ? { dauer: parseFloat(st.animationDuration), warten: parseFloat(st.animationDelay), kurve: st.animationTimingFunction } : null;
@@ -52,9 +53,10 @@ var zeiten = {
   blatt: zeit('[data-zeichen="kopie"] .z-blatt')
 };
 proben.forEach(function (d) { d.remove(); });
-var vorher = { haken: 0.42, punkt: 0.34, strich: 0.42, pfeil: 0.62, blatt: 0.5 };
-pruefe('W1 jedes Zeichen bewegt sich langsamer als zuvor', Object.keys(vorher).every(function (k) {
-  return zeiten[k] && zeiten[k].dauer >= vorher[k] * 1.5; }), JSON.stringify(zeiten));
+var flink = { haken: 0.42, punkt: 0.34, strich: 0.42, pfeil: 0.62, blatt: 0.5 };   // 0.11.0T
+var traege = { haken: 0.7, punkt: 0.55, strich: 0.7, pfeil: 0.95, blatt: 0.8 };     // 0.11.0T2
+pruefe('W1 jedes Zeichen liegt zwischen zu flink und zu träge', Object.keys(flink).every(function (k) {
+  return zeiten[k] && zeiten[k].dauer >= flink[k] * 1.1 && zeiten[k].dauer <= traege[k] * 0.8; }), JSON.stringify(zeiten));
 pruefe('W2 und ist fertig, bevor die Bestätigung geht', Object.keys(zeiten).every(function (k) {
   return zeiten[k] && (zeiten[k].dauer + zeiten[k].warten) * 1000 <= BESTAETIGUNG_MS - 200; }));
 pruefe('W3 der Punkt fällt weich, nicht beschleunigt bis zum Aufprall', zeiten.punkt &&

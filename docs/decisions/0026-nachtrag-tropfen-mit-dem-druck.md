@@ -1,7 +1,7 @@
 # 0026 · Nachtrag: Hell/Dunkel tropft mit dem Druck, Ticketfeld, Kalender
 
 *2026-10-06 · Ticket vom Gerät (App-Stand 0.9.0T4) · Version 0.9.0T5 · ändert 0025
-(Hell ↔ Dunkel, Ticketzeilen, Kalenderwochen, Woche ↔ Monat, «Hinzufügen»)*
+(Hell ↔ Dunkel, Ticketzeilen, Kalenderwochen, Woche ↔ Monat, «Hinzufügen») · `knaufGleiten` abgelöst durch 0037*
 
 ## Ausgangslage
 
