@@ -64,7 +64,10 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   «−» des Zählers, ab eins (ADR 0038).
 - **Timer und Zähler** (ADR 0038): Beim Timer startet der Tipp ihn und läßt ein Glasfenster
   aus der Kachel tropfen (`timerOeffnen`); abgehakt wird am Ende oder mit «Fertig», danebentippen
-  schließt nur das Fenster. Beim Zähler zählt der Tipp eins, der erste hakt ab (`zaehlen`).
+  schließt nur das Fenster; ein runder Knopf pausiert (`timerPause`). Beim Zähler zählt der
+  Tipp einen Schritt mit Einheit (0,3 L), der erste hakt ab (`zaehlen`, ADR 0040).
+- **Glas an einer Gewohnheit beginnt und endet in ihrer Scheibe** (`scheibeVon`), nie in der
+  ganzen Kachel — der Tropfen nimmt die Größe seiner Quelle (ADR 0040).
 - **Die Abgewöhnen-Kachel** hat nichts abzuhaken: Antippen oder lange drücken öffnet sie;
   *Drang* und *Rückfall* sind eigene Knöpfe darunter (ADR 0004).
 - **Ein Termin ist eine Zeile mit blauem Strich** (`zeichneTerminZeile`), auf dem

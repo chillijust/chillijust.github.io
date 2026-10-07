@@ -34,8 +34,8 @@ state = {
     archiviert: null,                    // | Tagesschlüssel
     erinnerung: null,                    // | 'HH:MM' — nur für den Kalender-Export
     timer: null,                         // | { minuten: 1–240, stumm } — schließt zaehler aus (ADR 0038)
-    zaehler: false,
-    zaehlung: {}                         // Tag → n, nur für n ≥ 2; ein erledigter Tag ohne Eintrag zählt 1
+    zaehler: null,                       // | { schritt: 0,01–1000, einheit: 'L' } (ADR 0040)
+    zaehlung: {}                         // Tag → Menge; ein erledigter Tag ohne Eintrag zählt einen Schritt
   }],
   abgewoehnen: [{
     id: 'a…',
@@ -62,7 +62,7 @@ state = {
     zeit: 1791700000000                  // zuletzt geschrieben, oder null
   }],
   welle: null,                           // | { id, start } — die laufende 10-Minuten-Welle
-  timer: null,                           // | { id, tag, start, ms, stumm } — der laufende Timer, höchstens einer
+  timer: null,                           // | { id, tag, start, ms, stumm, pausiert } — der laufende Timer, höchstens einer
   exportiert: null,                      // | Zeitpunkt in ms — wann zuletzt eine .ics hinausging
   tickets: [{
     id: 'k…',

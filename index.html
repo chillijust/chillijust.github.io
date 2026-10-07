@@ -505,6 +505,8 @@ svg.wm { display: block; flex: none; color: var(--text); overflow: visible; }
 .gw-scheibe svg { width: 20px; height: 20px; }
 /* Zähler: die Zahl von heute in der Scheibe, «−» daneben (ADR 0038). */
 .gw-zahl { font-family: var(--sans); font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.gw-zahl.lang { font-size: 12px; letter-spacing: -.02em; }
+.zaehl-felder { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .gw-minus { flex: none; margin-right: 6px; background: var(--flaeche-2); color: var(--text); }
 .gw-kachel.zaehlt.gerade .gw-scheibe { animation: abgehakt .5s cubic-bezier(.3, 1.6, .5, 1); }
 /* Timer: Das Fenster ist Glas wie der Hinweis; groß der Ring mit der Restzeit. */
@@ -517,6 +519,9 @@ svg.wm { display: block; flex: none; color: var(--text); overflow: visible; }
 .timer-zeit { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--sans);
   font-size: 40px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .timer-karte .klein { margin: 0 0 12px; }
+.timer-pause { width: 56px; height: 56px; margin: 0 auto 10px; background: var(--flaeche-2); color: var(--text); }
+.timer-pause svg { width: 24px; height: 24px; }
+.timer-karte.pausiert .timer-zeit { opacity: .5; }
 .gw-kachel.erledigt .gw-scheibe { background: var(--erledigt); color: var(--grund); }
 .gw-kachel.gerade.erledigt .gw-scheibe { animation: abgehakt .5s cubic-bezier(.3, 1.6, .5, 1); }
 @keyframes abgehakt {
@@ -1536,7 +1541,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.12.0T';
+var APP_VERSION = '0.12.0T2';
 var APP_STAND = '2026-10-07';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -1587,6 +1592,8 @@ var ICON = {
   minus: svg('<path d="M5 12h14"/>'),
   ton: svg('<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>'),
   stumm: svg('<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/>'),
+  pause: svg('<path d="M9 6v12M15 6v12"/>'),
+  spielen: svg('<path d="M8.5 5.8v12.4l9.8-6.2z"/>'),
   hinweis: svg('<circle cx="12" cy="12" r="9"/><path class="z-strich" pathLength="1" d="M12 11v5"/>' +
     '<path class="z-punkt" d="M12 7.5v.01"/>'),
   laden: svg('<g class="z-pfeil"><path d="M12 3v11"/><path d="M7.5 9.5l4.5 4.5 4.5-4.5"/></g>' +
@@ -1676,7 +1683,7 @@ function grundStand() {
     termine: [],
     journal: [],         // Wochenreflexionen, nach Woche sortiert
     welle: null,         // die laufende 10-Minuten-Welle: { id, start } oder null
-    timer: null,         // der laufende Timer einer Gewohnheit: { id, tag, start, ms, stumm } oder null
+    timer: null,         // der laufende Timer einer Gewohnheit: { id, tag, start, ms, stumm, pausiert } oder null
     exportiert: null,    // wann zuletzt eine .ics hinausging, als Zeitpunkt
     tickets: [],         // Fehler und Wünsche, bis sie kopiert sind — nicht im Sicherungscode
     gesichert: null,     // wann zuletzt ein Sicherungscode kopiert wurde, als Zeitpunkt
@@ -1748,7 +1755,8 @@ function stand(roh) {
     tm.ms >= 60000 && tm.ms <= TIMER_MAX * 60000) {
     s.gewohnheiten.forEach(function (g) {
       if (g.id === tm.id && !g.archiviert && g.timer) {
-        s.timer = { id: g.id, tag: tm.tag, start: tm.start, ms: tm.ms, stumm: tm.stumm === true };
+        s.timer = { id: g.id, tag: tm.tag, start: tm.start, ms: tm.ms, stumm: tm.stumm === true,
+          pausiert: istZeit(tm.pausiert) ? tm.pausiert : null };
       }
     });
   }
@@ -1764,19 +1772,22 @@ function stand(roh) {
 
 // Eine Gewohnheit, wie sie gespeichert wird:
 //   { id, name, rhythmus, angelegt: Tag, erledigt: [Tag, …], archiviert: Tag | null,
-//     erinnerung: 'HH:MM' | null, timer: { minuten, stumm } | null, zaehler: bool,
-//     zaehlung: { Tag: n } }
+//     erinnerung: 'HH:MM' | null, timer: { minuten, stumm } | null,
+//     zaehler: { schritt, einheit } | null, zaehlung: { Tag: Menge } }
 // Die Erinnerung ist nur für den Kalender-Export da (ADR 0009). Timer und Zähler
-// schließen sich aus (ADR 0038). Gezählt wird nur, was über eins hinausgeht: Ein
-// erledigter Tag ohne Eintrag in `zaehlung` steht für eins — so bleibt jeder
-// Haken, auch ein nachgetragener, eine gültige Zählung.
+// schließen sich aus (ADR 0038). Ein Zähler zählt in Schritten mit Einheit
+// (0,3 L); `zaehlung` hält die Menge des Tages. Ein erledigter Tag ohne Eintrag
+// steht für einen Schritt — so bleibt jeder Haken, auch ein nachgetragener, eine
+// gültige Zählung (ADR 0040). Ein älterer Stand mit `zaehler: true` zählt in Einern.
 // Was nicht paßt, fällt weg — lieber eine Gewohnheit weniger als eine kaputte.
 // Beide Grenzen stehen hier oben: `laden()` läuft, bevor das Skript weiter unten
 // ankommt, und eine spätere `var` wäre dann noch undefined.
 var NAME_MAX = 40;
 var PRO_WOCHE_MAX = 6;
 var TIMER_MAX = 240;      // Minuten
-var ZAEHLER_MAX = 99;
+var ZAEHLER_MAX = 9999;   // Menge an einem Tag
+var SCHRITT_MAX = 1000;
+var EINHEIT_MAX = 8;
 
 function gewohnheitLesen(g) {
   if (!g || typeof g !== 'object' || typeof g.id !== 'string' || !g.id) return null;
@@ -1792,11 +1803,17 @@ function gewohnheitLesen(g) {
   erledigt.sort();
   var t = g.timer, timer = t && typeof t === 'object' && t.minuten === Math.floor(t.minuten) &&
     t.minuten >= 1 && t.minuten <= TIMER_MAX ? { minuten: t.minuten, stumm: t.stumm === true } : null;
-  var zaehler = !timer && g.zaehler === true, zaehlung = {};
+  var z = g.zaehler, zaehler = null, zaehlung = {};
+  if (!timer && z === true) zaehler = { schritt: 1, einheit: '' };
+  else if (!timer && z && typeof z === 'object' && typeof z.schritt === 'number' && z.schritt > 0 &&
+    z.schritt <= SCHRITT_MAX && Math.round(z.schritt * 100) > 0) {
+    zaehler = { schritt: Math.round(z.schritt * 100) / 100,
+      einheit: typeof z.einheit === 'string' ? z.einheit.trim().slice(0, EINHEIT_MAX) : '' };
+  }
   if (zaehler && g.zaehlung && typeof g.zaehlung === 'object') {
     erledigt.forEach(function (k) {
       var n = g.zaehlung[k];
-      if (n === Math.floor(n) && n >= 2 && n <= ZAEHLER_MAX) zaehlung[k] = n;
+      if (typeof n === 'number' && n > 0 && n <= ZAEHLER_MAX) zaehlung[k] = Math.round(n * 1000) / 1000;
     });
   }
   return {
@@ -3092,10 +3109,11 @@ function hakenJubel(g, vorher, nachher, heute) {
 }
 
 // Das Glas mit Haken, aus dem, was den Jubel ausgelöst hat, und dorthin zurück:
-// die Zeile der Tagesliste, sonst die Kachel.
+// die runde Marke der Tageszeile, sonst die Scheibe der Kachel (ADR 0040).
 function jubeln(titel, text, id) {
   var el = ['[data-nachtrag="' + id + '"]', '[data-haken="' + id + '"]', '[data-ab="' + id + '"]']
     .map(function (s) { return document.querySelector(s); }).filter(zuSehen)[0] || null;
+  el = scheibeVon(el);
   bestaetigen(titel, text, el, el, 'haken');
 }
 
@@ -3813,17 +3831,19 @@ function zeichneKachel(e) {
   }
   // Timer: läuft er, zeigt der Ring die Restzeit statt der Stärke; sonst steht
   // seine Dauer dabei. Zähler: die Zahl von heute (ADR 0038).
-  if (laeuft) info = '<span data-timerrest>' + esc(restText(rest)) + '</span> · läuft';
+  if (laeuft) info = '<span data-timerrest>' + esc(restText(rest)) + '</span> · ' +
+    (state.timer.pausiert ? 'pausiert' : 'läuft');
   else if (g.timer && !a.erledigtHeute) info += ' · ' + g.timer.minuten + ' min';
-  else if (zahl) info = zahl + '× heute · ' + info;
+  else if (zahl) info = esc(mengeText(g, zahl)) + ' heute · ' + info;
   var klassen = 'gw-kachel' + (a.erledigtHeute ? ' erledigt' : '') + (a.warnen ? ' warnen' : '') +
     (geradeAbgehakt === g.id ? ' gerade' : '') + (laeuft ? ' laeuft' : '') + (zahl ? ' zaehlt' : '');
   return '<div class="' + klassen + '"' + (laeuft ? ' data-timerkachel="' + esc(g.id) + '"' : '') + '>' +
     '<button type="button" class="gw-haken" data-haken="' + esc(g.id) + '" aria-pressed="' +
-      (a.erledigtHeute ? 'true' : 'false') + '"' + (g.zaehler ? ' aria-label="' + esc(g.name) + ', ' + zahl +
-        ' gezählt, tippen zählt eins dazu"' : '') + '>' +
+      (a.erledigtHeute ? 'true' : 'false') + '"' + (g.zaehler ? ' aria-label="' + esc(g.name) + ', ' +
+        esc(mengeText(g, zahl)) + ' heute, tippen zählt ' + esc(zahlText(g.zaehler.schritt)) + ' dazu"' : '') + '>' +
       '<span class="gw-ring">' + (laeuft ? timerRing(rest / state.timer.ms) : ring(a.staerke, g.id)) +
-        '<span class="gw-scheibe">' + (zahl ? '<span class="gw-zahl">' + zahl + '</span>' : ICON.haken) +
+        '<span class="gw-scheibe">' + (zahl ? '<span class="gw-zahl' + (zahlText(zahl).length > 3 ? ' lang' : '') +
+          '">' + esc(zahlText(zahl)) + '</span>' : ICON.haken) +
         '</span></span>' +
       '<span class="gw-text"><span class="gw-name">' + esc(g.name) + '</span>' +
         '<span class="gw-info">' + info + '</span>' +
@@ -3831,7 +3851,7 @@ function zeichneKachel(e) {
           return '<span class="punkt ' + p.art + '"></span>';
         }).join('') + '</span></span>' +
     '</button>' +
-    (zahl ? '<button type="button" class="rund gw-minus" data-minus="' + esc(g.id) + '" aria-label="Eins weniger">' +
+    (zahl ? '<button type="button" class="rund gw-minus" data-minus="' + esc(g.id) + '" aria-label="Einen Schritt weniger">' +
       ICON.minus + '</button>' : '') +
     '</div>';
 }
@@ -4190,7 +4210,8 @@ function zeichneTagesGewohnheiten(k, heute) {
     var erl = g.erledigt.indexOf(k) !== -1;
     // «x-mal pro Woche» verpaßt keinen Tag — gewertet wird die Woche.
     var n = erl && g.zaehler ? zaehlStand(g, k) : 0;
-    var wie = erl ? (n > 1 ? n + '× erledigt' : 'erledigt') : g.rhythmus.art === 'proWoche' ? 'frei'
+    var wie = erl ? (n && (n !== 1 || g.zaehler.einheit) ? mengeText(g, n) + ' erledigt' : 'erledigt')
+      : g.rhythmus.art === 'proWoche' ? 'frei'
       : !faelligAm(g, k) ? 'nicht dran' : k === heute ? 'offen' : 'verpasst';
     var innen = '<span class="kal-haken">' + ICON.haken + '</span>' +
       '<span class="kal-name">' + esc(g.name) + '</span><span class="kal-status">' + wie + '</span>';
@@ -4456,6 +4477,8 @@ function entwurfAus(g) {
     anzahl: r.anzahl || 3,
     weise: g && g.timer ? 'timer' : g && g.zaehler ? 'zaehler' : 'tipp',
     minuten: g && g.timer ? String(g.timer.minuten) : '10',
+    schritt: g && g.zaehler ? zahlText(g.zaehler.schritt) : '1',
+    einheit: g && g.zaehler ? g.zaehler.einheit : '',
     ton: !(g && g.timer && g.timer.stumm),
     erinnern: !!(g && g.erinnerung),
     erinnerung: g && g.erinnerung ? g.erinnerung : '08:00',
@@ -4566,6 +4589,14 @@ function zeichneFormular() {
             'aria-checked="' + (entwurf.ton ? 'true' : 'false') + '"><span class="schalter-spur">' +
             '<span class="schalter-knauf"></span></span></button></div>' +
       '</div>' +
+      '<div class="rh-teil zaehl-felder" id="gwZaehlerTeil"' + (entwurf.weise === 'zaehler' ? '' : ' hidden') + '>' +
+        '<div><label class="tm-etikett" for="gwSchritt">Je Tipp</label>' +
+          '<input id="gwSchritt" class="eingabe" type="text" inputmode="decimal" autocomplete="off" value="' +
+            esc(entwurf.schritt) + '"></div>' +
+        '<div><label class="tm-etikett" for="gwEinheit">Einheit</label>' +
+          '<input id="gwEinheit" class="eingabe" type="text" maxlength="' + EINHEIT_MAX + '" autocomplete="off" ' +
+            'placeholder="z. B. L" value="' + esc(entwurf.einheit) + '"></div>' +
+      '</div>' +
       '<p class="klein" id="gwWeiseText">' + esc(weiseErklaerung(entwurf.weise)) + '</p>' +
     '</section>' +
     // Schon länger dabei, nur nicht eingetragen: Der Beginn darf zurück, nie
@@ -4650,7 +4681,7 @@ function erinnerungErklaerung(e) {
 function weiseErklaerung(w) {
   if (w === 'timer') return 'Ein Tipp startet den Timer; abgehakt ist sie, wenn er durch ist oder du «Fertig» tippst. ' +
     'Den Ton hörst du nur bei offener App.';
-  if (w === 'zaehler') return 'Jeder Tipp zählt eins, ab dem ersten ist sie erledigt. Vertippt? «−» auf der Kachel.';
+  if (w === 'zaehler') return 'Jeder Tipp zählt so viel dazu, ab dem ersten ist sie erledigt. Vertippt? «−» auf der Kachel.';
   return 'Ein Tipp hakt sie ab.';
 }
 
@@ -4718,11 +4749,14 @@ function bindeFormular() {
         x.setAttribute('aria-pressed', x === b ? 'true' : 'false');
       });
       teilZeigen($('gwTimerTeil'), entwurf.weise === 'timer', b);
+      teilZeigen($('gwZaehlerTeil'), entwurf.weise === 'zaehler', b);
       wahlenSetzen();
       $('gwWeiseText').textContent = weiseErklaerung(entwurf.weise);
     });
   });
   $('gwMinuten').addEventListener('input', function () { entwurf.minuten = this.value; });
+  $('gwSchritt').addEventListener('input', function () { entwurf.schritt = this.value; });
+  $('gwEinheit').addEventListener('input', function () { entwurf.einheit = this.value; });
   $('gwTon').addEventListener('click', function () {
     entwurf.ton = !entwurf.ton;
     this.setAttribute('aria-checked', entwurf.ton ? 'true' : 'false');
@@ -4765,6 +4799,15 @@ function entwurfSpeichern() {
     return;
   }
   var timer = entwurf.weise === 'timer' ? { minuten: minuten, stumm: !entwurf.ton } : null;
+  // «0,3» wie «0.3»; höchstens zwei Stellen hinter dem Komma.
+  var schritt = Number(String(entwurf.schritt).trim().replace(',', '.'));
+  if (entwurf.weise === 'zaehler' && !(schritt > 0 && schritt <= SCHRITT_MAX && Math.abs(schritt * 100 - Math.round(schritt * 100)) < 1e-6)) {
+    melden('Gib an, wie viel ein Tipp zählt — etwa 1 oder 0,3.');
+    $('gwSchritt').focus();
+    return;
+  }
+  var zaehler = entwurf.weise === 'zaehler' ? { schritt: Math.round(schritt * 100) / 100,
+    einheit: String(entwurf.einheit).trim().slice(0, EINHEIT_MAX) } : null;
   var r = entwurf.art === 'wochentage' ? { art: 'wochentage', tage: entwurf.tage.slice() }
     : entwurf.art === 'proWoche' ? { art: 'proWoche', anzahl: entwurf.anzahl } : { art: 'taeglich' };
   var g = entwurf.id ? gewohnheitNach(entwurf.id) : null, uhr = entwurf.erinnern ? entwurf.erinnerung : null;
@@ -4782,11 +4825,11 @@ function entwurfSpeichern() {
     if (!timer && state.timer && state.timer.id === g.id) state.timer = null;
     if (entwurf.weise !== 'zaehler') g.zaehlung = {};
     g.timer = timer;
-    g.zaehler = entwurf.weise === 'zaehler';
+    g.zaehler = zaehler;
   } else {
     g = { id: neueId('g'), name: name.slice(0, NAME_MAX), rhythmus: rhythmusLesen(r),
       angelegt: bisher, erledigt: [], archiviert: null, erinnerung: uhr, imKalender: null,
-      timer: timer, zaehler: entwurf.weise === 'zaehler', zaehlung: {} };
+      timer: timer, zaehler: zaehler, zaehlung: {} };
     state.gewohnheiten.push(g);
     g = null;
   }
@@ -4795,7 +4838,7 @@ function entwurfSpeichern() {
   if (speichern()) {
     bestaetigen(g ? 'Gespeichert' : 'Angelegt', g ? '' : entwurf.weise === 'timer' ? 'Antippen startet den Timer, lange drücken öffnet sie.'
       : entwurf.weise === 'zaehler' ? 'Antippen zählt eins, lange drücken öffnet sie.' : 'Antippen heißt erledigt, lange drücken öffnet sie.',
-      $('gwSpeichern'), '[data-haken="' + id + '"]');
+      $('gwSpeichern'), '[data-haken="' + id + '"]' + SCHEIBE);
   }
   zeige('home');
 }
@@ -4830,7 +4873,7 @@ function lasterSpeichern(name) {
   var id = l ? l.id : state.abgewoehnen[state.abgewoehnen.length - 1].id;
   if (speichern()) {
     bestaetigen(l ? 'Gespeichert' : 'Angelegt', l ? '' : 'Kommt ein Drang, tipp auf «Drang».',
-      $('gwSpeichern'), '[data-ab="' + id + '"]');
+      $('gwSpeichern'), '[data-ab="' + id + '"]' + SCHEIBE);
   }
   zeige('home');
 }
@@ -5229,23 +5272,49 @@ function takt() {
 var timerQuelle = null;   // die Gewohnheit, aus deren Kachel das Fenster tropfte
 var tonKontext = null;
 
+// Pausiert steht die Restzeit still: gerechnet wird bis zum Augenblick der Pause.
 function timerRest(nun) {
   var t = state.timer;
-  return t ? Math.max(0, t.start + t.ms - nun) : 0;
+  return t ? Math.max(0, t.start + t.ms - (t.pausiert || nun)) : 0;
 }
 
-function zaehlStand(g, k) { return g.erledigt.indexOf(k) === -1 ? 0 : g.zaehlung[k] || 1; }
+// Pause und weiter (ADR 0040): Weiter schiebt den Start um die Pause nach hinten.
+function timerPause() {
+  var t = state.timer, nun = zeitJetzt();
+  if (!t) return;
+  if (t.pausiert) { t.start += nun - t.pausiert; t.pausiert = null; } else t.pausiert = nun;
+  speichern();
+  render();
+  timerOeffnen(t.id);
+}
 
-function zaehlen(id, d) {
+function zaehlStand(g, k) {
+  if (g.erledigt.indexOf(k) === -1) return 0;
+  return g.zaehlung[k] !== undefined ? g.zaehlung[k] : g.zaehler ? g.zaehler.schritt : 1;
+}
+
+// Mengen auf Tausendstel: 0,1 + 0,2 soll 0,3 bleiben.
+function menge(x) { return Math.round(x * 1000) / 1000; }
+function zahlText(x) { return String(Math.round(x * 100) / 100).replace('.', ','); }
+// «1,2 L», ohne Einheit in Einern «3×», sonst nur die Zahl.
+function mengeText(g, x) {
+  var z = g.zaehler;
+  return zahlText(x) + (z.einheit ? ' ' + z.einheit : z.schritt === 1 ? '×' : '');
+}
+
+// Ein Schritt dazu (`richtung` 1) oder zurück (-1). Von null auf den ersten
+// Schritt und zurück ist ein Haken — mit allem Jubel, der dazugehört.
+function zaehlen(id, richtung) {
   var g = gewohnheitNach(id), k = heuteSchluessel();
   if (!g || !g.zaehler) return;
-  var n = zaehlStand(g, k), neu = Math.max(0, Math.min(ZAEHLER_MAX, n + d));
+  var n = zaehlStand(g, k), neu = Math.min(ZAEHLER_MAX, menge(n + richtung * g.zaehler.schritt));
+  if (neu < g.zaehler.schritt / 2) neu = 0;
   if (neu === n) return;
   geradeAbgehakt = neu ? id : null;
-  // Von null auf eins und zurück ist ein Haken — mit allem Jubel, der dazugehört.
-  if (!n || !neu) umschaltenUndZeichnen(id, k);
+  if (!n) { g.zaehlung[k] = neu; umschaltenUndZeichnen(id, k); }
+  else if (!neu) umschaltenUndZeichnen(id, k);
   else {
-    if (neu > 1) g.zaehlung[k] = neu; else delete g.zaehlung[k];
+    g.zaehlung[k] = neu;
     speichern();
     render();
   }
@@ -5284,6 +5353,11 @@ function gong() {
 }
 
 function kachelVon(id) { return document.querySelector('[data-haken="' + id + '"]'); }
+// Jedes Glas, das an einer Gewohnheit hängt, beginnt und endet in ihrer runden
+// Scheibe — nicht in der ganzen Kachel: Der Tropfen nimmt die Größe seiner
+// Quelle, und eine Kachel ist schon fast so breit wie das Fenster (ADR 0040).
+var SCHEIBE = ' .gw-scheibe';
+function scheibeVon(el) { return el && el.querySelector('.gw-scheibe, .kal-haken') || el; }
 
 // Ein Tipp auf die Kachel: Läuft schon ein anderer Timer, fragt das Glas;
 // läuft dieser, tropft sein Fenster wieder auf.
@@ -5294,13 +5368,13 @@ function timerStarten(id) {
   if (state.timer && state.timer.id !== id) {
     var alt = gewohnheitNach(state.timer.id);
     hinweisZeigen('Es läuft schon ein Timer', '«' + (alt ? alt.name : '') + '» ist noch nicht durch.',
-      k ? k.getBoundingClientRect() : null, '[data-haken="' + id + '"]',
+      k ? scheibeVon(k).getBoundingClientRect() : null, '[data-haken="' + id + '"]' + SCHEIBE,
       { frage: { ja: 'Abbrechen, diesen starten', beiJa: function () { state.timer = null; timerStarten(id); } } });
     return;
   }
   if (!state.timer) {
     state.timer = { id: id, tag: heuteSchluessel(), start: zeitJetzt(), ms: g.timer.minuten * 60000,
-      stumm: g.timer.stumm };
+      stumm: g.timer.stumm, pausiert: null };
     speichern();
     render();
   }
@@ -5322,7 +5396,9 @@ function zeichneTimerKarte(g, t) {
       (t.stumm ? 'false' : 'true') + '">' + (t.stumm ? ICON.stumm : ICON.ton) + '</button>' +
     '<div class="timer-bild">' + timerRing(rest / t.ms, 'timerFuell') +
       '<div class="timer-zeit" role="timer" data-timerrest>' + esc(restText(rest)) + '</div></div>' +
-    '<p class="klein">Läuft weiter, auch wenn du das Fenster schließt.</p>' +
+    '<button type="button" class="rund timer-pause" id="timerPause" aria-label="' +
+      (t.pausiert ? 'Weiter' : 'Pause') + '">' + (t.pausiert ? ICON.spielen : ICON.pause) + '</button>' +
+    '<p class="klein">' + (t.pausiert ? 'Pausiert.' : 'Läuft weiter, auch wenn du das Fenster schließt.') + '</p>' +
     '<div class="hinweis-knoepfe">' +
       '<button type="button" class="knopf zart" id="timerAbbrechen">Abbrechen</button>' +
       '<button type="button" class="knopf" id="timerFertig">Fertig</button>' +
@@ -5340,6 +5416,7 @@ function bindeTimerKarte() {
     this.innerHTML = t.stumm ? ICON.stumm : ICON.ton;
   });
   $('timerFertig').addEventListener('click', function () { timerFertig(false); });
+  $('timerPause').addEventListener('click', timerPause);
   // Abbrechen will zwei Tipps: Ein halber Lauf geht sonst mit einer Handbewegung verloren.
   $('timerAbbrechen').addEventListener('click', function () {
     if (!this.classList.contains('frage')) {
@@ -5360,13 +5437,14 @@ function timerOeffnen(id) {
   var blatt = $('timerBlatt'), karte = $('timerKarte'), t = state.timer, g = t && gewohnheitNach(t.id);
   if (!g) return;
   timerQuelle = id;
+  karte.classList.toggle('pausiert', !!t.pausiert);
   karte.innerHTML = zeichneTimerKarte(g, t);
   bindeTimerKarte();
   if (timerOffen()) return;
   blatt.hidden = false;
   void blatt.offsetWidth;
   blatt.classList.add('offen');
-  var k = kachelVon(id);
+  var k = scheibeVon(kachelVon(id));
   if (zuSehen(k)) tropfenAuf(karte, k.getBoundingClientRect(), { rund: '18px', glas: true });
 }
 
@@ -5375,7 +5453,7 @@ function timerSchliessen() {
   var blatt = $('timerBlatt'), karte = $('timerKarte');
   if (!timerOffen()) return;
   blatt.classList.remove('offen');
-  var ziel = kachelVon(timerQuelle), g = zuSehen(ziel) ? geist(karte) : null;
+  var ziel = scheibeVon(kachelVon(timerQuelle)), g = zuSehen(ziel) ? geist(karte) : null;
   if (!g) { blatt.hidden = true; return; }
   var r = karte.getBoundingClientRect();
   karte.style.opacity = '0';

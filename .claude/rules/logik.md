@@ -13,9 +13,10 @@ Gilt für die Gewohnheiten in `index.html`. Begründungen in ADR 0002 und im Pfl
   (über `setDate`), nie mit Millisekunden; verglichen als Text.
 - **Die Uhr ist `jetzt()`**, sonst nirgends `new Date()` für «heute» — der Prüfstand stellt sie.
 - **Heute zählt erst, wenn es erledigt ist.** Ein offener Tag ist kein Aussetzer.
-- **Gezählt ist, was erledigt ist** (ADR 0038): `zaehlStand(g, tag)` ist 0 ohne Haken, sonst
-  `zaehlung[tag]` oder 1. `zaehlung` hält nur Zahlen ab 2; wer einen Tag zurücknimmt, nimmt
-  seine Zahl mit. Ein Timer hakt den Tag ab, an dem er begann.
+- **Gezählt ist, was erledigt ist** (ADR 0038, 0040): `zaehlStand(g, tag)` ist 0 ohne Haken,
+  sonst `zaehlung[tag]` oder ein Schritt. `zaehlung` hält die Menge, auf Tausendstel
+  (`menge`); wer einen Tag zurücknimmt, nimmt seine Menge mit. Ein Timer hakt den Tag ab,
+  an dem er begann; pausiert rechnet `timerRest` bis zur Pause.
 - **x-mal pro Woche wird je Woche (Mo–So) gewertet** und wiegt x Gelegenheiten; die erste
   Woche verlangt nur, was an Tagen übrig war; die laufende zählt erst, wenn erreicht.
 - **Grenzen, die `stand()` braucht, stehen vor `var state = laden();`** — sonst sind sie beim

@@ -28,18 +28,24 @@ function g(id) { return gewohnheitNach(id); }
 
 // ── D · Gespeichert wird, was paßt ───────────────────────────
 var t1 = gw('a', { timer: { minuten: 20, stumm: true } });
-pruefe('D1 ein Timer mit Minuten und «stumm»', t1.timer.minuten === 20 && t1.timer.stumm === true && t1.zaehler === false);
+pruefe('D1 ein Timer mit Minuten und «stumm»', t1.timer.minuten === 20 && t1.timer.stumm === true && t1.zaehler === null);
 pruefe('D2 was nicht paßt, fällt weg', [0, 241, 1.5, '10'].every(function (m) { return gw('x', { timer: { minuten: m } }).timer === null; }));
-pruefe('D3 Timer und Zähler schließen sich aus', gw('x', { timer: { minuten: 5 }, zaehler: true }).zaehler === false);
+pruefe('D3 Timer und Zähler schließen sich aus', gw('x', { timer: { minuten: 5 }, zaehler: true }).zaehler === null);
 var z1 = gw('z', { zaehler: true, erledigt: ['2026-10-12', '2026-10-13'],
   zaehlung: { '2026-10-12': 3, '2026-10-13': 1, '2026-10-11': 5, '2026-10-10': 2.5 } });
-pruefe('D4 gezählt wird nur, was über eins hinausgeht und erledigt ist', JSON.stringify(z1.zaehlung) === '{"2026-10-12":3}' &&
+pruefe('D4 gezählt wird die Menge erledigter Tage', JSON.stringify(z1.zaehlung) === '{"2026-10-12":3,"2026-10-13":1}' &&
   zaehlStand(z1, '2026-10-12') === 3 && zaehlStand(z1, '2026-10-13') === 1 && zaehlStand(z1, '2026-10-11') === 0,
   JSON.stringify(z1.zaehlung));
 var roh = { gewohnheiten: [{ id: 'a', name: 'a', rhythmus: { art: 'taeglich' }, angelegt: '2026-10-01', erledigt: [],
   timer: { minuten: 10 } }, { id: 'b', name: 'b', rhythmus: { art: 'taeglich' }, angelegt: '2026-10-01', erledigt: [] }],
   timer: { id: 'a', tag: HEUTE, start: UHR, ms: 10 * MIN, stumm: false } };
 pruefe('D5 ein laufender Timer übersteht das Laden', stand(roh).timer && stand(roh).timer.id === 'a');
+// ADR 0040: Schritt und Einheit; ein älterer Stand zählt in Einern.
+pruefe('D7 ein älterer Zähler zählt in Einern', JSON.stringify(z1.zaehler) === '{"schritt":1,"einheit":""}');
+var zl = gw('l', { zaehler: { schritt: 0.3, einheit: ' L ' } });
+pruefe('D8 Schritt 0,3 und Einheit L', zl.zaehler.schritt === 0.3 && zl.zaehler.einheit === 'L');
+pruefe('D9 ein Schritt, der nicht paßt, fällt weg', [0, -1, '0.3', 1001].every(function (x) {
+  return gw('x', { zaehler: { schritt: x } }).zaehler === null; }));
 roh.timer.id = 'b';
 pruefe('D6 aber nur für eine Gewohnheit mit Timer', stand(roh).timer === null);
 
@@ -70,13 +76,26 @@ pruefe('F6 beim Öffnen steht es wieder so da', q('[data-weise="timer"]').getAtt
   q('#gwMinuten').value === '20' && q('#gwTon').getAttribute('aria-checked') === 'false');
 q('[data-weise="zaehler"]').click();
 q('#gwSpeichern').click();
-pruefe('F7 auf Zähler umgestellt: kein Timer mehr', lesen.zaehler === true && lesen.timer === null);
+pruefe('F7 auf Zähler umgestellt: kein Timer mehr', !!lesen.zaehler && lesen.zaehler.schritt === 1 && lesen.timer === null);
 lesen.zaehlung[HEUTE] = 4; lesen.erledigt.push(HEUTE);
 zeige('bearbeiten', lesen.id);
 q('[data-weise="tipp"]').click();
 q('#gwSpeichern').click();
 pruefe('F8 zurück auf Antippen: die Haken bleiben, die Zahlen gehen', !lesen.zaehler &&
   JSON.stringify(lesen.zaehlung) === '{}' && lesen.erledigt.indexOf(HEUTE) !== -1);
+zeige('bearbeiten', lesen.id);
+q('[data-weise="zaehler"]').click();
+ausbewegt();
+pruefe('F9 Zähler zeigt «Je Tipp» und «Einheit», Schrift ab 16 px', !q('#gwZaehlerTeil').hidden && q('#gwSchritt').value === '1' &&
+  ['#gwSchritt', '#gwEinheit'].every(function (s) { return parseFloat(getComputedStyle(q(s)).fontSize) >= 16; }));
+q('#gwSchritt').value = '0,333'; q('#gwSchritt').dispatchEvent(new Event('input'));
+q('#gwSpeichern').click();
+pruefe('F10 mehr als zwei Stellen hinter dem Komma gehen nicht', ansicht === 'bearbeiten' && !lesen.zaehler);
+q('#gwSchritt').value = '0,3'; q('#gwSchritt').dispatchEvent(new Event('input'));
+q('#gwEinheit').value = 'L'; q('#gwEinheit').dispatchEvent(new Event('input'));
+q('#gwSpeichern').click();
+pruefe('F11 gespeichert: je Tipp 0,3 L', JSON.stringify(lesen.zaehler) === '{"schritt":0.3,"einheit":"L"}',
+  JSON.stringify(lesen.zaehler));
 
 // ── T · Der Timer ───────────────────────────────────────────
 frisch();
@@ -89,22 +108,39 @@ kachel('lesen').click();
 var start = state.timer && state.timer.start;
 pruefe('T1 ein Tipp startet den Timer, noch nicht abgehakt', !!state.timer && state.timer.id === 'lesen' &&
   state.timer.tag === HEUTE && state.timer.ms === 20 * MIN && !erledigtAm('lesen', HEUTE));
+var huelle = alle('body > .tropfen-huelle').pop(), b0 = huelle ? huelle.getAnimations()[0].effect.getKeyframes()[0] : {};
+var sch = q('[data-haken="lesen"] .gw-scheibe').getBoundingClientRect();
 pruefe('T2 das Fenster tropft aus der Kachel, aus Glas', offen() && q('#timerKarte').classList.contains('glas') &&
-  alle('body > .tropfen-huelle').length > 0 && q('#timerName').textContent === 'lesen' &&
-  q('#timerKarte [data-timerrest]').textContent === '20:00');
+  !!huelle && q('#timerName').textContent === 'lesen' && q('#timerKarte [data-timerrest]').textContent === '20:00');
+pruefe('T2a es beginnt klein, in der Scheibe — nicht so groß wie die Kachel (ADR 0040)', parseFloat(b0.width) <= 48 &&
+  Math.abs(parseFloat(b0.left) + parseFloat(b0.width) / 2 - (sch.left + sch.width / 2)) < 2 &&
+  Math.abs(parseFloat(b0.top) + parseFloat(b0.height) / 2 - (sch.top + sch.height / 2)) < 2, [b0.left, b0.top, b0.width].join());
 ausbewegt();
-pruefe('T3 Fertig, Abbrechen, Ton — groß genug', ['#timerFertig', '#timerAbbrechen', '#timerTon'].every(function (s) {
+pruefe('T3 Fertig, Abbrechen, Pause, Ton — groß genug', ['#timerFertig', '#timerAbbrechen', '#timerPause', '#timerTon'].every(function (s) {
   var r = q(s).getBoundingClientRect(); return r.height >= 44 && r.width >= 44; }));
 UHR += 5 * MIN;
 takt();
 pruefe('T4 er läuft: Fenster und Kachel zeigen die Restzeit', q('#timerKarte [data-timerrest]').textContent === '15:00' &&
   q('#app [data-timerkachel="lesen"] [data-timerrest]').textContent === '15:00' &&
   q('[data-timerkachel="lesen"]').classList.contains('laeuft'));
+q('#timerPause').click();
+UHR += 10 * MIN;
+takt();
+pruefe('T4a Pause hält die Zeit an', !!state.timer.pausiert && q('#timerKarte [data-timerrest]').textContent === '15:00' &&
+  /pausiert/.test(q('#app [data-timerkachel="lesen"]').textContent) && q('#timerPause').getAttribute('aria-label') === 'Weiter' &&
+  q('#timerKarte').classList.contains('pausiert'));
+q('#timerPause').click();
+UHR += 1 * MIN;
+takt();
+pruefe('T4b weiter läuft sie von dort, wo sie stand', !state.timer.pausiert && q('#timerKarte [data-timerrest]').textContent === '14:00' &&
+  q('#timerPause').getAttribute('aria-label') === 'Pause');
 q('#timerBlatt').click();
+var hin = alle('body > .tropfen-huelle').pop(), b1 = hin ? hin.getAnimations()[0].effect.getKeyframes() : [];
 pruefe('T5 danebentippen schließt das Fenster, der Timer läuft weiter', !offen() && !!state.timer);
+pruefe('T5a zu fließt es in die Scheibe', b1.length > 0 && parseFloat(b1[b1.length - 1].width) <= 48, b1.length ? b1[b1.length - 1].width : '');
 return durch().then(function () {
   kachel('lesen').click();
-  pruefe('T6 ein Tipp auf die Kachel holt das Fenster zurück, derselbe Lauf', offen() && state.timer.start === start);
+  pruefe('T6 ein Tipp auf die Kachel holt das Fenster zurück, derselbe Lauf', offen() && state.timer.start === start + 10 * MIN);
   q('#timerTon').click();
   pruefe('T7 der Ton läßt sich für diesen Lauf abschalten', state.timer.stumm === true &&
     q('#timerTon').getAttribute('aria-pressed') === 'false' && g('lesen').timer.stumm === false);
@@ -192,6 +228,37 @@ return durch().then(function () {
   pruefe('Z6 die Tagesliste nennt die Zahl', !!zeile && /3× erledigt/.test(zeile.textContent), zeile && zeile.textContent);
   zeile.click();
   pruefe('Z7 dort zurückgenommen ist auch die Zahl fort', !erledigtAm('wasser', HEUTE) && !g('wasser').zaehlung[HEUTE]);
+  // ── S · Je Tipp 0,3 L (ADR 0040) ──────────────────────────────
+  frisch();
+  state.gewohnheiten = [gw('trinken', { zaehler: { schritt: 0.3, einheit: 'L' } })];
+  zeige('home');
+  ausbewegt();
+  for (var i = 0; i < 4; i++) kachel('trinken').click();
+  pruefe('S1 viermal getippt sind 1,2 L — ohne Rundungsrest', zaehlStand(g('trinken'), HEUTE) === 1.2 &&
+    /1,2 L heute/.test(kachel('trinken').textContent) && q('#app .gw-zahl').textContent === '1,2', zaehlStand(g('trinken'), HEUTE));
+  q('[data-minus="trinken"]').click();
+  pruefe('S2 «−» nimmt 0,3 zurück', zaehlStand(g('trinken'), HEUTE) === 0.9);
+  for (var j = 0; j < 3; j++) q('[data-minus="trinken"]').click();
+  pruefe('S3 bei null ist der Haken weg', !erledigtAm('trinken', HEUTE) && !q('[data-minus="trinken"]'));
+  for (var m = 0; m < 34; m++) kachel('trinken').click();
+  pruefe('S4 eine lange Zahl paßt kleiner in die Scheibe', q('#app .gw-zahl').textContent === '10,2' &&
+    q('#app .gw-zahl').classList.contains('lang') && q('#app .gw-zahl').getBoundingClientRect().width <=
+    q('#app .gw-scheibe').getBoundingClientRect().width, q('#app .gw-zahl').textContent);
+  kalTag = HEUTE;
+  render();
+  pruefe('S5 die Tagesliste nennt die Menge', /10,2 L erledigt/.test(q('[data-nachtrag="trinken"]').textContent));
+  // Jubel und «Angelegt» hängen an der Scheibe, nicht an der Kachel.
+  frisch();
+  state.gewohnheiten = [gw('neu', {})];
+  kalTag = null;
+  zeige('home');
+  ausbewegt();
+  q('#hinweisBlatt').classList.remove('offen');
+  q('#hinweisBlatt').hidden = true;
+  jubeln('Probe', '', 'neu');
+  pruefe('S6 der Jubel tropft aus der Scheibe', !!hinweisQuelle && hinweisQuelle.width <= 48 &&
+    hinweisZiel === q('[data-haken="neu"] .gw-scheibe'));
+  hinweisSchliessen();
   frisch();
   speichern();
 });
