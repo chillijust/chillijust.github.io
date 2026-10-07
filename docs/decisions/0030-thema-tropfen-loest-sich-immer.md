@@ -1,6 +1,6 @@
 # 0030 · Der Hell/Dunkel-Tropfen löst sich immer
 
-*2026-10-06 · GitHub-Lauf rot (Prüfstand, `thema C0`) · Version 0.10.0T2 · ergänzt 0025*
+*2026-10-06 · GitHub-Lauf rot (Prüfstand, `thema C0`) · Version 0.10.0T2, abgenommen · ergänzt 0025*
 
 ## Ausgangslage
 

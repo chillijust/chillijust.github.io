@@ -57,7 +57,7 @@ die Chili.
 | 5 · Kalender-Export (`.ics`), Erinnerung je Gewohnheit; «Heute» als Rückweg, Name «Chilli Journal», Schriftzug «Lodern» (frei); Exportiertes merken, Markierung aufheben, Hinweis aus Glas; nur Laden | fertig (0.5.0) |
 | 6 · Rückblick: Heatmap, Detail, Journal; Wisch vom Rand, Lesen, Woche wählen, Bestätigung im Glas | fertig (0.7.0); alle Meldungen im Glas (0.7.1) |
 | 7 · Sicherung (Code kopieren, Einlesen mit Rückgängig, Kachel nach 30 Tagen), Einstellungen (Hinweis ab 3, Bewegung, alles löschen), Tickets (Knopf unten rechts, Blatt als Tropfen); langer Druck tropft | fertig (0.8.0); Ticketblatt unten, «Alle Tickets» |
-| 8 · Feinschliff: Leerzustände als Wegweiser, Jubel bei 50 %/90 %, «nie zweimal» und neuem Rekord, Ende der Welle, gelöschte Zeilen als Geist | fertig (0.9.0); Ticketblatt aus Glas, Kalendertag, «Hinzufügen» im Glas, KW-Linien, Wisch von rechts, Hell/Dunkel als Tropfen, Tickets im Blatt; 0.9.1T (kein Zoom beim Tippen, Woche tropft zur Seite, Ticketliste so hoch wie das Ticket); 0.10.0T (Auftritt beim Kaltstart, Woche ohne Überbreite); 0.10.0T2 (Hell/Dunkel-Tropfen löst sich immer); 0.11.0T (Beginn zurückstellen, Export wählen, Zeichen bewegen sich, Geöffnetes tropft aus seinem Knopf, Woche \| Monat schaltet immer, Ticketblatt rollt innen), Abnahme offen |
+| 8 · Feinschliff: Leerzustände als Wegweiser, Jubel bei 50 %/90 %, «nie zweimal» und neuem Rekord, Ende der Welle, gelöschte Zeilen als Geist | fertig (0.9.0); Ticketblatt aus Glas, Kalendertag, «Hinzufügen» im Glas, KW-Linien, Wisch von rechts, Hell/Dunkel als Tropfen, Tickets im Blatt; 0.9.1T (kein Zoom beim Tippen, Woche tropft zur Seite, Ticketliste so hoch wie das Ticket); 0.10.0T (Auftritt beim Kaltstart, Woche ohne Überbreite); 0.10.0T2 (Hell/Dunkel-Tropfen löst sich immer) — abgenommen am 2026-10-07; 0.11.0T (Beginn zurückstellen, Export wählen, Zeichen bewegen sich, Geöffnetes tropft aus seinem Knopf, Woche \| Monat schaltet immer, Ticketblatt rollt innen), Abnahme offen |
 
 Im Menü stehen alle Einträge des Pflichtenhefts von Anfang an; was noch nicht gebaut ist,
 trägt «bald» und meldet sich mit einer Zeile. **Wer einen Abschnitt baut, gibt dem
@@ -223,7 +223,5 @@ Skill `ticket`.
 
 ## Offen
 
-- Abnahme von 0.10.0T2 (ADR 0028–0030) am Gerät — Zoom beim Sicherungscode, Wochentropfen
-  und den Auftritt beim Kaltstart zeigt nur das Gerät.
 - Abnahme von 0.11.0T (ADR 0031–0035) am Gerät — ob der Glastropfen jetzt als Tropfen zu
   sehen ist, wie die Zeichen wirken und wie «Begonnen am» im iOS-Datumsfeld aussieht.
