@@ -503,6 +503,20 @@ svg.wm { display: block; flex: none; color: var(--text); overflow: visible; }
   transition: background-color .25s ease, color .25s ease;
 }
 .gw-scheibe svg { width: 20px; height: 20px; }
+/* Zähler: die Zahl von heute in der Scheibe, «−» daneben (ADR 0038). */
+.gw-zahl { font-family: var(--sans); font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.gw-minus { flex: none; margin-right: 6px; background: var(--flaeche-2); color: var(--text); }
+.gw-kachel.zaehlt.gerade .gw-scheibe { animation: abgehakt .5s cubic-bezier(.3, 1.6, .5, 1); }
+/* Timer: Das Fenster ist Glas wie der Hinweis; groß der Ring mit der Restzeit. */
+.timer-karte h2 { margin: 4px 44px 0; font-family: var(--sans); font-size: 18px; font-weight: 600; }
+.timer-ton { position: absolute; top: 8px; right: 8px; background: transparent; }
+.timer-ton[aria-pressed="false"] { color: var(--text-2); }
+.timer-bild { position: relative; width: min(56vw, 210px); aspect-ratio: 1; margin: 12px auto 4px; }
+.timer-bild .ring { width: 100%; height: 100%; }
+.timer-bild .ring circle { stroke-width: 2.2; }
+.timer-zeit { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--sans);
+  font-size: 40px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.timer-karte .klein { margin: 0 0 12px; }
 .gw-kachel.erledigt .gw-scheibe { background: var(--erledigt); color: var(--grund); }
 .gw-kachel.gerade.erledigt .gw-scheibe { animation: abgehakt .5s cubic-bezier(.3, 1.6, .5, 1); }
 @keyframes abgehakt {
@@ -1166,7 +1180,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 /* ── Hinweis ───────────────────────────────────────────────── */
 /* Was man lesen muß, bevor es weitergeht: mittig, wartet auf «OK». Quillt als
    Tropfen aus dem Getippten (hinweisZeigen); der Schleier wie beim Menü. */
-#hinweisBlatt {
+#hinweisBlatt, #timerBlatt {
   position: fixed;
   inset: 0;
   z-index: 22;
@@ -1178,7 +1192,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 /* Der Schleier blendet als eigene Schicht, nie das Blatt: Ein Vorfahr mit
    Deckkraft unter 1 wäre die Grenze des Glases — die Karte sähe dann nur den
    Schleier hinter sich, nicht die Seite, und bliebe matt (ADR 0014). */
-#hinweisBlatt::before {
+#hinweisBlatt::before, #timerBlatt::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -1186,9 +1200,9 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
   opacity: 0;
   transition: opacity .22s ease;
 }
-#hinweisBlatt[hidden] { display: none; }
-#hinweisBlatt.offen::before { opacity: 1; }
-#hinweisBlatt:not(.offen) { pointer-events: none; }
+#hinweisBlatt[hidden], #timerBlatt[hidden] { display: none; }
+#hinweisBlatt.offen::before, #timerBlatt.offen::before { opacity: 1; }
+#hinweisBlatt:not(.offen), #timerBlatt:not(.offen) { pointer-events: none; }
 .hinweis-karte { position: relative; }
 .hinweis-karte {
   width: 100%;
@@ -1490,6 +1504,10 @@ textarea.eingabe.code {
   </div>
 </div>
 <div id="meldung" hidden></div>
+<div id="timerBlatt" hidden>
+  <div class="hinweis-karte glas timer-karte" id="timerKarte" tabindex="-1" role="dialog" aria-modal="true"
+    aria-labelledby="timerName"></div>
+</div>
 <div id="hinweisBlatt" hidden>
   <div class="hinweis-karte glas" id="hinweisKarte" tabindex="-1" role="alertdialog" aria-modal="true" aria-labelledby="hinweisTitel"
     aria-describedby="hinweisText">
@@ -1518,7 +1536,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.11.0T3';
+var APP_VERSION = '0.12.0T';
 var APP_STAND = '2026-10-07';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -1567,6 +1585,8 @@ var ICON = {
   haken: svg('<path class="z-strich" pathLength="1" d="M5 12.5l4.5 4.5L19 7.5"/>'),
   weiter: svg('<path d="M9 5l7 7-7 7"/>'),
   minus: svg('<path d="M5 12h14"/>'),
+  ton: svg('<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>'),
+  stumm: svg('<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/>'),
   hinweis: svg('<circle cx="12" cy="12" r="9"/><path class="z-strich" pathLength="1" d="M12 11v5"/>' +
     '<path class="z-punkt" d="M12 7.5v.01"/>'),
   laden: svg('<g class="z-pfeil"><path d="M12 3v11"/><path d="M7.5 9.5l4.5 4.5 4.5-4.5"/></g>' +
@@ -1656,6 +1676,7 @@ function grundStand() {
     termine: [],
     journal: [],         // Wochenreflexionen, nach Woche sortiert
     welle: null,         // die laufende 10-Minuten-Welle: { id, start } oder null
+    timer: null,         // der laufende Timer einer Gewohnheit: { id, tag, start, ms, stumm } oder null
     exportiert: null,    // wann zuletzt eine .ics hinausging, als Zeitpunkt
     tickets: [],         // Fehler und Wünsche, bis sie kopiert sind — nicht im Sicherungscode
     gesichert: null,     // wann zuletzt ein Sicherungscode kopiert wurde, als Zeitpunkt
@@ -1720,6 +1741,17 @@ function stand(roh) {
     });
     s.tickets.sort(function (x, y) { return x.erstellt - y.erstellt; });
   }
+  // Ein Timer gilt nur für eine Gewohnheit, die es gibt, die nicht archiviert
+  // ist und noch einen Timer hat (ADR 0038).
+  var tm = roh.timer;
+  if (tm && typeof tm === 'object' && istZeit(tm.start) && istSchluessel(tm.tag) && typeof tm.ms === 'number' &&
+    tm.ms >= 60000 && tm.ms <= TIMER_MAX * 60000) {
+    s.gewohnheiten.forEach(function (g) {
+      if (g.id === tm.id && !g.archiviert && g.timer) {
+        s.timer = { id: g.id, tag: tm.tag, start: tm.start, ms: tm.ms, stumm: tm.stumm === true };
+      }
+    });
+  }
   // Eine Welle gilt nur für etwas, das es noch gibt und das nicht archiviert ist.
   var w = roh.welle;
   if (w && typeof w === 'object' && istZeit(w.start)) {
@@ -1732,13 +1764,19 @@ function stand(roh) {
 
 // Eine Gewohnheit, wie sie gespeichert wird:
 //   { id, name, rhythmus, angelegt: Tag, erledigt: [Tag, …], archiviert: Tag | null,
-//     erinnerung: 'HH:MM' | null }
-// Die Erinnerung ist nur für den Kalender-Export da (ADR 0009).
+//     erinnerung: 'HH:MM' | null, timer: { minuten, stumm } | null, zaehler: bool,
+//     zaehlung: { Tag: n } }
+// Die Erinnerung ist nur für den Kalender-Export da (ADR 0009). Timer und Zähler
+// schließen sich aus (ADR 0038). Gezählt wird nur, was über eins hinausgeht: Ein
+// erledigter Tag ohne Eintrag in `zaehlung` steht für eins — so bleibt jeder
+// Haken, auch ein nachgetragener, eine gültige Zählung.
 // Was nicht paßt, fällt weg — lieber eine Gewohnheit weniger als eine kaputte.
 // Beide Grenzen stehen hier oben: `laden()` läuft, bevor das Skript weiter unten
 // ankommt, und eine spätere `var` wäre dann noch undefined.
 var NAME_MAX = 40;
 var PRO_WOCHE_MAX = 6;
+var TIMER_MAX = 240;      // Minuten
+var ZAEHLER_MAX = 99;
 
 function gewohnheitLesen(g) {
   if (!g || typeof g !== 'object' || typeof g.id !== 'string' || !g.id) return null;
@@ -1752,6 +1790,15 @@ function gewohnheitLesen(g) {
     });
   }
   erledigt.sort();
+  var t = g.timer, timer = t && typeof t === 'object' && t.minuten === Math.floor(t.minuten) &&
+    t.minuten >= 1 && t.minuten <= TIMER_MAX ? { minuten: t.minuten, stumm: t.stumm === true } : null;
+  var zaehler = !timer && g.zaehler === true, zaehlung = {};
+  if (zaehler && g.zaehlung && typeof g.zaehlung === 'object') {
+    erledigt.forEach(function (k) {
+      var n = g.zaehlung[k];
+      if (n === Math.floor(n) && n >= 2 && n <= ZAEHLER_MAX) zaehlung[k] = n;
+    });
+  }
   return {
     id: g.id,
     name: name,
@@ -1760,7 +1807,10 @@ function gewohnheitLesen(g) {
     erledigt: erledigt,
     archiviert: istSchluessel(g.archiviert) ? g.archiviert : null,
     erinnerung: istUhr(g.erinnerung) ? g.erinnerung : null,
-    imKalender: imKalenderLesen(g.imKalender)
+    imKalender: imKalenderLesen(g.imKalender),
+    timer: timer,
+    zaehler: zaehler,
+    zaehlung: zaehlung
   };
 }
 
@@ -2980,7 +3030,7 @@ function umschalten(id, k) {
   var g = gewohnheitNach(id);
   if (!aenderbarAm(g, k)) return false;
   var i = g.erledigt.indexOf(k);
-  if (i === -1) { g.erledigt.push(k); g.erledigt.sort(); } else g.erledigt.splice(i, 1);
+  if (i === -1) { g.erledigt.push(k); g.erledigt.sort(); } else { g.erledigt.splice(i, 1); delete g.zaehlung[k]; }
   speichern();
   return true;
 }
@@ -3348,7 +3398,8 @@ function gewohnheitEreignis(g, stempel) {
     }).map(function (t) { return ICS_TAG[t]; }).join(',');
   }
   return ['BEGIN:VEVENT', 'UID:' + g.id + '@chillinal', 'DTSTAMP:' + stempel, 'SUMMARY:' + icsText(g.name),
-    'DTSTART:' + icsUhr(start, g.erinnerung), 'DTEND:' + icsUhr(start, g.erinnerung, ICS_GEWOHNHEIT_MIN),
+    'DTSTART:' + icsUhr(start, g.erinnerung),
+    'DTEND:' + icsUhr(start, g.erinnerung, g.timer ? g.timer.minuten : ICS_GEWOHNHEIT_MIN),
     'RRULE:' + regel, 'DESCRIPTION:' + icsText('Gewohnheit aus Chilli Journal · ' + rhythmusText(r))]
     .concat(icsAlarm('PT0M', g.name), ['END:VEVENT']);
 }
@@ -3750,6 +3801,8 @@ function zeichneTagesring(fertig, von) {
 
 function zeichneKachel(e) {
   var g = e.g, a = e.a, woche = g.rhythmus.art === 'proWoche';
+  var laeuft = !!state.timer && state.timer.id === g.id, rest = laeuft ? timerRest(zeitJetzt()) : 0;
+  var zahl = g.zaehler ? zaehlStand(g, heuteSchluessel()) : 0;
   var info;
   if (a.warnen) {
     info = '<span class="gw-warnung">' + (woche ? 'Diese Woche nicht wieder' : 'Heute nicht wieder') + '</span>';
@@ -3758,18 +3811,28 @@ function zeichneKachel(e) {
       (woche ? ' · ' + Math.min(a.treffer, a.ziel) + ' von ' + a.ziel + ' diese Woche'
         : a.serie ? ' · Serie ' + a.serie : '');
   }
+  // Timer: läuft er, zeigt der Ring die Restzeit statt der Stärke; sonst steht
+  // seine Dauer dabei. Zähler: die Zahl von heute (ADR 0038).
+  if (laeuft) info = '<span data-timerrest>' + esc(restText(rest)) + '</span> · läuft';
+  else if (g.timer && !a.erledigtHeute) info += ' · ' + g.timer.minuten + ' min';
+  else if (zahl) info = zahl + '× heute · ' + info;
   var klassen = 'gw-kachel' + (a.erledigtHeute ? ' erledigt' : '') + (a.warnen ? ' warnen' : '') +
-    (geradeAbgehakt === g.id ? ' gerade' : '');
-  return '<div class="' + klassen + '">' +
+    (geradeAbgehakt === g.id ? ' gerade' : '') + (laeuft ? ' laeuft' : '') + (zahl ? ' zaehlt' : '');
+  return '<div class="' + klassen + '"' + (laeuft ? ' data-timerkachel="' + esc(g.id) + '"' : '') + '>' +
     '<button type="button" class="gw-haken" data-haken="' + esc(g.id) + '" aria-pressed="' +
-      (a.erledigtHeute ? 'true' : 'false') + '">' +
-      '<span class="gw-ring">' + ring(a.staerke, g.id) + '<span class="gw-scheibe">' + ICON.haken + '</span></span>' +
+      (a.erledigtHeute ? 'true' : 'false') + '"' + (g.zaehler ? ' aria-label="' + esc(g.name) + ', ' + zahl +
+        ' gezählt, tippen zählt eins dazu"' : '') + '>' +
+      '<span class="gw-ring">' + (laeuft ? timerRing(rest / state.timer.ms) : ring(a.staerke, g.id)) +
+        '<span class="gw-scheibe">' + (zahl ? '<span class="gw-zahl">' + zahl + '</span>' : ICON.haken) +
+        '</span></span>' +
       '<span class="gw-text"><span class="gw-name">' + esc(g.name) + '</span>' +
         '<span class="gw-info">' + info + '</span>' +
         '<span class="gw-punkte" aria-hidden="true">' + a.punkte.map(function (p) {
           return '<span class="punkt ' + p.art + '"></span>';
         }).join('') + '</span></span>' +
     '</button>' +
+    (zahl ? '<button type="button" class="rund gw-minus" data-minus="' + esc(g.id) + '" aria-label="Eins weniger">' +
+      ICON.minus + '</button>' : '') +
     '</div>';
 }
 
@@ -4126,7 +4189,8 @@ function zeichneTagesGewohnheiten(k, heute) {
   liste.forEach(function (g) {
     var erl = g.erledigt.indexOf(k) !== -1;
     // «x-mal pro Woche» verpaßt keinen Tag — gewertet wird die Woche.
-    var wie = erl ? 'erledigt' : g.rhythmus.art === 'proWoche' ? 'frei'
+    var n = erl && g.zaehler ? zaehlStand(g, k) : 0;
+    var wie = erl ? (n > 1 ? n + '× erledigt' : 'erledigt') : g.rhythmus.art === 'proWoche' ? 'frei'
       : !faelligAm(g, k) ? 'nicht dran' : k === heute ? 'offen' : 'verpasst';
     var innen = '<span class="kal-haken">' + ICON.haken + '</span>' +
       '<span class="kal-name">' + esc(g.name) + '</span><span class="kal-status">' + wie + '</span>';
@@ -4390,6 +4454,9 @@ function entwurfAus(g) {
     art: r.art,
     tage: r.tage ? r.tage.slice() : [1, 2, 3, 4, 5],
     anzahl: r.anzahl || 3,
+    weise: g && g.timer ? 'timer' : g && g.zaehler ? 'zaehler' : 'tipp',
+    minuten: g && g.timer ? String(g.timer.minuten) : '10',
+    ton: !(g && g.timer && g.timer.stumm),
     erinnern: !!(g && g.erinnerung),
     erinnerung: g && g.erinnerung ? g.erinnerung : '08:00',
     beginn: g ? g.angelegt : tagSchluessel(nun),
@@ -4431,6 +4498,7 @@ function entwurfAusLaster(a) {
 
 var RHYTHMEN = [['taeglich', 'Täglich'], ['wochentage', 'Wochentage'], ['proWoche', 'Pro Woche']];
 var RICHTUNGEN = [['an', 'Angewöhnen'], ['ab', 'Abgewöhnen']];
+var WEISEN = [['tipp', 'Antippen'], ['timer', 'Timer'], ['zaehler', 'Zähler']];
 var BEISPIEL = { an: 'Zum Beispiel: Zehn Minuten lesen', ab: 'Zum Beispiel: Rauchen' };
 
 function zeichneFormular() {
@@ -4482,6 +4550,23 @@ function zeichneFormular() {
         '<button type="button" class="rund" id="anzMehr" aria-label="Öfter">' + ICON.plus + '</button>' +
       '</div>' +
       '<p class="klein" id="rhText">' + esc(rhythmusErklaerung(entwurf.art)) + '</p>' +
+    '</section>' +
+    // Wie sie abgehakt wird: angetippt, mit einem Timer oder gezählt (ADR 0038).
+    '<section class="abschnitt" id="gwWeise"' + (ab ? ' hidden' : '') + '><h2>Abhaken</h2>' +
+      '<div class="wahl" role="group" aria-label="Abhaken">' + WEISEN.map(function (w) {
+        return '<button type="button" data-weise="' + w[0] + '" aria-pressed="' +
+          (entwurf.weise === w[0] ? 'true' : 'false') + '">' + esc(w[1]) + '</button>';
+      }).join('') + '</div>' +
+      '<div class="rh-teil" id="gwTimerTeil"' + (entwurf.weise === 'timer' ? '' : ' hidden') + '>' +
+        '<label class="tm-etikett" for="gwMinuten">Minuten</label>' +
+        '<input id="gwMinuten" class="eingabe" type="number" inputmode="numeric" min="1" max="' + TIMER_MAX +
+          '" step="1" value="' + esc(entwurf.minuten) + '">' +
+        '<div class="tm-schalterzeile"><span id="gwTonName">Ton am Ende</span>' +
+          '<button type="button" class="schalter" id="gwTon" role="switch" aria-labelledby="gwTonName" ' +
+            'aria-checked="' + (entwurf.ton ? 'true' : 'false') + '"><span class="schalter-spur">' +
+            '<span class="schalter-knauf"></span></span></button></div>' +
+      '</div>' +
+      '<p class="klein" id="gwWeiseText">' + esc(weiseErklaerung(entwurf.weise)) + '</p>' +
     '</section>' +
     // Schon länger dabei, nur nicht eingetragen: Der Beginn darf zurück, nie
     // vor — sonst ginge Gespeichertes verloren (ADR 0033).
@@ -4562,6 +4647,13 @@ function erinnerungErklaerung(e) {
   return 'An jedem fälligen Tag zu dieser Zeit. Erinnert wird über den Kalender-Export.';
 }
 
+function weiseErklaerung(w) {
+  if (w === 'timer') return 'Ein Tipp startet den Timer; abgehakt ist sie, wenn er durch ist oder du «Fertig» tippst. ' +
+    'Den Ton hörst du nur bei offener App.';
+  if (w === 'zaehler') return 'Jeder Tipp zählt eins, ab dem ersten ist sie erledigt. Vertippt? «−» auf der Kachel.';
+  return 'Ein Tipp hakt sie ab.';
+}
+
 function rhythmusErklaerung(art) {
   if (art === 'wochentage') return 'Nur an den Tagen, die du wählst.';
   if (art === 'proWoche') return 'An Tagen deiner Wahl. Gezählt wird die Woche, Montag bis Sonntag.';
@@ -4580,6 +4672,7 @@ function bindeFormular() {
         x.setAttribute('aria-pressed', x === b ? 'true' : 'false');
       });
       teilZeigen($('rhAbschnitt'), entwurf.richtung !== 'ab', b);
+      teilZeigen($('gwWeise'), entwurf.richtung !== 'ab', b);
       teilZeigen($('gwBeginnAbschnitt'), entwurf.richtung !== 'ab', b);
       teilZeigen($('gwErinnerung'), entwurf.richtung !== 'ab', b);
       teilZeigen($('abStart'), entwurf.richtung === 'ab', b);
@@ -4618,6 +4711,22 @@ function bindeFormular() {
     $('gwErText').textContent = erinnerungErklaerung(entwurf);
   });
   $('gwUhr').addEventListener('input', function () { entwurf.erinnerung = this.value; });
+  alleIn('[data-weise]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      entwurf.weise = this.getAttribute('data-weise');
+      alleIn('[data-weise]').forEach(function (x) {
+        x.setAttribute('aria-pressed', x === b ? 'true' : 'false');
+      });
+      teilZeigen($('gwTimerTeil'), entwurf.weise === 'timer', b);
+      wahlenSetzen();
+      $('gwWeiseText').textContent = weiseErklaerung(entwurf.weise);
+    });
+  });
+  $('gwMinuten').addEventListener('input', function () { entwurf.minuten = this.value; });
+  $('gwTon').addEventListener('click', function () {
+    entwurf.ton = !entwurf.ton;
+    this.setAttribute('aria-checked', entwurf.ton ? 'true' : 'false');
+  });
   $('anzWeniger').addEventListener('click', function () { anzahl(-1); });
   $('anzMehr').addEventListener('click', function () { anzahl(1); });
 
@@ -4649,6 +4758,13 @@ function entwurfSpeichern() {
     $('gwUhr').focus();
     return;
   }
+  var minuten = Number(entwurf.minuten);
+  if (entwurf.weise === 'timer' && !(minuten === Math.floor(minuten) && minuten >= 1 && minuten <= TIMER_MAX)) {
+    melden('Gib die Minuten an, von 1 bis ' + TIMER_MAX + '.');
+    $('gwMinuten').focus();
+    return;
+  }
+  var timer = entwurf.weise === 'timer' ? { minuten: minuten, stumm: !entwurf.ton } : null;
   var r = entwurf.art === 'wochentage' ? { art: 'wochentage', tage: entwurf.tage.slice() }
     : entwurf.art === 'proWoche' ? { art: 'proWoche', anzahl: entwurf.anzahl } : { art: 'taeglich' };
   var g = entwurf.id ? gewohnheitNach(entwurf.id) : null, uhr = entwurf.erinnern ? entwurf.erinnerung : null;
@@ -4662,16 +4778,23 @@ function entwurfSpeichern() {
     g.name = name.slice(0, NAME_MAX);
     g.rhythmus = rhythmusLesen(r);
     g.erinnerung = uhr;
+    // Ohne Timer endet ein laufender; ohne Zähler bleiben nur die Haken.
+    if (!timer && state.timer && state.timer.id === g.id) state.timer = null;
+    if (entwurf.weise !== 'zaehler') g.zaehlung = {};
+    g.timer = timer;
+    g.zaehler = entwurf.weise === 'zaehler';
   } else {
     g = { id: neueId('g'), name: name.slice(0, NAME_MAX), rhythmus: rhythmusLesen(r),
-      angelegt: bisher, erledigt: [], archiviert: null, erinnerung: uhr, imKalender: null };
+      angelegt: bisher, erledigt: [], archiviert: null, erinnerung: uhr, imKalender: null,
+      timer: timer, zaehler: entwurf.weise === 'zaehler', zaehlung: {} };
     state.gewohnheiten.push(g);
     g = null;
   }
   beginnVorziehen(g || state.gewohnheiten[state.gewohnheiten.length - 1], entwurf.beginn);
   var id = g ? g.id : state.gewohnheiten[state.gewohnheiten.length - 1].id;
   if (speichern()) {
-    bestaetigen(g ? 'Gespeichert' : 'Angelegt', g ? '' : 'Antippen heißt erledigt, lange drücken öffnet sie.',
+    bestaetigen(g ? 'Gespeichert' : 'Angelegt', g ? '' : entwurf.weise === 'timer' ? 'Antippen startet den Timer, lange drücken öffnet sie.'
+      : entwurf.weise === 'zaehler' ? 'Antippen zählt eins, lange drücken öffnet sie.' : 'Antippen heißt erledigt, lange drücken öffnet sie.',
       $('gwSpeichern'), '[data-haken="' + id + '"]');
   }
   zeige('home');
@@ -4724,6 +4847,7 @@ function archivierenTippen() {
   var g = entwurf.richtung === 'ab' ? lasterNach(entwurf.id) : gewohnheitNach(entwurf.id);
   if (g) g.archiviert = heuteSchluessel();
   if (state.welle && state.welle.id === entwurf.id) state.welle = null;
+  if (state.timer && state.timer.id === entwurf.id) state.timer = null;
   if (speichern()) melden('Archiviert. Deine Einträge bleiben erhalten.', 'haken');
   zeige('home');
 }
@@ -5065,6 +5189,13 @@ function bindeReflexion() {
 // eben den alten Rekord überholt hat.
 function takt() {
   var nun = zeitJetzt(), rest = welleRest(nun);
+  if (state.timer) {
+    var tr = timerRest(nun);
+    // Durch: Ton nur, wenn es eben geschah und die App zu sehen ist — wer sie
+    // Stunden später öffnet, braucht keinen Gong mehr.
+    if (tr === 0) { timerFertig(nun - state.timer.start - state.timer.ms < 5000 && !document.hidden); return; }
+    timerAnzeigen(tr);
+  }
   alleIn('[data-frei]').forEach(function (el) {
     var a = lasterNach(el.getAttribute('data-frei'));
     if (a) el.textContent = dauer(lasterAuswerten(a, nun).frei);
@@ -5085,6 +5216,196 @@ function takt() {
   $('welleZeit').textContent = restText(rest);
   var u = 2 * Math.PI * 15.5;
   $('welleFuell').setAttribute('stroke-dashoffset', (u * (1 - rest / WELLE_MS)).toFixed(2));
+}
+
+// ── Timer und Zähler ────────────────────────────────────────────
+//
+// Eine Gewohnheit wird entweder angetippt, mit einem Timer gemacht oder
+// gezählt (ADR 0038). Der Timer merkt sich seinen Start und läuft darum weiter,
+// auch wenn die App zu ist; abgehakt wird, wenn er durch ist oder «Fertig»
+// kommt. Hörbar enden kann er nur bei offener App: Ohne Server darf eine
+// Web-App auf iOS im Hintergrund weder klingen noch melden. Der Zähler hakt
+// beim ersten Tipp ab und zählt danach weiter mit; «−» nimmt einen zurück.
+var timerQuelle = null;   // die Gewohnheit, aus deren Kachel das Fenster tropfte
+var tonKontext = null;
+
+function timerRest(nun) {
+  var t = state.timer;
+  return t ? Math.max(0, t.start + t.ms - nun) : 0;
+}
+
+function zaehlStand(g, k) { return g.erledigt.indexOf(k) === -1 ? 0 : g.zaehlung[k] || 1; }
+
+function zaehlen(id, d) {
+  var g = gewohnheitNach(id), k = heuteSchluessel();
+  if (!g || !g.zaehler) return;
+  var n = zaehlStand(g, k), neu = Math.max(0, Math.min(ZAEHLER_MAX, n + d));
+  if (neu === n) return;
+  geradeAbgehakt = neu ? id : null;
+  // Von null auf eins und zurück ist ein Haken — mit allem Jubel, der dazugehört.
+  if (!n || !neu) umschaltenUndZeichnen(id, k);
+  else {
+    if (neu > 1) g.zaehlung[k] = neu; else delete g.zaehlung[k];
+    speichern();
+    render();
+  }
+  geradeAbgehakt = null;
+}
+
+// Der Klang braucht einen Tipp, bevor er darf (iOS): Beim Start des Timers
+// wird er geweckt.
+function tonBereit() {
+  try {
+    var A = window.AudioContext || window.webkitAudioContext;
+    if (!tonKontext && A) tonKontext = new A();
+    if (tonKontext && tonKontext.state === 'suspended') tonKontext.resume();
+  } catch (e) { tonKontext = null; }
+}
+
+// Ein sanfter Gong, in der App erzeugt: drei Teiltöne, die weich einsetzen und
+// langsam verklingen.
+function gong() {
+  if (!tonKontext) return;
+  try {
+    var c = tonKontext, t = c.currentTime;
+    [[392, 0.32], [784, 0.12], [1176, 0.05]].forEach(function (teil) {
+      var o = c.createOscillator(), v = c.createGain();
+      o.type = 'sine';
+      o.frequency.value = teil[0];
+      v.gain.setValueAtTime(0.0001, t);
+      v.gain.exponentialRampToValueAtTime(teil[1], t + 0.03);
+      v.gain.exponentialRampToValueAtTime(0.0001, t + 3.2);
+      o.connect(v);
+      v.connect(c.destination);
+      o.start(t);
+      o.stop(t + 3.3);
+    });
+  } catch (e) { /* dann eben still */ }
+}
+
+function kachelVon(id) { return document.querySelector('[data-haken="' + id + '"]'); }
+
+// Ein Tipp auf die Kachel: Läuft schon ein anderer Timer, fragt das Glas;
+// läuft dieser, tropft sein Fenster wieder auf.
+function timerStarten(id) {
+  var g = gewohnheitNach(id), k = kachelVon(id);
+  if (!g || !g.timer) return;
+  tonBereit();
+  if (state.timer && state.timer.id !== id) {
+    var alt = gewohnheitNach(state.timer.id);
+    hinweisZeigen('Es läuft schon ein Timer', '«' + (alt ? alt.name : '') + '» ist noch nicht durch.',
+      k ? k.getBoundingClientRect() : null, '[data-haken="' + id + '"]',
+      { frage: { ja: 'Abbrechen, diesen starten', beiJa: function () { state.timer = null; timerStarten(id); } } });
+    return;
+  }
+  if (!state.timer) {
+    state.timer = { id: id, tag: heuteSchluessel(), start: zeitJetzt(), ms: g.timer.minuten * 60000,
+      stumm: g.timer.stumm };
+    speichern();
+    render();
+  }
+  timerOeffnen(id);
+}
+
+function timerRing(anteil, id) {
+  var u = 2 * Math.PI * 15.5;
+  return '<svg class="ring" viewBox="0 0 36 36" aria-hidden="true">' +
+    '<circle class="ring-spur" cx="18" cy="18" r="15.5"/>' +
+    '<circle class="ring-fuell"' + (id ? ' id="' + id + '"' : '') + ' cx="18" cy="18" r="15.5" stroke-dasharray="' +
+      u.toFixed(2) + '" stroke-dashoffset="' + (u * (1 - anteil)).toFixed(2) + '"/></svg>';
+}
+
+function zeichneTimerKarte(g, t) {
+  var rest = timerRest(zeitJetzt());
+  return '<h2 id="timerName">' + esc(g.name) + '</h2>' +
+    '<button type="button" class="rund timer-ton" id="timerTon" aria-label="Ton am Ende" aria-pressed="' +
+      (t.stumm ? 'false' : 'true') + '">' + (t.stumm ? ICON.stumm : ICON.ton) + '</button>' +
+    '<div class="timer-bild">' + timerRing(rest / t.ms, 'timerFuell') +
+      '<div class="timer-zeit" role="timer" data-timerrest>' + esc(restText(rest)) + '</div></div>' +
+    '<p class="klein">Läuft weiter, auch wenn du das Fenster schließt.</p>' +
+    '<div class="hinweis-knoepfe">' +
+      '<button type="button" class="knopf zart" id="timerAbbrechen">Abbrechen</button>' +
+      '<button type="button" class="knopf" id="timerFertig">Fertig</button>' +
+    '</div>';
+}
+
+function bindeTimerKarte() {
+  $('timerTon').addEventListener('click', function () {
+    var t = state.timer;
+    if (!t) return;
+    tonBereit();
+    t.stumm = !t.stumm;
+    speichern();
+    this.setAttribute('aria-pressed', t.stumm ? 'false' : 'true');
+    this.innerHTML = t.stumm ? ICON.stumm : ICON.ton;
+  });
+  $('timerFertig').addEventListener('click', function () { timerFertig(false); });
+  // Abbrechen will zwei Tipps: Ein halber Lauf geht sonst mit einer Handbewegung verloren.
+  $('timerAbbrechen').addEventListener('click', function () {
+    if (!this.classList.contains('frage')) {
+      this.classList.add('frage');
+      this.textContent = 'Wirklich?';
+      return;
+    }
+    state.timer = null;
+    speichern();
+    timerSchliessen();
+    render();
+  });
+}
+
+function timerOffen() { return !$('timerBlatt').hidden && $('timerBlatt').classList.contains('offen'); }
+
+function timerOeffnen(id) {
+  var blatt = $('timerBlatt'), karte = $('timerKarte'), t = state.timer, g = t && gewohnheitNach(t.id);
+  if (!g) return;
+  timerQuelle = id;
+  karte.innerHTML = zeichneTimerKarte(g, t);
+  bindeTimerKarte();
+  if (timerOffen()) return;
+  blatt.hidden = false;
+  void blatt.offsetWidth;
+  blatt.classList.add('offen');
+  var k = kachelVon(id);
+  if (zuSehen(k)) tropfenAuf(karte, k.getBoundingClientRect(), { rund: '18px', glas: true });
+}
+
+// Zu: in die Kachel zurück. Der Timer läuft weiter, wenn er noch läuft.
+function timerSchliessen() {
+  var blatt = $('timerBlatt'), karte = $('timerKarte');
+  if (!timerOffen()) return;
+  blatt.classList.remove('offen');
+  var ziel = kachelVon(timerQuelle), g = zuSehen(ziel) ? geist(karte) : null;
+  if (!g) { blatt.hidden = true; return; }
+  var r = karte.getBoundingClientRect();
+  karte.style.opacity = '0';
+  tropfenZu(g, r, ziel, { rund: '18px', frueh: true, glas: true, fertig: function () {
+    karte.style.opacity = '';
+    if (!timerOffen()) blatt.hidden = true;
+  } });
+}
+
+// Durch oder «Fertig»: abgehakt für den Tag, an dem er begann.
+function timerFertig(ton) {
+  var t = state.timer;
+  if (!t) return;
+  state.timer = null;
+  speichern();
+  if (ton && !t.stumm) gong();
+  timerSchliessen();
+  if (!erledigtAm(t.id, t.tag)) {
+    geradeAbgehakt = t.id;
+    umschaltenUndZeichnen(t.id, t.tag);
+    geradeAbgehakt = null;
+  } else render();
+}
+
+function timerAnzeigen(rest) {
+  var t = state.timer, u = 2 * Math.PI * 15.5, versatz = (u * (1 - rest / t.ms)).toFixed(2);
+  alleIn('[data-timerrest]').forEach(function (el) { el.textContent = restText(rest); });
+  alleIn('#timerFuell, [data-timerkachel] .ring-fuell').forEach(function (el) {
+    el.setAttribute('stroke-dashoffset', versatz);
+  });
 }
 
 // ── Termin: neu und bearbeiten ──────────────────────────────────
@@ -5626,6 +5947,7 @@ function sicherungsCode(nun) {
   var d = JSON.parse(JSON.stringify(state));
   delete d.tickets;
   delete d.welle;
+  delete d.timer;
   d.gesichert = nun;
   d.gewohnheiten.forEach(function (g) {
     var z = tageVerdichten(g.erledigt);
@@ -6304,11 +6626,19 @@ function bindeAnsicht() {
     var id = b.getAttribute('data-haken');
     b.addEventListener('click', function () {
       if (langGedrueckt && Date.now() - langGedrueckt < 1000) return;
+      var g = gewohnheitNach(id), heute = heuteSchluessel();
+      // Zähler zählen, ein Timer startet oder zeigt sich (ADR 0038).
+      if (g && g.zaehler) { zaehlen(id, 1); return; }
+      if (state.timer && state.timer.id === id) { timerOeffnen(id); return; }
+      if (g && g.timer && !erledigtAm(id, heute)) { timerStarten(id); return; }
       geradeAbgehakt = id;
-      umschaltenUndZeichnen(id, heuteSchluessel());
+      umschaltenUndZeichnen(id, heute);
       geradeAbgehakt = null;
     });
     langDruecken(b, function () { zeige('bearbeiten', id); });
+  });
+  alleIn('[data-minus]').forEach(function (b) {
+    b.addEventListener('click', function () { zaehlen(this.getAttribute('data-minus'), -1); });
   });
   alleIn('[data-ab]').forEach(function (b) {
     var id = b.getAttribute('data-ab');
@@ -6894,6 +7224,8 @@ function start() {
     if ($('hinweisKarte').classList.contains('bestaetigung')) { hinweisSchliessen(); return; }
     if (hinweisWahl && e.target === this) { hinweisWahl = null; hinweisSchliessen(); }
   });
+  // Danebentippen schließt das Timerfenster; der Timer läuft weiter (ADR 0038).
+  $('timerBlatt').addEventListener('click', function (e) { if (e.target === this) timerSchliessen(); });
   $('swSpaeter').addEventListener('click', function () {
     swStand.gemeldet = true;
     $('swNeu').hidden = true;

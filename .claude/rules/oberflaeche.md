@@ -60,7 +60,11 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   trägt «bald»; wer ihn baut, setzt `ziel` und trägt die Ansicht in `ANSICHTEN` ein.
 - **Woche | Monat ist ein Schalter**: Jeder Tipp wechselt, auch auf das Gewählte (ADR 0031).
 - **Die Kachel kennt zwei Gesten**: kurz tippen hakt ab, lange drücken (`langDruecken`)
-  öffnet die Gewohnheit. Ein zweites Ziel auf der Kachel gibt es nicht (ADR 0003).
+  öffnet die Gewohnheit. Ein zweites Ziel auf der Kachel gibt es nicht (ADR 0003) — außer dem
+  «−» des Zählers, ab eins (ADR 0038).
+- **Timer und Zähler** (ADR 0038): Beim Timer startet der Tipp ihn und läßt ein Glasfenster
+  aus der Kachel tropfen (`timerOeffnen`); abgehakt wird am Ende oder mit «Fertig», danebentippen
+  schließt nur das Fenster. Beim Zähler zählt der Tipp eins, der erste hakt ab (`zaehlen`).
 - **Die Abgewöhnen-Kachel** hat nichts abzuhaken: Antippen oder lange drücken öffnet sie;
   *Drang* und *Rückfall* sind eigene Knöpfe darunter (ADR 0004).
 - **Ein Termin ist eine Zeile mit blauem Strich** (`zeichneTerminZeile`), auf dem

@@ -45,3 +45,4 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0035](0035-zeichen-bewegen-sich.md) | Zeichen bewegen sich: Haken zeichnet sich, Hinweis-Punkt fällt, Pfeil fällt in die Schale, Blatt schiebt sich heraus | gilt |
 | [0036](0036-tropfen-weicher-mehrmals-alle.md) | Hell/Dunkel tropft weicher, auch mehrmals hintereinander und aus den Einstellungen; «alle» im Export tropft; Zeichen langsamer | gilt; Dauer des Tropfens und Zeiten der Zeichen seit 0037 |
 | [0037](0037-tropfen-folgt-dem-traeger.md) | Der Hell/Dunkel-Tropfen folgt dem Knauf und der Markierung; Zeichen einen Tick flotter | gilt |
+| [0038](0038-timer-und-zaehler.md) | Timer und Zähler: abhaken mit Zeit oder durch Zählen | gilt |

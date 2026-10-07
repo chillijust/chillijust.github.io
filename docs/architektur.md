@@ -32,7 +32,10 @@ state = {
     angelegt: '2026-10-05',              // der Beginn, Tagesschlüssel; rückt nur zurück (beginnVorziehen)
     erledigt: ['2026-10-05', …],         // sortiert, einmalig
     archiviert: null,                    // | Tagesschlüssel
-    erinnerung: null                     // | 'HH:MM' — nur für den Kalender-Export
+    erinnerung: null,                    // | 'HH:MM' — nur für den Kalender-Export
+    timer: null,                         // | { minuten: 1–240, stumm } — schließt zaehler aus (ADR 0038)
+    zaehler: false,
+    zaehlung: {}                         // Tag → n, nur für n ≥ 2; ein erledigter Tag ohne Eintrag zählt 1
   }],
   abgewoehnen: [{
     id: 'a…',
@@ -59,6 +62,7 @@ state = {
     zeit: 1791700000000                  // zuletzt geschrieben, oder null
   }],
   welle: null,                           // | { id, start } — die laufende 10-Minuten-Welle
+  timer: null,                           // | { id, tag, start, ms, stumm } — der laufende Timer, höchstens einer
   exportiert: null,                      // | Zeitpunkt in ms — wann zuletzt eine .ics hinausging
   tickets: [{
     id: 'k…',
@@ -111,7 +115,7 @@ state = {
   Schema — mit neuem Schlüssel und Migration — und die erste Ziffer der Version.
 
 - **Sicherung** (ADR 0020): `sicherungsCode(nun)` schreibt `CHJ1~<pruefsumme>~<base64>` aus dem
-  Zustand ohne `tickets` und `welle`, die Tage einer Gewohnheit verdichtet (`tageVerdichten`,
+  Zustand ohne `tickets`, `welle` und `timer`, die Tage einer Gewohnheit verdichtet (`tageVerdichten`,
   Feld `e`). `codeLesen(text)` prüft und entfaltet zum Rohstand für `stand()`.
   `standErsetzen(neu)` legt den alten Stand in `rueckgaengig` (nur im Speicher der Seite),
   behält die Tickets und speichert; `sicherungZurueck()` holt ihn wieder. Die Kachel auf der
