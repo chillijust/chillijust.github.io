@@ -104,6 +104,37 @@ return durch().then(function () {
   return durch();
 }).then(function () {
   pruefe('T4 danach ist aufgeräumt', !alle('body > .geist').length);
+
+  // «alle» tropft auch (ADR 0036): Was sich ändert, rollt als Perle aus dem
+  // Schalter an seinen Platz; was bleibt, steht still. Der Knauf gleitet.
+  q('#exBearbeiten').click();
+  ausbewegt();
+  var sg = q('[data-exalle="g"]'), sr = sg.getBoundingClientRect();
+  sg.click();
+  sg = q('[data-exalle="g"]');
+  var hl = zeile('lesen').querySelector('.ex-haken'), hf = zeile('laufen').querySelector('.ex-haken');
+  var al = hl.getAnimations()[0], kl = al ? al.effect.getKeyframes() : [];
+  var ml = /translate\(([-\d.]+)px, ([-\d.]+)px\)/.exec(kl[0] && kl[0].transform || '');
+  var still = !q('[data-exwahl="t:kino"] .ex-haken').getAnimations().length && hf.getAnimations().length === 1;
+  var gleitet = sg.querySelector('.schalter-knauf').getAnimations().length === 1 &&
+    sg.querySelector('.schalter-spur').getAnimations().length === 1;
+  ausbewegt();
+  var hr = hl.getBoundingClientRect();
+  pruefe('T6 «alle» aus: das Häkchen, das geht, tropft aus dem Schalter', !!ml && /scale/.test(kl[0].transform) &&
+    Math.abs(hr.left + hr.width / 2 + parseFloat(ml[1]) - (sr.left + sr.width / 2)) < 3 &&
+    Math.abs(hr.top + hr.height / 2 + parseFloat(ml[2]) - (sr.top + sr.height / 2)) < 3, kl[0] && kl[0].transform);
+  pruefe('T7 was sich nicht ändert, steht still', still);
+  pruefe('T8 der Knauf gleitet hinüber, statt zu springen', gleitet);
+  return durch();
+}).then(function () {
+  q('[data-exalle="g"]').click();
+  pruefe('T9 «alle» an: beide Häkchen tropfen, nacheinander', alle('[data-exwahl^="g:"] .ex-haken').map(function (x) {
+    var a = x.getAnimations()[0]; return a ? a.effect.getTiming().delay : -1; }).join() === '0,45');
+  ausbewegt();
+  pruefe('T10 und stehen danach gewählt', alle('[data-exwahl^="g:"] .ex-haken.an').length === 2);
+  q('#exBearbeiten').click();
+  return durch();
+}).then(function () {
   state.bewegung = 'aus';
   q('#exBearbeiten').click();
   pruefe('T5 ohne Bewegung steht alles sofort', !q('#ansicht .ex-haken').getAnimations().length);

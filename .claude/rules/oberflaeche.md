@@ -47,10 +47,12 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 - **Der Sonne/Mond-Schalter ist ein Schieber** (`.thema-schalter`, `role="switch"`,
   `aria-checked` = dunkel): Sonne links, Mond rechts, beide immer sichtbar, der Knauf liegt
   unter dem, was gilt. Mit dem Druck tropft die neue Darstellung als runde Scheibe aus ihm
-  (`themaSetzen(wert, quelle)`, `startViewTransition`, 910 ms), ihr Kontrast steigt dabei
+  (`themaSetzen(wert, quelle)`, `startViewTransition`, 1300 ms), ihr Kontrast steigt dabei
   von durchsichtig auf voll; der Knauf gleitet derweil im neuen Bild hinüber
   (`knaufGleiten`, ADR 0025, 0026, 0027). `thema-tropft` nimmt spätestens ein Zeitgeber
-  wieder weg, auch wenn der Übergang sein Ende nie meldet (ADR 0030).
+  wieder weg, auch wenn der Übergang sein Ende nie meldet (ADR 0030) — aber nur der letzte Druck
+  (`themaLauf`), sonst nähme ein übersprungener Tropfen dem laufenden die Bühne. Die Wahl in den
+  Einstellungen tropft ebenso aus ihrem Knopf (ADR 0036).
 - **Das Menü** folgt dem Pflichtenheft in Reihenfolge und Wortlaut. Ein Eintrag ohne `ziel`
   trägt «bald»; wer ihn baut, setzt `ziel` und trägt die Ansicht in `ANSICHTEN` ein.
 - **Woche | Monat ist ein Schalter**: Jeder Tipp wechselt, auch auf das Gewählte (ADR 0031).
@@ -75,7 +77,7 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 - **Was schon im Kalender steht, tritt zurück** (`.ex-alt`) und geht nur über «Bearbeiten»
   noch einmal hinaus; Neues geht mit, außer es ist dort abgewählt, Geändertes trägt einen Vermerk (ADR 0011).
   «Bearbeiten» gibt es immer: Häkchen je Eintrag, «alle» je Abschnitt; beides tropft als Perlen aus dem
-  Knopf (`perlenAus`/`perlenZu`, ADR 0034).
+  Knopf (`perlenAus`/`perlenZu`, ADR 0034); was «alle» ändert, tropft aus dem Schalter (ADR 0036).
 - **Was live läuft, schreibt `takt()` an Ort und Stelle** (`[data-frei]`,
   `[data-wellerest]`, der Ring der Welle) — kein `render()` im Sekundentakt.
 - **Der Rückblick** (`zeichneHeatmap`) steht über «Stand» in der Gewohnheit und im Abgewöhnen:
@@ -136,7 +138,8 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   mit Haken, ohne «OK», geht von selbst und fließt ins Gespeicherte (ADR 0018). Wurde nichts
   gespeichert, dasselbe Glas mit neutralem Zeichen (`'hinweis'`), nie der grüne Haken.
 - **Zeichen bewegen sich einmal, wenn sie erscheinen** (`zeichenZeichnen`, Klassen `z-…`): Haken zeichnet
-  sich, «i» läßt den Punkt fallen, `laden` den Pfeil, `kopie` das Blatt; grün ist alles außer «i» (ADR 0035).
+  sich, «i» läßt den Punkt fallen, `laden` den Pfeil, `kopie` das Blatt; grün ist alles außer «i» (ADR 0035);
+  langsam und weich, fertig vor der Bestätigung (ADR 0036).
 - **Jede andere Meldung über `melden(text, zeichen)`** — auch sie erscheint im Glas, eine
   Zeile unten gibt es nicht mehr; `'haken'` nur, wenn etwas gelang (ADR 0019).
 - **Was man lesen muß, bevor es weitergeht, ist ein Hinweis** (`hinweisZeigen`, wartet auf

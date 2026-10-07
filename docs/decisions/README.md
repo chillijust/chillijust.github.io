@@ -43,3 +43,4 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0033](0033-beginn-zurueckstellen.md) | Der Beginn einer Gewohnheit läßt sich zurückstellen; fällige Tage seitdem gelten als erledigt | gilt |
 | [0034](0034-export-auswaehlen.md) | Im Export wählen: «Bearbeiten» immer, Häkchen je Eintrag, «alle» je Abschnitt; Abwahl von Neuem gemerkt | gilt |
 | [0035](0035-zeichen-bewegen-sich.md) | Zeichen bewegen sich: Haken zeichnet sich, Hinweis-Punkt fällt, Pfeil fällt in die Schale, Blatt schiebt sich heraus | gilt |
+| [0036](0036-tropfen-weicher-mehrmals-alle.md) | Hell/Dunkel tropft weicher, auch mehrmals hintereinander und aus den Einstellungen; «alle» im Export tropft; Zeichen langsamer | gilt |

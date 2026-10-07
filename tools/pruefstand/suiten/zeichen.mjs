@@ -36,6 +36,30 @@ bestaetigen('Gespeichert', '', null, null);
 pruefe('G3 jedes Mal von vorn', erst && zeichen().classList.contains('zeichnet'));
 hinweisSchliessen();
 
+// ── W · langsam und weich (ADR 0036) ────────────────────────
+// Am Gerät zu flink: Jede Bewegung dauert länger als zuvor, läuft ohne Ruck
+// an — und ist doch fertig, bevor die kürzeste Bestätigung geht.
+function zeit(sel) {
+  var el = q(sel), st = el && getComputedStyle(el);
+  return st ? { dauer: parseFloat(st.animationDuration), warten: parseFloat(st.animationDelay), kurve: st.animationTimingFunction } : null;
+}
+function allesZeichen(name) { var d = document.createElement('div'); d.className = 'zeichnet'; d.setAttribute('data-zeichen', name);
+  d.innerHTML = ICON[name]; q('#app').appendChild(d); return d; }
+var proben = ['haken', 'hinweis', 'laden', 'kopie'].map(allesZeichen);
+var zeiten = {
+  haken: zeit('[data-zeichen="haken"] .z-strich'), punkt: zeit('[data-zeichen="hinweis"] .z-punkt'),
+  strich: zeit('[data-zeichen="hinweis"] .z-strich'), pfeil: zeit('[data-zeichen="laden"] .z-pfeil'),
+  blatt: zeit('[data-zeichen="kopie"] .z-blatt')
+};
+proben.forEach(function (d) { d.remove(); });
+var vorher = { haken: 0.42, punkt: 0.34, strich: 0.42, pfeil: 0.62, blatt: 0.5 };
+pruefe('W1 jedes Zeichen bewegt sich langsamer als zuvor', Object.keys(vorher).every(function (k) {
+  return zeiten[k] && zeiten[k].dauer >= vorher[k] * 1.5; }), JSON.stringify(zeiten));
+pruefe('W2 und ist fertig, bevor die Bestätigung geht', Object.keys(zeiten).every(function (k) {
+  return zeiten[k] && (zeiten[k].dauer + zeiten[k].warten) * 1000 <= BESTAETIGUNG_MS - 200; }));
+pruefe('W3 der Punkt fällt weich, nicht beschleunigt bis zum Aufprall', zeiten.punkt &&
+  /cubic-bezier\(0?\.35, 0, 0?\.3, 1\)/.test(zeiten.punkt.kurve), zeiten.punkt && zeiten.punkt.kurve);
+
 // ── K · Kopieren ────────────────────────────────────────────
 frisch();
 zeige('sicherung');

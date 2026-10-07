@@ -78,13 +78,13 @@ pruefe('B4 eine gewählte helle Darstellung sticht das dunkle Gerät',
     function (r) { return r.cssText; }).join(' ')));
 
 // ── C · Der Schalter im Kopf ────────────────────────────────
-// Die neue Darstellung tropft mit dem Druck aus dem Schalter, 910 ms lang
-// (ADR 0025, 0026); der Knauf gleitet derweil hinüber.
+// Die neue Darstellung tropft mit dem Druck aus dem Schalter, THEMA_TROPFEN
+// lang (ADR 0025, 0026, 0036); der Knauf gleitet derweil hinüber.
 var sk = q('#themaKnopf').getBoundingClientRect(), tropfAn = null;
 themaUmschalten();
 pruefe('C0a der Tropfen beginnt mit dem Druck, nicht danach',
   document.documentElement.classList.contains('thema-tropft') &&
-  document.documentElement.style.getPropertyValue('--thema-dauer') === '910ms',
+  document.documentElement.style.getPropertyValue('--thema-dauer') === THEMA_TROPFEN + 'ms' && THEMA_TROPFEN >= 1200,
   document.documentElement.style.getPropertyValue('--thema-dauer'));
 // ADR 0027: In der Scheibe steigt der Kontrast langsam — die neue Darstellung
 // blendet von durchsichtig auf voll, während sie wächst.
@@ -154,9 +154,18 @@ return warte(340).then(function () {
   pruefe('D3 «Automatisch» führt zurück zum Gerät', state.thema === 'auto' &&
     !document.documentElement.hasAttribute('data-thema'));
   pruefe('D4 und ist gemerkt', gespeichert() === 'auto');
-  q('.wahl [data-thema="dunkel"]').click();
-  pruefe('D5 «Dunkel» wirkt sofort', grund() === 'rgb(20, 20, 19)' &&
-    q('.wahl [aria-pressed="true"]').getAttribute('data-thema') === 'dunkel');
+  pruefe('D4a was nichts sichtbar ändert, tropft nicht', !document.documentElement.classList.contains('thema-tropft'));
+  // Auch aus den Einstellungen tropft die neue Darstellung aus dem Knopf (ADR 0036).
+  var dk = q('.wahl [data-thema="dunkel"]'), dr = dk.getBoundingClientRect();
+  dk.click();
+  pruefe('D4b «Dunkel» tropft aus seinem Knopf', document.documentElement.classList.contains('thema-tropft') &&
+    Math.abs(parseFloat(document.documentElement.style.getPropertyValue('--thema-x')) - (dr.left + dr.width / 2)) < 2 &&
+    Math.abs(parseFloat(document.documentElement.style.getPropertyValue('--thema-y')) - (dr.top + dr.height / 2)) < 2);
+  return warte(THEMA_TROPFEN + 500);
+}).then(function () {
+  pruefe('D5 «Dunkel» wirkt', grund() === 'rgb(20, 20, 19)' &&
+    q('.wahl [aria-pressed="true"]').getAttribute('data-thema') === 'dunkel' &&
+    !document.documentElement.classList.contains('thema-tropft'));
 
   // ── E · Chillingo bleibt liegen ───────────────────────────
   pruefe('E1 Chillingos Lernstand ist unberührt', localStorage.getItem(ALT) === '{"boxes":{"x":3}}');

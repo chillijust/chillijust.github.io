@@ -54,7 +54,8 @@ meldet der Läufer das als Fehler statt sie zu übergehen.
 | `tropfen` | was ein Knopf öffnet, tropft aus ihm: Formularteile, Heatmap-Woche, «Alle Tickets»; Glas im Tropfen dicht und gefaßt |
 | `beginn` | «Begonnen am»: Beginn zurückstellen, fällige Tage als erledigt (täglich, Wochentage, pro Woche), aus dem Kalender, nie vor |
 | `exportwahl` | Export auswählen: Häkchen je Eintrag, «alle» je Abschnitt, Abwahl gemerkt, Dagewesenes dazuholen, Perlen aus «Bearbeiten» |
-| `zeichen` | Zeichen bewegen sich: Haken (Glas, Kachel), Hinweis, Laden, Kopieren; jedes Mal neu; ohne Bewegung still |
+| `zeichen` | Zeichen bewegen sich: Haken (Glas, Kachel), Hinweis, Laden, Kopieren; jedes Mal neu; ohne Bewegung still; langsam und weich |
+| `wechsel` | Hell/Dunkel mehrmals hintereinander: jeder Druck tropft, nur der letzte räumt auf; Dauer und Kurve; ohne Bewegung sofort |
 
 ## Eine Suite schreiben
 
