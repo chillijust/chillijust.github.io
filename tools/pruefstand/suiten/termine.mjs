@@ -230,6 +230,48 @@ pruefe('F24 ein einzelner fragt schlicht', q('#tmLoeschen').textContent === 'Wir
 zeige('home');
 pruefe('F25 Zurück ohne Speichern ändert nichts', state.termine.length === 1);
 
+// ── H · Abhaken (ADR 0041) ──────────────────────────────────
+frisch();
+kalVersatz = 0;
+kalTag = null;
+state.termine = [tm({ id: 'arzt', titel: 'Arzt' }), tm({ id: 'lauf', titel: 'Lauf', wiederholung: 'taeglich', tag: '2026-10-10' })];
+zeige('home');
+ausbewegt();
+var hk = q('#app .tm-liste [data-terminhaken="arzt"]');
+pruefe('H1 «Termine heute» trägt je Termin einen Haken, groß genug', !!hk && alle('#app [data-terminhaken]').every(function (b) {
+  var r = b.getBoundingClientRect(); return r.width >= 44 && r.height >= 44; }) && hk.getAttribute('aria-pressed') === 'false');
+hk.click();
+var reihe = q('#app [data-terminhaken="arzt"]').closest('.tm-reihe');
+pruefe('H2 ein Tipp hakt ab — gespeichert, grün, blaß, durchgestrichen', state.termine[0].erledigt.join() === HEUTE &&
+  gespeichert()[0].erledigt.join() === HEUTE && reihe.classList.contains('erledigt') &&
+  getComputedStyle(reihe.querySelector('.tm-titel')).textDecorationLine === 'line-through' &&
+  getComputedStyle(reihe.querySelector('.kal-haken')).backgroundColor === getComputedStyle(q('.kal-haken')).backgroundColor &&
+  q('#app [data-terminhaken="arzt"]').getAttribute('aria-pressed') === 'true');
+pruefe('H3 der Haken öffnet den Termin nicht', ansicht === 'home');
+q('#app [data-terminhaken="lauf"]').click();
+pruefe('H4 eine Reihe hakt nur den Tag ab', state.termine[1].erledigt.join() === HEUTE);
+kalTag = '2026-10-13';
+zeige('home');
+ausbewegt();
+pruefe('H5 gestern ist die Reihe noch offen, abhakbar', q('#kalLeiste [data-terminhaken="lauf"]').getAttribute('aria-pressed') === 'false');
+kalTag = '2026-10-15';
+zeige('home');
+pruefe('H6 ein kommender Tag hat keinen Haken', !!q('#kalLeiste [data-termin="lauf"]') && !q('#kalLeiste [data-terminhaken]'));
+terminAbhaken('lauf', '2026-10-15');
+pruefe('H7 auch nicht über die Funktion', state.termine[1].erledigt.join() === HEUTE);
+kalTag = null;
+zeige('home');
+q('#app [data-terminhaken="arzt"]').click();
+pruefe('H8 noch ein Tipp nimmt ihn zurück', !state.termine[0].erledigt.length && !gespeichert()[0].erledigt.length);
+var roh = stand({ termine: [{ id: 'x', titel: 'X', tag: HEUTE, von: '09:00', erledigt: [HEUTE, HEUTE, 'quatsch', 7] }] });
+pruefe('H9 gelesen bleibt nur ein gültiger Tag, einmal', roh.termine[0].erledigt.join() === HEUTE &&
+  terminLesen({ id: 'y', titel: 'Y', tag: HEUTE, von: '09:00' }).erledigt.length === 0);
+zeige('termin', 'lauf');
+tippe('tmTitel', 'Laufen');
+q('#tmSpeichern').click();
+pruefe('H10 Bearbeiten behält den Haken', state.termine[1].titel === 'Laufen' && state.termine[1].erledigt.join() === HEUTE);
+zeige('home');
+
 // ── M · Menü ────────────────────────────────────────────────
 menueOeffnen();
 pruefe('M1 «Neuer Termin» trägt kein «bald» mehr', !q('[data-menue="termin"] .bald') &&

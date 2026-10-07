@@ -118,6 +118,13 @@ pruefe('T2a es beginnt klein, in der Scheibe — nicht so groß wie die Kachel (
 ausbewegt();
 pruefe('T3 Fertig, Abbrechen, Pause, Ton — groß genug', ['#timerFertig', '#timerAbbrechen', '#timerPause', '#timerTon'].every(function (s) {
   var r = q(s).getBoundingClientRect(); return r.height >= 44 && r.width >= 44; }));
+var ringR = q('#timerKarte .timer-bild').getBoundingClientRect(), zeitR = q('#timerKarte .timer-zeit').getBoundingClientRect(),
+  pauseR = q('#timerPause').getBoundingClientRect(), mx = ringR.left + ringR.width / 2, my = ringR.top + ringR.height / 2;
+var ecken = [[pauseR.left, pauseR.top], [pauseR.right, pauseR.top], [pauseR.left, pauseR.bottom], [pauseR.right, pauseR.bottom]];
+pruefe('T3a Pause steht im Ring, unter den Zahlen (ADR 0041)', pauseR.top >= zeitR.bottom - 1 &&
+  Math.abs(pauseR.left + pauseR.width / 2 - mx) < 2 && ecken.every(function (e) {
+    return Math.sqrt(Math.pow(e[0] - mx, 2) + Math.pow(e[1] - my, 2)) < ringR.width / 2 * 0.92; }),
+  [pauseR.top, zeitR.bottom, ringR.width].join());
 UHR += 5 * MIN;
 takt();
 pruefe('T4 er läuft: Fenster und Kachel zeigen die Restzeit', q('#timerKarte [data-timerrest]').textContent === '15:00' &&

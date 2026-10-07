@@ -516,11 +516,14 @@ svg.wm { display: block; flex: none; color: var(--text); overflow: visible; }
 .timer-bild { position: relative; width: min(56vw, 210px); aspect-ratio: 1; margin: 12px auto 4px; }
 .timer-bild .ring { width: 100%; height: 100%; }
 .timer-bild .ring circle { stroke-width: 2.2; }
-.timer-zeit { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--sans);
-  font-size: 40px; font-weight: 600; font-variant-numeric: tabular-nums; }
+/* Im Ring stehen die Zahlen und darunter der Pausenknopf (ADR 0041). */
+.timer-mitte { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 6px; padding-top: 50px; }
+.timer-zeit { font-family: var(--sans); font-size: 40px; font-weight: 600; line-height: 1.1;
+  font-variant-numeric: tabular-nums; }
 .timer-karte .klein { margin: 0 0 12px; }
-.timer-pause { width: 56px; height: 56px; margin: 0 auto 10px; background: var(--flaeche-2); color: var(--text); }
-.timer-pause svg { width: 24px; height: 24px; }
+.timer-pause { width: 44px; height: 44px; background: var(--flaeche-2); color: var(--text); }
+.timer-pause svg { width: 20px; height: 20px; }
 .timer-karte.pausiert .timer-zeit { opacity: .5; }
 .gw-kachel.erledigt .gw-scheibe { background: var(--erledigt); color: var(--grund); }
 .gw-kachel.gerade.erledigt .gw-scheibe { animation: abgehakt .5s cubic-bezier(.3, 1.6, .5, 1); }
@@ -808,7 +811,16 @@ button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
   transition: transform .15s ease;
 }
 .tm-zeile:active { transform: scale(.98); }
-.tm-zeile + .tm-zeile { border-top: 1px solid var(--flaeche-2); border-radius: 0; }
+.tm-zeile + .tm-zeile, .tm-reihe + .tm-reihe { border-top: 1px solid var(--flaeche-2); border-radius: 0; }
+/* Ein Termin, der da war, läßt sich abhaken: rechts der Haken, grün wie
+   alles Erledigte; erledigt tritt die Zeile zurück (ADR 0041). */
+.tm-reihe { display: flex; align-items: center; }
+.tm-reihe .tm-zeile { flex: 1; min-width: 0; }
+.tm-haken { flex: none; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
+.tm-reihe.erledigt .kal-haken { background: var(--erledigt); color: var(--grund); box-shadow: none; }
+.tm-reihe.erledigt .tm-zeile { opacity: .55; }
+.tm-reihe.erledigt .tm-titel { text-decoration: line-through; }
+.tm-reihe.gerade.erledigt .kal-haken { animation: abgehakt .5s cubic-bezier(.3, 1.6, .5, 1); }
 /* Eine Gewohnheit im Export trägt keinen blauen Strich — Blau heißt Termin. */
 .ex-gw .tm-zeit { border-left-color: var(--linie); }
 .ex-gw.aus .tm-zeit { color: var(--text-2); }
@@ -1260,7 +1272,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
    der Pfeil fällt in die Schale, das zweite Blatt schiebt sich aus dem ersten.
    Weich, ohne Ruck (ADR 0036), ein Viertel flotter als dort (ADR 0037) — fertig,
    bevor die Bestätigung geht. */
-.zeichnet .z-strich, .gw-kachel.gerade.erledigt .gw-scheibe .z-strich {
+.zeichnet .z-strich, .gw-kachel.gerade.erledigt .gw-scheibe .z-strich, .tm-reihe.gerade.erledigt .z-strich {
   stroke-dasharray: 1;
   animation: z-zeichnen .53s .15s cubic-bezier(.45, 0, .25, 1) both;
 }
@@ -1921,7 +1933,11 @@ function terminLesen(t) {
     vorlauf: vorlauf,
     ort: textFeld(t.ort, ORT_MAX),
     notiz: textFeld(t.notiz, NOTIZ_MAX),
-    imKalender: imKalenderLesen(t.imKalender)
+    imKalender: imKalenderLesen(t.imKalender),
+    // Die Tage, an denen er abgehakt ist — bei einer Reihe je Tag (ADR 0041).
+    erledigt: Array.isArray(t.erledigt) ? t.erledigt.filter(function (k, i, a) {
+      return istSchluessel(k) && a.indexOf(k) === i;
+    }).sort() : []
   };
 }
 
@@ -3762,7 +3778,7 @@ function zeichneHome() {
   var fertig = dran.filter(function (e) { return e.a.erledigtHeute; }).length;
   return zeichneHeld(fertig, dran.length, heute) +
     (termine.length ? '<section class="abschnitt"><h2>Termine heute</h2><div class="tm-liste">' +
-      termine.map(zeichneTerminZeile).join('') + '</div></section>' : '') +
+      termine.map(function (t) { return zeichneTerminZeile(t, heute); }).join('') + '</div></section>' : '') +
     (dran.length ? '<section class="abschnitt"><h2>Gewohnheiten</h2><div class="gw-liste">' +
       dran.map(zeichneKachel).join('') + '</div></section>' : '') +
     (aktiv.length ? '' : zeichneGewohnheitLeer()) +
@@ -3882,8 +3898,20 @@ function zeichneLasterKachel(a) {
 }
 
 // Ein Termin als Zeile: links die Zeit, rechts Titel, Ort und Wiederholung.
-// Antippen öffnet ihn. Der blaue Strich sagt «Termin».
-function zeichneTerminZeile(t) {
+// Antippen öffnet ihn. Der blaue Strich sagt «Termin». Mit einem Tag `k`, der
+// nicht mehr kommt, steht rechts ein Haken für genau diesen Tag; abgehakt wird
+// die Zeile blaß und der Titel durchgestrichen (ADR 0041).
+function zeichneTerminZeile(t, k) {
+  var zeile = terminZeileKnopf(t);
+  if (!k || k > heuteSchluessel()) return zeile;
+  var erl = t.erledigt.indexOf(k) !== -1;
+  return '<div class="tm-reihe' + (erl ? ' erledigt' : '') + (geradeAbgehakt === 't:' + t.id ? ' gerade' : '') + '">' +
+    zeile + '<button type="button" class="tm-haken" data-terminhaken="' + esc(t.id) + '" data-tag="' + k +
+      '" aria-pressed="' + (erl ? 'true' : 'false') + '" aria-label="' + esc(t.titel) + ' erledigt">' +
+      '<span class="kal-haken">' + ICON.haken + '</span></button></div>';
+}
+
+function terminZeileKnopf(t) {
   var mehr = [t.ort, wiederholungText(t)].filter(function (x) { return !!x; }).join(' · ');
   return '<button type="button" class="tm-zeile" data-termin="' + esc(t.id) + '" aria-label="' +
       esc(t.titel + ', ' + terminZeitText(t) + (mehr ? ', ' + mehr : '')) + '">' +
@@ -4192,7 +4220,10 @@ function zeichneTagesleiste(k, heute) {
   var html = '<div class="kal-leiste" id="kalLeiste" aria-live="polite">' +
     '<div class="kal-leiste-kopf">' + esc(datumLang(ausSchluessel(k))) + '</div>';
   var termine = termineAm(k);
-  if (termine.length) html += '<div class="tm-liste flach">' + termine.map(zeichneTerminZeile).join('') + '</div>';
+  if (termine.length) {
+    html += '<div class="tm-liste flach">' + termine.map(function (t) { return zeichneTerminZeile(t, k); }).join('') +
+      '</div>';
+  }
   return html + zeichneTagesGewohnheiten(k, heute) +
     '<button type="button" class="kal-neu" id="kalNeu" data-tag="' + k + '" aria-haspopup="dialog">' +
       ICON.plus + '<span>Hinzufügen</span></button></div>';
@@ -5395,9 +5426,9 @@ function zeichneTimerKarte(g, t) {
     '<button type="button" class="rund timer-ton" id="timerTon" aria-label="Ton am Ende" aria-pressed="' +
       (t.stumm ? 'false' : 'true') + '">' + (t.stumm ? ICON.stumm : ICON.ton) + '</button>' +
     '<div class="timer-bild">' + timerRing(rest / t.ms, 'timerFuell') +
-      '<div class="timer-zeit" role="timer" data-timerrest>' + esc(restText(rest)) + '</div></div>' +
-    '<button type="button" class="rund timer-pause" id="timerPause" aria-label="' +
-      (t.pausiert ? 'Weiter' : 'Pause') + '">' + (t.pausiert ? ICON.spielen : ICON.pause) + '</button>' +
+      '<div class="timer-mitte"><div class="timer-zeit" role="timer" data-timerrest>' + esc(restText(rest)) + '</div>' +
+      '<button type="button" class="rund timer-pause" id="timerPause" aria-label="' +
+        (t.pausiert ? 'Weiter' : 'Pause') + '">' + (t.pausiert ? ICON.spielen : ICON.pause) + '</button></div></div>' +
     '<p class="klein">' + (t.pausiert ? 'Pausiert.' : 'Läuft weiter, auch wenn du das Fenster schließt.') + '</p>' +
     '<div class="hinweis-knoepfe">' +
       '<button type="button" class="knopf zart" id="timerAbbrechen">Abbrechen</button>' +
@@ -5654,12 +5685,26 @@ function terminSpeichern() {
     wiederholungBis: e.wiederholungBis, vorlauf: e.vorlauf, ort: e.ort, notiz: e.notiz,
     imKalender: e.id && terminNach(e.id) ? terminNach(e.id).imKalender : null });
   var alt = e.id ? terminNach(e.id) : null;
+  if (alt) t.erledigt = alt.erledigt.filter(function (k) { return terminAm(t, k); });
   if (alt) state.termine[state.termine.indexOf(alt)] = t;
   else state.termine.push(t);
   if (speichern()) bestaetigen(alt ? 'Gespeichert' : 'Angelegt', alt ? '' : 'Für ' + tagKurz(t.tag), $('tmSpeichern'),
     '[data-termin="' + t.id + '"]');
   kalZeige(t.tag);
   zeige('home');
+}
+
+// Ein Termin abgehakt oder zurück — für den einen Tag, nie für die ganze Reihe.
+// Kein Jubel: Ein Termin ist keine Gewohnheit, er zählt nicht zur Stärke.
+function terminAbhaken(id, k) {
+  var t = terminNach(id);
+  if (!t || !istSchluessel(k) || k > heuteSchluessel()) return;
+  var i = t.erledigt.indexOf(k);
+  if (i === -1) { t.erledigt.push(k); t.erledigt.sort(); } else t.erledigt.splice(i, 1);
+  speichern();
+  geradeAbgehakt = i === -1 ? 't:' + id : null;
+  render();
+  geradeAbgehakt = null;
 }
 
 // Löschen will zwei Tipps. Eine Reihe geht als Ganzes.
@@ -6737,6 +6782,11 @@ function bindeAnsicht() {
   });
   alleIn('[data-rueckfall]').forEach(function (b) {
     b.addEventListener('click', function () { zeige('rueckfall', this.getAttribute('data-rueckfall')); });
+  });
+  alleIn('[data-terminhaken]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      terminAbhaken(this.getAttribute('data-terminhaken'), this.getAttribute('data-tag'));
+    });
   });
   alleIn('[data-termin]').forEach(function (b) {
     var id = b.getAttribute('data-termin');
