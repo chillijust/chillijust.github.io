@@ -30,6 +30,12 @@ Gilt für die Suiten. Ausführlich in `tools/pruefstand/README.md` und im Skill 
 - **Blobs über `blobText(b)` lesen, nie über `b.text()`** — echtes Lesen läßt die
   virtuelle Uhr im Sekundentakt der App bis ans Budget laufen; die Suite kommt dann
   gelegentlich ohne Urteil zurück.
+- **Wer auf das Ende einer Bewegung wartet, rechnet aus ihrer Konstante** (`THEMA_TROPFEN
+  + 500`), nie mit einer festen Zahl. Lokal und auf GitHub endet derselbe Übergang auf
+  verschiedenen Wegen: lokal greift oft ein früher Notweg, auf GitHub nur die späte
+  Sicherheitsuhr — eine feste Zahl ist lokal grün und auf GitHub rot (ADR 0039).
+- **Das virtuelle Budget des Läufers ist 20 s** (`lauf.mjs`). Was eine Suite in Summe
+  wartet, bleibt darunter; sonst kommt sie mit «Chilli Journal» und null Prüfungen zurück.
 - **Übergänge abschalten, wenn eine Farbe gefragt ist** — der kopflose Browser läßt sie
   nicht zuverlässig ablaufen; gefragt ist das Ziel, nicht der Weg.
 - **Eine Prüfung zählt nicht auf, sie fragt nach allen.** Menüeinträge, Knöpfe,

@@ -90,8 +90,11 @@ for (const name of suiten) {
     // sich aus nimmt. Alles, was Lagen misst — der Scheinwerfer des Tutorials,
     // die Flammenreihe, die Trefferflächen —, prüfte sonst einen Bildschirm,
     // den niemand hat, und wäre auf dem echten Gerät trotzdem falsch.
+    // Das Budget ist virtuelle Zeit: Was eine Suite in Summe wartet, muß
+    // darunter bleiben, sonst kommt sie ohne Urteil zurück. `thema` wartet
+    // mehrmals THEMA_TROPFEN + 500 und sprengte 10 s (ADR 0039).
     dom = execFileSync(chrome, ['--headless', '--disable-gpu', '--no-sandbox',
-      '--window-size=430,932', '--virtual-time-budget=10000',
+      '--window-size=430,932', '--virtual-time-budget=20000',
       '--dump-dom', pathToFileURL(seite).href],
     { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] });
   } catch (e) {

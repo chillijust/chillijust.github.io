@@ -135,7 +135,11 @@ return warte(340).then(function () {
   tropfAn = { klasse: document.documentElement.classList.contains('thema-tropft'),
     x: parseFloat(document.documentElement.style.getPropertyValue('--thema-x')),
     y: parseFloat(document.documentElement.style.getPropertyValue('--thema-y')) };
-  return warte(1400);
+  // «Danach» heißt: nach der Uhr, die spätestens aufräumt (THEMA_TROPFEN + 400).
+  // Fest gewartet, war es nach ADR 0037 zu kurz — lokal fiel die Klasse über
+  // den 400-ms-Notweg früher, auf GitHub läuft der Übergang an und nur die Uhr
+  // nimmt sie weg.
+  return warte(THEMA_TROPFEN + 500 - 340);
 }).then(function () {
   pruefe('C0 sie tropft aus dem Schalter und ist danach fertig', !!document.startViewTransition && tropfAn.klasse &&
     Math.abs(tropfAn.x - (sk.left + sk.width / 2)) < 2 && Math.abs(tropfAn.y - (sk.top + sk.height / 2)) < 2 &&
@@ -154,7 +158,7 @@ return warte(340).then(function () {
   pruefe('C8 der Akzent bleibt die Chili', token('--akzent') === '#D97757', token('--akzent'));
   pruefe('C9 «erledigt» ist im Dunkeln aufgehellt', token('--erledigt') !== '#788C5D' && token('--erledigt') !== '');
   themaUmschalten();
-  return warte(1800);
+  return warte(THEMA_TROPFEN + 500);
 }).then(function () {
   pruefe('C10 der zweite Tipp schaltet hell — fest, nicht zurück auf auto', state.thema === 'hell');
   pruefe('C11 <html> trägt «hell»', document.documentElement.getAttribute('data-thema') === 'hell');
@@ -177,7 +181,7 @@ return warte(340).then(function () {
     pruefe('C14 meldet der Übergang sein Ende nie, löst sich die Klasse trotzdem', haengt &&
       !document.documentElement.classList.contains('thema-tropft'));
     themaUmschalten();
-    return warte(1800);
+    return warte(THEMA_TROPFEN + 500);
   });
 }).then(function () {
 

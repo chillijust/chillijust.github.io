@@ -46,3 +46,4 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0036](0036-tropfen-weicher-mehrmals-alle.md) | Hell/Dunkel tropft weicher, auch mehrmals hintereinander und aus den Einstellungen; «alle» im Export tropft; Zeichen langsamer | gilt; Dauer des Tropfens und Zeiten der Zeichen seit 0037 |
 | [0037](0037-tropfen-folgt-dem-traeger.md) | Der Hell/Dunkel-Tropfen folgt dem Knauf und der Markierung; Zeichen einen Tick flotter | gilt |
 | [0038](0038-timer-und-zaehler.md) | Timer und Zähler: abhaken mit Zeit oder durch Zählen | gilt |
+| [0039](0039-pruefstand-wartet-aus-der-konstante.md) | Der Prüfstand wartet aus der Bewegungskonstante, nicht fest; Budget des Läufers 20 s | gilt |
