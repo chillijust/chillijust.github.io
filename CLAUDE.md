@@ -124,6 +124,7 @@ tools/pruefstand/         Prüfstand: lauf.mjs, suiten/*.mjs, bild.mjs (siehe RE
 .claude/skills/           Abläufe für Claude: pruefstand, ticket
 .claude/hooks/            vor-dem-push.mjs — hält den Push an, wenn etwas rot ist
 docs/chillinal-plan.md    das Pflichtenheft
+docs/stil-vorlage.md      der Stil zum Übertragen auf andere Apps (Farben, Schrift, Glas, Bewegung)
 docs/maskottchen-freigestellt.png   die Chili (Quelle für App und Symbol)
 docs/appsymbol-*.png      das App-Symbol; 180 ist bitgleich mit dem ausgelieferten
 docs/                     Architektur, Deploy, Arbeitsweise
