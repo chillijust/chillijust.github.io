@@ -236,9 +236,10 @@ pruefe('F4 Name und Rhythmus geändert, die Geschichte bleibt', g.name === 'Lese
   g.rhythmus.art === 'proWoche' && g.erledigt.length === 10 && g.angelegt === vor(10));
 zeige('bearbeiten', id);
 q('#gwArchivieren').click();
-pruefe('F5 der erste Tipp fragt nur', !g.archiviert && /Wirklich/.test(q('#gwArchivieren').textContent));
-q('#gwArchivieren').click();
-pruefe('F6 der zweite archiviert', g.archiviert === HEUTE && ansicht === 'home');
+pruefe('F5 der Tipp fragt im Glas (ADR 0041)', !g.archiviert && q('#hinweisBlatt').classList.contains('offen') && !!hinweisFrage &&
+  q('#hinweisOk').textContent === 'Archivieren');
+q('#hinweisOk').click();
+pruefe('F6 «Archivieren» im Glas archiviert', g.archiviert === HEUTE && ansicht === 'home');
 pruefe('F7 vom Dashboard verschwunden, im Speicher geblieben', !q('.gw-kachel') && !!q('#ersteGewohnheit') &&
   JSON.parse(localStorage.getItem(SPEICHER)).gewohnheiten.length === 1);
 zeige('bearbeiten', 'gibtsnicht');

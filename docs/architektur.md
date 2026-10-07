@@ -54,7 +54,8 @@ state = {
     wiederholung: 'keine',               // | 'taeglich' | 'woechentlich' | 'monatlich'
     wiederholungBis: null,               // | Tag — nur bei einer Reihe
     vorlauf: 15,                         // Minuten vor dem Beginn, aus VORLAUF_ZEIT / VORLAUF_GANZ, oder null
-    ort: '', notiz: ''
+    ort: '', notiz: '',
+    erledigt: ['2026-10-16']             // abgehakte Tage, je Tag auch bei einer Reihe (ADR 0041)
   }],
   journal: [{
     woche: '2026-10-05',                 // Montag der Woche, eine Reflexion je Woche

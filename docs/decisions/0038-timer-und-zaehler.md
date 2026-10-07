@@ -1,7 +1,7 @@
 # 0038 · Timer und Zähler
 
 *2026-10-07 · Wunsch (App-Stand 0.11.0T3) · Version 0.12.0T · ergänzt das Pflichtenheft (Gewohnheiten);
-lockert 0003 (ein Ziel je Kachel) für den Zähler; erweitert 0009 (Export)*
+lockert 0003 (ein Ziel je Kachel) für den Zähler; erweitert 0009 (Export) · Abbrechen fragt seit 0041 im Glas*
 
 ## Ausgangslage
 

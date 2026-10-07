@@ -1,7 +1,7 @@
 # 0025 · Nachtrag: Wisch von rechts, schmale Bestätigung, Tickets im Blatt, Kalender, Hell/Dunkel als Tropfen
 
 *2026-10-06 · Ticket vom Gerät (App-Stand 0.9.0T3) · Version 0.9.0T4 · ändert 0021 («Alle Tickets»),
-0023 («Hinzufügen», Kalenderwochen, Wisch); ergänzt 0018 (Bestätigung), 0019 (Hinweis bietet eine Wahl)*
+0023 («Hinzufügen», Kalenderwochen, Wisch); ergänzt 0018 (Bestätigung), 0019 (Hinweis bietet eine Wahl) · «Hinzufügen» tropft seit 0041 aus dem Plus*
 
 ## Ausgangslage
 

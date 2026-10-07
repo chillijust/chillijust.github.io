@@ -213,8 +213,10 @@ var FEDER = (function () {
     von selbst und fließt ins Gespeicherte (0018).
   - *Meldung*: Glas mit Zeichen, geht nach zwei Sekunden.
   - *Hinweis*: Glas, wartet auf «OK» — nur, was man lesen muß.
-  - *Frage*: Was alles ersetzt oder löscht, fragt im Glas und läßt sich rückgängig machen;
-    Einzelnes fragt mit zweitem Tipp (Knopf bekommt einen Akzentring).
+  - *Frage*: Was löscht oder nicht zurückgeht, fragt im Glas, das aus dem Knopf tropft; was
+    alles ersetzt, läßt sich zudem rückgängig machen. Keinen zweiten Tipp auf denselben Knopf.
+  - *Fenster wird Meldung*: Geht ein Fenster mit seiner Meldung, zieht es sich zum Tropfen
+    zusammen, aus dem die Meldung quillt — eine Bewegung, nicht zwei.
 - **Leerzustand = Wegweiser**: ein Satz, was fehlt, und ein Knopf, der hinführt. Kein
   Tutorial. Wer schon etwas hatte, wird nicht begrüßt wie beim ersten Start (0022).
 - **Jubel sparsam**: nur an Wegmarken (50 %, 90 %, neuer Rekord), jeder Anlaß einmal.

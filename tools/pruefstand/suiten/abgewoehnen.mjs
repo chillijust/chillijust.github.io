@@ -255,17 +255,19 @@ pruefe('G5 ein Start nach dem ersten Rückfall wird abgewiesen', ansicht === 'ab
   /ersten Rückfall/.test(meldung()));
 var b = q('[data-rf-loeschen="0"]');
 b.click();
-pruefe('G6 Löschen fragt erst', a1.rueckfaelle.length === 2 && /Wirklich/.test(b.textContent));
+pruefe('G6 Löschen fragt erst, im Glas (ADR 0041)', a1.rueckfaelle.length === 2 && q('#hinweisBlatt').classList.contains('offen') && !!hinweisFrage &&
+  /Rückfall löschen/.test(q('#hinweisTitel').textContent) && b.textContent === 'Löschen');
+q('#hinweisNein').click();
+pruefe('G7 «Abbrechen» läßt ihn stehen', a1.rueckfaelle.length === 2 && !q('#hinweisBlatt').classList.contains('offen'));
 q('[data-rf-loeschen="1"]').click();
-pruefe('G7 ein anderer Knopf fragt neu', a1.rueckfaelle.length === 2 && q('[data-rf-loeschen="0"]').textContent === 'Löschen');
-q('[data-rf-loeschen="1"]').click();
-pruefe('G8 der zweite Tipp löscht', a1.rueckfaelle.length === 1 && a1.rueckfaelle[0].notiz === 'Stress im Büro' &&
+q('#hinweisOk').click();
+pruefe('G8 «Löschen» im Glas löscht', a1.rueckfaelle.length === 1 && a1.rueckfaelle[0].notiz === 'Stress im Büro' &&
   alle('.rf-zeile').length === 1);
 welleBeginnen(a1.id);
 zeige('abgewoehnen', a1.id);
 q('#gwArchivieren').click();
-pruefe('G9 Archivieren fragt erst', !a1.archiviert);
-q('#gwArchivieren').click();
+pruefe('G9 Archivieren fragt erst, im Glas', !a1.archiviert && q('#hinweisBlatt').classList.contains('offen') && !!hinweisFrage && /Archivieren/.test(q('#hinweisTitel').textContent));
+q('#hinweisOk').click();
 pruefe('G10 archiviert: weg vom Dashboard, die Welle mit', a1.archiviert === '2026-10-14' && state.welle === null &&
   ansicht === 'home' && !q('[data-ab="' + a1.id + '"]'));
 zeige('abgewoehnen', 'gibtsnicht');

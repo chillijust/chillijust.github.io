@@ -1,6 +1,6 @@
 # 0040 · Glas aus der Scheibe, Timer mit Pause, Zähler in Schritten mit Einheit
 
-*2026-10-07 · zwei Tickets vom Gerät (App-Stand 0.12.0T) · Version 0.12.0T2 · ändert 0038*
+*2026-10-07 · zwei Tickets vom Gerät (App-Stand 0.12.0T) · Version 0.12.0T2 · ändert 0038 · Pause im Ring seit 0041*
 
 ## Ausgangslage
 

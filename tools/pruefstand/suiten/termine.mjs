@@ -219,14 +219,16 @@ pruefe('F21 gespeichert unter derselben id', state.termine.length === 1 && state
 hinweisSchliessen();
 zeige('termin', neu.id);
 q('#tmLoeschen').click();
-pruefe('F22 der erste Tipp fragt nach der ganzen Reihe', state.termine.length === 1 &&
-  q('#tmLoeschen').textContent === 'Ganze Reihe löschen?');
-q('#tmLoeschen').click();
-pruefe('F23 der zweite löscht', !state.termine.length && !gespeichert().length && ansicht === 'home');
+pruefe('F22 er fragt im Glas nach der ganzen Reihe (ADR 0041)', state.termine.length === 1 &&
+  q('#hinweisBlatt').classList.contains('offen') && q('#hinweisTitel').textContent === 'Ganze Reihe löschen?' &&
+  !!q('body > .tropfen-huelle.glas'));
+q('#hinweisOk').click();
+pruefe('F23 «Löschen» im Glas löscht', !state.termine.length && !gespeichert().length && ansicht === 'home');
 state.termine = [tm({ id: 'e' })];
 zeige('termin', 'e');
 q('#tmLoeschen').click();
-pruefe('F24 ein einzelner fragt schlicht', q('#tmLoeschen').textContent === 'Wirklich löschen?');
+pruefe('F24 ein einzelner fragt schlicht', q('#hinweisTitel').textContent === 'Löschen?' && !!hinweisFrage);
+q('#hinweisNein').click();
 zeige('home');
 pruefe('F25 Zurück ohne Speichern ändert nichts', state.termine.length === 1);
 

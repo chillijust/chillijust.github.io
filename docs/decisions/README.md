@@ -25,9 +25,9 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0015](0015-heatmap-im-rueckblick.md) | Heatmap: sechs Monate, Tageszustand; Raster wählt die Woche, Streifen den Tag | gilt |
 | [0016](0016-vom-rand-wischen.md) | Vom linken Rand wischen heißt zurück | gilt; auf dem Dashboard öffnet er das Menü (0023) |
 | [0017](0017-journal-wochenreflexion.md) | Journal: eine Wochenreflexion je Woche, sonntags auf dem Dashboard | gilt; Lesen, Löschen und Nachholen geändert durch 0018 |
-| [0018](0018-bestaetigung-lesen-woche-waehlen.md) | Bestätigung im Glas, Reflexion lesen, Woche wählen | gilt |
+| [0018](0018-bestaetigung-lesen-woche-waehlen.md) | Bestätigung im Glas, Reflexion lesen, Woche wählen | gilt; Bestätigung aus dem Fenster seit 0041 |
 | [0019](0019-alle-meldungen-im-glas.md) | Alle Meldungen im Glas | gilt |
-| [0020](0020-sicherung-einstellungen-tickets.md) | Sicherung, Einstellungen, Tickets; langer Druck als Tropfen | gilt; Lage des Ticketblatts geändert durch 0021 |
+| [0020](0020-sicherung-einstellungen-tickets.md) | Sicherung, Einstellungen, Tickets; langer Druck als Tropfen | gilt; Lage des Ticketblatts geändert durch 0021; Fragen mit zweitem Tipp abgelöst durch 0041 |
 | [0021](0021-ticketblatt-unten-alle-tickets.md) | Das Ticketblatt steht unten, mit «Alle Tickets» | gilt; «Alle Tickets» im Blatt seit 0025 |
 | [0022](0022-feinschliff-leer-jubel-geist.md) | Feinschliff: Leerzustände, Jubel über den Haken hinaus, Zeilen gehen als Geist | gilt |
 | [0023](0023-kalendertag-hinzufuegen-runder-tropfen.md) | Kalender: Heute als Pille, heute im Kreis, Kalenderwochen, kommende Tage, «Hinzufügen» fragt; Welle abbrechen; Wisch öffnet das Menü; «Allgemein»; der Tropfen ist rund | gilt |
@@ -45,6 +45,7 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0035](0035-zeichen-bewegen-sich.md) | Zeichen bewegen sich: Haken zeichnet sich, Hinweis-Punkt fällt, Pfeil fällt in die Schale, Blatt schiebt sich heraus | gilt |
 | [0036](0036-tropfen-weicher-mehrmals-alle.md) | Hell/Dunkel tropft weicher, auch mehrmals hintereinander und aus den Einstellungen; «alle» im Export tropft; Zeichen langsamer | gilt; Dauer des Tropfens und Zeiten der Zeichen seit 0037 |
 | [0037](0037-tropfen-folgt-dem-traeger.md) | Der Hell/Dunkel-Tropfen folgt dem Knauf und der Markierung; Zeichen einen Tick flotter | gilt |
-| [0038](0038-timer-und-zaehler.md) | Timer und Zähler: abhaken mit Zeit oder durch Zählen | gilt; Glas aus der Scheibe, Pause, Zählschritt seit 0040 |
+| [0038](0038-timer-und-zaehler.md) | Timer und Zähler: abhaken mit Zeit oder durch Zählen | gilt; Glas aus der Scheibe, Pause, Zählschritt seit 0040; Abbrechen fragt im Glas seit 0041 |
 | [0039](0039-pruefstand-wartet-aus-der-konstante.md) | Der Prüfstand wartet aus der Bewegungskonstante, nicht fest; Budget des Läufers 20 s | gilt |
-| [0040](0040-timer-klein-pause-zaehlschritt.md) | Glas aus der Scheibe, Timer mit Pause, Zähler in Schritten mit Einheit | gilt |
+| [0040](0040-timer-klein-pause-zaehlschritt.md) | Glas aus der Scheibe, Timer mit Pause, Zähler in Schritten mit Einheit | gilt; Pause im Ring seit 0041 |
+| [0041](0041-termine-abhaken-fenster-wird-meldung.md) | Termine abhaken, Fenster wird Meldung, Menüknopf tropft herab, Einträge nacheinander, «Hinzufügen» aus dem Plus, Fragen im Glas | gilt |

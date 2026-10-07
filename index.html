@@ -637,7 +637,6 @@ svg.wm { display: block; flex: none; color: var(--text); overflow: visible; }
   font-size: 14px;
   font-weight: 500;
 }
-.rf-loeschen.frage { box-shadow: inset 0 0 0 2px var(--akzent); }
 .rf-leer { margin: 0; }
 
 /* ── Dashboard: Kalender ───────────────────────────────────── */
@@ -1092,7 +1091,6 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
   font-size: 15px;
 }
 .hinweis svg { width: 22px; height: 22px; flex: none; color: var(--akzent); margin-top: 1px; }
-.knopf.frage { box-shadow: inset 0 0 0 2px var(--akzent); }
 
 /* ── Menü ──────────────────────────────────────────────────── */
 /* Das Menü klappt unter seinem Knopf auf, wie bei Chillingo — als Tropfen,
@@ -1556,7 +1554,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.12.0T2';
+var APP_VERSION = '0.13.0T';
 var APP_STAND = '2026-10-07';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -2758,6 +2756,7 @@ function zeileGeht(el, liste, ersatz) {
 // Eine Karte ist kleiner als eine Ansicht, ihr Weg kürzer (ADR 0013).
 var HINWEIS_DAUER = Math.round(TROPFEN_DAUER * 0.4);
 var hinweisQuelle = null, hinweisZiel = null, hinweisUhr = null;
+var hinweisDauer = HINWEIS_DAUER;   // ein Glas, das wie der Timer tropft, nimmt sich dessen Zeit (ADR 0041)
 var hinweisFrage = null;   // { ja, beiJa } — der Hinweis fragt, statt nur zu sagen
 var hinweisWahl = null;    // { herkunft, knoepfe: [{ text, attr, tun }] } — er bietet eine Wahl
 
@@ -2828,12 +2827,13 @@ function hinweisZeigen(titel, text, quelle, ziel, opt) {
   hinweisZiel = ziel || null;
   if (offen) return;
   hinweisQuelle = quelle || null;
+  hinweisDauer = opt.dauer || HINWEIS_DAUER;
   blatt.hidden = false;
   void blatt.offsetWidth;
   blatt.classList.add('offen');
   try { $('hinweisKarte').focus({ preventScroll: true }); } catch (e) { /* egal */ }
   if (hinweisQuelle && hinweisQuelle.width) {
-    tropfenAuf($('hinweisKarte'), hinweisQuelle, { rund: '18px', dauer: HINWEIS_DAUER, glas: true, warten: opt.warten });
+    tropfenAuf($('hinweisKarte'), hinweisQuelle, { rund: '18px', dauer: hinweisDauer, glas: true, warten: opt.warten });
   }
 }
 
@@ -2852,7 +2852,7 @@ function hinweisSchliessen() {
   if (!g) { blatt.hidden = true; return; }
   var r = karte.getBoundingClientRect();
   karte.style.opacity = '0';
-  tropfenZu(g, r, ziel, { rund: '18px', dauer: HINWEIS_DAUER, frueh: true, glas: true, fertig: function () {
+  tropfenZu(g, r, ziel, { rund: '18px', dauer: hinweisDauer, frueh: true, glas: true, fertig: function () {
     karte.style.opacity = '';
     if (!blatt.classList.contains('offen')) blatt.hidden = true;
   } });
@@ -2872,6 +2872,15 @@ function bestaetigungDauer(titel, text) {
 function bestaetigen(titel, text, knopf, ziel, zeichen) {
   var quelle = zuSehen(knopf) ? knopf.getBoundingClientRect() : null;
   hinweisZeigen(titel, text, quelle, ziel, { bestaetigung: true, zeichen: zeichen });
+}
+
+// Was löscht oder sonst nicht zurückgeht, fragt im Glas, das aus dem Knopf
+// tropft — nicht mehr mit einem zweiten Tipp auf denselben Knopf (ADR 0041).
+// «Abbrechen» fließt in den Knopf zurück; meldet `beiJa` etwas, wird die Frage
+// an Ort und Stelle zur Antwort.
+function loeschenFragen(knopf, titel, text, ja, beiJa) {
+  hinweisZeigen(titel, text || '', zuSehen(knopf) ? knopf.getBoundingClientRect() : null, knopf,
+    { frage: { ja: ja, beiJa: beiJa } });
 }
 
 // ── Ein Fenster wird zur Meldung (ADR 0041) ──────────────────────
@@ -4581,8 +4590,6 @@ function entwurfAus(g) {
     startTag: tagSchluessel(nun),
     startUhr: zwei(nun.getHours()) + ':' + zwei(nun.getMinutes()),
     startGeaendert: false,
-    archivFrage: false,
-    loeschFrage: -1
   };
 }
 
@@ -4973,15 +4980,13 @@ function lasterSpeichern(name) {
   zeige('home');
 }
 
-// Archivieren will zwei Tipps: Die Kachel verschwindet vom Dashboard. Ihre
+// Archivieren fragt im Glas: Die Kachel verschwindet vom Dashboard. Ihre
 // Einträge bleiben im Speicher. Eine laufende Welle endet mit ihr.
 function archivierenTippen() {
-  if (!entwurf.archivFrage) {
-    entwurf.archivFrage = true;
-    this.textContent = 'Wirklich archivieren?';
-    this.classList.add('frage');
-    return;
-  }
+  loeschenFragen(this, 'Archivieren?', 'Die Kachel verschwindet, deine Einträge bleiben.', 'Archivieren', archivieren);
+}
+
+function archivieren() {
   var g = entwurf.richtung === 'ab' ? lasterNach(entwurf.id) : gewohnheitNach(entwurf.id);
   if (g) g.archiviert = heuteSchluessel();
   if (state.welle && state.welle.id === entwurf.id) state.welle = null;
@@ -4990,23 +4995,18 @@ function archivierenTippen() {
   zeige('home');
 }
 
-// Ein Rückfall geht mit zwei Tipps weg; der erste fragt nur.
+// Ein Rückfall geht erst nach der Frage im Glas weg.
 function rueckfallLoeschenTippen() {
-  var i = +this.getAttribute('data-rf-loeschen'), l = lasterNach(entwurf.id);
-  if (entwurf.loeschFrage !== i) {
-    alleIn('[data-rf-loeschen]').forEach(function (x) { x.textContent = 'Löschen'; x.classList.remove('frage'); });
-    entwurf.loeschFrage = i;
-    this.textContent = 'Wirklich?';
-    this.classList.add('frage');
-    return;
-  }
-  entwurf.loeschFrage = -1;
-  if (!l || !l.rueckfaelle[i]) return;
-  l.rueckfaelle.splice(i, 1);
-  var geht = zeileGeht(this.closest('.rf-zeile'), '.rf-liste');
-  if (speichern()) melden('Gelöscht.', 'haken');
-  render();
-  geht();
+  var i = +this.getAttribute('data-rf-loeschen'), knopf = this;
+  loeschenFragen(this, 'Rückfall löschen?', 'Er zählt dann nicht mehr.', 'Löschen', function () {
+    var l = lasterNach(entwurf && entwurf.id);
+    if (!l || !l.rueckfaelle[i]) return;
+    l.rueckfaelle.splice(i, 1);
+    var geht = document.contains(knopf) ? zeileGeht(knopf.closest('.rf-zeile'), '.rf-liste') : function () {};
+    if (speichern()) melden('Gelöscht.', 'haken');
+    render();
+    geht();
+  });
 }
 
 // ── Drang: die 10-Minuten-Welle ─────────────────────────────────
@@ -5124,7 +5124,7 @@ function reflexionMoeglich(woche) {
 
 function reflexionEntwurfAus(woche) {
   var r = reflexionNach(woche);
-  return { woche: woche, gut: r ? r.gut : '', stoerte: r ? r.stoerte : '', neu: !r, loeschFrage: false };
+  return { woche: woche, gut: r ? r.gut : '', stoerte: r ? r.stoerte : '', neu: !r };
 }
 
 // Die jüngste Woche ohne Reflexion, von der laufenden zurück — dort beginnt,
@@ -5307,17 +5307,13 @@ function bindeReflexion() {
     chiliFlammt = false;
   });
   $('jrAbbrechen').addEventListener('click', function () { zeige('home'); });
-  // Löschen will zwei Tipps, wie beim Termin.
+  // Löschen fragt im Glas, wie beim Termin.
   if ($('jrLoeschen')) $('jrLoeschen').addEventListener('click', function () {
     var e = reflexionEntwurf;
-    if (!e.loeschFrage) {
-      e.loeschFrage = true;
-      this.textContent = 'Wirklich löschen?';
-      this.classList.add('frage');
-      return;
-    }
-    if (reflexionLoeschen(e.woche)) bestaetigen('Gelöscht', 'Die Reflexion ist entfernt.', this);
-    zeige('journal');
+    loeschenFragen(this, 'Löschen?', 'Die Reflexion dieser Woche ist danach weg.', 'Löschen', function () {
+      if (reflexionLoeschen(e.woche)) bestaetigenUndGehen('Gelöscht', 'Die Reflexion ist entfernt.');
+      zeige('journal');
+    });
   });
 }
 
@@ -5512,17 +5508,14 @@ function bindeTimerKarte() {
   });
   $('timerFertig').addEventListener('click', function () { timerFertig(false); });
   $('timerPause').addEventListener('click', timerPause);
-  // Abbrechen will zwei Tipps: Ein halber Lauf geht sonst mit einer Handbewegung verloren.
+  // Abbrechen fragt im Glas: Ein halber Lauf geht sonst mit einer Handbewegung verloren.
   $('timerAbbrechen').addEventListener('click', function () {
-    if (!this.classList.contains('frage')) {
-      this.classList.add('frage');
-      this.textContent = 'Wirklich?';
-      return;
-    }
-    state.timer = null;
-    speichern();
-    timerSchliessen();
-    render();
+    loeschenFragen(this, 'Timer abbrechen?', 'Die Zeit bis hier zählt nicht.', 'Abbrechen', function () {
+      state.timer = null;
+      speichern();
+      timerSchliessen();
+      render();
+    });
   });
 }
 
@@ -5603,11 +5596,11 @@ function terminEntwurfAus(t, tag) {
   if (t) {
     return { id: t.id, titel: t.titel, tag: t.tag, ganztags: t.ganztags, von: t.von || '09:00',
       bis: t.bis || '', wiederholung: t.wiederholung, wiederholungBis: t.wiederholungBis || '',
-      vorlauf: t.vorlauf, ort: t.ort, notiz: t.notiz, loeschFrage: false };
+      vorlauf: t.vorlauf, ort: t.ort, notiz: t.notiz };
   }
   return { id: null, titel: '', tag: tag || heuteSchluessel(), ganztags: false,
     von: zwei(Math.min(jetzt().getHours() + 1, 23)) + ':00', bis: '', wiederholung: 'keine',
-    wiederholungBis: '', vorlauf: 15, ort: '', notiz: '', loeschFrage: false };
+    wiederholungBis: '', vorlauf: 15, ort: '', notiz: '' };
 }
 
 function vorlaufOptionen(e) {
@@ -5771,19 +5764,16 @@ function terminAbhaken(id, k) {
   geradeAbgehakt = null;
 }
 
-// Löschen will zwei Tipps. Eine Reihe geht als Ganzes.
+// Löschen fragt im Glas. Eine Reihe geht als Ganzes — die Frage sagt es.
 function terminLoeschenTippen() {
-  var e = terminEntwurf;
-  if (!e.loeschFrage) {
-    e.loeschFrage = true;
-    this.textContent = e.wiederholung !== 'keine' ? 'Ganze Reihe löschen?' : 'Wirklich löschen?';
-    this.classList.add('frage');
-    return;
-  }
-  var t = terminNach(e.id);
-  if (t) state.termine.splice(state.termine.indexOf(t), 1);
-  if (speichern()) melden('Gelöscht.', 'haken');
-  zeige('home');
+  var e = terminEntwurf, reihe = e.wiederholung !== 'keine';
+  loeschenFragen(this, reihe ? 'Ganze Reihe löschen?' : 'Löschen?',
+    reihe ? 'Alle Termine dieser Reihe sind danach weg.' : '«' + e.titel + '» ist danach weg.', 'Löschen', function () {
+      var t = terminNach(e.id);
+      if (t) state.termine.splice(state.termine.indexOf(t), 1);
+      if (speichern()) meldenUndGehen('Gelöscht.', 'haken');
+      zeige('home');
+    });
 }
 
 // ── Kalender-Export ─────────────────────────────────────────────
@@ -6310,7 +6300,6 @@ var ticketHoehe = 0;       // so hoch war das Ticket, als «Alle Tickets» kam (
 var ticketQuelle = null;    // das Element, aus dem das Blatt quoll — dorthin fließt es zurück
 var ticketListe = false;    // das Blatt zeigt alle Tickets statt des Formulars (ADR 0025)
 var tkAusgabe = '';         // der gebündelte Text zum Kopieren von Hand
-var tkAufraeumFrage = false;
 
 // Woher ein neues Ticket kommt: die Ansicht, über der man steht.
 var ORT_VON = { home: 'uebersicht', neu: 'gewohnheit', bearbeiten: 'gewohnheit', abgewoehnen: 'abgewoehnen',
@@ -6542,24 +6531,23 @@ function bindeTicketBlatt() {
     ticketBlattSchliessen();
   });
   if ($('tkLoeschen')) $('tkLoeschen').addEventListener('click', function () {
-    if (!e.loeschFrage) {
-      e.loeschFrage = true;
-      this.textContent = 'Wirklich löschen?';
-      this.classList.add('frage');
-      return;
-    }
-    var t = ticketNach(e.id), zeile = document.querySelector('#app [data-ticket="' + e.id + '"]');
-    if (t) state.tickets.splice(state.tickets.indexOf(t), 1);
-    ticketEntwurf = null;
-    var gut = speichern();
-    // Das Blatt fließt in seine Zeile; erst wenn es dort ist, geht sie.
-    var geht = ansicht === 'tickets' && zeile ? zeileGeht(zeile, '#' + zeile.closest('section').id + ' .tm-liste',
-      '#' + zeile.closest('section').id + ' .klein') : null;
-    ticketBlattSchliessen();
-    if (ansicht === 'tickets') render();
-    if (geht) geht(TROPFEN_DAUER);
-    if (gut) melden('Gelöscht.', 'haken');
+    loeschenFragen(this, 'Löschen?', 'Das Ticket ist danach weg.', 'Löschen', function () { ticketLoeschen(e); });
   });
+}
+
+// Gelöscht wird erst nach der Frage im Glas (ADR 0041).
+function ticketLoeschen(e) {
+  var t = ticketNach(e.id), zeile = document.querySelector('#app [data-ticket="' + e.id + '"]');
+  if (t) state.tickets.splice(state.tickets.indexOf(t), 1);
+  ticketEntwurf = null;
+  var gut = speichern();
+  // Das Blatt fließt in seine Zeile; erst wenn es dort ist, geht sie.
+  var geht = ansicht === 'tickets' && zeile ? zeileGeht(zeile, '#' + zeile.closest('section').id + ' .tm-liste',
+    '#' + zeile.closest('section').id + ' .klein') : null;
+  ticketBlattSchliessen();
+  if (ansicht === 'tickets') render();
+  if (geht) geht(TROPFEN_DAUER);
+  if (gut) melden('Gelöscht.', 'haken');
 }
 
 // Das Blatt steht unten. Geht die Tastatur auf, schiebt iOS sie über das
@@ -6685,8 +6673,7 @@ function zeichneTickets() {
     '</section>' +
     (ab.length ? '<section class="abschnitt" id="tkAbgegeben"><h2>Abgegeben</h2>' +
       '<div class="tm-liste gedimmt">' + ab.map(zeichneTicketZeile).join('') + '</div>' +
-      '<div class="knopfreihe"><button type="button" class="knopf zart' + (tkAufraeumFrage ? ' frage' : '') +
-        '" id="tkAufraeumen">' + (tkAufraeumFrage ? 'Wirklich löschen?' : 'Abgegebene löschen') + '</button></div>' +
+      '<div class="knopfreihe"><button type="button" class="knopf zart" id="tkAufraeumen">Abgegebene löschen</button></div>' +
     '</section>' : '');
 }
 
@@ -6718,17 +6705,12 @@ function bindeTickets() {
   });
   if ($('tkKopieren')) $('tkKopieren').addEventListener('click', ticketsKopieren);
   if ($('tkAufraeumen')) $('tkAufraeumen').addEventListener('click', function () {
-    if (!tkAufraeumFrage) {
-      tkAufraeumFrage = true;
-      this.textContent = 'Wirklich löschen?';
-      this.classList.add('frage');
-      return;
-    }
-    tkAufraeumFrage = false;
-    state.tickets = offeneTickets();
-    var gut = speichern();
-    render();
-    if (gut) melden('Gelöscht.', 'haken');
+    loeschenFragen(this, 'Abgegebene löschen?', 'Offene Tickets bleiben.', 'Löschen', function () {
+      state.tickets = offeneTickets();
+      var gut = speichern();
+      render();
+      if (gut) melden('Gelöscht.', 'haken');
+    });
   });
 }
 
@@ -6863,12 +6845,13 @@ function bindeAnsicht() {
     });
     langDruecken(b, function () { zeige('termin', id); });
   });
-  // «Hinzufügen» fragt erst, was — in einem Fenster aus Glas, das aus dem
-  // Knopf tropft (ADR 0025).
+  // «Hinzufügen» fragt erst, was — in einem Fenster aus Glas, das wie der
+  // Timer klein aus dem Plus tropft und in dessen Tempo, nicht aus dem ganzen,
+  // fast kartenbreiten Knopf (ADR 0025, 0041).
   if ($('kalNeu')) $('kalNeu').addEventListener('click', function () {
-    var k = this.getAttribute('data-tag');
+    var k = this.getAttribute('data-tag'), plus = this.querySelector('svg') || this;
     hinweisWahlHerkunft = '#kalNeu';
-    hinweisZeigen('Hinzufügen', 'Was möchtest du an diesem Tag hinzufügen?', this.getBoundingClientRect(), this, { wahl: {
+    hinweisZeigen('Hinzufügen', 'Was möchtest du an diesem Tag hinzufügen?', plus.getBoundingClientRect(), plus, { dauer: TROPFEN_DAUER, wahl: {
       knoepfe: [
         { text: 'Termin', attr: { 'data-neutermin': k }, tun: function () { zeige('terminNeu', k); } },
         { text: 'Gewohnheit', attr: { 'data-neugw': 'an' }, tun: function () { zeige('neu', { richtung: 'an', tag: k }); } },

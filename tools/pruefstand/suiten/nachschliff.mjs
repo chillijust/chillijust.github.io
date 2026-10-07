@@ -105,7 +105,11 @@ pruefe('A2 ein Tipp öffnet ein Fenster: Termin, Gewohnheit, Abgewöhnen (ADR 00
   q('#hinweisKarte').classList.contains('glas') && q('#hinweisTitel').textContent === 'Hinzufügen' &&
   knoepfe.map(function (k) { return k.textContent; }).join() === 'Termin,Gewohnheit,Abgewöhnen' &&
   q('#hinweisOk').hidden && !q('#hinweisNein').hidden);
+var a0 = auf ? auf.getAnimations()[0] : null, b0 = a0 ? a0.effect.getKeyframes()[0] : {}, plus = neu.querySelector('svg').getBoundingClientRect();
 pruefe('A3 es tropft aus «Hinzufügen»', !!auf && auf.classList.contains('glas'));
+pruefe('A3a wie der Timer: klein aus dem Plus, in dessen Tempo (ADR 0041)', parseFloat(b0.width) <= 48 &&
+  nah(mitte({ left: parseFloat(b0.left), top: parseFloat(b0.top), width: parseFloat(b0.width), height: parseFloat(b0.height) }),
+    mitte(plus)) && a0.effect.getTiming().duration === TROPFEN_DAUER, [b0.width, a0 && a0.effect.getTiming().duration].join());
 ausbewegt();
 pruefe('A4 groß genug, untereinander', knoepfe.every(function (k) { return k.getBoundingClientRect().height >= 44; }) &&
   knoepfe[2].getBoundingClientRect().top > knoepfe[0].getBoundingClientRect().bottom);

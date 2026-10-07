@@ -153,8 +153,9 @@ return durch().then(function () {
     q('#timerTon').getAttribute('aria-pressed') === 'false' && g('lesen').timer.stumm === false);
   q('#timerTon').click();
   q('#timerAbbrechen').click();
-  pruefe('T8 Abbrechen fragt erst', !!state.timer && q('#timerAbbrechen').textContent === 'Wirklich?');
-  q('#timerAbbrechen').click();
+  pruefe('T8 Abbrechen fragt erst, im Glas über dem Timer (ADR 0041)', !!state.timer && q('#hinweisBlatt').classList.contains('offen') && !!hinweisFrage &&
+    /Timer abbrechen/.test(q('#hinweisTitel').textContent) && offen());
+  q('#hinweisOk').click();
   pruefe('T9 dann ist er fort, nichts abgehakt', !state.timer && !offen() && !erledigtAm('lesen', HEUTE));
   return durch();
 }).then(function () {
@@ -202,7 +203,7 @@ return durch().then(function () {
   return durch();
 }).then(function () {
   zeige('bearbeiten', 'turnen');
-  q('#gwArchivieren').click(); q('#gwArchivieren').click();
+  q('#gwArchivieren').click(); q('#hinweisOk').click();
   pruefe('T17 Archivieren beendet den Timer', !state.timer);
   pruefe('T18 der Sicherungscode trägt Timer, aber keinen Lauf', /"timer":\{"minuten":20/.test(ausBase64(sicherungsCode(UHR).split('~')[2])) &&
     !/"start"/.test(ausBase64(sicherungsCode(UHR).split('~')[2])));

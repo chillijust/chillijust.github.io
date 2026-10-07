@@ -37,6 +37,8 @@ Gilt für die Gewohnheiten in `index.html`. Begründungen in ADR 0002 und im Pfl
 - **Termine liegen über `terminAm(t, k)`**, nie über eigene Datumsrechnung: monatlich
   fällt aus, wo der Monat den Tag nicht hat — wie in einer `RRULE`. Eine Reihe ändert sich
   nur als Ganzes; `vorlauf` sind Minuten vor dem Beginn, ganztags vor Mitternacht (ADR 0006).
+  Abgehakt wird ein Termin je Tag über `terminAbhaken` (auch in einer Reihe), nie für einen
+  kommenden Tag; `erledigt` hält nur die Tage (ADR 0041).
 - **Die `.ics` entsteht nur in `kalenderDatei`**, aus `terminEreignis` und `gewohnheitEreignis`:
   Zeiten schwebend (ohne Zeitzone), Zeilen mit CRLF und über `icsFalten`, Text über `icsText`,
   UID = `id@chillinal`. Vergangenes und Gewohnheiten ohne `erinnerung` bleiben draußen (ADR 0009).

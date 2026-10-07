@@ -64,7 +64,7 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   «−» des Zählers, ab eins (ADR 0038).
 - **Timer und Zähler** (ADR 0038): Beim Timer startet der Tipp ihn und läßt ein Glasfenster
   aus der Kachel tropfen (`timerOeffnen`); abgehakt wird am Ende oder mit «Fertig», danebentippen
-  schließt nur das Fenster; ein runder Knopf pausiert (`timerPause`). Beim Zähler zählt der
+  schließt nur das Fenster; ein runder Knopf im Ring unter den Zahlen pausiert (`timerPause`, ADR 0041). Beim Zähler zählt der
   Tipp einen Schritt mit Einheit (0,3 L), der erste hakt ab (`zaehlen`, ADR 0040).
 - **Glas an einer Gewohnheit beginnt und endet in ihrer Scheibe** (`scheibeVon`), nie in der
   ganzen Kachel — der Tropfen nimmt die Größe seiner Quelle (ADR 0040).
@@ -72,9 +72,12 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   *Drang* und *Rückfall* sind eigene Knöpfe darunter (ADR 0004).
 - **Ein Termin ist eine Zeile mit blauem Strich** (`zeichneTerminZeile`), auf dem
   Dashboard wie in der Tagesliste; im Kalender trägt sein Tag **einen** blauen Punkt, vorn
-  (ADR 0006). Die Tagesansicht ist die Liste unter dem Kalender, keine eigene Ansicht. Ein
+  (ADR 0006). An einem Tag, der nicht mehr kommt, trägt sie rechts einen runden Haken für genau
+  diesen Tag; abgehakt wird sie blaß und durchgestrichen (`terminAbhaken`, ADR 0041). Die
+  Tagesansicht ist die Liste unter dem Kalender, keine eigene Ansicht. Ein
   kommender Tag zeigt dort, was dran ist, ohne Haken; «Hinzufügen» fragt in einem Fenster
-  aus Glas — Termin, Gewohnheit, Abgewöhnen (`opt.wahl`, ADR 0025); ein Tipp daneben bricht
+  aus Glas — Termin, Gewohnheit, Abgewöhnen (`opt.wahl`, ADR 0025), das wie der Timer klein aus dem
+  Plus tropft (ADR 0041); ein Tipp daneben bricht
   ab wie «Abbrechen» (ADR 0026). Im Monat läuft über jeder Woche ein Strich quer bis an den
   Kartenrand, die KW links außen darauf; eine KW-Spalte gibt es nicht. In der Woche tropft
   Blättern zur Seite: vor tropft die alte nach links ab und die neue von rechts auf, zurück
@@ -116,8 +119,9 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   hoch wie der Titel und wächst bis drei Zeilen; gemessen wird erst, wenn das Blatt steht. Es ist aus Glas, wie Hinweis
   und Meldung, auch im Tropfen (ADR 0024).
 - **Was alles ersetzt oder löscht, fragt im Glas** (`hinweisZeigen` mit `frage`) und läßt
-  sich bis zum Neuladen rückgängig machen (`rueckgaengig`); Einzelnes fragt mit zweitem Tipp
-  (`.frage`).
+  sich bis zum Neuladen rückgängig machen (`rueckgaengig`); auch Einzelnes — Löschen, Archivieren,
+  Timer abbrechen — fragt im Glas aus seinem Knopf (`loeschenFragen`), einen zweiten Tipp auf
+  denselben Knopf gibt es nicht (ADR 0041).
 
 ## Chili
 
@@ -147,6 +151,11 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 - **Gespeichert und Angelegt bestätigt `bestaetigen()`**, nie `melden()`: der Hinweis aus Glas
   mit Haken, ohne «OK», geht von selbst und fließt ins Gespeicherte (ADR 0018). Wurde nichts
   gespeichert, dasselbe Glas mit neutralem Zeichen (`'hinweis'`), nie der grüne Haken.
+- **Geht das Fenster mit der Meldung, wird es selbst zur Meldung** (`bestaetigenUndGehen`,
+  `meldenUndGehen`, im Ticketblatt `ticketBlattSchliessen(null, meldung)`): Es zieht sich in der
+  Mitte zum Tropfen, aus dem die Meldung quillt; die Ansicht fließt nicht noch einmal zurück.
+  Sonst quillt eine Meldung aus dem zuletzt getippten Knopf (`letzterTipp`) — iOS gibt keinem
+  getippten Knopf den Fokus (ADR 0041).
 - **Zeichen bewegen sich einmal, wenn sie erscheinen** (`zeichenZeichnen`, Klassen `z-…`): Haken zeichnet
   sich, «i» läßt den Punkt fallen, `laden` den Pfeil, `kopie` das Blatt; grün ist alles außer «i» (ADR 0035);
   weich, ein Viertel flotter als in 0036, fertig vor der Bestätigung (ADR 0036, 0037).
@@ -166,7 +175,9 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   getönt wie die Karte (ADR 0032). Kacheln und Zeilen zoomen —
   außer beim langen Druck: dann tropft es aus dem Fingerpunkt (`punktFlaeche`, ADR 0020).
 - **Das Menü klappt unter seinem Knopf auf** (`menueOeffnen`, `blattLegen`), nie als Blatt
-  von unten. Schließen ist Öffnen rückwärts — gleiche Dauer, gespiegelte Bilder.
+  von unten. Schließen ist Öffnen rückwärts — gleiche Dauer, gespiegelte Bilder. Ist der Knopf
+  hinausgerollt, tropft erst ein Gast von ihm an den oberen Rand (`menueAnker`); die Einträge
+  tropfen als Perlen nacheinander auf (`menueEintraegeTropfen`, ADR 0041).
 - **Was zusammen geht, geht in einem Takt**: Wer Raster, Karte und Liste zugleich bewegt,
   gibt allen dieselbe Dauer und Kurve (`KAL_TAKT`, `heldTakt`) — zwei Takte sehen aus wie
   Schnappen (ADR 0008).

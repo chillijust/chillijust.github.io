@@ -162,18 +162,19 @@ return durch().then(function () {
   q('#tkKopieren').click();
   pruefe('D14 dann geht es, und das Feld ist fort', !q('#tkAusgabe') && ticketNach('k3').abgegeben === zeitJetzt());
   hinweisSchliessen();
-  // Löschen: ein Ticket im Blatt, mit zweitem Tipp.
+  // Löschen: ein Ticket im Blatt, nach der Frage im Glas (ADR 0041).
   q('[data-ticket="k3"]').click();
   q('#tkLoeschen').click();
-  pruefe('D15 Löschen fragt erst', !!ticketNach('k3') && q('#tkLoeschen').textContent === 'Wirklich löschen?');
-  q('#tkLoeschen').click();
+  pruefe('D15 Löschen fragt erst, im Glas über dem Blatt', !!ticketNach('k3') && q('#hinweisBlatt').classList.contains('offen') && !!hinweisFrage &&
+    blatt.classList.contains('offen'));
+  q('#hinweisOk').click();
   pruefe('D16 dann ist es fort', !ticketNach('k3') && !blatt.classList.contains('offen'));
   return durch();
 }).then(function () {
   hinweisSchliessen();
   q('#tkAufraeumen').click();
-  pruefe('D17 «Abgegebene löschen» fragt erst', state.tickets.length === 2 && q('#tkAufraeumen').classList.contains('frage'));
-  q('#tkAufraeumen').click();
+  pruefe('D17 «Abgegebene löschen» fragt erst, im Glas', state.tickets.length === 2 && q('#hinweisBlatt').classList.contains('offen') && !!hinweisFrage);
+  q('#hinweisOk').click();
   pruefe('D18 dann bleiben nur die offenen', state.tickets.length === 0 && !q('#tkAufraeumen'));
   hinweisSchliessen();
   q('#tkNeu').click();

@@ -296,10 +296,8 @@ neu();
 var al = laster('al', UHR - 9 * T, [{ zeit: UHR - 6 * T, notiz: 'eins' }, { zeit: UHR - 3 * T, notiz: 'zwei' }]);
 zeige('abgewoehnen', 'al');
 ausbewegt();
-var knopf = q('[data-rf-loeschen="1"]');
-knopf.click();
-knopf = q('[data-rf-loeschen="1"]');
-knopf.click();
+q('[data-rf-loeschen="1"]').click();
+q('#hinweisOk').click();
 var geister = alle('.rf-liste .geist');
 pruefe('E1 der gelöschte Rückfall steht als Geist in der Liste', al.rueckfaelle.length === 1 && geister.length === 1 &&
   alle('.rf-liste .rf-zeile').length === 1, geister.length);
@@ -310,7 +308,7 @@ pruefe('E3 ausbewegt ist er fort', alle('.rf-liste .geist').length === 0);
 state.bewegung = 'aus';
 themaAnwenden();
 q('[data-rf-loeschen="0"]').click();
-q('[data-rf-loeschen="0"]').click();
+q('#hinweisOk').click();
 pruefe('E4 ohne Bewegung kein Geist', al.rueckfaelle.length === 0 && alle('.rf-liste .geist').length === 0 &&
   !!q('.rf-leer'));
 state.bewegung = 'auto';
@@ -326,7 +324,7 @@ ausbewegt();
 q('[data-ticket="k1"]').click();
 ausbewegt();
 q('#tkLoeschen').click();
-q('#tkLoeschen').click();
+q('#hinweisOk').click();
 pruefe('E5 ein gelöschtes Ticket geht als Geist aus der Liste', state.tickets.length === 1 &&
   alle('#tkOffen .tm-liste .geist').length === 1 && alle('#tkOffen [data-ticket]').length === 1);
 ausbewegt();
@@ -337,7 +335,7 @@ hinweisSchliessen();
 q('[data-ticket="k2"]').click();
 ausbewegt();
 q('#tkLoeschen').click();
-q('#tkLoeschen').click();
+q('#hinweisOk').click();
 pruefe('E7 das letzte geht auch: vor dem Satz, der die Liste ersetzt', state.tickets.length === 0 &&
   alle('#tkOffen > .geist').length === 1 && q('#tkOffen > .geist').nextElementSibling === q('#tkOffen .klein'));
 ausbewegt();

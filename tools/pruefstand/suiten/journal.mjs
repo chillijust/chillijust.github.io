@@ -135,10 +135,10 @@ state.journal = [reflexionLesen({ woche: MO, gut: 'Weg damit', stoerte: '' })];
 zeige('lesen', MO);
 q('#jrBearbeiten').click();
 q('#jrLoeschen').click();
-pruefe('F12 «Löschen» fragt erst', !!reflexionNach(MO) && q('#jrLoeschen').textContent === 'Wirklich löschen?' &&
-  q('#jrLoeschen').classList.contains('frage'));
-q('#jrLoeschen').click();
-pruefe('F13 der zweite Tipp löscht, bestätigt und führt ins Journal', !reflexionNach(MO) && ansicht === 'journal' &&
+pruefe('F12 «Löschen» fragt erst, im Glas (ADR 0041)', !!reflexionNach(MO) && q('#hinweisBlatt').classList.contains('offen') && !!hinweisFrage &&
+  q('#hinweisOk').textContent === 'Löschen');
+q('#hinweisOk').click();
+pruefe('F13 «Löschen» im Glas löscht, bestätigt und führt ins Journal', !reflexionNach(MO) && ansicht === 'journal' &&
   !JSON.parse(localStorage.getItem(SPEICHER)).journal.length && /Gelöscht/.test(meldung()));
 
 // ── J · Das Journal im Menü ─────────────────────────────────
