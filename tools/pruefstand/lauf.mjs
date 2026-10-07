@@ -109,7 +109,7 @@ for (const name of suiten) {
     // Das Protokoll steht als Text in einem <pre>, eine Prüfung je Zeile. Also
     // an Zeilenumbrüchen **und** an spitzen Klammern trennen — sonst klebt die
     // erste Prüfung am Tag davor und keine Zeile fängt mit «FAIL» an.
-    dom.split(/[<\n]/).filter((z) => /^(FAIL|AUSNAHME)/.test(z))
+    dom.split(/[<>\n]/).filter((z) => /^(FAIL|AUSNAHME)/.test(z))
       .slice(0, 10).forEach((z) => console.log('    ' + z.trim()));
     gesagt.forEach((z) => console.log('    · ' + z));
   }
