@@ -1123,6 +1123,9 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
   overflow: hidden;
 }
 .menue-liste { list-style: none; margin: 0; padding: 0; }
+/* Der Gast des Menüknopfs, wenn der hinausgerollt ist (ADR 0041). */
+.menue-gast { position: absolute; top: calc(env(safe-area-inset-top) + 12px); background: var(--grund);
+  box-shadow: 0 2px 6px rgba(20, 20, 19, .10), 0 8px 20px rgba(20, 20, 19, .14); }
 .menue-eintrag {
   width: 100%;
   display: flex;
@@ -1668,9 +1671,19 @@ function melden(text, zeichen) {
   // Jede Meldung erscheint im Glas, wie die Bestätigung (ADR 0019): der erste
   // Satz als Titel, der Rest darunter; sie quillt aus dem, was gerade getippt
   // wurde. `zeichen` 'haken' nur für Gelungenes, sonst das neutrale.
-  var teil = String(text).match(/^(.*?[.!?])\s+(.+)$/), titel = teil ? teil[1] : String(text), rest = teil ? teil[2] : '';
-  var knopf = document.activeElement && document.activeElement !== document.body ? document.activeElement : null;
-  bestaetigen(titel.replace(/\.$/, ''), rest, knopf, null, zeichen === 'haken' || zeichen === 'kopie' ? zeichen : 'hinweis');
+  // Gequollen wird aus dem zuletzt getippten Knopf: iOS gibt einem getippten
+  // Knopf keinen Fokus, und nach dem Kopieren liegt er ohnehin nicht mehr
+  // dort — «Kopiert» tropfte darum gar nicht (ADR 0041).
+  var m = meldungTeilen(text), tipp = letzterTipp && Date.now() - letzterTipp.zeit < 3000 ? letzterTipp.el : null;
+  var knopf = zuSehen(tipp) ? tipp
+    : document.activeElement && document.activeElement !== document.body ? document.activeElement : null;
+  bestaetigen(m.titel, m.rest, knopf, null, zeichen === 'haken' || zeichen === 'kopie' ? zeichen : 'hinweis');
+}
+
+// Der erste Satz als Titel, ohne Punkt; der Rest darunter.
+function meldungTeilen(text) {
+  var teil = String(text).match(/^(.*?[.!?])\s+(.+)$/);
+  return { titel: (teil ? teil[1] : String(text)).replace(/\.$/, ''), rest: teil ? teil[2] : '' };
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -2427,7 +2440,9 @@ function tropfenZu(g, r, ziel, opt) {
 // wird ihr Geist; die echte Ansicht steht derweil unsichtbar schon bereit.
 // `opt` ist frei: `rund` die Ecken, in denen er ankommt (eine Ansicht hat
 // keine), `dauer` die eigene Dauer, `glas` die Hülle aus Glas, `grund` die
-// Farbe der Hülle, wenn sie nicht der Grund der Seite ist.
+// Farbe der Hülle, wenn sie nicht der Grund der Seite ist, `warten` wie lange
+// er unsichtbar wartet — etwa, bis ein Fenster an seiner Stelle zum Tropfen
+// geworden ist (ADR 0041).
 function tropfenAuf(neu, q, opt) {
   opt = opt || {};
   var g = geist(neu);
@@ -2440,12 +2455,13 @@ function tropfenAuf(neu, q, opt) {
   bewegt(h, [huellenBild(w.klein, TROPFEN, 0, 0, f.dicht), huellenBild(w.klein, TROPFEN, 1, 0.08, f.dicht),
     huellenBild(w.tropfen, TROPFEN, 1, 0.3, f.dicht), huellenBild(w.mitte, '40%', 1, 0.62, f.dicht),
     huellenBild(w.gross, opt.rund || '0px', 1, 1, f.duenn)],
-    { dauer: dauer, kurve: 'cubic-bezier(.3, 0, .25, 1)', fill: 'forwards' }, function () {
+    { dauer: dauer, warten: opt.warten, kurve: 'cubic-bezier(.3, 0, .25, 1)', fill: opt.warten ? 'both' : 'forwards' },
+    function () {
       neu.style.opacity = '';
       weg(h);
     });
   bewegt(g, [sk(w.klein, 0), sk(w.klein, 0.08), sk(w.tropfen, 0.3), sk(w.mitte, 0.62), sk(w.gross, 1)],
-    { dauer: dauer, kurve: 'cubic-bezier(.3, 0, .25, 1)', fill: 'forwards' });
+    { dauer: dauer, warten: opt.warten, kurve: 'cubic-bezier(.3, 0, .25, 1)', fill: opt.warten ? 'both' : 'forwards' });
   return h;
 }
 
@@ -2506,9 +2522,11 @@ function uebergangVorbereiten(von, nach) {
     herkunft = tipp && document.contains(tipp) ? selektorVon(tipp) : null;
     herkunftPunkt = punkt && herkunft ? { dx: punkt.x - flaeche.left, dy: punkt.y - flaeche.top } : null;
   }
+  var gemeldet = fensterIstMeldung;
+  fensterIstMeldung = false;
   if (von === nach || bewegungAus()) return null;
   var alt = $('ansicht');
-  return { zurueck: nach === 'home', altRect: alt.getBoundingClientRect(), geist: geist(alt),
+  return { zurueck: nach === 'home', altRect: alt.getBoundingClientRect(), geist: gemeldet ? null : geist(alt),
     quelle: punkt ? punktFlaeche(punkt.x, punkt.y) : flaeche, rund: !!punkt || (mitTipp && tropfenQuelle(tipp)) };
 }
 
@@ -2806,7 +2824,7 @@ function hinweisZeigen(titel, text, quelle, ziel, opt) {
   karte.classList.toggle('bestaetigung', best);
   karte.setAttribute('role', best ? 'status' : 'alertdialog');
   if (hinweisUhr) { clearTimeout(hinweisUhr); hinweisUhr = null; }
-  if (best) hinweisUhr = setTimeout(hinweisSchliessen, bestaetigungDauer(titel, text));
+  if (best) hinweisUhr = setTimeout(hinweisSchliessen, bestaetigungDauer(titel, text) + (opt.warten || 0));
   hinweisZiel = ziel || null;
   if (offen) return;
   hinweisQuelle = quelle || null;
@@ -2814,7 +2832,9 @@ function hinweisZeigen(titel, text, quelle, ziel, opt) {
   void blatt.offsetWidth;
   blatt.classList.add('offen');
   try { $('hinweisKarte').focus({ preventScroll: true }); } catch (e) { /* egal */ }
-  if (hinweisQuelle && hinweisQuelle.width) tropfenAuf($('hinweisKarte'), hinweisQuelle, { rund: '18px', dauer: HINWEIS_DAUER, glas: true });
+  if (hinweisQuelle && hinweisQuelle.width) {
+    tropfenAuf($('hinweisKarte'), hinweisQuelle, { rund: '18px', dauer: HINWEIS_DAUER, glas: true, warten: opt.warten });
+  }
 }
 
 // Schließen: Der Schleier blendet aus, die Karte geht als Geist in den
@@ -2852,6 +2872,50 @@ function bestaetigungDauer(titel, text) {
 function bestaetigen(titel, text, knopf, ziel, zeichen) {
   var quelle = zuSehen(knopf) ? knopf.getBoundingClientRect() : null;
   hinweisZeigen(titel, text, quelle, ziel, { bestaetigung: true, zeichen: zeichen });
+}
+
+// ── Ein Fenster wird zur Meldung (ADR 0041) ──────────────────────
+// Wer in einem Fenster speichert, das dabei geht — eine Ansicht, das
+// Ticketblatt —, sieht nicht erst das Fenster zurückfließen und dann die
+// Meldung aus einem Knopf quellen: Das Fenster zieht sich in der Mitte des
+// Bilds zum Tropfen zusammen, und aus diesem Tropfen quillt die Meldung. Es
+// sind die beiden bekannten Hälften, `tropfenZu` und `tropfenAuf`, mit einem
+// gemeinsamen Punkt — keine zweite Mechanik (ADR 0013).
+var MELDE_ZU = TROPFEN_DAUER;
+var fensterIstMeldung = false;   // die nächste Ansicht wechselt ohne eigenen Rückfluß
+
+function meldePunkt() {
+  var b = document.documentElement.clientWidth, h = window.innerHeight || document.documentElement.clientHeight;
+  return { left: b / 2 - 22, top: h / 2 - 22, width: 44, height: 44 };
+}
+
+// `g` ist der Geist des Fensters, `r` seine Fläche, `glas` ob es Glas war.
+// Ohne Geist (Bewegung aus) erscheint die Meldung einfach.
+function fensterWirdMeldung(g, r, glas, titel, text, ziel, zeichen) {
+  var p = meldePunkt(), opt = { bestaetigung: true, zeichen: zeichen };
+  if (g) {
+    tropfenZu(g, r, { getBoundingClientRect: function () { return p; } },
+      { rund: glas ? '18px' : '20px', glas: glas, frueh: true, dauer: MELDE_ZU });
+    // Die Meldung quillt, wenn das Fenster Tropfen geworden ist — beide
+    // blenden sich dort ineinander.
+    opt.warten = Math.round(MELDE_ZU * TROPFEN_ZU_FRUEH[2]);
+  }
+  hinweisZeigen(titel, text, g ? p : null, ziel, opt);
+}
+
+// Für eine Ansicht, die nach der Meldung geht: Ihr Geist wird jetzt genommen,
+// `zeige()` danach fließt nicht noch einmal zurück. Danach `zeige(…)` rufen.
+function bestaetigenUndGehen(titel, text, ziel, zeichen) {
+  var alt = $('ansicht'), g = geist(alt), r = alt.getBoundingClientRect();
+  if (g) fensterIstMeldung = true;
+  fensterWirdMeldung(g, r, false, titel, text, ziel, zeichen);
+}
+
+// Wie `melden()`, für eine Ansicht, die danach geht.
+function meldenUndGehen(text, zeichen) {
+  var m = meldungTeilen(text);
+  if ($('meldung')) $('meldung').textContent = text;
+  bestaetigenUndGehen(m.titel, m.rest, null, zeichen === 'haken' || zeichen === 'kopie' ? zeichen : 'hinweis');
 }
 
 // ── Umschalter: die Markierung fließt hinüber ───────────────────
@@ -4867,9 +4931,9 @@ function entwurfSpeichern() {
   beginnVorziehen(g || state.gewohnheiten[state.gewohnheiten.length - 1], entwurf.beginn);
   var id = g ? g.id : state.gewohnheiten[state.gewohnheiten.length - 1].id;
   if (speichern()) {
-    bestaetigen(g ? 'Gespeichert' : 'Angelegt', g ? '' : entwurf.weise === 'timer' ? 'Antippen startet den Timer, lange drücken öffnet sie.'
+    bestaetigenUndGehen(g ? 'Gespeichert' : 'Angelegt', g ? '' : entwurf.weise === 'timer' ? 'Antippen startet den Timer, lange drücken öffnet sie.'
       : entwurf.weise === 'zaehler' ? 'Antippen zählt eins, lange drücken öffnet sie.' : 'Antippen heißt erledigt, lange drücken öffnet sie.',
-      $('gwSpeichern'), '[data-haken="' + id + '"]' + SCHEIBE);
+      '[data-haken="' + id + '"]' + SCHEIBE);
   }
   zeige('home');
 }
@@ -4903,8 +4967,8 @@ function lasterSpeichern(name) {
   }
   var id = l ? l.id : state.abgewoehnen[state.abgewoehnen.length - 1].id;
   if (speichern()) {
-    bestaetigen(l ? 'Gespeichert' : 'Angelegt', l ? '' : 'Kommt ein Drang, tipp auf «Drang».',
-      $('gwSpeichern'), '[data-ab="' + id + '"]' + SCHEIBE);
+    bestaetigenUndGehen(l ? 'Gespeichert' : 'Angelegt', l ? '' : 'Kommt ein Drang, tipp auf «Drang».',
+      '[data-ab="' + id + '"]' + SCHEIBE);
   }
   zeige('home');
 }
@@ -4922,7 +4986,7 @@ function archivierenTippen() {
   if (g) g.archiviert = heuteSchluessel();
   if (state.welle && state.welle.id === entwurf.id) state.welle = null;
   if (state.timer && state.timer.id === entwurf.id) state.timer = null;
-  if (speichern()) melden('Archiviert. Deine Einträge bleiben erhalten.', 'haken');
+  if (speichern()) meldenUndGehen('Archiviert. Deine Einträge bleiben erhalten.', 'haken');
   zeige('home');
 }
 
@@ -4987,7 +5051,7 @@ function bindeWelle() {
   if ($('welleGewonnen')) {
     $('welleGewonnen').addEventListener('click', function () {
       if (!welleGewonnen()) return;
-      melden('Gewonnen. Die Welle ist durch.', 'haken');
+      meldenUndGehen('Gewonnen. Die Welle ist durch.', 'haken');
       chiliFlammt = 'flammt';
       zeige('home');
       chiliFlammt = false;
@@ -4998,7 +5062,7 @@ function bindeWelle() {
   });
   $('welleAbbrechen').addEventListener('click', function () {
     if (!welleAbbrechen()) return;
-    melden('Abgebrochen. Die Welle zählt nicht.');
+    meldenUndGehen('Abgebrochen. Die Welle zählt nicht.');
     zeige('home');
   });
 }
@@ -5030,7 +5094,7 @@ function zeichneRueckfall() {
 function bindeRueckfall() {
   $('rfNotiz').addEventListener('input', function () { rueckfallFuer.notiz = this.value; });
   $('rfEintragen').addEventListener('click', function () {
-    if (rueckfallEintragen(rueckfallFuer.id, rueckfallFuer.notiz)) melden('Eingetragen. Ab jetzt zählt es neu.', 'haken');
+    if (rueckfallEintragen(rueckfallFuer.id, rueckfallFuer.notiz)) meldenUndGehen('Eingetragen. Ab jetzt zählt es neu.', 'haken');
     zeige('home');
   });
   $('rfAbbrechen').addEventListener('click', function () {
@@ -5233,9 +5297,9 @@ function bindeReflexion() {
   $('jrAnsehen').addEventListener('click', function () { zeige('lesen', reflexionEntwurf.woche); });
   $('jrSpeichern').addEventListener('click', function () {
     var e = reflexionEntwurf, was = reflexionSpeichern(e.woche, e.gut, e.stoerte);
-    if (was === 'gespeichert') bestaetigen('Gespeichert', 'Nachzulesen im Journal.', this, '[data-lesen="' + e.woche + '"]');
-    else if (was === 'entfernt') bestaetigen('Gelöscht', 'Die Reflexion ist entfernt.', this);
-    else if (was === 'nichts') bestaetigen('Nichts gespeichert', 'Du hast nichts geschrieben.', this, null, 'hinweis');
+    if (was === 'gespeichert') bestaetigenUndGehen('Gespeichert', 'Nachzulesen im Journal.', '[data-lesen="' + e.woche + '"]');
+    else if (was === 'entfernt') bestaetigenUndGehen('Gelöscht', 'Die Reflexion ist entfernt.');
+    else if (was === 'nichts') bestaetigenUndGehen('Nichts gespeichert', 'Du hast nichts geschrieben.', null, 'hinweis');
     // Eine Woche angesehen und aufgeschrieben: Geht es aufs Dashboard, flammt
     // die Chili — wie beim Haken.
     if (was === 'gespeichert' && !rueckZiel) chiliFlammt = 'flammt';
@@ -5688,7 +5752,7 @@ function terminSpeichern() {
   if (alt) t.erledigt = alt.erledigt.filter(function (k) { return terminAm(t, k); });
   if (alt) state.termine[state.termine.indexOf(alt)] = t;
   else state.termine.push(t);
-  if (speichern()) bestaetigen(alt ? 'Gespeichert' : 'Angelegt', alt ? '' : 'Für ' + tagKurz(t.tag), $('tmSpeichern'),
+  if (speichern()) bestaetigenUndGehen(alt ? 'Gespeichert' : 'Angelegt', alt ? '' : 'Für ' + tagKurz(t.tag),
     '[data-termin="' + t.id + '"]');
   kalZeige(t.tag);
   zeige('home');
@@ -6536,8 +6600,9 @@ function ticketBlattOeffnen(quelle, id, flaeche) {
 }
 
 // Zu: in die Quelle zurück, ist sie fort, in den Knopf. `fertig` kommt, wenn
-// der Tropfen angekommen ist.
-function ticketBlattSchliessen(fertig) {
+// der Tropfen angekommen ist. Mit `meldung` ({ titel, text, ziel }) fließt das
+// Blatt nirgends hin, es wird selbst zur Meldung (ADR 0041).
+function ticketBlattSchliessen(fertig, meldung) {
   var blatt = $('ticketBlatt'), karte = $('ticketKarte');
   ticketKnopfZeigen();
   $('ticketKnopf').setAttribute('aria-expanded', 'false');
@@ -6552,8 +6617,13 @@ function ticketBlattSchliessen(fertig) {
     if (!blatt.classList.contains('offen')) blatt.hidden = true;
     if (fertig) fertig();
   }
-  if (!g) { zu(); return; }
   var r = karte.getBoundingClientRect();
+  if (meldung) {
+    zu();
+    fensterWirdMeldung(g, r, true, meldung.titel, meldung.text, meldung.ziel);
+    return;
+  }
+  if (!g) { zu(); return; }
   karte.style.opacity = '0';
   tropfenZu(g, r, ziel, { rund: '18px', glas: true, fertig: zu });
 }
@@ -6583,14 +6653,11 @@ function ticketSichern() {
   ticketEntwurf = null;
   var gut = speichern(), neu = !e.id;
   if (ansicht === 'tickets') render();
-  // Erst fließt das Blatt zurück, dann quillt die Bestätigung aus dem Knopf —
-  // zwei Tropfen zugleich sähen aus wie einer, der sich verdoppelt.
-  ticketBlattSchliessen(function () {
-    if (!gut) return;
-    var k = $('ticketKnopf');
-    bestaetigen(neu ? 'Ticket gesichert' : 'Gespeichert', neu ? 'Es bleibt auf dem Gerät, bis du es kopierst.' : '',
-      k, ansicht === 'tickets' ? '[data-ticket="' + t.id + '"]' : k);
-  });
+  // Das Blatt wird selbst zur Bestätigung, die danach ins Gespeicherte fließt
+  // (ADR 0041) — nicht erst zurück und dann aus dem Knopf.
+  ticketBlattSchliessen(null, gut ? { titel: neu ? 'Ticket gesichert' : 'Gespeichert',
+    text: neu ? 'Es bleibt auf dem Gerät, bis du es kopierst.' : '',
+    ziel: ansicht === 'tickets' ? '[data-ticket="' + t.id + '"]' : $('ticketKnopf') } : null);
 }
 
 // ── Die Ticketliste ─────────────────────────────────────────────
@@ -6988,9 +7055,62 @@ function menueWahl() {
   }
 }
 
+// Woran das Menü hängt: am Menüknopf — oder, ist der hinausgerollt, an
+// seinem Gast, der oben ins Bild getropft ist (ADR 0041).
+function menueAnker() { return $('menueGast') || $('menuKnopf'); }
+
+// Ist der Menüknopf nach oben aus dem Bild gerollt, tropft er herab: Ein Gast
+// mit seinem Symbol fällt von dort, wo der Knopf steht, an den oberen Rand,
+// erst dann klappt das Menü unter ihm auf. Gesetzt wird er still; fallen läßt
+// ihn `menueGastFallen`, nachdem das Blatt an ihm gemessen ist.
+function menueGastSetzen(huelle) {
+  var k = $('menuKnopf');
+  weg($('menueGast'));
+  if (!k || !zuSehen(k)) return 0;
+  var kr = k.getBoundingClientRect(), gast = document.createElement('button');
+  gast.type = 'button';
+  gast.id = 'menueGast';
+  gast.className = 'rund menue-gast';
+  gast.setAttribute('aria-label', 'Menü schließen');
+  gast.innerHTML = ICON.menue;
+  gast.style.right = px(Math.max(8, document.documentElement.clientWidth - kr.right));
+  huelle.appendChild(gast);
+  if (kr.top >= gast.getBoundingClientRect().top - 1) { weg(gast); return 0; }
+  gast.addEventListener('click', function () { menueSchliessen(); });
+  return kr.top;
+}
+
+// Gibt die Dauer des Falls zurück — so lange wartet das Blatt.
+function menueGastFallen(von) {
+  var gast = $('menueGast');
+  if (!gast || bewegungAus()) return 0;
+  bewegt(gast, [{ transform: 'translateY(' + px(von - gast.getBoundingClientRect().top) + ')' }, { transform: 'none' }],
+    { dauer: MENUE_DAUER, kurve: TROPFEN_KURVE });
+  return MENUE_DAUER;
+}
+
+// Die Einträge tropfen nacheinander auf, wie die Zeilen unter «Alle Tickets»:
+// jeder als Perle an seinem Symbol, die zur Zeile wächst (ADR 0041). Enger
+// gestaffelt als dort — das Menü öffnet man oft, und sieben Zeilen in je
+// 160 ms ließen auf das letzte Ziel fast zwei Sekunden warten.
+var MENUE_STAFFEL = 70, MENUE_ZEILE = 460;
+function menueEintraegeTropfen(warten) {
+  alleIn('#menueListe .menue-eintrag').forEach(function (z, i) {
+    var w = z.offsetWidth, h = z.offsetHeight;
+    if (!w || !h) return;
+    var d = Math.min(h, 40), perle = 'inset(' + px((h - d) / 2) + ' ' + px(w - d - 2) + ' ' + px((h - d) / 2) + ' 2px round ' +
+      px(d / 2) + ')';
+    bewegt(z, [
+      { clipPath: perle, opacity: 0, transform: 'translateY(-6px)' },
+      { clipPath: perle, opacity: 1, transform: 'none', offset: 0.3 },
+      { clipPath: 'inset(0px 0px 0px 0px round 12px)', opacity: 1, transform: 'none' }
+    ], { dauer: MENUE_ZEILE, warten: warten + MENUE_STAFFEL * i, kurve: TROPFEN_KURVE, fill: 'backwards' });
+  });
+}
+
 // Das Blatt hängt unter dem Knopf, rechtsbündig mit ihm.
 function blattLegen() {
-  var k = $('menuKnopf'), b = document.querySelector('#menue .blatt');
+  var k = menueAnker(), b = document.querySelector('#menue .blatt');
   if (!k || !b) return;
   var r = k.getBoundingClientRect();
   b.style.top = px(r.bottom + 8);
@@ -7000,7 +7120,7 @@ function blattLegen() {
 // Die Bilder des Blatts zwischen Knopf und voller Größe: von oben rechts
 // skaliert, die Ecken vom Tropfen zur Karte.
 function blattBilder() {
-  var k = $('menuKnopf'), b = document.querySelector('#menue .blatt');
+  var k = menueAnker(), b = document.querySelector('#menue .blatt');
   var kr = k ? k.getBoundingClientRect() : null, br = b.getBoundingClientRect();
   if (!kr || !br.width || !br.height) return null;
   var dy = kr.top - br.top;
@@ -7026,15 +7146,16 @@ function menueOeffnen() {
   var huelle = $('menue'), b = document.querySelector('#menue .blatt');
   menueZeichnen();
   huelle.hidden = false;
+  b.style.visibility = '';
+  var von = menueGastSetzen(huelle);
   blattLegen();
   // Erst sichtbar, dann einblenden — sonst springt der Schleier ohne Übergang.
   void huelle.offsetWidth;
   huelle.classList.add('offen');
-  var bilder = blattBilder();
+  var bilder = blattBilder(), fall = menueGastFallen(von);
   if (bilder) {
-    bewegt(b, bilder, { dauer: MENUE_DAUER, kurve: TROPFEN_KURVE });
-    bewegt($('menueListe'), [{ opacity: 0 }, { opacity: 1 }], { dauer: MENUE_DAUER * 0.5, warten: MENUE_DAUER * 0.4,
-      kurve: 'ease-out', fill: 'backwards' });
+    bewegt(b, bilder, { dauer: MENUE_DAUER, warten: fall, kurve: TROPFEN_KURVE, fill: 'backwards' });
+    menueEintraegeTropfen(fall + MENUE_DAUER * 0.4);
   }
 }
 
@@ -7044,7 +7165,20 @@ function menueSchliessen(sofort) {
   var huelle = $('menue'), b = document.querySelector('#menue .blatt');
   if (huelle.hidden) return;
   huelle.classList.remove('offen');
-  function zu() { if (!huelle.classList.contains('offen')) huelle.hidden = true; }
+  var gast = $('menueGast');
+  function zu() {
+    if (huelle.classList.contains('offen')) return;
+    huelle.hidden = true;
+    weg(gast);
+  }
+  // Der Gast steigt zurück, dorthin, wo sein Knopf steht — danach ist zu.
+  function hoch() {
+    var k = $('menuKnopf');
+    if (!gast || !k || huelle.classList.contains('offen')) { zu(); return; }
+    var heben = bewegt(gast, [{ transform: 'none' }, { transform: 'translateY(' +
+      px(k.getBoundingClientRect().top - gast.getBoundingClientRect().top) + ')' }],
+      { dauer: MENUE_DAUER, kurve: TROPFEN_KURVE, fill: 'forwards' }, function () { zu(); if (heben) heben.cancel(); });
+  }
   var bilder = sofort ? null : blattBilder();
   if (!bilder || bewegungAus()) { zu(); return; }
   // Das Schließen ist das Öffnen rückwärts — dieselben Bilder, dieselbe Dauer,
@@ -7056,7 +7190,8 @@ function menueSchliessen(sofort) {
   var blatt = null;
   blatt = bewegt(b, bilder.reverse().map(function (f) { f.offset = 1 - f.offset; return f; }),
     { dauer: MENUE_DAUER, kurve: TROPFEN_KURVE, fill: 'forwards' }, function () {
-      zu();
+      if (gast) b.style.visibility = 'hidden';
+      hoch();
       if (blatt) blatt.cancel();
       if (liste) liste.cancel();
     });

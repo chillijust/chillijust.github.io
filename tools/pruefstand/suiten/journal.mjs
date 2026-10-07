@@ -248,16 +248,24 @@ pruefe('S2 auch das Journal duzt', !/\bSie\b|\bIhnen\b|\bIhr(e|en)?\b/.test(text
 mitGewohnheit();
 kachel().click();
 tippe('jrGut', 'Gut');
-var knopfFlaeche = q('#jrSpeichern').getBoundingClientRect();
+var fenster = q('#ansicht').getBoundingClientRect(), vorher = alle('body > .tropfen-huelle, body > .geist').length;
 q('#jrSpeichern').click();
-var huelle = q('body > .tropfen-huelle.glas');
+var neue = alle('body > .tropfen-huelle, body > .geist').slice(vorher);
+var huelle = neue.filter(function (h) { return h.matches('.tropfen-huelle.glas'); })[0];
+var zu = neue.filter(function (h) { return h.matches('.tropfen-huelle:not(.glas)'); })[0];
+var zuBilder = zu ? zu.getAnimations()[0].effect.getKeyframes() : [], aufZug = huelle ? huelle.getAnimations()[0] : null;
 pruefe('B1 gespeichert: das Glasfenster mit Haken, ohne «OK»', !q('#hinweisBlatt').hidden &&
   q('#hinweisKarte').classList.contains('bestaetigung') && q('#hinweisKarte').classList.contains('glas') &&
   !q('#hinweisHaken').hidden && !!q('#hinweisHaken svg') && q('#hinweisOk').hidden &&
   q('#hinweisKarte').getAttribute('role') === 'status' && q('#hinweisTitel').textContent === 'Gespeichert' &&
   !/Gespeichert/.test(q('#meldung').textContent));
-pruefe('B2 er quillt aus «Speichern»', !!huelle && knopfFlaeche.width > 0);
-return warten(bestaetigungDauer('Gespeichert', 'Nachzulesen im Journal.') + 100).then(function () {
+pruefe('B2 das Journal wird selbst zum Tropfen, aus dem die Bestätigung quillt (ADR 0041)', !!huelle && !!zu &&
+  Math.abs(parseFloat(zuBilder[0].width) - fenster.width) < 2 &&
+  Math.abs(parseFloat(zuBilder[zuBilder.length - 1].left) - parseFloat(aufZug.effect.getKeyframes()[0].left)) < 1 &&
+  Math.abs(parseFloat(zuBilder[zuBilder.length - 1].top) - parseFloat(aufZug.effect.getKeyframes()[0].top)) < 1 &&
+  aufZug.effect.getTiming().delay > 0, [zuBilder.length && zuBilder[0].width, fenster.width].join());
+pruefe('B2a es fließt nicht noch einmal zurück — nur diese beiden Tropfen', neue.length === 2, neue.length);
+return warten(bestaetigungDauer('Gespeichert', 'Nachzulesen im Journal.') + MELDE_ZU + 100).then(function () {
   pruefe('B3 und geht von selbst', !q('#hinweisBlatt').classList.contains('offen'));
   ausbewegt();
   return warten(30);

@@ -69,6 +69,7 @@ return durch().then(function () {
   hinweisSchliessen();
   tippen(q('#tkTitel'), '  Knopf klemmt  ');
   tippen(q('#tkText'), 'Er reagiert erst beim zweiten Mal.\n');
+  var vorSichern = alle('body > .tropfen-huelle.glas').length;
   q('#tkSichern').click();
   var t = state.tickets[0];
   pruefe('B14 Sichern legt das Ticket an', state.tickets.length === 1 && t.titel === 'Knopf klemmt' && t.art === 'fehler' &&
@@ -76,8 +77,10 @@ return durch().then(function () {
   pruefe('B15 mit dem Stand der App', t.stand === APP_VERSION + ' · ' + APP_STAND && t.erstellt === zeitJetzt());
   pruefe('B16 gespeichert', JSON.parse(localStorage.getItem(SPEICHER)).tickets[0].titel === 'Knopf klemmt');
   pruefe('B17 der Entwurf ist verbraucht', ticketEntwurf === null && !knopf.classList.contains('hat-entwurf'));
-  pruefe('B18 erst fließt das Blatt zurück, dann kommt die Bestätigung', !blatt.classList.contains('offen') &&
-    !q('#hinweisBlatt').classList.contains('offen'));
+  var glasZu = alle('body > .tropfen-huelle.glas').slice(vorSichern), zb = glasZu.length ? glasZu[0].getAnimations()[0].effect.getKeyframes() : [];
+  pruefe('B18 das Blatt fließt nicht zurück, es wird selbst zur Bestätigung (ADR 0041)', !blatt.classList.contains('offen') &&
+    q('#hinweisBlatt').classList.contains('offen') && glasZu.length === 2 &&
+    Math.abs(parseFloat(zb[zb.length - 1].left) - parseFloat(glasZu[1].getAnimations()[0].effect.getKeyframes()[0].left)) < 1, glasZu.length);
   return durch();
 }).then(function () {
   pruefe('B19 dann bestätigt das Glas', q('#hinweisBlatt').classList.contains('offen') &&
@@ -112,7 +115,13 @@ return durch().then(function () {
   q('[data-menue="tickets"]').click();
   pruefe('D1 das Menü führt in die Tickets', ansicht === 'tickets' && q('#kopf h1').textContent === 'Tickets');
   pruefe('D2 offen stehen beide', alle('[data-ticket]').length === 2 && q('#tkKopieren').textContent === 'Alle 2 kopieren');
+  var vorKopie = alle('body > .tropfen-huelle.glas').length, kopierKnopf = q('#tkKopieren').getBoundingClientRect();
   q('#tkKopieren').click();
+  var kopieTropfen = alle('body > .tropfen-huelle.glas').slice(vorKopie)[0];
+  var kb = kopieTropfen ? kopieTropfen.getAnimations()[0].effect.getKeyframes()[0] : null;
+  pruefe('D2a «Kopiert» tropft aus dem Knopf, auch ohne Fokus (ADR 0041)', !!kb && /Kopiert/.test(q('#hinweisTitel').textContent) &&
+    Math.abs(parseFloat(kb.top) + parseFloat(kb.height) / 2 - (kopierKnopf.top + kopierKnopf.height / 2)) < 2,
+    kb ? kb.top : 'kein Tropfen');
   pruefe('D3 der Text trägt Kopf und Nummern', kopiert.indexOf('# Chillinal · 2 Tickets\n\n## 1 · Fehler: Knopf klemmt\n\n' +
     'Er reagiert erst beim zweiten Mal.\n\n- Ort: Kalender\n- Art: Bedienung\n') === 0, kopiert);
   pruefe('D4 der Wunsch folgt, ohne leere Zeilen', kopiert.indexOf('## 2 · Wunsch: Zweite Erinnerung\n\n- Ort: Gewohnheit\n' +

@@ -42,8 +42,13 @@ pruefe('C1 das Menü geht zu', !huelle.classList.contains('offen'));
 pruefe('C2 die Meldung sagt im Glas, dass es kommt', /nächsten Fassung/.test(q('#hinweisTitel').textContent) &&
   !q('#hinweisBlatt').hidden && q('#hinweisKarte').classList.contains('glas') &&
   q('#hinweisHaken').classList.contains('neutral') && getComputedStyle(q('#meldung')).display === 'none');
+pruefe('C2a sie quillt aus dem getippten Eintrag (ADR 0041)', !!q('body > .tropfen-huelle.glas'));
 hinweisSchliessen();
 pruefe('C3 die Ansicht bleibt', ansicht === 'home');
+// Das Glas fließt zurück in den Eintrag; verborgen ist es erst danach — die
+// Suite läuft ohne Pause weiter.
+ausbewegt();
+q('#hinweisBlatt').hidden = true;
 
 // ── D · Einstellungen und zurück ────────────────────────────
 menueOeffnen();
@@ -143,4 +148,59 @@ hinweisSchliessen();
 pruefe('B1 kurz ist schmal, lang breiter, höchstens wie ein Hinweis mit «OK»', kurz >= 180 && kurz < 260 && lang > kurz &&
   lang <= mitOk + 0.5 && mitOk >= 300, [kurz, lang, mitOk].join());
 frisch();
+
+// ── S · Die Einträge tropfen nacheinander auf (ADR 0041) ─────
+menueSchliessen(true);
+ausbewegt();
+menueOeffnen();
+var zuege = alle('#menueListe .menue-eintrag').map(function (z) {
+  var a = z.getAnimations()[0];
+  return a ? { warten: a.effect.getTiming().delay, clip: a.effect.getKeyframes()[0].clipPath || '' } : null;
+});
+pruefe('S1 jeder Eintrag beginnt als Perle', zuege.every(function (z) { return z && /round/.test(z.clip); }));
+pruefe('S2 einer nach dem anderen', zuege.every(function (z, i) { return !i || z.warten > zuege[i - 1].warten; }) &&
+  zuege[zuege.length - 1].warten - zuege[0].warten < 700, zuege.map(function (z) { return z && z.warten; }).join());
+ausbewegt();
+menueSchliessen(true);
+ausbewegt();
+
+// ── R · Hinausgerollt tropft der Menüknopf herab (ADR 0041) ──
+pruefe('R0 oben steht kein Gast', (menueOeffnen(), !q('#menueGast')));
+menueSchliessen(true);
+ausbewegt();
+// Die Schließbilder der Abschnitte davor räumt sonst erst ihr Versprechen ab —
+// die Suite läuft aber ohne Pause durch.
+q('#menue .blatt').getAnimations().forEach(function (a) { a.cancel(); });
+q('#app').style.minHeight = '4000px';
+window.scrollTo(0, 1500);
+var B2 = innerWidth;
+wisch(B2 - 10, 400, B2 - 200, 400);
+var gast = q('#menueGast'), kn = q('#menuKnopf').getBoundingClientRect();
+var fall = gast && gast.getAnimations()[0], f0 = fall ? fall.effect.getKeyframes()[0].transform : '';
+pruefe('R1 der Knopf ist fort, ein Gast tropft von seiner Stelle herab', kn.bottom < 0 && !!gast &&
+  /translateY\(-/.test(f0), f0);
+ausbewegt();
+var gr = q('#menueGast').getBoundingClientRect(), br = q('#menue .blatt').getBoundingClientRect();
+pruefe('R2 er steht oben im Bild, rechts wie sein Knopf, 44 groß', gr.top >= 0 && gr.top < 60 &&
+  Math.abs(gr.right - kn.right) < 1 && gr.width >= 44 && gr.height >= 44, [gr.top, gr.right, kn.right].join());
+pruefe('R3 das Menü hängt unter ihm, im Bild', br.top >= gr.bottom && br.top < 120 && br.bottom <= innerHeight,
+  [br.top, gr.bottom].join());
+q('#menueGast').click();
+pruefe('R4 ein Tipp auf den Gast schließt', !q('#menue').classList.contains('offen'));
+return new Promise(function (fertig) {
+  ausbewegt();
+  setTimeout(function () {
+    ausbewegt();
+    setTimeout(function () {
+      pruefe('R5 danach ist er fort, das Menü zu', !q('#menueGast') && q('#menue').hidden);
+      menueOeffnen();
+      menueSchliessen(true);
+      pruefe('R6 eine Wahl im Menü nimmt ihn sofort mit', !q('#menueGast') && q('#menue').hidden);
+      window.scrollTo(0, 0);
+      q('#app').style.minHeight = '';
+      frisch();
+      fertig();
+    }, 50);
+  }, 50);
+});
 `);
