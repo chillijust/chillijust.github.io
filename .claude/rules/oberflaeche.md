@@ -42,7 +42,9 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   Rückweg zum Export geht. Der Schriftzug «Lodern» kommt aus `zeichneMarke`, «Chilli» steht
   vorn und am größten; Ablauf nur mit `wm-los`, einmal — nur die Flammen lodern immer (ADR 0010).
   Beim Kaltstart schreibt er sich groß in der Mitte, wandert an seinen Platz, dann tropft das
-  Dashboard Karte für Karte auf (`auftritt`, ADR 0029); ein Tipp überspringt das.
+  Dashboard Karte für Karte auf (`auftritt`, ADR 0029); ein Tipp überspringt das. Meldet sich
+  währenddessen eine neue Fassung, wartet `#swNeu` unsichtbar und tropft als erste mit; kommt
+  sie später, tropft sie allein (`perleAuf`, ADR 0044).
 - **Runde Knöpfe** (`.rund`) sind 44 × 44 und tragen ein Symbol aus `ICON` mit `aria-label`.
 - **Der Sonne/Mond-Schalter ist ein Schieber** (`.thema-schalter`, `role="switch"`,
   `aria-checked` = dunkel): Sonne links, Mond rechts, beide immer sichtbar, der Knauf liegt
@@ -79,8 +81,8 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   Tagesansicht ist die Liste unter dem Kalender, keine eigene Ansicht. Ein
   kommender Tag zeigt dort, was dran ist, ohne Haken; «Hinzufügen» fragt in einem Fenster
   aus Glas — Termin, Gewohnheit, Abgewöhnen (`opt.wahl`, ADR 0025), das wie der Timer klein aus dem
-  Plus tropft (ADR 0041); ein Tipp daneben bricht
-  ab wie «Abbrechen» (ADR 0026). Im Monat läuft über jeder Woche ein Strich quer bis an den
+  Plus tropft (ADR 0041); ab bricht, wer danebentippt (ADR 0026) — einen Knopf
+  «Abbrechen» trägt es nicht (ADR 0044). Im Monat läuft über jeder Woche ein Strich quer bis an den
   Kartenrand, die KW links außen darauf; eine KW-Spalte gibt es nicht. In der Woche tropft
   Blättern zur Seite: vor tropft die alte nach links ab und die neue von rechts auf, zurück
   umgekehrt (`kalBlaettern`, `kalSeitlich`, ADR 0028); der Monat blendet ein. Was im Fluß
@@ -123,8 +125,8 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 - **Was alles ersetzt oder löscht, fragt im Glas** (`hinweisZeigen` mit `frage`) und läßt
   sich bis zum Neuladen rückgängig machen (`rueckgaengig`); auch Einzelnes — Löschen, Archivieren,
   Timer abbrechen — fragt im Glas aus seinem Knopf (`loeschenFragen`), einen zweiten Tipp auf
-  denselben Knopf gibt es nicht (ADR 0041). Eine Frage verneint man mit «Nein», eine Wahl bricht man
-  mit «Abbrechen» ab (ADR 0042).
+  denselben Knopf gibt es nicht (ADR 0041). Eine Frage verneint man mit «Nein» (ADR 0042); eine Wahl
+  trägt keinen Knopf zum Abbrechen, sie schließt, wer danebentippt (ADR 0044).
 
 ## Chili
 

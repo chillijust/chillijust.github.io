@@ -213,8 +213,9 @@ svg { display: block; }
 .kopf-unter .kopf-heim { align-items: center; }
 /* Der Auftritt beim Kaltstart (ADR 0029): Solange er läuft, steht nur der
    Schriftzug da; der Rest wartet unsichtbar und nimmt keinen Tipp an — ein Tipp
-   irgendwohin überspringt ihn. */
-html.auftritt #ansicht, html.auftritt .kopf-titel .datum, html.auftritt #themaKnopf,
+   irgendwohin überspringt ihn. Auch die Zeile «Eine neue Fassung» wartet, wenn
+   sie sich mittendrin meldet, und tropft mit den Karten auf (ADR 0044). */
+html.auftritt #ansicht, html.auftritt #swNeu, html.auftritt .kopf-titel .datum, html.auftritt #themaKnopf,
 html.auftritt #menuKnopf, html.auftritt #ticketKnopf { opacity: 0; }
 html.auftritt body { pointer-events: none; }
 html.auftritt #markeKnopf svg.wm { position: relative; z-index: 5; }
@@ -1497,11 +1498,11 @@ textarea.eingabe.code {
 }
 .sc-scheibe { inset: 7px; color: var(--akzent); }
 .hinweis-knoepfe { display: flex; gap: 8px; }
-.hinweis-wahl { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.hinweis-wahl { display: flex; flex-direction: column; gap: 8px; }
 .hinweis-wahl[hidden] { display: none; }
 .hinweis-wahl .knopf { width: 100%; }
 .hinweis-knoepfe .knopf { flex: 1; }
-.hinweis-knoepfe .knopf[hidden] { display: none; }
+.hinweis-knoepfe .knopf[hidden], .hinweis-knoepfe[hidden] { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -1545,7 +1546,7 @@ textarea.eingabe.code {
       <p id="hinweisText"></p>
       <div class="hinweis-wahl" id="hinweisWahl" hidden></div>
       <div class="hinweis-knoepfe">
-        <button type="button" class="knopf zart" id="hinweisNein" hidden>Abbrechen</button>
+        <button type="button" class="knopf zart" id="hinweisNein" hidden>Nein</button>
         <button type="button" class="knopf" id="hinweisOk">OK</button>
       </div>
     </div>
@@ -1564,7 +1565,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.13.0';
+var APP_VERSION = '0.13.1T';
 var APP_STAND = '2026-10-08';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -2787,8 +2788,9 @@ function zuSehen(el) { return !!el && document.contains(el) && el.getClientRects
 // `opt.frage` ({ ja, beiJa }): Statt «OK» stehen «Abbrechen» und `ja` da; nur
 // `ja` führt `beiJa` aus. Meldet `beiJa` etwas, wird aus der Frage an Ort und
 // Stelle die Antwort — kein zweiter Tropfen (ADR 0020).
-// `opt.wahl` ({ herkunft, knoepfe }): untereinander die Knöpfe zur Wahl, darunter
-// «Abbrechen». Ein Knopf schließt und tut, was er sagt (ADR 0025).
+// `opt.wahl` ({ herkunft, knoepfe }): untereinander die Knöpfe zur Wahl, sonst
+// nichts. Ein Knopf schließt und tut, was er sagt (ADR 0025); ab bricht, wer
+// danebentippt — einen Knopf dafür gibt es nicht (ADR 0044).
 var ZEICHEN = ['haken', 'hinweis', 'kopie', 'laden'];
 
 // Ein Zeichen bewegt sich einmal, jedes Mal, wenn es erscheint: Die Klasse
@@ -2837,10 +2839,11 @@ function hinweisZeigen(titel, text, quelle, ziel, opt) {
   });
   $('hinweisOk').textContent = hinweisFrage ? hinweisFrage.ja : 'OK';
   $('hinweisOk').hidden = best || !!hinweisWahl;
-  $('hinweisNein').hidden = best || !(hinweisFrage || hinweisWahl);
-  // Eine Frage verneint man, eine Wahl bricht man ab — «Abbrechen» neben
-  // «Timer abbrechen» hieße zweimal dasselbe Wort für Gegenteiliges.
-  $('hinweisNein').textContent = hinweisFrage ? hinweisFrage.nein || 'Nein' : 'Abbrechen';
+  $('hinweisNein').hidden = best || !hinweisFrage;
+  $('hinweisOk').parentNode.hidden = !!hinweisWahl;
+  // Eine Frage verneint man — «Abbrechen» neben «Timer abbrechen» hieße
+  // zweimal dasselbe Wort für Gegenteiliges (ADR 0042).
+  $('hinweisNein').textContent = hinweisFrage && hinweisFrage.nein || 'Nein';
   karte.classList.toggle('bestaetigung', best);
   karte.setAttribute('role', best ? 'status' : 'alertdialog');
   if (hinweisUhr) { clearTimeout(hinweisUhr); hinweisUhr = null; }
@@ -7304,7 +7307,11 @@ function swWartendPruefen(reg) {
 function swHinweisZeigen() {
   var leiste = $('swNeu');
   if (!leiste || swStand.gemeldet) return;
+  var neu = leiste.hidden;
   leiste.hidden = false;
+  // Im Auftritt wartet sie und tropft mit den Karten auf; sonst tropft sie
+  // allein — erscheinen soll sie nie mit einem Schlag (ADR 0044).
+  if (neu && !auftrittLaeuft) perleAuf(leiste, 0);
   if (ansicht === 'einstellungen') render();
 }
 
@@ -7483,7 +7490,8 @@ function dashboardAuftropfen() {
     bewegt(el, [{ opacity: 0 }, { opacity: 1 }], { dauer: 420, kurve: 'ease-out', fill: 'backwards' });
   });
   var teile = [];
-  alleIn('#ansicht > *').forEach(function (el) {
+  // Die Zeile «Eine neue Fassung» steht über der Ansicht und tropft als erste.
+  alleIn('#swNeu:not([hidden]), #ansicht > *').forEach(function (el) {
     if (el.classList.contains('abschnitt')) {
       Array.prototype.forEach.call(el.children, function (k) {
         if (k.tagName === 'H2') teile.push(k);
@@ -7493,17 +7501,21 @@ function dashboardAuftropfen() {
     } else teile.push(el);
   });
   var i = 0;
-  teile.forEach(function (el) {
-    var b = el.getBoundingClientRect();
-    if (!b.width || !b.height || b.top > window.innerHeight) return;
-    var d = Math.min(b.width, b.height, 44), seite = px((b.width - d) / 2);
-    bewegt(el, [
-      { clipPath: 'inset(0px ' + seite + ' ' + px(b.height - d) + ' ' + seite + ' round ' + px(d / 2) + ')', opacity: 0 },
-      { clipPath: 'inset(0px ' + seite + ' ' + px(b.height - d) + ' ' + seite + ' round ' + px(d / 2) + ')', opacity: 1, offset: 0.15 },
-      { clipPath: 'inset(-40px -40px -40px -40px round 0px)', opacity: 1 }
-    ], { dauer: 620, warten: 110 * i, kurve: TROPFEN_KURVE, fill: 'backwards' });
-    i++;
-  });
+  teile.forEach(function (el) { if (perleAuf(el, 110 * i)) i++; });
+}
+
+// Ein Teil tropft auf: als Perle oben in seiner Mitte, die sich zum Ganzen
+// streckt. Was unter dem Bildrand liegt oder nichts mißt, ist einfach da.
+function perleAuf(el, warten) {
+  var b = el.getBoundingClientRect();
+  if (!b.width || !b.height || b.top > window.innerHeight) return false;
+  var d = Math.min(b.width, b.height, 44), seite = px((b.width - d) / 2);
+  bewegt(el, [
+    { clipPath: 'inset(0px ' + seite + ' ' + px(b.height - d) + ' ' + seite + ' round ' + px(d / 2) + ')', opacity: 0 },
+    { clipPath: 'inset(0px ' + seite + ' ' + px(b.height - d) + ' ' + seite + ' round ' + px(d / 2) + ')', opacity: 1, offset: 0.15 },
+    { clipPath: 'inset(-40px -40px -40px -40px round 0px)', opacity: 1 }
+  ], { dauer: 620, warten: warten, kurve: TROPFEN_KURVE, fill: 'backwards' });
+  return true;
 }
 
 // ════════════════════════════════════════════════════════════════

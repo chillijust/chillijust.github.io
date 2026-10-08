@@ -1,7 +1,7 @@
 # 0029 · Der Auftritt beim Kaltstart; die Woche rückt nicht über den Rand
 
 *2026-10-06 · zwei Tickets vom Gerät (App-Stand 0.9.0 und 0.9.1T) · Version 0.10.0T, abgenommen mit 0.10.0T2 ·
-ergänzt 0010 (Schriftzug); ändert 0028 (Seitentropfen der Woche)*
+ergänzt 0010 (Schriftzug); ändert 0028 (Seitentropfen der Woche) · «Neue Fassung» tropft mit seit 0044*
 
 ## Ausgangslage
 

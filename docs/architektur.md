@@ -214,9 +214,11 @@ der Umschalter (ADR 0007).
   das Lesen. Geändert wird nur über `reflexionSpeichern` — leer gespeichert entfernt —,
   gelöscht über `reflexionLoeschen`. Eine neue Reflexion wählt ihre Woche mit
   `reflexionWocheWaehlen`, an Ort und Stelle (ADR 0018).
-- **Frage** (ADR 0020): `hinweisZeigen(…, { frage: { ja, beiJa } })` zeigt «Abbrechen»
-  (`#hinweisNein`) und `ja` (`#hinweisOk`); meldet `beiJa` etwas, wird die Karte an Ort und
-  Stelle zur Bestätigung.
+- **Frage** (ADR 0020): `hinweisZeigen(…, { frage: { ja, beiJa } })` zeigt «Nein» oder
+  `nein` (`#hinweisNein`, ADR 0042) und `ja` (`#hinweisOk`); meldet `beiJa` etwas, wird die
+  Karte an Ort und Stelle zur Bestätigung.
+- **Wahl** (ADR 0025): `opt.wahl` zeigt nur die Knöpfe zur Wahl; die Knopfleiste ist dann
+  verborgen, ab bricht, wer aufs Blatt tippt (ADR 0044).
 - **Bestätigung** (ADR 0018): `bestaetigen()` öffnet den Hinweis mit `bestaetigung`;
   `hinweisUhr` schließt ihn, ein Tipp aufs Blatt früher. Das Ziel darf ein Selektor sein. `wochenZahlen` rechnet die Haken
   der Woche aus `tagesStand`, nichts davon wird gespeichert.
@@ -262,7 +264,7 @@ auftropfen. Ein `pointerdown` überspringt das, `render()` beendet es still
 ## Service Worker
 
 `swAnmelden()` beim Start. Wartet eine neue Fassung und läuft schon eine, erscheint
-`#swNeu`; «Jetzt laden» schickt `uebernehmen`, beim Wechsel des Workers lädt die Seite
+`#swNeu` als Perle (`perleAuf`) — im Auftritt erst mit den Karten (ADR 0044); «Jetzt laden» schickt `uebernehmen`, beim Wechsel des Workers lädt die Seite
 einmal neu. Die Einstellungen zeigen die gespeicherte Fassung (`swAuskunft()`) und haben
 «Nach Aktualisierung suchen» (`swNachsehen()` → `ok` · `kein netz` · `unmoeglich`) und den
 Notausgang `swAufraeumen()`.

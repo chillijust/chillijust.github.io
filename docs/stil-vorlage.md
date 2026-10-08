@@ -136,7 +136,7 @@ Karten (0014, 0019, 0024).
 - Unterwegs (im Tropfen) ist es dichter und gefaßt: `--glas-tropfen` plus `--glas-rand`;
   am Ziel blendet es zur normalen Tönung über (0032).
 - Hinter einem fragenden Glas liegt ein Schleier `--glas-schleier`; ein Tipp daneben bricht
-  ab wie «Abbrechen» (0026).
+  ab (0026).
 
 ## 5 · Symbole
 
@@ -238,8 +238,9 @@ var FEDER = (function () {
   - *Frage*: Was löscht oder nicht zurückgeht, fragt im Glas, das aus dem Knopf tropft; was
     alles ersetzt, läßt sich zudem rückgängig machen. Keinen zweiten Tipp auf denselben Knopf
     — der läßt sich mit einem Doppeltipp überspringen (0041). Eine Frage beantwortet man mit
-    «Ja» und **«Nein»**, eine Wahl bricht man mit «Abbrechen» ab; nie dasselbe Wort für
-    Gegenteiliges («Timer abbrechen?» — «Abbrechen») (0042).
+    «Ja» und **«Nein»**; nie dasselbe Wort für Gegenteiliges («Timer abbrechen?» —
+    «Abbrechen») (0042). Eine *Wahl* trägt nur ihre Knöpfe — ab bricht, wer danebentippt
+    (0044).
   - *Fenster wird Meldung*: Geht ein Fenster mit seiner Meldung, zieht es sich in der Mitte
     zum Tropfen zusammen, aus dem die Meldung quillt — eine Bewegung, nicht zwei (0041).
   - **Woher sie quillt**: aus dem zuletzt getippten Knopf (höchstens drei Sekunden alt und
@@ -261,7 +262,8 @@ var FEDER = (function () {
 - App-Symbol: die Chili auf Elfenbein `#FAF9F5`.
 - Schriftzug «Lodern»: «Chilli» vorn und am größten, die Flammen lodern dauerhaft, der Rest
   läuft einmal ab (0010). Beim Kaltstart schreibt er sich groß in der Mitte und wandert an
-  seinen Platz, dann tropft die Übersicht Karte für Karte auf (0029).
+  seinen Platz, dann tropft die Übersicht Karte für Karte auf (0029). Was sich währenddessen
+  meldet (eine neue Fassung), wartet und tropft mit (0044).
 
 ## 9 · Rahmen fürs iPhone
 

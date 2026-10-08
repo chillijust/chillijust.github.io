@@ -104,8 +104,12 @@ var knoepfe = alle('#hinweisWahl .knopf'), auf = letzteHuelle();
 pruefe('A2 ein Tipp öffnet ein Fenster: Termin, Gewohnheit, Abgewöhnen (ADR 0025)', !q('#hinweisBlatt').hidden &&
   q('#hinweisKarte').classList.contains('glas') && q('#hinweisTitel').textContent === 'Hinzufügen' &&
   knoepfe.map(function (k) { return k.textContent; }).join() === 'Termin,Gewohnheit,Abgewöhnen' &&
-  q('#hinweisOk').hidden && !q('#hinweisNein').hidden);
-pruefe('A2a eine Wahl bricht man ab, sie verneint man nicht (ADR 0042)', q('#hinweisNein').textContent === 'Abbrechen');
+  q('#hinweisOk').hidden);
+pruefe('A2a ohne «Abbrechen» und ohne leere Knopfleiste: ab bricht, wer danebentippt (ADR 0044)',
+  q('#hinweisNein').hidden && q('#hinweisOk').parentNode.hidden &&
+  getComputedStyle(q('#hinweisOk').parentNode).display === 'none' &&
+  alle('#hinweisKarte button').filter(function (b) { return b.getClientRects().length; }).every(function (b) {
+    return !/Abbrechen/.test(b.textContent); }));
 var a0 = auf ? auf.getAnimations()[0] : null, b0 = a0 ? a0.effect.getKeyframes()[0] : {}, plus = neu.querySelector('svg').getBoundingClientRect();
 pruefe('A3 es tropft aus «Hinzufügen»', !!auf && auf.classList.contains('glas'));
 pruefe('A3a wie der Timer: klein aus dem Plus, in dessen Tempo (ADR 0041)', parseFloat(b0.width) <= 48 &&
@@ -114,20 +118,30 @@ pruefe('A3a wie der Timer: klein aus dem Plus, in dessen Tempo (ADR 0041)', pars
 ausbewegt();
 pruefe('A4 groß genug, untereinander', knoepfe.every(function (k) { return k.getBoundingClientRect().height >= 44; }) &&
   knoepfe[2].getBoundingClientRect().top > knoepfe[0].getBoundingClientRect().bottom);
-q('#hinweisNein').click();
-pruefe('A5 «Abbrechen» schließt es, nichts geschieht', !q('#hinweisBlatt').classList.contains('offen') && ansicht === 'home');
+q('#hinweisBlatt').click();
+pruefe('A5 ein Tipp daneben schließt es, nichts geschieht (ADR 0026, 0044)', !q('#hinweisBlatt').classList.contains('offen') &&
+  ansicht === 'home');
 ausbewegt();
 neu.click();
 ausbewegt();
+var unten = q('#hinweisWahl').getBoundingClientRect().bottom, karteUnten = q('#hinweisKarte').getBoundingClientRect().bottom;
+pruefe('A5a unter der Wahl steht nur noch der Rand der Karte', karteUnten - unten <= 32, [unten, karteUnten].join());
 q('#hinweisBlatt').click();
-pruefe('A5a ein Tipp daneben bricht ebenso ab (ADR 0026)', !q('#hinweisBlatt').classList.contains('offen') &&
-  ansicht === 'home');
+ausbewegt();
+neu.click();
+var frage = { frage: { ja: 'Ja', beiJa: function () {} } };
+hinweisSchliessen();
+ausbewegt();
+hinweisZeigen('Frage', 'Wirklich?', null, null, frage);
+pruefe('A5c nach einer Wahl hat eine Frage ihre Knöpfe wieder', !q('#hinweisOk').parentNode.hidden &&
+  !q('#hinweisNein').hidden && q('#hinweisNein').textContent === 'Nein' && !q('#hinweisOk').hidden);
+q('#hinweisNein').click();
 ausbewegt();
 neu.click();
 ausbewegt();
 q('#hinweisKarte').click();
 pruefe('A5b ein Tipp ins Fenster selbst schließt es nicht', q('#hinweisBlatt').classList.contains('offen'));
-q('#hinweisNein').click();
+q('#hinweisBlatt').click();
 ausbewegt();
 neu.click();
 q('#hinweisWahl [data-neugw="an"]').click();

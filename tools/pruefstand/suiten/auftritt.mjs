@@ -46,6 +46,30 @@ return Promise.resolve().then(function () {
   pruefe('A8 Datum, Schalter und Knöpfe blenden auf', ['#kopf .datum', '#themaKnopf', '#menuKnopf', '#ticketKnopf'].every(function (s) {
     return q(s).getAnimations().length > 0; }));
   ausbewegt();
+  // Meldet sich mitten im Auftritt eine neue Fassung, wartet ihre Zeile
+  // unsichtbar und tropft als erste mit den Karten auf (ADR 0044).
+  auftritt();
+  swStand.gemeldet = false;
+  swHinweisZeigen();
+  pruefe('A14 meldet sich mitten im Auftritt eine neue Fassung, wartet ihre Zeile unsichtbar', !q('#swNeu').hidden &&
+    deckend('#swNeu') === 0);
+  auftrittEnde();
+  var sw = q('#swNeu').getAnimations()[0], erste = alle('#ansicht .held, #ansicht .abschnitt > h2, #ansicht .gw-liste > *')[0];
+  var ersteA = erste ? erste.getAnimations()[0] : null;
+  pruefe('A15 sie tropft als erste auf, die Karten im selben Takt danach', !!sw &&
+    /round/.test(sw.effect.getKeyframes()[0].clipPath) && sw.effect.getTiming().delay === 0 &&
+    sw.effect.getTiming().fill === 'backwards' && !!ersteA && ersteA.effect.getTiming().delay > 0 &&
+    ersteA.effect.getTiming().duration === sw.effect.getTiming().duration,
+    [sw && sw.effect.getTiming().delay, ersteA && ersteA.effect.getTiming().delay].join());
+  ausbewegt();
+  q('#swNeu').hidden = true;
+  // Kommt sie erst danach, ploppt sie ebensowenig.
+  swHinweisZeigen();
+  var sw2 = q('#swNeu').getAnimations()[0];
+  pruefe('A16 kommt sie später, tropft sie allein auf', !q('#swNeu').hidden && !!sw2 &&
+    /round/.test(sw2.effect.getKeyframes()[0].clipPath));
+  ausbewegt();
+  q('#swNeu').hidden = true;
   // Ein Tipp überspringt ihn.
   auftritt();
   document.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
