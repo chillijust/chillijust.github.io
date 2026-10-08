@@ -196,6 +196,29 @@ return new Promise(function (fertig) {
       menueOeffnen();
       menueSchliessen(true);
       pruefe('R6 eine Wahl im Menü nimmt ihn sofort mit', !q('#menueGast') && q('#menue').hidden);
+
+      // ── M · Bei offenem Menü rollt sein Knopf nicht davon (ADR 0042) ──
+      window.scrollTo(0, 0);
+      menueOeffnen();
+      ausbewegt();
+      var b0 = q('#menue .blatt').getBoundingClientRect();
+      window.scrollTo(0, 800);
+      window.dispatchEvent(new Event('scroll'));
+      var mg = q('#menueGast'), mk = q('#menuKnopf').getBoundingClientRect();
+      var mgr = mg ? mg.getBoundingClientRect() : {}, mb = q('#menue .blatt').getBoundingClientRect();
+      pruefe('M1 rollt der Knopf hinaus, bleibt sein Gast oben stehen — ohne Fall', mk.bottom < 0 && !!mg &&
+        !mg.getAnimations().length && mgr.top >= 0 && mgr.top < 60 && Math.abs(mgr.right - mk.right) < 1,
+        [mk.bottom, mgr.top].join());
+      pruefe('M2 das Menü hängt weiter unter ihm', Math.abs(mb.top - mgr.bottom - 8) < 1 && mb.top <= b0.top,
+        [mb.top, mgr.bottom, b0.top].join());
+      window.scrollTo(0, 0);
+      window.dispatchEvent(new Event('scroll'));
+      var zk = q('#menuKnopf').getBoundingClientRect(), zb = q('#menue .blatt').getBoundingClientRect();
+      pruefe('M3 zurück oben löst er sich in den Knopf, das Menü hängt an ihm', !q('#menueGast') &&
+        zb.top >= zk.bottom && zb.top - zk.bottom < 12, [zb.top, zk.bottom].join());
+      menueSchliessen(true);
+      window.dispatchEvent(new Event('scroll'));
+      pruefe('M4 bei geschlossenem Menü tut Rollen nichts', !q('#menueGast'));
       window.scrollTo(0, 0);
       q('#app').style.minHeight = '';
       frisch();

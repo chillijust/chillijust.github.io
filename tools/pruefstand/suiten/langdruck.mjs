@@ -69,12 +69,13 @@ return Promise.resolve()
   .then(fall('L', '[data-ab="L"]', 'abgewoehnen'))
   .then(fall('T', '#ansicht > .abschnitt [data-termin="T"]', 'termin'))
   .then(function () {
-    // Kurz antippen: die Gewohnheit hakt ab, der Termin zoomt wie bisher.
+    // Kurz antippen: Gewohnheit wie Termin von heute haken ab (ADR 0042).
     aufbauen();
     langGedrueckt = 0;
     q('[data-termin="T"]').click();
-    pruefe('K1 ein kurzer Tipp auf den Termin öffnet ihn', ansicht === 'termin');
-    pruefe('K2 als Zoom, nicht als Tropfen', !q('body > .tropfen-huelle'));
+    pruefe('K1 ein kurzer Tipp auf den Termin hakt ihn ab, wie die Kachel', ansicht === 'home' &&
+      terminNach('T').erledigt.join() === '2026-10-14');
+    pruefe('K2 und öffnet nichts', !q('body > .tropfen-huelle'));
     return durch();
   }).then(function () {
     zeige('home');
@@ -87,7 +88,8 @@ return Promise.resolve()
     zeige('home');
     ausbewegt();
     q('[data-termin="T"]').click();
-    pruefe('K3 der Klick gleich nach dem langen Druck tut nichts', vorher === 'termin' && ansicht === 'home');
+    pruefe('K3 der Klick gleich nach dem langen Druck tut nichts', vorher === 'termin' && ansicht === 'home' &&
+      terminNach('T').erledigt.join() === '2026-10-14');
     langGedrueckt = 0;
     return durch();
   }).then(function () {

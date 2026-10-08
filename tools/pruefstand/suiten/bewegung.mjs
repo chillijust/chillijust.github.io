@@ -66,24 +66,30 @@ return durch().then(function () {
   pruefe('T11 danach ist er weg', geister().length === 0);
 
   // ── A · Ansichten wachsen aus dem Getippten ───────────────
+  // Ein Termin von heute hakt beim Antippen ab (ADR 0042); was beim Antippen
+  // öffnet, ist die Kachel vom Abgewöhnen.
   aufbauen();
+  state.abgewoehnen = [lasterLesen({ id: 'z', name: 'Zucker', start: new Date(2026, 9, 1).getTime(), rueckfaelle: [],
+    draenge: [] })];
+  render();
+  ausbewegt();
   window.scrollTo(0, 120);
   var gerollt = window.pageYOffset;
-  q('#ansicht > .abschnitt [data-termin="t1"]').click();
-  pruefe('A1 die Ansicht wechselt sofort', ansicht === 'termin' && q('#tmTitel').value === 'Zahnarzt');
-  pruefe('A2 sie wächst aus der Zeile', laeuft(q('#ansicht')) && herkunft === '[data-termin="t1"]');
+  q('[data-ab="z"]').click();
+  pruefe('A1 die Ansicht wechselt sofort', ansicht === 'abgewoehnen' && q('#gwName').value === 'Zucker');
+  pruefe('A2 sie wächst aus der Kachel', laeuft(q('#ansicht')) && herkunft === '[data-ab="z"]');
   var g = q('body > .geist');
   pruefe('A3 die alte liegt als Geist darunter', !!g && getComputedStyle(g).zIndex === '0' &&
     !!g.shadowRoot.querySelector('.held'));
-  pruefe('A4 Skripte sehen nur die neue', alle('[data-termin]').length === 0 && alle('#chiliFigur').length === 0);
+  pruefe('A4 Skripte sehen nur die neue', alle('[data-ab]').length === 0 && alle('#chiliFigur').length === 0);
   return durch().then(function () {
     pruefe('A5 danach ist der Geist weg', geister().length === 0 && q('#ansicht').style.background === '' &&
       !laeuft(q('#ansicht')));
     q('#zurueckKnopf').click();
     pruefe('A6 zurück ist sofort das Dashboard', ansicht === 'home' && !!q('.held'));
     var g2 = q('body > .geist');
-    pruefe('A7 die Ansicht schrumpft oben in ihre Zeile', !!g2 && getComputedStyle(g2).zIndex === '5' &&
-      !!g2.shadowRoot.querySelector('#tmTitel') && laeuft(g2));
+    pruefe('A7 die Ansicht schrumpft oben in ihre Kachel', !!g2 && getComputedStyle(g2).zIndex === '5' &&
+      !!g2.shadowRoot.querySelector('#gwName') && laeuft(g2));
     pruefe('A8 das Dashboard steht, wo es verlassen wurde', gerollt > 0 && Math.abs(window.pageYOffset - gerollt) < 2,
       gerollt + ' / ' + window.pageYOffset);
     pruefe('A9 die Herkunft ist verbraucht', herkunft === null);
@@ -226,8 +232,9 @@ return durch().then(function () {
   pruefe('R1 kein Tropfen, kein Fließen', !q('.tropfen') && !laeuft(q('.held')) && !!q('#kalLeiste'));
   q('[data-kaltag="2026-10-16"]').click();
   pruefe('R2 kein Geist beim Schließen', geister().length === 0);
-  q('#ansicht > .abschnitt [data-termin="t1"]').click();
-  pruefe('R3 die Ansicht steht sofort', ansicht === 'termin' && !laeuft(q('#ansicht')) && geister().length === 0);
+  menueOeffnen();
+  q('[data-menue="termin"]').click();
+  pruefe('R3 die Ansicht steht sofort', ansicht === 'terminNeu' && !laeuft(q('#ansicht')) && geister().length === 0);
   q('#tmGanz').click();
   pruefe('R4 Formularteile verschwinden ohne Geist', q('#tmZeiten').hidden && geister().length === 0);
   q('[data-wdh="taeglich"]').click();

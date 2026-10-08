@@ -105,6 +105,7 @@ pruefe('A2 ein Tipp öffnet ein Fenster: Termin, Gewohnheit, Abgewöhnen (ADR 00
   q('#hinweisKarte').classList.contains('glas') && q('#hinweisTitel').textContent === 'Hinzufügen' &&
   knoepfe.map(function (k) { return k.textContent; }).join() === 'Termin,Gewohnheit,Abgewöhnen' &&
   q('#hinweisOk').hidden && !q('#hinweisNein').hidden);
+pruefe('A2a eine Wahl bricht man ab, sie verneint man nicht (ADR 0042)', q('#hinweisNein').textContent === 'Abbrechen');
 var a0 = auf ? auf.getAnimations()[0] : null, b0 = a0 ? a0.effect.getKeyframes()[0] : {}, plus = neu.querySelector('svg').getBoundingClientRect();
 pruefe('A3 es tropft aus «Hinzufügen»', !!auf && auf.classList.contains('glas'));
 pruefe('A3a wie der Timer: klein aus dem Plus, in dessen Tempo (ADR 0041)', parseFloat(b0.width) <= 48 &&

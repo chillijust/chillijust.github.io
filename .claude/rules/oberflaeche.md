@@ -72,8 +72,9 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   *Drang* und *Rückfall* sind eigene Knöpfe darunter (ADR 0004).
 - **Ein Termin ist eine Zeile mit blauem Strich** (`zeichneTerminZeile`), auf dem
   Dashboard wie in der Tagesliste; im Kalender trägt sein Tag **einen** blauen Punkt, vorn
-  (ADR 0006). An einem Tag, der nicht mehr kommt, trägt sie rechts einen runden Haken für genau
-  diesen Tag; abgehakt wird sie blaß und durchgestrichen (`terminAbhaken`, ADR 0041). Die
+  (ADR 0006). An einem Tag, der nicht mehr kommt, ist sie wie eine Kachel: antippen hakt genau
+  diesen Tag ab, lange drücken öffnet; rechts in ihr steht der runde Haken, abgehakt treten Zeit
+  und Text zurück (`terminAbhaken`, ADR 0041, 0042). An einem kommenden öffnet das Antippen. Die
   Tagesansicht ist die Liste unter dem Kalender, keine eigene Ansicht. Ein
   kommender Tag zeigt dort, was dran ist, ohne Haken; «Hinzufügen» fragt in einem Fenster
   aus Glas — Termin, Gewohnheit, Abgewöhnen (`opt.wahl`, ADR 0025), das wie der Timer klein aus dem
@@ -121,7 +122,8 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 - **Was alles ersetzt oder löscht, fragt im Glas** (`hinweisZeigen` mit `frage`) und läßt
   sich bis zum Neuladen rückgängig machen (`rueckgaengig`); auch Einzelnes — Löschen, Archivieren,
   Timer abbrechen — fragt im Glas aus seinem Knopf (`loeschenFragen`), einen zweiten Tipp auf
-  denselben Knopf gibt es nicht (ADR 0041).
+  denselben Knopf gibt es nicht (ADR 0041). Eine Frage verneint man mit «Nein», eine Wahl bricht man
+  mit «Abbrechen» ab (ADR 0042).
 
 ## Chili
 
@@ -153,7 +155,8 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
   gespeichert, dasselbe Glas mit neutralem Zeichen (`'hinweis'`), nie der grüne Haken.
 - **Geht das Fenster mit der Meldung, wird es selbst zur Meldung** (`bestaetigenUndGehen`,
   `meldenUndGehen`, im Ticketblatt `ticketBlattSchliessen(null, meldung)`): Es zieht sich in der
-  Mitte zum Tropfen, aus dem die Meldung quillt; die Ansicht fließt nicht noch einmal zurück.
+  Mitte zum Tropfen, aus dem die Meldung quillt; die nächste Ansicht fließt nicht zurück und wächst
+  nicht aus dem getippten Knopf, sie blendet sich nur ein — wohin sie auch führt (ADR 0042).
   Sonst quillt eine Meldung aus dem zuletzt getippten Knopf (`letzterTipp`) — iOS gibt keinem
   getippten Knopf den Fokus (ADR 0041).
 - **Zeichen bewegen sich einmal, wenn sie erscheinen** (`zeichenZeichnen`, Klassen `z-…`): Haken zeichnet
@@ -177,7 +180,8 @@ Gilt für `index.html`. Begründungen in ADR 0001 und im Pflichtenheft `docs/chi
 - **Das Menü klappt unter seinem Knopf auf** (`menueOeffnen`, `blattLegen`), nie als Blatt
   von unten. Schließen ist Öffnen rückwärts — gleiche Dauer, gespiegelte Bilder. Ist der Knopf
   hinausgerollt, tropft erst ein Gast von ihm an den oberen Rand (`menueAnker`); die Einträge
-  tropfen als Perlen nacheinander auf (`menueEintraegeTropfen`, ADR 0041).
+  tropfen als Perlen nacheinander auf (`menueEintraegeTropfen`, ADR 0041). Rollt die Seite bei
+  offenem Menü, bleibt der Knopf als Gast oben stehen, das Blatt unter ihm (`menueMitrollen`, ADR 0042).
 - **Was zusammen geht, geht in einem Takt**: Wer Raster, Karte und Liste zugleich bewegt,
   gibt allen dieselbe Dauer und Kurve (`KAL_TAKT`, `heldTakt`) — zwei Takte sehen aus wie
   Schnappen (ADR 0008).

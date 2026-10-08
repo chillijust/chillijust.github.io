@@ -244,6 +244,31 @@ zeige('reflexion', MO);
 texte += q('#app').textContent + alle('textarea').map(function (t) { return t.placeholder; }).join(' ');
 pruefe('S2 auch das Journal duzt', !/\bSie\b|\bIhnen\b|\bIhr(e|en)?\b/.test(texte));
 
+// ── W · Wohin es nach der Meldung auch geht: nur zwei Tropfen (ADR 0042) ──
+// Aus dem Journal und aus «Lesen» führt Speichern nicht aufs Dashboard; die
+// nächste Ansicht tropfte dann noch einmal aus dem getippten «Speichern».
+[['W1 aus dem Journal', function () { zeige('journal'); q('#jrNeu').click(); }, 'journal'],
+ ['W2 aus dem Journal, leer', function () { zeige('journal'); q('#jrNeu').click(); }, 'journal', true],
+ ['W3 aus «Lesen»', function () {
+   state.journal = [reflexionLesen({ woche: MO, gut: 'a', stoerte: '' })];
+   zeige('journal'); zeige('lesen', MO); q('#jrBearbeiten').click(); }, 'lesen']].forEach(function (f) {
+  mitGewohnheit();
+  f[1]();
+  ausbewegt();
+  tippe('jrGut', f[3] ? '' : 'Gut');
+  if (f[3]) tippe('jrStoerte', '');
+  var vorher = alle('body > .tropfen-huelle').length;
+  q('#jrSpeichern').click();
+  var neue = alle('body > .tropfen-huelle').slice(vorher), z = q('#ansicht').getAnimations()[0];
+  pruefe(f[0] + ': das Fenster wird Meldung, die nächste Ansicht steht still dahinter', ansicht === f[2] &&
+    neue.length === 2 && neue.filter(function (h) { return h.classList.contains('glas'); }).length === 1 &&
+    !!z && z.effect.getKeyframes()[0].opacity === '0.4', ansicht + ' ' + neue.length);
+  ausbewegt();
+  q('#hinweisBlatt').hidden = true;
+  q('#hinweisBlatt').classList.remove('offen');
+  alle('body > .tropfen-huelle').forEach(function (h) { h.parentNode.removeChild(h); });
+});
+
 // ── B · Die Bestätigung im Glas ─────────────────────────────
 mitGewohnheit();
 kachel().click();

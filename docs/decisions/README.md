@@ -48,4 +48,5 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0038](0038-timer-und-zaehler.md) | Timer und Zähler: abhaken mit Zeit oder durch Zählen | gilt; Glas aus der Scheibe, Pause, Zählschritt seit 0040; Abbrechen fragt im Glas seit 0041 |
 | [0039](0039-pruefstand-wartet-aus-der-konstante.md) | Der Prüfstand wartet aus der Bewegungskonstante, nicht fest; Budget des Läufers 20 s | gilt |
 | [0040](0040-timer-klein-pause-zaehlschritt.md) | Glas aus der Scheibe, Timer mit Pause, Zähler in Schritten mit Einheit | gilt; Pause im Ring seit 0041 |
-| [0041](0041-termine-abhaken-fenster-wird-meldung.md) | Termine abhaken, Fenster wird Meldung, Menüknopf tropft herab, Einträge nacheinander, «Hinzufügen» aus dem Plus, Fragen im Glas | gilt |
+| [0041](0041-termine-abhaken-fenster-wird-meldung.md) | Termine abhaken, Fenster wird Meldung, Menüknopf tropft herab, Einträge nacheinander, «Hinzufügen» aus dem Plus, Fragen im Glas | gilt; Termin wie Kachel, «Nein», Menüknopf rollt mit seit 0042 |
+| [0042](0042-termin-wie-kachel-nein-menue-rollt.md) | Termin wie eine Kachel, «Nein» in der Frage, Menüknopf rollt mit, Meldung ohne zweiten Tropfen | gilt |

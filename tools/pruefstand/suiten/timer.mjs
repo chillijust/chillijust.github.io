@@ -155,6 +155,8 @@ return durch().then(function () {
   q('#timerAbbrechen').click();
   pruefe('T8 Abbrechen fragt erst, im Glas über dem Timer (ADR 0041)', !!state.timer && q('#hinweisBlatt').classList.contains('offen') && !!hinweisFrage &&
     /Timer abbrechen/.test(q('#hinweisTitel').textContent) && offen());
+  pruefe('T8a gefragt wird mit «Ja» und «Nein» — nicht zweimal «Abbrechen» (ADR 0042)',
+    q('#hinweisOk').textContent === 'Ja' && q('#hinweisNein').textContent === 'Nein' && !q('#hinweisNein').hidden);
   q('#hinweisOk').click();
   pruefe('T9 dann ist er fort, nichts abgehakt', !state.timer && !offen() && !erledigtAm('lesen', HEUTE));
   return durch();
@@ -197,6 +199,7 @@ return durch().then(function () {
   kachel('turnen').click();
   pruefe('T15 ein zweiter Timer fragt erst im Glas', state.timer.id === 'lesen' && !q('#hinweisBlatt').hidden &&
     q('#hinweisTitel').textContent === 'Es läuft schon ein Timer');
+  pruefe('T15a der Ausweg sagt, was er tut', q('#hinweisNein').textContent === 'Weiterlaufen lassen');
   q('#hinweisOk').click();
   pruefe('T16 «Abbrechen, diesen starten»: einer läuft, der neue', state.timer.id === 'turnen' && offen());
   q('#timerBlatt').click();
