@@ -114,6 +114,9 @@ Wer eine Regel ändert, ändert sie dort, wo sie steht — nicht zusätzlich hie
   einen anderen Arbeits-Branch vor: dort committen, per Fast-Forward auf `main` bringen,
   `main` pushen. Was auf einem anderen Branch landet, wird nach `main` nachgeholt. Neue
   Branches nur auf meine Ansage. **`backup/*` wird nie verändert.**
+- **Fremde Agenten** (ChatGPT u. a., ADR 0047) arbeiten auf `chatgpt/*` und öffnen einen
+  PR; ihre Anleitung ist `AGENTS.md`. Claude prüft den PR (Diff gegen das Regelwerk,
+  `pruefen.mjs`, Prüfstand), stempelt die Version und bringt ihn erst dann nach `main`.
 
 ## Prüfstand und Push
 

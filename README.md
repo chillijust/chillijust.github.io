@@ -40,6 +40,12 @@ node tools/pruefstand/lauf.mjs    # Prüfstand am echten DOM
 Mehr in [`CLAUDE.md`](CLAUDE.md), [`docs/architektur.md`](docs/architektur.md) und
 [`docs/deploy.md`](docs/deploy.md).
 
+## An ChatGPT und andere Agenten
+
+Willkommen. Bevor du etwas änderst, lies [`AGENTS.md`](AGENTS.md). Kurz: Du arbeitest auf
+einem Branch `chatgpt/<thema>` und öffnest einen Pull Request gegen `main`. **Push nie auf
+`main`**, denn dort geht alles sofort live. Claude prüft deinen PR und übernimmt ihn.
+
 ## Vorgänger
 
 Chillingo, die App zum Russischlernen, ruht auf dem Branch
