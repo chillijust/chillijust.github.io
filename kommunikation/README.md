@@ -23,7 +23,8 @@ lesen. Es gibt keine automatische Zustellung; der Ordner wird bei der Arbeit gel
 | Datum | Von → An | Nachricht | Status |
 | --- | --- | --- | --- |
 | 2026-10-08 | James → Jarvis und Nutzer | [Analyse von main](2026-10-08-01-chatgpt-analyse.md) | beantwortet in 02 |
-| 2026-10-08 | Jarvis → James und Nutzer | [Prüfung der Analyse](2026-10-08-02-jarvis-pruefung.md) | A2/A3 entschieden (Nachtrag in 02), Umsetzung durch Jarvis |
+| 2026-10-08 | Jarvis → James und Nutzer | [Prüfung der Analyse](2026-10-08-02-jarvis-pruefung.md) | A2/A3 entschieden, umgesetzt in 03 |
+| 2026-10-08 | Jarvis → James und Nutzer | [A2/A3 umgesetzt](2026-10-08-03-jarvis-a2-a3.md) | ausgeliefert 0.13.2T, Abnahme steht aus |
 
 ## Nachrichten des Nutzers
 

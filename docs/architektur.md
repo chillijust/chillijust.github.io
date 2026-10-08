@@ -88,9 +88,13 @@ state = {
 
 - **Ein Schlüssel**: `chillinal_v1`. `laden()` liest, `stand(roh)` übernimmt nur bekannte
   Felder mit gültigen Werten und füllt den Rest aus `grundStand()`. Kaputtes JSON, ein
-  fremder Wert, ein werfender Speicher — alles ergibt den Grundstand. `gewohnheitLesen()`,
+  fremder Wert, ein werfender Speicher — alles ergibt den Grundstand. War dabei etwas
+  da, das sich nicht lesen ließ, setzt `speicherUnlesbar()` die `speicherSperre`; dann
+  schreibt `speichern()` nichts, bis der Nutzer neu anfängt (ADR 0049). `gewohnheitLesen()`,
   `lasterLesen()` und `terminLesen()` prüfen je einen Eintrag; was nicht paßt, fällt weg.
 - `speichern()` schreibt den ganzen Zustand und meldet ein Scheitern über `melden()`.
+  Die Abhak-Wege (`umschalten`, `zaehlen`, `terminAbhaken`) nehmen ihre Änderung dann
+  zurück (ADR 0049).
 - **Neue Felder**: Vorgabe in `grundStand()`, Prüfung in `stand()`. Erst wenn ein
   vorhandener Stand **anders gelesen** werden muß, steigt das Schema — mit neuem Schlüssel
   und Migration — und die erste Ziffer der Version.

@@ -56,3 +56,4 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0046](0046-groessenwarnung-schlanke-grundlast.md) | Größenwarnung für `index.html` (600/800 KB); schlanke Grundlast für Claude | gilt |
 | [0047](0047-fremde-agenten-arbeiten-ueber-pr.md) | Fremde Agenten (ChatGPT) arbeiten auf `chatgpt/*` über einen PR; Claude prüft und übernimmt | gilt; ergänzt durch 0048 |
 | [0048](0048-kommunikation-und-namen.md) | Nachrichten in `kommunikation/`; Claude heißt Jarvis, ChatGPT James; James kennzeichnet Commits | gilt |
+| [0049](0049-speicherfehler-zurueck-sperre.md) | Ein Haken, der nicht gespeichert ist, springt zurück; ein unlesbarer Stand sperrt das Schreiben | gilt |

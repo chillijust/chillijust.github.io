@@ -1565,7 +1565,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.13.1';
+var APP_VERSION = '0.13.2T';
 var APP_STAND = '2026-10-08';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -2030,8 +2030,13 @@ function laden() {
 }
 
 // Schlägt das Schreiben fehl (privater Modus, voller Speicher), läuft die App
-// weiter — sie sagt es aber, statt still zu verlieren.
+// weiter — sie sagt es aber, statt still zu verlieren. Ist der gespeicherte
+// Stand unlesbar, schreibt sie gar nicht, bis der Nutzer entschieden hat.
 function speichern() {
+  if (speicherSperre) {
+    sperreZeigen();
+    return false;
+  }
   try {
     localStorage.setItem(SPEICHER, JSON.stringify(state));
     return true;
@@ -2082,6 +2087,53 @@ function markeAbspielen(svg) {
 }
 
 var state = laden();
+
+// Steht unter dem Schlüssel etwas, das sich nicht lesen läßt, startet die App
+// leer — überschreibt es aber nicht: Das nächste Speichern hätte sonst den
+// alten Stand still durch den leeren ersetzt. Die Sperre hält, bis der Nutzer
+// den Rohtext kopiert und bewußt neu anfängt. `roh` ist null, wenn schon das
+// Lesen warf; dann weiß niemand, was dort liegt.
+function speicherUnlesbar() {
+  var roh;
+  try {
+    roh = localStorage.getItem(SPEICHER);
+  } catch (e) { return { roh: null }; }
+  if (!roh) return null;
+  try {
+    var wert = JSON.parse(roh);
+    if (wert && typeof wert === 'object' && !Array.isArray(wert)) return null;
+  } catch (e) { /* unlesbar */ }
+  return { roh: roh };
+}
+
+var speicherSperre = speicherUnlesbar();
+
+function sperreZeigen() {
+  var roh = speicherSperre && speicherSperre.roh, knoepfe = [];
+  if (roh) knoepfe.push({ text: 'Rohtext kopieren', attr: { 'data-sperre': 'kopieren' }, tun: sperreKopieren });
+  knoepfe.push({ text: 'Neu anfangen', attr: { 'data-sperre': 'neu' }, tun: sperreNeuFragen });
+  hinweisZeigen('Deine Daten sind nicht lesbar', roh
+    ? 'Auf diesem Gerät liegt ein gespeicherter Stand, den die App nicht lesen kann. Sie überschreibt ihn nicht. ' +
+      'Kopier ihn und heb ihn auf, oder fang bewusst neu an.'
+    : 'Der Speicher lässt sich gerade nicht lesen. Die App schreibt nichts, damit nichts verloren geht.',
+    null, null, { zeichen: 'hinweis', wahl: { knoepfe: knoepfe } });
+}
+
+function sperreKopieren() {
+  if (!speicherSperre || !speicherSperre.roh) return;
+  kopieren(speicherSperre.roh, function (ok) {
+    if (ok) melden('Kopiert. Leg den Text an einen sicheren Ort, etwa in eine Notiz.', 'kopie');
+    else melden('Kopieren ging nicht. Versuch es noch einmal.');
+  });
+}
+
+function sperreNeuFragen() {
+  hinweisZeigen('Neu anfangen?', 'Der unlesbare Stand wird dann überschrieben. Kopier ihn vorher, wenn du ihn behalten willst.',
+    null, null, { frage: { ja: 'Ja', beiJa: function () {
+      speicherSperre = null;
+      if (speichern()) melden('Neu angefangen. Der alte Stand ist überschrieben.', 'haken');
+    } } });
+}
 
 // ════════════════════════════════════════════════════════════════
 //  Darstellung: hell, dunkel, automatisch
@@ -3159,10 +3211,18 @@ function aenderbarAm(g, k) {
 function umschalten(id, k) {
   var g = gewohnheitNach(id);
   if (!aenderbarAm(g, k)) return false;
-  var i = g.erledigt.indexOf(k);
+  var i = g.erledigt.indexOf(k), menge = g.zaehlung[k];
   if (i === -1) { g.erledigt.push(k); g.erledigt.sort(); } else { g.erledigt.splice(i, 1); delete g.zaehlung[k]; }
-  speichern();
-  return true;
+  if (speichern()) return true;
+  // Nicht gespeichert: Der Haken springt zurück. Was man sieht, ist gespeichert;
+  // sonst jubelte die App über etwas, das beim nächsten Start fehlt.
+  if (i === -1) g.erledigt.splice(g.erledigt.indexOf(k), 1);
+  else {
+    g.erledigt.push(k);
+    g.erledigt.sort();
+    if (menge !== undefined) g.zaehlung[k] = menge;
+  }
+  return false;
 }
 
 function erledigtAm(id, k) {
@@ -3186,7 +3246,7 @@ function tagVoll() {
 function umschaltenUndZeichnen(id, k) {
   var vollVorher = tagVoll(), g = gewohnheitNach(id), heute = heuteSchluessel();
   var vorher = g ? auswerten(g, heute) : null, jubel = null;
-  if (!umschalten(id, k)) return;
+  if (!umschalten(id, k)) return false;
   if (erledigtAm(id, k)) {
     jubel = hakenJubel(g, vorher, auswerten(g, heute), k === heute);
     chiliFlammt = (!vollVorher && tagVoll()) || (jubel && jubel.lodert) ? 'lodert' : 'flammt';
@@ -3194,6 +3254,7 @@ function umschaltenUndZeichnen(id, k) {
   render();
   chiliFlammt = false;
   if (jubel) jubeln(jubel.titel, jubel.text, id);
+  return true;
 }
 
 // Jubel über den Haken hinaus: Die Stärke erreicht die Hälfte oder 90 %
@@ -5428,11 +5489,16 @@ function zaehlen(id, richtung) {
   if (neu < g.zaehler.schritt / 2) neu = 0;
   if (neu === n) return;
   geradeAbgehakt = neu ? id : null;
-  if (!n) { g.zaehlung[k] = neu; umschaltenUndZeichnen(id, k); }
-  else if (!neu) umschaltenUndZeichnen(id, k);
+  // Scheitert das Speichern, gilt wieder die Menge von vorher.
+  var alt = g.zaehlung[k];
+  var zurueck = function () { if (alt === undefined) delete g.zaehlung[k]; else g.zaehlung[k] = alt; };
+  if (!n) {
+    g.zaehlung[k] = neu;
+    if (!umschaltenUndZeichnen(id, k)) zurueck();
+  } else if (!neu) umschaltenUndZeichnen(id, k);
   else {
     g.zaehlung[k] = neu;
-    speichern();
+    if (!speichern()) { zurueck(); geradeAbgehakt = null; }
     render();
   }
   geradeAbgehakt = null;
@@ -5784,8 +5850,11 @@ function terminAbhaken(id, k) {
   if (!t || !istSchluessel(k) || k > heuteSchluessel()) return;
   var i = t.erledigt.indexOf(k);
   if (i === -1) { t.erledigt.push(k); t.erledigt.sort(); } else t.erledigt.splice(i, 1);
-  speichern();
-  geradeAbgehakt = i === -1 ? 't:' + id : null;
+  var gut = speichern();
+  // Nicht gespeichert: Der Haken springt zurück, wie bei den Gewohnheiten.
+  if (!gut && i === -1) t.erledigt.splice(t.erledigt.indexOf(k), 1);
+  else if (!gut) { t.erledigt.push(k); t.erledigt.sort(); }
+  geradeAbgehakt = gut && i === -1 ? 't:' + id : null;
   render();
   geradeAbgehakt = null;
 }
@@ -7527,6 +7596,7 @@ function start() {
   document.documentElement.style.setProperty('--feder', FEDER);
   render();
   auftritt();
+  if (speicherSperre) sperreZeigen();
   // Ein Tipp irgendwohin überspringt den Auftritt.
   document.addEventListener('pointerdown', function () { if (auftrittLaeuft) auftrittEnde(); }, true);
 

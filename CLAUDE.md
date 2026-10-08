@@ -149,7 +149,8 @@ node tools/pruefen.mjs                      # Vor-Push-Prüfung allein
 - **iOS-Quick-Look** zeigt HTML anders und speichert nichts. Getestet wird in Safari oder
   in der Home-Bildschirm-App.
 - **`localStorage` wirft** im privaten Modus und bei vollem Kontingent; scheitert das
-  Schreiben, sagt die App es. Neue Felder: Vorgabe in `grundStand()`. Schemawechsel nur mit
+  Schreiben, sagt die App es, und ein Haken springt zurück. Ein unlesbarer Stand sperrt
+  das Schreiben, bis der Nutzer neu anfängt (ADR 0049). Neue Felder: Vorgabe in `grundStand()`. Schemawechsel nur mit
   neuem Schlüssel und Migration.
 - **Die Tagesgrenze ist lokale Mitternacht.** Eine offene App merkt den Wechsel erst beim
   Zeichnen — `visibilitychange` zeichnet neu.
@@ -158,8 +159,6 @@ node tools/pruefen.mjs                      # Vor-Push-Prüfung allein
 
 ## Offen
 
-- Analyse von James (`kommunikation/`, 01 und 02). Als Nächstes A2/A3, entschieden:
-  **A3** — scheitert `speichern()`, wird die Änderung zurückgerollt, kein Jubel, das Glas
-  sagt es. **A2** — sind die Daten beim Start unlesbar, überschreibt die App nichts,
-  meldet es und bietet an, den Rohtext zu kopieren oder bewusst neu anzufangen; nur
-  `chillinal_v1`. Danach A1 Worker-Cache (ADR nötig); A4–A6 niedrig.
+- Analyse von James (`kommunikation/`, 01–03). A2/A3 ausgeliefert in 0.13.2T (ADR 0049),
+  Abnahme am Gerät steht aus. Als Nächstes A1 Worker-Cache (ADR nötig); dann Rest von A3
+  (Formulare, Löschen, Rückfall, Drang behalten ihren Stand bis zum Neuladen), A4–A6.
