@@ -1,0 +1,176 @@
+[
+  {
+    "id": "akanje",
+    "name": "Akanje",
+    "kurz": "Unbetont klingt anders",
+    "frage": "Man hört «malakó» — geschrieben steht молоко. Warum?",
+    "deutungen": [
+      "Unbetontes о klingt wie а, geschrieben bleibt es о",
+      "Das Wort wird auch mit а geschrieben, beides geht",
+      "Es ist eine Ausnahme, die man auswendig lernt"
+    ],
+    "richtig": 0,
+    "regel": "Unbetontes о spricht sich wie а — geschrieben wird trotzdem о. Russisch schreibt nach dem Wortstamm, nicht nach dem Klang. Wer nach Gehör schreibt, schreibt малако.",
+    "merksatz": "Nur der betonte Vokal klingt so, wie er dasteht.",
+    "aufgaben": [
+      { "ist": "молоко", "klingt": "малоко", "pruef": "мо́лочный", "de": "Milch" },
+      { "ist": "вода", "klingt": "вада", "pruef": "во́ды", "de": "Wasser" },
+      { "ist": "гора", "klingt": "гара", "pruef": "го́ры", "de": "Berg" },
+      { "ist": "нога", "klingt": "нага", "pruef": "но́ги", "de": "Bein" },
+      { "ist": "голова", "klingt": "галова", "pruef": "го́ловы", "de": "Kopf" },
+      { "ist": "хорошо", "klingt": "харошо", "pruef": "хоро́ший", "de": "gut" },
+      { "ist": "окно", "klingt": "акно", "pruef": "о́кна", "de": "Fenster" },
+      { "ist": "сова", "klingt": "сава", "pruef": "со́вы", "de": "Eule" }
+    ]
+  },
+  {
+    "id": "auslaut",
+    "name": "Auslautverhärtung",
+    "kurz": "Am Wortende wird hart",
+    "frage": "Man hört «gorat» — geschrieben steht город. Woher weiß man das д?",
+    "deutungen": [
+      "Man hängt einen Vokal an: города — dort hört man das д",
+      "Am Wortende schreibt man immer den weichen Laut",
+      "Das muss man sich bei jedem Wort merken"
+    ],
+    "richtig": 0,
+    "regel": "Am Wortende klingt б wie п, в wie ф, г wie к, д wie т, ж wie ш, з wie с. Geschrieben wird der Laut, den man hört, sobald ein Vokal dahinter steht.",
+    "merksatz": "Vokal dahinter bringen, dann hört man es.",
+    "aufgaben": [
+      { "ist": "город", "klingt": "горот", "pruef": "города́", "de": "Stadt" },
+      { "ist": "хлеб", "klingt": "хлеп", "pruef": "хле́ба", "de": "Brot" },
+      { "ist": "друг", "klingt": "друк", "pruef": "дру́га", "de": "Freund" },
+      { "ist": "сад", "klingt": "сат", "pruef": "са́да", "de": "Garten" },
+      { "ist": "глаз", "klingt": "глас", "pruef": "гла́за", "de": "Auge" },
+      { "ist": "нож", "klingt": "нош", "pruef": "ножа́", "de": "Messer" },
+      { "ist": "снег", "klingt": "снек", "pruef": "сне́га", "de": "Schnee" },
+      { "ist": "зуб", "klingt": "зуп", "pruef": "зу́бы", "de": "Zahn" }
+    ]
+  },
+  {
+    "id": "stumm",
+    "name": "Stumme Buchstaben",
+    "kurz": "Geschrieben, nicht gesprochen",
+    "frage": "Man hört «schto» — geschrieben steht что. Was ist da los?",
+    "deutungen": [
+      "Manche Buchstaben stehen da, ohne gesprochen zu werden",
+      "Der Laut sch wird immer als ч geschrieben",
+      "Es ist ein Druckfehler, der sich eingebürgert hat"
+    ],
+    "richtig": 0,
+    "regel": "In einigen häufigen Wörtern steht ein Buchstabe, den man nicht hört: что und конечно spricht man mit ш, солнце ohne л, сердце ohne д. Es sind wenige Wörter — und man braucht sie täglich.",
+    "merksatz": "Was man nicht hört, steht trotzdem da.",
+    "aufgaben": [
+      { "ist": "что", "klingt": "што", "de": "was" },
+      { "ist": "конечно", "klingt": "конешно", "de": "natürlich" },
+      { "ist": "солнце", "klingt": "сонце", "de": "Sonne" },
+      { "ist": "сердце", "klingt": "серце", "de": "Herz" },
+      { "ist": "поздно", "klingt": "позно", "de": "spät" },
+      { "ist": "лестница", "klingt": "лесница", "de": "Treppe" }
+    ]
+  },
+  {
+    "id": "schischi",
+    "name": "Zischlaut-Regeln",
+    "kurz": "Feste Verbindungen",
+    "frage": "Nach ж und ш hört man ein ы — geschrieben steht и. Warum?",
+    "deutungen": [
+      "Weil es so festgelegt ist — die Aussprache ändert daran nichts",
+      "Weil ж und ш immer weich ausgesprochen werden",
+      "Weil ы nach Zischlauten nicht aussprechbar wäre"
+    ],
+    "richtig": 0,
+    "regel": "жи und ши immer mit и, ча und ща immer mit а, чу und щу immer mit у. Das ist reine Rechtschreibung, sie gilt ohne Ausnahme — und sie ist die erste Regel, die russische Kinder lernen.",
+    "merksatz": "жи-ши mit и, ча-ща mit а, чу-щу mit у.",
+    "aufgaben": [
+      { "ist": "жить", "klingt": "жыть", "de": "leben" },
+      { "ist": "машина", "klingt": "машына", "de": "Auto" },
+      { "ist": "широкий", "klingt": "шырокий", "de": "breit" },
+      { "ist": "часто", "klingt": "чясто", "de": "oft" },
+      { "ist": "чудо", "klingt": "чюдо", "de": "Wunder" },
+      { "ist": "площадь", "klingt": "площядь", "de": "Platz" },
+      { "ist": "живот", "klingt": "жывот", "de": "Bauch" }
+    ]
+  },
+  {
+    "id": "tsja", "hoerbar": false,
+    "name": "Verben auf -tsja",
+    "kurz": "Mit Weichzeichen oder ohne",
+    "frage": "Beides klingt «-zza». Woran erkennt man, welches gemeint ist?",
+    "deutungen": [
+      "An der Frage: «was tun?» mit ь, «was tut er?» ohne",
+      "Am Wortende: nach Vokal mit ь, nach Konsonant ohne",
+      "Es ist gleichgültig, beide Schreibweisen sind erlaubt"
+    ],
+    "richtig": 0,
+    "regel": "Passt die Frage «что делать?» — also die Grundform —, steht ь: учиться. Passt «что делает?», steht keines: учится. Der Trick: Steht in der Frage ein ь, steht auch im Wort eines.",
+    "merksatz": "ь in der Frage, ь im Wort.",
+    "aufgaben": [
+      { "ist": "учиться", "klingt": "учится", "de": "lernen · was tun?" },
+      { "ist": "учится", "klingt": "учиться", "de": "er lernt · was tut er?" },
+      { "ist": "нравиться", "klingt": "нравится", "de": "gefallen · was tun?" },
+      { "ist": "нравится", "klingt": "нравиться", "de": "es gefällt · was tut es?" }
+    ]
+  },
+  {
+    "id": "weichzeichen", "hoerbar": false,
+    "name": "Weichzeichen am Ende",
+    "kurz": "Steht da, klingt nicht",
+    "frage": "ночь mit ь, врач ohne. Woran liegt das?",
+    "deutungen": [
+      "Am Geschlecht: weibliche Nomen bekommen ь, männliche nicht",
+      "An der Aussprache: ночь klingt weicher als врач",
+      "An der Silbenzahl des Wortes"
+    ],
+    "richtig": 0,
+    "regel": "Endet ein Nomen auf ж, ч, ш oder щ, steht ь nur bei weiblichen: ночь, дочь, вещь — aber врач, нож, товарищ. Bei Verben steht es immer: пишешь, идёшь.",
+    "merksatz": "Weiblich mit ь, männlich ohne. Verben immer mit.",
+    "aufgaben": [
+      { "ist": "ночь", "klingt": "ноч", "de": "Nacht · weiblich" },
+      { "ist": "дочь", "klingt": "доч", "de": "Tochter · weiblich" },
+      { "ist": "вещь", "klingt": "вещ", "de": "Sache · weiblich" },
+      { "ist": "врач", "klingt": "врачь", "de": "Arzt · männlich" },
+      { "ist": "нож", "klingt": "ножь", "de": "Messer · männlich" },
+      { "ist": "пишешь", "klingt": "пишеш", "de": "du schreibst · Verb" }
+    ]
+  },
+  {
+    "id": "ogo",
+    "name": "Endung -ogo und -ego",
+    "kurz": "Geschriebenes g, gesprochenes w",
+    "frage": "Man hört «jewó» — geschrieben steht его. Warum das г?",
+    "deutungen": [
+      "In den Endungen -ого und -его spricht sich г wie в",
+      "Es ist ein alter Schreibfehler, der geblieben ist",
+      "Das г wird gar nicht gesprochen"
+    ],
+    "richtig": 0,
+    "regel": "In den Endungen -ого und -его klingt das г wie в: его spricht sich «jewó», нового «nówawa». Nur dort — sonst bleibt г ein г.",
+    "merksatz": "In der Endung klingt г wie в. Geschrieben bleibt г.",
+    "aufgaben": [
+      { "ist": "его", "klingt": "ево", "de": "ihn · sein" },
+      { "ist": "нового", "klingt": "новово", "de": "des neuen" },
+      { "ist": "сегодня", "klingt": "севодня", "de": "heute" }
+    ]
+  },
+  {
+    "id": "assimilation",
+    "name": "Stimmassimilation",
+    "kurz": "Der Nachbar färbt ab",
+    "frage": "Man hört «fsjo» — geschrieben steht всё. Woher das в?",
+    "deutungen": [
+      "Vor einem stimmlosen Laut klingt в wie ф — geschrieben bleibt в",
+      "в und ф sind austauschbar",
+      "Das Wort wird auch фсё geschrieben"
+    ],
+    "richtig": 0,
+    "regel": "Ein stimmhafter Konsonant vor einem stimmlosen klingt selbst stimmlos: всё wie «fsjo», вчера wie «ftschirá». Geschrieben wird der Stamm, nicht der Klang.",
+    "merksatz": "Der Nachbar färbt den Klang, nicht die Schreibung.",
+    "aufgaben": [
+      { "ist": "всё", "klingt": "фсё", "de": "alles" },
+      { "ist": "вчера", "klingt": "фчера", "de": "gestern" },
+      { "ist": "второй", "klingt": "фторой", "de": "der zweite" },
+      { "ist": "автобус", "klingt": "афтобус", "de": "Bus" }
+    ]
+  }
+]
