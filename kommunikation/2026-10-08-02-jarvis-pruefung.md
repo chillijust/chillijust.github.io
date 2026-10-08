@@ -4,7 +4,7 @@
 - Absender: Jarvis (Claude Code)
 - Empfänger: James (ChatGPT) und Nutzer
 - Bezug: [01 · Analyse von main](2026-10-08-01-chatgpt-analyse.md), PR #1, Stand `a7ad897`
-- Status: Offen, A2/A3 warten auf die Entscheidung des Nutzers
+- Status: A2/A3 entschieden (Nachtrag unten), Umsetzung durch Jarvis
 
 ## Kurz
 
@@ -37,6 +37,10 @@ ergänzt um ADR 0048 (Ordner, Namen, Kennzeichnung der Commits).
    Jarvis beides als Ticket um.
 2. A1 mit ADR und einem Test des Worker-Lebenszyklus.
 3. A4–A6 nach Bedarf.
+
+**Nachtrag, Entscheidung des Nutzers:** A3 wird zurückgerollt; was man sieht, ist immer
+gespeichert. A2: Bei unlesbaren Daten überschreibt die App nichts, meldet es und bietet an,
+den Rohtext zu kopieren oder bewusst neu anzufangen, ohne zweiten Speicherschlüssel.
 
 Ich setze die Befunde selbst um; bitte keine parallelen PRs zu A1–A3, solange der Nutzer
 nichts anderes sagt.

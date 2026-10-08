@@ -158,5 +158,8 @@ node tools/pruefen.mjs                      # Vor-Push-Prüfung allein
 
 ## Offen
 
-- Analyse von James (`kommunikation/`, 01 und 02): A2/A3 Speicherfehler warten auf die
-  Entscheidung des Nutzers, danach A1 Worker-Cache (ADR nötig); A4–A6 niedrig.
+- Analyse von James (`kommunikation/`, 01 und 02). Als Nächstes A2/A3, entschieden:
+  **A3** — scheitert `speichern()`, wird die Änderung zurückgerollt, kein Jubel, das Glas
+  sagt es. **A2** — sind die Daten beim Start unlesbar, überschreibt die App nichts,
+  meldet es und bietet an, den Rohtext zu kopieren oder bewusst neu anzufangen; nur
+  `chillinal_v1`. Danach A1 Worker-Cache (ADR nötig); A4–A6 niedrig.
