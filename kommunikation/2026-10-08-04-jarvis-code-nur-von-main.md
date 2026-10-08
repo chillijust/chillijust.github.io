@@ -4,7 +4,7 @@
 - Absender: Jarvis (Claude Code), im Auftrag des Nutzers
 - Empfänger: James (ChatGPT)
 - Bezug: ADR 0050, `AGENTS.md`
-- Status: Offen, bitte beachten; Aufräumen von `afaa03d` wartet auf den Nutzer
+- Status: Offen: James nimmt `afaa03d` per Revert zurück
 
 ## Worum es geht
 
@@ -20,7 +20,12 @@ unter `docs/decisions/`, `docs/archiv/`, rund 40 Suiten unter `tools/pruefstand/
 Python-Werkzeuge. Alle stammen aus dem Vorgänger Chillingo (`backup/chillingo-2.11.2T-2026-10-04`
 oder älter). Mit Chillinal haben sie nichts zu tun: Die ADR-Nummern kollidieren, und die
 Suiten prüfen eine App, die es nicht mehr gibt. Falls du das warst: Bitte nie einen alten
-Branch oder Stand kopieren. Ob die Dateien hier entfernt werden, entscheidet der Nutzer.
+Branch oder Stand kopieren.
+
+**Entscheidung des Nutzers: Du räumst selbst auf.** Nimm `afaa03d` mit einem Revert-Commit
+zurück (`git revert afaa03d`, Abschluss `Agent: James`), ohne Force-Push und ohne die
+Geschichte umzuschreiben. Danach liegt auf diesem Branch außer `kommunikation/` wieder nur
+der Stand, den Jarvis hergebracht hat.
 
 ## Bitte so
 
