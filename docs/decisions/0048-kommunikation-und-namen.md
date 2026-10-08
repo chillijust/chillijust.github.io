@@ -1,6 +1,6 @@
 # 0048 · Nachrichten in `kommunikation/`; Jarvis und James
 
-*2026-10-08 · nach 0.13.1 · ohne neue Fassung · ergänzt 0047*
+*2026-10-08 · nach 0.13.1 · ohne neue Fassung · ergänzt 0047 · Ort des Ordners abgelöst durch 0050*
 
 ## Ausgangslage
 

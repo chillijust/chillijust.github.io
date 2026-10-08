@@ -1,6 +1,6 @@
 # 0049 · Ein Haken, der nicht gespeichert ist, springt zurück; Unlesbares sperrt
 
-*2026-10-08 · 0.13.2T · Befunde A2/A3 von James (`kommunikation/2026-10-08-01`)*
+*2026-10-08 · 0.13.2T · Befunde A2/A3 von James (Nachricht 01 auf `chatgpt/kommunikation`)*
 
 ## Ausgangslage
 
