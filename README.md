@@ -12,14 +12,12 @@ damit sie offline startet.
 
 ## Was sie kann — und was noch kommt
 
-Gebaut wird in acht Abschnitten nach dem Pflichtenheft
-[`docs/chillinal-plan.md`](docs/chillinal-plan.md). Fertig ist Abschnitt 1: das Gerüst mit
-Kopf, hellem und dunklem Erscheinungsbild, Menü, Einstellungen und Offline-Betrieb.
-
-Geplant: Gewohnheiten abhaken mit einem Tipp, eine **Stärke** statt eines zerbrechlichen
+Gebaut wurde in acht Abschnitten nach dem Pflichtenheft
+[`docs/chillinal-plan.md`](docs/chillinal-plan.md); alle acht sind fertig. Die App kann:
+Gewohnheiten abhaken mit einem Tipp, eine **Stärke** statt eines zerbrechlichen
 Serienzählers, «nie zweimal auslassen», Abgewöhnen mit «frei seit» und einer
 10-Minuten-Welle gegen den Drang, Termine mit Monatskalender, Erinnerungen über einen
-Kalender-Export, Heatmap und eine Wochenreflexion.
+Kalender-Export, Heatmap, Journal, Sicherung, Timer und Zähler.
 
 Alle Daten liegen ausschließlich im `localStorage` des Geräts.
 
