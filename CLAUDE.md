@@ -70,6 +70,8 @@ Nachschlagen **nur bei Bedarf**, nicht vorab:
 - `docs/decisions/README.md` — Index der ADRs; die Begründung jeder Regel steht im ADR
 - `tools/pruefstand/README.md` — Aufbau des Prüfstands, Vorlage für eine Suite
 - `docs/stil-vorlage.md` — der Stil zum Übertragen auf andere Apps
+- `kommunikation/README.md` — Nachrichten zwischen Nutzer, Jarvis und James (ADR 0048);
+  lesen, wenn der Nutzer darauf verweist oder eine Nachricht beantwortet wird
 
 Wer eine Regel ändert, ändert sie dort, wo sie steht — nicht zusätzlich hier.
 
@@ -114,8 +116,9 @@ Wer eine Regel ändert, ändert sie dort, wo sie steht — nicht zusätzlich hie
   einen anderen Arbeits-Branch vor: dort committen, per Fast-Forward auf `main` bringen,
   `main` pushen. Was auf einem anderen Branch landet, wird nach `main` nachgeholt. Neue
   Branches nur auf meine Ansage. **`backup/*` wird nie verändert.**
-- **Fremde Agenten** (ChatGPT u. a., ADR 0047) arbeiten auf `chatgpt/*` und öffnen einen
-  PR; ihre Anleitung ist `AGENTS.md`. Claude prüft den PR (Diff gegen das Regelwerk,
+- **Namen:** Claude heißt hier **Jarvis**, ChatGPT heißt **James**.
+- **Fremde Agenten** (James u. a., ADR 0047) arbeiten auf `chatgpt/*` und öffnen einen
+  PR; ihre Anleitung ist `AGENTS.md`. Jarvis prüft den PR (Diff gegen das Regelwerk,
   `pruefen.mjs`, Prüfstand), stempelt die Version und bringt ihn erst dann nach `main`.
 
 ## Prüfstand und Push
@@ -155,4 +158,5 @@ node tools/pruefen.mjs                      # Vor-Push-Prüfung allein
 
 ## Offen
 
-- nichts
+- Analyse von James (`kommunikation/`, 01 und 02): A2/A3 Speicherfehler warten auf die
+  Entscheidung des Nutzers, danach A1 Worker-Cache (ADR nötig); A4–A6 niedrig.

@@ -1,6 +1,6 @@
 # 0047 · Fremde Agenten arbeiten über einen PR; Claude prüft
 
-*2026-10-08 · nach 0.13.1 · ohne neue Fassung*
+*2026-10-08 · nach 0.13.1 · ohne neue Fassung · ergänzt durch 0048*
 
 ## Ausgangslage
 

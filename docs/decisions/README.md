@@ -54,4 +54,5 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0044](0044-wahl-ohne-abbrechen-fassung-tropft-mit.md) | «Hinzufügen» ohne «Abbrechen»; die Zeile «Neue Fassung» tropft mit dem Dashboard auf | gilt |
 | [0045](0045-regelwerk-verschlankt.md) | Das Regelwerk wird schlanker: ADRs nur für Entscheidungen, modernes JavaScript erlaubt | gilt; weicht vom Pflichtenheft ab (ES5-nah) |
 | [0046](0046-groessenwarnung-schlanke-grundlast.md) | Größenwarnung für `index.html` (600/800 KB); schlanke Grundlast für Claude | gilt |
-| [0047](0047-fremde-agenten-arbeiten-ueber-pr.md) | Fremde Agenten (ChatGPT) arbeiten auf `chatgpt/*` über einen PR; Claude prüft und übernimmt | gilt |
+| [0047](0047-fremde-agenten-arbeiten-ueber-pr.md) | Fremde Agenten (ChatGPT) arbeiten auf `chatgpt/*` über einen PR; Claude prüft und übernimmt | gilt; ergänzt durch 0048 |
+| [0048](0048-kommunikation-und-namen.md) | Nachrichten in `kommunikation/`; Claude heißt Jarvis, ChatGPT James; James kennzeichnet Commits | gilt |

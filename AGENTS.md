@@ -1,31 +1,43 @@
-# Für ChatGPT und andere Agenten
+# Für James (ChatGPT) und andere Agenten
 
 Du arbeitest an **Chillinal** («Chilli Journal»): eine Web-App zum An- und Abgewöhnen von
 Gewohnheiten, offline, Daten nur auf dem Gerät, live unter https://chillijust.github.io/.
-Hauptsächlich arbeitet hier Claude (Claude Code). Was du machst, prüft Claude, bevor es
-live geht.
+
+**Namen:** Hier heißt ChatGPT **James**, Claude (Claude Code) heißt **Jarvis**. So
+schreibst du sie in Nachrichten, PRs und Commits. Hauptsächlich arbeitet Jarvis. Was du
+machst, prüft Jarvis, bevor es live geht.
 
 ## So arbeitest du hier: auf einem Branch, mit PR
 
 - **Arbeite nur auf einem eigenen Branch `chatgpt/<thema>`**, abgezweigt vom aktuellen
   `main`. Öffne für jede Änderung einen **Pull Request gegen `main`**.
 - **Push nie auf `main`.** GitHub Pages liefert `main` sofort aus, und jeder Push dorthin
-  ist sofort live. Den Merge macht Claude nach der Prüfung.
+  ist sofort live. Den Merge macht Jarvis nach der Prüfung.
 - **`backup/*` und fremde Branches fasst du nie an.** Kein Force-Push, kein
   History-Rewrite, kein Löschen von Branches.
-- **`VERSION` änderst du nicht.** Die Version stempelt Claude beim Übernehmen
+- **`VERSION` änderst du nicht.** Die Version stempelt Jarvis beim Übernehmen
   (`T`-Schema, siehe `.claude/rules/auslieferung.md`).
 - Ein PR enthält eine logische Änderung. Commits auf Deutsch, Betreff im Imperativ, im
   Rumpf das *Warum*.
+- **Jeder Commit endet mit der Zeile `Agent: James`.** Deine Commits laufen unter dem
+  Git-Namen des Nutzers; nur diese Zeile zeigt im Log, dass sie von dir stammen.
+
+## Nachrichten: `kommunikation/`
+
+Befunde, Fragen und Antworten zwischen dem Nutzer, Jarvis und dir stehen in
+`kommunikation/`. Lies dort vor jeder Arbeit den Index in `kommunikation/README.md` und
+die offenen Nachrichten an dich. Eine eigene Nachricht legst du nach den Regeln dieser
+README an, im selben PR wie die Arbeit, auf die sie sich bezieht. Beschlossen ist erst,
+was im Pflichtenheft oder in einem ADR steht.
 
 ## Das Regelwerk gilt auch für dich
 
 Lies **`CLAUDE.md`**, bevor du etwas änderst. Es gilt vollständig, mit drei Ausnahmen,
-die nur Claude betreffen: die Anrede und die Übergabe im Abschnitt «Umgang mit mir», die
+die nur Jarvis betreffen: die Anrede und die Übergabe im Abschnitt «Umgang mit mir», die
 Branch-Regel «immer auf `main`» (für dich gilt der Abschnitt oben) und der Push-Hook unter
 `.claude/hooks/`, der bei dir nicht läuft.
 
-Bei Claude laden die Regeldateien automatisch. **Du musst sie selbst lesen**, bevor du
+Bei Jarvis laden die Regeldateien automatisch. **Du musst sie selbst lesen**, bevor du
 eine passende Datei änderst:
 
 | Du änderst | Lies vorher |
