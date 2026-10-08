@@ -93,6 +93,30 @@ return Promise.resolve()
     langGedrueckt = 0;
     return durch();
   }).then(function () {
+    // ── M · Nach dem langen Druck markiert iOS nichts (ADR 0043) ──
+    zeige('home');
+    ausbewegt();
+    langGedrueckt = 0;
+    var zeile = q('[data-termin="T"]'), st = getComputedStyle(zeile);
+    pruefe('M1 die Termin-Zeile läßt sich nicht markieren, wie die Kachel', st.userSelect === 'none' &&
+      (st.webkitTouchCallout === undefined || st.webkitTouchCallout === 'none'));
+    // Was iOS beim Halten schon markiert hätte.
+    var r = document.createRange();
+    r.selectNodeContents(q('[data-termin="T"] .tm-titel'));
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(r);
+    druck('[data-termin="T"]', punktIn('[data-termin="T"]'));
+    return warten(LANG_MS + 100);
+  }).then(function () {
+    var feld = q('#tmTitel');
+    pruefe('M2 offen, der Finger liegt noch: nichts markiert, nichts markierbar', ansicht === 'termin' &&
+      window.getSelection().isCollapsed !== false && window.getSelection().toString() === '' &&
+      document.documentElement.classList.contains('lang-haelt') && getComputedStyle(q('#ansicht h2, #ansicht label, #ansicht p') || feld).userSelect === 'none');
+    document.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
+    pruefe('M3 hebt er sich, ist wieder alles wie sonst', !document.documentElement.classList.contains('lang-haelt'));
+    langGedrueckt = 0;
+    return durch();
+  }).then(function () {
     frisch();
     speichern();
   });

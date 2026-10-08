@@ -1,7 +1,7 @@
 # 0042 · Termin wie eine Kachel, «Nein» in der Frage, Menüknopf rollt mit, Meldung ohne zweiten Tropfen
 
 *2026-10-08 · drei Tickets und ein Nachtrag vom Gerät (App-Stand 0.13.0T) · Version 0.13.0T2 ·
-ändert 0041*
+ändert 0041 · Gast beim Rollen geändert durch 0043*
 
 ## Ausgangslage
 

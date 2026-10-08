@@ -810,6 +810,14 @@ button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
   transition: transform .15s ease;
 }
 .tm-zeile:active { transform: scale(.98); }
+/* Lange drücken öffnet den Termin, wie bei der Kachel: kein markierter Text,
+   kein Menü von iOS, und wer hält, sieht die Zeile einsinken (ADR 0043). */
+.tm-zeile { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.tm-zeile.halten { transform: scale(.97); transition: transform .35s ease .15s; }
+/* Nach dem langen Druck liegt der Finger noch auf der neuen Ansicht — bis er
+   sich hebt, markiert iOS dort nichts (ADR 0043). */
+.lang-haelt, .lang-haelt * { -webkit-touch-callout: none !important; -webkit-user-select: none !important;
+  user-select: none !important; }
 .tm-zeile + .tm-zeile, .tm-reihe + .tm-reihe { border-top: 1px solid var(--flaeche-2); border-radius: 0; }
 /* Ein Termin, der da war, läßt sich abhaken wie eine Kachel: rechts in der
    Zeile der Haken, grün wie alles Erledigte; erledigt tritt die Zeile zurück,
@@ -1121,7 +1129,9 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
   overflow: hidden;
 }
 .menue-liste { list-style: none; margin: 0; padding: 0; }
-/* Der Gast des Menüknopfs, wenn der hinausgerollt ist (ADR 0041). */
+/* Der Gast des Menüknopfs, wenn der hinausgerollt ist (ADR 0041); solange er
+   da ist, ist der Knopf es nicht (ADR 0043). */
+.menue-gast-da #menuKnopf { visibility: hidden; }
 .menue-gast { position: absolute; top: calc(env(safe-area-inset-top) + 12px); background: var(--grund);
   box-shadow: 0 2px 6px rgba(20, 20, 19, .10), 0 8px 20px rgba(20, 20, 19, .14); }
 .menue-eintrag {
@@ -1554,7 +1564,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.13.0T2';
+var APP_VERSION = '0.13.0T3';
 var APP_STAND = '2026-10-08';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -6924,6 +6934,28 @@ var LANG_MS = 500;
 var langGedrueckt = 0;   // wann der letzte lange Druck auslöste
 var langPunkt = null;    // wo: { x, y } — dort quillt die Ansicht heraus
 
+// Der Finger liegt nach dem langen Druck noch auf, die neue Ansicht steht
+// schon unter ihm — iOS markierte dort das Wort unter dem Finger. Bis er sich
+// hebt, ist nichts auswählbar, und was doch markiert wurde, geht (ADR 0043).
+function langHalten() {
+  var wurzel = document.documentElement;
+  function los() {
+    wurzel.classList.remove('lang-haelt');
+    try { window.getSelection().removeAllRanges(); } catch (e) { /* egal */ }
+    ['pointerup', 'pointercancel', 'touchend', 'touchcancel'].forEach(function (n) {
+      document.removeEventListener(n, los, true);
+    });
+  }
+  wurzel.classList.add('lang-haelt');
+  try { window.getSelection().removeAllRanges(); } catch (e) { /* egal */ }
+  ['pointerup', 'pointercancel', 'touchend', 'touchcancel'].forEach(function (n) {
+    document.addEventListener(n, los, true);
+  });
+  // Kommt das Heben nie an (ein Rechtsklick, ein verschlucktes Ereignis),
+  // bleibt die Seite trotzdem nicht für immer unauswählbar.
+  setTimeout(los, 8000);
+}
+
 function langDruecken(el, beiLang) {
   var uhr = null, x = 0, y = 0;
   function aus() {
@@ -6934,6 +6966,7 @@ function langDruecken(el, beiLang) {
     aus();
     langGedrueckt = Date.now();
     langPunkt = { x: x, y: y };
+    langHalten();
     beiLang();
   }
   el.addEventListener('pointerdown', function (e) {
@@ -7059,7 +7092,7 @@ function menueAnker() { return $('menueGast') || $('menuKnopf'); }
 // ihn `menueGastFallen`, nachdem das Blatt an ihm gemessen ist.
 function menueGastSetzen(huelle) {
   var k = $('menuKnopf');
-  weg($('menueGast'));
+  menueGastWeg();
   if (!k || !zuSehen(k)) return 0;
   var kr = k.getBoundingClientRect(), gast = document.createElement('button');
   gast.type = 'button';
@@ -7071,22 +7104,40 @@ function menueGastSetzen(huelle) {
   huelle.appendChild(gast);
   if (kr.top >= gast.getBoundingClientRect().top - 1) { weg(gast); return 0; }
   gast.addEventListener('click', function () { menueSchliessen(); });
+  // Solange er unterwegs ist, ist sein Knopf es auch — zwei Menüknöpfe gibt
+  // es nie (ADR 0043).
+  document.documentElement.classList.add('menue-gast-da');
   return kr.top;
 }
 
-// Rollt die Seite bei offenem Menü, rollt der Knopf nicht davon: Erreicht er
-// den oberen Rand, bleibt dort sein Gast stehen, und das Blatt hängt weiter
-// unter ihm; kommt er zurück ins Bild, löst sich der Gast wieder in ihn auf
-// (ADR 0042). Ohne Fall — der Knopf ist ja die ganze Zeit zu sehen.
+function menueGastWeg() {
+  weg($('menueGast'));
+  document.documentElement.classList.remove('menue-gast-da');
+}
+
+// Rollt die Seite bei offenem Menü, rollt der Knopf nicht davon: Das Blatt
+// folgt ihm, bis er ganz aus dem Bild ist; dann tropft sein Gast aus der Ecke
+// oben rechts herab, und das Blatt fällt mit. Kommt der Knopf zurück an seinen
+// Platz, ist der Gast wieder er (ADR 0042, 0043).
 function menueMitrollen() {
-  var huelle = $('menue');
-  if (huelle.hidden || !huelle.classList.contains('offen')) return;
+  var huelle = $('menue'), b = document.querySelector('#menue .blatt');
+  if (huelle.hidden || !huelle.classList.contains('offen') || !b) return;
   var gast = $('menueGast'), k = $('menuKnopf');
-  if (gast) {
-    // Fällt er noch, bleibt es beim Fall.
-    if (gast.getAnimations && gast.getAnimations().length) return;
-    if (k && zuSehen(k) && k.getBoundingClientRect().top >= gast.getBoundingClientRect().top) weg(gast);
-  } else menueGastSetzen(huelle);
+  // Fällt er noch, bleibt es beim Fall; danach wird nachgesehen.
+  if (gast && gast.getAnimations && gast.getAnimations().length) return;
+  var kr = k && zuSehen(k) ? k.getBoundingClientRect() : null;
+  if (gast && kr && kr.top >= gast.getBoundingClientRect().top) menueGastWeg();
+  else if (!gast && kr && kr.bottom <= 0) {
+    var alt = b.getBoundingClientRect().top, von = menueGastSetzen(huelle);
+    blattLegen();
+    var fall = menueGastFallen(von);
+    if (fall) {
+      bewegt(b, [{ transform: 'translateY(' + px(alt - b.getBoundingClientRect().top) + ')' }, { transform: 'none' }],
+        { dauer: fall, kurve: TROPFEN_KURVE });
+      setTimeout(menueMitrollen, fall + 30);
+    }
+    return;
+  }
   blattLegen();
 }
 
@@ -7179,7 +7230,8 @@ function menueSchliessen(sofort) {
   function zu() {
     if (huelle.classList.contains('offen')) return;
     huelle.hidden = true;
-    weg(gast);
+    if ($('menueGast') === gast) menueGastWeg();
+    else weg(gast);
   }
   // Der Gast steigt zurück, dorthin, wo sein Knopf steht — danach ist zu.
   function hoch() {

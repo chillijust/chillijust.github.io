@@ -185,6 +185,8 @@ pruefe('R2 er steht oben im Bild, rechts wie sein Knopf, 44 groß', gr.top >= 0 
   Math.abs(gr.right - kn.right) < 1 && gr.width >= 44 && gr.height >= 44, [gr.top, gr.right, kn.right].join());
 pruefe('R3 das Menü hängt unter ihm, im Bild', br.top >= gr.bottom && br.top < 120 && br.bottom <= innerHeight,
   [br.top, gr.bottom].join());
+pruefe('R3a solange er da ist, ist sein Knopf unsichtbar — nie zwei (ADR 0043)',
+  getComputedStyle(q('#menuKnopf')).visibility === 'hidden');
 q('#menueGast').click();
 pruefe('R4 ein Tipp auf den Gast schließt', !q('#menue').classList.contains('offen'));
 return new Promise(function (fertig) {
@@ -192,29 +194,42 @@ return new Promise(function (fertig) {
   setTimeout(function () {
     ausbewegt();
     setTimeout(function () {
-      pruefe('R5 danach ist er fort, das Menü zu', !q('#menueGast') && q('#menue').hidden);
+      pruefe('R5 danach ist er fort, das Menü zu, der Knopf wieder da', !q('#menueGast') && q('#menue').hidden &&
+        getComputedStyle(q('#menuKnopf')).visibility === 'visible');
       menueOeffnen();
       menueSchliessen(true);
       pruefe('R6 eine Wahl im Menü nimmt ihn sofort mit', !q('#menueGast') && q('#menue').hidden);
 
-      // ── M · Bei offenem Menü rollt sein Knopf nicht davon (ADR 0042) ──
+      // ── M · Bei offenem Menü rollt sein Knopf nicht davon (ADR 0042, 0043) ──
+      function sichtbar(el) { return getComputedStyle(el).visibility !== 'hidden'; }
       window.scrollTo(0, 0);
       menueOeffnen();
       ausbewegt();
-      var b0 = q('#menue .blatt').getBoundingClientRect();
+      window.scrollTo(0, 20);
+      window.dispatchEvent(new Event('scroll'));
+      var hk = q('#menuKnopf').getBoundingClientRect(), hb = q('#menue .blatt').getBoundingClientRect();
+      pruefe('M1 ist der Knopf noch im Bild, folgt ihm das Blatt — und es gibt keinen Gast', !q('#menueGast') &&
+        hk.bottom > 0 && Math.abs(hb.top - hk.bottom - 8) < 1 && sichtbar(q('#menuKnopf')), [hb.top, hk.bottom].join());
       window.scrollTo(0, 800);
       window.dispatchEvent(new Event('scroll'));
       var mg = q('#menueGast'), mk = q('#menuKnopf').getBoundingClientRect();
-      var mgr = mg ? mg.getBoundingClientRect() : {}, mb = q('#menue .blatt').getBoundingClientRect();
-      pruefe('M1 rollt der Knopf hinaus, bleibt sein Gast oben stehen — ohne Fall', mk.bottom < 0 && !!mg &&
-        !mg.getAnimations().length && mgr.top >= 0 && mgr.top < 60 && Math.abs(mgr.right - mk.right) < 1,
-        [mk.bottom, mgr.top].join());
-      pruefe('M2 das Menü hängt weiter unter ihm', Math.abs(mb.top - mgr.bottom - 8) < 1 && mb.top <= b0.top,
-        [mb.top, mgr.bottom, b0.top].join());
+      var fall = mg && mg.getAnimations()[0], f0 = fall ? fall.effect.getKeyframes()[0].transform : '';
+      var bz = q('#menue .blatt').getAnimations().filter(function (a) { return a.playState === 'running'; })[0];
+      pruefe('M2 ist er ganz hinaus, tropft sein Gast aus der Ecke oben herab, das Blatt fällt mit', mk.bottom <= 0 && !!mg &&
+        /translateY\(-/.test(f0) && parseFloat(f0.slice(11)) <= -mg.getBoundingClientRect().bottom + 1 && !!bz &&
+        fall.effect.getTiming().duration === bz.effect.getTiming().duration, f0);
+      pruefe('M3 solange der Gast da ist, ist der Knopf es nicht — nie zwei', !sichtbar(q('#menuKnopf')));
+      ausbewegt();
+      var mgr = q('#menueGast').getBoundingClientRect(), mb = q('#menue .blatt').getBoundingClientRect();
+      pruefe('M3a danach steht er oben, rechts wie sein Knopf, das Menü unter ihm', mgr.top >= 0 && mgr.top < 60 &&
+        Math.abs(mgr.right - mk.right) < 1 && Math.abs(mb.top - mgr.bottom - 8) < 1, [mgr.top, mb.top].join());
+      window.scrollTo(0, 400);
+      window.dispatchEvent(new Event('scroll'));
+      pruefe('M3b weiter rollen läßt ihn stehen', !!q('#menueGast') && !q('#menueGast').getAnimations().length);
       window.scrollTo(0, 0);
       window.dispatchEvent(new Event('scroll'));
       var zk = q('#menuKnopf').getBoundingClientRect(), zb = q('#menue .blatt').getBoundingClientRect();
-      pruefe('M3 zurück oben löst er sich in den Knopf, das Menü hängt an ihm', !q('#menueGast') &&
+      pruefe('M3c zurück oben ist er wieder der Knopf, das Menü hängt an ihm', !q('#menueGast') && sichtbar(q('#menuKnopf')) &&
         zb.top >= zk.bottom && zb.top - zk.bottom < 12, [zb.top, zk.bottom].join());
       menueSchliessen(true);
       window.dispatchEvent(new Event('scroll'));
