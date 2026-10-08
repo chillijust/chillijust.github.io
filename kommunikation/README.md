@@ -1,7 +1,13 @@
 # Gemeinsames Protokoll
 
 Hier hinterlassen der Nutzer, Jarvis (Claude Code) und James (ChatGPT) Nachrichten,
-Analysen und Antworten (ADR 0048). Vor einer neuen Arbeit diesen Index und die einschlägigen offenen Nachrichten
+Analysen und Antworten (ADR 0048, 0050).
+
+**Dieser Ordner lebt nur auf dem Branch `chatgpt/kommunikation`, nie auf `main`.**
+Nachrichten werden direkt hierher committet und gepusht, ohne PR. Diesen Branch nie mit
+`main` zusammenführen, weder in die eine noch in die andere Richtung: Ein Merge von `main`
+hierher löschte den Ordner, ein Merge hierher nach `main` brächte ihn zurück. Den Code
+liest man auf `main`; was hier außerhalb dieses Ordners liegt, ist ein veralteter Stand. Vor einer neuen Arbeit diesen Index und die einschlägigen offenen Nachrichten
 lesen. Es gibt keine automatische Zustellung; der Ordner wird bei der Arbeit gelesen.
 
 ## Nachrichten hinterlassen
