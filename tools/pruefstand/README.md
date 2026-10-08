@@ -1,10 +1,9 @@
 # Prüfstand
 
-Die App wird nicht gebaut, hat keine Module und kein Testwerkzeug — sie ist eine
-einzelne HTML-Datei. Geprüft wird sie darum so, wie ein Gerät sie sieht: Die
-ausgelieferte Datei bekommt ein Skript angehängt, ein kopfloser Browser lädt
-sie, das Skript prüft am **echten DOM** und schreibt sein Urteil in den
-Seitentitel.
+Die App ist eine einzelne HTML-Datei ohne Build und ohne Testwerkzeug. Geprüft wird sie
+so, wie ein Gerät sie sieht: Die ausgelieferte Datei bekommt ein Skript angehängt, ein
+kopfloser Browser lädt sie, das Skript prüft am **echten DOM** und schreibt sein Urteil in
+den Seitentitel.
 
 ```sh
 node tools/pruefstand/lauf.mjs              # alle Suiten
@@ -12,9 +11,11 @@ node tools/pruefstand/lauf.mjs thema menue  # nur diese
 node tools/pruefstand/lauf.mjs -v           # auch jede grüne Suite einzeln nennen
 ```
 
-Der Rückgabewert ist 0, wenn alles grün ist, sonst 1. Ein Hook
-(`.claude/hooks/vor-dem-push.mjs`) fährt ihn vor jedem `git push` und hält den
-Push an, wenn etwas rot ist.
+Rückgabewert 0, wenn alles grün ist, sonst 1. `.claude/hooks/vor-dem-push.mjs` fährt ihn
+vor jedem `git push` und hält den Push an, wenn etwas rot ist.
+
+**Die Fallen** — was beim Schreiben einer Suite schon schiefging — stehen gesammelt in
+`.claude/rules/pruefstand.md`.
 
 ## Aufbau
 
@@ -23,43 +24,19 @@ Push an, wenn etwas rot ist.
 | `lauf.mjs` | der Läufer |
 | `helfer.mjs` | Wege (`WURZEL`, `APP`, `BAU`), Browsersuche, `testseite()`, `suite()` |
 | `bild.mjs` | Bildschirmfotos in Handybreite (430 × 932) |
-| `suiten/*.mjs` | die Suiten — eine Datei, ein Thema |
+| `suiten/*.mjs` | die Suiten — eine Datei, ein Thema; der Kopfkommentar sagt, was sie prüft |
 | `bau/` | erzeugte Testseiten und Bilder, wegwerfbar (in `.gitignore`) |
 
-Der Läufer liest `suiten/` selbst aus: **Eine neue Datei läuft ab sofort mit.**
-Sie muss ihre Seite nach `bau/t-<dateiname>.html` schreiben; tut sie das nicht,
-meldet der Läufer das als Fehler statt sie zu übergehen.
+Welche Suiten es gibt und was sie prüfen: `head -3 tools/pruefstand/suiten/*.mjs`.
 
-| Suite | prüft |
-| --- | --- |
-| `geruest` | Kopf, leeres Dashboard, Chili, Trefferflächen, Duzen, Emoji, Schriften |
-| `thema` | hell/dunkel/automatisch, Schalter, beide dunklen Paletten gleich, Chillingos Speicher unberührt |
-| `menue` | Reihenfolge, «bald» gegen Gebautes, Rückweg, Wisch vom Rand, Schließen, «Neue Gewohnheit» |
-| `speicher` | Lesen, Kaputtes, werfender Speicher |
-| `gewohnheiten` | Stärke, Serie, nie zweimal, Anlegen, Abhaken, Bearbeiten, Archiv, Hinweis ab 3, Speicher |
-| `kalender` | langer Druck, Woche und Monat, Tönung, Tag antippen, Nachtragen |
-| `abgewoehnen` | frei seit, Rekord, Stärke, Speicher, Anlegen, Takt, Rückfall, Welle, Bearbeiten, Duzen |
-| `termine` | Lesen, Wiederholung, «Termine heute», blauer Punkt, Tagesliste, Formular, Löschen |
-| `export` | `.ics`-Rechnung (Faltung, Maskierung, RRULE, VALARM), Erinnerung der Gewohnheit, Ansicht, Laden, Rückweg |
-| `bewegung` | Tropfen in die Tagesliste, Geister, Zoom aus dem Getippten, Marke der Umschalter, Formularteile, ohne Bewegung |
-| `rueckblick` | Heatmap: Raster, Monate, Tönung, Summe, Woche wählen, Wochenstreifen, Tag, pro Woche, Abgewöhnen |
-| `journal` | Wochenreflexion: Lesen, Kachel nur sonntags, Schreiben, Ändern, Leeren, Journal-Liste, Rückweg, welche Woche, Ausgabe |
-| `offline` | `sw.js` von außen, App ohne Worker, Hinweis, Knopf, Notausgang |
-| `sicherung` | Tage verdichten, Code hin und zurück, Prüfsumme, Kachel nach 30 Tagen, Kopieren, Einlesen mit Frage, Rückgängig |
-| `tickets` | Knopf unten rechts, Blatt über der Ansicht als Tropfen, Entwurf, Ort und Grund, Liste, gebündelter Text, abgegeben, Löschen |
-| `einstellungen` | Hinweis ab drei abschaltbar, Bewegung reduzieren, alle Daten löschen und zurück |
-| `langdruck` | langer Druck auf Gewohnheit, Abgewöhnen, Termin: Tropfen aus dem Fingerpunkt und zurück |
-| `feinschliff` | Leerzustände, Jubel bei 50 %/90 % und «nie zweimal», neuer Rekord, Ende der Welle, gelöschte Zeilen als Geist |
-| `nachschliff` | «Heute» als Pille, heute im Kreis, kommender Tag, «Hinzufügen» fragt, Welle abbrechen, Kalenderwochen, «Allgemein», runder Tropfen, Rückweg ohne Herkunft |
-| `tropfen` | was ein Knopf öffnet, tropft aus ihm: Formularteile, Heatmap-Woche, «Alle Tickets»; Glas im Tropfen dicht und gefaßt |
-| `beginn` | «Begonnen am»: Beginn zurückstellen, fällige Tage als erledigt (täglich, Wochentage, pro Woche), aus dem Kalender, nie vor |
-| `exportwahl` | Export auswählen: Häkchen je Eintrag, «alle» je Abschnitt, Abwahl gemerkt, Dagewesenes dazuholen, Perlen aus «Bearbeiten» |
-| `zeichen` | Zeichen bewegen sich: Haken (Glas, Kachel), Hinweis, Laden, Kopieren; jedes Mal neu; ohne Bewegung still; langsam und weich |
-| `wechsel` | Hell/Dunkel mehrmals hintereinander: jeder Druck tropft, nur der letzte räumt auf; Dauer und Kurve; ohne Bewegung sofort |
+Der Läufer liest `suiten/` selbst aus: **Eine neue Datei läuft ab sofort mit.** Sie muss
+ihre Seite nach `bau/t-<dateiname>.html` schreiben; tut sie das nicht, meldet der Läufer
+das als Fehler.
 
 ## Eine Suite schreiben
 
 ```js
+// Einstellungen: der Knopf steht da und ist groß genug. (Kopfkommentar: was, warum, ADR)
 import { readFileSync } from 'node:fs';
 import { APP, suite } from '../helfer.mjs';
 const html = readFileSync(APP, 'utf8');
@@ -74,45 +51,16 @@ pruefe('A2 jeder Knopf ist groß genug', alle('#app button').every(function (b) 
 `);
 ```
 
-`suite()` stellt bereit: `pruefe(name, bedingung, extra)`, `q()`, `alle()` und
-`frisch()` (Menü zu, Grundstand, Dashboard). Gibt der Rumpf ein Promise zurück,
-wird erst geurteilt, wenn es erfüllt ist — so lassen sich Schriften
-(`document.fonts.ready`) oder ein `setTimeout` der App abwarten.
+`suite()` stellt bereit: `pruefe(name, bedingung, extra)`, `q()`, `alle()`, `frisch()`
+(Menü zu, Grundstand, Dashboard), `ausbewegt()` und `blobText()`. Gibt der Rumpf ein
+Promise zurück, wird erst geurteilt, wenn es erfüllt ist.
 
-Das Prüfskript läuft **im Gültigkeitsbereich der App**: `state`, `ANSICHTEN`,
-`zeige()`, jede Funktion steht bereit. `String.raw` verhindert, dass Node die
-Fluchtzeichen frisst, bevor der Browser sie sieht.
+Das Prüfskript läuft **im Gültigkeitsbereich der App**: `state`, `ANSICHTEN`, `zeige()`,
+jede Funktion steht bereit, und Funktionen auf oberster Ebene lassen sich ersetzen
+(`jetzt = function () { … }` stellt die Uhr).
 
-Eine Prüfung **von außen** — etwa an `sw.js`, das unter `file://` nicht läuft —
-steht vor dem `suite()`-Aufruf in Node und wirft bei einem Fehler (siehe
-`offline.mjs`).
-
-## Regeln, die aus Schaden entstanden sind
-
-Aus Chillingo übernommen, jede einmal teuer bezahlt:
-
-- **Keine Prüfung in einem `if`, dessen Bedingung vom Zufall oder vom Lauftag
-  abhängt.** Sie lief mal und mal nicht — und die Zahl der Prüfungen schwankte
-  still von Lauf zu Lauf.
-- **Die Zahl im Titel ist ein Messwert.** Sinkt sie ohne Grund, ist eine Prüfung
-  verschwunden, nicht bestanden.
-- **Ein grüner Lauf muss 0 zurückgeben.** Der Vorgänger hängte den Rückgabewert
-  an ein `grep`, das bei vollständigem Erfolg nichts fand — und meldete Erfolg
-  als Fehlschlag.
-- **Nichts einspritzen, was die App selbst setzt.** `bild.mjs` rendert die Datei,
-  wie sie ausgeliefert wird.
-- **Kein Backtick im Prüfskript**, auch nicht in Kommentaren — es steckt in einem
-  `String.raw`-Template.
-- **Kein `$&` in einer Ersatz-Zeichenkette.** In `String.replace` sind `$&`,
-  `` $` ``, `$'` und `$1` Steuerzeichen. `testseite()` und `suite()` setzen darum
-  eine Funktion als Ersatz ein; wer die Seite von Hand zusammenbaut, tritt wieder
-  hinein.
-
-Neu mit Chillinal:
-
-- **Was gesucht wird, steht nicht wörtlich im Prüfskript.** Das Skript hängt im
-  selben Dokument: Die Emoji-Prüfung fand anfangs die Zeichen in ihrem eigenen
-  Suchmuster. Grenzen über `String.fromCharCode`, gelesen wird `#app`.
+Eine Prüfung **von außen** — etwa an `sw.js`, das unter `file://` nicht läuft — steht vor
+dem `suite()`-Aufruf in Node und wirft bei einem Fehler (siehe `offline.mjs`).
 
 ## Bildschirmfotos
 
@@ -130,5 +78,5 @@ export default {
 };
 ```
 
-Als Modul erlaubt `schuss(namen, { ausschnitt: '.willkommen' })` einen Ausschnitt.
-Die Überbreite wird bei jedem Bild gemeldet; sie muss 0 sein.
+Als Modul erlaubt `schuss(namen, { ausschnitt: '.willkommen' })` einen Ausschnitt. Die
+Überbreite wird bei jedem Bild gemeldet; sie muss 0 sein.

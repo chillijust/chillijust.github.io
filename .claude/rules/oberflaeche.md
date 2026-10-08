@@ -20,6 +20,8 @@ fest.
   ändert, ändert beide (Suite `thema`); den Grund zusätzlich in `GRUND`.
 - **Ohne Wahl entscheidet das Stylesheet**; `themaAnwenden()` setzt nur das Attribut und
   `theme-color`.
+- **Die Statusleiste** steht auf `black-translucent`; ihre Grundfarbe ist `theme-color`. Wie
+  iOS die Schrift darin färbt, zeigt nur das Gerät.
 - **Der Akzent ist kein Schriftgrund** (3,1 : 1). Hauptknöpfe nehmen `--knopf`, Schrift
   auf Akzent `--auf-akzent`.
 - **Grün heißt erledigt, Blau heißt Termin** — sonst nichts.

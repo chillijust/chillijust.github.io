@@ -3,45 +3,58 @@ paths:
   - "tools/pruefstand/**"
 ---
 
-# Prüfstand · Chillinal
+# Prüfstand · Fallen
 
-Gilt für die Suiten. Ausführlich in `tools/pruefstand/README.md` und im Skill `pruefstand`.
+Gilt für die Suiten und den Läufer. Jede Falle hier ist schon einmal zugeschnappt. Aufbau
+und Vorlage: `tools/pruefstand/README.md`; Vorgehen: Skill `pruefstand`.
 
-- **Eine Suite baut ihre Seite mit `suite(name, html, rumpf)`** aus `helfer.mjs`. Der Rumpf
-  hat `pruefe`, `q`, `alle`, `frisch()` und darf ein Promise zurückgeben — dann wird erst
-  geurteilt, wenn es erfüllt ist.
-- **Eine Suite bricht mit `throw` ab, nie mit `process.exit()`** — ein Ausstieg beim Bauen
-  beendet den Läufer selbst, ohne Ausgabe und ohne Grund.
-- **Backticks brechen `String.raw`** — auch im Kommentar. Symptom: «SUITE BRICHT AB —
-  Unexpected identifier». Statt dessen «» oder Klartext.
+## Die Seite bauen
+
+- **Immer mit `suite(name, html, rumpf)` oder `testseite()`** aus `helfer.mjs`, nie von
+  Hand über `html.replace('</body>', …)`: In einem Ersatztext sind `$&`, `` $` ``, `$'`
+  und `$1` Steuerzeichen — ein `'\$&'` wurde still zu `</body>`.
+- Der Rumpf hat `pruefe`, `q`, `alle`, `frisch()` und läuft im Gültigkeitsbereich der App.
+  Gibt er ein Promise zurück, wird erst geurteilt, wenn es erfüllt ist.
+- **Eine Suite bricht mit `throw` ab, nie mit `process.exit()`** — sonst endet der Läufer
+  selbst, ohne Ausgabe und ohne Grund.
+
+## Das Prüfskript
+
+- **Kein Backtick im Rumpf, auch nicht im Kommentar** — er steckt in `String.raw`.
+  Symptom: «SUITE BRICHT AB — Unexpected identifier». Statt dessen «» oder Klartext.
 - **Ein Syntaxfehler im Rumpf meldet sich nur als Seitentitel** («Chilli Journal», null
-  Prüfungen). Häufigste Ursache: Wer eine Suite per Skript ändert, verwandelt ein `\n` im
-  Suchtext in einen echten Zeilenumbruch — im String-Literal ist das ein Syntaxfehler.
-- **Was die Prüfung sucht, steht nicht wörtlich in ihr.** Das Prüfskript hängt im selben
-  Dokument: Ein Emoji im Suchmuster findet sich selbst, Chillingos Schlüssel im Klartext
-  ließe `pruefen.mjs` anschlagen. Zeichen über `String.fromCharCode`, Schlüssel
-  zusammengesetzt; gelesen wird `#app`, nicht `document.body`.
-- **Der Auftritt beim Kaltstart ist vor jeder Suite still beendet** (`helfer.mjs`, ebenso
-  `bild.mjs`). Ob er lief, sagt `auftrittBeimStart`; wer ihn sehen will, ruft `auftritt()`.
-- **Wer Lage oder Größe mißt, ruft vorher `ausbewegt()`** — Ansichten wachsen, Teile
-  ziehen sich auf (ADR 0007). Der Läufer rechnet in virtueller Zeit ohne Bilder:
-  Animationen kommen nie von selbst an, auf ihr Ende wartet man mit `ausbewegt()` und
-  einem kurzen `setTimeout`.
+  Prüfungen). Häufigste Ursache: Wer eine Suite per Skript ändert, macht aus `\n` im
+  Suchtext einen echten Zeilenumbruch.
+- **Was gesucht wird, steht nicht wörtlich im Prüfskript** — es hängt im selben Dokument
+  und fände sich selbst. Zeichen über `String.fromCharCode`, Schlüssel zusammengesetzt;
+  gelesen wird `#app`, nicht `document.body`.
+- **Feldnamen nachschlagen, nicht raten** (`docs/architektur.md`) — ein falscher Name läßt
+  die Prüfung stumm in den falschen Zweig laufen.
+- **Keine Prüfung in einem `if`, das vom Zufall oder vom Lauftag abhängt.** Wer «heute»
+  braucht, stellt die Uhr selbst (`jetzt = function …`).
+- **Eine Prüfung zählt nicht auf, sie fragt nach allen**: `alle()` und eine Bedingung für
+  jeden, keine feste Anzahl.
+
+## Zeit und Bewegung
+
+- **Der Läufer rechnet in virtueller Zeit ohne Bilder**: Animationen kommen nie von selbst
+  an. Wer Lage oder Größe mißt, ruft vorher `ausbewegt()`, dann ein kurzes `setTimeout`.
+- **Auf das Ende einer Bewegung wartet man aus ihrer Konstante** (`THEMA_TROPFEN + 500`),
+  nie mit einer festen Zahl — lokal grün, auf GitHub rot (ADR 0039).
+- **Das virtuelle Budget ist 20 s** (`lauf.mjs`). Wartet eine Suite länger, kommt sie mit
+  «Chilli Journal» und null Prüfungen zurück.
 - **Blobs über `blobText(b)` lesen, nie über `b.text()`** — echtes Lesen läßt die
-  virtuelle Uhr im Sekundentakt der App bis ans Budget laufen; die Suite kommt dann
-  gelegentlich ohne Urteil zurück.
-- **Wer auf das Ende einer Bewegung wartet, rechnet aus ihrer Konstante** (`THEMA_TROPFEN
-  + 500`), nie mit einer festen Zahl. Lokal und auf GitHub endet derselbe Übergang auf
-  verschiedenen Wegen: lokal greift oft ein früher Notweg, auf GitHub nur die späte
-  Sicherheitsuhr — eine feste Zahl ist lokal grün und auf GitHub rot (ADR 0039).
-- **Das virtuelle Budget des Läufers ist 20 s** (`lauf.mjs`). Was eine Suite in Summe
-  wartet, bleibt darunter; sonst kommt sie mit «Chilli Journal» und null Prüfungen zurück.
-- **Übergänge abschalten, wenn eine Farbe gefragt ist** — der kopflose Browser läßt sie
-  nicht zuverlässig ablaufen; gefragt ist das Ziel, nicht der Weg.
-- **Eine Prüfung zählt nicht auf, sie fragt nach allen.** Menüeinträge, Knöpfe,
-  Trefferflächen: über `alle()` und eine Bedingung für jeden, nicht über eine feste Zahl.
-- **Das Menü blendet nach dem Schließen noch aus.** Wer danach Knöpfe zählt, fragt `#app`.
-- **Nur das Bild findet manches.** Ein DOM-Test sagt nichts über Größe und Umbruch. Bei
-  sichtbaren Änderungen ein Bildschirmfoto in Handybreite, **hell und dunkel**.
-- **Der kopflose Browser kennt weder Safe-Area noch iOS-Leiste noch ein dunkles Gerät** —
-  was davon abhängt, findet nur das Gerät.
+  virtuelle Uhr bis ans Budget laufen.
+- **Übergänge abschalten, wenn eine Farbe gefragt ist** — gefragt ist das Ziel.
+- Der Auftritt beim Kaltstart ist vor jeder Suite still beendet; ob er lief, sagt
+  `auftrittBeimStart`, sehen will man ihn mit `auftritt()`.
+- Das Menü blendet nach dem Schließen noch aus — wer danach Knöpfe zählt, fragt `#app`.
+
+## Urteil
+
+- **Die Zahl der Prüfungen ist ein Messwert.** Sinkt sie ohne Grund, ist eine Prüfung
+  verschwunden, nicht bestanden. Bei jedem Lauf hinsehen.
+- **Ein grüner Lauf gibt 0 zurück** — nie den Rückgabewert über ein `grep` leiten.
+- **`bild.mjs` spritzt nichts ein**; die Seite rendert, wie sie ausgeliefert wird.
+- **Nur das Bild findet Größe und Umbruch** — bei sichtbaren Änderungen ein Foto, hell und
+  dunkel. Safe-Area, iOS-Leiste und ein dunkles Gerät findet nur das Gerät.

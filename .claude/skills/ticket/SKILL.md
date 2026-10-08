@@ -46,12 +46,17 @@ Renderzyklus, gehört sie in `docs/architektur.md`.
 **8 · Version stempeln** (`VERSION`, danach `node tools/build.mjs`):
 erste Ziffer = gespeicherte Daten werden anders gelesen · zweite = etwas kommt dazu ·
 dritte = alles Übrige. Ein Fehler ist die dritte.
+Ausgeliefert zum Ansehen am Gerät wird mit **`T`** am Ende (`0.14.0T`); jede weitere
+Nachbesserung an derselben angesagten Fassung zählt es hoch (`0.14.0T2`). Erst die Abnahme
+durch den Nutzer nimmt das `T` weg.
 
 **9 · Commit** — einer je logischer Änderung, Betreff im Imperativ, im Rumpf
 steht das *Warum*, nicht das *Was*.
 
 **10 · Push.** Der Hook fährt `build.mjs --check`, `pruefen.mjs` und den
 Prüfstand und hält an, wenn etwas rot ist. **Damit ist das Ticket erledigt.**
+Meldet der Push einen **Hinweis** (etwa die Größe von `index.html` über 600 KB,
+ADR 0046), gehört er in den Bericht an den Nutzer — nicht still übergehen.
 
 **Den Pages-Bau nicht mehr über GitHub nachschlagen.** Der Hook hat den ganzen
 Prüfstand da bereits gefahren, und ein Lauf-Abruf schüttet bis zu 50 000 Zeichen

@@ -1,7 +1,8 @@
 # Architektur
 
-Eine Datei, ein Skript, ein Zustand. Dieses Papier beschreibt, wie `index.html` gebaut ist —
-es wächst mit jedem Bauabschnitt.
+Eine Datei, ein Skript, ein Zustand. Hier steht, wie `index.html` gebaut ist und wo man
+was findet. Wie sich eine Ansicht im Einzelnen verhält, steht im ADR und in der Suite.
+**Nur bei Bedarf lesen**, nicht vor jeder Arbeit.
 
 ## Aufbau der Datei
 
@@ -13,9 +14,10 @@ es wächst mit jedem Bauabschnitt.
 | `<script>` | genau einer, `'use strict'`; oben `var`/`function`, innen modern (ADR 0045) |
 
 Im Skript, von oben: Version und Stand · `CHILI_BILD` · Hilfen (`esc`, `ICON`, Datum,
-`melden`, Tage) · Zustand und Speicher · Darstellung · Bewegung (Tropfen) · Gewohnheiten
-(Rechnung) · Abgewöhnen (Rechnung, Welle) · Termine · Kalender-Export (`.ics`) · Ansichten ·
-Sicherung · Tickets · Einstellungen · Menü · Service Worker · Start.
+`melden`, Tage) · Zustand und Speicher · Darstellung · Bewegung · Gewohnheiten ·
+Abgewöhnen · Termine · Kalender-Export · Ansichten · Sicherung · Tickets · Einstellungen ·
+Menü · Service Worker · Start. Die Abschnitte trennen Kommentarbalken `// ── Name ──`;
+`grep -n "^// ── " index.html` zeigt das Inhaltsverzeichnis.
 
 ## Zustand
 
@@ -82,189 +84,60 @@ state = {
 }
 ```
 
-- **Gespeichert sind nur Tage.** Stärke, Serie, «nie zweimal» und die Punkte rechnet
-  `auswerten(g, heute)` bei jedem Zeichnen neu (ADR 0002, `.claude/rules/logik.md`).
-- **`jetzt()` ist die einzige Uhr**; Tage sind Schlüssel `JJJJ-MM-TT` (`tagSchluessel`,
-  `tagPlus`, `wochenAnfang`).
-- `gewohnheitLesen()` prüft jede Gewohnheit einzeln; was nicht paßt, fällt weg.
-  `lasterLesen()` ebenso fürs Abgewöhnen; eine Welle gilt nur für etwas, das es gibt und
-  das nicht archiviert ist. `gefeiert` behält nur Zeitpunkte für Laster, die es gibt.
-- **Abgewöhnen** (ADR 0004): `lasterAuswerten(a, nun)` liefert «frei seit», Rekord und
-  Stärke; `zeitJetzt()` ist `jetzt()` in Millisekunden. Geändert wird nur über
-  `rueckfallEintragen`, `welleBeginnen` und `welleGewonnen`.
-
-- **Termine** (ADR 0006): `terminAm(t, k)` sagt, ob ein Termin an einem Tag liegt,
-  `termineAm(k)` liefert sie sortiert (ganztags zuerst, dann Uhrzeit). Monatlich fällt in
-  Monaten ohne die Tageszahl aus. `terminLesen()` prüft jeden einzeln.
-
-- **Kalender-Export** (ADR 0009): `kalenderDatei(heute, nun)` schreibt die `.ics` aus
-  `exportTermine(heute)` (was heute oder später noch liegt) und `exportGewohnheiten()`
-  (laufend, mit Erinnerung) — je ein VEVENT über `terminEreignis` bzw.
-  `gewohnheitEreignis`, Zeiten schwebend in der Zeit des Geräts, Zeilen über `icsFalten`.
-  Hinaus geht sie über `icsLaden` (Blob, `<a download>`), das `exportiert` setzt;
-  Teilen gibt es nicht mehr (ADR 0013).
-  Die Kachel zeichnet ihre Wege immer mit, nur verborgen; `exTeileNachziehen()` (aus
-  `bindeExport`) vergleicht mit `exTeileZuvor` und läßt Geändertes über `teilTropfen`
-  auf- und zugehen. Außerhalb der Exportansicht ist `exTeileZuvor` `null` (ADR 0012).
+## Speicher
 
 - **Ein Schlüssel**: `chillinal_v1`. `laden()` liest, `stand(roh)` übernimmt nur bekannte
   Felder mit gültigen Werten und füllt den Rest aus `grundStand()`. Kaputtes JSON, ein
-  fremder Wert, ein werfender Speicher — alles ergibt den Grundstand.
+  fremder Wert, ein werfender Speicher — alles ergibt den Grundstand. `gewohnheitLesen()`,
+  `lasterLesen()` und `terminLesen()` prüfen je einen Eintrag; was nicht paßt, fällt weg.
 - `speichern()` schreibt den ganzen Zustand und meldet ein Scheitern über `melden()`.
-- **Neue Felder** bekommen ihren Vorgabewert in `grundStand()` und ihre Prüfung in
-  `stand()`. Erst wenn ein vorhandener Stand **anders gelesen** werden muß, steigt das
-  Schema — mit neuem Schlüssel und Migration — und die erste Ziffer der Version.
-
-- **Sicherung** (ADR 0020): `sicherungsCode(nun)` schreibt `CHJ1~<pruefsumme>~<base64>` aus dem
-  Zustand ohne `tickets`, `welle` und `timer`, die Tage einer Gewohnheit verdichtet (`tageVerdichten`,
-  Feld `e`). `codeLesen(text)` prüft und entfaltet zum Rohstand für `stand()`.
-  `standErsetzen(neu)` legt den alten Stand in `rueckgaengig` (nur im Speicher der Seite),
-  behält die Tickets und speichert; `sicherungZurueck()` holt ihn wieder. Die Kachel auf der
-  Übersicht zeigt `sicherungFaellig()`. Kopiert wird über `kopieren(text, fertig)` —
-  Zwischenablage, sonst verborgenes Feld, sonst sieht man den Text.
-- **Tickets** (ADR 0020): Das Ticketblatt (`#ticketBlatt`) liegt außerhalb von `#app` und
-  überlebt jedes `render()`. `ticketBlattOeffnen(quelle, id, flaeche)` füllt es aus
-  `ticketEntwurf` (bleibt beim Zuklappen) und tropft aus der Quelle; `ticketBlattSchliessen`
-  fließt zurück, sonst in `#ticketKnopf`. `ticketSichern` legt an oder ändert (dann wieder
-  offen) und bestätigt erst, wenn das Blatt angekommen ist. `ticketsAlsText` bündelt;
-  `ticketsKopieren` setzt `abgegeben`. Das Blatt steht unten; `ticketTastatur()` hebt es
-  über `--tastatur` um die Höhe der Tastatur (`visualViewport`). «Alle Tickets» (`#tkAlle`)
-  setzt `ticketListe` und zeichnet die Liste ins Blatt (`ticketBlattWechseln`); Zurück
-  zeichnet das Formular mit dem liegenden Entwurf (ADR 0025).
+- **Neue Felder**: Vorgabe in `grundStand()`, Prüfung in `stand()`. Erst wenn ein
+  vorhandener Stand **anders gelesen** werden muß, steigt das Schema — mit neuem Schlüssel
+  und Migration — und die erste Ziffer der Version.
+- **Gespeichert sind nur Tatsachen** (Tage, Zeitpunkte). Stärke, Serie, Rekord rechnen
+  `auswerten(g, heute)` und `lasterAuswerten(a, nun)` bei jedem Zeichnen neu.
+- Nur im Speicher der Seite, nie in `state`: `kalVersatz`, `kalTag`, `hm`, `entwurf`,
+  `terminEntwurf`, `reflexionEntwurf`, `ticketEntwurf`, `rueckgaengig`.
 
 ## Render-Zyklus
 
-`render()` zeichnet erst den Kopf (`renderKopf()`), dann die Ansicht: `ANSICHTEN[ansicht]
-.zeichnen()` liefert HTML, danach hängt `bindeAnsicht()` die Ereignisse an. Kein Diffing,
-keine Teilaktualisierung — eine Ansicht ist schnell genug neu gezeichnet. Danach zieht
-`heldNachziehen()` die Höhe der Karte oben weich nach und `wahlenSetzen()` legt die Marken
-der Umschalter (ADR 0007).
+- `zeige(name, id)` wechselt die Ansicht; ein unbekannter Name oder eine ungültige `id`
+  landet beim Dashboard.
+- `render()` zeichnet den Kopf (`renderKopf()`), dann die Ansicht:
+  `ANSICHTEN[ansicht].zeichnen()` liefert HTML, danach hängt `bindeAnsicht()` die
+  Ereignisse an. Kein Diffing — eine Ansicht ist schnell genug ganz neu gezeichnet.
+  Danach `heldNachziehen()` (Höhe der Karte oben), `wahlenSetzen()` (Marken der
+  Umschalter), `ringeFuellen()` (Ringe laufen vom alten Wert herüber).
+- **Bewegung legt sich über das Neuzeichnen, sie verzögert es nie** (ADR 0007):
+  `uebergangVorbereiten` nimmt die alte Ansicht als Geist, `uebergangAusfuehren` läßt die
+  neue aus dem Getippten wachsen (`tippMerken`).
+- **Was `render()` überlebt**, liegt außerhalb von `#app`: Hinweis (`#hinweisBlatt`),
+  Menü (`#menue`), Ticketblatt (`#ticketBlatt`).
+- **Was sich an Ort und Stelle ändert, ohne `render()`**: der Sekundentakt `takt()`
+  («frei seit», Welle, Timer), das Formular beim Wählen, Heatmap-Woche und -Tag.
+- `visibilitychange` zeichnet neu — nach Mitternacht ist ein anderer Tag, nach zehn
+  Minuten im Hintergrund ist die Welle durch.
 
-- **Bewegung legt sich über das Neuzeichnen, sie verzögert es nie** (ADR 0007).
-  `zeige()` nimmt vor `render()` die alte Ansicht als Geist (`uebergangVorbereiten`) und
-  läßt danach die neue aus dem getippten Element wachsen oder die alte in ihre Herkunft
-  schrumpfen (`uebergangAusfuehren`). Woher getippt wurde, merkt sich `tippMerken` (Erfassung
-  von `pointerdown` und `click`); `herkunft` hält den Selektor auf dem Dashboard,
-  `homeScroll` die Rollposition. Der Tag im Kalender öffnet mit `tropfenFallen`, schließt
-  mit `leisteZurueck`.
-  Der Hinweis (`hinweisZeigen`/`hinweisSchliessen`) liegt außerhalb von `#app` in
-  `#hinweisBlatt` und überlebt darum jedes `render()`. Er tropft über `tropfenAuf` und
-  `tropfenZu` wie eine Ansicht (ADR 0013).
+## Wegweiser
 
-- `zeige(name, id)` wechselt die Ansicht; ein unbekannter Name landet beim Dashboard.
-  `neu` und `bearbeiten` legen dabei den `entwurf` an; `bearbeiten` ohne gültige `id`
-  landet ebenfalls beim Dashboard.
-- **Ansichten:** `home` (Dashboard), `neu` (Neue Gewohnheit, mit Umschalter Angewöhnen |
-  Abgewöhnen), `bearbeiten` (Gewohnheit: Rückblick, Stand, Formular, Archivieren), `abgewoehnen`
-  (Rückblick, Stand, Formular, Rückfälle, Archivieren), `welle` (Drang), `rueckfall`, `journal`, `reflexion`, `terminNeu` und
-  `termin` (Formular, Löschen), `export` (Kalender-Export), `einstellungen`, `sicherung`,
-  `tickets`. Wer aus `export` eine
-  Gewohnheit oder einen Termin öffnet, kommt über `rueckZiel` dorthin zurück — mit dem
-  Rückweg wie nach dem Speichern. `termin` braucht eine gültige `id`,
-  `terminNeu` nimmt statt dessen einen Tag; beide legen `terminEntwurf` an.
-  `journal` (Liste) und `reflexion` (zwei Fragen; `id` ist der Montag, nicht in der
-  Zukunft — sonst Dashboard) legen `reflexionEntwurf` an; aus dem Journal geöffnet, führt
-  `rueckZiel` dorthin zurück. `lesen` zeigt die Reflexion der Woche `lesenWoche`; zurück
-  geht es nach `lesenZurueck`, aus `reflexion` zurück ins Lesen (ADR 0018). Gibt es die
-  Woche nicht (mehr), führt `lesen` ins Journal.
-  `abgewoehnen` und `rueckfall` brauchen eine gültige `id`, `welle` eine laufende Welle —
-  sonst geht es zum Dashboard.
-- **Der Takt:** `takt()` läuft jede Sekunde und schreibt «frei seit» (`[data-frei]`), die
-  Restzeit auf dem Drang-Knopf (`[data-wellerest]`) und den Ring der Welle an Ort und
-  Stelle. Neu gezeichnet wird nur, wenn die Welle durch ist.
-- **Das Formular zeichnet sich beim Wählen nicht neu**: Rhythmus, Tage und Zähler ändern
-  `entwurf` und die Knöpfe an Ort und Stelle; gespeichert wird mit dem Knopf.
-- **Abhaken** (`[data-haken]`) ändert `erledigt`, speichert und zeichnet neu; die eben
-  getippte Kachel trägt dabei `gerade` für ihre Animation. Kacheln bleiben, wo sie sind.
-  **Lange drücken** (`langDruecken`, 500 ms) öffnet statt dessen `bearbeiten`; der Klick
-  danach ist gesperrt (`langGedrueckt`). Der Punkt des Drucks (`langPunkt`) wird zur Quelle
-  des Tropfens (`punktFlaeche`); `herkunftPunkt` merkt ihn relativ zur Kachel für den
-  Rückweg (ADR 0020). Ebenso Abgewöhnen-Kacheln und Terminzeilen.
-- **Jede Änderung eines Tages** geht über `umschalten(id, tag)` — die Kachel für heute,
-  der Kalender (`[data-nachtrag]`) für bis zu `NACHTRAG_TAGE` zurück.
-- **Oben steht eine Karte** (`zeichneHeld`, ADR 0005): Tagesring mit Chili und der
-  Umschalter Woche | Monat, darunter der Kalender.
-- **Kalender** (`zeichneKalender`, `bindeKalender`): `state.kalender` wählt Woche oder
-  Monat; was zu sehen ist, halten `kalVersatz` (Wochen bzw. Monate von heute) und `kalTag`
-  (der angetippte Tag) — beide nur im Speicher der Seite, nicht in `state`. Jeder Tag trägt
-  vorn einen blauen Punkt, wenn er Termine hat, dann einen je Gewohnheit (`kalPunkte`);
-  `kalStufe` aus `tagesStand(k)` färbt nur noch die Zahl eines vollen Tags. Die
-  Tagesliste (`zeichneTagesleiste`) zeigt Termine, Gewohnheiten und «Termin an diesem
-  Tag» (`[data-neutermin]`). `kalZeige(k)` stellt den Kalender auf einen Tag — nach dem
-  Speichern eines Termins. Blättern und Umschalten setzen `kalGewechselt` für das
-  Einblenden des Rasters.
-- **Termine heute** stehen unter der Karte; eine Zeile (`zeichneTerminZeile`,
-  `[data-termin]`) öffnet den Termin — auf dem Dashboard wie in der Tagesliste.
-- **Jubel** (ADR 0022): `umschaltenUndZeichnen` vergleicht die Auswertung vor und nach dem
-  Haken; `hakenJubel` meldet Stufen (50 %, 90 % nach `prozent`) und «nie zweimal», einmal je
-  Sitzung (`jubelGehabt`), `jubeln` zeigt das Glas aus Zeile oder Kachel. Den Rekord prüft
-  `render()` auf dem Dashboard über `rekordFeiern` (merkt in `gefeiert`), der Takt zeichnet
-  neu, sobald `rekordFaellig` etwas findet. Ist die Welle durch, setzt der Takt
-  `chiliFlammt` und läßt `#welleUrteil` tropfen.
-- **Leer**: Ohne aktive Gewohnheit, aber mit Abgewöhnen oder Terminen, steht
-  `zeichneGewohnheitLeer` (`#gwAnlegen`); ohne alles `zeichneWillkommen`, nach Archivieren
-  mit anderem Gruß. Aus dem leeren Export führen `#exTerminNeu` und `#exGewohnheitNeu`,
-  zurück über `rueckZiel`.
-- **Zeilen, die gelöscht werden** (Rückfall, Ticket), gehen über `zeileGeht`: Geist vor dem
-  Neuzeichnen, danach an der alten Stelle eingesetzt und zusammengezogen.
-- **Ringe** werden mit dem Ziel gezeichnet und tragen in `data-von` den zuletzt gezeigten
-  Wert (`ringZuletzt`); `ringeFuellen()` läßt sie nach jedem `render()` herüberlaufen.
-- **Journal** (ADR 0017): sonntags setzt `zeichneHome` die Kachel `zeichneReflexionKachel`
-  unter die fälligen Gewohnheiten; `[data-reflexion]` öffnet das Formular, `[data-lesen]`
-  das Lesen. Geändert wird nur über `reflexionSpeichern` — leer gespeichert entfernt —,
-  gelöscht über `reflexionLoeschen`. Eine neue Reflexion wählt ihre Woche mit
-  `reflexionWocheWaehlen`, an Ort und Stelle (ADR 0018).
-- **Frage** (ADR 0020): `hinweisZeigen(…, { frage: { ja, beiJa } })` zeigt «Nein» oder
-  `nein` (`#hinweisNein`, ADR 0042) und `ja` (`#hinweisOk`); meldet `beiJa` etwas, wird die
-  Karte an Ort und Stelle zur Bestätigung.
-- **Wahl** (ADR 0025): `opt.wahl` zeigt nur die Knöpfe zur Wahl; die Knopfleiste ist dann
-  verborgen, ab bricht, wer aufs Blatt tippt (ADR 0044).
-- **Bestätigung** (ADR 0018): `bestaetigen()` öffnet den Hinweis mit `bestaetigung`;
-  `hinweisUhr` schließt ihn, ein Tipp aufs Blatt früher. Das Ziel darf ein Selektor sein. `wochenZahlen` rechnet die Haken
-  der Woche aus `tagesStand`, nichts davon wird gespeichert.
-- `visibilitychange` zeichnet das Dashboard und die Welle ganz neu — nach Mitternacht ist es
-  ein anderer Tag, nach zehn Minuten im Hintergrund ist die Welle durch.
-- Der Kopf hat zwei Gestalten: auf dem Dashboard Titel, Datum, Sonne/Mond, Menüknopf;
-  unterwegs Rückweg und Titel.
-- **Der Rückweg ist `zurueckGehen()`** — der Knopf ruft ihn, ebenso der Wisch vom linken
-  Rand (`wischBeginnen`/`wischEnden` an `document`, passiv; ADR 0016). Vom rechten Rand
-  öffnet derselbe Wisch das Menü (ADR 0025).
-- **Die Heatmap** (`zeichneHeatmap`, ADR 0015) hält ihre Wahl in `hm` (`fuer`, `woche`,
-  `tag`, dazu `wie` für den Zustand eines Tages). Woche und Tag wechseln an Ort und Stelle
-  (`hmWocheWaehlen`, `hmTagZeigen`), ohne `render()`; `zeige()` in eine andere Ansicht
-  setzt `hm.fuer` zurück. Den Rahmen um die Woche mißt `hmRahmenSetzen()` am Raster.
-- Das Menü klappt unter dem Menüknopf auf (`blattLegen`), über einem Schleier, gezeichnet
-  beim Öffnen aus `MENUE`; es quillt als Tropfen aus dem Knopf und fließt zurück. Ein
-  Eintrag mit `ziel` öffnet die Ansicht als Tropfen aus dem Eintrag und schließt das Menü
-  sofort (`menueSchliessen(true)`), einer ohne meldet «kommt» (ADR 0008).
-- **Tropfen** (`tropfenAuf`, `tropfenZu`): Wo die Quelle rund ist (`tropfenQuelle`), läuft
-  der Übergang in einer festen Hülle (`.tropfen-huelle`) mit einem Geist darin statt als
-  Zoom. Woche | Monat behalten `kalTag`; `kalAnker` und `versatzFuer` wählen, was zu sehen
-  ist, `kalFliessen` läßt den Monat aus der Woche quellen und zurück; Kartenhöhe (`heldTakt`) und
-  Tagesliste (`leisteGleiten`) laufen dabei im selben `KAL_TAKT` — 640 ms auf einer gleichmäßigen
-  Kurve, damit der Tropfen über die ganze Dauer sichtbar wandert (ADR 0026).
-
-## Darstellung
-
-Die Palette steht als CSS-Variablen: hell im `:root`, dunkel zweimal gleich — unter
-`@media (prefers-color-scheme: dark)` für `:root:not([data-thema="hell"])` und unter
-`:root[data-thema="dunkel"]`. Die Suite `thema` vergleicht beide Wert für Wert.
-`themaAnwenden()` setzt nur das Attribut und `theme-color`; ohne Wahl tut das Stylesheet
-die Arbeit allein.
-
-## Auftritt
-
-`start()` zeichnet das Dashboard und ruft `auftritt()`: `html.auftritt` macht alles außer
-dem Schriftzug unsichtbar und nimmt Tipps aus; der Schriftzug steht per Transform groß in
-der Mitte, schreibt sich (`wm-los`) und wandert an seinen Platz. Danach entfernt
-`auftrittEnde()` die Klasse, und `dashboardAuftropfen()` läßt die Karten gestaffelt
-auftropfen. Ein `pointerdown` überspringt das, `render()` beendet es still
-(`auftrittEnde(true)`). Prüfstand und Bildbau beenden es still, bevor sie messen (ADR 0029).
-
-## Service Worker
-
-`swAnmelden()` beim Start. Wartet eine neue Fassung und läuft schon eine, erscheint
-`#swNeu` als Perle (`perleAuf`) — im Auftritt erst mit den Karten (ADR 0044); «Jetzt laden» schickt `uebernehmen`, beim Wechsel des Workers lädt die Seite
-einmal neu. Die Einstellungen zeigen die gespeicherte Fassung (`swAuskunft()`) und haben
-«Nach Aktualisierung suchen» (`swNachsehen()` → `ok` · `kein netz` · `unmoeglich`) und den
-Notausgang `swAufraeumen()`.
+| Bereich | Einstieg |
+| --- | --- |
+| Ansichten, Rückweg | `zeige`, `ANSICHTEN`, `bindeAnsicht`, `zurueckGehen`, `rueckZiel` |
+| Dashboard, Karte oben | `zeichneHome`, `zeichneHeld`, `tagesStand` |
+| Gewohnheiten | `auswerten`, `umschalten`, `umschaltenUndZeichnen`, `beginnVorziehen`, `zeichneFormular`, `bindeFormular`, `entwurfSpeichern` |
+| Timer, Zähler | `timerOeffnen`, `timerPause`, `timerRest`, `zaehlen`, `zaehlStand` |
+| Abgewöhnen, Welle | `lasterAuswerten`, `rueckfallEintragen`, `welleBeginnen`, `welleGewonnen`, `welleAbbrechen` |
+| Termine | `terminAm`, `termineAm`, `terminAbhaken`, `zeichneTerminZeile`, `zeichneTerminFormular` |
+| Kalender | `zeichneKalender`, `bindeKalender`, `kalZeige`, `kalBlaettern`, `kalFliessen`, `zeichneTagesleiste` |
+| Kalender-Export | `kalenderDatei`, `exportAuswahl`, `exportiertMerken`, `icsLaden`, `zeichneExport`, `bindeExport` |
+| Rückblick | `zeichneHeatmap`, `hmWocheWaehlen`, `hmTagZeigen` |
+| Journal | `zeichneReflexionKachel`, `reflexionSpeichern`, `reflexionLoeschen` |
+| Sicherung | `sicherungsCode`, `codeLesen`, `standErsetzen`, `sicherungZurueck`, `kopieren` |
+| Tickets | `ticketBlattOeffnen`, `ticketBlattSchliessen`, `ticketSichern`, `ticketBlattWechseln`, `ticketTastatur` |
+| Meldungen, Fragen, Jubel | `melden`, `bestaetigen`, `hinweisZeigen`, `loeschenFragen`, `jubeln`, `hakenJubel`, `rekordFeiern` |
+| Bewegung | `tropfenAuf`, `tropfenZu`, `teilZeigen`, `teilTropfen`, `geist`, `zeileGeht`, `langDruecken`, `punktFlaeche` |
+| Menü | `MENUE`, `menueOeffnen`, `menueSchliessen`, `menueAnker`, `menueMitrollen` |
+| Hell/Dunkel | `themaSetzen`, `themaAnwenden` |
+| Kaltstart, Schriftzug | `start`, `auftritt`, `auftrittEnde`, `dashboardAuftropfen`, `zeichneMarke` |
+| Service Worker | `swAnmelden`, `swNachsehen`, `swAuskunft`, `swAufraeumen`, `perleAuf` |
+| Uhr, Tage | `jetzt`, `tagSchluessel`, `tagPlus`, `wochenAnfang` |
