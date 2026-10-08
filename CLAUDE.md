@@ -57,7 +57,7 @@ die Chili.
 | 5 · Kalender-Export (`.ics`), Erinnerung je Gewohnheit; «Heute» als Rückweg, Name «Chilli Journal», Schriftzug «Lodern» (frei); Exportiertes merken, Markierung aufheben, Hinweis aus Glas; nur Laden | fertig (0.5.0) |
 | 6 · Rückblick: Heatmap, Detail, Journal; Wisch vom Rand, Lesen, Woche wählen, Bestätigung im Glas | fertig (0.7.0); alle Meldungen im Glas (0.7.1) |
 | 7 · Sicherung (Code kopieren, Einlesen mit Rückgängig, Kachel nach 30 Tagen), Einstellungen (Hinweis ab 3, Bewegung, alles löschen), Tickets (Knopf unten rechts, Blatt als Tropfen); langer Druck tropft | fertig (0.8.0); Ticketblatt unten, «Alle Tickets» |
-| 8 · Feinschliff: Leerzustände als Wegweiser, Jubel bei 50 %/90 %, «nie zweimal» und neuem Rekord, Ende der Welle, gelöschte Zeilen als Geist | fertig (0.9.0); Ticketblatt aus Glas, Kalendertag, «Hinzufügen» im Glas, KW-Linien, Wisch von rechts, Hell/Dunkel als Tropfen, Tickets im Blatt; 0.9.1T (kein Zoom beim Tippen, Woche tropft zur Seite, Ticketliste so hoch wie das Ticket); 0.10.0T (Auftritt beim Kaltstart, Woche ohne Überbreite); 0.10.0T2 (Hell/Dunkel-Tropfen löst sich immer) — abgenommen am 2026-10-07; 0.11.0T (Beginn zurückstellen, Export wählen, Zeichen bewegen sich, Geöffnetes tropft aus seinem Knopf, Woche \| Monat schaltet immer, Ticketblatt rollt innen) — Glastropfen und «Begonnen am» abgenommen; 0.11.0T2 (Hell/Dunkel weicher, mehrmals und aus den Einstellungen; «alle» tropft; Zeichen langsamer); 0.11.0T3 (der Tropfen folgt Knauf und Markierung, Zeichen einen Tick flotter); 0.12.0T (Timer und Zähler je Gewohnheit); 0.12.0T2 (Glas aus der Scheibe, Timer-Pause, Zähler in Schritten mit Einheit), Abnahme offen; 0.13.0T (Termine abhaken, Pause im Ring, Menüknopf tropft herab, Einträge nacheinander, Fenster wird Meldung, «Hinzufügen» aus dem Plus, Fragen im Glas); 0.13.0T2 (Termin wie eine Kachel, «Nein» in der Frage, Menüknopf rollt mit, Meldung ohne zweiten Tropfen); 0.13.0T3 (langer Druck markiert nichts, Gast aus der Ecke, nie zwei Menüknöpfe), Abnahme offen |
+| 8 · Feinschliff: Leerzustände als Wegweiser, Jubel bei 50 %/90 %, «nie zweimal» und neuem Rekord, Ende der Welle, gelöschte Zeilen als Geist | fertig (0.9.0); Ticketblatt aus Glas, Kalendertag, «Hinzufügen» im Glas, KW-Linien, Wisch von rechts, Hell/Dunkel als Tropfen, Tickets im Blatt; 0.9.1T (kein Zoom beim Tippen, Woche tropft zur Seite, Ticketliste so hoch wie das Ticket); 0.10.0T (Auftritt beim Kaltstart, Woche ohne Überbreite); 0.10.0T2 (Hell/Dunkel-Tropfen löst sich immer) — abgenommen am 2026-10-07; 0.11.0T (Beginn zurückstellen, Export wählen, Zeichen bewegen sich, Geöffnetes tropft aus seinem Knopf, Woche \| Monat schaltet immer, Ticketblatt rollt innen) — Glastropfen und «Begonnen am» abgenommen; 0.11.0T2 (Hell/Dunkel weicher, mehrmals und aus den Einstellungen; «alle» tropft; Zeichen langsamer); 0.11.0T3 (der Tropfen folgt Knauf und Markierung, Zeichen einen Tick flotter); 0.12.0T (Timer und Zähler je Gewohnheit); 0.12.0T2 (Glas aus der Scheibe, Timer-Pause, Zähler in Schritten mit Einheit); 0.13.0T (Termine abhaken, Pause im Ring, Menüknopf tropft herab, Einträge nacheinander, Fenster wird Meldung, «Hinzufügen» aus dem Plus, Fragen im Glas); 0.13.0T2 (Termin wie eine Kachel, «Nein» in der Frage, Menüknopf rollt mit, Meldung ohne zweiten Tropfen); 0.13.0T3 (langer Druck markiert nichts, Gast aus der Ecke, nie zwei Menüknöpfe) — alles abgenommen, frei als 0.13.0 am 2026-10-08 |
 
 Im Menü stehen alle Einträge des Pflichtenhefts von Anfang an; was noch nicht gebaut ist,
 trägt «bald» und meldet sich mit einer Zeile. **Wer einen Abschnitt baut, gibt dem
@@ -224,13 +224,4 @@ Skill `ticket`.
 
 ## Offen
 
-- Abnahme von 0.11.0T3 (ADR 0036, 0037) am Gerät — ob der Tropfen dem Knauf und der Markierung
-  sichtbar folgt (im Kopf und in den Einstellungen, auch mehrmals hintereinander), Tempo der
-  Zeichen, «alle» im Export.
-- Abnahme von 0.12.0T2 (ADR 0038, 0040) am Gerät — Timer klein aus der Scheibe, Pause, Gong (auch
-  mit Stummschalter), Zähler in Schritten mit Einheit.
-- Abnahme von 0.13.0T3 (ADR 0041–0043) am Gerät — Termin antippen hakt ab, lange drücken öffnet
-  ohne markierten Text; Pause im Ring; Menü nach dem Hinunterrollen und beim Rollen mit offenem Menü
-  (Gast tropft aus der Ecke, nie zwei Knöpfe); Einträge nacheinander;
-  Fenster wird Meldung ohne zweiten Tropfen (auch Wochenreflexion aus dem Journal); «Kopiert» tropft;
-  «Hinzufügen» klein aus dem Plus; Fragen im Glas mit «Nein».
+- nichts
