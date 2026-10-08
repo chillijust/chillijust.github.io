@@ -10,7 +10,7 @@ es wächst mit jedem Bauabschnitt.
 | `<head>` | Meta für iOS, CSP, App-Symbol (Daten-URI), `theme-color` |
 | `<style>` | Schriftblock (generiert), Farbtokens hell/dunkel, Bausteine |
 | `<body>` | `#app` mit `#kopf`, `#swNeu`, `#ansicht`; daneben `#menue`, `#meldung`, `#hinweisBlatt`, `#ticketKnopf`, `#ticketBlatt` |
-| `<script>` | genau einer, `'use strict'`, ES5-nah |
+| `<script>` | genau einer, `'use strict'`; oben `var`/`function`, innen modern (ADR 0045) |
 
 Im Skript, von oben: Version und Stand · `CHILI_BILD` · Hilfen (`esc`, `ICON`, Datum,
 `melden`, Tage) · Zustand und Speicher · Darstellung · Bewegung (Tropfen) · Gewohnheiten

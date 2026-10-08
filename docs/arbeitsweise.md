@@ -59,7 +59,7 @@ Der häufigste Fall. Neue Sitzung, dann **eine** Nachricht:
 > 2 · Wunsch: Die Heatmap soll mit Montag beginnen, nicht mit Sonntag.
 
 Ich erkenne das Format und fahre den Skill `ticket` von selbst: reproduzieren,
-reparieren, im Prüfstand absichern, ADR schreiben, Version stempeln, committen,
+reparieren, im Prüfstand absichern, dokumentieren, Version stempeln, committen,
 pushen. Am Ende kommt der Schnitt mit der neuen Übergabe.
 
 **Ist nichts offen, lassen Sie die Übergabe einfach weg** und schicken nur die Tickets.

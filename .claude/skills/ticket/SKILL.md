@@ -25,8 +25,10 @@ passiert.
 und Termine teilen sich Muster — Tagesgrenze, Kachel, Ring, Kalender. Wer nur die
 gemeldete Stelle repariert, bekommt die nächste Meldung.
 
-**4 · Reparieren** — im vorhandenen Stil (ES5-nah, `var`, `function`, zwei
-Leerzeichen, deutsche Kommentare, die das *Warum* nennen).
+**4 · Reparieren** — zwei Leerzeichen, deutsche Kommentare, die das *Warum* nennen.
+Innerhalb von Funktionen ist modernes JavaScript erlaubt (`let`/`const`, Pfeile,
+Template-Strings); auf oberster Ebene bleibt es bei `var` und `function`, sonst kann
+der Prüfstand sie nicht ersetzen (ADR 0045).
 
 **5 · Absichern.** Die Prüfung, die den Fehler zeigte, wird eine Suite. Sie ist
 ab jetzt das Gedächtnis dafür.
@@ -34,10 +36,12 @@ ab jetzt das Gedächtnis dafür.
 **6 · Aussehen prüfen**, wenn die Änderung sichtbar ist: Bildschirmfoto in
 Handybreite, und zwar **hell und dunkel**.
 
-**7 · Dokumentieren.** Eine Entscheidung mit Begründung bekommt einen ADR unter
-`docs/decisions/`, fortlaufend nummeriert. Eine Regel, an die man sich später
-halten muss, kommt zusätzlich als **ein Satz** in `CLAUDE.md`. Berührt die
-Änderung Zustand oder Renderzyklus, gehört sie in `docs/architektur.md`.
+**7 · Dokumentieren.** Ein ADR nur für eine echte Entscheidung — Datenmodell,
+Rechnung, neue Grundmechanik, Abweichung vom Pflichtenheft (`.claude/rules/docs.md`,
+ADR 0045). Feinschliff und Fehlerbehebung tragen ihr *Warum* im Commit-Rumpf; das
+Verhalten hält die Suite. Eine Regeldatei bekommt nur dann einen Satz, wenn weder
+Code noch Suite die Falle von selbst zeigen. Berührt die Änderung Zustand oder
+Renderzyklus, gehört sie in `docs/architektur.md`.
 
 **8 · Version stempeln** (`VERSION`, danach `node tools/build.mjs`):
 erste Ziffer = gespeicherte Daten werden anders gelesen · zweite = etwas kommt dazu ·

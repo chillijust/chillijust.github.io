@@ -51,13 +51,15 @@ die Chili.
 | Bauabschnitt | Stand |
 | --- | --- |
 | 1 · Umbau, Gerüst, Kopf, Farben, Schriften, Symbol, `sw.js` | fertig (0.1.0) |
-| 2 · Gewohnheiten: anlegen, Rhythmus, Abhaken, Stärke, nie zweimal; Kalender, Nachtragen, langer Druck | fertig (0.2.0) |
-| 3 · Abgewöhnen, 10-Minuten-Welle; Chili und Kalender in einer Karte | fertig (0.3.0T2, frei mit 0.4.0) |
-| 4 · Termine im Kalender, Tagesansicht; Tropfen statt Aufploppen, Tropfenform, Menü unter dem Knopf | fertig (0.4.0) |
-| 5 · Kalender-Export (`.ics`), Erinnerung je Gewohnheit; «Heute» als Rückweg, Name «Chilli Journal», Schriftzug «Lodern» (frei); Exportiertes merken, Markierung aufheben, Hinweis aus Glas; nur Laden | fertig (0.5.0) |
-| 6 · Rückblick: Heatmap, Detail, Journal; Wisch vom Rand, Lesen, Woche wählen, Bestätigung im Glas | fertig (0.7.0); alle Meldungen im Glas (0.7.1) |
-| 7 · Sicherung (Code kopieren, Einlesen mit Rückgängig, Kachel nach 30 Tagen), Einstellungen (Hinweis ab 3, Bewegung, alles löschen), Tickets (Knopf unten rechts, Blatt als Tropfen); langer Druck tropft | fertig (0.8.0); Ticketblatt unten, «Alle Tickets» |
-| 8 · Feinschliff: Leerzustände als Wegweiser, Jubel bei 50 %/90 %, «nie zweimal» und neuem Rekord, Ende der Welle, gelöschte Zeilen als Geist | fertig (0.9.0); Ticketblatt aus Glas, Kalendertag, «Hinzufügen» im Glas, KW-Linien, Wisch von rechts, Hell/Dunkel als Tropfen, Tickets im Blatt; 0.9.1T (kein Zoom beim Tippen, Woche tropft zur Seite, Ticketliste so hoch wie das Ticket); 0.10.0T (Auftritt beim Kaltstart, Woche ohne Überbreite); 0.10.0T2 (Hell/Dunkel-Tropfen löst sich immer) — abgenommen am 2026-10-07; 0.11.0T (Beginn zurückstellen, Export wählen, Zeichen bewegen sich, Geöffnetes tropft aus seinem Knopf, Woche \| Monat schaltet immer, Ticketblatt rollt innen) — Glastropfen und «Begonnen am» abgenommen; 0.11.0T2 (Hell/Dunkel weicher, mehrmals und aus den Einstellungen; «alle» tropft; Zeichen langsamer); 0.11.0T3 (der Tropfen folgt Knauf und Markierung, Zeichen einen Tick flotter); 0.12.0T (Timer und Zähler je Gewohnheit); 0.12.0T2 (Glas aus der Scheibe, Timer-Pause, Zähler in Schritten mit Einheit); 0.13.0T (Termine abhaken, Pause im Ring, Menüknopf tropft herab, Einträge nacheinander, Fenster wird Meldung, «Hinzufügen» aus dem Plus, Fragen im Glas); 0.13.0T2 (Termin wie eine Kachel, «Nein» in der Frage, Menüknopf rollt mit, Meldung ohne zweiten Tropfen); 0.13.0T3 (langer Druck markiert nichts, Gast aus der Ecke, nie zwei Menüknöpfe) — alles abgenommen, frei als 0.13.0 am 2026-10-08; 0.13.1T («Hinzufügen» ohne «Abbrechen», «Neue Fassung» tropft mit auf) — abgenommen, frei als 0.13.1 am 2026-10-08 |
+| 2 · Gewohnheiten, Stärke, nie zweimal, Kalender, Nachtragen | fertig (0.2.0) |
+| 3 · Abgewöhnen, 10-Minuten-Welle | fertig (0.4.0) |
+| 4 · Termine, Tagesansicht, Tropfen | fertig (0.4.0) |
+| 5 · Kalender-Export (`.ics`), Erinnerung, Name «Chilli Journal» | fertig (0.5.0) |
+| 6 · Rückblick: Heatmap, Journal | fertig (0.7.1) |
+| 7 · Sicherung, Einstellungen, Tickets | fertig (0.8.0) |
+| 8 · Feinschliff: Leerzustände, Jubel, Geist; Nachbesserungen am Gerät, Timer und Zähler, Termine abhaken | fertig (0.13.1, 2026-10-08) |
+
+Was je Fassung dazukam, steht in `git log` und im ADR-Index.
 
 Im Menü stehen alle Einträge des Pflichtenhefts von Anfang an; was noch nicht gebaut ist,
 trägt «bald» und meldet sich mit einer Zeile. **Wer einen Abschnitt baut, gibt dem
@@ -136,10 +138,13 @@ Vor inhaltlicher Arbeit lesen: `docs/architektur.md` (Zustand, Render-Zyklus),
 
 ## Konventionen
 
-- **Code-Stil in `index.html`:** ES5-nah — `var`, klassische `function`-Ausdrücke, keine
-  Klassen, keine Module, kein `async`, `'use strict'` am Skriptanfang. Bewußt so; neue
-  Abschnitte folgen demselben Stil. Zwei Leerzeichen Einrückung, einfache
-  Anführungszeichen. Gliederung über Kommentarbalken.
+- **Code-Stil in `index.html`** (ADR 0045): Ziel ist allein Safari auf iOS als
+  Home-Bildschirm-App — was dort läuft, ist erlaubt (`let`/`const`, Pfeilfunktionen,
+  Template-Strings, `?.`, `??`). Ein klassisches `<script>`, `'use strict'`, keine Module.
+  **Auf oberster Ebene nur `var` und `function`** — der Prüfstand ersetzt dort Funktionen
+  wie `jetzt`. Bestand wird nicht umgeschrieben; was man anfaßt, wird es als ganze
+  Funktion. Zwei Leerzeichen Einrückung, einfache Anführungszeichen, Gliederung über
+  Kommentarbalken.
 - **Alle Ausgaben durch `esc()`**, Ereignisbehandler nach dem Setzen von `innerHTML`
   anhängen, nie als `onclick`-Attribut.
 - **Eingebettetes setzt `tools/build.mjs`**, nie die Hand: der Schriftblock zwischen
