@@ -30,6 +30,22 @@ if (!/^<!DOCTYPE html>\r?\n/i.test(html)) {
 // 2 · kein YAML-Front-Matter (sonst behandelt Jekyll die Datei als Template)
 if (/^---\r?\n/.test(html)) fehler.push('index.html beginnt mit YAML-Front-Matter.');
 
+// 2b · Größe (ADR 0046). Die Datei wächst um etwa 25 KB je Fassung. Ab GROESSE_HINWEIS
+// sagt es der Push, ab GROESSE_HALT hält er an — dann ist zu entscheiden: aufräumen,
+// auf Quelldateien umstellen, die build.mjs zusammensetzt, oder die Schwelle bewußt
+// anheben. Anheben ist eine Entscheidung des Nutzers, keine Reparatur.
+const GROESSE_HINWEIS = 600 * 1024;
+const GROESSE_HALT = 800 * 1024;
+const groesse = Buffer.byteLength(html, 'utf8');
+const kb = (n) => Math.round(n / 1024) + ' KB';
+if (groesse > GROESSE_HALT) {
+  fehler.push('index.html hat ' + kb(groesse) + ', die Grenze ist ' + kb(GROESSE_HALT) +
+    ' (ADR 0046). Nicht still anheben — den Nutzer fragen.');
+} else if (groesse > GROESSE_HINWEIS) {
+  hinweise.push('index.html hat ' + kb(groesse) + ' — über ' + kb(GROESSE_HINWEIS) +
+    ', Halt bei ' + kb(GROESSE_HALT) + ' (ADR 0046). Dem Nutzer sagen.');
+}
+
 // 3 · .nojekyll vorhanden
 if (!existsSync(join(ROOT, '.nojekyll'))) {
   fehler.push('.nojekyll fehlt — GitHub Pages würde die Dateien wieder durch Jekyll schicken.');
@@ -167,7 +183,7 @@ if (/localStorage\s*\.\s*clear\s*\(/.test(html)) {
   fehler.push('localStorage.clear() gefunden — das löschte auch Chillingos Lernstand.');
 }
 
-console.log('index.html · ' + html.split('\n').length + ' Zeilen · ' + (html.length / 1024).toFixed(0) + ' KB');
+console.log('index.html · ' + html.split('\n').length + ' Zeilen · ' + kb(groesse));
 if (sw) console.log('sw.js · ' + sw.split('\n').length + ' Zeilen · ' + (sw.length / 1024).toFixed(1) + ' KB');
 hinweise.forEach((h) => console.log('Hinweis: ' + h));
 

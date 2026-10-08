@@ -109,4 +109,4 @@ if (nurPruefen) {
   if (swNeu !== swAlt) writeFileSync(SW, swNeu);
   console.log(abweichungen.length ? 'Aktualisiert: ' + abweichungen.join(', ') : 'Keine Änderung nötig.');
 }
-console.log('Version ' + version + ' · index.html ' + (neu.length / 1024).toFixed(0) + ' KB');
+console.log('Version ' + version + ' · index.html ' + Math.round(Buffer.byteLength(neu, 'utf8') / 1024) + ' KB');

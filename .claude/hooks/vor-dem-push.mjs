@@ -40,9 +40,13 @@ const schritte = [
   ['Prüfstand', ['tools/pruefstand/lauf.mjs', '-q']]
 ];
 
+// Grün schweigt — bis auf Hinweise. Die sammeln sich hier und gehen am Ende als
+// Meldung hinaus, sonst sähe sie beim Push niemand (etwa die Größe, ADR 0046).
+const hinweise = [];
 for (const [was, argumente] of schritte) {
   try {
-    execFileSync('node', argumente, { cwd: WURZEL, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+    const aus = execFileSync('node', argumente, { cwd: WURZEL, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+    aus.split('\n').filter((z) => z.startsWith('Hinweis: ')).forEach((z) => hinweise.push(z));
   } catch (e) {
     const ausgabe = ((e.stdout || '') + (e.stderr || '')).trim();
     console.error('Push angehalten — ' + was + ' ist rot.\n');
@@ -52,4 +56,5 @@ for (const [was, argumente] of schritte) {
     process.exit(2);
   }
 }
+if (hinweise.length) console.log(JSON.stringify({ systemMessage: hinweise.join('\n') }));
 process.exit(0);
