@@ -33,6 +33,9 @@ brächte ihn zurück. Deshalb ist der Merge in beide Richtungen tabu.
 - Außerhalb von `kommunikation/` trägt der Branch den Stand von `main` vom letzten
   Abgleich durch James. Maßgeblich bleibt `main`.
 - Der Obsidian-Tresor des Nutzers gleicht über das Plugin «Fit» mit dem Branch ab; seine
-  Commits heißen «Commit from … on …».
+  Commits heißen «Commit from … on …». Fit spiegelt den Tresor samt Löschungen und alten
+  Ständen (`afaa03d`, `ed286d4`: Prüfstand rot). Der Workflow nennt deshalb auf diesem
+  Branch jede Abweichung von `main` außerhalb von `kommunikation/`, als Warnung, nicht als
+  Fehler, weil Rückstand bis zum Abgleich durch James erlaubt ist (Nachtrag 2026-10-09).
 - Was aus einer Nachricht ansteht, trägt Jarvis weiter in «Offen» in `CLAUDE.md` ein.
 - Die Commits von PR #1 bleiben in der Geschichte von `main`; entfernt ist nur der Ordner.

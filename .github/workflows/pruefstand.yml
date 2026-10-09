@@ -14,8 +14,34 @@ on:
 jobs:
   pruefen:
     runs-on: ubuntu-latest
+    # Ein Lauf dauert gut eine Minute. Ein hängender Browser lief einmal sechs
+    # Stunden, bis GitHub ihn abbrach (Lauf 214).
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+
+      # Auf chatgpt/kommunikation soll außerhalb von kommunikation/ der Stand von
+      # main liegen (ADR 0050). Obsidian (Fit) spiegelt dorthin auch Löschungen und
+      # alte Stände; dann scheitern Suiten, ohne zu sagen, warum. Dieser Schritt
+      # nennt die Abweichung. Er warnt nur: Rückstand bis zum Abgleich durch James
+      # ist erlaubt.
+      - name: Abgleich mit main
+        if: github.ref == 'refs/heads/chatgpt/kommunikation'
+        run: |
+          git fetch --quiet --depth=1 origin main
+          git diff --no-renames --name-status FETCH_HEAD HEAD -- . ':(exclude)kommunikation' > abw.txt
+          melde() {
+            n=$(grep -c "^$1" abw.txt || true)
+            [ "$n" -eq 0 ] && return
+            liste=$(grep "^$1" abw.txt | cut -f2- | head -8 | paste -sd ' ' -)
+            echo "::warning title=$2::$n Dateien $3: $liste"
+            { echo "### $2 ($n)"; echo; grep "^$1" abw.txt | cut -f2- | sed 's/^/- /'; echo; } >> "$GITHUB_STEP_SUMMARY"
+          }
+          melde A 'Fremd gegenüber main' 'gibt es auf main nicht'
+          melde D 'Fehlt gegenüber main' 'fehlen hier, main hat sie'
+          melde M 'Abweichend von main' 'weichen von main ab'
+          [ -s abw.txt ] || echo 'App-Teil gleich main.'
+          rm abw.txt
 
       - uses: actions/setup-node@v4
         with:
