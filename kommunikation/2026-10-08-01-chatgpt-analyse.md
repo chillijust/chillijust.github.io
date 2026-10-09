@@ -56,7 +56,7 @@ und offline starten.
 
 ### A2 · Hoch · Fehler beim Laden erscheinen als leerer Stand
 
-Quelle: [index.html](index.html), `laden()` ab Zeile 2019.
+Quelle: [index.html](../index.html), `laden()` ab Zeile 2019.
 
 Ein Lesefehler oder ungültiges JSON führt ohne sichtbare Fehlerdiagnose zu
 `grundStand()`. Reproduktion mit `getItem()` → `'{kaputt'`: null Gewohnheiten.
@@ -69,7 +69,7 @@ Entscheidung verhindern. Einen verständlichen Wiederherstellungsweg anbieten.
 
 ### A3 · Hoch · Abhaken meldet Erfolg trotz Schreibfehler
 
-Quelle: [index.html](index.html), `umschalten()` ab Zeile 3158 und `speichern()`
+Quelle: [index.html](../index.html), `umschalten()` ab Zeile 3158 und `speichern()`
 ab Zeile 2034.
 
 `umschalten()` verändert den Arbeitsspeicher, ignoriert den Rückgabewert von
@@ -86,7 +86,7 @@ Persistierung. Quota-Fehler und gesperrten Speicher als Fehlerszenarien prüfen.
 
 ### A4 · Mittel · Unbekannte Schemaversionen werden nicht abgewiesen
 
-Quelle: [index.html](index.html), `stand()` ab Zeile 1731,
+Quelle: [index.html](../index.html), `stand()` ab Zeile 1731,
 `codeLesen()` ab Zeile 6165 und `sicherungEinlesen()` ab Zeile 6283.
 
 `stand()` prüft `roh.schema` nicht. Reproduktion: Ein Objekt mit `schema: 999`
@@ -100,8 +100,8 @@ veränderte Einträge zählen und vor dem Ersetzen anzeigen; unbekannte Versione
 
 ### A5 · Mittel · Offline-Suite prüft den Lebenszyklus nicht
 
-Quelle: [offline.mjs](offline.mjs),
-[lauf.mjs](lauf.mjs).
+Quelle: [offline.mjs](../tools/pruefstand/suiten/offline.mjs),
+[lauf.mjs](../tools/pruefstand/lauf.mjs).
 
 Die Suite dokumentiert selbst ihre Grenze: Der Prüfstand lädt über `file://`, wo der
 Worker nicht läuft. Viele Worker-Prüfungen suchen Quelltextmuster. Damit können sie
@@ -113,7 +113,7 @@ Auslieferungskonzepts. Gerätestests in Safari bleiben für iOS-Eigenheiten notw
 
 ### A6 · Mittel · Dialogbedienung für assistive Technik prüfen
 
-Quelle: [index.html](index.html), Dialog-Markup ab Zeile 1531,
+Quelle: [index.html](../index.html), Dialog-Markup ab Zeile 1531,
 `hinweisZeigen()` und `hinweisSchliessen()` um Zeile 2858.
 
 Dialogrollen und Fokussetzung sind vorhanden. In der Durchsicht war aber keine

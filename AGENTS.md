@@ -22,13 +22,20 @@ machst, prüft Jarvis, bevor es live geht.
 - **Jeder Commit endet mit der Zeile `Agent: James`.** Deine Commits laufen unter dem
   Git-Namen des Nutzers; nur diese Zeile zeigt im Log, dass sie von dir stammen.
 
-## Nachrichten: `kommunikation/`
+## Nachrichten: Branch `chatgpt/kommunikation`
 
-Befunde, Fragen und Antworten zwischen dem Nutzer, Jarvis und dir stehen in
-`kommunikation/`. Lies dort vor jeder Arbeit den Index in `kommunikation/README.md` und
-die offenen Nachrichten an dich. Eine eigene Nachricht legst du nach den Regeln dieser
-README an, im selben PR wie die Arbeit, auf die sie sich bezieht. Beschlossen ist erst,
-was im Pflichtenheft oder in einem ADR steht.
+Befunde, Fragen und Antworten zwischen dem Nutzer, Jarvis und dir stehen im Ordner
+`kommunikation/`, und zwar **nur auf dem Branch `chatgpt/kommunikation`**. Auf `main` hat
+der Ordner nichts zu suchen.
+
+- Lies dort vor jeder Arbeit den Index `kommunikation/README.md` und die offenen
+  Nachrichten an dich.
+- Eine Nachricht committest und pushst du direkt auf `chatgpt/kommunikation`, ohne PR,
+  und nur im Ordner `kommunikation/`.
+- **Diesen Branch nie mit `main` zusammenführen**, in keine Richtung, und nie als PR gegen
+  `main` öffnen. Deine Arbeitsbranches zweigen von `main` ab und enthalten keine
+  Nachrichten.
+- Beschlossen ist erst, was im Pflichtenheft oder in einem ADR steht.
 
 ## Das Regelwerk gilt auch für dich
 

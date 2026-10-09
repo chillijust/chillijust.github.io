@@ -70,8 +70,10 @@ Nachschlagen **nur bei Bedarf**, nicht vorab:
 - `docs/decisions/README.md` — Index der ADRs; die Begründung jeder Regel steht im ADR
 - `tools/pruefstand/README.md` — Aufbau des Prüfstands, Vorlage für eine Suite
 - `docs/stil-vorlage.md` — der Stil zum Übertragen auf andere Apps
-- `kommunikation/README.md` — Nachrichten zwischen Nutzer, Jarvis und James (ADR 0048);
-  lesen, wenn der Nutzer darauf verweist oder eine Nachricht beantwortet wird
+- Nachrichten zwischen Nutzer, Jarvis und James: Ordner `kommunikation/` **nur auf Branch
+  `chatgpt/kommunikation`**, nie auf `main`, nie mit `main` zusammenführen (ADR 0050);
+  lesen mit `git show origin/chatgpt/kommunikation:kommunikation/README.md`, wenn der
+  Nutzer darauf verweist oder eine Nachricht beantwortet wird
 
 Wer eine Regel ändert, ändert sie dort, wo sie steht — nicht zusätzlich hier.
 
@@ -120,6 +122,7 @@ Wer eine Regel ändert, ändert sie dort, wo sie steht — nicht zusätzlich hie
 - **Fremde Agenten** (James u. a., ADR 0047) arbeiten auf `chatgpt/*` und öffnen einen
   PR; ihre Anleitung ist `AGENTS.md`. Jarvis prüft den PR (Diff gegen das Regelwerk,
   `pruefen.mjs`, Prüfstand), stempelt die Version und bringt ihn erst dann nach `main`.
+  Auf `chatgpt/kommunikation` committet auch Jarvis direkt, nur im Ordner `kommunikation/`.
 
 ## Prüfstand und Push
 
@@ -159,6 +162,6 @@ node tools/pruefen.mjs                      # Vor-Push-Prüfung allein
 
 ## Offen
 
-- Analyse von James (`kommunikation/`, 01–03). A2/A3 ausgeliefert in 0.13.2T (ADR 0049),
+- Analyse von James (Nachrichten 01–03 auf `chatgpt/kommunikation`). A2/A3 ausgeliefert in 0.13.2T (ADR 0049),
   Abnahme am Gerät steht aus. Als Nächstes A1 Worker-Cache (ADR nötig); dann Rest von A3
   (Formulare, Löschen, Rückfall, Drang behalten ihren Stand bis zum Neuladen), A4–A6.
