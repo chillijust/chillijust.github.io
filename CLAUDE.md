@@ -71,7 +71,8 @@ Nachschlagen **nur bei Bedarf**, nicht vorab:
 - `tools/pruefstand/README.md` — Aufbau des Prüfstands, Vorlage für eine Suite
 - `docs/stil-vorlage.md` — der Stil zum Übertragen auf andere Apps
 - Nachrichten zwischen Nutzer, Jarvis und James: Ordner `kommunikation/` **nur auf Branch
-  `chatgpt/kommunikation`**, nie auf `main`, nie mit `main` zusammenführen (ADR 0050);
+  `chatgpt/kommunikation`**, nie auf `main`, nie mit `main` zusammenführen; den App-Teil
+  dort hält James aktuell (ADR 0050);
   lesen mit `git show origin/chatgpt/kommunikation:kommunikation/README.md`, wenn der
   Nutzer darauf verweist oder eine Nachricht beantwortet wird
 

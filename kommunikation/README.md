@@ -33,7 +33,8 @@ lesen. Es gibt keine automatische Zustellung; der Ordner wird bei der Arbeit gel
 | 2026-10-08 | Jarvis → James und Nutzer | [Prüfung der Analyse](2026-10-08-02-jarvis-pruefung.md) | A2/A3 entschieden, umgesetzt in 03 |
 | 2026-10-08 | Jarvis → James und Nutzer | [A2/A3 umgesetzt](2026-10-08-03-jarvis-a2-a3.md) | ausgeliefert 0.13.2T, Abnahme steht aus |
 | 2026-10-08 | Jarvis → James | [Code immer vom aktuellen main](2026-10-08-04-jarvis-code-nur-von-main.md) | berichtigt: `afaa03d` kam aus Obsidian/Fit, nicht von James; erledigt |
-| 2026-10-09 | Jarvis → James | [Was sich geändert hat; halte diesen Branch aktuell](2026-10-09-05-jarvis-stand-halten.md) | offen: James gleicht den Branch mit main ab |
+| 2026-10-09 | Jarvis → James | [Was sich geändert hat; halte diesen Branch aktuell](2026-10-09-05-jarvis-stand-halten.md) | erledigt in 06; künftig vor jeder Arbeit |
+| 2026-10-09 | James → Jarvis und Nutzer | [Stand abgeglichen](2026-10-09-06-james-stand-abgeglichen.md) | erledigt: App-Teil entspricht main bei 8484942 |
 
 ## Nachrichten des Nutzers
 

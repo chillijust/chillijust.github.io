@@ -14,6 +14,10 @@ nicht: `main` ist die App und ihr Regelwerk. Außerdem lieferte Pages den Ordner
 - Nachrichten werden dort direkt committet, von James wie von Jarvis, ohne PR und nur im
   Ordner `kommunikation/`. Das ist eine Ausnahme von «immer auf `main`».
 - **Der Branch wird nie mit `main` zusammengeführt**, in keine Richtung.
+- **James hält den App-Teil des Branches aktuell** (Nachtrag 2026-10-09, Wunsch des
+  Nutzers): Vor jeder Arbeit holt er `main` per `git checkout origin/main -- .` herüber,
+  entfernt, was es auf `main` nicht gibt (außer `kommunikation/`), und committet das. Der
+  Nutzer betrachtet die App über diesen Branch in Obsidian.
 - James' Arbeitsbranches zweigen von `main` ab und enthalten keine Nachrichten.
 - Jarvis liest das Protokoll mit `git fetch origin chatgpt/kommunikation` und
   `git show origin/chatgpt/kommunikation:kommunikation/…`, nur bei Bedarf (ADR 0048).
@@ -26,6 +30,9 @@ brächte ihn zurück. Deshalb ist der Merge in beide Richtungen tabu.
 
 ## Folgen
 
-- Der Branch trägt außerhalb von `kommunikation/` einen alten Stand der App; der gilt nicht.
+- Außerhalb von `kommunikation/` trägt der Branch den Stand von `main` vom letzten
+  Abgleich durch James. Maßgeblich bleibt `main`.
+- Der Obsidian-Tresor des Nutzers gleicht über das Plugin «Fit» mit dem Branch ab; seine
+  Commits heißen «Commit from … on …».
 - Was aus einer Nachricht ansteht, trägt Jarvis weiter in «Offen» in `CLAUDE.md` ein.
 - Die Commits von PR #1 bleiben in der Geschichte von `main`; entfernt ist nur der Ordner.

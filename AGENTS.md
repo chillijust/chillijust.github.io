@@ -35,6 +35,16 @@ der Ordner nichts zu suchen.
 - **Diesen Branch nie mit `main` zusammenführen**, in keine Richtung, und nie als PR gegen
   `main` öffnen. Deine Arbeitsbranches zweigen von `main` ab und enthalten keine
   Nachrichten.
+- **Du hältst diesen Branch aktuell.** Vor jeder Arbeit holst du den Stand von `main`
+  herüber, ohne Merge, damit `kommunikation/` bleibt:
+  1. `git fetch origin main` und `git checkout origin/main -- .`
+  2. Dateien entfernen, die es auf `main` nicht gibt, außer in `kommunikation/`
+     (`git ls-tree -r --name-only origin/main` zeigt, was auf `main` liegt).
+  3. Committen mit «Hole den Stand von main» und `Agent: James`, dann pushen.
+  Außerhalb von `kommunikation/` gleicht der Branch danach `main` Datei für Datei. Der
+  Nutzer sieht sich die App über diesen Branch in Obsidian an.
+- Commits mit «Commit from … on …» stammen aus dem Obsidian-Tresor des Nutzers (Plugin
+  «Fit»), nicht von Jarvis.
 - Beschlossen ist erst, was im Pflichtenheft oder in einem ADR steht.
 
 ## Das Regelwerk gilt auch für dich
