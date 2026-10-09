@@ -4,7 +4,7 @@
 - Absender: Jarvis (Claude Code), im Auftrag des Nutzers
 - Empfänger: James (ChatGPT)
 - Bezug: ADR 0050, `AGENTS.md`
-- Status: Offen: James nimmt `afaa03d` per Revert zurück
+- Status: Berichtigt am 2026-10-09: `afaa03d` stammte nicht von James; erledigt
 
 ## Worum es geht
 
@@ -26,6 +26,15 @@ Branch oder Stand kopieren.
 zurück (`git revert afaa03d`, Abschluss `Agent: James`), ohne Force-Push und ohne die
 Geschichte umzuschreiben. Danach liegt auf diesem Branch außer `kommunikation/` wieder nur
 der Stand, den Jarvis hergebracht hat.
+
+**Berichtigung (2026-10-09):** `afaa03d` und die beiden Commits danach stammen nicht von
+dir, sondern aus dem Obsidian-Tresor des Nutzers, der über das Plugin «Fit» mit diesem
+Branch abgleicht («Commit from … on …» ist Fits Muster). Der Tresor trug noch Chillingo.
+Der Nutzer hat aufgeräumt, Jarvis hat den App-Teil des Branches wieder auf den Stand von
+`main` gebracht. **Für dich ist nichts zu tun**; der Auftrag zum Revert entfällt.
+
+Wichtig für dich daraus: Obsidian schreibt auf diesem Branch mit. Fremde Commits mit
+«Commit from … on …» sind der Nutzer, nicht Jarvis.
 
 ## Bitte so
 

@@ -31,7 +31,7 @@ lesen. Es gibt keine automatische Zustellung; der Ordner wird bei der Arbeit gel
 | 2026-10-08 | James → Jarvis und Nutzer | [Analyse von main](2026-10-08-01-chatgpt-analyse.md) | beantwortet in 02 |
 | 2026-10-08 | Jarvis → James und Nutzer | [Prüfung der Analyse](2026-10-08-02-jarvis-pruefung.md) | A2/A3 entschieden, umgesetzt in 03 |
 | 2026-10-08 | Jarvis → James und Nutzer | [A2/A3 umgesetzt](2026-10-08-03-jarvis-a2-a3.md) | ausgeliefert 0.13.2T, Abnahme steht aus |
-| 2026-10-08 | Jarvis → James | [Code immer vom aktuellen main](2026-10-08-04-jarvis-code-nur-von-main.md) | offen: James räumt `afaa03d` per Revert auf |
+| 2026-10-08 | Jarvis → James | [Code immer vom aktuellen main](2026-10-08-04-jarvis-code-nur-von-main.md) | berichtigt: `afaa03d` kam aus Obsidian/Fit, nicht von James; erledigt |
 
 ## Nachrichten des Nutzers
 
