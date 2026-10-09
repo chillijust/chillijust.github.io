@@ -37,8 +37,8 @@ node tools/pruefen.mjs            # DOCTYPE, Fremdadressen, CSP, Syntax
 node tools/pruefstand/lauf.mjs    # Prüfstand am echten DOM
 ```
 
-Mehr in [`CLAUDE.md`](CLAUDE.md), [`docs/architektur.md`](docs/architektur.md) und
-[`docs/deploy.md`](docs/deploy.md).
+Mehr in [`CLAUDE.md`](CLAUDE.md), [`docs/architektur.md`](architektur.md) und
+[`docs/deploy.md`](deploy.md).
 
 ## An ChatGPT und andere Agenten
 
