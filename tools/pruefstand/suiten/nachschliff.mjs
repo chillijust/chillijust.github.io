@@ -223,8 +223,8 @@ return durch().then(function () {
   var st = getComputedStyle(kw[1], '::after'), strich = kw[1].querySelector('span').getBoundingClientRect();
   pruefe('K3 der Strich läuft waagrecht durch den ganzen Kalender', st.content !== 'none' && parseFloat(st.height) === 1 &&
     k41.right >= so.right - 4 && k41.width > mo.width * 6, [st.content, st.height, k41.right, so.right].join(' '));
-  pruefe('K4 die Wochentage stehen über ihren Tagen, ohne Spalte davor', alle('.kal-wtage .kal-wt').length === 7 &&
-    Math.abs(mitte(alle('.kal-wtage .kal-wt')[0].getBoundingClientRect()).x - mitte(mo).x) < 1);
+  pruefe('K4 die Wochentage stehen über ihren Tagen, ohne Spalte davor', alle('.held .kal-wtage .kal-wt').length === 7 &&
+    Math.abs(mitte(alle('.held .kal-wtage .kal-wt')[0].getBoundingClientRect()).x - mitte(mo).x) < 1);
   pruefe('K5 Trefferflächen im Monat', zuKlein('#app').length === 0, zuKlein('#app').join());
   pruefe('K6 die Woche nennt die KW im Titel, nicht im Raster', (q('[data-kalender="woche"]').click(),
     !q('#kalRaster .kal-kw-zeile') && /KW 42/.test(q('#kalTitel, #kalHeute').textContent)));
