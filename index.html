@@ -1325,6 +1325,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 .zv-kreis { stroke: var(--zv-grund); transform: rotate(-90deg); }
 .zv-puls { stroke: var(--zv-grund); opacity: 0; }
 .zv-fortschritt { stroke-width: 1.5; opacity: 0; }
+/* Der Puls füllt nur nach vorn: Vorab stünde sein Ring schon am Rand. */
 /* Haken: A quillt als Tropfen, B schließt erst den Kreis, C pulst nach. */
 .zeichnet[data-zeichen="haken"][data-variante="a"] .zv-scheibe { animation: zv-quellen .38s cubic-bezier(.2, .7, .3, 1) both; }
 .zeichnet[data-zeichen="haken"][data-variante="a"] .zv-haken { animation: z-zeichnen .45s .28s cubic-bezier(.45, 0, .25, 1) both; }
@@ -1333,7 +1334,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 .zeichnet[data-zeichen="haken"][data-variante="b"] .zv-haken { animation: z-zeichnen .4s .5s cubic-bezier(.45, 0, .25, 1) both; }
 .zeichnet[data-zeichen="haken"][data-variante="c"] .zv-haken { animation: z-zeichnen .45s .08s cubic-bezier(.45, 0, .25, 1) both; }
 .zeichnet[data-zeichen="haken"][data-variante="c"] .zv-scheibe { animation: zv-nicken .3s .48s ease-in-out both; }
-.zeichnet[data-zeichen="haken"][data-variante="c"] .zv-puls { animation: zv-puls .6s .48s ease-out both; }
+.zeichnet[data-zeichen="haken"][data-variante="c"] .zv-puls { animation: zv-puls .6s .48s ease-out forwards; }
 /* Hinweis: A der Strich wächst, der Punkt steigt auf; B der Punkt fällt als
    Tropfen und plättet sich; C das «i» pendelt aus. */
 .zeichnet[data-zeichen="hinweis"][data-variante="a"] .zv-i { animation: z-zeichnen .35s .08s cubic-bezier(.45, 0, .25, 1) both; }
@@ -1346,7 +1347,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 .zeichnet[data-zeichen="warnung"][data-variante="a"] .zv-ausruf { animation: z-zeichnen .25s .45s cubic-bezier(.45, 0, .25, 1) both; }
 .zeichnet[data-zeichen="warnung"][data-variante="a"] .zv-punkt { animation: zv-steigen .22s .68s cubic-bezier(.2, .7, .3, 1) both; }
 .zeichnet[data-zeichen="warnung"][data-variante="b"] .zv-wackeln { animation: zv-wackeln .62s .08s ease-in-out both; }
-.zeichnet[data-zeichen="warnung"][data-variante="c"] .zv-puls { animation: zv-puls .5s .05s ease-out 2 both; }
+.zeichnet[data-zeichen="warnung"][data-variante="c"] .zv-puls { animation: zv-puls .5s .05s ease-out 2 forwards; }
 .zeichnet[data-zeichen="warnung"][data-variante="c"] .zv-ausruf-auf { animation: zv-quellen .3s .05s cubic-bezier(.2, .7, .3, 1) both; }
 /* Kopie: A fächert auf, B stempelt das zweite Blatt auf, C zeichnet beide. */
 .zeichnet[data-zeichen="kopie"][data-variante="a"] .zv-hinten { animation: zv-hinten .5s .08s cubic-bezier(.35, 0, .25, 1) both; }
@@ -1364,6 +1365,32 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 .zeichnet[data-zeichen="laden"][data-variante="b"] .zv-spitze { animation: z-zeichnen .25s .5s cubic-bezier(.45, 0, .25, 1) both; }
 .zeichnet[data-zeichen="laden"][data-variante="c"] .zv-fortschritt { animation: zv-fortschritt .7s ease both; }
 .zeichnet[data-zeichen="laden"][data-variante="c"] .zv-pfeil { animation: zv-fallen .45s .45s cubic-bezier(.4, 0, .25, 1) both; }
+/* D: aus der Wahl zusammengesetzt (0.13.3T2), jede endet mit dem Puls —
+   gestrafft, damit auch er fertig ist, bevor die Bestätigung geht. */
+.zv-rand { transform-box: fill-box; transform-origin: center; transform: rotate(-90deg); }
+.hinweis-haken.neutral .zv-puls { stroke: var(--text-2); }
+.zeichnet[data-zeichen="haken"][data-variante="d"] .zv-kreis { animation: z-zeichnen .38s cubic-bezier(.45, 0, .25, 1) both; }
+.zeichnet[data-zeichen="haken"][data-variante="d"] .zv-scheibe { animation: zv-auf .2s .3s ease both; }
+.zeichnet[data-zeichen="haken"][data-variante="d"] .zv-haken { animation: z-zeichnen .34s .42s cubic-bezier(.45, 0, .25, 1) both; }
+.zeichnet[data-zeichen="haken"][data-variante="d"] .zv-puls { animation: zv-puls .42s .74s ease-out forwards; }
+.zeichnet[data-zeichen="hinweis"][data-variante="d"] .zv-rand { animation: z-zeichnen .35s cubic-bezier(.45, 0, .25, 1) both; }
+.zeichnet[data-zeichen="hinweis"][data-variante="d"] .zv-punkt { animation: zv-tropfen .5s .12s cubic-bezier(.35, 0, .3, 1) both; }
+.zeichnet[data-zeichen="hinweis"][data-variante="d"] .zv-i { animation: z-zeichnen .26s .56s cubic-bezier(.45, 0, .25, 1) both; }
+.zeichnet[data-zeichen="hinweis"][data-variante="d"] .zv-puls { animation: zv-puls .36s .8s ease-out forwards; }
+.zeichnet[data-zeichen="warnung"][data-variante="d"] .zv-wackeln { animation: zv-wackeln .62s .08s ease-in-out both; }
+.zeichnet[data-zeichen="warnung"][data-variante="d"] .zv-puls { animation: zv-puls .42s .68s ease-out forwards; }
+.zeichnet[data-zeichen="kopie"][data-variante="d"] .zv-hinten {
+  animation: z-zeichnen .36s cubic-bezier(.45, 0, .25, 1) both, zv-hinten .5s .08s cubic-bezier(.35, 0, .25, 1) both;
+}
+.zeichnet[data-zeichen="kopie"][data-variante="d"] .zv-vorn {
+  animation: z-zeichnen .36s .18s cubic-bezier(.45, 0, .25, 1) both, zv-vorn .5s .08s cubic-bezier(.35, 0, .25, 1) both;
+}
+.zeichnet[data-zeichen="kopie"][data-variante="d"] .zv-puls { animation: zv-puls .42s .6s ease-out forwards; }
+.zeichnet[data-zeichen="laden"][data-variante="d"] .zv-schale {
+  animation: z-zeichnen .32s cubic-bezier(.45, 0, .25, 1) both, zv-tauchen .28s .66s ease-in-out both;
+}
+.zeichnet[data-zeichen="laden"][data-variante="d"] .zv-pfeil { animation: zv-fallen .42s .26s cubic-bezier(.4, 0, .25, 1) both; }
+.zeichnet[data-zeichen="laden"][data-variante="d"] .zv-puls { animation: zv-puls .4s .76s ease-out forwards; }
 @keyframes zv-quellen { from { transform: scale(.15); opacity: 0; } 40% { opacity: 1; } to { transform: none; opacity: 1; } }
 @keyframes zv-auf { from { opacity: 0; } to { opacity: 1; } }
 @keyframes zv-nicken { 0%, 100% { transform: none; } 50% { transform: scale(.9); } }
@@ -1401,11 +1428,11 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
   70% { stroke-dashoffset: 0; opacity: .5; }
   100% { stroke-dashoffset: 0; opacity: 0; }
 }
-/* Die Kachel: je Zeichen eine Reihe, links das heutige, daneben A, B, C. */
+/* Die Kachel: je Zeichen eine Reihe, links das heutige, daneben A bis D. */
 .zp-text { margin: 0 0 14px; font-size: 15px; color: var(--text-2); }
 .zp-reihe + .zp-reihe { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--flaeche-2); }
 .zp-reihe h3 { margin: 0 0 6px; font-family: var(--sans); font-size: 14px; font-weight: 600; }
-.zp-zellen { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+.zp-zellen { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2px; }
 .zp-zelle {
   display: flex;
   flex-direction: column;
@@ -1415,6 +1442,8 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
   padding: 6px 0;
   border-radius: 12px;
 }
+/* D ist die Wahl des Nutzers — sie steht auf eigenem Grund. */
+.zp-zelle.zp-d { background: var(--flaeche-2); }
 .zp-zelle:active { background: var(--flaeche-2); }
 .zp-zelle .hinweis-haken { margin: 0; }
 .zp-name { font-family: var(--sans); font-size: 12px; color: var(--text-2); white-space: nowrap; }
@@ -1680,7 +1709,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.13.3T';
+var APP_VERSION = '0.13.3T2';
 var APP_STAND = '2026-10-10';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -2971,15 +3000,16 @@ function zeichenZeichnen(el) {
 
 // ── Zeichenprobe: drei Fassungen je Zeichen zur Wahl ────────────
 // Eine Kachel auf dem Dashboard zeigt je Zeichen das heutige und drei neue
-// Fassungen (0.13.3T). Ein Tipp zeigt die Fassung in einer echten Meldung,
+// Fassungen (0.13.3T); D setzt zusammen, was der Nutzer daraus gewählt hat,
+// und endet immer mit dem Puls (0.13.3T2). Ein Tipp zeigt die Fassung in einer echten Meldung,
 // «Alle abspielen» bewegt alle nebeneinander. Geht, sobald gewählt ist.
 // Die Warnung gibt es bisher nicht; sie hat darum kein heutiges Zeichen.
 var ZEICHEN_PROBE = {
-  haken: { name: 'Haken', titel: 'Gespeichert', varianten: [['a', 'Quellen'], ['b', 'Kreis'], ['c', 'Puls']] },
-  hinweis: { name: 'Hinweis', titel: 'Es läuft schon eine Welle', varianten: [['a', 'Steigen'], ['b', 'Tropfen'], ['c', 'Pendeln']] },
-  warnung: { name: 'Warnung', titel: 'Speichern ging nicht', varianten: [['a', 'Zeichnen'], ['b', 'Wackeln'], ['c', 'Puls']] },
-  kopie: { name: 'Kopiert', titel: 'Kopiert', varianten: [['a', 'Fächern'], ['b', 'Stempeln'], ['c', 'Zeichnen']] },
-  laden: { name: 'Datei geladen', titel: 'Datei geladen', varianten: [['a', 'Federn'], ['b', 'Zeichnen'], ['c', 'Ring']] }
+  haken: { name: 'Haken', titel: 'Gespeichert', varianten: [['a', 'Quellen'], ['b', 'Kreis'], ['c', 'Puls'], ['d', 'Mix']] },
+  hinweis: { name: 'Hinweis', titel: 'Es läuft schon eine Welle', varianten: [['a', 'Steigen'], ['b', 'Tropfen'], ['c', 'Pendeln'], ['d', 'Mix']] },
+  warnung: { name: 'Warnung', titel: 'Speichern ging nicht', varianten: [['a', 'Zeichnen'], ['b', 'Wackeln'], ['c', 'Puls'], ['d', 'Mix']] },
+  kopie: { name: 'Kopiert', titel: 'Kopiert', varianten: [['a', 'Fächern'], ['b', 'Stempeln'], ['c', 'Zeichnen'], ['d', 'Mix']] },
+  laden: { name: 'Datei geladen', titel: 'Datei geladen', varianten: [['a', 'Federn'], ['b', 'Zeichnen'], ['c', 'Ring'], ['d', 'Mix']] }
 };
 
 // Die Fassungen malen ihre Scheibe selbst: 44 px, die Linien im Maß von
@@ -3023,7 +3053,18 @@ function zeichenProbe(zeichen, variante) {
       '<path class="zv-strich zv-spitze" pathLength="1" d="M7.5 9.5l4.5 4.5 4.5-4.5"/>' +
       '<path class="zv-strich zv-schale" pathLength="1" d="' + schale + '"/>',
     'laden:c': scheibe + '<circle class="zv-strich zv-fortschritt" pathLength="1" cx="12" cy="12" r="19"/>' + pfeil +
-      '<path d="' + schale + '"/>'
+      '<path d="' + schale + '"/>',
+    // D: Haken wie B, Hinweis wie B mit gezeichnetem Kreis, Warnung wie B,
+    // Kopiert wie A mit Zeichnen, Laden: die Schale zeichnet sich, der Pfeil
+    // fliegt hinein wie bei C, die Schale gibt nach wie bei A.
+    'haken:d': '<circle class="zv-strich zv-kreis" pathLength="1" cx="12" cy="12" r="21"/>' + scheibe + puls + haken,
+    'hinweis:d': scheibe + puls + '<circle class="zv-strich zv-rand" pathLength="1" cx="12" cy="12" r="9"/>' +
+      '<path class="zv-strich zv-i" pathLength="1" d="M12 11v5"/>' + punkt(7.5, 'zv-punkt'),
+    'warnung:d': scheibe + puls + '<g class="zv-wackeln"><path d="' + dreieck + '"/><path d="' + ausruf + '"/>' +
+      punkt(16.6) + '</g>',
+    'kopie:d': scheibe + puls + '<path class="zv-strich zv-hinten" pathLength="1" d="' + hinten + '"/>' +
+      '<rect class="zv-strich zv-vorn" pathLength="1" ' + vorn + '/>',
+    'laden:d': scheibe + puls + pfeil + '<path class="zv-strich zv-schale" pathLength="1" d="' + schale + '"/>'
   }[zeichen + ':' + variante];
   return innen ? '<svg viewBox="-10 -10 44 44" fill="none" stroke="currentColor" stroke-width="2" ' +
     'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + innen + '</svg>' : '';
@@ -3047,15 +3088,17 @@ function zeichneZeichenProbe() {
             zeichenScheibe(z, null) + '<span class="zp-name">Heute</span></button>'
           : '<div class="zp-zelle"><span class="zp-leer" aria-hidden="true"></span><span class="zp-name">neu</span></div>') +
         p.varianten.map(function (v) {
-          return '<button type="button" class="zp-zelle" data-probe="' + z + ':' + v[0] + '" aria-label="' +
+          return '<button type="button" class="zp-zelle' + (v[0] === 'd' ? ' zp-d' : '') + '" data-probe="' + z + ':' + v[0] + '" aria-label="' +
             esc(p.name + ', Fassung ' + v[0].toUpperCase() + ': ' + v[1]) + '">' + zeichenScheibe(z, v[0]) +
-            '<span class="zp-name">' + esc(v[0].toUpperCase() + ' · ' + v[1]) + '</span></button>';
+            '<span class="zp-name">' + esc(v[0].toUpperCase()) + '</span></button>';
         }).join('') + '</div></div>';
     }).join('') +
     '<button type="button" class="knopf zart" id="zpAlle">Alle abspielen</button>' +
     '</div></section>';
 }
 
+// Unter dem Zeichen steht nur der Buchstabe — fünf Namen passen nicht
+// nebeneinander; der Name steht in der Meldung.
 // Die Zelle bewegt sich, dann quillt dieselbe Fassung als Meldung aus ihr.
 function zeichenProbeZeigen(knopf) {
   var teil = knopf.getAttribute('data-probe').split(':'), z = teil[0], v = teil[1] || null, p = ZEICHEN_PROBE[z];

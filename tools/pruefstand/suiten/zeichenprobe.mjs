@@ -1,5 +1,5 @@
 // Zeichenprobe (0.13.3T): Am Ende des Dashboards steht je Zeichen das heutige und
-// drei neue Fassungen zur Wahl — Haken, Hinweis, Warnung (neu), Kopiert,
+// drei neue Fassungen zur Wahl, dazu D aus der Wahl des Nutzers (0.13.3T2) — Haken, Hinweis, Warnung (neu), Kopiert,
 // Datei geladen. Ein Tipp zeigt die Fassung in einer echten Meldung; jede
 // bewegt sich und ist fertig, bevor die Bestätigung geht. Danach trägt eine
 // gewöhnliche Meldung wieder ihr heutiges Zeichen. Geht mit der Kachel.
@@ -23,8 +23,8 @@ var namen = Object.keys(ZEICHEN_PROBE);
 mitDaten();
 var reihen = alle('#zeichenProbe .zp-reihe');
 pruefe('K1 die Kachel steht als letzte auf dem Dashboard', !!q('#zeichenProbe') && !q('#zeichenProbe').nextElementSibling);
-pruefe('K2 je Zeichen eine Reihe mit drei Fassungen', reihen.length === namen.length && namen.every(function (z) {
-  return ['a', 'b', 'c'].every(function (v) { return !!q('#zeichenProbe [data-probe="' + z + ':' + v + '"] svg'); });
+pruefe('K2 je Zeichen eine Reihe mit vier Fassungen', reihen.length === namen.length && namen.every(function (z) {
+  return ['a', 'b', 'c', 'd'].every(function (v) { return !!q('#zeichenProbe [data-probe="' + z + ':' + v + '"] svg'); });
 }), reihen.length);
 pruefe('K3 das heutige steht daneben, wo es eins gibt', ZEICHEN.every(function (z) {
   return !!q('#zeichenProbe [data-probe="' + z + ':"] .hinweis-haken:not([data-variante])');
@@ -38,9 +38,15 @@ pruefe('K5 nichts ragt über den Rand', alle('#zeichenProbe .zp-zelle').every(fu
 }));
 
 // ── B · jede Fassung bewegt sich, kurz genug ────────────────
+// Ein Teil kann mehrere Bewegungen tragen — jede zählt, die späteste entscheidet.
 function ende(el) {
-  var st = getComputedStyle(el), n = st.animationIterationCount === 'infinite' ? 99 : parseFloat(st.animationIterationCount) || 1;
-  return st.animationName === 'none' ? 0 : parseFloat(st.animationDelay) + parseFloat(st.animationDuration) * n;
+  var st = getComputedStyle(el);
+  if (st.animationName === 'none') return 0;
+  var warten = st.animationDelay.split(','), dauer = st.animationDuration.split(','), mal = st.animationIterationCount.split(',');
+  return Math.max.apply(null, st.animationName.split(',').map(function (x, i) {
+    var n = (mal[i % mal.length] || '1').trim(); n = n === 'infinite' ? 99 : parseFloat(n) || 1;
+    return parseFloat(warten[i % warten.length]) + parseFloat(dauer[i % dauer.length]) * n;
+  }));
 }
 q('#zpAlle').click();
 var bericht = {};
@@ -56,6 +62,30 @@ pruefe('B1 «Alle abspielen»: jede Fassung bewegt sich und ist vor der Bestäti
 pruefe('B2 das heutige bewegt sich mit', ZEICHEN.every(function (z) {
   return q('#zeichenProbe [data-probe="' + z + ':"] .hinweis-haken').classList.contains('zeichnet');
 }));
+
+// ── D · aus der Wahl, jede endet mit dem Puls ───────────────
+function letzte(s) {
+  var teile = Array.prototype.slice.call(s.querySelectorAll('svg *')).filter(function (el) {
+    return getComputedStyle(el).animationName !== 'none'; });
+  var spaet = Math.max.apply(null, teile.map(ende));
+  return teile.filter(function (el) { return ende(el) === spaet; })[0];
+}
+var dZellen = alle('#zeichenProbe [data-variante="d"]');
+pruefe('D1 jede D-Fassung endet mit dem Puls', dZellen.length === namen.length && dZellen.every(function (s) {
+  var l = letzte(s); return l && l.classList.contains('zv-puls');
+}));
+pruefe('D5 der Puls zeigt sich nicht, solange er wartet', alle('#zeichenProbe .zv-puls').every(function (el) {
+  var st = getComputedStyle(el); return st.animationName === 'none' || st.animationFillMode === 'forwards';
+}));
+var hd = q('#zeichenProbe [data-probe="hinweis:d"] .hinweis-haken');
+pruefe('D2 Hinweis D: der Kreis um das i zeichnet sich, der Punkt fällt', getComputedStyle(hd.querySelector('.zv-rand')).animationName === 'z-zeichnen' &&
+  getComputedStyle(hd.querySelector('.zv-punkt')).animationName === 'zv-tropfen');
+var kd = getComputedStyle(q('#zeichenProbe [data-probe="kopie:d"] .zv-vorn')).animationName;
+pruefe('D3 Kopiert D: das Blatt fächert und zeichnet sich zugleich', /z-zeichnen/.test(kd) && /zv-vorn/.test(kd), kd);
+var ld = q('#zeichenProbe [data-probe="laden:d"] .hinweis-haken');
+var schale = getComputedStyle(ld.querySelector('.zv-schale')).animationName;
+pruefe('D4 Laden D: die Schale zeichnet sich und gibt nach, der Pfeil fliegt hinein', /z-zeichnen/.test(schale) &&
+  /zv-tauchen/.test(schale) && getComputedStyle(ld.querySelector('.zv-pfeil')).animationName === 'zv-fallen', schale);
 
 // ── M · als Meldung ─────────────────────────────────────────
 q('#zeichenProbe [data-probe="warnung:b"]').click();
