@@ -186,7 +186,7 @@ pruefe('W2 der Ring ist ein Drittel so dick wie zuvor', Math.abs(parseFloat(getC
 state.welle = null;
 zeige('home');
 
-var blattFluss = null;
+var blattFluss = null, stillstand = null;
 return Promise.resolve().then(function () {
   // ── M · Das Menü auf iOS, in Bewegung ─────────────────────
   aufbauen();
@@ -275,6 +275,76 @@ return Promise.resolve().then(function () {
   pruefe('B12 ohne Bewegung steht sie sofort am Ziel', fpLauf.perle.offen() && !fpLauf.perle.laeuft);
   pruefe('B13 nichts macht die Seite breiter', document.documentElement.scrollWidth <= innerWidth);
   state.bewegung = 'auto';
+  state.fluessig = null;
+  flDauernSetzen();
+  // ── D · Dunkel: Kontrast, Saum, Lichtkante ──────────────────
+  aufbauen();
+  // Gefragt ist die Zielfarbe, nicht der Übergang dorthin.
+  stillstand = document.createElement('style');
+  stillstand.textContent = '*, *::before, *::after { transition: none !important; }';
+  document.head.appendChild(stillstand);
+  state.thema = 'dunkel';
+  themaAnwenden();
+  function hell(c) { var f = flRgb(c); return f ? 0.2126 * f[0] + 0.7152 * f[1] + 0.0722 * f[2] : 0; }
+  var seite = hell(getComputedStyle(document.body).backgroundColor);
+  pruefe('D1 in Dunkel ist das Menü heller als der Grund', hell(getComputedStyle(q('#menue .blatt')).backgroundColor) > seite + 15);
+  pruefe('D2 der Menüknopf hebt sich ab, mit hellem Rand', hell(getComputedStyle(q('#menuKnopf')).backgroundColor) > seite + 10 &&
+    getComputedStyle(q('#menuKnopf')).boxShadow.indexOf('inset') >= 0);
+  pruefe('D3 die Marke einer Wahl ist heller als ihre Bahn',
+    hell(getComputedStyle(q('.held .wahl-marke')).backgroundColor) > hell(getComputedStyle(q('.held .wahl')).backgroundColor) + 10);
+  // Ab hier zählen die echten Übergänge wieder: W3 und T2 fragen nach ihnen.
+  weg(stillstand);
+  var probe = document.createElement('div');
+  document.body.appendChild(probe);
+  var pb = fpSchichten(probe, 'pruef', true);
+  pruefe('D4 die Lichtkante stanzt mit voller Deckkraft aus, sonst bliebe ein grauer Schleier',
+    !!probe.querySelector('filter[id="fpL-pruef"] feComponentTransfer feFuncA[type="linear"]') && !!pb.kern);
+  weg(probe);
+  pruefe('D5 Farben lesen und mischen', flMischen([255, 255, 255, 1], flRgb('#141413'), 0) === 'rgba(20, 20, 19, 1)' &&
+    flMischen([255, 255, 255, 1], [0, 0, 0, 1], 1) === 'rgba(255, 255, 255, 1)' && flRgb('rgba(1, 2, 3, .5)')[3] === 0.5);
+  state.fluessig = { ios: { menue: true, ansichten: true, tag: true, schalter: true, haken: true } };
+  flDauernSetzen();
+  menueOeffnen();
+  var mf = q('#menue .blatt')._fluss;
+  pruefe('D6 im Fließen trägt das Flüssige einen hellen Saum und hebt sich', !!mf &&
+    hell(mf.b.fluss.style.background) > hell(mf.b.kern.style.background) + 20 &&
+    hell(mf.b.kern.style.background) > hell(getComputedStyle(document.documentElement).getPropertyValue('--erhoben')));
+  letzterTipp = { el: q('#menueListe [data-menue="journal"]'), zeit: Date.now() };
+  var u = uebergangVorbereiten('home', 'journal'), kr = q('#menuKnopf').getBoundingClientRect();
+  pruefe('Q1 aus dem Menü quillt eine Ansicht aus dem Menüknopf, nicht aus dem, was unter dem Eintrag liegt',
+    !!u && !!u.quelle && Math.abs(u.quelle.left - kr.left) < 1 && Math.abs(u.quelle.top - kr.top) < 1);
+  menueSchliessen(true);
+  q('[data-kalender="monat"]').click();
+  pruefe('W3 nach dem Neuzeichnen trägt kein Knopf eine zweite Marke',
+    getComputedStyle(q('.held [data-kalender="monat"]')).backgroundColor === 'rgba(0, 0, 0, 0)');
+  ausbewegt();
+  q('[data-kalender="woche"]').click();
+  ausbewegt();
+  alle('#kalRaster [data-kaltag]')[1].click();
+  return warten(900);
+}).then(function () {
+  ausbewegt();
+  alle('#kalRaster [data-kaltag]')[4].click();
+  var n = q('#kalRaster .kal-tag.gewaehlt');
+  pruefe('T1 auf iOS wechselt die Tagesliste nur den Inhalt, ohne neuen Tropfen', !q('.held .tropfen') && !!q('#kalLeiste'));
+  pruefe('T2 ein Ring gleitet, der Zielring wartet, ohne auszublenden', !!q('body > .fl-tagring') && !!n &&
+    n.classList.contains('gleitet') && getComputedStyle(n).transitionDuration.split(',').every(function (d) { return parseFloat(d) === 0; }));
+  return warten(900);
+}).then(function () {
+  ausbewegt();
+  q('#app [data-kaltag].gewaehlt').click();
+  state.gewohnheiten.push(gewohnheitLesen({ id: 'Z', name: 'Wasser', rhythmus: { art: 'taeglich' },
+    angelegt: tagPlus(heuteSchluessel(), -3), erledigt: [], zaehler: { schritt: 1 } }));
+  zeige('home');
+  return warten(900);
+}).then(function () {
+  ausbewegt();
+  var vor = alle('body > .fl-perle').length;
+  q('#app [data-haken="Z"]').click();
+  pruefe('Z1 auch ein Zähler schickt auf iOS einen Tropfen in den Tagesring', alle('body > .fl-perle').length > vor);
+  state.thema = 'auto';
+  themaAnwenden();
+  weg(stillstand);
   state.fluessig = null;
   flDauernSetzen();
 });

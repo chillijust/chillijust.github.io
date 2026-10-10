@@ -2,7 +2,7 @@
 
 *2026-10-10 · Planänderung des Nutzers nach 0.17.0T2 · Version 0.17.0T3 · löst in 0053 die
 Voreinstellung «iOS 26 im Filter», die eigenen Einstellungen (Grund, Technik, Regler),
-«Einstellungen kopieren» und den Filter ab; ändert in 0041 den Aufbau des Timers*
+«Einstellungen kopieren» und den Filter ab; ändert in 0041 den Aufbau des Timers; ergänzt durch 0055 (Kontrast in Dunkel)*
 
 ## Ausgangslage
 

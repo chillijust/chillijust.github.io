@@ -64,6 +64,16 @@
      kurzen Weg nicht (ADR 0032). */
   --glas-tropfen: rgba(250, 249, 245, .86);
   --glas-rand: rgba(20, 20, 19, .16);
+  /* Erhöht (Menü), Marke einer Wahl und ihr Rand: in Hell wie der Grund, in
+     Dunkel heller als er — ein Schatten trägt dort nicht. Das Flüssige zeigt
+     im Fließen einen Saum (`--fl-rand`) und hebt sich um `--fl-hebung` Prozent
+     zum Weißen, in Ruhe ist es wieder das Teil (ADR 0054). */
+  --erhoben: #FAF9F5;
+  --marke: #FAF9F5;
+  --spur: #E8E6DC;
+  --rand-hell: rgba(255, 255, 255, 0);
+  --fl-rand: #D6D3C9;
+  --fl-hebung: 0;
   --rund: 20px;
   --serif: 'Lora', Georgia, 'Times New Roman', serif;
   --sans: 'Poppins', -apple-system, 'Helvetica Neue', Arial, sans-serif;
@@ -74,8 +84,8 @@
     --grund: #141413;
     --text: #FAF9F5;
     --text-2: #B0AEA5;
-    --flaeche: #1F1F1D;
-    --flaeche-2: #2B2B28;
+    --flaeche: #242422;
+    --flaeche-2: #33332F;
     --linie: #4A4945;
     --erledigt: #9DB283;
     --termin: #8FB6DD;
@@ -89,6 +99,12 @@
     --glas-schleier: rgba(0, 0, 0, .38);
     --glas-tropfen: rgba(43, 43, 40, .9);
     --glas-rand: rgba(255, 255, 255, .2);
+    --erhoben: #2C2C29;
+    --marke: #4A4A44;
+    --spur: #4A4A44;
+    --rand-hell: rgba(255, 255, 255, .12);
+    --fl-rand: #85837B;
+    --fl-hebung: 9;
     color-scheme: dark;
   }
 }
@@ -96,8 +112,8 @@
   --grund: #141413;
   --text: #FAF9F5;
   --text-2: #B0AEA5;
-  --flaeche: #1F1F1D;
-  --flaeche-2: #2B2B28;
+  --flaeche: #242422;
+  --flaeche-2: #33332F;
   --linie: #4A4945;
   --erledigt: #9DB283;
   --termin: #8FB6DD;
@@ -111,6 +127,12 @@
   --glas-schleier: rgba(0, 0, 0, .38);
   --glas-tropfen: rgba(43, 43, 40, .9);
   --glas-rand: rgba(255, 255, 255, .2);
+  --erhoben: #2C2C29;
+  --marke: #4A4A44;
+  --spur: #4A4A44;
+  --rand-hell: rgba(255, 255, 255, .12);
+  --fl-rand: #85837B;
+  --fl-hebung: 9;
   color-scheme: dark;
 }
 
@@ -271,6 +293,7 @@ svg.wm { display: block; flex: none; color: var(--text); overflow: visible; }
   display: grid;
   place-items: center;
   background: var(--flaeche);
+  box-shadow: inset 0 0 0 1px var(--rand-hell);
   transition: transform .15s ease, background-color .3s ease;
 }
 .rund:active { transform: scale(.92); }
@@ -647,7 +670,7 @@ svg.wm { display: block; flex: none; color: var(--text); overflow: visible; }
 
 /* ── Dashboard: Kalender ───────────────────────────────────── */
 .kal-kopf { display: flex; align-items: center; gap: 4px; margin: 10px 0 6px; }
-.kal-kopf .rund { background: transparent; }
+.kal-kopf .rund { background: transparent; box-shadow: none; }
 .kal-titel {
   flex: 1;
   min-height: 44px;
@@ -955,7 +978,7 @@ button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
   width: 51px;
   height: 31px;
   border-radius: 16px;
-  background: var(--flaeche-2);
+  background: var(--spur);
   transition: background-color .2s ease;
 }
 .schalter-knauf {
@@ -1146,10 +1169,10 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
   width: max-content;
   min-width: 220px;
   max-width: calc(100vw - 32px);
-  background: var(--grund);
+  background: var(--erhoben);
   border-radius: 18px;
   padding: 6px;
-  box-shadow: 0 2px 6px rgba(20, 20, 19, .10), 0 16px 40px rgba(20, 20, 19, .18);
+  box-shadow: inset 0 0 0 1px var(--rand-hell), 0 2px 6px rgba(20, 20, 19, .10), 0 16px 40px rgba(20, 20, 19, .18);
   transform-origin: 100% 0;
   overflow: hidden;
 }
@@ -1209,7 +1232,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
   color: var(--text-2);
   transition: background-color .2s ease, color .2s ease;
 }
-.wahl button[aria-pressed="true"] { background: var(--grund); color: var(--text); box-shadow: var(--schatten); }
+.wahl button[aria-pressed="true"] { background: var(--marke); color: var(--text); box-shadow: inset 0 0 0 1px var(--rand-hell), var(--schatten); }
 .zeile {
   display: flex;
   align-items: center;
@@ -1404,7 +1427,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 @keyframes fl-kante-ein { from { opacity: 0; } to { opacity: 1; } }
 .fl-perle { position: fixed; z-index: 30; border-radius: 50%; background: var(--erledigt); pointer-events: none; }
 .fl-tagring { position: fixed; z-index: 5; pointer-events: none; box-shadow: inset 0 0 0 2px var(--akzent); }
-.kal-tag.gewaehlt.gleitet { box-shadow: none; }
+.kal-tag.gewaehlt.gleitet { box-shadow: none; transition: none; }
 .fl-welle { position: absolute; inset: 8.5%; border-radius: 50%; overflow: hidden; opacity: .5; --fp-farbe: var(--akzent); }
 /* Ungespeichertes im Reiter «Flüssig»: oben, bleibt beim Rollen. */
 .fl-leiste {
@@ -1460,6 +1483,10 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 .fp-buehne[data-fp-buehne="perle"] { height: 184px; }
 .fp-schicht { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
 .fp-fluss { z-index: 2; background: var(--fp-farbe); }
+/* Der Kern liegt um den Saum eingerückt auf dem Fluß; zwischen beiden steht
+   der Saum (`fpZeichnen`). Glas hat keinen. */
+.fp-kern { z-index: 2; background: var(--fp-farbe); }
+.fp-glas .fp-kern { display: none; }
 .fp-glas .fp-fluss { background: var(--glas); -webkit-backdrop-filter: blur(3px) saturate(190%); backdrop-filter: blur(3px) saturate(190%); }
 .fp-schatten { opacity: .24; }
 .fp-schicht.fp-oben { z-index: 3; }
@@ -1523,11 +1550,15 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 .wahl-marke {
   position: absolute;
   border-radius: 12px;
-  background: var(--grund);
-  box-shadow: var(--schatten);
+  background: var(--marke);
+  box-shadow: inset 0 0 0 1px var(--rand-hell), var(--schatten);
   pointer-events: none;
 }
 .wahl.mit-marke button[aria-pressed="true"] { background: transparent; box-shadow: none; }
+/* Mit Marke blendet kein Knopf seinen Grund: Neu gezeichnet trägt der gewählte
+   ihn einen Augenblick selbst, bis die Marke da ist — eine zweite Marke, die
+   noch ausblendete. */
+.wahl.mit-marke button { transition: color .2s ease; }
 /* Wer einen Schalter drückt, sieht den Knauf sich strecken — wie unter iOS. */
 .schalter-knauf { transition: transform .5s var(--fl-schalter-kurve, var(--feder, ease)), width .3s var(--feder, ease); }
 .schalter:active .schalter-knauf { width: 33px; }
@@ -1643,7 +1674,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 .ticket-karte textarea.eingabe { min-height: 50px; resize: none; overflow-y: hidden; }
 .tk-wahlen { display: flex; flex-direction: column; gap: 0; }
 .tk-kopf-liste { justify-content: flex-start; gap: 4px; margin-left: -6px; }
-.tk-kopf-liste .rund { background: transparent; }
+.tk-kopf-liste .rund { background: transparent; box-shadow: none; }
 .tk-kopf-liste .tk-alle { margin-left: auto; }
 .tk-liste-blatt { display: flex; flex-direction: column; gap: 6px; }
 /* Jede Zeile ist eine eigene Fläche — so sieht man sie einzeln auftropfen (ADR 0026). */
@@ -1755,7 +1786,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.17.0T5';
+var APP_VERSION = '0.17.0T6';
 var APP_STAND = '2026-10-10';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -2876,8 +2907,12 @@ function teilSchritt(el, weiter) {
   f.b.kante = FP_IOS.kante * fpKlemme(Math.abs(p.ziel - p.x) * 3, 0, 1);
   f.s.style.display = '';
   fpLage(f.s, { x: x0, y: y0, w: x1 - x0, h: y1 - y0 });
+  // Glas spart den Tropfen um den Saum eingerückt aus: Der Saum bleibt stehen
+  // und faßt das Glas, das sonst im Dunkeln kaum zu sehen wäre.
+  var sa = FP_SAUM, glasLoch = o.glas ? fpUmriss(fpPunkte({ x: t.x + sa, y: t.y + sa, w: Math.max(0, t.w - 2 * sa),
+    h: Math.max(0, t.h - 2 * sa), r: Math.max(0, t.r - sa), deh: t.deh })) : '';
   var loch = 'path(evenodd, "M0 0H' + fpZ(x1 - x0) + 'V' + fpZ(y1 - y0) + 'H0Z' + (o.rest ? '' : fpUmriss(fpPunkte(q))) +
-    (o.glas ? fpUmriss(fpPunkte(t)) : '') + '")';
+    glasLoch + '")';
   f.s.style.clipPath = f.s.style.webkitClipPath = loch;
   fpZeichnen(f.b);
   fpBild(weiter);
@@ -2908,13 +2943,13 @@ function huelleFliesst(h, inhalt, z, quelle, auf, opt, dauer, fertig) {
   h.style.width = px(z.width);
   h.style.height = px(z.height);
   h.style.borderRadius = rund;
-  // Auf quillt er aus einer Perle von Knopfgröße mitten in der Quelle — die
-  // Quelle selbst kann eine breite Zeile sein, oder schon fort.
+  // Auf quillt er aus einem Kreis von Knopfgröße mitten in der Quelle — die
+  // Quelle selbst kann eine breite Kachel sein.
   var q = auf ? function () {
     var r = quelle(), d = r ? Math.min(r.width, r.height, 44) : 0;
     return r && { left: r.left + r.width / 2 - d / 2, top: r.top + r.height / 2 - d / 2, width: d, height: d };
   } : quelle;
-  teilFliesst(h, { quelle: q, rest: auf, ziel: function () { return z; }, rund: parseFloat(rund) || 0, d0: 36, inhalt: inhalt,
+  teilFliesst(h, { quelle: q, ziel: function () { return z; }, rund: parseFloat(rund) || 0, d0: 36, inhalt: inhalt,
     glas: !!opt.glas, farbe: f.dicht, farbeAmZiel: f.duenn, schatten: opt.glas ? SCHATTEN_GLAS : SCHATTEN_HUELLE, auf: auf,
     warten: opt.warten, schnell: fpKlemme(dauer / fluessigTakt(opt.glas ? 'hinweis' : 'ansichten').dauer, 0.4, 2), fertig: fertig });
 }
@@ -2958,17 +2993,21 @@ function tagGleitet(von, nach) {
   if (!nach || bewegungAus() || !zuSehen(nach)) return;
   var n = nach.getBoundingClientRect(), tk = fluessigTakt('tag'), deh = FP_IOS.dehnen;
   if (Math.abs(von.left - n.left) < 1 && Math.abs(von.top - n.top) < 1) return;
-  var g = document.createElement('div'), dx = von.left - n.left, dy = von.top - n.top;
+  var g = document.createElement('div');
   g.className = 'fl-tagring';
   g.setAttribute('aria-hidden', 'true');
   g.style.cssText = 'left: ' + px(n.left) + '; top: ' + px(n.top) + '; width: ' + px(n.width) + '; height: ' + px(n.height) +
     '; border-radius: ' + getComputedStyle(nach).borderTopLeftRadius + ';';
   document.body.appendChild(g);
   nach.classList.add('gleitet');
-  bewegt(g, [{ transform: 'translate(' + px(dx) + ', ' + px(dy) + ')' },
-    { transform: 'translate(' + px(dx / 2) + ', ' + px(dy / 2) + ') scale(' + (1 + 0.3 * deh).toFixed(3) + ', ' +
-      (1 - 0.15 * deh).toFixed(3) + ')', offset: 0.4 },
-    { transform: 'translate(0px, 0px)' }], { dauer: tk.dauer, kurve: tk.kurve }, function () {
+  // Gedehnt wird über Breite und Höhe, nicht über scale — sonst würde der
+  // Ring unterwegs dicker und dünner.
+  var mx = (von.left + von.width / 2 + n.left + n.width / 2) / 2, my = (von.top + von.height / 2 + n.top + n.height / 2) / 2;
+  var waag = Math.abs(n.left - von.left) >= Math.abs(n.top - von.top);
+  var mb = n.width * (waag ? 1 + 0.35 * deh : 1 - 0.12 * deh), mh = n.height * (waag ? 1 - 0.12 * deh : 1 + 0.35 * deh);
+  function bild(l, t, b, h, off) { var f = { left: px(l), top: px(t), width: px(b), height: px(h) }; if (off !== undefined) f.offset = off; return f; }
+  bewegt(g, [bild(von.left, von.top, von.width, von.height), bild(mx - mb / 2, my - mh / 2, mb, mh, 0.45),
+    bild(n.left, n.top, n.width, n.height)], { dauer: tk.dauer, kurve: tk.kurve }, function () {
     weg(g);
     nach.classList.remove('gleitet');
   });
@@ -2983,7 +3022,7 @@ function hakenFliesst(id) {
   if (!zuSehen(von) || !zuSehen(ziel)) return;
   var a = von.getBoundingClientRect(), z = ziel.getBoundingClientRect(), hoehe = window.innerHeight || 0;
   if (z.bottom < 0 || z.top > hoehe || a.bottom < 0 || a.top > hoehe) return;
-  var tk = fluessigTakt('haken', true), w = FP_IOS, d = 16, dauer = Math.round(tk.dauer * 1.2);
+  var tk = fluessigTakt('haken', true), w = FP_IOS, d = 22, dauer = Math.round(tk.dauer * 1.5);
   var ax = a.left + a.width / 2, ay = a.top + a.height / 2, zx = z.left + z.width / 2, zy = z.top + z.height / 2;
   var bogen = Math.min(70, Math.abs(zy - ay) * 0.3), t = document.createElement('div'), bilder = [];
   t.className = 'fl-perle';
@@ -3263,6 +3302,12 @@ function uebergangVorbereiten(von, nach) {
   var mitTipp = nach !== 'home' && tipp && document.contains(tipp);
   var flaeche = mitTipp ? tippFlaeche(tipp).getBoundingClientRect() : null;
   if (!flaeche) punkt = null;
+  // Aus dem Menü quillt eine Ansicht auf iOS aus dem Menüknopf: Der Eintrag
+  // ist fort, wenn sie kommt — an seiner Stelle stünde, was darunter liegt,
+  // etwa «Woche | Monat», und es sähe aus, als käme sie von dort.
+  if (flaeche && !punkt && flIos('ansichten') && tipp.closest('#menue') && zuSehen(menueAnker())) {
+    flaeche = menueAnker().getBoundingClientRect();
+  }
   if (von === 'home' && nach !== 'home') {
     homeScroll = window.pageYOffset || 0;
     herkunft = tipp && document.contains(tipp) ? selektorVon(tipp) : null;
@@ -5610,22 +5655,83 @@ function fpGleiterFormen(g, w, liste, haelse, key) {
 function fpZeichnen(b) {
   var w = FP_IOS, erg = b.formen(w), liste = erg.formen, jetzt = {};
   function mitte(x) { return typeof x === 'number' ? fpMitte(liste[x]) : x; }
-  function kreis(x, gegen) { return typeof x === 'number' ? fpKern(liste[x], gegen) : x; }
+  function kreis(x, gegen, l) { return typeof x === 'number' ? fpKern((l || liste)[x], gegen) : x; }
+  function umriss(l) { return l.filter(function (f) { return !f.nur; }).map(function (f) { return fpUmriss(fpPunkte(f)); }).join(''); }
   // Eine Form mit `nur` trägt einen Hals, gemalt wird sie nicht.
-  var d = (erg.pfade || []).join('') + liste.filter(function (f) { return !f.nur; }).map(function (f) { return fpUmriss(fpPunkte(f)); }).join('');
+  var d = (erg.pfade || []).join('') + umriss(liste);
   (erg.haelse || []).forEach(function (h) {
     var t = fpHalsPfad(kreis(h.a, mitte(h.b)), kreis(h.b, mitte(h.a)), h.weite);
     if (t) { d += t; jetzt[h.key] = true; }
   });
   d = d || 'M0 0Z';
+  var kante = b.kante === undefined ? w.kante : b.kante, stark = fpKlemme(kante / 0.6, 0, 1);
   b.fluss.style.webkitClipPath = 'path("' + d + '")';
   b.fluss.style.clipPath = 'path("' + d + '")';
+  // Der Saum: Der Kern ist dieselbe Form, um FP_SAUM eingerückt; der Fluß
+  // darunter trägt die Farbe des Saums. Er leuchtet, solange es fließt, und
+  // ist in Ruhe wieder das Teil — so springt am Ende nichts.
+  if (b.kern) {
+    var innen = liste.map(function (f) {
+      var s = f.s || 1, k = FP_SAUM / s;
+      return { x: f.x + k, y: f.y + k, w: Math.max(0, f.w - 2 * k), h: Math.max(0, f.h - 2 * k), r: Math.max(0, f.r - k), s: f.s,
+        deh: f.deh, nur: f.nur };
+    }), dk = (erg.pfade || []).join('') + umriss(innen);
+    (erg.haelse || []).forEach(function (h) {
+      if (!jetzt[h.key]) return;
+      dk += fpHalsPfad(kreis(h.a, mitte(h.b), innen), kreis(h.b, mitte(h.a), innen), h.weite) || '';
+    });
+    dk = dk || 'M0 0Z';
+    b.kern.style.webkitClipPath = 'path("' + dk + '")';
+    b.kern.style.clipPath = 'path("' + dk + '")';
+    var f = flFarben(b);
+    if (f) {
+      b.fluss.style.background = flMischen(f.rand, f.grund, stark);
+      b.kern.style.background = flMischen([255, 255, 255, 1], f.grund, f.hebung * stark);
+    }
+  }
   b.licht.setAttribute('d', d);
-  b.licht.style.opacity = String(b.kante === undefined ? w.kante : b.kante);
+  b.licht.style.opacity = String(kante);
   if (b.schatten) b.schatten.setAttribute('d', d);
   if (b.riss && !bewegungAus()) Object.keys(b.haelse).forEach(function (k) { if (!jetzt[k]) b.riss(k, w); });
   b.haelse = jetzt;
   if (b.zeigen) b.zeigen(w);
+}
+
+// Wie breit der Saum ist, in Pixeln.
+var FP_SAUM = 1.5;
+
+// Die Farben des Flüssigen, einmal gelesen: sein Grund (`--fp-farbe`), der
+// Saum und die Hebung aus dem Thema. Glas der Proben hat keinen Saum.
+function flFarben(b) {
+  if (b.farben !== undefined) return b.farben;
+  if (b.fluss.closest && b.fluss.closest('.fp-glas')) return (b.farben = null);
+  var cs = getComputedStyle(b.fluss), wurzel = getComputedStyle(document.documentElement);
+  var grund = flRgb(cs.getPropertyValue('--fp-farbe')) || flRgb(cs.backgroundColor);
+  if (!grund) return null;
+  b.farben = { grund: grund, rand: flRgb(wurzel.getPropertyValue('--fl-rand')) || grund,
+    hebung: (parseFloat(wurzel.getPropertyValue('--fl-hebung')) || 0) / 100 };
+  return b.farben;
+}
+
+// Eine Farbe als [r, g, b, a] — aus #rgb, #rrggbb, rgb() und rgba().
+function flRgb(t) {
+  t = String(t || '').trim();
+  var m = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(t);
+  if (m) {
+    var h = m[1].length === 3 ? m[1].replace(/./g, '$&$&') : m[1];
+    return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16), 1];
+  }
+  m = /^rgba?\(([^)]+)\)$/.exec(t);
+  if (!m) return null;
+  var z = m[1].split(/[\s,\/]+/).filter(Boolean).map(parseFloat);
+  return z.length >= 3 ? [z[0], z[1], z[2], z.length > 3 ? z[3] : 1] : null;
+}
+
+// `a` zum Anteil `t`, der Rest `b`.
+function flMischen(a, b, t) {
+  t = fpKlemme(t, 0, 1);
+  function k(i) { return Math.round(a[i] * t + b[i] * (1 - t)); }
+  return 'rgba(' + k(0) + ', ' + k(1) + ', ' + k(2) + ', ' + Math.round((a[3] * t + b[3] * (1 - t)) * 1000) / 1000 + ')';
 }
 
 function fpTeil(b, name) { return b.el.querySelector('[data-fp-teil="' + name + '"]'); }
@@ -5642,11 +5748,13 @@ function fpSchichten(ort, schluessel, flach) {
       '<filter id="fpS-' + schluessel + '" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur in="SourceAlpha" stdDeviation="6"/>' +
       '<feOffset dy="5" result="s"/><feComposite in="s" in2="SourceAlpha" operator="out"/></filter>' +
       '<path class="fp-schatten" filter="url(#fpS-' + schluessel + ')"/></svg>') +
-    '<div class="fp-schicht fp-fluss"></div>' +
+    '<div class="fp-schicht fp-fluss"></div><div class="fp-schicht fp-kern"></div>' +
     '<svg class="fp-schicht fp-oben" aria-hidden="true"><filter id="fpL-' + schluessel + '" x="-10%" y="-10%" width="120%" height="120%">' +
-      '<feOffset in="SourceAlpha" dx="0" dy="1.6" result="ver"/><feComposite in="SourceGraphic" in2="ver" operator="out" result="rand"/>' +
+      '<feComponentTransfer in="SourceAlpha" result="voll"><feFuncA type="linear" slope="50"/></feComponentTransfer>' +
+      '<feOffset in="voll" dx="0" dy="1.6" result="ver"/><feComposite in="SourceGraphic" in2="ver" operator="out" result="rand"/>' +
       '<feGaussianBlur in="rand" stdDeviation=".5"/></filter><path class="fp-licht" filter="url(#fpL-' + schluessel + ')"/></svg>');
   b.fluss = ort.querySelector('.fp-fluss');
+  b.kern = ort.querySelector('.fp-kern');
   b.licht = ort.querySelector('.fp-licht');
   b.schatten = ort.querySelector('.fp-schatten');
   return b;
@@ -8675,7 +8783,11 @@ function bindeAnsicht() {
       if (langGedrueckt && Date.now() - langGedrueckt < 1000) return;
       var g = gewohnheitNach(id), heute = heuteSchluessel();
       // Zähler zählen, ein Timer startet oder zeigt sich (ADR 0038).
-      if (g && g.zaehler) { zaehlen(id, 1); return; }
+      if (g && g.zaehler) {
+        zaehlen(id, 1);
+        if (flIos('haken')) hakenFliesst(id);
+        return;
+      }
       if (state.timer && state.timer.id === id) { timerOeffnen(id); return; }
       if (g && g.timer && !erledigtAm(id, heute)) { timerStarten(id); return; }
       geradeAbgehakt = id;
@@ -8896,7 +9008,12 @@ function bindeKalender() {
       kalTag = zu ? null : k;
       render();
       if (von && kalTag && flIos('tag')) tagGleitet(von, document.querySelector('#kalRaster [data-kaltag="' + kalTag + '"]'));
-      if (kalTag) tropfenFallen(tag, $('kalLeiste'));
+      // Auf iOS bleibt die Liste stehen, wenn ein anderer Tag gewählt wird, und
+      // wechselt nur den Inhalt — sonst liefen Markierung, Liste und Tropfen
+      // zugleich, und es sah unruhig aus.
+      if (kalTag && alt && flIos('tag') && $('kalLeiste')) {
+        bewegt($('kalLeiste'), [{ opacity: 0.35 }, { opacity: 1 }], { dauer: 260, kurve: 'ease-out' });
+      } else if (kalTag) tropfenFallen(tag, $('kalLeiste'));
       else leisteZurueck(g, r, tag);
     });
   });

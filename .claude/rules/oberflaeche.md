@@ -15,6 +15,9 @@ fest.
 - **Farben nur über Tokens** (`--grund`, `--text`, `--flaeche`, `--akzent`, `--knopf`,
   `--erledigt`, `--termin`, `--glas…` usw.). Keine Hexzahl außerhalb der drei
   Paletten-Blöcke und `GRUND` im Skript.
+- **Erhöhtes ist in Dunkel heller als der Grund** (`--erhoben`, `--marke`, `--spur`,
+  Rand `--rand-hell`; ADR 0055) — ein Schatten trägt dort nicht. Das Flüssige zeigt im
+  Fließen seinen Saum (`--fl-rand`, `--fl-hebung`), in Ruhe ist es das Teil.
 - **Die dunkle Palette steht zweimal gleich**: unter `prefers-color-scheme: dark` für
   `:root:not([data-thema="hell"])` und unter `:root[data-thema="dunkel"]` — wer einen Wert
   ändert, ändert beide (Suite `thema`); den Grund zusätzlich in `GRUND`.
