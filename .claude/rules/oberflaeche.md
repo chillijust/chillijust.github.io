@@ -55,7 +55,8 @@ fest.
   `zeileGeht(el, liste, ersatz)`.
 - **Es gibt eine Tropfen-Mechanik**: `tropfenAuf`/`tropfenZu` mit `tropfenQuelle` — rund,
   ohne Spitze. Sie fließt (ADR 0053): Kurve und Dauer aus `fluessigTakt(stelle)`, hinein
-  ohne Überschwingen, der Hals zur Quelle über `fliessen()`. Was ein Knopf öffnet, tropft
+  ohne Überschwingen, der Hals zur Quelle über `fliessen()`. Feste Dauern setzt nur
+  `flDauernSetzen` — keine Zahl von Hand. Was ein Knopf öffnet, tropft
   aus ihm und in ihn zurück; ist die Herkunft fort, in den Menüknopf. Nach langem Druck aus
   dem Fingerpunkt (`punktFlaeche`).
 - **Teile über `teilZeigen(el, an, quelle)`, Knöpfe über `teilTropfen(el, an)`**, nie

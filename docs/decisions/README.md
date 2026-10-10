@@ -60,4 +60,4 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0050](0050-kommunikation-nur-auf-eigenem-branch.md) | `kommunikation/` lebt nur auf `chatgpt/kommunikation`, nie auf `main`; nie zusammenführen | gilt |
 | [0051](0051-zeichen-neu-mit-puls-und-warnung.md) | Zeichen der Meldung neu bewegt, jedes endet mit dem Puls; eine Warnung für Fehlschläge | gilt |
 | [0052](0052-kalender-wischen.md) | Der Kalender folgt dem Finger (Tropfen, 1:1); Pfeile und «Heute» spielen dieselbe Bewegung | gilt; löst den Seitentropfen aus 0028 ab |
-| [0053](0053-fluessige-tropfen.md) | Die Tropfen fließen wie in iOS 26: Feder, Hals, Dehnen, Lichtkante; Reiter «Flüssig» in den Einstellungen | gilt; löst «ohne Überschwingen» aus 0008 ab |
+| [0053](0053-fluessige-tropfen.md) | Die Tropfen fließen wie in iOS 26: Feder, Hals, Dehnen, Lichtkante, an jeder Stelle; Reiter «Flüssig» in den Einstellungen | gilt; löst «ohne Überschwingen» aus 0008 und die festen Dauern ab |

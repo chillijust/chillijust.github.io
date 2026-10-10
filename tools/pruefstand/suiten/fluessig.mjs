@@ -81,7 +81,8 @@ pruefe('F1 ohne Nachfedern kommt sie ohne Überschwingen an', spitze(0).max <= 1
 pruefe('F2 mit Nachfedern schwingt sie über', spitze(0.7).max > 1.05);
 function punkte(kurve) { return kurve.slice(7, -1).split(',').map(Number); }
 var tk = fluessigTakt('menue'), tz = fluessigTakt('menue', true);
-pruefe('F3 die Voreinstellung läßt die abgenommenen Dauern, wie sie sind', Math.abs(tk.faktor - 1) < 1e-9);
+pruefe('F3 die App läuft mit der Zeit der Feder, wie die Probe', TROPFEN_DAUER === tk.dauer && tk.dauer > 400 && tk.dauer < 700 &&
+  MENUE_DAUER === Math.round(tk.dauer * 0.8125) && HINWEIS_DAUER === Math.round(fluessigTakt('hinweis').dauer * 0.4), tk.dauer);
 pruefe('F4 die Kurve ist die Feder, mit Überschwingen', tk.kurve.indexOf('linear(') === 0 &&
   Math.max.apply(null, punkte(tk.kurve)) > 1 && punkte(tk.kurve).pop() === 1);
 pruefe('F5 in den Knopf hinein schwingt nichts über', punkte(tz.kurve).every(function (x, i, a) { return x <= 1 && (!i || x >= a[i - 1]); }));
@@ -169,7 +170,7 @@ return warten(120).then(function () {
   return warten(120);
 }).then(function () {
   pruefe('R3 fern der Quelle ist er gerissen', hals.style.display === 'none');
-  return warten(400);
+  return warten(800);
 }).then(function () {
   pruefe('R4 danach räumt er auf', !hals.isConnected && !tropfen.classList.contains('fl-kante'));
   weg(quelle);
@@ -180,22 +181,24 @@ return warten(120).then(function () {
     a.effect.getTiming().duration === MENUE_DAUER && !!q('#menue .fl-schicht'));
   menueSchliessen(true);
   state.fluessig = fluessigLesen({ eigen: true, werte: { tempo: 1, feder: 0.35, hals: 0.35, dehnen: 0.4, kante: 0.6 } });
+  flDauernSetzen();
   var vorher = alle('body > .tropfen-huelle');
   tropfenAuf(q('#ansicht'), punktFlaeche(320, 60));
   h = alle('body > .tropfen-huelle').filter(function (x) { return vorher.indexOf(x) < 0; })[0];
   pruefe('R6 eigenes Tempo dehnt die Dauer, der Tropfen hängt an seiner Quelle', !!h &&
-    h.getAnimations()[0].effect.getTiming().duration === Math.round(TROPFEN_DAUER * fluessigTakt('menue').faktor) &&
-    fluessigTakt('menue').faktor > 1.9 && !!h.previousElementSibling && h.previousElementSibling.classList.contains('fl-schicht'));
-  return warten(Math.round(TROPFEN_DAUER * fluessigTakt('menue').faktor) + 300);
+    h.getAnimations()[0].effect.getTiming().duration === TROPFEN_DAUER && TROPFEN_DAUER > 900 &&
+    !!h.previousElementSibling && h.previousElementSibling.classList.contains('fl-schicht'));
+  return warten(TROPFEN_DAUER + 300);
 }).then(function () {
   ausbewegt();
-  return warten(50);
+  return warten(450);
 }).then(function () {
   pruefe('R7 nach dem Tropfen ist nichts übrig', !q('.fl-schicht') && !q('.fl-kante') && !h.isConnected);
   state.bewegung = 'aus';
   pruefe('R8 ohne Bewegung kein Hals', fliessen(q('#ansicht'), q('#menuKnopf'), { stelle: 'menue', dauer: 400 }) === null);
   state.bewegung = 'auto';
   state.fluessig = null;
+  flDauernSetzen();
 
   // ── B · Bewegung in den Proben ──────────────────────────────
   labor();
@@ -238,5 +241,54 @@ return warten(120).then(function () {
 }).then(function () {
   pruefe('B13 ohne Bewegung steht sie sofort am Ziel', fpLauf.perle.offen() && !fpLauf.perle.laeuft);
   pruefe('B14 nichts macht die Seite breiter', document.documentElement.scrollWidth <= innerWidth);
+  state.bewegung = 'auto';
+
+  // ── N · Die übrigen Stellen der App fließen ─────────────────
+  aufbauen();
+  var heute = heuteSchluessel();
+  q('[data-kalender="monat"]').click();
+  var marke = q('.held .wahl-marke'), a = marke.getAnimations()[0];
+  pruefe('N1 die Wahl-Marke fließt auf der Feder und läßt einen Rest mit Hals', !!a &&
+    a.effect.getTiming().easing.indexOf('linear(') === 0 && a.effect.getTiming().duration === fluessigTakt('schalter').dauer &&
+    !!q('.held .wahl .fl-schicht') && q('.held .wahl .fl-schicht').nextElementSibling === marke);
+  ausbewegt();
+  var tage = alle('#kalRaster [data-kaltag]').filter(function (b) { return b.getAttribute('data-kaltag') <= heute; });
+  tage[0].click();
+  tage = alle('#kalRaster [data-kaltag]').filter(function (b) { return b.getAttribute('data-kaltag') <= heute; });
+  tage[tage.length - 1].click();
+  var ring = q('body > .fl-tagring'), neu = q('#kalRaster .kal-tag.gewaehlt');
+  pruefe('N2 die Tagesmarkierung gleitet zum neuen Tag', !!ring && !!neu && neu.classList.contains('gleitet') &&
+    ring.getAnimations()[0].effect.getTiming().duration === fluessigTakt('tag').dauer);
+  ausbewegt();
+  return warten(60);
+}).then(function () {
+  pruefe('N3 danach trägt der Tag den Ring wieder selbst', !q('.fl-tagring') && !q('#kalRaster .gleitet'));
+  // In der Woche liegt die Kachel im Bild — nur dann fliegt der Tropfen.
+  q('[data-kalender="woche"]').click();
+  ausbewegt();
+  q('#app [data-haken="A"]').click();
+  var perle = q('body > .fl-perle');
+  pruefe('N4 abgehakt: ein Tropfen fließt in den Tagesring', !!perle && perle.getAnimations()[0].effect.getTiming().duration ===
+    Math.round(fluessigTakt('haken', true).dauer * 1.2) && getComputedStyle(document.documentElement).getPropertyValue('--fl-haken-kurve').indexOf('linear(') >= 0);
+  ausbewegt();
+  return warten(60);
+}).then(function () {
+  pruefe('N5 er ist im Ring aufgegangen', !q('.fl-perle'));
+  q('#app [data-haken="A"]').click();
+  pruefe('N6 zurückgenommen fließt nichts', !q('.fl-perle'));
+  var nun = zeitJetzt();
+  state.abgewoehnen = [lasterLesen({ id: 'w1', name: 'Zucker', start: nun - 86400000, rueckfaelle: [], draenge: [] })];
+  welleBeginnen('w1');
+  zeige('welle');
+  var fl = q('#welle .fl-welle');
+  pruefe('N7 in der Welle steht Flüssigkeit, im Filter, unter der Chili', !!fl && fl.querySelector('.fp-goo').children.length > 3 &&
+    fl.nextElementSibling === q('#chiliFigur'));
+  return warten(300);
+}).then(function () {
+  pruefe('N8 sie zeichnet weiter, aber nicht jedes Bild', !!q('#welle .fl-welle .fp-goo'));
+  state.welle = null;
+  zeige('home');
+  pruefe('N9 die Lichtkante geht weich: erst abblenden, dann fort', /fl-kante-weg/.test(String(fliessen)) &&
+    /dy="1\.6"/.test(String(fpSchichten)) && !/dx="1\.2"/.test(String(fpSchichten)));
 });
 `);
