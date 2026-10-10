@@ -137,10 +137,13 @@ pruefe('E8 gespeichert geht man ohne Frage', ansicht === 'home');
 
 // ── I · Was auf iOS steht, fließt ───────────────────────────
 menueOeffnen();
-ba = q('#menue .blatt').getAnimations()[0];
-pruefe('I1 das Menü quillt mit der Feder und hängt am Knopf', !!ba && ba.effect.getTiming().easing.indexOf('linear(') === 0 &&
-  !!q('#menue .fl-schicht'));
+blatt = q('#menue .blatt');
+pruefe('I1 das Blatt selbst fließt, ohne die Chilli-Bilder darunter', !!blatt._fluss && !blatt.getAnimations().length &&
+  !!q('#menue .fl-blatt') && blatt.style.background === 'transparent' && /path\(|inset\(/.test(blatt.style.clipPath) &&
+  !alle('#menueListe .menue-eintrag').some(function (z) { return z.getAnimations().length; }));
 menueSchliessen(true);
+pruefe('I1b sofort zu räumt alles ab', !blatt._fluss && !q('#menue .fl-blatt') && !blatt.style.background && !blatt.style.clipPath &&
+  !q('#menueListe').style.opacity);
 vorher = alle('body > .tropfen-huelle');
 tropfenAuf(q('#ansicht'), punktFlaeche(320, 60));
 h = alle('body > .tropfen-huelle').filter(function (x) { return vorher.indexOf(x) < 0; })[0];
@@ -179,7 +182,31 @@ pruefe('W2 der Ring ist ein Drittel so dick wie zuvor', Math.abs(parseFloat(getC
 state.welle = null;
 zeige('home');
 
+var blattFluss = null;
 return Promise.resolve().then(function () {
+  // ── M · Das Menü auf iOS, in Bewegung ─────────────────────
+  aufbauen();
+  state.fluessig = { ios: { menue: true } };
+  flDauernSetzen();
+  menueOeffnen();
+  blattFluss = blatt._fluss;
+  return warten(120);
+}).then(function () {
+  menueSchliessen();
+  pruefe('M1 wer mitten im Weg schließt, kehrt mit derselben Feder um', !!blatt._fluss && blatt._fluss === blattFluss &&
+    blattFluss.p.ziel === 0 && blattFluss.p.x > 0);
+  return warten(1500);
+}).then(function () {
+  pruefe('M2 zurückgeflossen ist das Menü zu und aufgeräumt', q('#menue').hidden && !blatt._fluss && !q('#menue .fl-blatt') &&
+    !blatt.style.clipPath && !blatt.style.background);
+  menueOeffnen();
+  return warten(1500);
+}).then(function () {
+  pruefe('M3 aufgeflossen steht das Blatt als es selbst', !q('#menue').hidden && !blatt._fluss && !q('#menue .fl-blatt') &&
+    !blatt.style.clipPath && !blatt.style.boxShadow && !q('#menueListe').style.opacity);
+  menueSchliessen(true);
+  state.fluessig = null;
+  flDauernSetzen();
   // ── B · Bewegung in den Proben ────────────────────────────
   labor();
   tipp('menue', 'knopf');

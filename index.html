@@ -1387,6 +1387,8 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 /* Der Hals der echten Tropfen liegt in einer Schicht direkt unter ihnen; die
    Lichtkante trägt der Tropfen selbst, solange er fließt. */
 .fl-schicht { position: fixed; pointer-events: none; }
+/* Das fließende Menü wirft den Schatten des Blatts (.blatt), nicht den der Proben. */
+.fl-blatt { filter: drop-shadow(0 2px 3px rgba(20, 20, 19, .10)) drop-shadow(0 16px 20px rgba(20, 20, 19, .18)); }
 .fl-kante::after {
   content: '';
   position: absolute;
@@ -1751,7 +1753,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.17.0T3';
+var APP_VERSION = '0.17.0T4';
 var APP_STAND = '2026-10-10';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -8840,6 +8842,101 @@ function blattBilder() {
 // Die Kurve um das Menü: fest, bis das Menü auf iOS steht.
 function menueKurve() { return flIos('menue') ? fluessigTakt('menue', true).kurve : TROPFEN_KURVE_FEST; }
 
+// Das Menü auf iOS (ADR 0054): Das Blatt selbst fließt wie in der Probe — ein
+// runder Tropfen löst sich vom Knopf, wandert hinüber und wächst zur Karte;
+// zu fließt er denselben Weg zurück. Die Chilli-Bilder laufen dabei nicht,
+// sonst sähe man ein Menü vor einem zweiten. Gemalt wird das Flüssige in
+// einer Schicht unter dem Blatt, in seiner Farbe und mit seinem Schatten;
+// das Blatt selbst ist derweil durchsichtig und auf den Tropfen beschnitten.
+// Am Ziel sind beide deckungsgleich, so geht der Wechsel ohne Kante. Wer
+// mitten im Weg umkehrt, nimmt die Feder mit, wie sie gerade schwingt.
+var BLATT_TROPFEN = 36;
+function blattFliesst(el, auf, warten, fertig) {
+  var f = el._fluss;
+  if (bewegungAus()) {
+    blattFliesstEnde(el);
+    if (fertig) fertig();
+    return;
+  }
+  if (!f) {
+    var cs = getComputedStyle(el), s = document.createElement('div');
+    s.className = 'fl-schicht fl-blatt';
+    s.setAttribute('aria-hidden', 'true');
+    s.style.display = 'none';
+    el.parentNode.insertBefore(s, el);
+    f = el._fluss = { p: fpFeder(auf ? 0 : 1), s: s, b: fpSchichten(s, 'flb' + (++flNummer), true), formen: [], weite: 0,
+      ab: Date.now() + (warten || 0), zuletzt: 0, rund: parseFloat(cs.borderTopLeftRadius) || 18 };
+    f.b.el = s;
+    f.b.haelse = {};
+    f.b.formen = function () { return { formen: f.formen, haelse: f.formen.length > 1 ? [{ a: 0, b: 1, key: 'hals', weite: f.weite }] : [] }; };
+    s.style.setProperty('--fp-farbe', cs.backgroundColor);
+    el.style.background = 'transparent';
+    el.style.boxShadow = 'none';
+    el.style.clipPath = el.style.webkitClipPath = 'inset(50%)';
+    $('menueListe').style.opacity = '0';
+    f.p.ziel = auf ? 1 : 0;
+    f.fertig = fertig;
+    // Das erste Bild gleich: Ein Blatt, das zufließt, verschwände sonst einen
+    // Augenblick lang.
+    blattSchritt(el, function schritt() { blattSchritt(el, schritt); });
+    return;
+  }
+  f.p.ziel = auf ? 1 : 0;
+  f.fertig = fertig;
+}
+
+function blattSchritt(el, weiter) {
+  var f = el._fluss, k = menueAnker(), nun = Date.now();
+  if (!f) return;
+  if (!el.isConnected || !k) { blattFliesstEnde(el); return; }
+  if (nun < f.ab) { fpBild(weiter); return; }
+  var dt = f.zuletzt ? fpKlemme((nun - f.zuletzt) / 1000, 0.001, 0.05) : 0.016, p = f.p;
+  f.zuletzt = nun;
+  fpSchwingen(p, dt, FP_IOS);
+  var ruht = Math.abs(p.x - p.ziel) < 0.0015 && Math.abs(p.v) < 0.02;
+  if (ruht) { p.x = p.ziel; p.v = 0; }
+  if ((ruht && p.ziel === 1) || (p.ziel === 0 && p.x < 0.02)) {
+    var fertig = f.fertig;
+    blattFliesstEnde(el);
+    if (fertig) fertig();
+    return;
+  }
+  var kr = k.getBoundingClientRect(), zr = el.getBoundingClientRect();
+  var q = { x: kr.left, y: kr.top, w: kr.width, h: kr.height, r: Math.min(kr.width, kr.height) / 2 };
+  var z = { x: zr.left, y: zr.top, w: zr.width, h: zr.height, r: f.rund };
+  var t = fpTropfen(q, z, p.x, p.v, BLATT_TROPFEN, FP_IOS);
+  // Das Blatt: auf den Tropfen beschnitten, in seinen eigenen Maßen.
+  var innen = { x: t.x - z.x, y: t.y - z.y, w: t.w, h: t.h, r: t.r, deh: t.deh };
+  el.style.clipPath = el.style.webkitClipPath = 'path("' + fpUmriss(fpPunkte(innen)) + '")';
+  $('menueListe').style.opacity = fpAnteil((p.x - 0.72) / 0.25);
+  // Die Schicht: Knopf, Hals und Tropfen in einem Kasten um alle drei; der
+  // Knopf selbst bleibt ausgespart, er steht schon da.
+  // Der Rand ist so breit wie der Schatten des Blatts.
+  var x0 = Math.min(q.x, t.x, z.x) - 60, y0 = Math.min(q.y, t.y, z.y) - 60;
+  var x1 = Math.max(q.x + q.w, t.x + t.w, z.x + z.w) + 60, y1 = Math.max(q.y + q.h, t.y + t.h, z.y + z.h) + 80;
+  q.x -= x0; q.y -= y0; t.x -= x0; t.y -= y0;
+  f.formen = [q, t];
+  f.weite = fpWeite(q.r, BLATT_TROPFEN / 2, FP_IOS);
+  // Die Lichtkante leuchtet, solange er fließt, und ist fort, wenn er steht —
+  // das Blatt selbst hat keine.
+  f.b.kante = FP_IOS.kante * fpKlemme(Math.abs(p.ziel - p.x) * 3, 0, 1);
+  f.s.style.display = '';
+  fpLage(f.s, { x: x0, y: y0, w: x1 - x0, h: y1 - y0 });
+  var loch = 'path(evenodd, "M0 0H' + fpZ(x1 - x0) + 'V' + fpZ(y1 - y0) + 'H0Z' + fpUmriss(fpPunkte(q)) + '")';
+  f.s.style.clipPath = f.s.style.webkitClipPath = loch;
+  fpZeichnen(f.b);
+  fpBild(weiter);
+}
+
+// Räumt ab: Das Blatt ist wieder ganz es selbst.
+function blattFliesstEnde(el) {
+  var f = el._fluss;
+  el._fluss = null;
+  if (f) weg(f.s);
+  ['background', 'boxShadow', 'clipPath', 'webkitClipPath'].forEach(function (k) { el.style[k] = ''; });
+  if ($('menueListe')) $('menueListe').style.opacity = '';
+}
+
 function menueOeffnen() {
   var huelle = $('menue'), b = document.querySelector('#menue .blatt');
   menueZeichnen();
@@ -8850,12 +8947,12 @@ function menueOeffnen() {
   // Erst sichtbar, dann einblenden — sonst springt der Schleier ohne Übergang.
   void huelle.offsetWidth;
   huelle.classList.add('offen');
-  var bilder = blattBilder(), fall = menueGastFallen(von), ios = flIos('menue');
+  var fall = menueGastFallen(von);
+  if (flIos('menue')) { blattFliesst(b, true, fall); return; }
+  var bilder = blattBilder();
   if (bilder) {
-    bewegt(b, bilder, { dauer: MENUE_DAUER, warten: fall, kurve: ios ? fluessigTakt('menue').kurve : TROPFEN_KURVE_FEST,
-      fill: 'backwards' });
+    bewegt(b, bilder, { dauer: MENUE_DAUER, warten: fall, kurve: TROPFEN_KURVE_FEST, fill: 'backwards' });
     menueEintraegeTropfen(fall + MENUE_DAUER * 0.4);
-    if (ios) fliessen(b, menueAnker(), { stelle: 'menue', dauer: MENUE_DAUER, warten: fall });
   }
 }
 
@@ -8880,19 +8977,28 @@ function menueSchliessen(sofort) {
       px(k.getBoundingClientRect().top - gast.getBoundingClientRect().top) + ')' }],
       { dauer: MENUE_DAUER, kurve: menueKurve(), fill: 'forwards' }, function () { zu(); if (heben) heben.cancel(); });
   }
-  var bilder = sofort ? null : blattBilder();
-  if (!bilder || bewegungAus()) { zu(); return; }
+  function geflossen() {
+    if (huelle.classList.contains('offen')) return;
+    if (gast) b.style.visibility = 'hidden';
+    hoch();
+  }
+  if (sofort || bewegungAus()) { blattFliesstEnde(b); zu(); return; }
+  if (flIos('menue') || b._fluss) {
+    // Ein Blatt, das schon steht, fließt von dort zurück, wo es ist.
+    blattFliesst(b, false, 0, geflossen);
+    return;
+  }
+  var bilder = blattBilder();
+  if (!bilder) { zu(); return; }
   // Das Schließen ist das Öffnen rückwärts — dieselben Bilder, dieselbe Dauer,
   // gespiegelte Zeitpunkte. Der Inhalt geht, bevor das Blatt sich staucht.
   // Nur die eigenen Bilder abräumen: Wer währenddessen wieder öffnet, behält
   // seinen Tropfen.
-  var ios = flIos('menue');
   var liste = bewegt($('menueListe'), [{ opacity: 1 }, { opacity: 0 }], { dauer: MENUE_DAUER * 0.35, kurve: 'ease-in',
     fill: 'forwards' });
   var blatt = null;
-  if (ios) fliessen(b, menueAnker(), { stelle: 'menue', dauer: MENUE_DAUER });
   blatt = bewegt(b, bilder.reverse().map(function (f) { f.offset = 1 - f.offset; return f; }),
-    { dauer: MENUE_DAUER, kurve: ios ? fluessigTakt('menue', true).kurve : TROPFEN_KURVE_FEST, fill: 'forwards' }, function () {
+    { dauer: MENUE_DAUER, kurve: TROPFEN_KURVE_FEST, fill: 'forwards' }, function () {
       if (gast) b.style.visibility = 'hidden';
       hoch();
       if (blatt) blatt.cancel();
