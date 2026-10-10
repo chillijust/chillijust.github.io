@@ -60,7 +60,8 @@ fest.
 - **Standard ist die Chilli-Bewegung; iOS-Flüssig gilt je Stelle** (ADR 0054): Wer an einer
   Stelle bewegt, fragt `flIos(stelle)` und nimmt dann `fluessigTakt`/`fliessen`. Feste
   Dauern setzt nur `flDauernSetzen` — keine Zahl von Hand. Auf iOS ersetzt das Flüssige
-  die Chilli-Bewegung, es legt sich nicht darunter (Menü: `blattFliesst`).
+  die Chilli-Bewegung, es legt sich nicht darunter (`teilFliesst`); `fliessen` malt nur
+  Hals und Rest, nie das Teil.
 - **Teile über `teilZeigen(el, an, quelle)`, Knöpfe über `teilTropfen(el, an)`**, nie
   `el.hidden = …`. Ein Teil mit eigenem `display` braucht `[hidden] { display: none; }`.
   Eine neue `.wahl` bekommt ihre Marke von `wahlenSetzen()`.

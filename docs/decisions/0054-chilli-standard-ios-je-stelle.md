@@ -21,10 +21,16 @@ hart schneiden) rechnet Safari auf dem iPhone teils ohne Grafikchip, Bild für B
   Schalter überschreibt dort die Chilli-Bewegung, fest mit iOS 26 (`FP_IOS`). Jede Stelle
   zeigt ihre Probe, wie sie auf iOS fließt. Kein Hauptschalter, keine Regler.
 - **Auf iOS fließt das Teil selbst, wie in seiner Probe** — die Chilli-Bilder laufen dann
-  nicht zusätzlich. Das Menü (`blattFliesst`): ein runder Tropfen löst sich vom Knopf,
-  wandert, wächst zur Karte; gemalt in einer Schicht unter dem durchsichtigen Blatt, mit
-  dessen Farbe und Schatten. In 0.17.0T3 lief das Blatt noch wie in Chilli und der Hals
-  darunter — am Gerät sah das aus wie zwei Menüs übereinander.
+  nicht zusätzlich. Menü, Ansichten, Teile und Hinweis (`teilFliesst`): ein runder Tropfen
+  löst sich aus der Quelle, wandert, wächst zum Teil; gemalt in einer Schicht unter dem
+  beschnittenen Teil, mit dessen Farbe und Schatten (Glas bleibt Glas, die Schicht malt
+  dann nur Hals und Schatten). Ist die Quelle fort, quillt er aus einer Perle, die
+  leerläuft. Der Knauf eines Schalters fließt gedehnt hinüber (`knaufFliesst`).
+  `fliessen` (Marke, Knauf, Abhaken) malt nur Hals und Rest, nie das Teil selbst. In
+  0.17.0T3 lief überall die Chilli-Bewegung, und das Flüssige lag als zweites Bild
+  darunter — am Gerät sah das aus wie zwei Teile übereinander, mit doppeltem Schatten.
+- **Jede Stelle im Reiter sagt, was sie tut, wie ihre Probe läuft und wie man sie in der
+  App testet** («So testest du es»).
 - **Pfad statt Filter**, in App und Proben: Formen und Hals als ein Umriß (`clip-path`),
   ein Bruchteil der Rechnung.
 - **Entwurf und Speichern.** Die Schalter ändern einen Entwurf (`flEntwurf`); die App

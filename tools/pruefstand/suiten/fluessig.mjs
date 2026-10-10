@@ -45,6 +45,11 @@ pruefe('A2 der Reiter «Flüssig» zeigt neun Stellen, je mit Probe und Schalter
   }));
 pruefe('A3 keine Regler, keine Technik-Wahl, kein Kopieren', !q('#fluessigProbe input') && !q('#fluessigProbe .wahl') &&
   !q('#fpKopieren'));
+pruefe('A3b jede Stelle sagt, was sie tut, wie die Probe läuft und wie man es in der App testet', alle('#fluessigProbe .fp-karte').every(function (k) {
+  var wie = k.querySelectorAll('.fp-wie');
+  return wie.length === 2 && wie[0].textContent.indexOf('Probe:') === 0 && wie[1].textContent.indexOf('So testest du es:') === 0 &&
+    wie[1].textContent.indexOf('Speichern') > 0 && k.querySelector('.fp-text').textContent.length > 60;
+}));
 pruefe('A4 «Speichern» ist fort, solange nichts geändert ist', q('#flLeiste').hidden === true);
 pruefe('A5 jede Probe rechnet als Pfad', IDS.every(function (id) {
   var f = buehne(id).querySelector('.fp-fluss');
@@ -139,17 +144,16 @@ pruefe('E8 gespeichert geht man ohne Frage', ansicht === 'home');
 menueOeffnen();
 blatt = q('#menue .blatt');
 pruefe('I1 das Blatt selbst fließt, ohne die Chilli-Bilder darunter', !!blatt._fluss && !blatt.getAnimations().length &&
-  !!q('#menue .fl-blatt') && blatt.style.background === 'transparent' && /path\(|inset\(/.test(blatt.style.clipPath) &&
+  !!q('#menue .fl-schicht') && blatt.style.background === 'transparent' && /path\(|inset\(/.test(blatt.style.clipPath) &&
   !alle('#menueListe .menue-eintrag').some(function (z) { return z.getAnimations().length; }));
 menueSchliessen(true);
-pruefe('I1b sofort zu räumt alles ab', !blatt._fluss && !q('#menue .fl-blatt') && !blatt.style.background && !blatt.style.clipPath &&
+pruefe('I1b sofort zu räumt alles ab', !blatt._fluss && !q('#menue .fl-schicht') && !blatt.style.background && !blatt.style.clipPath &&
   !q('#menueListe').style.opacity);
 vorher = alle('body > .tropfen-huelle');
 tropfenAuf(q('#ansicht'), punktFlaeche(320, 60));
 h = alle('body > .tropfen-huelle').filter(function (x) { return vorher.indexOf(x) < 0; })[0];
-pruefe('I2 eine Ansicht quillt mit der Feder und hängt an ihrer Quelle', !!h &&
-  h.getAnimations()[0].effect.getTiming().duration === TROPFEN_DAUER && !!h.previousElementSibling &&
-  h.previousElementSibling.classList.contains('fl-schicht'));
+pruefe('I2 eine Ansicht fließt selbst, ohne Chilli-Hülle, mit Schicht darunter', !!h && !!h._fluss && !h.getAnimations().length &&
+  !!h.previousElementSibling && h.previousElementSibling.classList.contains('fl-schicht') && h.style.background === 'transparent');
 ausbewegt();
 q('[data-kalender="monat"]').click();
 var marke = q('.held .wahl-marke');
@@ -197,14 +201,42 @@ return Promise.resolve().then(function () {
     blattFluss.p.ziel === 0 && blattFluss.p.x > 0);
   return warten(1500);
 }).then(function () {
-  pruefe('M2 zurückgeflossen ist das Menü zu und aufgeräumt', q('#menue').hidden && !blatt._fluss && !q('#menue .fl-blatt') &&
+  pruefe('M2 zurückgeflossen ist das Menü zu und aufgeräumt', q('#menue').hidden && !blatt._fluss && !q('#menue .fl-schicht') &&
     !blatt.style.clipPath && !blatt.style.background);
   menueOeffnen();
   return warten(1500);
 }).then(function () {
-  pruefe('M3 aufgeflossen steht das Blatt als es selbst', !q('#menue').hidden && !blatt._fluss && !q('#menue .fl-blatt') &&
+  pruefe('M3 aufgeflossen steht das Blatt als es selbst', !q('#menue').hidden && !blatt._fluss && !q('#menue .fl-schicht') &&
     !blatt.style.clipPath && !blatt.style.boxShadow && !q('#menueListe').style.opacity);
   menueSchliessen(true);
+  // Hinweis aus Glas: Der Tropfen ist das Glas, die Schicht malt nur Hals
+  // und Schatten.
+  state.fluessig = { ios: { hinweis: true, schalter: true } };
+  flDauernSetzen();
+  vorher = alle('body > .tropfen-huelle');
+  tropfenAuf(q('#hinweisKarte'), punktFlaeche(320, 600), { rund: '18px', glas: true });
+  h = alle('body > .tropfen-huelle').filter(function (x) { return vorher.indexOf(x) < 0; })[0];
+  return warten(80);
+}).then(function () {
+  var sch = h && h.previousElementSibling, loch = sch ? sch.style.clipPath : '';
+  pruefe('M4 der Hinweis fließt als Glas, die Schicht spart den Tropfen aus', !!h && !!h._fluss && h.classList.contains('glas') &&
+    !h.getAnimations().length && h.style.background !== 'transparent' && (loch.match(/M/g) || []).length >= 2);
+  ausbewegt();
+  q('[data-kalender="monat"]').click();
+  return warten(60);
+}).then(function () {
+  var sch = q('.held .wahl .fl-schicht .fp-schatten'), d = sch ? sch.getAttribute('d') || '' : '';
+  pruefe('M5 unter der Marke liegt kein zweites Bild: nur Rest und Hals', !!sch && (d.match(/M/g) || []).length <= 2);
+  ausbewegt();
+  zeige('einstellungen');
+  q('#esHinweis').click();
+  var k = q('#esHinweis .schalter-knauf');
+  pruefe('M6 der Knauf fließt hinüber, mit Rest und Hals', !!k && k.getAnimations().length === 1 &&
+    k.getAnimations()[0].effect.getTiming().easing.indexOf('linear(') === 0 && !!q('#esHinweis .fl-schicht') &&
+    getComputedStyle(k).transitionProperty.indexOf('transform') < 0);
+  q('#esHinweis').click();
+  ausbewegt();
+  zeige('home');
   state.fluessig = null;
   flDauernSetzen();
   // ── B · Bewegung in den Proben ────────────────────────────

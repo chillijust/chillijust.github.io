@@ -1387,8 +1387,8 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 /* Der Hals der echten Tropfen liegt in einer Schicht direkt unter ihnen; die
    Lichtkante trägt der Tropfen selbst, solange er fließt. */
 .fl-schicht { position: fixed; pointer-events: none; }
-/* Das fließende Menü wirft den Schatten des Blatts (.blatt), nicht den der Proben. */
-.fl-blatt { filter: drop-shadow(0 2px 3px rgba(20, 20, 19, .10)) drop-shadow(0 16px 20px rgba(20, 20, 19, .18)); }
+/* Auf iOS fließt der Knauf selbst (`knaufFliesst`) statt zu gleiten. */
+.fl-knauf .schalter .schalter-knauf { transition: width .3s var(--feder, ease); }
 .fl-kante::after {
   content: '';
   position: absolute;
@@ -1438,6 +1438,8 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 .fp-karte { margin-top: 12px; padding: 16px 14px 14px; }
 .fp-name { margin: 0 4px; font-family: var(--sans); font-size: 15px; font-weight: 600; }
 .fp-karte > .fp-text { margin: 2px 4px 10px; font-size: 14px; }
+.fp-karte > .fp-wie { margin: 8px 4px 4px; font-size: 13px; }
+.fp-wie b { font-weight: 600; color: var(--text); }
 .fp-buehne {
   position: relative;
   overflow: hidden;
@@ -1753,7 +1755,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.17.0T4';
+var APP_VERSION = '0.17.0T5';
 var APP_STAND = '2026-10-10';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -2276,16 +2278,55 @@ function markeAbspielen(svg) {
 // Steht vor dem Laden, weil stand() es braucht. Standard ist die Chilli-
 // Bewegung; je Stelle läßt sie sich auf iOS-Flüssig umschalten. Gemerkt wird
 // nur, welche Stellen auf iOS stehen.
+// Je Stelle: Schlüssel, Name, was iOS dort tut, wie die Probe läuft, wie man es
+// in der App sieht.
 var FP_STELLEN = [
-  ['ansichten', 'Ansichten', 'Tipp auf den Knopf: Die Ansicht quillt aus ihm. Tipp auf sie: Sie fließt zurück.'],
-  ['menue', 'Menüknopf und Menü', 'Tipp auf den Knopf: Das Menü löst sich mit einem Hals heraus. Tipp aufs Menü: Es fließt zurück.'],
-  ['hinweis', 'Hinweis aus Glas', 'Tipp auf «Speichern»: Der Hinweis quillt als Glas heraus. Tipp auf ihn: Er fließt zurück.'],
-  ['schalter', 'Schalter und Wahl', 'Tipp auf den Schalter oder ein Feld: Der Knauf fließt hinüber.'],
-  ['haken', 'Abhaken und Zähler', 'Tipp auf den Kreis: Ein Tropfen löst sich und fließt in den Zähler.'],
-  ['welle', '10-Minuten-Welle', 'Tipp in den Kreis: zehn Minuten im Zeitraffer, Perlen steigen auf.'],
-  ['tag', 'Tagesmarkierung im Kalender', 'Tipp auf einen Tag: Die Markierung fließt hinüber.'],
-  ['zeilen', 'Zeilen kommen und gehen', 'Tipp auf Plus: Eine Zeile tropft in die Liste. Eine getippte Zeile fließt in den Menüknopf.'],
-  ['perle', 'Neue Version', 'Tipp auf den Kopf: Eine Perle löst sich und wird zum Hinweis. Tipp darauf, und sie fließt zurück.']
+  ['ansichten', 'Ansichten',
+    'Journal, Einstellungen, Formulare und kleinere Teile wie die Wochenleiste im Kalender. Mit iOS löst sich ein runder ' +
+      'Tropfen mit Hals aus dem Getippten und wächst zur Ansicht; zurück fließt sie in den Knopf.',
+    'Tipp auf den Knopf, dann auf die Fläche.',
+    'Speichern, im Menü «Journal» öffnen und oben links mit dem Pfeil zurückgehen.'],
+  ['menue', 'Menüknopf und Menü',
+    'Das Menü hinter dem runden Knopf oben rechts. Mit iOS löst es sich als Tropfen aus dem Knopf, wandert hinüber und ' +
+      'wächst zur Karte; zu fließt es denselben Weg zurück.',
+    'Tipp auf den Knopf, dann aufs Menü.',
+    'Speichern, den Menüknopf oben rechts tippen und mit einem Tipp neben das Menü wieder schließen.'],
+  ['hinweis', 'Hinweis aus Glas',
+    'Rückfragen und Hinweise aus Glas, etwa vor dem Löschen, und das Ticketblatt. Mit iOS quillt das Glas als Tropfen aus ' +
+      'dem getippten Knopf und fließt beim Schließen in ihn zurück.',
+    'Tipp auf «Speichern», dann auf den Hinweis.',
+    'Speichern, dann hier einen anderen Schalter umlegen und über das Menü weggehen: Die Rückfrage «Nicht gespeichert» ' +
+      'kommt im Glas.'],
+  ['schalter', 'Schalter und Wahl',
+    'Jeder Schalter und jede Wahl aus Feldern, außer «Darstellung» — die hat ihren eigenen Tropfen. Mit iOS fließt der ' +
+      'Knauf gedehnt hinüber; am alten Platz bleibt ein Rest, der am Hals hängt und schwindet.',
+    'Tipp auf den Schalter oder ein Feld.',
+    'Speichern, unter «Allgemein» einen Schalter umlegen oder auf dem Dashboard im Kalender zwischen «Woche» und «Monat» ' +
+      'wechseln.'],
+  ['haken', 'Abhaken',
+    'Das Abhaken einer Gewohnheit. Mit iOS federt der Haken, ein Tropfen löst sich aus ihm und fließt im Bogen in den ' +
+      'Tagesring, der ihn mit einem Nicken schluckt.',
+    'Tipp auf den Kreis.',
+    'Speichern, dann auf dem Dashboard eine offene Gewohnheit abhaken, während der Tagesring oben zu sehen ist.'],
+  ['welle', 'Welle bei Drang und Timer',
+    'Die Flüssigkeit im Ring bei «Drang» und im Timer. Sie steht immer da und sinkt mit der Zeit; mit iOS wogt sie, und ' +
+      'Perlen steigen auf.',
+    'Tipp in den Kreis: zehn Minuten im Zeitraffer.',
+    'Speichern, dann bei einer Gewohnheit zum Abgewöhnen «Drang» tippen oder den Timer einer Gewohnheit starten.'],
+  ['tag', 'Tagesmarkierung im Kalender',
+    'Die Markierung des gewählten Tags. Mit iOS gleitet sie auf der Feder hinüber und dehnt sich unterwegs; sonst springt sie.',
+    'Tipp auf einen Tag.',
+    'Speichern, dann auf dem Dashboard im Kalender einen Tag tippen und danach einen anderen.'],
+  ['zeilen', 'Zeilen kommen und gehen',
+    'Zeilen und Perlen in Listen, die kommen oder gehen. Mit iOS federn sie beim Auftropfen, und eine gelöschte Zeile ' +
+      'zieht sich zur Perle zusammen und läuft ab.',
+    'Tipp auf Plus, dann auf eine Zeile.',
+    'Speichern, dann unter «Tickets» ein Ticket löschen oder im «Kalender-Export» auf «Bearbeiten» tippen.'],
+  ['perle', 'Auftropfen beim Start',
+    'Die Karten des Dashboards beim Start und die Zeile «Eine neue Fassung». Jede tropft als Perle auf und streckt sich ' +
+      'zur Karte; mit iOS federt sie dabei.',
+    'Tipp auf den Kopf, dann auf die Perle.',
+    'Speichern, die App ganz schließen und neu öffnen: Die Karten tropfen nacheinander auf.']
 ];
 // iOS 26, fest (ADR 0054): Antwortzeit, Nachfedern, Zähigkeit des Halses, Dehnen, Lichtkante.
 var FP_IOS = { tempo: 0.5, feder: 0.35, hals: 0.35, dehnen: 0.4, kante: 0.6 };
@@ -2648,6 +2689,7 @@ function flDauernSetzen() {
   TROPFEN_KURVE = flIos('zeilen') ? fluessigTakt('zeilen', true).kurve : TROPFEN_KURVE_FEST;
   var r = document.documentElement.style;
   if (flIos('schalter')) r.setProperty('--fl-schalter-kurve', ios.kurve); else r.removeProperty('--fl-schalter-kurve');
+  document.documentElement.classList.toggle('fl-knauf', flIos('schalter'));
   if (flIos('haken')) {
     r.setProperty('--fl-haken-kurve', ios.kurve);
     r.setProperty('--fl-haken-dauer', ios.dauer + 'ms');
@@ -2665,14 +2707,13 @@ function flRadius(el, r) {
   return Math.max(0, Math.min(x * s, r.width / 2, r.height / 2));
 }
 
-// Der Hals zwischen `el` (dem Tropfen, während er sich bewegt) und `quelle`
-// (was getBoundingClientRect kennt). Die Schicht liegt direkt unter dem
-// Tropfen und spart die Quelle aus — der Knopf bleibt, wie er ist, der Hals
-// setzt an seinem Rand an. Glas spart auch den Tropfen aus, sonst schiene
-// der Hals hindurch. `opt`: `stelle`, `dauer`, `warten`, `glas`, `dehnen`
-// (der Tropfen selbst dehnt sich, solange er klein ist — nur, wo sein
-// transform frei ist), `rest` (statt einer Quelle: wo ein Knauf eben stand —
-// dort bleibt ein Rest, der schwindet und über den Hals an ihm hängt).
+// Der Hals zwischen `el` (dem, was fließt) und `quelle` (was
+// getBoundingClientRect kennt) — für Teile, die eine eigene Bewegung haben:
+// Wahl-Marke, Knauf, Tropfen beim Abhaken. Die Schicht liegt direkt unter
+// `el` und malt nur den Hals und, mit `rest`, was am alten Platz zurückbleibt
+// und schwindet — nie `el` selbst: Ein zweites Bild darunter sähe man als
+// Doppel, mit doppeltem Schatten (ADR 0054). Die Quelle bleibt ausgespart.
+// `opt`: `stelle`, `dauer`, `warten`, `rest`.
 function fliessen(el, quelle, opt) {
   if (!el || !el.parentNode || !(quelle || opt.rest) || bewegungAus()) return null;
   var id = opt.stelle, s = document.createElement('div');
@@ -2682,7 +2723,7 @@ function fliessen(el, quelle, opt) {
   s.style.zIndex = getComputedStyle(el).zIndex;
   el.parentNode.insertBefore(s, el);
   // Mit Schatten: Ein Hals in der Farbe des Grunds sähe man sonst nicht.
-  var b = fpSchichten(s, 'fl' + (++flNummer), false), formen = [], weite = 0, farbe = false, vorher = null;
+  var b = fpSchichten(s, 'fl' + (++flNummer), false), formen = [], weite = 0, farbe = false;
   b.id = id;
   b.el = s;
   b.haelse = {};
@@ -2696,7 +2737,6 @@ function fliessen(el, quelle, opt) {
   el.style.setProperty('--fl-kante', String(Math.round(FP_IOS.kante * 70) / 100));
   function aufraeumen() {
     weg(s);
-    if (opt.dehnen) el.style.transform = '';
     el.classList.add('fl-kante-weg');
     setTimeout(function () {
       el.classList.remove('fl-kante', 'fl-kante-weg');
@@ -2705,40 +2745,28 @@ function fliessen(el, quelle, opt) {
   }
   function schritt() {
     if (!el.isConnected || Date.now() > ende) { aufraeumen(); return; }
-    var w = FP_IOS, qr = opt.rest ? restJetzt() : quelle.getBoundingClientRect();
-    // Wer sich dehnt, wird an seiner Lage ohne transform gemessen.
-    var er = opt.dehnen ? { left: el.offsetLeft, top: el.offsetTop, width: el.offsetWidth, height: el.offsetHeight }
-      : el.getBoundingClientRect();
+    var qr = opt.rest ? restJetzt() : quelle.getBoundingClientRect(), er = el.getBoundingClientRect();
     if (!er.width || qr.width < 1) { s.style.display = 'none'; fpBild(schritt); return; }
-    var dq = Math.min(qr.width, qr.height) / 2, nun = Date.now();
-    var q = { x: qr.left, y: qr.top, w: qr.width, h: qr.height, r: dq };
-    var e = { x: er.left, y: er.top, w: er.width, h: er.height, r: flRadius(el, er) };
-    if (opt.dehnen) {
-      var m = fpMitte(e), klein = fpKlemme(1 - (Math.min(e.w, e.h) - 2 * dq) / (4 * dq), 0, 1), deh = null;
-      if (vorher && nun > vorher.t) deh = fpDehnung((m.x - vorher.x) * 1000 / (nun - vorher.t), (m.y - vorher.y) * 1000 / (nun - vorher.t), w, klein);
-      vorher = { x: m.x, y: m.y, t: nun };
-      el.style.transform = deh && deh.e > 1.001 ? 'rotate(' + fpZ(deh.a * 180 / Math.PI) + 'deg) scale(' +
-        Math.round(deh.e * 1000) / 1000 + ', ' + Math.round(1000 / deh.e) / 1000 + ') rotate(' + fpZ(-deh.a * 180 / Math.PI) + 'deg)' : '';
-    }
-    // Die Weite wächst mit dem Tropfen, bis zur dreifachen Knopfgröße: Die
+    var dq = Math.min(qr.width, qr.height) / 2;
+    var q = { x: qr.left, y: qr.top, w: qr.width, h: qr.height, r: dq, nur: !opt.rest };
+    var e = { x: er.left, y: er.top, w: er.width, h: er.height, r: flRadius(el, er), nur: true };
+    // Die Weite wächst mit dem Teil, bis zur dreifachen Quellgröße: Die
     // Wege sind hier lang, ein Hals von Knopfgröße hielte keine 40 ms.
     var kq = fpKern(q, fpMitte(e)), ke = fpKern(e, fpMitte(q)), d = Math.sqrt(Math.pow(ke.x - kq.x, 2) + Math.pow(ke.y - kq.y, 2));
-    weite = fpWeite(dq, Math.min(ke.r, 2 * dq), w);
+    weite = fpWeite(dq, Math.min(ke.r, 2 * dq), FP_IOS);
     // Ein Rest steht auch ohne Hals noch da, bis er geschwunden ist.
     if (!opt.rest && (d > weite || d <= Math.abs(kq.r - ke.r))) { s.style.display = 'none'; fpBild(schritt); return; }
-    // Gezeichnet wird in einem Kasten um beide, nicht über den ganzen Schirm:
-    // Der Filter kostet je Bildpunkt.
     var x0 = Math.min(q.x, e.x) - 30, y0 = Math.min(q.y, e.y) - 30;
     var x1 = Math.max(q.x + q.w, e.x + e.w) + 30, y1 = Math.max(q.y + q.h, e.y + e.h) + 30;
     q.x -= x0; q.y -= y0; e.x -= x0; e.y -= y0;
     formen = [q, e];
     s.style.display = '';
-    // Der Hals blendet mit dem Tropfen ein und aus.
+    // Der Hals blendet mit dem Teil ein und aus.
     s.style.opacity = getComputedStyle(el).opacity;
     fpLage(s, { x: x0, y: y0, w: x1 - x0, h: y1 - y0 });
     if (!farbe) { s.style.setProperty('--fp-farbe', getComputedStyle(el).backgroundColor); farbe = true; }
     var loch = 'path(evenodd, "M0 0H' + fpZ(x1 - x0) + 'V' + fpZ(y1 - y0) + 'H0Z' + (opt.rest ? '' : fpUmriss(fpPunkte(q))) +
-      (opt.glas ? fpUmriss(fpPunkte(e)) : '') + '")';
+      fpUmriss(fpPunkte(e)) + '")';
     s.style.webkitClipPath = loch;
     s.style.clipPath = loch;
     fpZeichnen(b);
@@ -2746,6 +2774,181 @@ function fliessen(el, quelle, opt) {
   }
   fpBild(schritt);
   return s;
+}
+
+// ── Ein Teil fließt selbst (ADR 0054) ──────────────────────────
+// Auf iOS fließt ein Teil, wie in seiner Probe: Ein runder Tropfen löst sich
+// aus der Quelle, wandert hinüber und wächst zum Teil; zu fließt er denselben
+// Weg zurück. Eine Chilli-Bewegung läuft dabei nicht mit, sonst sähe man das
+// Teil vor einem zweiten. Gemalt wird das Flüssige in einer Schicht unter dem
+// Teil, in seiner Farbe und mit seinem Schatten; das Teil selbst ist derweil
+// durchsichtig und auf den Tropfen beschnitten — am Ziel sind beide
+// deckungsgleich, der Wechsel geht ohne Kante. Glas bleibt Glas: Dann ist der
+// Tropfen das Teil, und die Schicht malt nur Hals und Schatten. Wer mitten im
+// Weg umkehrt, nimmt die Feder mit, wie sie gerade schwingt.
+// `o`: `quelle()` und `ziel()` geben Rechtecke; `rund` die Ecken am Ziel,
+// `d0` die Größe des Tropfens, `inhalt` blendet erst spät ein, `glas` mit
+// `farbe` (unterwegs) und `farbeAmZiel`, `schatten` als CSS-Filter, `auf`,
+// `warten`, `schnell` (Faktor auf die Antwortzeit der Feder), `fertig`; `rest`:
+// Die Quelle ist eine Perle, die leerläuft, statt ausgespart zu stehen.
+function teilFliesst(el, o) {
+  var f = el._fluss;
+  if (bewegungAus()) {
+    teilFliesstEnde(el);
+    if (o.fertig) o.fertig();
+    return;
+  }
+  if (f) {
+    f.p.ziel = o.auf ? 1 : 0;
+    f.fertig = o.fertig;
+    return;
+  }
+  var cs = getComputedStyle(el), s = document.createElement('div');
+  s.className = 'fl-schicht';
+  s.setAttribute('aria-hidden', 'true');
+  s.style.display = 'none';
+  s.style.zIndex = cs.zIndex;
+  if (o.schatten) s.style.filter = o.schatten;
+  el.parentNode.insertBefore(s, el);
+  f = el._fluss = { o: o, p: fpFeder(o.auf ? 0 : 1, o.schnell || 1), s: s, b: fpSchichten(s, 'flt' + (++flNummer), true),
+    formen: [], weite: 0, ab: Date.now() + (o.warten || 0), zuletzt: 0, fertig: o.fertig,
+    alt: { background: el.style.background, boxShadow: el.style.boxShadow, transition: el.style.transition } };
+  f.p.ziel = o.auf ? 1 : 0;
+  f.b.el = s;
+  f.b.haelse = {};
+  f.b.formen = function () { return { formen: f.formen, haelse: f.formen.length > 1 ? [{ a: 0, b: 1, key: 'hals', weite: f.weite }] : [] }; };
+  s.style.setProperty('--fp-farbe', o.glas ? o.farbe || cs.backgroundColor : cs.backgroundColor);
+  if (o.glas) {
+    if (o.farbe) el.style.background = o.farbe;
+    el.style.transition = 'background-color .3s ease';
+  } else el.style.background = 'transparent';
+  el.style.boxShadow = 'none';
+  el.style.clipPath = el.style.webkitClipPath = 'inset(50%)';
+  if (o.inhalt) o.inhalt.style.opacity = '0';
+  // Das erste Bild gleich: Ein Teil, das zufließt, verschwände sonst einen
+  // Augenblick lang.
+  teilSchritt(el, function schritt() { teilSchritt(el, schritt); });
+}
+
+function teilSchritt(el, weiter) {
+  var f = el._fluss, nun = Date.now();
+  if (!f) return;
+  var o = f.o, qr = el.isConnected ? o.quelle() : null;
+  if (!qr || !qr.width) {
+    var weg1 = f.fertig;
+    teilFliesstEnde(el);
+    if (weg1) weg1();
+    return;
+  }
+  if (nun < f.ab) { fpBild(weiter); return; }
+  var dt = f.zuletzt ? fpKlemme((nun - f.zuletzt) / 1000, 0.001, 0.05) : 0.016, p = f.p;
+  f.zuletzt = nun;
+  fpSchwingen(p, dt, FP_IOS);
+  var ruht = Math.abs(p.x - p.ziel) < 0.0015 && Math.abs(p.v) < 0.02;
+  if (ruht) { p.x = p.ziel; p.v = 0; }
+  if ((ruht && p.ziel === 1) || (p.ziel === 0 && p.x < 0.02)) {
+    var fertig = f.fertig;
+    teilFliesstEnde(el);
+    if (fertig) fertig();
+    return;
+  }
+  var zr = o.ziel(), er = el.getBoundingClientRect();
+  var q = { x: qr.left, y: qr.top, w: qr.width, h: qr.height, r: Math.min(qr.width, qr.height) / 2, nur: !o.rest };
+  var z = { x: zr.left, y: zr.top, w: zr.width, h: zr.height, r: o.rund || 0 };
+  var t = fpTropfen(q, z, p.x, p.v, o.d0, FP_IOS);
+  // Ist die Quelle nicht mehr da (ein Eintrag im geschlossenen Menü), quillt
+  // der Tropfen aus einer Perle an ihrer Stelle, die dabei leerläuft.
+  if (o.rest) q.s = Math.max(0, 1 - p.x * 1.9);
+  // Das Teil: auf den Tropfen beschnitten, in seinen eigenen Maßen.
+  var innen = { x: t.x - er.left, y: t.y - er.top, w: t.w, h: t.h, r: t.r, deh: t.deh };
+  el.style.clipPath = el.style.webkitClipPath = 'path("' + fpUmriss(fpPunkte(innen)) + '")';
+  if (o.inhalt) o.inhalt.style.opacity = fpAnteil((p.x - 0.72) / 0.25);
+  if (o.glas && o.farbeAmZiel) el.style.backgroundColor = p.ziel === 1 && p.x > 0.8 ? o.farbeAmZiel : o.farbe || '';
+  // Die Schicht: Hals und Tropfen in einem Kasten um alle, so breit wie der
+  // Schatten. Die Quelle trägt nur den Hals und bleibt ausgespart — sie steht
+  // schon da; Glas spart auch den Tropfen aus.
+  var x0 = Math.min(q.x, t.x, z.x) - 60, y0 = Math.min(q.y, t.y, z.y) - 60;
+  var x1 = Math.max(q.x + q.w, t.x + t.w, z.x + z.w) + 60, y1 = Math.max(q.y + q.h, t.y + t.h, z.y + z.h) + 80;
+  q.x -= x0; q.y -= y0; t.x -= x0; t.y -= y0;
+  f.formen = o.rest && q.s < 0.03 ? [t] : [q, t];
+  f.weite = fpWeite(q.r * (q.s === undefined ? 1 : q.s), o.d0 / 2, FP_IOS);
+  // Die Lichtkante leuchtet, solange er fließt, und ist fort, wenn er steht.
+  f.b.kante = FP_IOS.kante * fpKlemme(Math.abs(p.ziel - p.x) * 3, 0, 1);
+  f.s.style.display = '';
+  fpLage(f.s, { x: x0, y: y0, w: x1 - x0, h: y1 - y0 });
+  var loch = 'path(evenodd, "M0 0H' + fpZ(x1 - x0) + 'V' + fpZ(y1 - y0) + 'H0Z' + (o.rest ? '' : fpUmriss(fpPunkte(q))) +
+    (o.glas ? fpUmriss(fpPunkte(t)) : '') + '")';
+  f.s.style.clipPath = f.s.style.webkitClipPath = loch;
+  fpZeichnen(f.b);
+  fpBild(weiter);
+}
+
+// Räumt ab: Das Teil ist wieder ganz es selbst.
+function teilFliesstEnde(el) {
+  var f = el._fluss;
+  el._fluss = null;
+  if (!f) return;
+  weg(f.s);
+  el.style.background = f.alt.background;
+  el.style.boxShadow = f.alt.boxShadow;
+  el.style.transition = f.alt.transition;
+  el.style.clipPath = el.style.webkitClipPath = '';
+  if (f.o.inhalt) f.o.inhalt.style.opacity = '';
+}
+
+// Ansicht und Hinweis auf iOS: Die Hülle steht gleich an ihrem Platz `z`, der
+// Geist `inhalt` darin unverkleinert, und fließt als Tropfen aus `quelle()`
+// heraus (`auf`) oder hinein. Die Dauer des Aufrufers stimmt die Feder.
+var SCHATTEN_HUELLE = 'drop-shadow(0 10px 15px rgba(20, 20, 19, .16))';
+var SCHATTEN_GLAS = 'drop-shadow(0 4px 5px rgba(20, 20, 19, .14)) drop-shadow(0 14px 16px rgba(20, 20, 19, .28))';
+function huelleFliesst(h, inhalt, z, quelle, auf, opt, dauer, fertig) {
+  var f = glasFarben(opt.glas), rund = opt.rund || (auf ? '0px' : '20px');
+  h.style.left = px(z.left);
+  h.style.top = px(z.top);
+  h.style.width = px(z.width);
+  h.style.height = px(z.height);
+  h.style.borderRadius = rund;
+  // Auf quillt er aus einer Perle von Knopfgröße mitten in der Quelle — die
+  // Quelle selbst kann eine breite Zeile sein, oder schon fort.
+  var q = auf ? function () {
+    var r = quelle(), d = r ? Math.min(r.width, r.height, 44) : 0;
+    return r && { left: r.left + r.width / 2 - d / 2, top: r.top + r.height / 2 - d / 2, width: d, height: d };
+  } : quelle;
+  teilFliesst(h, { quelle: q, rest: auf, ziel: function () { return z; }, rund: parseFloat(rund) || 0, d0: 36, inhalt: inhalt,
+    glas: !!opt.glas, farbe: f.dicht, farbeAmZiel: f.duenn, schatten: opt.glas ? SCHATTEN_GLAS : SCHATTEN_HUELLE, auf: auf,
+    warten: opt.warten, schnell: fpKlemme(dauer / fluessigTakt(opt.glas ? 'hinweis' : 'ansichten').dauer, 0.4, 2), fertig: fertig });
+}
+
+// Der Knauf eines Schalters auf iOS, wie in der Probe «Schalter und Wahl»:
+// Er fließt gedehnt hinüber, am alten Platz bleibt ein Rest, der über einen
+// Hals an ihm hängt und schwindet. Gemessen wird vor dem Tipp (beim
+// Einfangen), bewegt danach (beim Aufsteigen) — auch wenn der Schalter
+// dabei neu gezeichnet wurde. Wer seinen Knauf selbst bewegt, behält das.
+var knaufTipp = null;
+function knaufMerken(e) {
+  knaufTipp = null;
+  if (!flIos('schalter') || bewegungAus()) return;
+  var sw = e.target && e.target.closest ? e.target.closest('.schalter') : null, k = sw && sw.querySelector('.schalter-knauf');
+  if (!k || sw.closest('[data-fp-buehne]')) return;
+  knaufTipp = { sw: sw, id: sw.id, an: sw.getAttribute('aria-checked'), r: k.getBoundingClientRect() };
+}
+
+function knaufFliesst() {
+  var t = knaufTipp;
+  knaufTipp = null;
+  if (!t) return;
+  var sw = t.sw.isConnected ? t.sw : (t.id ? $(t.id) : null), k = sw && sw.querySelector('.schalter-knauf');
+  if (!k || sw.getAttribute('aria-checked') === t.an || k.getAnimations().length) return;
+  var n = k.getBoundingClientRect(), dx = t.r.left - n.left;
+  if (Math.abs(dx) < 1) return;
+  var m = getComputedStyle(k).transform, xn = 0;
+  try { if (m && m !== 'none') xn = new DOMMatrix(m).m41; } catch (e) { xn = 0; }
+  var xa = xn + dx, tk = fluessigTakt('schalter'), deh = FP_IOS.dehnen;
+  bewegt(k, [{ transform: 'translateX(' + px(xa) + ')' },
+    { transform: 'translateX(' + px((xa + xn) / 2) + ') scale(' + (1 + 0.3 * deh).toFixed(3) + ', ' + (1 - 0.18 * deh).toFixed(3) + ')',
+      offset: 0.4 },
+    { transform: 'translateX(' + px(xn) + ')' }], { dauer: tk.dauer, kurve: tk.kurve });
+  fliessen(k, null, { stelle: 'schalter', dauer: tk.dauer, rest: { left: t.r.left, top: t.r.top, width: t.r.width, height: t.r.height } });
 }
 
 // Der Kalender: Die Markierung gleitet vom alten zum neuen Tag, auf der Feder
@@ -2938,12 +3141,26 @@ var TROPFEN_ZU_FRUEH = [0.18, 0.4, 0.86];
 function tropfenZu(g, r, ziel, opt) {
   opt = opt || {};
   var k = ziel.getBoundingClientRect(), w = tropfenWeg(sichtbar(r), k), h = tropfenHuelle(g, r.width, opt.glas);
-  var stelle = opt.glas ? 'hinweis' : 'ansichten', ios = flIos(stelle);
-  var kurve = ios ? fluessigTakt(stelle, true).kurve : 'cubic-bezier(.35, 0, .4, 1)';
   var dauer = opt.dauer || TROPFEN_DAUER, t = opt.frueh ? TROPFEN_ZU_FRUEH : TROPFEN_ZU_TAKT;
   var f = glasFarben(opt.glas);
   function sk(b, off) { return { transform: 'scale(' + (b.width / r.width).toFixed(4) + ')', offset: off }; }
+  function nicken(warten) {
+    bewegt(ziel, [{ transform: 'scale(1)' }, { transform: 'scale(1.14)', offset: 0.45 }, { transform: 'scale(1)' }],
+      { dauer: 320, warten: warten, kurve: 'ease-out' });
+  }
   if (opt.grund) h.style.background = opt.grund;
+  // Auf iOS fließt die Hülle selbst in den Knopf (ADR 0054); er nickt, wenn
+  // sie in ihm aufgegangen ist.
+  if (flIos(opt.glas ? 'hinweis' : 'ansichten')) {
+    huelleFliesst(h, g, w.gross, function () { return ziel.isConnected === false ? null : ziel.getBoundingClientRect(); }, false,
+      opt, dauer, function () {
+        weg(h);
+        nicken(0);
+        if (opt.fertig) opt.fertig();
+      });
+    return h;
+  }
+  var kurve = 'cubic-bezier(.35, 0, .4, 1)';
   bewegt(h, [huellenBild(w.gross, opt.rund || '20px', 1, 0, f.duenn), huellenBild(w.mitte, '40%', 1, t[0], f.dicht),
     huellenBild(w.tropfen, TROPFEN, 1, t[1], f.dicht), huellenBild(w.klein, TROPFEN, 1, t[2], f.dicht),
     huellenBild(w.klein, TROPFEN, 0, 1, f.dicht)],
@@ -2953,9 +3170,7 @@ function tropfenZu(g, r, ziel, opt) {
     });
   bewegt(g, [sk(w.gross, 0), sk(w.mitte, t[0]), sk(w.tropfen, t[1]), sk(w.klein, t[2]), sk(w.klein, 1)],
     { dauer: dauer, kurve: kurve, fill: 'forwards' });
-  bewegt(ziel, [{ transform: 'scale(1)' }, { transform: 'scale(1.14)', offset: 0.45 }, { transform: 'scale(1)' }],
-    { dauer: 320, warten: dauer * 0.8, kurve: 'ease-out' });
-  if (ios) fliessen(h, ziel, { stelle: stelle, dauer: dauer, glas: opt.glas, dehnen: true });
+  nicken(dauer * 0.8);
   return h;
 }
 
@@ -2965,18 +3180,24 @@ function tropfenZu(g, r, ziel, opt) {
 // keine), `dauer` die eigene Dauer, `glas` die Hülle aus Glas, `grund` die
 // Farbe der Hülle, wenn sie nicht der Grund der Seite ist, `warten` wie lange
 // er unsichtbar wartet — etwa, bis ein Fenster an seiner Stelle zum Tropfen
-// geworden ist (ADR 0041).
+// geworden ist (ADR 0041). Auf iOS fließt die Hülle selbst (ADR 0054).
 function tropfenAuf(neu, q, opt) {
   opt = opt || {};
   var g = geist(neu);
   if (!g) return null;
   var n = neu.getBoundingClientRect(), w = tropfenWeg(sichtbar(n), q), h = tropfenHuelle(g, n.width, opt.glas);
-  var stelle = opt.glas ? 'hinweis' : 'ansichten', ios = flIos(stelle);
-  var kurve = ios ? fluessigTakt(stelle).kurve : 'cubic-bezier(.3, 0, .25, 1)';
   var dauer = opt.dauer || TROPFEN_DAUER, f = glasFarben(opt.glas);
   function sk(b, off) { return { transform: 'scale(' + (b.width / n.width).toFixed(4) + ')', offset: off }; }
   if (opt.grund) h.style.background = opt.grund;
   neu.style.opacity = '0';
+  if (flIos(opt.glas ? 'hinweis' : 'ansichten')) {
+    huelleFliesst(h, g, w.gross, function () { return q; }, true, opt, dauer, function () {
+      neu.style.opacity = '';
+      weg(h);
+    });
+    return h;
+  }
+  var kurve = 'cubic-bezier(.3, 0, .25, 1)';
   bewegt(h, [huellenBild(w.klein, TROPFEN, 0, 0, f.dicht), huellenBild(w.klein, TROPFEN, 1, 0.08, f.dicht),
     huellenBild(w.tropfen, TROPFEN, 1, 0.3, f.dicht), huellenBild(w.mitte, '40%', 1, 0.62, f.dicht),
     huellenBild(w.gross, opt.rund || '0px', 1, 1, f.duenn)],
@@ -2987,8 +3208,6 @@ function tropfenAuf(neu, q, opt) {
     });
   bewegt(g, [sk(w.klein, 0), sk(w.klein, 0.08), sk(w.tropfen, 0.3), sk(w.mitte, 0.62), sk(w.gross, 1)],
     { dauer: dauer, warten: opt.warten, kurve: kurve, fill: opt.warten ? 'both' : 'forwards' });
-  if (ios) fliessen(h, { getBoundingClientRect: function () { return q; } },
-    { stelle: stelle, dauer: dauer, warten: opt.warten, glas: opt.glas, dehnen: true });
   return h;
 }
 
@@ -5392,7 +5611,8 @@ function fpZeichnen(b) {
   var w = FP_IOS, erg = b.formen(w), liste = erg.formen, jetzt = {};
   function mitte(x) { return typeof x === 'number' ? fpMitte(liste[x]) : x; }
   function kreis(x, gegen) { return typeof x === 'number' ? fpKern(liste[x], gegen) : x; }
-  var d = (erg.pfade || []).join('') + liste.map(function (f) { return fpUmriss(fpPunkte(f)); }).join('');
+  // Eine Form mit `nur` trägt einen Hals, gemalt wird sie nicht.
+  var d = (erg.pfade || []).join('') + liste.filter(function (f) { return !f.nur; }).map(function (f) { return fpUmriss(fpPunkte(f)); }).join('');
   (erg.haelse || []).forEach(function (h) {
     var t = fpHalsPfad(kreis(h.a, mitte(h.b)), kreis(h.b, mitte(h.a)), h.weite);
     if (t) { d += t; jetzt[h.key] = true; }
@@ -5865,7 +6085,9 @@ function fpKarteHtml(s, ios) {
   return '<div class="kachel fp-karte" data-fp-karte="' + id + '">' +
     '<h3 class="fp-name">' + esc(s[1]) + '</h3><p class="fp-text">' + esc(s[2]) + '</p>' +
     fpBuehneHtml(id) +
+    '<p class="fp-text fp-wie"><b>Probe:</b> ' + esc(s[3]) + '</p>' +
     fpSchalterHtml(id, 'iOS-Flüssig', !!ios[id]) +
+    '<p class="fp-text fp-wie"><b>So testest du es:</b> ' + esc(s[4]) + '</p>' +
     '</div>';
 }
 
@@ -5889,8 +6111,9 @@ function zeichneFluessigProbe() {
     '<div class="fl-leiste" id="flLeiste"' + (flUngespeichert() ? '' : ' hidden') + '>' +
       '<span>Nicht gespeichert</span><button type="button" class="knopf" id="flSpeichern">Speichern</button></div>' +
     '<section class="abschnitt"><h2>Chilli oder iOS</h2>' +
-      '<p class="fp-text fp-vorab">Standard ist die Chilli-Bewegung. Schalte eine Stelle auf iOS-Flüssig, dann ersetzt ' +
-        'sie dort die Chilli-Bewegung. Tipp in die Probe, um zu sehen, wie. Es gilt erst nach «Speichern».</p>' +
+      '<p class="fp-text fp-vorab">Standard ist die Chilli-Bewegung. Schaltest du eine Stelle auf iOS-Flüssig, ' +
+        'ersetzt das Flüssige dort die Chilli-Bewegung. Die Probe zeigt, wie es aussieht; in der App gilt es erst nach ' +
+        '«Speichern» oben. Unter jeder Probe steht, wo du es in der App siehst.</p>' +
       FP_STELLEN.map(function (s) { return fpKarteHtml(s, ios); }).join('') +
     '</section></div>';
 }
@@ -8842,99 +9065,13 @@ function blattBilder() {
 // Die Kurve um das Menü: fest, bis das Menü auf iOS steht.
 function menueKurve() { return flIos('menue') ? fluessigTakt('menue', true).kurve : TROPFEN_KURVE_FEST; }
 
-// Das Menü auf iOS (ADR 0054): Das Blatt selbst fließt wie in der Probe — ein
-// runder Tropfen löst sich vom Knopf, wandert hinüber und wächst zur Karte;
-// zu fließt er denselben Weg zurück. Die Chilli-Bilder laufen dabei nicht,
-// sonst sähe man ein Menü vor einem zweiten. Gemalt wird das Flüssige in
-// einer Schicht unter dem Blatt, in seiner Farbe und mit seinem Schatten;
-// das Blatt selbst ist derweil durchsichtig und auf den Tropfen beschnitten.
-// Am Ziel sind beide deckungsgleich, so geht der Wechsel ohne Kante. Wer
-// mitten im Weg umkehrt, nimmt die Feder mit, wie sie gerade schwingt.
-var BLATT_TROPFEN = 36;
+// Das Menü auf iOS (ADR 0054): Das Blatt selbst fließt wie in der Probe
+// (`teilFliesst`), die Chilli-Bilder laufen dabei nicht.
+var SCHATTEN_BLATT = 'drop-shadow(0 2px 3px rgba(20, 20, 19, .10)) drop-shadow(0 16px 20px rgba(20, 20, 19, .18))';
 function blattFliesst(el, auf, warten, fertig) {
-  var f = el._fluss;
-  if (bewegungAus()) {
-    blattFliesstEnde(el);
-    if (fertig) fertig();
-    return;
-  }
-  if (!f) {
-    var cs = getComputedStyle(el), s = document.createElement('div');
-    s.className = 'fl-schicht fl-blatt';
-    s.setAttribute('aria-hidden', 'true');
-    s.style.display = 'none';
-    el.parentNode.insertBefore(s, el);
-    f = el._fluss = { p: fpFeder(auf ? 0 : 1), s: s, b: fpSchichten(s, 'flb' + (++flNummer), true), formen: [], weite: 0,
-      ab: Date.now() + (warten || 0), zuletzt: 0, rund: parseFloat(cs.borderTopLeftRadius) || 18 };
-    f.b.el = s;
-    f.b.haelse = {};
-    f.b.formen = function () { return { formen: f.formen, haelse: f.formen.length > 1 ? [{ a: 0, b: 1, key: 'hals', weite: f.weite }] : [] }; };
-    s.style.setProperty('--fp-farbe', cs.backgroundColor);
-    el.style.background = 'transparent';
-    el.style.boxShadow = 'none';
-    el.style.clipPath = el.style.webkitClipPath = 'inset(50%)';
-    $('menueListe').style.opacity = '0';
-    f.p.ziel = auf ? 1 : 0;
-    f.fertig = fertig;
-    // Das erste Bild gleich: Ein Blatt, das zufließt, verschwände sonst einen
-    // Augenblick lang.
-    blattSchritt(el, function schritt() { blattSchritt(el, schritt); });
-    return;
-  }
-  f.p.ziel = auf ? 1 : 0;
-  f.fertig = fertig;
-}
-
-function blattSchritt(el, weiter) {
-  var f = el._fluss, k = menueAnker(), nun = Date.now();
-  if (!f) return;
-  if (!el.isConnected || !k) { blattFliesstEnde(el); return; }
-  if (nun < f.ab) { fpBild(weiter); return; }
-  var dt = f.zuletzt ? fpKlemme((nun - f.zuletzt) / 1000, 0.001, 0.05) : 0.016, p = f.p;
-  f.zuletzt = nun;
-  fpSchwingen(p, dt, FP_IOS);
-  var ruht = Math.abs(p.x - p.ziel) < 0.0015 && Math.abs(p.v) < 0.02;
-  if (ruht) { p.x = p.ziel; p.v = 0; }
-  if ((ruht && p.ziel === 1) || (p.ziel === 0 && p.x < 0.02)) {
-    var fertig = f.fertig;
-    blattFliesstEnde(el);
-    if (fertig) fertig();
-    return;
-  }
-  var kr = k.getBoundingClientRect(), zr = el.getBoundingClientRect();
-  var q = { x: kr.left, y: kr.top, w: kr.width, h: kr.height, r: Math.min(kr.width, kr.height) / 2 };
-  var z = { x: zr.left, y: zr.top, w: zr.width, h: zr.height, r: f.rund };
-  var t = fpTropfen(q, z, p.x, p.v, BLATT_TROPFEN, FP_IOS);
-  // Das Blatt: auf den Tropfen beschnitten, in seinen eigenen Maßen.
-  var innen = { x: t.x - z.x, y: t.y - z.y, w: t.w, h: t.h, r: t.r, deh: t.deh };
-  el.style.clipPath = el.style.webkitClipPath = 'path("' + fpUmriss(fpPunkte(innen)) + '")';
-  $('menueListe').style.opacity = fpAnteil((p.x - 0.72) / 0.25);
-  // Die Schicht: Knopf, Hals und Tropfen in einem Kasten um alle drei; der
-  // Knopf selbst bleibt ausgespart, er steht schon da.
-  // Der Rand ist so breit wie der Schatten des Blatts.
-  var x0 = Math.min(q.x, t.x, z.x) - 60, y0 = Math.min(q.y, t.y, z.y) - 60;
-  var x1 = Math.max(q.x + q.w, t.x + t.w, z.x + z.w) + 60, y1 = Math.max(q.y + q.h, t.y + t.h, z.y + z.h) + 80;
-  q.x -= x0; q.y -= y0; t.x -= x0; t.y -= y0;
-  f.formen = [q, t];
-  f.weite = fpWeite(q.r, BLATT_TROPFEN / 2, FP_IOS);
-  // Die Lichtkante leuchtet, solange er fließt, und ist fort, wenn er steht —
-  // das Blatt selbst hat keine.
-  f.b.kante = FP_IOS.kante * fpKlemme(Math.abs(p.ziel - p.x) * 3, 0, 1);
-  f.s.style.display = '';
-  fpLage(f.s, { x: x0, y: y0, w: x1 - x0, h: y1 - y0 });
-  var loch = 'path(evenodd, "M0 0H' + fpZ(x1 - x0) + 'V' + fpZ(y1 - y0) + 'H0Z' + fpUmriss(fpPunkte(q)) + '")';
-  f.s.style.clipPath = f.s.style.webkitClipPath = loch;
-  fpZeichnen(f.b);
-  fpBild(weiter);
-}
-
-// Räumt ab: Das Blatt ist wieder ganz es selbst.
-function blattFliesstEnde(el) {
-  var f = el._fluss;
-  el._fluss = null;
-  if (f) weg(f.s);
-  ['background', 'boxShadow', 'clipPath', 'webkitClipPath'].forEach(function (k) { el.style[k] = ''; });
-  if ($('menueListe')) $('menueListe').style.opacity = '';
+  teilFliesst(el, { quelle: function () { var k = menueAnker(); return k ? k.getBoundingClientRect() : null; },
+    ziel: function () { return el.getBoundingClientRect(); }, rund: 18, d0: 36, inhalt: $('menueListe'),
+    schatten: SCHATTEN_BLATT, auf: auf, warten: warten, fertig: fertig });
 }
 
 function menueOeffnen() {
@@ -8982,7 +9119,7 @@ function menueSchliessen(sofort) {
     if (gast) b.style.visibility = 'hidden';
     hoch();
   }
-  if (sofort || bewegungAus()) { blattFliesstEnde(b); zu(); return; }
+  if (sofort || bewegungAus()) { teilFliesstEnde(b); zu(); return; }
   if (flIos('menue') || b._fluss) {
     // Ein Blatt, das schon steht, fließt von dort zurück, wo es ist.
     blattFliesst(b, false, 0, geflossen);
@@ -9279,6 +9416,9 @@ function start() {
 
   // Woher ein Tipp kam, damit die nächste Ansicht dort herauswachsen kann.
   document.addEventListener('pointerdown', tippMerken, true);
+  // Der Knauf eines Schalters fließt auf iOS (knaufFliesst).
+  document.addEventListener('click', knaufMerken, true);
+  document.addEventListener('click', knaufFliesst);
   document.addEventListener('click', tippMerken, true);
   // Die Marken der Umschalter sitzen erst richtig, wenn die Schriften da sind.
   window.addEventListener('resize', wahlenSetzen);
