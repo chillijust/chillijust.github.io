@@ -7701,7 +7701,11 @@ function start() {
   });
   // Eine Bestätigung geht auch mit einem Tipp irgendwohin.
   // Eine Wahl («Hinzufügen») bricht ab, wer danebentippt (ADR 0026).
+  // Der Tipp auf einen Knopf der Karte ist schon beantwortet: Wird aus der
+  // Frage an Ort und Stelle die Antwort, stiege derselbe Tipp sonst hier an
+  // und schlösse sie, kaum dass sie steht.
   $('hinweisBlatt').addEventListener('click', function (e) {
+    if (e.target.closest('button')) return;
     if ($('hinweisKarte').classList.contains('bestaetigung')) { hinweisSchliessen(); return; }
     if (hinweisWahl && e.target === this) { hinweisWahl = null; hinweisSchliessen(); }
   });

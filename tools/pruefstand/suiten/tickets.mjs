@@ -169,6 +169,10 @@ return durch().then(function () {
     blatt.classList.contains('offen'));
   q('#hinweisOk').click();
   pruefe('D16 dann ist es fort', !ticketNach('k3') && !blatt.classList.contains('offen'));
+  // Derselbe Tipp, der «Löschen» sagte, stieg zum Blatt der Meldung an und
+  // schloss die Antwort, kaum dass sie stand (Ticket 0.13.1).
+  pruefe('D16b die Antwort bleibt stehen', q('#hinweisBlatt').classList.contains('offen') &&
+    q('#hinweisKarte').classList.contains('bestaetigung') && q('#hinweisTitel').textContent === 'Gel' + String.fromCharCode(246) + 'scht');
   return durch();
 }).then(function () {
   hinweisSchliessen();
@@ -176,7 +180,18 @@ return durch().then(function () {
   pruefe('D17 «Abgegebene löschen» fragt erst, im Glas', state.tickets.length === 2 && q('#hinweisBlatt').classList.contains('offen') && !!hinweisFrage);
   q('#hinweisOk').click();
   pruefe('D18 dann bleiben nur die offenen', state.tickets.length === 0 && !q('#tkAufraeumen'));
+  pruefe('D18b auch hier bleibt die Antwort stehen', q('#hinweisBlatt').classList.contains('offen') &&
+    q('#hinweisKarte').classList.contains('bestaetigung'));
   hinweisSchliessen();
+  return durch();
+}).then(function () {
+  // Ebenso ein Wahlknopf, der etwas meldet.
+  hinweisZeigen('Wahl', '', null, null, { wahl: { knoepfe: [{ text: 'Eins', tun: function () { melden('Getan.', 'haken'); } }] } });
+  q('#hinweisWahl [data-wahl]').click();
+  pruefe('D18c eine Wahl, die meldet, läßt die Meldung stehen', q('#hinweisBlatt').classList.contains('offen') &&
+    q('#hinweisTitel').textContent === 'Getan');
+  q('#hinweisKarte').click();
+  pruefe('D18d ein Tipp auf die Meldung schließt sie weiter', !q('#hinweisBlatt').classList.contains('offen'));
   q('#tkNeu').click();
   pruefe('D19 «Neues Ticket» öffnet das Blatt, Ort Tickets', blatt.classList.contains('offen') && q('#tkOrt').value === 'tickets');
   ausbewegt();
