@@ -1265,197 +1265,94 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 .hinweis-karte .knopf { width: 100%; }
 /* Den Fokus trägt die Karte, für Vorleser — ein Ring um «OK» sähe aus wie eine Wahl. */
 .hinweis-karte:focus { outline: none; }
-/* Die Bestätigung: dasselbe Glas, ein grüner Haken statt «OK» (ADR 0018). */
+/* Die Bestätigung: dasselbe Glas, ein Zeichen statt «OK» (ADR 0018). Das
+   Zeichen malt seine Scheibe selbst (`.zm-scheibe`), damit es sie füllen und
+   über ihren Rand hinaus pulsen kann (ADR 0051): grün für Gelungenes, grau
+   das neutrale «i», im Akzent die Warnung. */
 .hinweis-haken {
   display: grid;
   place-items: center;
   width: 44px;
   height: 44px;
   margin: 0 auto 10px;
-  border-radius: 50%;
-  background: var(--erledigt);
   color: var(--grund);
+  --zm-grund: var(--erledigt);
 }
 .hinweis-haken[hidden] { display: none; }
-.hinweis-haken.neutral { background: var(--flaeche-2); color: var(--text-2); }
-.hinweis-haken svg { width: 24px; height: 24px; }
-/* Die Zeichen bewegen sich einmal, wenn sie erscheinen (ADR 0035): Der Haken
-   zeichnet sich, beim Hinweis fällt der Punkt als Tropfen und der Strich wächst,
-   der Pfeil fällt in die Schale, das zweite Blatt schiebt sich aus dem ersten.
-   Weich, ohne Ruck (ADR 0036), ein Viertel flotter als dort (ADR 0037) — fertig,
-   bevor die Bestätigung geht. */
-.zeichnet .z-strich, .gw-kachel.gerade.erledigt .gw-scheibe .z-strich, .tm-reihe.gerade.erledigt .z-strich {
+.hinweis-haken.neutral { color: var(--text-2); --zm-grund: var(--flaeche-2); }
+.hinweis-haken.warnend { color: var(--auf-akzent); --zm-grund: var(--akzent); }
+.hinweis-haken svg { width: 44px; height: 44px; overflow: visible; }
+/* Der Haken auf der Kachel zeichnet sich, wenn er eben gesetzt wurde
+   (ADR 0035, 0037). */
+.gw-kachel.gerade.erledigt .gw-scheibe .z-strich, .tm-reihe.gerade.erledigt .z-strich {
   stroke-dasharray: 1;
   animation: z-zeichnen .53s .15s cubic-bezier(.45, 0, .25, 1) both;
 }
-.zeichnet .z-punkt { animation: z-fallen .41s cubic-bezier(.35, 0, .3, 1) both; }
-.zeichnet[data-zeichen="hinweis"] .z-strich { animation-delay: .34s; }
-.z-punkt { transform-box: fill-box; transform-origin: center; }
-.zeichnet .z-pfeil { animation: z-pfeil .71s .09s cubic-bezier(.4, 0, .25, 1) both; }
-.zeichnet .z-blatt { animation: z-blatt .6s .11s cubic-bezier(.35, 0, .25, 1) both; }
 @keyframes z-zeichnen { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
-@keyframes z-fallen {
-  0% { transform: translateY(-7px) scale(.6); opacity: 0; }
-  60% { opacity: 1; }
-  100% { transform: none; opacity: 1; }
+/* Die Zeichen der Meldung bewegen sich einmal, wenn sie erscheinen, und
+   enden mit dem Puls (ADR 0051) — fertig, bevor die kürzeste Bestätigung
+   geht. Der Puls füllt nur nach vorn: vorab stünde sein Ring schon am Rand. */
+.zm-scheibe { fill: var(--zm-grund); stroke: none; }
+.zm-scheibe, .zm-puls, .zm-punkt, .zm-pfeil, .zm-wackeln, .zm-hinten, .zm-vorn, .zm-schale, .zm-kreis,
+.zm-rand { transform-box: fill-box; transform-origin: center; }
+.zm-strich { stroke-dasharray: 1; }
+.zm-kreis { stroke: var(--zm-grund); transform: rotate(-90deg); }
+.zm-rand { transform: rotate(-90deg); }
+.zm-puls { stroke: var(--zm-grund); opacity: 0; }
+.neutral .zm-puls { stroke: var(--text-2); }
+/* Haken: der Kreis schließt sich, die Scheibe füllt sich, der Haken zieht sich. */
+.zeichnet[data-zeichen="haken"] .zm-kreis { animation: z-zeichnen .38s cubic-bezier(.45, 0, .25, 1) both; }
+.zeichnet[data-zeichen="haken"] .zm-scheibe { animation: zm-auf .2s .3s ease both; }
+.zeichnet[data-zeichen="haken"] .zm-haken { animation: z-zeichnen .34s .42s cubic-bezier(.45, 0, .25, 1) both; }
+.zeichnet[data-zeichen="haken"] .zm-puls { animation: zm-puls .42s .74s ease-out forwards; }
+/* Hinweis: der Kreis zeichnet sich, der Punkt fällt als Tropfen, der Strich wächst. */
+.zeichnet[data-zeichen="hinweis"] .zm-rand { animation: z-zeichnen .35s cubic-bezier(.45, 0, .25, 1) both; }
+.zeichnet[data-zeichen="hinweis"] .zm-punkt { animation: zm-tropfen .5s .12s cubic-bezier(.35, 0, .3, 1) both; }
+.zeichnet[data-zeichen="hinweis"] .zm-i { animation: z-zeichnen .26s .56s cubic-bezier(.45, 0, .25, 1) both; }
+.zeichnet[data-zeichen="hinweis"] .zm-puls { animation: zm-puls .36s .8s ease-out forwards; }
+/* Warnung: zeichnet sich, wackelt dann; der Puls läuft im Wackeln mit —
+   nacheinander wäre es länger als die Bestätigung. */
+.zeichnet[data-zeichen="warnung"] .zm-dreieck { animation: z-zeichnen .34s cubic-bezier(.45, 0, .25, 1) both; }
+.zeichnet[data-zeichen="warnung"] .zm-ausruf { animation: z-zeichnen .18s .3s cubic-bezier(.45, 0, .25, 1) both; }
+.zeichnet[data-zeichen="warnung"] .zm-punkt { animation: zm-steigen .16s .46s cubic-bezier(.2, .7, .3, 1) both; }
+.zeichnet[data-zeichen="warnung"] .zm-wackeln { animation: zm-wackeln .5s .62s ease-in-out both; }
+.zeichnet[data-zeichen="warnung"] .zm-puls { animation: zm-puls .42s .72s ease-out forwards; }
+/* Kopiert: beide Blätter zeichnen sich übereinander, dann fächern sie auf. */
+.zeichnet[data-zeichen="kopie"] .zm-hinten {
+  animation: z-zeichnen .32s cubic-bezier(.45, 0, .25, 1) both, zm-hinten .36s .48s cubic-bezier(.35, 0, .25, 1) both;
 }
-@keyframes z-pfeil {
-  0% { transform: translateY(-9px); opacity: 0; }
-  40% { opacity: 1; }
-  78% { transform: translateY(.8px); }
-  100% { transform: none; opacity: 1; }
+.zeichnet[data-zeichen="kopie"] .zm-vorn {
+  animation: z-zeichnen .32s .16s cubic-bezier(.45, 0, .25, 1) both, zm-vorn .36s .48s cubic-bezier(.35, 0, .25, 1) both;
 }
-@keyframes z-blatt { from { transform: translate(-5px, -5px); } to { transform: none; } }
-/* ── Zeichenprobe ──────────────────────────────────────────── */
-/* Drei Fassungen je Zeichen zur Wahl, auf dem Dashboard (0.13.3T). Geht, sobald
-   gewählt ist; die gewählte Fassung tritt dann an die Stelle von `z-…`. Die
-   Fassungen malen ihre Scheibe selbst (`.zv-scheibe`, 44 px, die Linien im
-   selben Maß wie `ICON`), damit sie sie bewegen und über ihren Rand hinaus
-   zeichnen können. Alles ist fertig, bevor die kürzeste Bestätigung geht. */
-.hinweis-haken { --zv-grund: var(--erledigt); }
-.hinweis-haken.neutral { --zv-grund: var(--flaeche-2); }
-.hinweis-haken.warnend { --zv-grund: var(--akzent); background: var(--akzent); color: var(--auf-akzent); }
-.hinweis-haken[data-variante] { background: none; }
-.hinweis-haken[data-variante] svg { width: 44px; height: 44px; overflow: visible; }
-.zv-scheibe { fill: var(--zv-grund); stroke: none; }
-.zv-scheibe, .zv-puls, .zv-punkt, .zv-pfeil, .zv-wackeln, .zv-hinten, .zv-vorn, .zv-stempel, .zv-schale,
-.zv-kreis, .zv-ausruf-auf { transform-box: fill-box; transform-origin: center; }
-.zv-pendel { transform-box: fill-box; transform-origin: 50% 100%; }
-.zv-strich { stroke-dasharray: 1; }
-.zv-kreis { stroke: var(--zv-grund); transform: rotate(-90deg); }
-.zv-puls { stroke: var(--zv-grund); opacity: 0; }
-.zv-fortschritt { stroke-width: 1.5; opacity: 0; }
-/* Der Puls füllt nur nach vorn: Vorab stünde sein Ring schon am Rand. */
-/* Haken: A quillt als Tropfen, B schließt erst den Kreis, C pulst nach. */
-.zeichnet[data-zeichen="haken"][data-variante="a"] .zv-scheibe { animation: zv-quellen .38s cubic-bezier(.2, .7, .3, 1) both; }
-.zeichnet[data-zeichen="haken"][data-variante="a"] .zv-haken { animation: z-zeichnen .45s .28s cubic-bezier(.45, 0, .25, 1) both; }
-.zeichnet[data-zeichen="haken"][data-variante="b"] .zv-kreis { animation: z-zeichnen .45s cubic-bezier(.45, 0, .25, 1) both; }
-.zeichnet[data-zeichen="haken"][data-variante="b"] .zv-scheibe { animation: zv-auf .22s .38s ease both; }
-.zeichnet[data-zeichen="haken"][data-variante="b"] .zv-haken { animation: z-zeichnen .4s .5s cubic-bezier(.45, 0, .25, 1) both; }
-.zeichnet[data-zeichen="haken"][data-variante="c"] .zv-haken { animation: z-zeichnen .45s .08s cubic-bezier(.45, 0, .25, 1) both; }
-.zeichnet[data-zeichen="haken"][data-variante="c"] .zv-scheibe { animation: zv-nicken .3s .48s ease-in-out both; }
-.zeichnet[data-zeichen="haken"][data-variante="c"] .zv-puls { animation: zv-puls .6s .48s ease-out forwards; }
-/* Hinweis: A der Strich wächst, der Punkt steigt auf; B der Punkt fällt als
-   Tropfen und plättet sich; C das «i» pendelt aus. */
-.zeichnet[data-zeichen="hinweis"][data-variante="a"] .zv-i { animation: z-zeichnen .35s .08s cubic-bezier(.45, 0, .25, 1) both; }
-.zeichnet[data-zeichen="hinweis"][data-variante="a"] .zv-punkt { animation: zv-steigen .38s .4s cubic-bezier(.2, .7, .3, 1) both; }
-.zeichnet[data-zeichen="hinweis"][data-variante="b"] .zv-punkt { animation: zv-tropfen .55s cubic-bezier(.35, 0, .3, 1) both; }
-.zeichnet[data-zeichen="hinweis"][data-variante="b"] .zv-i { animation: z-zeichnen .32s .48s cubic-bezier(.45, 0, .25, 1) both; }
-.zeichnet[data-zeichen="hinweis"][data-variante="c"] .zv-pendel { animation: zv-pendeln .9s ease-in-out both; }
-/* Warnung (neu): A zeichnet sich, B wackelt, C pulst zweimal. */
-.zeichnet[data-zeichen="warnung"][data-variante="a"] .zv-dreieck { animation: z-zeichnen .5s cubic-bezier(.45, 0, .25, 1) both; }
-.zeichnet[data-zeichen="warnung"][data-variante="a"] .zv-ausruf { animation: z-zeichnen .25s .45s cubic-bezier(.45, 0, .25, 1) both; }
-.zeichnet[data-zeichen="warnung"][data-variante="a"] .zv-punkt { animation: zv-steigen .22s .68s cubic-bezier(.2, .7, .3, 1) both; }
-.zeichnet[data-zeichen="warnung"][data-variante="b"] .zv-wackeln { animation: zv-wackeln .62s .08s ease-in-out both; }
-.zeichnet[data-zeichen="warnung"][data-variante="c"] .zv-puls { animation: zv-puls .5s .05s ease-out 2 forwards; }
-.zeichnet[data-zeichen="warnung"][data-variante="c"] .zv-ausruf-auf { animation: zv-quellen .3s .05s cubic-bezier(.2, .7, .3, 1) both; }
-/* Kopie: A fächert auf, B stempelt das zweite Blatt auf, C zeichnet beide. */
-.zeichnet[data-zeichen="kopie"][data-variante="a"] .zv-hinten { animation: zv-hinten .5s .08s cubic-bezier(.35, 0, .25, 1) both; }
-.zeichnet[data-zeichen="kopie"][data-variante="a"] .zv-vorn { animation: zv-vorn .5s .08s cubic-bezier(.35, 0, .25, 1) both; }
-.zeichnet[data-zeichen="kopie"][data-variante="b"] .zv-stempel { animation: zv-stempel .4s cubic-bezier(.3, 0, .3, 1) both; }
-.zeichnet[data-zeichen="kopie"][data-variante="b"] .zv-scheibe { animation: zv-nicken .26s .36s ease-in-out both; }
-.zeichnet[data-zeichen="kopie"][data-variante="c"] .zv-hinten { animation: z-zeichnen .4s cubic-bezier(.45, 0, .25, 1) both; }
-.zeichnet[data-zeichen="kopie"][data-variante="c"] .zv-vorn { animation: z-zeichnen .4s .3s cubic-bezier(.45, 0, .25, 1) both; }
-/* Laden: A der Pfeil fällt, die Schale gibt nach; B zeichnet Schale, Schaft,
-   Spitze; C läuft erst ein Ring voll, dann fällt der Pfeil. */
-.zeichnet[data-zeichen="laden"][data-variante="a"] .zv-pfeil { animation: zv-fallen .5s cubic-bezier(.4, 0, .25, 1) both; }
-.zeichnet[data-zeichen="laden"][data-variante="a"] .zv-schale { animation: zv-tauchen .3s .42s ease-in-out both; }
-.zeichnet[data-zeichen="laden"][data-variante="b"] .zv-schale { animation: z-zeichnen .35s cubic-bezier(.45, 0, .25, 1) both; }
-.zeichnet[data-zeichen="laden"][data-variante="b"] .zv-schaft { animation: z-zeichnen .3s .25s cubic-bezier(.45, 0, .25, 1) both; }
-.zeichnet[data-zeichen="laden"][data-variante="b"] .zv-spitze { animation: z-zeichnen .25s .5s cubic-bezier(.45, 0, .25, 1) both; }
-.zeichnet[data-zeichen="laden"][data-variante="c"] .zv-fortschritt { animation: zv-fortschritt .7s ease both; }
-.zeichnet[data-zeichen="laden"][data-variante="c"] .zv-pfeil { animation: zv-fallen .45s .45s cubic-bezier(.4, 0, .25, 1) both; }
-/* D: aus der Wahl zusammengesetzt (0.13.3T2), jede endet mit dem Puls —
-   gestrafft, damit auch er fertig ist, bevor die Bestätigung geht. */
-.zv-rand { transform-box: fill-box; transform-origin: center; transform: rotate(-90deg); }
-.hinweis-haken.neutral .zv-puls { stroke: var(--text-2); }
-.zeichnet[data-zeichen="haken"][data-variante="d"] .zv-kreis { animation: z-zeichnen .38s cubic-bezier(.45, 0, .25, 1) both; }
-.zeichnet[data-zeichen="haken"][data-variante="d"] .zv-scheibe { animation: zv-auf .2s .3s ease both; }
-.zeichnet[data-zeichen="haken"][data-variante="d"] .zv-haken { animation: z-zeichnen .34s .42s cubic-bezier(.45, 0, .25, 1) both; }
-.zeichnet[data-zeichen="haken"][data-variante="d"] .zv-puls { animation: zv-puls .42s .74s ease-out forwards; }
-.zeichnet[data-zeichen="hinweis"][data-variante="d"] .zv-rand { animation: z-zeichnen .35s cubic-bezier(.45, 0, .25, 1) both; }
-.zeichnet[data-zeichen="hinweis"][data-variante="d"] .zv-punkt { animation: zv-tropfen .5s .12s cubic-bezier(.35, 0, .3, 1) both; }
-.zeichnet[data-zeichen="hinweis"][data-variante="d"] .zv-i { animation: z-zeichnen .26s .56s cubic-bezier(.45, 0, .25, 1) both; }
-.zeichnet[data-zeichen="hinweis"][data-variante="d"] .zv-puls { animation: zv-puls .36s .8s ease-out forwards; }
-/* Warnung D: zeichnet sich wie A, wackelt dann wie B; der Puls läuft im
-   Wackeln mit — nacheinander wäre es länger als die Bestätigung. */
-.zeichnet[data-zeichen="warnung"][data-variante="d"] .zv-dreieck { animation: z-zeichnen .34s cubic-bezier(.45, 0, .25, 1) both; }
-.zeichnet[data-zeichen="warnung"][data-variante="d"] .zv-ausruf { animation: z-zeichnen .18s .3s cubic-bezier(.45, 0, .25, 1) both; }
-.zeichnet[data-zeichen="warnung"][data-variante="d"] .zv-punkt { animation: zv-steigen .16s .46s cubic-bezier(.2, .7, .3, 1) both; }
-.zeichnet[data-zeichen="warnung"][data-variante="d"] .zv-wackeln { animation: zv-wackeln .5s .62s ease-in-out both; }
-.zeichnet[data-zeichen="warnung"][data-variante="d"] .zv-puls { animation: zv-puls .42s .72s ease-out forwards; }
-/* Kopiert D: Beide Blätter zeichnen sich übereinander, erst dann fächern sie auf. */
-.zeichnet[data-zeichen="kopie"][data-variante="d"] .zv-hinten {
-  animation: z-zeichnen .32s cubic-bezier(.45, 0, .25, 1) both, zv-hinten .36s .48s cubic-bezier(.35, 0, .25, 1) both;
+.zeichnet[data-zeichen="kopie"] .zm-puls { animation: zm-puls .34s .82s ease-out forwards; }
+/* Datei geladen: die Schale zeichnet sich, der Pfeil fliegt hinein, die
+   Schale gibt nach. */
+.zeichnet[data-zeichen="laden"] .zm-schale {
+  animation: z-zeichnen .32s cubic-bezier(.45, 0, .25, 1) both, zm-tauchen .28s .66s ease-in-out both;
 }
-.zeichnet[data-zeichen="kopie"][data-variante="d"] .zv-vorn {
-  animation: z-zeichnen .32s .16s cubic-bezier(.45, 0, .25, 1) both, zv-vorn .36s .48s cubic-bezier(.35, 0, .25, 1) both;
-}
-.zeichnet[data-zeichen="kopie"][data-variante="d"] .zv-puls { animation: zv-puls .34s .82s ease-out forwards; }
-.zeichnet[data-zeichen="laden"][data-variante="d"] .zv-schale {
-  animation: z-zeichnen .32s cubic-bezier(.45, 0, .25, 1) both, zv-tauchen .28s .66s ease-in-out both;
-}
-.zeichnet[data-zeichen="laden"][data-variante="d"] .zv-pfeil { animation: zv-fallen .42s .26s cubic-bezier(.4, 0, .25, 1) both; }
-.zeichnet[data-zeichen="laden"][data-variante="d"] .zv-puls { animation: zv-puls .4s .76s ease-out forwards; }
-@keyframes zv-quellen { from { transform: scale(.15); opacity: 0; } 40% { opacity: 1; } to { transform: none; opacity: 1; } }
-@keyframes zv-auf { from { opacity: 0; } to { opacity: 1; } }
-@keyframes zv-nicken { 0%, 100% { transform: none; } 50% { transform: scale(.9); } }
-@keyframes zv-puls { from { transform: none; opacity: .6; } to { transform: scale(1.5); opacity: 0; } }
-@keyframes zv-steigen { from { transform: translateY(3px) scale(.2); opacity: 0; } to { transform: none; opacity: 1; } }
-@keyframes zv-tropfen {
+.zeichnet[data-zeichen="laden"] .zm-pfeil { animation: zm-fallen .42s .26s cubic-bezier(.4, 0, .25, 1) both; }
+.zeichnet[data-zeichen="laden"] .zm-puls { animation: zm-puls .4s .76s ease-out forwards; }
+@keyframes zm-auf { from { opacity: 0; } to { opacity: 1; } }
+@keyframes zm-puls { from { transform: none; opacity: .6; } to { transform: scale(1.5); opacity: 0; } }
+@keyframes zm-steigen { from { transform: translateY(3px) scale(.2); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes zm-tropfen {
   0% { transform: translateY(-16px); opacity: 0; }
   20% { opacity: 1; }
   68% { transform: none; }
   82% { transform: scale(1.4, .6); }
   100% { transform: none; opacity: 1; }
 }
-@keyframes zv-pendeln {
-  0% { transform: rotate(-16deg); opacity: 0; }
-  12% { opacity: 1; }
-  35% { transform: rotate(10deg); }
-  58% { transform: rotate(-5deg); }
-  80% { transform: rotate(2deg); }
-  100% { transform: none; opacity: 1; }
-}
-@keyframes zv-wackeln {
+@keyframes zm-wackeln {
   0%, 100% { transform: none; }
   15% { transform: translateX(-2.2px) rotate(-6deg); }
   35% { transform: translateX(2px) rotate(5deg); }
   55% { transform: translateX(-1.4px) rotate(-3deg); }
   75% { transform: translateX(.8px) rotate(1.5deg); }
 }
-@keyframes zv-hinten { from { transform: translate(2.5px, 2.5px); } to { transform: none; } }
-@keyframes zv-vorn { from { transform: translate(-3.5px, -3.5px); } to { transform: none; } }
-@keyframes zv-stempel { from { transform: scale(1.5); opacity: 0; } 60% { opacity: 1; } to { transform: none; opacity: 1; } }
-@keyframes zv-fallen { 0% { transform: translateY(-14px); opacity: 0; } 35% { opacity: 1; } 100% { transform: none; opacity: 1; } }
-@keyframes zv-tauchen { 0%, 100% { transform: none; } 45% { transform: translateY(1.5px); } }
-@keyframes zv-fortschritt {
-  0% { stroke-dashoffset: 1; opacity: .5; }
-  70% { stroke-dashoffset: 0; opacity: .5; }
-  100% { stroke-dashoffset: 0; opacity: 0; }
-}
-/* Die Kachel: je Zeichen eine Reihe, links das heutige, daneben A bis D. */
-.zp-text { margin: 0 0 14px; font-size: 15px; color: var(--text-2); }
-.zp-reihe + .zp-reihe { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--flaeche-2); }
-.zp-reihe h3 { margin: 0 0 6px; font-family: var(--sans); font-size: 14px; font-weight: 600; }
-.zp-zellen { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2px; }
-.zp-zelle {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  min-height: 44px;
-  padding: 6px 0;
-  border-radius: 12px;
-}
-/* D ist die Wahl des Nutzers — sie steht auf eigenem Grund. */
-.zp-zelle.zp-d { background: var(--flaeche-2); }
-.zp-zelle:active { background: var(--flaeche-2); }
-.zp-zelle .hinweis-haken { margin: 0; }
-.zp-name { font-family: var(--sans); font-size: 12px; color: var(--text-2); white-space: nowrap; }
-.zp-leer { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
-  border: 1.5px dashed var(--flaeche-2); }
-.zp .knopf { width: 100%; margin-top: 16px; }
+@keyframes zm-hinten { from { transform: translate(2.5px, 2.5px); } to { transform: none; } }
+@keyframes zm-vorn { from { transform: translate(-3.5px, -3.5px); } to { transform: none; } }
+@keyframes zm-fallen { 0% { transform: translateY(-14px); opacity: 0; } 35% { opacity: 1; } 100% { transform: none; opacity: 1; } }
+@keyframes zm-tauchen { 0%, 100% { transform: none; } 45% { transform: translateY(1.5px); } }
 .hinweis-karte.bestaetigung p { margin-bottom: 4px; }
 /* Eine Bestätigung ist so breit wie ihr Text, nicht wie der Bildschirm (ADR 0025). */
 .hinweis-karte.bestaetigung { width: auto; min-width: 180px; padding-left: 28px; padding-right: 28px; }
@@ -1715,7 +1612,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.13.3T4';
+var APP_VERSION = '0.14.0T';
 var APP_STAND = '2026-10-10';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -1759,8 +1656,8 @@ var ICON = {
     '2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'),
   sicherung: svg('<path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/>'),
   ticket: svg('<path d="M4 6h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4z"/><path d="M10 9h4M10 15h4"/>'),
-  // Die Teile mit `z-…` bewegen sich, wo ein Zeichen erscheint (`zeichenZeichnen`,
-  // ADR 0035); `pathLength` macht den Strich unabhängig von seiner Länge.
+  // Der Haken zeichnet sich auf der Kachel (ADR 0035); `pathLength` macht den
+  // Strich unabhängig von seiner Länge. Die Zeichen der Meldung: `zeichenBild`.
   haken: svg('<path class="z-strich" pathLength="1" d="M5 12.5l4.5 4.5L19 7.5"/>'),
   weiter: svg('<path d="M9 5l7 7-7 7"/>'),
   minus: svg('<path d="M5 12h14"/>'),
@@ -1768,12 +1665,7 @@ var ICON = {
   stumm: svg('<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/>'),
   pause: svg('<path d="M9 6v12M15 6v12"/>'),
   spielen: svg('<path d="M8.5 5.8v12.4l9.8-6.2z"/>'),
-  hinweis: svg('<circle cx="12" cy="12" r="9"/><path class="z-strich" pathLength="1" d="M12 11v5"/>' +
-    '<path class="z-punkt" d="M12 7.5v.01"/>'),
-  laden: svg('<g class="z-pfeil"><path d="M12 3v11"/><path d="M7.5 9.5l4.5 4.5 4.5-4.5"/></g>' +
-    '<path d="M5 15v3.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V15"/>'),
-  kopie: svg('<path d="M15 9V5.5A1.5 1.5 0 0 0 13.5 4h-8A1.5 1.5 0 0 0 4 5.5v8A1.5 1.5 0 0 0 5.5 15H9"/>' +
-    '<rect class="z-blatt" x="9" y="9" width="11" height="11" rx="2"/>'),
+  hinweis: svg('<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.01"/>'),
   frei: svg('<circle cx="12" cy="12" r="8"/><path d="M6.4 6.4l11.2 11.2"/>'),
   welle: svg('<path d="M2 9c2.5 0 2.5-3 5-3s2.5 3 5 3 2.5-3 5-3 2.5 3 5 3"/>' +
     '<path d="M2 16c2.5 0 2.5-3 5-3s2.5 3 5 3 2.5-3 5-3 2.5 3 5 3"/>'),
@@ -1829,14 +1721,15 @@ function melden(text, zeichen) {
   if (feld) feld.textContent = text;
   // Jede Meldung erscheint im Glas, wie die Bestätigung (ADR 0019): der erste
   // Satz als Titel, der Rest darunter; sie quillt aus dem, was gerade getippt
-  // wurde. `zeichen` 'haken' nur für Gelungenes, sonst das neutrale.
+  // wurde. `zeichen` 'haken' nur für Gelungenes, 'warnung' für einen
+  // Fehlschlag (ADR 0051), sonst das neutrale.
   // Gequollen wird aus dem zuletzt getippten Knopf: iOS gibt einem getippten
   // Knopf keinen Fokus, und nach dem Kopieren liegt er ohnehin nicht mehr
   // dort — «Kopiert» tropfte darum gar nicht (ADR 0041).
   var m = meldungTeilen(text), tipp = letzterTipp && Date.now() - letzterTipp.zeit < 3000 ? letzterTipp.el : null;
   var knopf = zuSehen(tipp) ? tipp
     : document.activeElement && document.activeElement !== document.body ? document.activeElement : null;
-  bestaetigen(m.titel, m.rest, knopf, null, zeichen === 'haken' || zeichen === 'kopie' ? zeichen : 'hinweis');
+  bestaetigen(m.titel, m.rest, knopf, null, ZEICHEN.indexOf(zeichen) !== -1 ? zeichen : 'hinweis');
 }
 
 // Der erste Satz als Titel, ohne Punkt; der Rest darunter.
@@ -2191,7 +2084,7 @@ function speichern() {
     localStorage.setItem(SPEICHER, JSON.stringify(state));
     return true;
   } catch (e) {
-    melden('Speichern ging nicht — der Speicher ist voll oder gesperrt.');
+    melden('Speichern ging nicht — der Speicher ist voll oder gesperrt.', 'warnung');
     return false;
   }
 }
@@ -2266,14 +2159,14 @@ function sperreZeigen() {
     ? 'Auf diesem Gerät liegt ein gespeicherter Stand, den die App nicht lesen kann. Sie überschreibt ihn nicht. ' +
       'Kopier ihn und heb ihn auf, oder fang bewusst neu an.'
     : 'Der Speicher lässt sich gerade nicht lesen. Die App schreibt nichts, damit nichts verloren geht.',
-    null, null, { zeichen: 'hinweis', wahl: { knoepfe: knoepfe } });
+    null, null, { zeichen: 'warnung', wahl: { knoepfe: knoepfe } });
 }
 
 function sperreKopieren() {
   if (!speicherSperre || !speicherSperre.roh) return;
   kopieren(speicherSperre.roh, function (ok) {
     if (ok) melden('Kopiert. Leg den Text an einen sicheren Ort, etwa in eine Notiz.', 'kopie');
-    else melden('Kopieren ging nicht. Versuch es noch einmal.');
+    else melden('Kopieren ging nicht. Versuch es noch einmal.', 'warnung');
   });
 }
 
@@ -2993,7 +2886,7 @@ function zuSehen(el) { return !!el && document.contains(el) && el.getClientRects
 // `opt.wahl` ({ herkunft, knoepfe }): untereinander die Knöpfe zur Wahl, sonst
 // nichts. Ein Knopf schließt und tut, was er sagt (ADR 0025); ab bricht, wer
 // danebentippt — einen Knopf dafür gibt es nicht (ADR 0044).
-var ZEICHEN = ['haken', 'hinweis', 'kopie', 'laden'];
+var ZEICHEN = ['haken', 'hinweis', 'warnung', 'kopie', 'laden'];
 
 // Ein Zeichen bewegt sich einmal, jedes Mal, wenn es erscheint: Die Klasse
 // geht weg und kommt nach einem Umbruch wieder, damit die Animation neu läuft.
@@ -3004,115 +2897,30 @@ function zeichenZeichnen(el) {
   el.classList.add('zeichnet');
 }
 
-// ── Zeichenprobe: drei Fassungen je Zeichen zur Wahl ────────────
-// Eine Kachel auf dem Dashboard zeigt je Zeichen das heutige und drei neue
-// Fassungen (0.13.3T); D setzt zusammen, was der Nutzer daraus gewählt hat,
-// und endet immer mit dem Puls (0.13.3T2). Ein Tipp zeigt die Fassung in einer echten Meldung,
-// «Alle abspielen» bewegt alle nebeneinander. Geht, sobald gewählt ist.
-// Die Warnung gibt es bisher nicht; sie hat darum kein heutiges Zeichen.
-var ZEICHEN_PROBE = {
-  haken: { name: 'Haken', titel: 'Gespeichert', varianten: [['a', 'Quellen'], ['b', 'Kreis'], ['c', 'Puls'], ['d', 'Mix']] },
-  hinweis: { name: 'Hinweis', titel: 'Es läuft schon eine Welle', varianten: [['a', 'Steigen'], ['b', 'Tropfen'], ['c', 'Pendeln'], ['d', 'Mix']] },
-  warnung: { name: 'Warnung', titel: 'Speichern ging nicht', varianten: [['a', 'Zeichnen'], ['b', 'Wackeln'], ['c', 'Puls'], ['d', 'Mix']] },
-  kopie: { name: 'Kopiert', titel: 'Kopiert', varianten: [['a', 'Fächern'], ['b', 'Stempeln'], ['c', 'Zeichnen'], ['d', 'Mix']] },
-  laden: { name: 'Datei geladen', titel: 'Datei geladen', varianten: [['a', 'Federn'], ['b', 'Zeichnen'], ['c', 'Ring'], ['d', 'Mix']] }
-};
-
-// Die Fassungen malen ihre Scheibe selbst: 44 px, die Linien im Maß von
-// `ICON` (24 Einheiten in der Mitte), darum der Rahmen von −10 bis 34.
-function zeichenProbe(zeichen, variante) {
-  var scheibe = '<circle class="zv-scheibe" cx="12" cy="12" r="22"/>';
-  var puls = '<circle class="zv-puls" cx="12" cy="12" r="22"/>';
-  var haken = '<path class="zv-strich zv-haken" pathLength="1" d="M5 12.5l4.5 4.5L19 7.5"/>';
-  var rand = '<circle cx="12" cy="12" r="9"/>';
-  // Punkte sind Kreise, keine Striche der Länge null: Nur mit einer Fläche
-  // fällt, steigt und plättet sich ein Punkt um seine Mitte.
-  var punkt = function (y, klasse) {
-    return '<circle' + (klasse ? ' class="' + klasse + '"' : '') + ' cx="12" cy="' + y + '" r="1.1" fill="currentColor" stroke="none"/>';
+// ── Die Zeichen der Meldung (ADR 0051) ───────────────────────────
+// Jedes malt seine Scheibe selbst: 44 px, die Linien im Maß von `ICON` (24
+// Einheiten in der Mitte), darum der Rahmen von −10 bis 34. Punkte sind
+// Kreise, keine Striche der Länge null: Nur mit einer Fläche fällt und
+// plättet sich ein Punkt um seine Mitte.
+function zeichenBild(zeichen) {
+  var scheibe = '<circle class="zm-scheibe" cx="12" cy="12" r="22"/><circle class="zm-puls" cx="12" cy="12" r="22"/>';
+  var punkt = function (y) {
+    return '<circle class="zm-punkt" cx="12" cy="' + y + '" r="1.1" fill="currentColor" stroke="none"/>';
   };
-  var dreieck = 'M12 4.2L20.6 19.2H3.4z', ausruf = 'M12 9.8v4';
-  var hinten = 'M15 9V5.5A1.5 1.5 0 0 0 13.5 4h-8A1.5 1.5 0 0 0 4 5.5v8A1.5 1.5 0 0 0 5.5 15H9';
-  var vorn = 'x="9" y="9" width="11" height="11" rx="2"';
-  var pfeil = '<g class="zv-pfeil"><path d="M12 3v11"/><path d="M7.5 9.5l4.5 4.5 4.5-4.5"/></g>';
-  var schale = 'M5 15v3.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V15';
   var innen = {
-    'haken:a': scheibe + haken,
-    'haken:b': '<circle class="zv-strich zv-kreis" pathLength="1" cx="12" cy="12" r="21"/>' + scheibe + haken,
-    'haken:c': scheibe + puls + haken,
-    'hinweis:a': scheibe + rand + '<path class="zv-strich zv-i" pathLength="1" d="M12 16v-5"/>' +
-      punkt(7.5, 'zv-punkt'),
-    'hinweis:b': scheibe + rand + '<path class="zv-strich zv-i" pathLength="1" d="M12 11v5"/>' +
-      punkt(7.5, 'zv-punkt'),
-    'hinweis:c': scheibe + rand + '<g class="zv-pendel"><path d="M12 11v5"/>' + punkt(7.5) + '</g>',
-    'warnung:a': scheibe + '<path class="zv-strich zv-dreieck" pathLength="1" d="' + dreieck + '"/>' +
-      '<path class="zv-strich zv-ausruf" pathLength="1" d="' + ausruf + '"/>' + punkt(16.6, 'zv-punkt'),
-    'warnung:b': scheibe + '<g class="zv-wackeln"><path d="' + dreieck + '"/><path d="' + ausruf + '"/>' +
-      punkt(16.6) + '</g>',
-    'warnung:c': scheibe + puls + '<path d="' + dreieck + '"/><g class="zv-ausruf-auf"><path d="' + ausruf + '"/>' +
-      punkt(16.6) + '</g>',
-    'kopie:a': scheibe + '<path class="zv-hinten" d="' + hinten + '"/><rect class="zv-vorn" ' + vorn + '/>',
-    'kopie:b': scheibe + '<path d="' + hinten + '"/><rect class="zv-stempel" ' + vorn + '/>',
-    'kopie:c': scheibe + '<path class="zv-strich zv-hinten" pathLength="1" d="' + hinten + '"/>' +
-      '<rect class="zv-strich zv-vorn" pathLength="1" ' + vorn + '/>',
-    'laden:a': scheibe + pfeil + '<path class="zv-schale" d="' + schale + '"/>',
-    'laden:b': scheibe + '<path class="zv-strich zv-schaft" pathLength="1" d="M12 3v11"/>' +
-      '<path class="zv-strich zv-spitze" pathLength="1" d="M7.5 9.5l4.5 4.5 4.5-4.5"/>' +
-      '<path class="zv-strich zv-schale" pathLength="1" d="' + schale + '"/>',
-    'laden:c': scheibe + '<circle class="zv-strich zv-fortschritt" pathLength="1" cx="12" cy="12" r="19"/>' + pfeil +
-      '<path d="' + schale + '"/>',
-    // D: Haken wie B, Hinweis wie B mit gezeichnetem Kreis, Warnung wie A
-    // und am Ende wie B,
-    // Kopiert erst gezeichnet, dann gefächert wie A, Laden: die Schale
-    // zeichnet sich, der Pfeil fliegt hinein wie bei C, die Schale gibt nach
-    // wie bei A.
-    'haken:d': '<circle class="zv-strich zv-kreis" pathLength="1" cx="12" cy="12" r="21"/>' + scheibe + puls + haken,
-    'hinweis:d': scheibe + puls + '<circle class="zv-strich zv-rand" pathLength="1" cx="12" cy="12" r="9"/>' +
-      '<path class="zv-strich zv-i" pathLength="1" d="M12 11v5"/>' + punkt(7.5, 'zv-punkt'),
-    'warnung:d': scheibe + puls + '<g class="zv-wackeln"><path class="zv-strich zv-dreieck" pathLength="1" d="' + dreieck + '"/>' +
-      '<path class="zv-strich zv-ausruf" pathLength="1" d="' + ausruf + '"/>' + punkt(16.6, 'zv-punkt') + '</g>',
-    'kopie:d': scheibe + puls + '<path class="zv-strich zv-hinten" pathLength="1" d="' + hinten + '"/>' +
-      '<rect class="zv-strich zv-vorn" pathLength="1" ' + vorn + '/>',
-    'laden:d': scheibe + puls + pfeil + '<path class="zv-strich zv-schale" pathLength="1" d="' + schale + '"/>'
-  }[zeichen + ':' + variante];
+    haken: '<circle class="zm-strich zm-kreis" pathLength="1" cx="12" cy="12" r="21"/>' + scheibe +
+      '<path class="zm-strich zm-haken" pathLength="1" d="M5 12.5l4.5 4.5L19 7.5"/>',
+    hinweis: scheibe + '<circle class="zm-strich zm-rand" pathLength="1" cx="12" cy="12" r="9"/>' +
+      '<path class="zm-strich zm-i" pathLength="1" d="M12 11v5"/>' + punkt(7.5),
+    warnung: scheibe + '<g class="zm-wackeln"><path class="zm-strich zm-dreieck" pathLength="1" d="M12 4.2L20.6 19.2H3.4z"/>' +
+      '<path class="zm-strich zm-ausruf" pathLength="1" d="M12 9.8v4"/>' + punkt(16.6) + '</g>',
+    kopie: scheibe + '<path class="zm-strich zm-hinten" pathLength="1" d="M15 9V5.5A1.5 1.5 0 0 0 13.5 4h-8A1.5 1.5 0 0 0 ' +
+      '4 5.5v8A1.5 1.5 0 0 0 5.5 15H9"/><rect class="zm-strich zm-vorn" pathLength="1" x="9" y="9" width="11" height="11" rx="2"/>',
+    laden: scheibe + '<g class="zm-pfeil"><path d="M12 3v11"/><path d="M7.5 9.5l4.5 4.5 4.5-4.5"/></g>' +
+      '<path class="zm-strich zm-schale" pathLength="1" d="M5 15v3.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V15"/>'
+  }[zeichen];
   return innen ? '<svg viewBox="-10 -10 44 44" fill="none" stroke="currentColor" stroke-width="2" ' +
     'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + innen + '</svg>' : '';
-}
-
-// Ein Zeichen in einer Zelle, so gefärbt wie in der Meldung.
-function zeichenScheibe(zeichen, variante) {
-  return '<span class="hinweis-haken' + (zeichen === 'hinweis' ? ' neutral' : zeichen === 'warnung' ? ' warnend' : '') +
-    '" data-zeichen="' + zeichen + '"' + (variante ? ' data-variante="' + variante + '"' : '') + ' aria-hidden="true">' +
-    (variante ? zeichenProbe(zeichen, variante) : ICON[zeichen]) + '</span>';
-}
-
-function zeichneZeichenProbe() {
-  return '<section class="abschnitt" id="zeichenProbe"><h2>Zeichen zur Wahl</h2><div class="kachel zp">' +
-    '<p class="zp-text">Tipp auf ein Zeichen, dann erscheint es in einer Meldung. Sag Jarvis, welches bleiben soll.</p>' +
-    Object.keys(ZEICHEN_PROBE).map(function (z) {
-      var p = ZEICHEN_PROBE[z], heute = ZEICHEN.indexOf(z) !== -1;
-      return '<div class="zp-reihe"><h3>' + esc(p.name) + '</h3><div class="zp-zellen">' +
-        (heute
-          ? '<button type="button" class="zp-zelle" data-probe="' + z + ':" aria-label="' + esc(p.name) + ', heute">' +
-            zeichenScheibe(z, null) + '<span class="zp-name">Heute</span></button>'
-          : '<div class="zp-zelle"><span class="zp-leer" aria-hidden="true"></span><span class="zp-name">neu</span></div>') +
-        p.varianten.map(function (v) {
-          return '<button type="button" class="zp-zelle' + (v[0] === 'd' ? ' zp-d' : '') + '" data-probe="' + z + ':' + v[0] + '" aria-label="' +
-            esc(p.name + ', Fassung ' + v[0].toUpperCase() + ': ' + v[1]) + '">' + zeichenScheibe(z, v[0]) +
-            '<span class="zp-name">' + esc(v[0].toUpperCase()) + '</span></button>';
-        }).join('') + '</div></div>';
-    }).join('') +
-    '<button type="button" class="knopf zart" id="zpAlle">Alle abspielen</button>' +
-    '</div></section>';
-}
-
-// Unter dem Zeichen steht nur der Buchstabe — fünf Namen passen nicht
-// nebeneinander; der Name steht in der Meldung.
-// Die Zelle bewegt sich, dann quillt dieselbe Fassung als Meldung aus ihr.
-function zeichenProbeZeigen(knopf) {
-  var teil = knopf.getAttribute('data-probe').split(':'), z = teil[0], v = teil[1] || null, p = ZEICHEN_PROBE[z];
-  var name = v ? 'Fassung ' + v.toUpperCase() + ' · ' + p.varianten.filter(function (x) { return x[0] === v; })[0][1]
-    : 'Wie es heute ist';
-  hinweisZeigen(p.titel, name, knopf.getBoundingClientRect(), null, { bestaetigung: true, zeichen: z, variante: v });
 }
 
 function hinweisZeigen(titel, text, quelle, ziel, opt) {
@@ -3124,21 +2932,18 @@ function hinweisZeigen(titel, text, quelle, ziel, opt) {
   // Der grüne Haken heißt «gespeichert»; ist nichts geschehen, steht ein
   // neutrales Zeichen da (`opt.zeichen`). Kopiert und Geladen sind gelungen und
   // tragen ihr eigenes Zeichen, grün wie der Haken; ein Hinweis mit «OK» trägt
-  // eins nur, wenn er es nennt (ADR 0035).
-  // `opt.variante` zeigt eine Fassung aus der Zeichenprobe statt des heutigen.
-  var variante = opt.variante && ZEICHEN_PROBE[opt.zeichen] ? opt.variante : null;
-  var zeichen = variante || ZEICHEN.indexOf(opt.zeichen) !== -1 ? opt.zeichen : 'haken', mitZeichen = best || !!opt.zeichen;
+  // eins nur, wenn er es nennt (ADR 0035). Ein Fehlschlag trägt die Warnung
+  // (ADR 0051).
+  var zeichen = ZEICHEN.indexOf(opt.zeichen) !== -1 ? opt.zeichen : 'haken', mitZeichen = best || !!opt.zeichen;
   var haken = $('hinweisHaken');
-  if (mitZeichen && (haken.getAttribute('data-zeichen') !== zeichen || haken.getAttribute('data-variante') !== variante)) {
-    haken.innerHTML = variante ? zeichenProbe(zeichen, variante) : ICON[zeichen];
+  if (mitZeichen && haken.getAttribute('data-zeichen') !== zeichen) {
+    haken.innerHTML = zeichenBild(zeichen);
     haken.setAttribute('data-zeichen', zeichen);
-    if (variante) haken.setAttribute('data-variante', variante);
-    else haken.removeAttribute('data-variante');
   }
   haken.classList.toggle('neutral', zeichen === 'hinweis');
   haken.classList.toggle('warnend', zeichen === 'warnung');
-  $('hinweisHaken').hidden = !mitZeichen;
-  if (mitZeichen) zeichenZeichnen($('hinweisHaken'));
+  haken.hidden = !mitZeichen;
+  if (mitZeichen) zeichenZeichnen(haken);
   hinweisFrage = !best && opt.frage ? opt.frage : null;
   hinweisWahl = !best && opt.wahl ? opt.wahl : null;
   var wahlFeld = $('hinweisWahl');
@@ -3267,7 +3072,7 @@ function bestaetigenUndGehen(titel, text, ziel, zeichen) {
 function meldenUndGehen(text, zeichen) {
   var m = meldungTeilen(text);
   if ($('meldung')) $('meldung').textContent = text;
-  bestaetigenUndGehen(m.titel, m.rest, null, zeichen === 'haken' || zeichen === 'kopie' ? zeichen : 'hinweis');
+  bestaetigenUndGehen(m.titel, m.rest, null, ZEICHEN.indexOf(zeichen) !== -1 ? zeichen : 'hinweis');
 }
 
 // ── Umschalter: die Markierung fließt hinüber ───────────────────
@@ -3946,7 +3751,7 @@ function exportiertMerken(auswahl) {
 function icsLaden() {
   var url, auswahl = exportAuswahl(heuteSchluessel()), knopf = $('exLaden');
   var quelle = zuSehen(knopf) ? knopf.getBoundingClientRect() : null;
-  try { url = URL.createObjectURL(icsBlob(auswahl)); } catch (e) { melden('Die Datei ließ sich nicht anlegen.'); return; }
+  try { url = URL.createObjectURL(icsBlob(auswahl)); } catch (e) { melden('Die Datei ließ sich nicht anlegen.', 'warnung'); return; }
   var a = document.createElement('a');
   a.href = url;
   a.download = ICS_DATEI;
@@ -4212,8 +4017,7 @@ function zeichneHome() {
     (frei.length ? '<section class="abschnitt"><h2>Heute nicht dran</h2><div class="gw-liste gedimmt">' +
       frei.map(zeichneKachel).join('') + '</div></section>' : '') +
     (laster.length ? '<section class="abschnitt"><h2>Abgewöhnen</h2><div class="gw-liste">' +
-      laster.map(zeichneLasterKachel).join('') + '</div></section>' : '') +
-    zeichneZeichenProbe();
+      laster.map(zeichneLasterKachel).join('') + '</div></section>' : '');
 }
 
 // Oben eine Karte für heute und die Tage drumherum: die Chili im Tagesring,
@@ -6620,7 +6424,7 @@ function sicherungKopieren() {
 function sicherungEinlesen() {
   var roh = codeLesen($('scEingabe').value);
   if (!roh) {
-    melden('Das ist kein gültiger Sicherungscode. Kopier ihn noch einmal ganz.');
+    melden('Das ist kein gültiger Sicherungscode. Kopier ihn noch einmal ganz.', 'warnung');
     return;
   }
   var neu = stand(roh), wann = istZeit(roh.gesichert) ? datumLang(new Date(roh.gesichert)) : '';
@@ -6855,7 +6659,7 @@ function bindeTicketListe() {
         if (ticketListe) ticketBlattWechseln(true);
         if (ansicht === 'tickets') render();
       } else {
-        melden('Kopieren ging nicht. Unter Tickets im Menü kannst du den Text von Hand kopieren.');
+        melden('Kopieren ging nicht. Unter Tickets im Menü kannst du den Text von Hand kopieren.', 'warnung');
       }
     });
   });
@@ -7156,14 +6960,6 @@ function zeichneEinstellungen() {
 function bindeAnsicht() {
   var erste = $('ersteGewohnheit') || $('gwAnlegen');
   if (erste) erste.addEventListener('click', function () { zeige('neu'); });
-  // Die Zeichenprobe: ein Tipp zeigt die Fassung als Meldung, «Alle
-  // abspielen» bewegt alle Zellen zugleich.
-  alleIn('#ansicht [data-probe]').forEach(function (b) {
-    b.addEventListener('click', function () { zeichenProbeZeigen(this); });
-  });
-  if ($('zpAlle')) $('zpAlle').addEventListener('click', function () {
-    alleIn('#zeichenProbe .zp-zelle .hinweis-haken').forEach(zeichenZeichnen);
-  });
 
   alleIn('[data-haken]').forEach(function (b) {
     var id = b.getAttribute('data-haken');

@@ -65,7 +65,8 @@ fest.
   (`scheibeVon`).
 - **Rückmeldung** — immer im Glas:
   - gespeichert oder angelegt: `bestaetigen()` (ohne Speichern mit `'hinweis'`, nie Haken);
-  - alles andere: `melden(text, zeichen)`, `'haken'` nur bei Erfolg;
+  - alles andere: `melden(text, zeichen)`, `'haken'` nur bei Erfolg, `'warnung'` bei einem
+    Fehlschlag (ADR 0051), sonst das neutrale «i»;
   - was man lesen muß: `hinweisZeigen` (wartet auf «OK»);
   - geht das Fenster mit: `bestaetigenUndGehen`/`meldenUndGehen` — es wird selbst zur Meldung.
 - **Was ersetzt oder löscht, fragt im Glas** (`hinweisZeigen` mit `frage`, Einzelnes über

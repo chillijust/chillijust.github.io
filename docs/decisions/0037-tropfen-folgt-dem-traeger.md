@@ -1,7 +1,7 @@
 # 0037 · Der Hell/Dunkel-Tropfen folgt dem Knauf und der Markierung; Zeichen einen Tick flotter
 
 *2026-10-07 · Abnahme 0.11.0T2 · Version 0.11.0T3 · ändert 0026 (`knaufGleiten`), 0036 (Dauer des
-Tropfens, Zeiten der Zeichen); ergänzt 0025, 0027*
+Tropfens, Zeiten der Zeichen); ergänzt 0025, 0027 · Zeiten der Zeichen der Meldung abgelöst durch 0051*
 
 ## Ausgangslage
 

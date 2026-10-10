@@ -42,9 +42,9 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0032](0032-was-ein-knopf-oeffnet-tropft.md) | Was ein Knopf öffnet, tropft aus ihm (Formularteile, Heatmap-Woche, Alle Tickets); Glas im Tropfen dicht und gefaßt | gilt |
 | [0033](0033-beginn-zurueckstellen.md) | Der Beginn einer Gewohnheit läßt sich zurückstellen; fällige Tage seitdem gelten als erledigt | gilt |
 | [0034](0034-export-auswaehlen.md) | Im Export wählen: «Bearbeiten» immer, Häkchen je Eintrag, «alle» je Abschnitt; Abwahl von Neuem gemerkt | gilt |
-| [0035](0035-zeichen-bewegen-sich.md) | Zeichen bewegen sich: Haken zeichnet sich, Hinweis-Punkt fällt, Pfeil fällt in die Schale, Blatt schiebt sich heraus | gilt |
-| [0036](0036-tropfen-weicher-mehrmals-alle.md) | Hell/Dunkel tropft weicher, auch mehrmals hintereinander und aus den Einstellungen; «alle» im Export tropft; Zeichen langsamer | gilt; Dauer des Tropfens und Zeiten der Zeichen seit 0037 |
-| [0037](0037-tropfen-folgt-dem-traeger.md) | Der Hell/Dunkel-Tropfen folgt dem Knauf und der Markierung; Zeichen einen Tick flotter | gilt |
+| [0035](0035-zeichen-bewegen-sich.md) | Zeichen bewegen sich: Haken zeichnet sich, Hinweis-Punkt fällt, Pfeil fällt in die Schale, Blatt schiebt sich heraus | gilt für den Haken der Kachel; Zeichen der Meldung seit 0051 |
+| [0036](0036-tropfen-weicher-mehrmals-alle.md) | Hell/Dunkel tropft weicher, auch mehrmals hintereinander und aus den Einstellungen; «alle» im Export tropft; Zeichen langsamer | gilt; Dauer des Tropfens und Zeiten der Zeichen seit 0037, Zeichen der Meldung seit 0051 |
+| [0037](0037-tropfen-folgt-dem-traeger.md) | Der Hell/Dunkel-Tropfen folgt dem Knauf und der Markierung; Zeichen einen Tick flotter | gilt; Zeichen der Meldung seit 0051 |
 | [0038](0038-timer-und-zaehler.md) | Timer und Zähler: abhaken mit Zeit oder durch Zählen | gilt; Glas aus der Scheibe, Pause, Zählschritt seit 0040; Abbrechen fragt im Glas seit 0041 |
 | [0039](0039-pruefstand-wartet-aus-der-konstante.md) | Der Prüfstand wartet aus der Bewegungskonstante, nicht fest; Budget des Läufers 20 s | gilt |
 | [0040](0040-timer-klein-pause-zaehlschritt.md) | Glas aus der Scheibe, Timer mit Pause, Zähler in Schritten mit Einheit | gilt; Pause im Ring seit 0041 |
@@ -58,3 +58,4 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0048](0048-kommunikation-und-namen.md) | Nachrichten in `kommunikation/`; Claude heißt Jarvis, ChatGPT James; James kennzeichnet Commits | gilt; der Ordner liegt seit 0050 nur auf `chatgpt/kommunikation` |
 | [0049](0049-speicherfehler-zurueck-sperre.md) | Ein Haken, der nicht gespeichert ist, springt zurück; ein unlesbarer Stand sperrt das Schreiben | gilt |
 | [0050](0050-kommunikation-nur-auf-eigenem-branch.md) | `kommunikation/` lebt nur auf `chatgpt/kommunikation`, nie auf `main`; nie zusammenführen | gilt |
+| [0051](0051-zeichen-neu-mit-puls-und-warnung.md) | Zeichen der Meldung neu bewegt, jedes endet mit dem Puls; eine Warnung für Fehlschläge | gilt |
