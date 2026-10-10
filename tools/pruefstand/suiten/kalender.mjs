@@ -190,6 +190,59 @@ pruefe('H5 «Heute» ist eine Trefferfläche', q('#heuteKnopf').tagName === 'BUT
   q('#heuteKnopf').getBoundingClientRect().height >= 44 && q('#tagesZahl').closest('#heuteKnopf') !== null);
 state.kalender = 'woche';
 
+// ── S · Wischen blättert (Ticket 0.14.0T) ───────────────────
+// Ein Wisch über den Kalender blättert wie die Pfeile; Rand, Tagesliste und
+// ein Schubs nach oben oder unten tun es nicht.
+function wischUeber(el, dx, dy, x0) {
+  var r = el.getBoundingClientRect(), x = x0 === undefined ? r.left + r.width / 2 : x0, y = r.top + Math.min(20, r.height / 2);
+  function punkt(px, py) { return new Touch({ identifier: 9, target: el, clientX: px, clientY: py }); }
+  el.dispatchEvent(new TouchEvent('touchstart', { bubbles: true, touches: [punkt(x, y)], changedTouches: [punkt(x, y)] }));
+  el.dispatchEvent(new TouchEvent('touchend', { bubbles: true, touches: [], changedTouches: [punkt(x + dx, y + dy)] }));
+}
+aufbauen();
+wischUeber(q('#kalRaster'), -120, 10);
+pruefe('S1 nach links: die nächste Woche', kalVersatz === 1 && /KW 43/.test(q('#kalHeute').textContent), kalVersatz);
+wischUeber(q('#kalRaster'), 120, -10);
+wischUeber(q('#kalRaster'), 120, 0);
+pruefe('S2 nach rechts: zurück, auch vor heute', kalVersatz === -1 && /KW 41/.test(q('#kalHeute').textContent), kalVersatz);
+wischUeber(q('.kal-kopf'), -120, 0);
+pruefe('S3 auch über dem Kopf des Kalenders', kalVersatz === 0 && !!q('#kalTitel'));
+wischUeber(q('#kalRaster'), -30, 0);
+pruefe('S4 zu kurz: nichts', kalVersatz === 0);
+wischUeber(q('#kalRaster'), -80, 90);
+pruefe('S5 eher nach unten: die Seite rollt, der Kalender bleibt', kalVersatz === 0);
+state.kalender = 'monat';
+kalTag = null;
+render();
+wischUeber(q('#kalRaster'), -120, 0);
+pruefe('S7 im Monat: der nächste', kalVersatz === 1 && /November 2026/.test(q('#kalHeute').textContent));
+kalTag = null;
+kalVersatz = 0;
+kalGewischt = 0;
+render();
+tag(HEUTE).click();
+wischUeber(q('#kalLeiste'), -120, 0);
+pruefe('S8 über der Tagesliste blättert nichts', kalVersatz === 0 && kalTag === HEUTE);
+// Schickt der Browser zum Wisch einen Tipp nach, wählt er keinen Tag.
+kalTag = null;
+render();
+wischUeber(q('#kalRaster'), -120, 0);
+var t2 = q('#kalRaster [data-kaltag]');
+t2.click();
+pruefe('S9 der Tipp gleich nach dem Wisch wählt keinen Tag', kalTag === null);
+kalGewischt = 0;
+t2 = q('#kalRaster [data-kaltag]');
+t2.click();
+pruefe('S10 danach wählt ein Tipp wieder', kalTag === t2.getAttribute('data-kaltag'));
+state.kalender = 'woche';
+kalVersatz = 0;
+kalTag = null;
+render();
+// Zuletzt: Das Menü blendet nach dem Schließen noch aus und sperrt so lange jeden Wisch.
+wischUeber(q('#kalRaster'), 150, 0, 5);
+pruefe('S6 vom linken Rand öffnet es das Menü, blättert nicht', kalVersatz === 0 && !q('#menue').hidden);
+menueSchliessen();
+
 // ── L · Langer Druck ────────────────────────────────────────
 aufbauen();
 pruefe('L1 der Pfeil ist weg', !q('[data-bearbeiten]') && !q('.gw-pfeil'));

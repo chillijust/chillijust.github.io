@@ -1612,7 +1612,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.14.0';
+var APP_VERSION = '0.15.0T';
 var APP_STAND = '2026-10-10';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -3968,25 +3968,52 @@ function blattOffen() {
   return !$('menue').hidden || !$('hinweisBlatt').hidden || !$('ticketBlatt').hidden;
 }
 
+// Über dem Kalender blättert ein Wisch: nach links zur nächsten Woche oder zum
+// nächsten Monat, nach rechts zurück — wie die Pfeile, nur ohne zu zielen. Der
+// Rand bleibt dem Menü und dem Zurück; die Tagesliste wischt nicht, dort
+// liegen Zeilen unter dem Finger.
+var KAL_WISCH_WEG = 50;     // px waagerecht, ab denen der Kalender blättert
+var KAL_WISCH_STILL = 450;  // ms, in denen nach dem Blättern kein Tipp mehr zählt
+var kalGewischt = 0;        // wann zuletzt geblättert wurde
+
 // Vom rechten Rand nach links, zum Menüknopf hin, öffnet das Menü — auf dem
 // Dashboard wie unterwegs (ADR 0025).
 function wischBeginnen(e) {
   wischVon = null;
   if (e.touches.length !== 1 || blattOffen()) return;
-  var t = e.touches[0], breite = window.innerWidth || document.documentElement.clientWidth;
+  const t = e.touches[0], breite = window.innerWidth || document.documentElement.clientWidth;
   if (t.clientX <= WISCH_RAND) wischVon = { x: t.clientX, y: t.clientY, rechts: false };
   else if (t.clientX >= breite - WISCH_RAND) wischVon = { x: t.clientX, y: t.clientY, rechts: true };
+  else if (e.target.closest && e.target.closest('#kalRaster, .kal-kopf, .kal-wtage')) {
+    wischVon = { x: t.clientX, y: t.clientY, kal: true };
+  }
 }
 
 function wischEnden(e) {
-  var von = wischVon, t = e.changedTouches && e.changedTouches[0];
+  const von = wischVon, t = e.changedTouches && e.changedTouches[0];
   wischVon = null;
   if (!von || !t || blattOffen()) return;
-  var quer = von.rechts ? von.x - t.clientX : t.clientX - von.x, hoch = Math.abs(t.clientY - von.y);
+  if (von.kal) {
+    const dx = t.clientX - von.x, hoch = Math.abs(t.clientY - von.y);
+    if (Math.abs(dx) < KAL_WISCH_WEG || hoch > Math.abs(dx) * 0.7 || !$('kalRaster')) return;
+    kalGewischt = Date.now();
+    kalBlaettern(kalVersatz + (dx < 0 ? 1 : -1));
+    return;
+  }
+  const quer = von.rechts ? von.x - t.clientX : t.clientX - von.x, hoch = Math.abs(t.clientY - von.y);
   // Waagerecht muß deutlich überwiegen, sonst war es ein Blättern.
   if (quer < WISCH_WEG || hoch > quer * 0.7) return;
   if (von.rechts || ansicht === 'home') { if ($('menuKnopf')) menueOeffnen(); else zeige('home'); }
   else zurueckGehen();
+}
+
+// Nach dem Blättern liegt unter dem Finger ein anderer Tag. Schickt der
+// Browser zum Wisch doch einen Tipp nach, wählte er ihn — der fällt weg.
+function kalTippNachWisch(e) {
+  if (Date.now() - kalGewischt > KAL_WISCH_STILL) return;
+  if (!e.target.closest || !e.target.closest('#kalRaster, .kal-kopf')) return;
+  e.preventDefault();
+  e.stopPropagation();
 }
 
 // ── Dashboard ───────────────────────────────────────────────────
@@ -7687,6 +7714,7 @@ function start() {
   document.addEventListener('touchstart', wischBeginnen, { passive: true });
   document.addEventListener('touchend', wischEnden, { passive: true });
   document.addEventListener('touchcancel', function () { wischVon = null; }, { passive: true });
+  document.addEventListener('click', kalTippNachWisch, true);
 
   $('swLaden').addEventListener('click', function () { swUebernehmen(); });
   $('hinweisOk').addEventListener('click', function () {

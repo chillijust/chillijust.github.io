@@ -59,3 +59,4 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0049](0049-speicherfehler-zurueck-sperre.md) | Ein Haken, der nicht gespeichert ist, springt zurück; ein unlesbarer Stand sperrt das Schreiben | gilt |
 | [0050](0050-kommunikation-nur-auf-eigenem-branch.md) | `kommunikation/` lebt nur auf `chatgpt/kommunikation`, nie auf `main`; nie zusammenführen | gilt |
 | [0051](0051-zeichen-neu-mit-puls-und-warnung.md) | Zeichen der Meldung neu bewegt, jedes endet mit dem Puls; eine Warnung für Fehlschläge | gilt |
+| [0052](0052-kalender-wischen.md) | Im Kalender blättert ein waagerechter Wisch wie die Pfeile; Rand und Tagesliste bleiben frei | gilt |
