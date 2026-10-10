@@ -54,11 +54,12 @@ fest.
   sich darüber. Was verschwindet, zeigt `geist(el)`; eine Zeile geht über
   `zeileGeht(el, liste, ersatz)`.
 - **Es gibt eine Tropfen-Mechanik**: `tropfenAuf`/`tropfenZu` mit `tropfenQuelle` — rund,
-  ohne Spitze. Sie fließt (ADR 0053): Kurve und Dauer aus `fluessigTakt(stelle)`, hinein
-  ohne Überschwingen, der Hals zur Quelle über `fliessen()`. Feste Dauern setzt nur
-  `flDauernSetzen` — keine Zahl von Hand. Was ein Knopf öffnet, tropft
-  aus ihm und in ihn zurück; ist die Herkunft fort, in den Menüknopf. Nach langem Druck aus
-  dem Fingerpunkt (`punktFlaeche`).
+  ohne Spitze, ohne Überschwingen. Was ein Knopf öffnet, tropft aus ihm und in ihn zurück;
+  ist die Herkunft fort, in den Menüknopf. Nach langem Druck aus dem Fingerpunkt
+  (`punktFlaeche`).
+- **Standard ist die Chilli-Bewegung; iOS-Flüssig gilt je Stelle** (ADR 0054): Wer an einer
+  Stelle bewegt, fragt `flIos(stelle)` und nimmt dann `fluessigTakt`/`fliessen`. Feste
+  Dauern setzt nur `flDauernSetzen` — keine Zahl von Hand.
 - **Teile über `teilZeigen(el, an, quelle)`, Knöpfe über `teilTropfen(el, an)`**, nie
   `el.hidden = …`. Ein Teil mit eigenem `display` braucht `[hidden] { display: none; }`.
   Eine neue `.wahl` bekommt ihre Marke von `wahlenSetzen()`.
@@ -90,7 +91,8 @@ fest.
 
 ## Chili
 
-- `#chiliFigur` steht **genau einmal** im Dokument; das Bild ist nur `CHILI_BILD`.
+- `#chiliFigur` steht **genau einmal** im Dokument; das Bild ist nur `CHILI_BILD`. Im offenen
+  Timer sitzt sie dort, nicht im Tagesring (`chiliImTimer`, `chiliZurueck`).
 - Ein Haken läßt sie flammen (`chiliFlammt`), ein voller Tag lodern (`lodert`);
   Zurücknehmen ist kein Jubel. Wegmarken jubeln über `jubeln`, jeder Anlaß einmal.
 - **Ein Leerzustand ist ein Wegweiser** (`.kachel.leer`): ein Satz, was fehlt, ein Knopf

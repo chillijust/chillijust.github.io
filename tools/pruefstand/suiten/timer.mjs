@@ -120,11 +120,13 @@ pruefe('T3 Fertig, Abbrechen, Pause, Ton — groß genug', ['#timerFertig', '#ti
   var r = q(s).getBoundingClientRect(); return r.height >= 44 && r.width >= 44; }));
 var ringR = q('#timerKarte .timer-bild').getBoundingClientRect(), zeitR = q('#timerKarte .timer-zeit').getBoundingClientRect(),
   pauseR = q('#timerPause').getBoundingClientRect(), mx = ringR.left + ringR.width / 2, my = ringR.top + ringR.height / 2;
-var ecken = [[pauseR.left, pauseR.top], [pauseR.right, pauseR.top], [pauseR.left, pauseR.bottom], [pauseR.right, pauseR.bottom]];
-pruefe('T3a Pause steht im Ring, unter den Zahlen (ADR 0041)', pauseR.top >= zeitR.bottom - 1 &&
-  Math.abs(pauseR.left + pauseR.width / 2 - mx) < 2 && ecken.every(function (e) {
-    return Math.sqrt(Math.pow(e[0] - mx, 2) + Math.pow(e[1] - my, 2)) < ringR.width / 2 * 0.92; }),
-  [pauseR.top, zeitR.bottom, ringR.width].join());
+// Seit ADR 0054 wie beim Drang: im Ring Flüssigkeit und Chili, die Zeit groß
+// darunter, dann die Pause.
+pruefe('T3a Zeit und Pause stehen unter dem Ring, mittig', zeitR.top >= ringR.bottom - 1 && pauseR.top >= zeitR.bottom - 1 &&
+  Math.abs(pauseR.left + pauseR.width / 2 - mx) < 2 && Math.abs(zeitR.left + zeitR.width / 2 - mx) < 2,
+  [ringR.bottom, zeitR.top, zeitR.bottom, pauseR.top].join());
+pruefe('T3b im Ring stehen Flüssigkeit und die Chili, die Chili nur einmal im Dokument',
+  !!q('#timerKarte .timer-bild .fl-welle') && !!q('#timerKarte .timer-bild #chiliFigur') && alle('#chiliFigur').length === 1);
 UHR += 5 * MIN;
 takt();
 pruefe('T4 er läuft: Fenster und Kachel zeigen die Restzeit', q('#timerKarte [data-timerrest]').textContent === '15:00' &&

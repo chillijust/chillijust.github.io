@@ -48,7 +48,7 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0038](0038-timer-und-zaehler.md) | Timer und Zähler: abhaken mit Zeit oder durch Zählen | gilt; Glas aus der Scheibe, Pause, Zählschritt seit 0040; Abbrechen fragt im Glas seit 0041 |
 | [0039](0039-pruefstand-wartet-aus-der-konstante.md) | Der Prüfstand wartet aus der Bewegungskonstante, nicht fest; Budget des Läufers 20 s | gilt |
 | [0040](0040-timer-klein-pause-zaehlschritt.md) | Glas aus der Scheibe, Timer mit Pause, Zähler in Schritten mit Einheit | gilt; Pause im Ring seit 0041 |
-| [0041](0041-termine-abhaken-fenster-wird-meldung.md) | Termine abhaken, Fenster wird Meldung, Menüknopf tropft herab, Einträge nacheinander, «Hinzufügen» aus dem Plus, Fragen im Glas | gilt; Termin wie Kachel, «Nein», Menüknopf rollt mit seit 0042 |
+| [0041](0041-termine-abhaken-fenster-wird-meldung.md) | Termine abhaken, Fenster wird Meldung, Menüknopf tropft herab, Einträge nacheinander, «Hinzufügen» aus dem Plus, Fragen im Glas | gilt; Termin wie Kachel, «Nein», Menüknopf rollt mit seit 0042; Aufbau des Timers abgelöst durch 0054 |
 | [0042](0042-termin-wie-kachel-nein-menue-rollt.md) | Termin wie eine Kachel, «Nein» in der Frage, Menüknopf rollt mit, Meldung ohne zweiten Tropfen | gilt; Gast erst aus der Ecke seit 0043; Wahl ohne «Abbrechen» seit 0044 |
 | [0043](0043-langdruck-ohne-markieren-gast-aus-der-ecke.md) | Langer Druck markiert nichts, der Gast des Menüknopfs tropft aus der Ecke, nie zwei Knöpfe | gilt |
 | [0044](0044-wahl-ohne-abbrechen-fassung-tropft-mit.md) | «Hinzufügen» ohne «Abbrechen»; die Zeile «Neue Fassung» tropft mit dem Dashboard auf | gilt |
@@ -60,4 +60,5 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0050](0050-kommunikation-nur-auf-eigenem-branch.md) | `kommunikation/` lebt nur auf `chatgpt/kommunikation`, nie auf `main`; nie zusammenführen | gilt |
 | [0051](0051-zeichen-neu-mit-puls-und-warnung.md) | Zeichen der Meldung neu bewegt, jedes endet mit dem Puls; eine Warnung für Fehlschläge | gilt |
 | [0052](0052-kalender-wischen.md) | Der Kalender folgt dem Finger (Tropfen, 1:1); Pfeile und «Heute» spielen dieselbe Bewegung | gilt; löst den Seitentropfen aus 0028 ab |
-| [0053](0053-fluessige-tropfen.md) | Die Tropfen fließen wie in iOS 26: Feder, Hals, Dehnen, Lichtkante, an jeder Stelle; Reiter «Flüssig» in den Einstellungen | gilt; löst «ohne Überschwingen» aus 0008 und die festen Dauern ab |
+| [0053](0053-fluessige-tropfen.md) | Die Tropfen fließen wie in iOS 26: Feder, Hals, Dehnen, Lichtkante, an jeder Stelle; Reiter «Flüssig» in den Einstellungen | Mechanik und Reiter gelten; Voreinstellung, Regler, Filter abgelöst durch 0054 |
+| [0054](0054-chilli-standard-ios-je-stelle.md) | Chilli ist Standard; iOS-Flüssig je Stelle im Reiter «Flüssig», mit Speichern; Pfad statt Filter; Drang und Timer mit Flüssigkeit und Chili | gilt |

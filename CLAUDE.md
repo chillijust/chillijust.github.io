@@ -49,7 +49,7 @@ Safari als Home-Bildschirm-App im Vollbild.
 | 6 · Rückblick: Heatmap, Journal | fertig (0.7.1) |
 | 7 · Sicherung, Einstellungen, Tickets | fertig (0.8.0) |
 | 8 · Feinschliff, Nachbesserungen am Gerät, Timer und Zähler, Termine abhaken | fertig (0.13.1) |
-| 9 · Flüssig wie iOS 26: Feder, Hals, Reiter «Flüssig» (ADR 0053) | im Bau (0.17.0T2) |
+| 9 · Flüssig wie iOS 26 je Stelle, Chilli als Standard (ADR 0053, 0054) | im Bau (0.17.0T3) |
 
 ## Wo was steht
 
@@ -164,7 +164,7 @@ node tools/pruefen.mjs                      # Vor-Push-Prüfung allein
 
 ## Offen
 
-- Flüssig (ADR 0053): Alle Stellen fließen seit 0.17.0T2 mit der Zeit der Feder; Abnahme am Gerät steht aus.
+- Flüssig (ADR 0054): Chilli ist Standard, iOS je Stelle mit Speichern; Timer wie Drang (0.17.0T3). Abnahme am Gerät steht aus.
 - Analyse von James (Nachrichten 01–03 auf `chatgpt/kommunikation`). A2/A3 ausgeliefert in 0.13.2T (ADR 0049),
   Abnahme am Gerät steht aus. Als Nächstes A1 Worker-Cache (ADR nötig); dann Rest von A3
   (Formulare, Löschen, Rückfall, Drang behalten ihren Stand bis zum Neuladen), A4–A6.

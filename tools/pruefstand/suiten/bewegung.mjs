@@ -116,10 +116,8 @@ return durch().then(function () {
   var m = q('.held .wahl-marke');
   pruefe('W2 Woche zu Monat: die Marke fließt', laeuft(m));
   var mitte = m.getAnimations()[0].effect.getKeyframes()[1];
-  // Seit ADR 0053 fließt sie auf der Feder und dehnt sich unterwegs, statt sich über beide zu legen.
-  pruefe('W3 und dehnt sich dabei auf halbem Weg', /scale\(1\.[0-9]+, 0\.[0-9]+\)/.test(mitte.transform) &&
-    parseFloat(mitte.left) > q('[data-kalender="woche"]').offsetLeft && parseFloat(mitte.left) < q('[data-kalender="monat"]').offsetLeft &&
-    m.getAnimations()[0].effect.getTiming().easing.indexOf('linear(') === 0, mitte.transform + ' ' + mitte.left);
+  pruefe('W3 und streckt sich dabei über beide', parseFloat(mitte.width) > q('[data-kalender="monat"]').offsetWidth +
+    q('[data-kalender="woche"]').offsetWidth - 2, mitte.width);
   ausbewegt();
   pruefe('W4 am Ende liegt sie unter «Monat»', unter(m, q('[data-kalender="monat"]')));
   q('[data-kalender="woche"]').click();
@@ -169,8 +167,7 @@ return durch().then(function () {
   pruefe('D3 zu fließt es zurück in den Knopf', laeuft(bl) && !q('#menue').classList.contains('offen') && !q('#menue').hidden);
   var zuBild = bl.getAnimations()[0], zuEnde = zuBild.effect.getKeyframes().slice(-1)[0];
   pruefe('D3a zu ist auf an Dauer gleich und blendet am Knopf aus, statt zu verschwinden',
-    zuBild.effect.getTiming().duration === MENUE_DAUER && MENUE_DAUER === Math.round(fluessigTakt('menue').dauer * 0.8125) &&
-    String(zuEnde.opacity) === '0' &&
+    zuBild.effect.getTiming().duration === MENUE_DAUER && MENUE_DAUER === 338 && String(zuEnde.opacity) === '0' &&
     zuEnde.borderRadius === TROPFEN, zuBild.effect.getTiming().duration + ' ' + zuEnde.opacity);
   return durch();
 }).then(function () {
@@ -193,8 +190,7 @@ return durch().then(function () {
   pruefe('D9 zurück fließt die Ansicht als Tropfen in den Menüknopf', ansicht === 'home' && !!h && laeuft(h) &&
     !!h.querySelector('.geist'));
   pruefe('D10 der Tropfen ist rund, ohne Spitze (ADR 0023)', z.borderRadius === '50%', z.borderRadius);
-  pruefe('D10a die Dauer ist die der Feder (ADR 0053)', h.getAnimations()[0].effect.getTiming().duration === TROPFEN_DAUER &&
-    TROPFEN_DAUER === fluessigTakt('menue').dauer);
+  pruefe('D10a um 35 % schneller als zuerst', h.getAnimations()[0].effect.getTiming().duration === 416);
   pruefe('D11 und landet auf dem Knopf', Math.abs(parseFloat(z.left) + parseFloat(z.width) / 2 - (k.left + k.width / 2)) < 2 &&
     Math.abs(parseFloat(z.top) + parseFloat(z.height) / 2 - (k.top + k.height / 2)) < 2);
   pruefe('D12 Kacheln bleiben Rechtecke', !tropfenQuelle(q('[data-haken]')) && !tropfenQuelle(q('[data-termin]')) &&

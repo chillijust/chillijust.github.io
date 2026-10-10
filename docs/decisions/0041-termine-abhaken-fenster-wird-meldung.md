@@ -1,7 +1,7 @@
 # 0041 · Termine abhaken, Fenster wird Meldung, Menüknopf tropft herab, Fragen im Glas
 
 *2026-10-07 · sechs Tickets und ein Nachtrag vom Gerät (App-Stand 0.12.0T2) · Version 0.13.0T ·
-ändert 0018, 0020, 0025, 0038, 0040 · Termin-Geste, Fragen und Menü ergänzt durch 0042*
+ändert 0018, 0020, 0025, 0038, 0040 · Termin-Geste, Fragen und Menü ergänzt durch 0042 · Aufbau des Timers abgelöst durch 0054*
 
 ## Ausgangslage
 
