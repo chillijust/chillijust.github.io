@@ -1382,6 +1382,90 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 .hinweis-karte.bestaetigung p:empty { display: none; }
 .hinweis-karte .knopf[hidden] { display: none; }
 
+/* ── Flüssigprobe (0.16.0T) ────────────────────────────────── */
+/* Acht kleine Bühnen am Ende des Dashboards. Das Flüssige liegt in Schichten
+   unter dem Inhalt: im Pfad ein Umriß als clip-path mit Schatten und
+   Lichtkante darüber, im Filter Formen, die weich gezeichnet und hart
+   abgeschnitten werden. Die Bühne schneidet ab, was über ihren Rand will
+   (ADR 0029). */
+.fp-steuer { display: flex; flex-direction: column; gap: 10px; }
+.fp-text { margin: 0; font-size: 15px; color: var(--text-2); line-height: 1.4; }
+.fp-karte { margin-top: 12px; padding: 16px 14px 14px; }
+.fp-name { margin: 0 4px; font-family: var(--sans); font-size: 15px; font-weight: 600; }
+.fp-stand { font-weight: 500; font-size: 14px; color: var(--text-2); }
+.fp-karte > .fp-text { margin: 2px 4px 10px; font-size: 14px; }
+.fp-regler-liste { display: flex; flex-direction: column; margin-top: 2px; }
+.fp-regler { display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 12px; margin: 0 4px; }
+.fp-regler-name { font-size: 15px; }
+.fp-regler-wert { font-family: var(--sans); font-size: 14px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.fp-regler input { grid-column: 1 / -1; width: 100%; height: 44px; margin: 0; font-size: 16px; accent-color: var(--akzent); }
+.fp-wahlen { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.fp-eigen { width: 100%; }
+.fp-eigen[aria-pressed="false"] { background: var(--flaeche-2); color: var(--text); }
+.fp-buehne {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  background: var(--grund);
+  --fp-farbe: var(--flaeche);
+  -webkit-user-select: none;
+  user-select: none;
+}
+.fp-buehne[data-fp-buehne="menue"] { height: 250px; }
+.fp-buehne[data-fp-buehne="hinweis"] { height: 228px; }
+.fp-buehne[data-fp-buehne="schalter"] { height: 146px; background: none; --fp-farbe: var(--grund); }
+.fp-buehne[data-fp-buehne="haken"] { height: 112px; background: none; --fp-farbe: var(--erledigt); }
+.fp-buehne[data-fp-buehne="welle"] { background: none; --fp-farbe: var(--akzent); }
+.fp-buehne[data-fp-buehne="tag"] { height: 96px; background: none; --fp-farbe: var(--grund); }
+.fp-buehne[data-fp-buehne="zeilen"] { height: 252px; }
+.fp-buehne[data-fp-buehne="perle"] { height: 184px; }
+.fp-schicht { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.fp-fluss { z-index: 2; background: var(--fp-farbe); }
+.fp-goo { z-index: 2; }
+.fp-goo > div { position: absolute; background: var(--fp-farbe); }
+.fp-glas .fp-fluss { background: var(--glas); -webkit-backdrop-filter: blur(3px) saturate(190%); backdrop-filter: blur(3px) saturate(190%); }
+.fp-glas .fp-goo > div { background: var(--glas-tropfen); }
+.fp-schatten { opacity: .24; }
+.fp-schicht.fp-oben { z-index: 3; }
+.fp-licht { fill: var(--glas-licht); }
+.fp-ziel { position: absolute; z-index: 5; min-width: 44px; min-height: 44px; color: var(--text); }
+.fp-inhalt { position: absolute; z-index: 4; pointer-events: none; }
+.fp-symbol { display: grid; place-items: center; }
+.fp-symbol svg { width: 22px; height: 22px; }
+.fp-schrift { display: grid; place-items: center; font-size: 15px; font-weight: 500; }
+.fp-liste { display: flex; flex-direction: column; justify-content: center; padding: 6px 18px; box-sizing: border-box; }
+.fp-liste span { padding: 5px 0; font-size: 16px; }
+.fp-liste span + span { border-top: 1px solid var(--flaeche-2); }
+.fp-meldung { display: flex; flex-direction: column; justify-content: center; gap: 4px; padding: 0 20px; box-sizing: border-box; }
+.fp-meldung b { font-family: var(--sans); font-size: 17px; font-weight: 600; }
+.fp-meldung span { font-size: 15px; color: var(--text-2); }
+.fp-mitte { align-items: center; text-align: center; }
+.fp-deko { position: absolute; inset: 0; padding: 8px 18px; }
+.fp-deko span { display: block; height: 10px; margin: 14px 0; border-radius: 5px; background: var(--flaeche-2); }
+.fp-deko span:nth-child(2n) { width: 70%; }
+.fp-deko span:nth-child(3) { width: 45%; background: var(--akzent); }
+.fp-deko span:nth-child(6) { width: 55%; background: var(--linie); }
+.fp-bahn { position: absolute; background: var(--flaeche-2); border-radius: 20px; }
+.fp-bahn.fp-weit { border-radius: 16px; }
+.fp-ring-aus { position: absolute; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--linie); }
+.fp-zeichen { display: grid; place-items: center; color: var(--grund); }
+.fp-zeichen svg { width: 26px; height: 26px; stroke-width: 2.6; }
+.fp-gw-name { display: flex; align-items: center; font-size: 16px; }
+.fp-zahl { display: grid; place-items: center; font-family: var(--sans); font-size: 18px; font-weight: 600;
+  color: var(--grund); font-variant-numeric: tabular-nums; }
+.fp-tag { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+.fp-tag .fp-wt { font-size: 12px; color: var(--text-2); }
+.fp-tag .fp-tz { font-size: 16px; font-weight: 600; }
+.fp-zeile { display: flex; align-items: center; padding: 0 16px; font-size: 16px; font-weight: 500; text-align: left; }
+.fp-welle-bild { position: relative; width: min(232px, 100% - 32px); aspect-ratio: 1; margin: 8px auto 0; }
+.fp-welle-ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.fp-welle-ring circle { fill: none; stroke-width: 2.2; }
+.fp-ring-grund { stroke: var(--flaeche-2); }
+.fp-ring-fuell { stroke: var(--akzent); stroke-dasharray: 1; stroke-linecap: round; }
+.fp-rund { position: absolute; inset: 9px; border-radius: 50%; overflow: hidden; background: var(--flaeche-2); }
+.fp-welle-bild .fp-ziel { inset: 0; border-radius: 50%; }
+.fp-welle-zeit { margin: 6px 0 8px; text-align: center; font-family: var(--sans); font-size: 20px; font-weight: 600;
+  font-variant-numeric: tabular-nums; }
 /* ── Bewegung: Tropfen ─────────────────────────────────────────
    Nichts ploppt (ADR 0007). Die Ansicht liegt über dem Geist der alten; der
    Tropfen liegt in der Karte hinter ihrem Inhalt. `--feder` setzt das Skript. */
@@ -1635,7 +1719,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.15.0';
+var APP_VERSION = '0.16.0T';
 var APP_STAND = '2026-10-10';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -1790,7 +1874,8 @@ function grundStand() {
     gefeiert: {},        // Abgewöhnen: id → der Rückfall, nach dem der neue Rekord schon gefeiert ist
     exportOhne: {},      // Export: 't:id' / 'g:id' → true — Neues, das bewußt draußen bleibt (ADR 0034)
     schwachHinweis: true,   // der sanfte Hinweis ab drei ungefestigten Gewohnheiten
-    bewegung: 'auto'     // 'auto' folgt dem Gerät, 'aus' stellt alles still
+    bewegung: 'auto',    // 'auto' folgt dem Gerät, 'aus' stellt alles still
+    fluessig: null       // die Flüssigprobe (0.16.0T): Regler und Urteile, bis gewählt ist — nicht im Sicherungscode
   };
 }
 
@@ -1840,6 +1925,7 @@ function stand(roh) {
   }
   if (roh.schwachHinweis === false) s.schwachHinweis = false;
   if (roh.bewegung === 'aus') s.bewegung = 'aus';
+  s.fluessig = fluessigLesen(roh.fluessig);
   if (Array.isArray(roh.tickets)) {
     var tkids = {};
     roh.tickets.forEach(function (t) {
@@ -2150,6 +2236,65 @@ function markeAbspielen(svg) {
   svg.classList.remove('wm-los');
   void svg.getBoundingClientRect();
   svg.classList.add('wm-los');
+}
+
+// ── Flüssigprobe: was gemerkt wird (0.16.0T) ───────────────────
+// Steht vor dem Laden, weil stand() es braucht. Die Probe merkt sich ihre
+// Regler unter `state.fluessig`, bis gewählt ist — iOS beendet die
+// Home-Bildschirm-App gern, und dann wären sie fort.
+var FP_STELLEN = [
+  ['menue', 'Menüknopf und Menü', 'Tipp auf den Knopf: Das Menü löst sich mit einem Hals heraus. Tipp aufs Menü: Es fließt zurück.'],
+  ['hinweis', 'Hinweis aus Glas', 'Tipp auf «Speichern»: Der Hinweis quillt als Glas heraus. Tipp auf ihn: Er fließt zurück.'],
+  ['schalter', 'Schalter und Wahl', 'Tipp auf den Schalter oder ein Feld: Der Knauf fließt hinüber.'],
+  ['haken', 'Abhaken und Zähler', 'Tipp auf den Kreis: Ein Tropfen löst sich und fließt in den Zähler.'],
+  ['welle', '10-Minuten-Welle', 'Tipp in den Kreis: zehn Minuten im Zeitraffer, Perlen steigen auf.'],
+  ['tag', 'Tagesmarkierung im Kalender', 'Tipp auf einen Tag: Die Markierung fließt hinüber.'],
+  ['zeilen', 'Zeilen kommen und gehen', 'Tipp auf Plus: Eine Zeile tropft in die Liste. Eine getippte Zeile fließt in den Menüknopf.'],
+  ['perle', 'Neue Version', 'Tipp auf den Kopf: Eine Perle löst sich und wird zum Hinweis. Tipp darauf, und sie fließt zurück.']
+];
+var FP_GRUND = {
+  ios: { name: 'iOS 26', tempo: 0.5, feder: 0.35, hals: 0.35, dehnen: 0.4, kante: 0.6 },
+  honig: { name: 'Honig', tempo: 0.8, feder: 0.1, hals: 0.85, dehnen: 0.25, kante: 0.4 },
+  quecksilber: { name: 'Quecksilber', tempo: 0.42, feder: 0.7, hals: 0.2, dehnen: 0.6, kante: 0.95 }
+};
+var FP_GRUND_REIHE = ['ios', 'honig', 'quecksilber'];
+// Schlüssel, Name, kleinster und größter Wert.
+var FP_REGLER = [
+  ['tempo', 'Tempo', 0.25, 1],
+  ['feder', 'Nachfedern', 0, 1],
+  ['hals', 'Zähigkeit des Halses', 0, 1],
+  ['dehnen', 'Dehnen', 0, 1],
+  ['kante', 'Lichtkante', 0, 1]
+];
+
+function fpWerteLesen(roh) {
+  if (!roh || typeof roh !== 'object') return null;
+  var w = {};
+  for (var i = 0; i < FP_REGLER.length; i++) {
+    var r = FP_REGLER[i], v = roh[r[0]];
+    if (typeof v !== 'number' || !isFinite(v)) return null;
+    w[r[0]] = Math.min(r[3], Math.max(r[2], Math.round(v * 100) / 100));
+  }
+  return w;
+}
+
+// Ein gemerkter Stand der Probe; ohne ihn gilt «iOS 26» im Pfad.
+function fluessigLesen(roh) {
+  if (!roh || typeof roh !== 'object') return null;
+  var f = { grund: FP_GRUND_REIHE.indexOf(roh.grund) >= 0 ? roh.grund : 'ios',
+    technik: roh.technik === 'filter' ? 'filter' : 'pfad', werte: null, stellen: {} };
+  f.werte = fpWerteLesen(roh.werte) || fpWerteLesen(FP_GRUND[f.grund]);
+  var st = roh.stellen && typeof roh.stellen === 'object' ? roh.stellen : {};
+  FP_STELLEN.forEach(function (s) {
+    var e = st[s[0]], gut = {};
+    if (!e || typeof e !== 'object') return;
+    if (e.technik === 'pfad' || e.technik === 'filter') gut.technik = e.technik;
+    var w = fpWerteLesen(e.werte);
+    if (w) gut.werte = w;
+    if (e.urteil === 'ja' || e.urteil === 'nein') gut.urteil = e.urteil;
+    if (Object.keys(gut).length) f.stellen[s[0]] = gut;
+  });
+  return f;
 }
 
 var state = laden();
@@ -4061,7 +4206,8 @@ function zeichneHome() {
     (frei.length ? '<section class="abschnitt"><h2>Heute nicht dran</h2><div class="gw-liste gedimmt">' +
       frei.map(zeichneKachel).join('') + '</div></section>' : '') +
     (laster.length ? '<section class="abschnitt"><h2>Abgewöhnen</h2><div class="gw-liste">' +
-      laster.map(zeichneLasterKachel).join('') + '</div></section>' : '');
+      laster.map(zeichneLasterKachel).join('') + '</div></section>' : '') +
+    zeichneFluessigProbe();
 }
 
 // Oben eine Karte für heute und die Tage drumherum: die Chili im Tagesring,
@@ -4712,6 +4858,976 @@ function zeichneTagVoraus(liste, k) {
         '<span class="kal-haken">' + ICON.haken + '</span>' +
         '<span class="kal-name">' + esc(g.name) + '</span><span class="kal-status">' + w + '</span></div>';
     }).join('');
+}
+
+// ════════════════════════════════════════════════════════════════
+//  Flüssigprobe (0.16.0T)
+// ════════════════════════════════════════════════════════════════
+//
+// Der Nutzer will die Tropfen näher an iOS 26: Formen, die über einen Hals
+// verschmelzen und abreißen (Metaball, wie in der Swift-Vorlage), die
+// nachfedern, sich in Laufrichtung dehnen und eine Lichtkante tragen. Am
+// Gerät wählt man Bewegung besser als nach Beschreibung, darum acht Proben am
+// Ende des Dashboards, je in zwei Techniken: «Pfad» rechnet Formen und Hälse
+// als einen Umriß (scharf, Glas bleibt Glas), «Filter» zeichnet weich und
+// schneidet hart ab wie die Vorlage (organischer, aber ohne Glas). Die
+// Regler gelten für alle, eine Probe kann abweichen; «Einstellungen
+// kopieren» faßt alles als Text. Die echten Tropfen bleiben, wie sie sind,
+// bis gewählt ist (ADR 0008: ohne Überschwingen); dann geht die Probe.
+var FP_WELLE_DAUER = 9000;   // ms: die zehn Minuten im Zeitraffer
+var fpLauf = {};             // Stelle → ihre Bühne: Maß, Federn, was sie zeichnet
+
+function fpStand() { return state.fluessig || fluessigLesen({}); }
+
+// Was für eine Stelle gilt: ihre eigene Technik und ihre eigenen Werte,
+// sonst die gemeinsamen.
+function fpFuer(id) {
+  var f = fpStand(), e = f.stellen[id] || {};
+  return { technik: e.technik || f.technik, werte: e.werte || f.werte };
+}
+
+function fpAendern(wie) {
+  var f = fpStand();
+  wie(f);
+  state.fluessig = f;
+}
+
+function fpEintrag(f, id) { return f.stellen[id] || (f.stellen[id] = {}); }
+
+function fpAufraeumen(f, id) { if (f.stellen[id] && !Object.keys(f.stellen[id]).length) delete f.stellen[id]; }
+
+function fpGleich(a, b) {
+  return FP_REGLER.every(function (r) { return Math.abs(a[r[0]] - b[r[0]]) < 0.001; });
+}
+
+function fpWertText(k, v) {
+  return k === 'tempo' ? v.toFixed(2).replace('.', ',') + ' s' : Math.round(v * 100) + ' %';
+}
+
+function fpWerteText(w) {
+  return FP_REGLER.map(function (r) { return r[1] + ' ' + fpWertText(r[0], w[r[0]]); }).join(' · ');
+}
+
+function fpGrundText(f) {
+  return FP_GRUND[f.grund].name + (fpGleich(f.werte, FP_GRUND[f.grund]) ? '' : ', verändert');
+}
+
+function fpName(id) {
+  for (var i = 0; i < FP_STELLEN.length; i++) if (FP_STELLEN[i][0] === id) return FP_STELLEN[i][1];
+  return id;
+}
+
+function fpTechnikName(t) { return t === 'filter' ? 'Filter' : 'Pfad'; }
+
+// Was der Nutzer kopiert und schickt: lesbar und genau genug, um es
+// nachzubauen.
+function fpSicherung() {
+  var f = fpStand(), z = ['Flüssigprobe · Chilli Journal ' + APP_VERSION], aus = [];
+  z.push('Grund: ' + fpGrundText(f));
+  z.push('Technik: ' + fpTechnikName(f.technik));
+  z.push(fpWerteText(f.werte));
+  FP_STELLEN.forEach(function (s) {
+    var e = f.stellen[s[0]];
+    if (e && e.technik) aus.push('· ' + s[1] + ': ' + fpTechnikName(e.technik));
+    if (e && e.werte) aus.push('· ' + s[1] + ': eigene Regler, ' + fpWerteText(e.werte));
+  });
+  z.push('Ausnahmen:' + (aus.length ? '' : ' keine'));
+  z = z.concat(aus);
+  z.push('Urteil:');
+  FP_STELLEN.forEach(function (s) {
+    var u = (f.stellen[s[0]] || {}).urteil;
+    z.push('· ' + s[1] + ': ' + (u === 'ja' ? 'nehmen' : u === 'nein' ? 'nicht nehmen' : 'offen'));
+  });
+  return z.join('\n');
+}
+
+// ── Flüssigprobe: Federn ───────────────────────────────────────
+// Eine Feder wie bei SwiftUI: «Tempo» ist die Antwortzeit, «Nachfedern» nimmt
+// Dämpfung weg — bei 0 kommt sie ohne Überschwingen an. `schnell` kürzt die
+// Antwortzeit für kleine Zuckungen.
+function fpFeder(x, schnell) { return { x: x, v: 0, ziel: x, schnell: schnell || 1 }; }
+
+function fpDaempfung(w) { return 1 - 0.78 * w.feder; }
+
+function fpSchwingen(f, dt, w) {
+  var antwort = w.tempo * f.schnell, z = fpDaempfung(w);
+  var k = Math.pow(2 * Math.PI / antwort, 2), c = 4 * Math.PI * z / antwort;
+  for (var rest = dt; rest > 1e-6; rest -= 0.004) {
+    var h = Math.min(rest, 0.004);
+    f.v += (-k * (f.x - f.ziel) - c * f.v) * h;
+    f.x += f.v * h;
+  }
+}
+
+// Bewegt alle Federn um dt; sagt, ob noch eine schwingt.
+function fpBewegen(federn, dt, w, still) {
+  var unruhig = false;
+  federn.forEach(function (f) {
+    if (!still) fpSchwingen(f, dt, w);
+    if (still || (Math.abs(f.x - f.ziel) < 0.0015 && Math.abs(f.v) < 0.02)) { f.x = f.ziel; f.v = 0; } else unruhig = true;
+  });
+  return unruhig;
+}
+
+// Wie lange eine Feder braucht, bis sie ruht.
+function fpRuhe(w) {
+  return Math.ceil(1000 * Math.log(1 / 0.0015) / (fpDaempfung(w) * 2 * Math.PI / w.tempo)) + 250;
+}
+
+// Der Stoß, mit dem eine Quelle zuckt, wenn ein Hals reißt oder ein Tropfen
+// in ihr aufgeht.
+function fpZucken(w) { return 2.4 * (0.2 + w.feder); }
+
+// Ein Bild weiter; der Zeitgeber springt ein, wo es keine Bilder gibt.
+function fpBild(f) {
+  var einmal = false;
+  function los() { if (!einmal) { einmal = true; f(); } }
+  if (window.requestAnimationFrame) requestAnimationFrame(los);
+  setTimeout(los, 34);
+}
+
+function fpAnstossen(b) {
+  if (b.laeuft) return;
+  b.laeuft = true;
+  b.zuletzt = Date.now();
+  fpBild(function () { fpTakt(b); });
+}
+
+function fpTakt(b) {
+  if (fpLauf[b.id] !== b || !b.el.isConnected) { b.laeuft = false; return; }
+  var nun = Date.now(), dt = fpKlemme((nun - b.zuletzt) / 1000, 0.001, 0.05), w = fpFuer(b.id).werte, still = bewegungAus();
+  b.zuletzt = nun;
+  var weiter = fpBewegen(b.federn(), dt, w, still);
+  if (b.extra && b.extra(dt, w, still)) weiter = true;
+  fpZeichnen(b);
+  // Ein Riß beim Zeichnen stößt eine Feder an, die eben noch ruhte.
+  if (!weiter) weiter = b.federn().some(function (f) { return f.v !== 0 || f.x !== f.ziel; });
+  if (weiter && !still) fpBild(function () { fpTakt(b); }); else b.laeuft = false;
+}
+
+// ── Flüssigprobe: Formen ───────────────────────────────────────
+// Eine Form ist ein gerundetes Rechteck { x, y, w, h, r }, wahlweise mit
+// Maßstab `s` um die Mitte und Dehnung `deh` ({ a: Richtung, e: Faktor }).
+function fpMitte(f) { return { x: f.x + f.w / 2, y: f.y + f.h / 2 }; }
+function fpMisch(a, b, t) { return a + (b - a) * t; }
+function fpKlemme(v, a, b) { return Math.max(a, Math.min(b, v)); }
+function fpZ(n) { return Math.round(n * 10) / 10; }
+function fpAnteil(v) { return String(Math.round(fpKlemme(v, 0, 1) * 100) / 100); }
+
+function fpLage(el, f) {
+  el.style.left = px(f.x);
+  el.style.top = px(f.y);
+  el.style.width = px(f.w);
+  el.style.height = px(f.h);
+}
+
+// Der größte Kreis in der Form, so nah am Punkt p wie möglich: Daran hängt
+// der Hals.
+function fpKern(f, p) {
+  var s = f.s || 1, m = fpMitte(f), w = f.w * s, h = f.h * s, r = Math.min(w, h) / 2;
+  return w >= h ? { x: fpKlemme(p.x, m.x - w / 2 + r, m.x + w / 2 - r), y: m.y, r: r }
+    : { x: m.x, y: fpKlemme(p.y, m.y - h / 2 + r, m.y + h / 2 - r), r: r };
+}
+
+// Der Umriß als Punkte, im Uhrzeigersinn: Alle Umrisse eines Pfads laufen
+// gleich herum, sonst stanzt eine Überlappung ein Loch.
+function fpPunkte(f) {
+  var s = f.s || 1, m = fpMitte(f), w = f.w * s, h = f.h * s, r = Math.max(0, Math.min(f.r * s, w / 2, h / 2));
+  var ecken = [[m.x + w / 2 - r, m.y - h / 2 + r, -0.5], [m.x + w / 2 - r, m.y + h / 2 - r, 0],
+    [m.x - w / 2 + r, m.y + h / 2 - r, 0.5], [m.x - w / 2 + r, m.y - h / 2 + r, 1]], pts = [];
+  ecken.forEach(function (e) {
+    for (var i = 0; i <= 8; i++) {
+      var a = (e[2] + i / 16) * Math.PI;
+      pts.push([e[0] + r * Math.cos(a), e[1] + r * Math.sin(a)]);
+    }
+  });
+  if (f.deh && f.deh.e > 1.001) {
+    var c = Math.cos(f.deh.a), sn = Math.sin(f.deh.a), e = f.deh.e;
+    pts = pts.map(function (p) {
+      var dx = p[0] - m.x, dy = p[1] - m.y, u = (dx * c + dy * sn) * e, v = (dy * c - dx * sn) / e;
+      return [m.x + u * c - v * sn, m.y + u * sn + v * c];
+    });
+  }
+  return pts;
+}
+
+function fpUmriss(pts) {
+  return 'M' + pts.map(function (p) { return fpZ(p[0]) + ' ' + fpZ(p[1]); }).join('L') + 'Z';
+}
+
+// Dehnen in Laufrichtung: je schneller, desto länger und schmaler.
+function fpDehnung(vx, vy, w, gewicht) {
+  var v = Math.sqrt(vx * vx + vy * vy);
+  return { a: Math.atan2(vy, vx), e: 1 + w.dehnen * 0.6 * Math.min(1, v / 900) * Math.max(0, gewicht) };
+}
+
+// Bis zu welchem Abstand der Mitten ein Hals hält — die Zähigkeit.
+function fpWeite(r1, r2, w) { return (r1 + r2) * (1.15 + 2.4 * w.hals); }
+
+// Der Hals zwischen zwei Kreisen, nach dem Metaball von Hiroyuki Sato: zwei
+// Kurven, die sich zur Mitte hin einschnüren, je weiter die Kreise
+// auseinander sind. Leer, wenn er gerissen ist oder ein Kreis im anderen liegt.
+function fpHalsPfad(c1, c2, weite) {
+  var dx = c2.x - c1.x, dy = c2.y - c1.y, d = Math.sqrt(dx * dx + dy * dy), r1 = c1.r, r2 = c2.r;
+  if (r1 < 0.5 || r2 < 0.5 || d > weite || d <= Math.abs(r1 - r2) + 0.5) return '';
+  var u1 = 0, u2 = 0, v = 0.5, hp = Math.PI / 2;
+  if (d < r1 + r2) {
+    u1 = Math.acos(fpKlemme((r1 * r1 + d * d - r2 * r2) / (2 * r1 * d), -1, 1));
+    u2 = Math.acos(fpKlemme((r2 * r2 + d * d - r1 * r1) / (2 * r2 * d), -1, 1));
+  }
+  var m = Math.atan2(dy, dx), sp = Math.acos(fpKlemme((r1 - r2) / d, -1, 1));
+  var a1 = m + u1 + (sp - u1) * v, a2 = m - u1 - (sp - u1) * v;
+  var a3 = m + Math.PI - u2 - (Math.PI - u2 - sp) * v, a4 = m - Math.PI + u2 + (Math.PI - u2 - sp) * v;
+  function auf(x, y, a, r) { return [x + r * Math.cos(a), y + r * Math.sin(a)]; }
+  function pt(p) { return fpZ(p[0]) + ' ' + fpZ(p[1]); }
+  var p1 = auf(c1.x, c1.y, a1, r1), p2 = auf(c1.x, c1.y, a2, r1), p3 = auf(c2.x, c2.y, a3, r2), p4 = auf(c2.x, c2.y, a4, r2);
+  var k = Math.min(v * 2.4, Math.sqrt(Math.pow(p1[0] - p3[0], 2) + Math.pow(p1[1] - p3[1], 2)) / (r1 + r2)) *
+    Math.min(1, d * 2 / (r1 + r2));
+  var h1 = auf(p1[0], p1[1], a1 - hp, r1 * k), h2 = auf(p2[0], p2[1], a2 + hp, r1 * k);
+  var h3 = auf(p3[0], p3[1], a3 + hp, r2 * k), h4 = auf(p4[0], p4[1], a4 - hp, r2 * k);
+  // Kurz vor dem Reißen ist die Mitte ein Haar — am Gerät ein Strich, kein
+  // Hals. Darunter gilt er als gerissen.
+  var mx = (p1[0] + 3 * h1[0] + 3 * h3[0] + p3[0] - p2[0] - 3 * h2[0] - 3 * h4[0] - p4[0]) / 8;
+  var my = (p1[1] + 3 * h1[1] + 3 * h3[1] + p3[1] - p2[1] - 3 * h2[1] - 3 * h4[1] - p4[1]) / 8;
+  if (d > r1 + r2 && Math.sqrt(mx * mx + my * my) < 0.22 * Math.min(r1, r2)) return '';
+  var flaeche = (p1[0] * p3[1] - p3[0] * p1[1]) + (p3[0] * p4[1] - p4[0] * p3[1]) +
+    (p4[0] * p2[1] - p2[0] * p4[1]) + (p2[0] * p1[1] - p1[0] * p2[1]);
+  return flaeche >= 0
+    ? 'M' + pt(p1) + 'C' + pt(h1) + ' ' + pt(h3) + ' ' + pt(p3) + 'L' + pt(p4) + 'C' + pt(h4) + ' ' + pt(h2) + ' ' + pt(p2) + 'Z'
+    : 'M' + pt(p2) + 'C' + pt(h2) + ' ' + pt(h4) + ' ' + pt(p4) + 'L' + pt(p3) + 'C' + pt(h3) + ' ' + pt(h1) + ' ' + pt(p1) + 'Z';
+}
+
+// Im Filter ist der Hals ein Faden, der dünner wird, je weiter die Kreise
+// auseinander sind. Was zu dünn ist, schneidet der Filter weg: Der Hals reißt.
+function fpFadenDicke(c1, c2, weite) {
+  var d = Math.sqrt(Math.pow(c2.x - c1.x, 2) + Math.pow(c2.y - c1.y, 2)), an = (c1.r + c2.r) * 0.7;
+  if (d > weite || d <= Math.abs(c1.r - c2.r)) return 0;
+  return 1.6 * Math.min(c1.r, c2.r) * Math.pow(1 - fpKlemme((d - an) / Math.max(1, weite - an), 0, 1), 0.7);
+}
+
+// Der Tropfen von der Quelle q zum Ziel z bei p: Erst wandert eine Perle vom
+// Durchmesser d0, ab knapp einem Drittel wächst sie zur Fläche. Über 1 hinaus
+// (die Feder schwingt über) wird sie etwas größer und weiter, dann federt sie
+// zurück. Gedehnt wird nur die Perle; eine gedehnte Fläche sähe schief aus.
+function fpTropfen(q, z, p, pv, d0, w) {
+  var m = fpMitte(z), k = fpKern(q, m), t = Math.max(0, p), g = Math.max(0, (t - 0.3) / 0.7);
+  var bw = Math.max(d0, d0 + (z.w - d0) * g), bh = Math.max(d0, d0 + (z.h - d0) * g);
+  var cx = fpMisch(k.x, m.x, t), cy = fpMisch(k.y, m.y, t);
+  return { x: cx - bw / 2, y: cy - bh / 2, w: bw, h: bh, r: Math.min(fpMisch(d0 / 2, z.r, Math.min(1, g)), bw / 2, bh / 2),
+    deh: fpDehnung(pv * (m.x - k.x), pv * (m.y - k.y), w, Math.pow(Math.max(0, 1 - g * 1.6), 2)) };
+}
+
+// Ein Gleiter: ein Knauf, der von einem Platz zum nächsten fließt. Unterwegs
+// hebt er sich wie eine Linse und dehnt sich; am alten Platz bleibt ein Rest,
+// der schwindet und über einen Hals an ihm hängt.
+function fpGleiter(form) { return { von: form, nach: form, q: fpFeder(1) }; }
+
+function fpGleiterForm(g) {
+  var q = g.q.x, a = g.von, b = g.nach;
+  return { x: fpMisch(a.x, b.x, q), y: fpMisch(a.y, b.y, q), w: fpMisch(a.w, b.w, q), h: fpMisch(a.h, b.h, q),
+    r: fpMisch(a.r, b.r, fpKlemme(q, 0, 1)) };
+}
+
+function fpGleiterZiel(g, nach) {
+  g.von = fpGleiterForm(g);
+  g.nach = nach;
+  g.q.x = 0;
+  g.q.v = 0;
+  g.q.ziel = 1;
+}
+
+function fpGleiterFormen(g, w, liste, haelse, key) {
+  var q = g.q.x, m = fpGleiterForm(g), b = fpKlemme(q, 0, 1), rest = 1 - q * 1.9, a = g.von;
+  m.s = 1 + 0.64 * b * (1 - b);
+  m.deh = fpDehnung(g.q.v * (g.nach.x - a.x), g.q.v * (g.nach.y - a.y), w, 1);
+  if (rest > 0.04 && (a.x !== g.nach.x || a.y !== g.nach.y)) {
+    liste.push({ x: a.x, y: a.y, w: a.w, h: a.h, r: a.r, s: rest });
+    haelse.push({ a: liste.length - 1, b: liste.length, key: key,
+      weite: fpWeite(Math.min(a.w, a.h) / 2, Math.min(m.w, m.h) / 2, w) });
+  }
+  liste.push(m);
+}
+
+// ── Flüssigprobe: Zeichnen ─────────────────────────────────────
+// Die Bühne liefert Formen, Hälse (zwischen zwei Formen oder einer Form und
+// einem freien Kreis) und im Pfad fertige Umrisse; hier wird daraus ein Bild.
+// Ein Hals, der eben noch da war, ist gerissen oder aufgegangen — dann zuckt,
+// woran er hing (`riss`).
+function fpZeichnen(b) {
+  var fuer = fpFuer(b.id), w = fuer.werte, erg = b.formen(w, b.technik), liste = erg.formen, jetzt = {};
+  function mitte(x) { return typeof x === 'number' ? fpMitte(liste[x]) : x; }
+  function kreis(x, gegen) { return typeof x === 'number' ? fpKern(liste[x], gegen) : x; }
+  var haelse = (erg.haelse || []).map(function (h) {
+    return { c1: kreis(h.a, mitte(h.b)), c2: kreis(h.b, mitte(h.a)), weite: h.weite, key: h.key };
+  });
+  if (b.technik === 'pfad') {
+    var d = (erg.pfade || []).join('') + liste.map(function (f) { return fpUmriss(fpPunkte(f)); }).join('');
+    haelse.forEach(function (h) {
+      var s = fpHalsPfad(h.c1, h.c2, h.weite);
+      if (s) { d += s; jetzt[h.key] = true; }
+    });
+    d = d || 'M0 0Z';
+    b.fluss.style.webkitClipPath = 'path("' + d + '")';
+    b.fluss.style.clipPath = 'path("' + d + '")';
+    b.licht.setAttribute('d', d);
+    b.licht.style.opacity = String(w.kante);
+    if (b.schatten) b.schatten.setAttribute('d', d);
+  } else {
+    var n = 0, kinder = b.goo.children;
+    var teil = function () {
+      var el = kinder[n] || b.goo.appendChild(document.createElement('div'));
+      n++;
+      el.style.display = '';
+      return el;
+    };
+    liste.forEach(function (f) {
+      var el = teil(), tr = 'scale(' + fpZ((f.s || 1) * 1000) / 1000 + ')';
+      if (f.deh && f.deh.e > 1.001) {
+        var gr = fpZ(f.deh.a * 180 / Math.PI), e = Math.round(f.deh.e * 1000) / 1000;
+        tr = 'rotate(' + gr + 'deg) scale(' + e + ', ' + Math.round(1000 / e) / 1000 + ') rotate(' + (-gr) + 'deg) ' + tr;
+      }
+      fpLage(el, f);
+      el.style.borderRadius = px(Math.max(0, Math.min(f.r, f.w / 2, f.h / 2)));
+      el.style.transformOrigin = '';
+      el.style.transform = tr;
+    });
+    haelse.forEach(function (h) {
+      var t = fpFadenDicke(h.c1, h.c2, h.weite);
+      if (t < 1) return;
+      jetzt[h.key] = true;
+      var el = teil(), dx = h.c2.x - h.c1.x, dy = h.c2.y - h.c1.y;
+      fpLage(el, { x: h.c1.x, y: h.c1.y - t / 2, w: Math.sqrt(dx * dx + dy * dy), h: t });
+      el.style.borderRadius = px(t / 2);
+      el.style.transformOrigin = '0 50%';
+      el.style.transform = 'rotate(' + Math.round(Math.atan2(dy, dx) * 1000) / 1000 + 'rad)';
+    });
+    for (var i = n; i < kinder.length; i++) kinder[i].style.display = 'none';
+    // Zäher heißt weicher gezeichnet: Der Filter hält Formen länger zusammen.
+    var std = fpZ(4 + 7 * w.hals);
+    if (b.std !== std) { b.blur.setAttribute('stdDeviation', String(std)); b.std = std; }
+    b.flut.setAttribute('flood-opacity', String(Math.round(w.kante * 80) / 100));
+  }
+  if (b.riss && !bewegungAus()) Object.keys(b.haelse).forEach(function (k) { if (!jetzt[k]) b.riss(k, w); });
+  b.haelse = jetzt;
+  if (b.zeigen) b.zeigen(w);
+}
+
+function fpTeil(b, name) { return b.el.querySelector('[data-fp-teil="' + name + '"]'); }
+function fpTipp(b, name) { return b.el.querySelector('[data-fp-tipp="' + name + '"]'); }
+
+// Die Schichten des Flüssigen unter den Inhalt legen und die Bühne
+// aufziehen. Wechselt die Technik, wird neu gebaut; was eben lief, beginnt
+// von vorn.
+function fpBauen(el) {
+  var id = el.getAttribute('data-fp-buehne'), ort = el.querySelector('.fp-ort') || el;
+  Array.prototype.slice.call(ort.querySelectorAll('.fp-schicht')).forEach(weg);
+  var b = { id: id, el: el, ort: ort, W: ort.clientWidth, H: ort.clientHeight, technik: fpFuer(id).technik, haelse: {} };
+  var flach = el.classList.contains('fp-flach');
+  if (b.technik === 'pfad') {
+    ort.insertAdjacentHTML('afterbegin', (flach ? '' : '<svg class="fp-schicht" aria-hidden="true">' +
+        '<filter id="fpS-' + id + '" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur in="SourceAlpha" stdDeviation="6"/>' +
+        '<feOffset dy="5" result="s"/><feComposite in="s" in2="SourceAlpha" operator="out"/></filter>' +
+        '<path class="fp-schatten" filter="url(#fpS-' + id + ')"/></svg>') +
+      '<div class="fp-schicht fp-fluss"></div>' +
+      '<svg class="fp-schicht fp-oben" aria-hidden="true"><filter id="fpL-' + id + '" x="-10%" y="-10%" width="120%" height="120%">' +
+        '<feOffset in="SourceAlpha" dx="1.2" dy="1.6" result="ver"/><feComposite in="SourceGraphic" in2="ver" operator="out" result="rand"/>' +
+        '<feGaussianBlur in="rand" stdDeviation=".5"/></filter><path class="fp-licht" filter="url(#fpL-' + id + ')"/></svg>');
+    b.fluss = ort.querySelector('.fp-fluss');
+    b.licht = ort.querySelector('.fp-licht');
+    b.schatten = ort.querySelector('.fp-schatten');
+  } else {
+    // Weich zeichnen, die Deckkraft hart abschneiden (wie colorBurn und
+    // colorDodge in der Vorlage), dann die Lichtkante: was oben links über
+    // den eigenen, leicht versetzten Umriß hinausragt.
+    ort.insertAdjacentHTML('afterbegin', '<svg class="fp-schicht" aria-hidden="true"><filter id="fpG-' + id +
+        '" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">' +
+        '<feGaussianBlur in="SourceGraphic" stdDeviation="6"/>' +
+        '<feColorMatrix type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 20 -9" result="g"/>' +
+        '<feOffset in="g" dx="1.2" dy="1.6" result="ver"/><feComposite in="g" in2="ver" operator="out" result="rand"/>' +
+        '<feFlood flood-color="white" flood-opacity=".5"/><feComposite in2="rand" operator="in" result="licht"/>' +
+        '<feMerge><feMergeNode in="g"/><feMergeNode in="licht"/></feMerge></filter></svg>' +
+      '<div class="fp-schicht fp-goo"></div>');
+    b.goo = ort.querySelector('.fp-goo');
+    b.blur = ort.querySelector('feGaussianBlur');
+    b.flut = ort.querySelector('feFlood');
+    b.goo.style.filter = 'url(#fpG-' + id + ')' + (flach ? '' : ' drop-shadow(0 4px 8px rgba(20, 20, 19, .18))');
+  }
+  FP_BUEHNEN[id](b);
+  fpLauf[id] = b;
+  fpZeichnen(b);
+  return b;
+}
+
+// ── Flüssigprobe: die Bühnen ───────────────────────────────────
+// Jede setzt ihre Federn (`federn`), ihre Formen (`formen`), den Inhalt
+// (`zeigen`) und was ein Tipp tut (`tippen`).
+
+// Auf und zu: aus der Quelle q quillt die Fläche z und fließt dorthin zurück.
+// Menü, Hinweis und Perle sind dieselbe Bewegung an anderem Ort.
+function fpAufZu(b, q, z, d0) {
+  var p = fpFeder(0), zk = fpFeder(0, 0.55), knopf = fpTipp(b, 'knopf'), flaeche = fpTipp(b, 'flaeche'), inhalt = fpTeil(b, 'inhalt');
+  // Eine breite Quelle zuckt weniger: 4 % von 300 px wären ein Sprung.
+  var zuck = Math.min(1, 60 / q.w);
+  fpLage(knopf, q);
+  fpLage(flaeche, z);
+  fpLage(inhalt, z);
+  b.federn = function () { return [p, zk]; };
+  b.formen = function (w) {
+    var liste = [{ x: q.x, y: q.y, w: q.w, h: q.h, r: q.r, s: 1 + zk.x * zuck }], haelse = [];
+    if (p.x > 0.02) {
+      liste.push(fpTropfen(q, z, p.x, p.v, d0, w));
+      haelse.push({ a: 0, b: 1, key: 'tropfen', weite: fpWeite(Math.min(q.w, q.h) / 2, d0 / 2, w) });
+    }
+    return { formen: liste, haelse: haelse };
+  };
+  b.riss = function (key, w) { zk.v += fpZucken(w); };
+  b.zeigen = function () {
+    var offen = p.ziel === 1;
+    inhalt.style.opacity = fpAnteil((p.x - 0.72) / 0.25);
+    flaeche.style.visibility = offen ? '' : 'hidden';
+    knopf.setAttribute('aria-expanded', offen ? 'true' : 'false');
+  };
+  b.tippen = function () {
+    p.ziel = p.ziel ? 0 : 1;
+    b.zeigen();
+    fpAnstossen(b);
+  };
+  b.offen = function () { return p.ziel === 1 && p.x === 1; };
+}
+
+function fpMenue(b) {
+  var zw = Math.min(232, b.W - 32);
+  fpAufZu(b, { x: b.W - 60, y: 16, w: 44, h: 44, r: 22 }, { x: b.W - 16 - zw, y: 72, w: zw, h: 162, r: 18 }, 36);
+}
+
+function fpHinweis(b) {
+  fpAufZu(b, { x: 16, y: b.H - 64, w: 136, h: 48, r: 24 }, { x: 24, y: 20, w: b.W - 48, h: 108, r: 22 }, 38);
+}
+
+function fpPerle(b) {
+  fpAufZu(b, { x: 16, y: 14, w: b.W - 32, h: 52, r: 26 }, { x: 28, y: 104, w: b.W - 56, h: 60, r: 30 }, 30);
+}
+
+// Schalter und Wahl: zwei Gleiter.
+function fpSchalter(b) {
+  var an = false, wahl = 1, sw = (b.W - 32 - 16) / 3;
+  function knauf(i) { return { x: 20 + i * 36, y: 22, w: 32, h: 32, r: 16 }; }
+  function feld(i) { return { x: 20 + i * (sw + 4), y: 82, w: sw, h: 44, r: 12 }; }
+  var g1 = fpGleiter(knauf(0)), g2 = fpGleiter(feld(1));
+  fpLage(fpTeil(b, 'bahn'), { x: 16, y: 18, w: 76, h: 40 });
+  fpLage(fpTeil(b, 'wahlbahn'), { x: 16, y: 78, w: b.W - 32, h: 52 });
+  fpLage(fpTipp(b, 'schalter'), { x: 16, y: 16, w: 76, h: 44 });
+  for (var i = 0; i < 3; i++) fpLage(fpTipp(b, 'feld' + i), feld(i));
+  b.federn = function () { return [g1.q, g2.q]; };
+  b.formen = function (w) {
+    var l = [], h = [];
+    fpGleiterFormen(g1, w, l, h, 'knauf');
+    fpGleiterFormen(g2, w, l, h, 'feld');
+    return { formen: l, haelse: h };
+  };
+  b.zeigen = function () {
+    fpTipp(b, 'schalter').setAttribute('aria-checked', an ? 'true' : 'false');
+    for (var j = 0; j < 3; j++) fpTipp(b, 'feld' + j).setAttribute('aria-pressed', j === wahl ? 'true' : 'false');
+  };
+  b.tippen = function (was) {
+    if (was === 'schalter') {
+      an = !an;
+      fpGleiterZiel(g1, knauf(an ? 1 : 0));
+    } else {
+      var j = +was.slice(4);
+      if (j === wahl) return;
+      wahl = j;
+      fpGleiterZiel(g2, feld(j));
+    }
+    b.zeigen();
+    fpAnstossen(b);
+  };
+}
+
+// Abhaken: Der Kreis füllt sich, ein Tropfen löst sich, fliegt im Bogen und
+// geht im Zähler auf; erst dann zählt er weiter.
+function fpHaken(b) {
+  var q = { x: 16, y: b.H / 2 - 24, w: 48, h: 48, r: 24 }, z = { x: b.W - 92, y: b.H / 2 - 24, w: 76, h: 48, r: 24 };
+  var fuell = fpFeder(0), flug = fpFeder(0), zz = fpFeder(0, 0.55), zq = fpFeder(0, 0.55);
+  var an = false, zahl = 3, flugAb = 0, angekommen = true;
+  fpLage(fpTipp(b, 'haken'), q);
+  fpLage(fpTeil(b, 'ring'), q);
+  fpLage(fpTeil(b, 'zeichen'), q);
+  fpLage(fpTeil(b, 'zahl'), z);
+  fpLage(fpTeil(b, 'name'), { x: 78, y: q.y, w: b.W - 92 - 86, h: 48 });
+  b.federn = function () { return [fuell, flug, zz, zq]; };
+  b.extra = function () {
+    if (flugAb && Date.now() >= flugAb) {
+      flugAb = 0;
+      flug.x = 0;
+      flug.v = 0;
+      flug.ziel = 1;
+      angekommen = false;
+    }
+    if (!angekommen && flug.x >= 0.96) { angekommen = true; zahl++; }
+    return flugAb !== 0;
+  };
+  b.formen = function (w) {
+    var l = [], h = [], qm = fpMitte(q), zk = fpKern(z, qm), mitFuell = fuell.x > 0.03;
+    if (mitFuell) l.push({ x: q.x, y: q.y, w: q.w, h: q.h, r: q.r, s: fuell.x * (1 + zq.x) });
+    l.push({ x: z.x, y: z.y, w: z.w, h: z.h, r: z.r, s: 1 + zz.x * 0.8 });
+    var iz = l.length - 1;
+    if (flug.ziel === 1 && (flug.x !== 1 || flug.v !== 0)) {
+      var t = fpKlemme(flug.x, 0, 1.2), u = fpKlemme(t, 0, 1), d = 18;
+      var cx = fpMisch(qm.x, zk.x, t), cy = fpMisch(qm.y, zk.y, t) - Math.sin(Math.PI * u) * 30;
+      var vy = flug.v * (zk.y - qm.y - Math.cos(Math.PI * u) * Math.PI * 30);
+      l.push({ x: cx - d / 2, y: cy - d / 2, w: d, h: d, r: d / 2, deh: fpDehnung(flug.v * (zk.x - qm.x), vy, w, 1) });
+      if (mitFuell) h.push({ a: 0, b: l.length - 1, key: 'ab', weite: fpWeite(24, 9, w) });
+      h.push({ a: iz, b: l.length - 1, key: 'an', weite: fpWeite(24, 9, w) });
+    }
+    return { formen: l, haelse: h };
+  };
+  b.riss = function (key, w) {
+    if (key === 'ab') zq.v += fpZucken(w);
+    else zz.v += fpZucken(w);
+  };
+  b.zeigen = function () {
+    fpTipp(b, 'haken').setAttribute('aria-pressed', an ? 'true' : 'false');
+    fpTeil(b, 'zeichen').style.opacity = fpAnteil(fuell.x);
+    fpTeil(b, 'zahl').textContent = String(zahl);
+  };
+  b.tippen = function () {
+    an = !an;
+    if (an) {
+      fuell.ziel = 1;
+      flugAb = Date.now() + Math.round(fpFuer(b.id).werte.tempo * 260);
+    } else {
+      fuell.ziel = 0;
+      flugAb = 0;
+      flug.x = flug.v = flug.ziel = 0;
+      // Fliegt der Tropfen noch, hat er nicht gezählt.
+      if (angekommen) zahl = Math.max(0, zahl - 1);
+      angekommen = true;
+      zz.v -= fpZucken(fpFuer(b.id).werte) * 0.6;
+    }
+    b.zeigen();
+    fpAnstossen(b);
+  };
+  b.zahl = function () { return zahl; };
+}
+
+// Die Welle: ein Pegel mit bewegter Oberfläche, der in zehn Minuten (im
+// Zeitraffer) ausläuft; Perlen steigen auf, hängen kurz über einen Hals an
+// der Oberfläche und gehen als Beule in ihr auf. Steht still, solange sie
+// nicht läuft — kein Bild ohne Anlaß.
+function fpWelle(b) {
+  var D = b.W, stand = fpFeder(0.8), kipp = fpFeder(0), amp = fpFeder(0, 1.6), t = 0, laeuft = 0, naechste = 0;
+  var perlen = [], beulen = [], nr = 0, ring = fpTeil(b, 'ring'), zeit = fpTeil(b, 'zeit');
+  function oberflaeche(x, w) {
+    var ruhig = 1 - w.hals, y = D * (1 - stand.x);
+    y += amp.x * ((2 + 4 * ruhig) * Math.sin(x * 0.045 + t * (1.6 + 2.2 * ruhig)) +
+      (1 + 2 * ruhig) * Math.sin(x * 0.09 - t * (2.3 + 1.5 * ruhig) + 1.3));
+    y += kipp.x * (x - D / 2) * 0.22;
+    beulen.forEach(function (u) { var k = (x - u.x) / 15; y -= u.f.x * 12 * Math.exp(-k * k); });
+    return y;
+  }
+  function anteil() { return laeuft ? fpKlemme((Date.now() - laeuft) / FP_WELLE_DAUER, 0, 1) : 0; }
+  b.federn = function () { return [stand, kipp, amp].concat(beulen.map(function (u) { return u.f; })); };
+  b.extra = function (dt, w, still) {
+    t += dt;
+    var k = anteil(), aktiv = false;
+    if (laeuft && (k >= 1 || still)) {
+      laeuft = 0;
+      stand.ziel = 0.8;
+      amp.ziel = 0;
+      kipp.v -= fpZucken(w) * 0.25;
+    } else if (laeuft) {
+      aktiv = true;
+      stand.ziel = 0.86 - 0.74 * k;
+      if (Date.now() >= naechste) {
+        naechste = Date.now() + 380 + Math.random() * 420;
+        perlen.push({ nr: nr++, x: D * (0.25 + 0.5 * Math.random()), y: D + 10, r: 4 + Math.random() * 5 });
+      }
+    }
+    var steig = 50 + 90 * (1 - w.hals);
+    perlen = perlen.filter(function (p) {
+      p.y -= steig * dt;
+      if (p.y - p.r * 0.2 > oberflaeche(p.x, w)) return true;
+      var f = fpFeder(0, 0.7);
+      f.v = 3.2 * (0.4 + w.feder);
+      beulen.push({ x: p.x, f: f });
+      return false;
+    });
+    beulen = beulen.filter(function (u) { return u.f.x !== 0 || u.f.v !== 0; });
+    return aktiv || perlen.length > 0 || amp.x > 0.002;
+  };
+  b.formen = function (w, technik) {
+    var l = [], h = [], pf = [], x;
+    if (technik === 'pfad') {
+      // Hoch an der linken Seite, die Oberfläche entlang, rechts hinunter:
+      // im Uhrzeigersinn wie jede Form.
+      var s = 'M-2 ' + (D + 2);
+      for (x = -2; x <= D + 2; x += 6) s += 'L' + fpZ(x) + ' ' + fpZ(oberflaeche(x, w));
+      pf.push(s + 'L' + (D + 2) + ' ' + (D + 2) + 'Z');
+      perlen.forEach(function (p) {
+        l.push({ x: p.x - p.r, y: p.y - p.r, w: 2 * p.r, h: 2 * p.r, r: p.r });
+        // Die Oberfläche über der Perle als großer Kreis — daran hängt ihr Hals.
+        h.push({ a: l.length - 1, b: { x: p.x, y: oberflaeche(p.x, w) + 40, r: 40 }, key: 'p' + p.nr,
+          weite: 40 + p.r * (1.6 + 2.4 * w.hals) });
+      });
+    } else {
+      // Im Filter bilden Kuppen auf dem Körper die Oberfläche; der Filter
+      // läßt sie und die Perlen ineinanderfließen.
+      var rk = D / 7 * 0.75;
+      l.push({ x: -20, y: D * (1 - stand.x) + 10, w: D + 40, h: D, r: 0 });
+      for (var i = 0; i <= 7; i++) {
+        x = i * D / 7;
+        l.push({ x: x - rk, y: oberflaeche(x, w), w: 2 * rk, h: 2 * rk, r: rk });
+      }
+      perlen.forEach(function (p) { l.push({ x: p.x - p.r, y: p.y - p.r, w: 2 * p.r, h: 2 * p.r, r: p.r }); });
+    }
+    return { formen: l, haelse: h, pfade: pf };
+  };
+  b.zeigen = function () {
+    var k = anteil(), rest = Math.round(600 * (1 - k));
+    ring.style.strokeDashoffset = String(Math.round((1 - k) * 1000) / 1000);
+    zeit.textContent = Math.floor(rest / 60) + ':' + String(rest % 60).padStart(2, '0');
+    fpTipp(b, 'welle').setAttribute('aria-pressed', laeuft ? 'true' : 'false');
+  };
+  b.tippen = function () {
+    var w = fpFuer(b.id).werte;
+    if (laeuft) {
+      laeuft = 0;
+      stand.ziel = 0.8;
+      amp.ziel = 0;
+    } else {
+      laeuft = Date.now();
+      naechste = 0;
+      amp.ziel = 1;
+      stand.ziel = 0.86;
+    }
+    kipp.v += fpZucken(w) * 0.3;
+    b.zeigen();
+    fpAnstossen(b);
+  };
+  // `b.laeuft` gehört der Schleife; ob die Welle läuft, sagt `wellenLauf`.
+  b.wellenLauf = function () { return !!laeuft; };
+}
+
+// Die Tagesmarkierung: ein Gleiter über sieben Tagen.
+function fpTag(b) {
+  var cw = (b.W - 40) / 7, wahl = 2;
+  function zelle(i) { return { x: 20 + i * cw, y: 20, w: cw, h: 56, r: 14 }; }
+  var g = fpGleiter(zelle(wahl));
+  fpLage(fpTeil(b, 'bahn'), { x: 16, y: 16, w: b.W - 32, h: 64 });
+  for (var i = 0; i < 7; i++) fpLage(fpTipp(b, 'tag' + i), zelle(i));
+  b.federn = function () { return [g.q]; };
+  b.formen = function (w) {
+    var l = [], h = [];
+    fpGleiterFormen(g, w, l, h, 'tag');
+    return { formen: l, haelse: h };
+  };
+  b.zeigen = function () {
+    for (var j = 0; j < 7; j++) fpTipp(b, 'tag' + j).setAttribute('aria-pressed', j === wahl ? 'true' : 'false');
+  };
+  b.tippen = function (was) {
+    var j = +was.slice(3);
+    if (j === wahl) return;
+    wahl = j;
+    fpGleiterZiel(g, zelle(j));
+    b.zeigen();
+    fpAnstossen(b);
+  };
+}
+
+// Zeilen: Eine neue tropft aus dem Plus in die Liste, eine getippte fließt in
+// den Menüknopf; die übrigen rücken nach.
+function fpZeilen(b) {
+  var k = { x: b.W - 60, y: 16, w: 44, h: 44, r: 22 }, pl = { x: b.W - 60, y: b.H - 60, w: 44, h: 44, r: 22 };
+  var zk = fpFeder(0, 0.55), zp = fpFeder(0, 0.55), zeilen = [], nr = 0, rw = b.W - 32 - 56;
+  var NAMEN = ['Lesen', 'Wasser', 'Spazieren', 'Dehnen', 'Atmen', 'Kochen'], liste = fpTeil(b, 'zeilen');
+  function platz(y) { return { x: 16, y: 16 + y * 56, w: rw, h: 48, r: 14 }; }
+  function bleibt(z) { return !z.geht; }
+  function neu(offen) {
+    var z = { nr: nr, name: NAMEN[nr % NAMEN.length], p: fpFeder(offen ? 1 : 0), y: fpFeder(zeilen.filter(bleibt).length), geht: false };
+    nr++;
+    zeilen.push(z);
+    return z;
+  }
+  function ordnen() { zeilen.filter(bleibt).forEach(function (z, i) { z.y.ziel = i; }); }
+  neu(true);
+  neu(true);
+  fpLage(fpTeil(b, 'menue'), k);
+  fpLage(fpTipp(b, 'plus'), pl);
+  b.federn = function () {
+    var f = [zk, zp];
+    zeilen.forEach(function (z) { f.push(z.p, z.y); });
+    return f;
+  };
+  b.extra = function () {
+    zeilen = zeilen.filter(function (z) { return !z.geht || z.p.x !== 0 || z.p.v !== 0; });
+    return false;
+  };
+  b.formen = function (w) {
+    var l = [{ x: k.x, y: k.y, w: 44, h: 44, r: 22, s: 1 + zk.x }, { x: pl.x, y: pl.y, w: 44, h: 44, r: 22, s: 1 + zp.x }], h = [];
+    zeilen.forEach(function (z) {
+      if (z.p.x <= 0.02) return;
+      l.push(fpTropfen(z.geht ? k : pl, platz(z.y.x), z.p.x, z.p.v, 34, w));
+      h.push({ a: z.geht ? 0 : 1, b: l.length - 1, key: (z.geht ? 'k' : 'p') + z.nr, weite: fpWeite(22, 17, w) });
+    });
+    return { formen: l, haelse: h };
+  };
+  b.riss = function (key, w) {
+    if (key.charAt(0) === 'k') zk.v += fpZucken(w);
+    else zp.v += fpZucken(w);
+  };
+  b.zeigen = function () {
+    var da = {};
+    zeilen.forEach(function (z) {
+      var el = liste.querySelector('[data-fp-tipp="zeile' + z.nr + '"]');
+      if (!el) {
+        el = document.createElement('button');
+        el.type = 'button';
+        el.className = 'fp-ziel fp-schrift fp-zeile';
+        el.setAttribute('data-fp-tipp', 'zeile' + z.nr);
+        el.textContent = z.name;
+        liste.appendChild(el);
+      }
+      da[z.nr] = true;
+      fpLage(el, platz(z.y.x));
+      el.style.opacity = fpAnteil((z.p.x - 0.72) / 0.25);
+      el.style.visibility = z.geht ? 'hidden' : '';
+    });
+    Array.prototype.slice.call(liste.children).forEach(function (el) {
+      if (!da[el.getAttribute('data-fp-tipp').slice(5)]) weg(el);
+    });
+  };
+  b.tippen = function (was) {
+    var w = fpFuer(b.id).werte;
+    if (was === 'plus') {
+      // Voll: Das Plus zuckt nur.
+      if (zeilen.filter(bleibt).length >= 4) zp.v -= fpZucken(w);
+      else neu(false).p.ziel = 1;
+    } else {
+      var n = +was.slice(5), z = zeilen.filter(function (x) { return x.nr === n; })[0];
+      if (!z || z.geht) return;
+      z.geht = true;
+      z.p.ziel = 0;
+      ordnen();
+    }
+    b.zeigen();
+    fpAnstossen(b);
+  };
+  b.anzahl = function () { return zeilen.filter(bleibt).length; };
+}
+
+var FP_BUEHNEN = { menue: fpMenue, hinweis: fpHinweis, schalter: fpSchalter, haken: fpHaken, welle: fpWelle,
+  tag: fpTag, zeilen: fpZeilen, perle: fpPerle };
+
+// ── Flüssigprobe: Aufbau und Steuerung ─────────────────────────
+function fpWahl(name, attr, liste, wert, extra) {
+  return '<div class="wahl" role="group" aria-label="' + esc(name) + '">' + liste.map(function (w) {
+    return '<button type="button" ' + attr + '="' + w[0] + '"' + (extra || '') + ' aria-pressed="' +
+      (w[0] === wert ? 'true' : 'false') + '">' + esc(w[1]) + '</button>';
+  }).join('') + '</div>';
+}
+
+function fpReglerHtml(werte, id) {
+  return '<div class="fp-regler-liste">' + FP_REGLER.map(function (r) {
+    return '<label class="fp-regler"><span class="fp-regler-name">' + esc(r[1]) + '</span>' +
+      '<span class="fp-regler-wert" data-fp-wert>' + esc(fpWertText(r[0], werte[r[0]])) + '</span>' +
+      '<input type="range" min="' + r[2] + '" max="' + r[3] + '" step="0.05" value="' + werte[r[0]] +
+      '" data-fp-regler="' + r[0] + '" data-fp-fuer="' + id + '"></label>';
+  }).join('') + '</div>';
+}
+
+function fpBuehneHtml(id) {
+  var tage = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'], lang = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
+  var innen = {
+    menue: '<button type="button" class="fp-ziel fp-symbol" data-fp-tipp="knopf" aria-label="Menü der Probe">' + ICON.menue + '</button>' +
+      '<div class="fp-inhalt fp-liste" data-fp-teil="inhalt" aria-hidden="true"><span>Gewohnheiten</span><span>Termine</span>' +
+      '<span>Rückblick</span><span>Einstellungen</span></div>' +
+      '<button type="button" class="fp-ziel" data-fp-tipp="flaeche" aria-label="Menü der Probe schließen"></button>',
+    hinweis: '<div class="fp-deko" aria-hidden="true">' + '<span></span>'.repeat(8) + '</div>' +
+      '<button type="button" class="fp-ziel fp-schrift" data-fp-tipp="knopf">Speichern</button>' +
+      '<div class="fp-inhalt fp-meldung" data-fp-teil="inhalt" aria-hidden="true"><b>Gespeichert</b>' +
+      '<span>Der Hinweis kam aus dem Knopf.</span></div>' +
+      '<button type="button" class="fp-ziel" data-fp-tipp="flaeche" aria-label="Hinweis der Probe schließen"></button>',
+    schalter: '<span class="fp-bahn" data-fp-teil="bahn"></span><span class="fp-bahn fp-weit" data-fp-teil="wahlbahn"></span>' +
+      '<button type="button" class="fp-ziel" role="switch" aria-checked="false" data-fp-tipp="schalter" aria-label="Schalter der Probe"></button>' +
+      ['Tag', 'Woche', 'Monat'].map(function (t, i) {
+        return '<button type="button" class="fp-ziel fp-schrift" data-fp-tipp="feld' + i + '" aria-pressed="' + (i === 1) + '">' + t + '</button>';
+      }).join(''),
+    haken: '<span class="fp-ring-aus" data-fp-teil="ring"></span>' +
+      '<span class="fp-inhalt fp-zeichen" data-fp-teil="zeichen" aria-hidden="true">' + svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>') + '</span>' +
+      '<span class="fp-inhalt fp-gw-name" data-fp-teil="name">Wasser trinken</span>' +
+      '<span class="fp-inhalt fp-zahl" data-fp-teil="zahl">3</span>' +
+      '<button type="button" class="fp-ziel" data-fp-tipp="haken" aria-pressed="false" aria-label="Probe abhaken"></button>',
+    welle: '<div class="fp-welle-bild"><svg class="fp-welle-ring" viewBox="0 0 100 100" aria-hidden="true">' +
+      '<circle class="fp-ring-grund" cx="50" cy="50" r="48"/><circle class="fp-ring-fuell" data-fp-teil="ring" cx="50" cy="50" r="48" pathLength="1"/></svg>' +
+      '<div class="fp-ort fp-rund"></div>' +
+      '<button type="button" class="fp-ziel" data-fp-tipp="welle" aria-pressed="false" aria-label="Welle der Probe im Zeitraffer"></button></div>' +
+      '<p class="fp-welle-zeit" data-fp-teil="zeit">10:00</p>',
+    tag: '<span class="fp-bahn" data-fp-teil="bahn"></span>' + tage.map(function (t, i) {
+      return '<button type="button" class="fp-ziel fp-tag" data-fp-tipp="tag' + i + '" aria-pressed="' + (i === 2) +
+        '" aria-label="' + lang[i] + ', ' + (12 + i) + '."><span class="fp-wt">' + t + '</span><span class="fp-tz">' + (12 + i) + '</span></button>';
+    }).join(''),
+    zeilen: '<span class="fp-inhalt fp-symbol" data-fp-teil="menue" aria-hidden="true">' + ICON.menue + '</span>' +
+      '<button type="button" class="fp-ziel fp-symbol" data-fp-tipp="plus" aria-label="Zeile der Probe hinzufügen">' + ICON.plus + '</button>' +
+      '<div data-fp-teil="zeilen"></div>',
+    perle: '<button type="button" class="fp-ziel fp-schrift" data-fp-tipp="knopf">Chilli Journal</button>' +
+      '<div class="fp-inhalt fp-meldung fp-mitte" data-fp-teil="inhalt" aria-hidden="true"><b>Neue Version da</b>' +
+      '<span>Tippen lädt neu</span></div>' +
+      '<button type="button" class="fp-ziel" data-fp-tipp="flaeche" aria-label="Hinweis der Probe schließen"></button>'
+  };
+  return '<div class="fp-buehne' + (id === 'hinweis' ? ' fp-glas' : '') + (id === 'welle' ? ' fp-flach' : '') +
+    '" data-fp-buehne="' + id + '">' + innen[id] + '</div>';
+}
+
+function fpKarteHtml(s, f) {
+  var id = s[0], e = f.stellen[id] || {}, fuer = ' data-fp-fuer="' + id + '"';
+  return '<div class="kachel fp-karte" data-fp-karte="' + id + '">' +
+    '<h3 class="fp-name">' + esc(s[1]) + '</h3><p class="fp-text">' + esc(s[2]) + '</p>' +
+    fpBuehneHtml(id) +
+    '<div class="fp-wahlen">' +
+      fpWahl('Technik · ' + s[1], 'data-fp-stelle-technik', [['oben', 'Wie oben'], ['pfad', 'Pfad'], ['filter', 'Filter']],
+        e.technik || 'oben', fuer) +
+      fpWahl('Urteil · ' + s[1], 'data-fp-urteil', [['offen', 'Offen'], ['ja', 'Nehmen'], ['nein', 'Nicht']], e.urteil || 'offen', fuer) +
+      '<button type="button" class="knopf fp-eigen" data-fp-eigen="' + id + '" aria-pressed="' + (e.werte ? 'true' : 'false') +
+        '">Eigene Regler</button>' +
+      '<div class="fp-regler-ort"' + fuer + '>' + (e.werte ? fpReglerHtml(e.werte, id) : '') + '</div>' +
+    '</div></div>';
+}
+
+function zeichneFluessigProbe() {
+  var f = fpStand();
+  return '<section class="abschnitt" id="fluessigProbe"><h2>Flüssig zur Wahl</h2>' +
+    '<div class="kachel fp-steuer">' +
+      '<p class="fp-text">Tipp in eine Probe, dann läuft sie. Die Regler gelten für alle Proben, außer eine hat eigene. ' +
+        'Ganz unten kopierst du alles als Text.</p>' +
+      '<h3 class="fp-name">Grund <span class="fp-stand" id="fpGrundStand">' + esc(fpGrundText(f)) + '</span></h3>' +
+      fpWahl('Flüssig: Grund', 'data-fp-grund', FP_GRUND_REIHE.map(function (k) { return [k, FP_GRUND[k].name]; }), f.grund) +
+      '<h3 class="fp-name">Technik</h3>' +
+      fpWahl('Flüssig: Technik', 'data-fp-technik', [['pfad', 'Pfad'], ['filter', 'Filter']], f.technik) +
+      '<p class="fp-text">Pfad: scharf, Glas bleibt Glas. Filter: weich wie die Vorlage, ohne Glas.</p>' +
+      '<div class="fp-regler-ort" data-fp-fuer="">' + fpReglerHtml(f.werte, '') + '</div>' +
+    '</div>' +
+    FP_STELLEN.map(function (s) { return fpKarteHtml(s, f); }).join('') +
+    '<div class="knopfreihe"><button type="button" class="knopf" id="fpKopieren">Einstellungen kopieren</button></div>' +
+    '</section>';
+}
+
+// Nach einer Änderung: merken, den Stand nennen und neu zeichnen — wer die
+// Technik wechselt, bekommt eine neu gebaute Bühne.
+function fpGeaendert(id) {
+  speichern();
+  fpNeuZeichnen(id);
+}
+
+function fpNeuZeichnen(id) {
+  if ($('fpGrundStand')) $('fpGrundStand').textContent = fpGrundText(fpStand());
+  Object.keys(fpLauf).forEach(function (k) {
+    var b = fpLauf[k];
+    if ((id && k !== id) || !b.el.isConnected) return;
+    if (b.technik !== fpFuer(k).technik) fpBauen(b.el);
+    else fpZeichnen(b);
+  });
+}
+
+function fpWahlSetzen(knoepfe, wert, attr) {
+  knoepfe.forEach(function (k) { k.setAttribute('aria-pressed', k.getAttribute(attr) === wert ? 'true' : 'false'); });
+  wahlenSetzen();
+}
+
+function fpReglerBinden(ort) {
+  Array.prototype.forEach.call(ort.querySelectorAll('input[data-fp-regler]'), function (r) {
+    r.addEventListener('input', function () {
+      var k = this.getAttribute('data-fp-regler'), id = this.getAttribute('data-fp-fuer'), v = parseFloat(this.value);
+      fpAendern(function (f) {
+        var w = id ? (f.stellen[id] || {}).werte : f.werte;
+        if (w) w[k] = v;
+      });
+      this.parentNode.querySelector('[data-fp-wert]').textContent = fpWertText(k, v);
+      fpNeuZeichnen(id);
+    });
+    r.addEventListener('change', function () { speichern(); });
+  });
+}
+
+function bindeFluessigProbe() {
+  fpLauf = {};
+  alleIn('#fluessigProbe [data-fp-buehne]').forEach(function (el) {
+    el.addEventListener('click', function (e) {
+      var t = e.target.closest('[data-fp-tipp]'), b = fpLauf[el.getAttribute('data-fp-buehne')];
+      if (t && b && b.el === el && b.tippen) b.tippen(t.getAttribute('data-fp-tipp'));
+    });
+    fpBauen(el);
+  });
+  var gruende = alleIn('#fluessigProbe [data-fp-grund]');
+  gruende.forEach(function (k) {
+    k.addEventListener('click', function () {
+      var g = this.getAttribute('data-fp-grund');
+      fpAendern(function (f) { f.grund = g; f.werte = fpWerteLesen(FP_GRUND[g]); });
+      var w = fpStand().werte;
+      alleIn('#fluessigProbe .fp-regler-ort[data-fp-fuer=""] input[data-fp-regler]').forEach(function (r) {
+        var k2 = r.getAttribute('data-fp-regler');
+        r.value = String(w[k2]);
+        r.parentNode.querySelector('[data-fp-wert]').textContent = fpWertText(k2, w[k2]);
+      });
+      fpWahlSetzen(gruende, g, 'data-fp-grund');
+      fpGeaendert();
+    });
+  });
+  var techniken = alleIn('#fluessigProbe [data-fp-technik]');
+  techniken.forEach(function (k) {
+    k.addEventListener('click', function () {
+      var t = this.getAttribute('data-fp-technik');
+      fpAendern(function (f) { f.technik = t; });
+      fpWahlSetzen(techniken, t, 'data-fp-technik');
+      fpGeaendert();
+    });
+  });
+  alleIn('#fluessigProbe [data-fp-stelle-technik]').forEach(function (k) {
+    k.addEventListener('click', function () {
+      var id = this.getAttribute('data-fp-fuer'), t = this.getAttribute('data-fp-stelle-technik');
+      fpAendern(function (f) {
+        var e = fpEintrag(f, id);
+        if (t === 'oben') delete e.technik; else e.technik = t;
+        fpAufraeumen(f, id);
+      });
+      fpWahlSetzen(alleIn('#fluessigProbe [data-fp-stelle-technik][data-fp-fuer="' + id + '"]'), t, 'data-fp-stelle-technik');
+      fpGeaendert(id);
+    });
+  });
+  alleIn('#fluessigProbe [data-fp-urteil]').forEach(function (k) {
+    k.addEventListener('click', function () {
+      var id = this.getAttribute('data-fp-fuer'), u = this.getAttribute('data-fp-urteil');
+      fpAendern(function (f) {
+        var e = fpEintrag(f, id);
+        if (u === 'offen') delete e.urteil; else e.urteil = u;
+        fpAufraeumen(f, id);
+      });
+      fpWahlSetzen(alleIn('#fluessigProbe [data-fp-urteil][data-fp-fuer="' + id + '"]'), u, 'data-fp-urteil');
+      speichern();
+    });
+  });
+  alleIn('#fluessigProbe [data-fp-eigen]').forEach(function (k) {
+    k.addEventListener('click', function () {
+      var id = this.getAttribute('data-fp-eigen'), an = this.getAttribute('aria-pressed') !== 'true';
+      fpAendern(function (f) {
+        var e = fpEintrag(f, id);
+        if (an) e.werte = fpWerteLesen(f.werte); else delete e.werte;
+        fpAufraeumen(f, id);
+      });
+      this.setAttribute('aria-pressed', an ? 'true' : 'false');
+      var ort = document.querySelector('#fluessigProbe .fp-regler-ort[data-fp-fuer="' + id + '"]');
+      ort.innerHTML = an ? fpReglerHtml(fpFuer(id).werte, id) : '';
+      fpReglerBinden(ort);
+      fpGeaendert(id);
+    });
+  });
+  fpReglerBinden($('fluessigProbe'));
+  $('fpKopieren').addEventListener('click', function () {
+    kopieren(fpSicherung(), function (ok) {
+      if (ok) melden('Einstellungen kopiert.', 'haken');
+      else melden('Kopieren ging nicht.', 'warnung');
+    });
+  });
 }
 
 // ── Rückblick: Heatmap ─────────────────────────────────────────
@@ -6499,6 +7615,7 @@ function sicherungsCode(nun) {
   delete d.tickets;
   delete d.welle;
   delete d.timer;
+  delete d.fluessig;
   d.gesichert = nun;
   d.gewohnheiten.forEach(function (g) {
     var z = tageVerdichten(g.erledigt);
@@ -6605,6 +7722,7 @@ function zeichneSicherung() {
 function standErsetzen(neu) {
   rueckgaengig = JSON.stringify(state);
   neu.tickets = state.tickets;
+  neu.fluessig = state.fluessig;
   state = neu;
   entwurf = null;
   terminEntwurf = null;
@@ -7167,6 +8285,7 @@ function zeichneEinstellungen() {
 function bindeAnsicht() {
   var erste = $('ersteGewohnheit') || $('gwAnlegen');
   if (erste) erste.addEventListener('click', function () { zeige('neu'); });
+  if ($('fluessigProbe')) bindeFluessigProbe();
 
   alleIn('[data-haken]').forEach(function (b) {
     var id = b.getAttribute('data-haken');

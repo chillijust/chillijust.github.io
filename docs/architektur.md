@@ -80,7 +80,9 @@ state = {
   gefeiert: { 'a…': 1791200000000 },     // Abgewöhnen: der Rückfall, nach dem der neue Rekord gefeiert ist
   exportOhne: { 't:…': true },          // Export: Neues, das bewußt draußen bleibt (ADR 0034)
   schwachHinweis: true,                  // der Hinweis ab drei ungefestigten Gewohnheiten
-  bewegung: 'auto'                       // | 'aus' — Bewegung reduzieren
+  bewegung: 'auto',                      // | 'aus' — Bewegung reduzieren
+  fluessig: null                         // | { grund, technik, werte, stellen } — die Flüssigprobe (0.16.0T),
+                                         //   bis gewählt ist; nicht im Sicherungscode, bleibt beim Einlesen
 }
 ```
 
