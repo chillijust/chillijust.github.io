@@ -117,6 +117,10 @@
 /* ── Grundlage ─────────────────────────────────────────────── */
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
+/* Gerollt wird nur, was über den Bildschirm reicht. Ist weniger da, federt iOS
+   die Seite sonst trotzdem — sie läßt sich ziehen, als gäbe es mehr. Am Ende
+   von langem Inhalt federt sie ebenso nicht mehr nach. */
+html, body { overscroll-behavior: none; }
 body {
   margin: 0;
   background: var(--grund);
