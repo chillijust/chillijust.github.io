@@ -1,4 +1,4 @@
-// Zeichenprobe (0.13.3T, D nachgebessert in 0.13.3T3): Am Ende des Dashboards steht je Zeichen das heutige und
+// Zeichenprobe (0.13.3T, D nachgebessert bis 0.13.3T4): Am Ende des Dashboards steht je Zeichen das heutige und
 // drei neue Fassungen zur Wahl, dazu D aus der Wahl des Nutzers (0.13.3T2) — Haken, Hinweis, Warnung (neu), Kopiert,
 // Datei geladen. Ein Tipp zeigt die Fassung in einer echten Meldung; jede
 // bewegt sich und ist fertig, bevor die Bestätigung geht. Danach trägt eine
@@ -93,9 +93,12 @@ pruefe('D3 Kopiert D: erst zeichnen sich beide Blätter, dann fächern sie auf',
   return f.length === 1 && f[0].von >= gezeichnet - 0.001;
 }), JSON.stringify(kopieD));
 var wd = q('#zeichenProbe [data-probe="warnung:d"] .hinweis-haken');
-pruefe('D6 Warnung D zeichnet sich wie A, ohne zu wackeln', !wd.querySelector('.zv-wackeln') &&
+var wGezeichnet = Math.max.apply(null, ['.zv-dreieck', '.zv-ausruf', '.zv-punkt'].map(function (sel) { return ende(wd.querySelector(sel)); }));
+var wWackeln = laeufe(wd.querySelector('.zv-wackeln'))[0];
+pruefe('D6 Warnung D zeichnet sich wie A und wackelt erst danach wie B (0.13.3T4)',
   getComputedStyle(wd.querySelector('.zv-dreieck')).animationName === 'z-zeichnen' &&
-  getComputedStyle(wd.querySelector('.zv-ausruf')).animationName === 'z-zeichnen');
+  getComputedStyle(wd.querySelector('.zv-ausruf')).animationName === 'z-zeichnen' &&
+  wWackeln.name === 'zv-wackeln' && wWackeln.von >= wGezeichnet - 0.001, JSON.stringify(wWackeln) + ' ' + wGezeichnet);
 var ld = q('#zeichenProbe [data-probe="laden:d"] .hinweis-haken');
 var schale = getComputedStyle(ld.querySelector('.zv-schale')).animationName;
 pruefe('D4 Laden D: die Schale zeichnet sich und gibt nach, der Pfeil fliegt hinein', /z-zeichnen/.test(schale) &&
