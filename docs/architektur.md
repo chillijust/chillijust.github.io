@@ -81,8 +81,8 @@ state = {
   exportOhne: { 't:…': true },          // Export: Neues, das bewußt draußen bleibt (ADR 0034)
   schwachHinweis: true,                  // der Hinweis ab drei ungefestigten Gewohnheiten
   bewegung: 'auto',                      // | 'aus' — Bewegung reduzieren
-  fluessig: null                         // | { grund, technik, werte, stellen } — die Flüssigprobe (0.16.0T),
-                                         //   bis gewählt ist; nicht im Sicherungscode, bleibt beim Einlesen
+  fluessig: null                         // | { eigen, grund, technik, werte, stellen: { id: { eigen, technik, werte } } }
+                                         //   — Reiter «Flüssig» (ADR 0053); nicht im Sicherungscode, bleibt beim Einlesen
 }
 ```
 

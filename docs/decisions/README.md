@@ -15,7 +15,7 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0005](0005-chili-und-kalender-eine-karte.md) | Chili und Kalender in einer Karte, Punkte statt Tönung | gilt |
 | [0006](0006-termine-im-einzelnen.md) | Termine: Felder, Wiederholung, Erinnerung, Tagesliste | gilt; «Hinzufügen» statt «Termin an diesem Tag» (0023) |
 | [0007](0007-tropfen-statt-aufploppen.md) | Tropfen statt Aufploppen: Geist, Feder, Zoom aus dem Getippten | gilt; Menü und Schrumpfen in den Menüknopf abgelöst durch 0008 |
-| [0008](0008-tropfenform-menue-kalenderwechsel.md) | Tropfenform, Menü unter dem Knopf, Woche \| Monat hält den Tag | gilt; langer Druck tropft auch aus Kacheln (0020); Spitze abgelöst durch 0023 |
+| [0008](0008-tropfenform-menue-kalenderwechsel.md) | Tropfenform, Menü unter dem Knopf, Woche \| Monat hält den Tag | gilt; langer Druck tropft auch aus Kacheln (0020); Spitze abgelöst durch 0023; «ohne Überschwingen» abgelöst durch 0053 |
 | [0009](0009-kalender-export-im-einzelnen.md) | Kalender-Export: schwebende Zeiten, Teilen und Laden, Erinnerung der Gewohnheit | gilt; Teilen entfällt mit 0013 |
 | [0010](0010-chilli-journal-und-heute.md) | Der Name heißt «Chilli Journal», «Heute» führt den Kalender nach Hause | gilt |
 | [0011](0011-was-schon-im-kalender-steht.md) | Was schon im Kalender steht, geht nicht noch einmal hinaus | gilt; ergänzt durch 0012; Abwahl von Neuem seit 0034 |
@@ -60,3 +60,4 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0050](0050-kommunikation-nur-auf-eigenem-branch.md) | `kommunikation/` lebt nur auf `chatgpt/kommunikation`, nie auf `main`; nie zusammenführen | gilt |
 | [0051](0051-zeichen-neu-mit-puls-und-warnung.md) | Zeichen der Meldung neu bewegt, jedes endet mit dem Puls; eine Warnung für Fehlschläge | gilt |
 | [0052](0052-kalender-wischen.md) | Der Kalender folgt dem Finger (Tropfen, 1:1); Pfeile und «Heute» spielen dieselbe Bewegung | gilt; löst den Seitentropfen aus 0028 ab |
+| [0053](0053-fluessige-tropfen.md) | Die Tropfen fließen wie in iOS 26: Feder, Hals, Dehnen, Lichtkante; Reiter «Flüssig» in den Einstellungen | gilt; löst «ohne Überschwingen» aus 0008 ab |

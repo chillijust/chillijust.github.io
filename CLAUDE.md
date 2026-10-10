@@ -33,7 +33,7 @@ Safari als Home-Bildschirm-App im Vollbild.
 - **Das Pflichtenheft ist `docs/chillinal-plan.md`.** Was dort steht, ist entschieden. Wer
   abweicht, sagt es und hält es in einem ADR fest.
 - Start ist das **Dashboard**; alles Weitere öffnet der runde **Menüknopf**. Keine
-  Reiterleiste. Maskottchen ist die Chili.
+  Reiterleiste als Navigation — nur die Einstellungen haben Reiter (ADR 0053). Maskottchen ist die Chili.
 - Im Menü steht jeder Eintrag des Pflichtenhefts; Ungebautes trägt «bald». **Wer etwas
   baut, gibt dem Eintrag sein `ziel`** (Suite `menue`).
 - Vorgänger **Chillingo** ruht auf `backup/chillingo-2.11.2T-2026-10-04` (ADR 0001); sein
@@ -49,6 +49,7 @@ Safari als Home-Bildschirm-App im Vollbild.
 | 6 · Rückblick: Heatmap, Journal | fertig (0.7.1) |
 | 7 · Sicherung, Einstellungen, Tickets | fertig (0.8.0) |
 | 8 · Feinschliff, Nachbesserungen am Gerät, Timer und Zähler, Termine abhaken | fertig (0.13.1) |
+| 9 · Flüssig wie iOS 26: Feder, Hals, Reiter «Flüssig» (ADR 0053) | im Bau (0.17.0T) |
 
 ## Wo was steht
 
@@ -163,6 +164,8 @@ node tools/pruefen.mjs                      # Vor-Push-Prüfung allein
 
 ## Offen
 
+- Flüssig (ADR 0053): Tropfen aus Knöpfen und Menü fließen seit 0.17.0T, Abnahme am Gerät steht aus.
+  Als Nächstes dieselbe Mechanik für Knauf und Wahl, Tagesmarkierung, Abhaken, Zeilen, Welle, Perle.
 - Analyse von James (Nachrichten 01–03 auf `chatgpt/kommunikation`). A2/A3 ausgeliefert in 0.13.2T (ADR 0049),
   Abnahme am Gerät steht aus. Als Nächstes A1 Worker-Cache (ADR nötig); dann Rest von A3
   (Formulare, Löschen, Rückfall, Drang behalten ihren Stand bis zum Neuladen), A4–A6.

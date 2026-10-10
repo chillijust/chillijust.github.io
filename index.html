@@ -1382,7 +1382,24 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 .hinweis-karte.bestaetigung p:empty { display: none; }
 .hinweis-karte .knopf[hidden] { display: none; }
 
-/* ── Flüssigprobe (0.16.0T) ────────────────────────────────── */
+/* ── Flüssig (ADR 0053) ────────────────────────────────────── */
+/* Der Hals der echten Tropfen liegt in einer Schicht direkt unter ihnen; die
+   Lichtkante trägt der Tropfen selbst, solange er fließt. */
+.fl-schicht { position: fixed; pointer-events: none; }
+.fl-kante::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 1.2px 1.6px 0 rgba(255, 255, 255, var(--fl-kante, .4));
+}
+.es-reiter { margin-bottom: 22px; }
+.fp-eigenes { display: flex; flex-direction: column; gap: 8px; }
+.fp-eigenes:not(:empty) { margin-top: 6px; }
+.fp-karte .tm-schalterzeile { margin-top: 12px; }
+.fp-vorab { margin: 0 4px 4px; }
+/* ── Flüssigprobe (0.16.0T, in den Einstellungen seit 0.17.0T) ── */
 /* Acht kleine Bühnen am Ende des Dashboards. Das Flüssige liegt in Schichten
    unter dem Inhalt: im Pfad ein Umriß als clip-path mit Schatten und
    Lichtkante darüber, im Filter Formen, die weich gezeichnet und hart
@@ -1399,9 +1416,6 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 .fp-regler-name { font-size: 15px; }
 .fp-regler-wert { font-family: var(--sans); font-size: 14px; color: var(--text-2); font-variant-numeric: tabular-nums; }
 .fp-regler input { grid-column: 1 / -1; width: 100%; height: 44px; margin: 0; font-size: 16px; accent-color: var(--akzent); }
-.fp-wahlen { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
-.fp-eigen { width: 100%; }
-.fp-eigen[aria-pressed="false"] { background: var(--flaeche-2); color: var(--text); }
 .fp-buehne {
   position: relative;
   overflow: hidden;
@@ -1719,7 +1733,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.16.0T';
+var APP_VERSION = '0.17.0T';
 var APP_STAND = '2026-10-10';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -1875,7 +1889,7 @@ function grundStand() {
     exportOhne: {},      // Export: 't:id' / 'g:id' → true — Neues, das bewußt draußen bleibt (ADR 0034)
     schwachHinweis: true,   // der sanfte Hinweis ab drei ungefestigten Gewohnheiten
     bewegung: 'auto',    // 'auto' folgt dem Gerät, 'aus' stellt alles still
-    fluessig: null       // die Flüssigprobe (0.16.0T): Regler und Urteile, bis gewählt ist — nicht im Sicherungscode
+    fluessig: null       // Flüssig (ADR 0053): eigene Einstellungen der Tropfen — nicht im Sicherungscode
   };
 }
 
@@ -2238,10 +2252,9 @@ function markeAbspielen(svg) {
   svg.classList.add('wm-los');
 }
 
-// ── Flüssigprobe: was gemerkt wird (0.16.0T) ───────────────────
-// Steht vor dem Laden, weil stand() es braucht. Die Probe merkt sich ihre
-// Regler unter `state.fluessig`, bis gewählt ist — iOS beendet die
-// Home-Bildschirm-App gern, und dann wären sie fort.
+// ── Flüssig: was gemerkt wird (ADR 0053) ───────────────────────
+// Steht vor dem Laden, weil stand() es braucht. Eigene Einstellungen der
+// Tropfen liegen unter `state.fluessig`; ohne sie gilt die Voreinstellung.
 var FP_STELLEN = [
   ['menue', 'Menüknopf und Menü', 'Tipp auf den Knopf: Das Menü löst sich mit einem Hals heraus. Tipp aufs Menü: Es fließt zurück.'],
   ['hinweis', 'Hinweis aus Glas', 'Tipp auf «Speichern»: Der Hinweis quillt als Glas heraus. Tipp auf ihn: Er fließt zurück.'],
@@ -2258,6 +2271,7 @@ var FP_GRUND = {
   quecksilber: { name: 'Quecksilber', tempo: 0.42, feder: 0.7, hals: 0.2, dehnen: 0.6, kante: 0.95 }
 };
 var FP_GRUND_REIHE = ['ios', 'honig', 'quecksilber'];
+var FP_VORGABE = null;   // die Werte der Voreinstellung, einmal gelesen
 // Schlüssel, Name, kleinster und größter Wert.
 var FP_REGLER = [
   ['tempo', 'Tempo', 0.25, 1],
@@ -2278,21 +2292,20 @@ function fpWerteLesen(roh) {
   return w;
 }
 
-// Ein gemerkter Stand der Probe; ohne ihn gilt «iOS 26» im Pfad.
+
+// Ein gemerkter Stand; ohne ihn gilt die Voreinstellung (ADR 0053).
+// `eigen` schaltet die eigenen Einstellungen ein — für alle oder je Stelle;
+// was ausgeschaltet ist, bleibt gemerkt und kommt beim Einschalten zurück.
 function fluessigLesen(roh) {
   if (!roh || typeof roh !== 'object') return null;
-  var f = { grund: FP_GRUND_REIHE.indexOf(roh.grund) >= 0 ? roh.grund : 'ios',
-    technik: roh.technik === 'filter' ? 'filter' : 'pfad', werte: null, stellen: {} };
+  var f = { eigen: roh.eigen === true, grund: FP_GRUND_REIHE.indexOf(roh.grund) >= 0 ? roh.grund : 'ios',
+    technik: roh.technik === 'pfad' ? 'pfad' : 'filter', werte: null, stellen: {} };
   f.werte = fpWerteLesen(roh.werte) || fpWerteLesen(FP_GRUND[f.grund]);
   var st = roh.stellen && typeof roh.stellen === 'object' ? roh.stellen : {};
   FP_STELLEN.forEach(function (s) {
-    var e = st[s[0]], gut = {};
-    if (!e || typeof e !== 'object') return;
-    if (e.technik === 'pfad' || e.technik === 'filter') gut.technik = e.technik;
-    var w = fpWerteLesen(e.werte);
-    if (w) gut.werte = w;
-    if (e.urteil === 'ja' || e.urteil === 'nein') gut.urteil = e.urteil;
-    if (Object.keys(gut).length) f.stellen[s[0]] = gut;
+    var e = st[s[0]], w = e && typeof e === 'object' ? fpWerteLesen(e.werte) : null;
+    if (!w) return;
+    f.stellen[s[0]] = { eigen: e.eigen === true, technik: e.technik === 'pfad' ? 'pfad' : 'filter', werte: w };
   });
   return f;
 }
@@ -2590,6 +2603,131 @@ function zoomBild(q, n) {
 }
 var ZOOM_VOLL = { transform: 'translate(0px, 0px) scale(1)', clipPath: 'inset(0px 0px 0px 0px round 0px)' };
 
+// ── Flüssig: Feder und Hals der echten Tropfen (ADR 0053) ──────
+// Die Tropfen fließen, wie im Reiter «Flüssig» eingestellt: Die Feder gibt
+// die Kurve (mit Nachfedern), das Tempo dehnt oder kürzt die am Gerät
+// abgenommenen Dauern — bei der Voreinstellung bleiben sie, wie sie sind.
+// Solange der Tropfen nah an seiner Quelle ist, hängt er über einen Hals an
+// ihr, bis der reißt.
+var flTakte = {};   // Stelle und Werte → die Kurve dazu, einmal gerechnet
+var flNummer = 0;   // hält die Filter gleichzeitiger Hälse auseinander
+
+// Wie lange eine Feder mit Antwortzeit 1 s braucht, bis sie ruht, und ihre
+// Bahn dabei.
+function flBahn(feder) {
+  var f = fpFeder(0), w = { tempo: 1, feder: feder }, bahn = [0], t = 0, dt = 1 / 240;
+  f.ziel = 1;
+  while (t < 8) {
+    fpSchwingen(f, dt, w);
+    t += dt;
+    bahn.push(f.x);
+    if (Math.abs(f.x - 1) < 0.003 && Math.abs(f.v) < 0.03) break;
+  }
+  return { zeit: t, bahn: bahn };
+}
+
+// Die Kurve einer Stelle für bewegt(): `kurve` als linear() mit den Punkten
+// der Feder, `faktor` für die Dauer. `ohneUeber`: ohne Überschwingen — wer in
+// einen Knopf fließt, schwänge sonst als Geist wieder heraus; dort federt
+// der Knopf.
+function fluessigTakt(id, ohneUeber) {
+  var w = fpFuer(id).werte, schluessel = (ohneUeber ? '-' : '+') + w.tempo + '/' + w.feder;
+  if (flTakte[schluessel]) return flTakte[schluessel];
+  var b = flBahn(w.feder), basis = flBahn(FP_GRUND.ios.feder), punkte = [], hoch = 0;
+  for (var i = 0; i <= 40; i++) {
+    var x = i === 40 ? 1 : b.bahn[Math.round(i / 40 * (b.bahn.length - 1))];
+    if (ohneUeber) x = hoch = Math.max(hoch, Math.min(1, x));
+    punkte.push(Math.round(x * 1000) / 1000);
+  }
+  var kurve = 'linear(' + punkte.join(', ') + ')';
+  try { if (!(window.CSS && CSS.supports && CSS.supports('transition-timing-function', kurve))) kurve = null; } catch (e) { kurve = null; }
+  return (flTakte[schluessel] = { kurve: kurve || (ohneUeber ? TROPFEN_KURVE : FEDER),
+    faktor: w.tempo / FP_GRUND.ios.tempo * b.zeit / basis.zeit });
+}
+
+// Die sichtbaren Ecken eines Elements, auch während es skaliert wird.
+function flRadius(el, r) {
+  var t = getComputedStyle(el).borderTopLeftRadius || '0', pr = /(-?[\d.]+)%/.exec(t), pp = /(-?[\d.]+)px/.exec(t);
+  var w = el.offsetWidth || r.width, h = el.offsetHeight || r.height, s = Math.min(r.width / w, r.height / h);
+  var x = (pr ? parseFloat(pr[1]) / 100 * Math.min(w, h) : 0) + (pp ? parseFloat(pp[1]) : 0);
+  return Math.max(0, Math.min(x * s, r.width / 2, r.height / 2));
+}
+
+// Der Hals zwischen `el` (dem Tropfen, während er sich bewegt) und `quelle`
+// (was getBoundingClientRect kennt). Die Schicht liegt direkt unter dem
+// Tropfen und spart die Quelle aus — der Knopf bleibt, wie er ist, der Hals
+// setzt an seinem Rand an. Glas spart auch den Tropfen aus, sonst schiene
+// der Hals hindurch. `opt`: `stelle`, `dauer`, `warten`, `glas`, `dehnen`
+// (der Tropfen selbst dehnt sich, solange er klein ist — nur, wo sein
+// transform frei ist).
+function fliessen(el, quelle, opt) {
+  if (!el || !el.parentNode || !quelle || bewegungAus()) return null;
+  var id = opt.stelle, technik = fpFuer(id).technik, s = document.createElement('div');
+  s.className = 'fl-schicht';
+  s.setAttribute('aria-hidden', 'true');
+  s.style.display = 'none';
+  s.style.zIndex = getComputedStyle(el).zIndex;
+  el.parentNode.insertBefore(s, el);
+  // Mit Schatten: Ein Hals in der Farbe des Grunds sähe man sonst nicht.
+  var b = fpSchichten(s, 'fl' + (++flNummer), technik, false), formen = [], weite = 0, farbe = false, vorher = null;
+  b.id = id;
+  b.el = s;
+  b.technik = technik;
+  b.haelse = {};
+  b.formen = function () { return { formen: formen, haelse: [{ a: 0, b: 1, key: 'hals', weite: weite }] }; };
+  var ende = Date.now() + (opt.warten || 0) + opt.dauer + 80;
+  el.classList.add('fl-kante');
+  el.style.setProperty('--fl-kante', String(Math.round(fpFuer(id).werte.kante * 70) / 100));
+  function aufraeumen() {
+    weg(s);
+    el.classList.remove('fl-kante');
+    el.style.removeProperty('--fl-kante');
+    if (opt.dehnen) el.style.transform = '';
+  }
+  function schritt() {
+    if (!el.isConnected || Date.now() > ende) { aufraeumen(); return; }
+    var w = fpFuer(id).werte, qr = quelle.getBoundingClientRect();
+    // Wer sich dehnt, wird an seiner Lage ohne transform gemessen.
+    var er = opt.dehnen ? { left: el.offsetLeft, top: el.offsetTop, width: el.offsetWidth, height: el.offsetHeight }
+      : el.getBoundingClientRect();
+    if (!er.width || !qr.width) { s.style.display = 'none'; fpBild(schritt); return; }
+    var dq = Math.min(qr.width, qr.height) / 2, nun = Date.now();
+    var q = { x: qr.left, y: qr.top, w: qr.width, h: qr.height, r: dq };
+    var e = { x: er.left, y: er.top, w: er.width, h: er.height, r: flRadius(el, er) };
+    if (opt.dehnen) {
+      var m = fpMitte(e), klein = fpKlemme(1 - (Math.min(e.w, e.h) - 2 * dq) / (4 * dq), 0, 1), deh = null;
+      if (vorher && nun > vorher.t) deh = fpDehnung((m.x - vorher.x) * 1000 / (nun - vorher.t), (m.y - vorher.y) * 1000 / (nun - vorher.t), w, klein);
+      vorher = { x: m.x, y: m.y, t: nun };
+      el.style.transform = deh && deh.e > 1.001 ? 'rotate(' + fpZ(deh.a * 180 / Math.PI) + 'deg) scale(' +
+        Math.round(deh.e * 1000) / 1000 + ', ' + Math.round(1000 / deh.e) / 1000 + ') rotate(' + fpZ(-deh.a * 180 / Math.PI) + 'deg)' : '';
+    }
+    // Die Weite wächst mit dem Tropfen, bis zur dreifachen Knopfgröße: Die
+    // Wege sind hier lang, ein Hals von Knopfgröße hielte keine 40 ms.
+    var kq = fpKern(q, fpMitte(e)), ke = fpKern(e, fpMitte(q)), d = Math.sqrt(Math.pow(ke.x - kq.x, 2) + Math.pow(ke.y - kq.y, 2));
+    weite = fpWeite(dq, Math.min(ke.r, 2 * dq), w);
+    if (d > weite || d <= Math.abs(kq.r - ke.r)) { s.style.display = 'none'; fpBild(schritt); return; }
+    // Gezeichnet wird in einem Kasten um beide, nicht über den ganzen Schirm:
+    // Der Filter kostet je Bildpunkt.
+    var x0 = Math.min(q.x, e.x) - 30, y0 = Math.min(q.y, e.y) - 30;
+    var x1 = Math.max(q.x + q.w, e.x + e.w) + 30, y1 = Math.max(q.y + q.h, e.y + e.h) + 30;
+    q.x -= x0; q.y -= y0; e.x -= x0; e.y -= y0;
+    formen = [q, e];
+    s.style.display = '';
+    // Der Hals blendet mit dem Tropfen ein und aus.
+    s.style.opacity = getComputedStyle(el).opacity;
+    fpLage(s, { x: x0, y: y0, w: x1 - x0, h: y1 - y0 });
+    if (!farbe) { s.style.setProperty('--fp-farbe', getComputedStyle(el).backgroundColor); farbe = true; }
+    var loch = 'path(evenodd, "M0 0H' + fpZ(x1 - x0) + 'V' + fpZ(y1 - y0) + 'H0Z' + fpUmriss(fpPunkte(q)) +
+      (opt.glas ? fpUmriss(fpPunkte(e)) : '') + '")';
+    s.style.webkitClipPath = loch;
+    s.style.clipPath = loch;
+    fpZeichnen(b);
+    fpBild(schritt);
+  }
+  fpBild(schritt);
+  return s;
+}
+
 // ── Tropfen: auf aus einem runden Knopf, zu in ihn hinein (ADR 0008) ──
 //
 // Rund heißt: alles, was keine Kachel und keine Zeile ist — der Menüknopf, die
@@ -2691,20 +2829,25 @@ var TROPFEN_ZU_FRUEH = [0.18, 0.4, 0.86];
 function tropfenZu(g, r, ziel, opt) {
   opt = opt || {};
   var k = ziel.getBoundingClientRect(), w = tropfenWeg(sichtbar(r), k), h = tropfenHuelle(g, r.width, opt.glas);
-  var dauer = opt.dauer || TROPFEN_DAUER, t = opt.frueh ? TROPFEN_ZU_FRUEH : TROPFEN_ZU_TAKT, f = glasFarben(opt.glas);
+  var stelle = opt.glas ? 'hinweis' : 'menue', tk = fluessigTakt(stelle, true);
+  var dauer = Math.round((opt.dauer || TROPFEN_DAUER) * tk.faktor), t = opt.frueh ? TROPFEN_ZU_FRUEH : TROPFEN_ZU_TAKT;
+  var f = glasFarben(opt.glas);
   function sk(b, off) { return { transform: 'scale(' + (b.width / r.width).toFixed(4) + ')', offset: off }; }
   if (opt.grund) h.style.background = opt.grund;
   bewegt(h, [huellenBild(w.gross, opt.rund || '20px', 1, 0, f.duenn), huellenBild(w.mitte, '40%', 1, t[0], f.dicht),
     huellenBild(w.tropfen, TROPFEN, 1, t[1], f.dicht), huellenBild(w.klein, TROPFEN, 1, t[2], f.dicht),
     huellenBild(w.klein, TROPFEN, 0, 1, f.dicht)],
-    { dauer: dauer, kurve: 'cubic-bezier(.35, 0, .4, 1)', fill: 'forwards' }, function () {
+    { dauer: dauer, kurve: tk.kurve, fill: 'forwards' }, function () {
       weg(h);
       if (opt.fertig) opt.fertig();
     });
   bewegt(g, [sk(w.gross, 0), sk(w.mitte, t[0]), sk(w.tropfen, t[1]), sk(w.klein, t[2]), sk(w.klein, 1)],
-    { dauer: dauer, kurve: 'cubic-bezier(.35, 0, .4, 1)', fill: 'forwards' });
-  bewegt(ziel, [{ transform: 'scale(1)' }, { transform: 'scale(1.14)', offset: 0.45 }, { transform: 'scale(1)' }],
+    { dauer: dauer, kurve: tk.kurve, fill: 'forwards' });
+  // Der Knopf schluckt den Tropfen und federt nach, so weit wie eingestellt.
+  var nick = 1 + 0.06 + 0.22 * fpFuer(stelle).werte.feder;
+  bewegt(ziel, [{ transform: 'scale(1)' }, { transform: 'scale(' + nick.toFixed(3) + ')', offset: 0.45 }, { transform: 'scale(1)' }],
     { dauer: 320, warten: dauer * 0.8, kurve: 'ease-out' });
+  fliessen(h, ziel, { stelle: stelle, dauer: dauer, glas: opt.glas, dehnen: true });
   return h;
 }
 
@@ -2720,20 +2863,23 @@ function tropfenAuf(neu, q, opt) {
   var g = geist(neu);
   if (!g) return null;
   var n = neu.getBoundingClientRect(), w = tropfenWeg(sichtbar(n), q), h = tropfenHuelle(g, n.width, opt.glas);
-  var dauer = opt.dauer || TROPFEN_DAUER, f = glasFarben(opt.glas);
+  var stelle = opt.glas ? 'hinweis' : 'menue', tk = fluessigTakt(stelle);
+  var dauer = Math.round((opt.dauer || TROPFEN_DAUER) * tk.faktor), f = glasFarben(opt.glas);
   function sk(b, off) { return { transform: 'scale(' + (b.width / n.width).toFixed(4) + ')', offset: off }; }
   if (opt.grund) h.style.background = opt.grund;
   neu.style.opacity = '0';
   bewegt(h, [huellenBild(w.klein, TROPFEN, 0, 0, f.dicht), huellenBild(w.klein, TROPFEN, 1, 0.08, f.dicht),
     huellenBild(w.tropfen, TROPFEN, 1, 0.3, f.dicht), huellenBild(w.mitte, '40%', 1, 0.62, f.dicht),
     huellenBild(w.gross, opt.rund || '0px', 1, 1, f.duenn)],
-    { dauer: dauer, warten: opt.warten, kurve: 'cubic-bezier(.3, 0, .25, 1)', fill: opt.warten ? 'both' : 'forwards' },
+    { dauer: dauer, warten: opt.warten, kurve: tk.kurve, fill: opt.warten ? 'both' : 'forwards' },
     function () {
       neu.style.opacity = '';
       weg(h);
     });
   bewegt(g, [sk(w.klein, 0), sk(w.klein, 0.08), sk(w.tropfen, 0.3), sk(w.mitte, 0.62), sk(w.gross, 1)],
-    { dauer: dauer, warten: opt.warten, kurve: 'cubic-bezier(.3, 0, .25, 1)', fill: opt.warten ? 'both' : 'forwards' });
+    { dauer: dauer, warten: opt.warten, kurve: tk.kurve, fill: opt.warten ? 'both' : 'forwards' });
+  fliessen(h, { getBoundingClientRect: function () { return q; } },
+    { stelle: stelle, dauer: dauer, warten: opt.warten, glas: opt.glas, dehnen: true });
   return h;
 }
 
@@ -4206,8 +4352,7 @@ function zeichneHome() {
     (frei.length ? '<section class="abschnitt"><h2>Heute nicht dran</h2><div class="gw-liste gedimmt">' +
       frei.map(zeichneKachel).join('') + '</div></section>' : '') +
     (laster.length ? '<section class="abschnitt"><h2>Abgewöhnen</h2><div class="gw-liste">' +
-      laster.map(zeichneLasterKachel).join('') + '</div></section>' : '') +
-    zeichneFluessigProbe();
+      laster.map(zeichneLasterKachel).join('') + '</div></section>' : '');
 }
 
 // Oben eine Karte für heute und die Tage drumherum: die Chili im Tagesring,
@@ -4861,29 +5006,36 @@ function zeichneTagVoraus(liste, k) {
 }
 
 // ════════════════════════════════════════════════════════════════
-//  Flüssigprobe (0.16.0T)
+//  Flüssig: das Labor in den Einstellungen (ADR 0053)
 // ════════════════════════════════════════════════════════════════
 //
-// Der Nutzer will die Tropfen näher an iOS 26: Formen, die über einen Hals
-// verschmelzen und abreißen (Metaball, wie in der Swift-Vorlage), die
-// nachfedern, sich in Laufrichtung dehnen und eine Lichtkante tragen. Am
-// Gerät wählt man Bewegung besser als nach Beschreibung, darum acht Proben am
-// Ende des Dashboards, je in zwei Techniken: «Pfad» rechnet Formen und Hälse
-// als einen Umriß (scharf, Glas bleibt Glas), «Filter» zeichnet weich und
-// schneidet hart ab wie die Vorlage (organischer, aber ohne Glas). Die
-// Regler gelten für alle, eine Probe kann abweichen; «Einstellungen
-// kopieren» faßt alles als Text. Die echten Tropfen bleiben, wie sie sind,
-// bis gewählt ist (ADR 0008: ohne Überschwingen); dann geht die Probe.
+// Die Tropfen fließen wie in iOS 26: Formen hängen über einen Hals zusammen,
+// bis er reißt (Metaball, wie in der Swift-Vorlage), federn nach, dehnen
+// sich in Laufrichtung und tragen eine Lichtkante. Der Reiter «Flüssig» der
+// Einstellungen zeigt acht Proben, je in zwei Techniken: «Pfad» rechnet
+// Formen und Hälse als einen Umriß (scharf, Glas bleibt Glas), «Filter»
+// zeichnet weich und schneidet hart ab wie die Vorlage (organischer, ohne
+// Glas). Voreingestellt ist iOS 26 im Filter; mit «Eigene Einstellungen»
+// feilt der Nutzer für alle oder je Stelle, und die App folgt sofort.
+// «Einstellungen kopieren» faßt alles als Text.
 var FP_WELLE_DAUER = 9000;   // ms: die zehn Minuten im Zeitraffer
 var fpLauf = {};             // Stelle → ihre Bühne: Maß, Federn, was sie zeichnet
 
 function fpStand() { return state.fluessig || fluessigLesen({}); }
 
-// Was für eine Stelle gilt: ihre eigene Technik und ihre eigenen Werte,
-// sonst die gemeinsamen.
+// Was für eine Stelle gilt: ihre eigenen Einstellungen, wenn sie an sind,
+// sonst die für alle.
+
 function fpFuer(id) {
-  var f = fpStand(), e = f.stellen[id] || {};
-  return { technik: e.technik || f.technik, werte: e.werte || f.werte };
+  var f = fpStand(), e = f.stellen[id];
+  return e && e.eigen ? { technik: e.technik, werte: e.werte } : fpAllgemein(f);
+}
+
+// Was für alle gilt: ohne eigene Einstellungen die Voreinstellung — iOS 26
+// im Filter, wie der Nutzer gewählt hat (ADR 0053).
+function fpAllgemein(f) {
+  if (f.eigen) return { technik: f.technik, werte: f.werte };
+  return { technik: 'filter', werte: FP_VORGABE || (FP_VORGABE = fpWerteLesen(FP_GRUND.ios)) };
 }
 
 function fpAendern(wie) {
@@ -4891,10 +5043,6 @@ function fpAendern(wie) {
   wie(f);
   state.fluessig = f;
 }
-
-function fpEintrag(f, id) { return f.stellen[id] || (f.stellen[id] = {}); }
-
-function fpAufraeumen(f, id) { if (f.stellen[id] && !Object.keys(f.stellen[id]).length) delete f.stellen[id]; }
 
 function fpGleich(a, b) {
   return FP_REGLER.every(function (r) { return Math.abs(a[r[0]] - b[r[0]]) < 0.001; });
@@ -4908,8 +5056,11 @@ function fpWerteText(w) {
   return FP_REGLER.map(function (r) { return r[1] + ' ' + fpWertText(r[0], w[r[0]]); }).join(' · ');
 }
 
+
 function fpGrundText(f) {
-  return FP_GRUND[f.grund].name + (fpGleich(f.werte, FP_GRUND[f.grund]) ? '' : ', verändert');
+  if (!f.eigen) return 'Aus: Es gilt die Voreinstellung ' + FP_GRUND.ios.name + ' im Filter.';
+  return 'Grund ' + FP_GRUND[f.grund].name + (fpGleich(f.werte, FP_GRUND[f.grund]) ? '' : ', verändert') +
+    ' · ' + fpTechnikName(f.technik);
 }
 
 function fpName(id) {
@@ -4921,24 +5072,19 @@ function fpTechnikName(t) { return t === 'filter' ? 'Filter' : 'Pfad'; }
 
 // Was der Nutzer kopiert und schickt: lesbar und genau genug, um es
 // nachzubauen.
+
 function fpSicherung() {
-  var f = fpStand(), z = ['Flüssigprobe · Chilli Journal ' + APP_VERSION], aus = [];
-  z.push('Grund: ' + fpGrundText(f));
-  z.push('Technik: ' + fpTechnikName(f.technik));
-  z.push(fpWerteText(f.werte));
+  var f = fpStand(), a = fpAllgemein(f), z = ['Flüssig · Chilli Journal ' + APP_VERSION], je = [];
+  z.push('Eigene Einstellungen: ' + (f.eigen ? 'an' : 'aus, es gilt ' + FP_GRUND.ios.name + ' im Filter'));
+  if (f.eigen) z.push('Grund: ' + FP_GRUND[f.grund].name + (fpGleich(f.werte, FP_GRUND[f.grund]) ? '' : ', verändert'));
+  z.push('Technik: ' + fpTechnikName(a.technik));
+  z.push(fpWerteText(a.werte));
   FP_STELLEN.forEach(function (s) {
     var e = f.stellen[s[0]];
-    if (e && e.technik) aus.push('· ' + s[1] + ': ' + fpTechnikName(e.technik));
-    if (e && e.werte) aus.push('· ' + s[1] + ': eigene Regler, ' + fpWerteText(e.werte));
+    if (e && e.eigen) je.push('· ' + s[1] + ': ' + fpTechnikName(e.technik) + ' · ' + fpWerteText(e.werte));
   });
-  z.push('Ausnahmen:' + (aus.length ? '' : ' keine'));
-  z = z.concat(aus);
-  z.push('Urteil:');
-  FP_STELLEN.forEach(function (s) {
-    var u = (f.stellen[s[0]] || {}).urteil;
-    z.push('· ' + s[1] + ': ' + (u === 'ja' ? 'nehmen' : u === 'nein' ? 'nicht nehmen' : 'offen'));
-  });
-  return z.join('\n');
+  z.push('Eigene je Stelle:' + (je.length ? '' : ' keine'));
+  return z.concat(je).join('\n');
 }
 
 // ── Flüssigprobe: Federn ───────────────────────────────────────
@@ -5218,20 +5364,20 @@ function fpTipp(b, name) { return b.el.querySelector('[data-fp-tipp="' + name + 
 // Die Schichten des Flüssigen unter den Inhalt legen und die Bühne
 // aufziehen. Wechselt die Technik, wird neu gebaut; was eben lief, beginnt
 // von vorn.
-function fpBauen(el) {
-  var id = el.getAttribute('data-fp-buehne'), ort = el.querySelector('.fp-ort') || el;
-  Array.prototype.slice.call(ort.querySelectorAll('.fp-schicht')).forEach(weg);
-  var b = { id: id, el: el, ort: ort, W: ort.clientWidth, H: ort.clientHeight, technik: fpFuer(id).technik, haelse: {} };
-  var flach = el.classList.contains('fp-flach');
-  if (b.technik === 'pfad') {
+// Die Schichten des Flüssigen in `ort`: im Pfad Schatten, Umriß und Lichtkante,
+// im Filter die weich gezeichneten Formen. `schluessel` hält die Filter auseinander,
+// `flach` läßt den Schatten weg.
+function fpSchichten(ort, schluessel, technik, flach) {
+  var b = {};
+  if (technik === 'pfad') {
     ort.insertAdjacentHTML('afterbegin', (flach ? '' : '<svg class="fp-schicht" aria-hidden="true">' +
-        '<filter id="fpS-' + id + '" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur in="SourceAlpha" stdDeviation="6"/>' +
+        '<filter id="fpS-' + schluessel + '" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur in="SourceAlpha" stdDeviation="6"/>' +
         '<feOffset dy="5" result="s"/><feComposite in="s" in2="SourceAlpha" operator="out"/></filter>' +
-        '<path class="fp-schatten" filter="url(#fpS-' + id + ')"/></svg>') +
+        '<path class="fp-schatten" filter="url(#fpS-' + schluessel + ')"/></svg>') +
       '<div class="fp-schicht fp-fluss"></div>' +
-      '<svg class="fp-schicht fp-oben" aria-hidden="true"><filter id="fpL-' + id + '" x="-10%" y="-10%" width="120%" height="120%">' +
+      '<svg class="fp-schicht fp-oben" aria-hidden="true"><filter id="fpL-' + schluessel + '" x="-10%" y="-10%" width="120%" height="120%">' +
         '<feOffset in="SourceAlpha" dx="1.2" dy="1.6" result="ver"/><feComposite in="SourceGraphic" in2="ver" operator="out" result="rand"/>' +
-        '<feGaussianBlur in="rand" stdDeviation=".5"/></filter><path class="fp-licht" filter="url(#fpL-' + id + ')"/></svg>');
+        '<feGaussianBlur in="rand" stdDeviation=".5"/></filter><path class="fp-licht" filter="url(#fpL-' + schluessel + ')"/></svg>');
     b.fluss = ort.querySelector('.fp-fluss');
     b.licht = ort.querySelector('.fp-licht');
     b.schatten = ort.querySelector('.fp-schatten');
@@ -5239,7 +5385,7 @@ function fpBauen(el) {
     // Weich zeichnen, die Deckkraft hart abschneiden (wie colorBurn und
     // colorDodge in der Vorlage), dann die Lichtkante: was oben links über
     // den eigenen, leicht versetzten Umriß hinausragt.
-    ort.insertAdjacentHTML('afterbegin', '<svg class="fp-schicht" aria-hidden="true"><filter id="fpG-' + id +
+    ort.insertAdjacentHTML('afterbegin', '<svg class="fp-schicht" aria-hidden="true"><filter id="fpG-' + schluessel +
         '" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">' +
         '<feGaussianBlur in="SourceGraphic" stdDeviation="6"/>' +
         '<feColorMatrix type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 20 -9" result="g"/>' +
@@ -5250,8 +5396,22 @@ function fpBauen(el) {
     b.goo = ort.querySelector('.fp-goo');
     b.blur = ort.querySelector('feGaussianBlur');
     b.flut = ort.querySelector('feFlood');
-    b.goo.style.filter = 'url(#fpG-' + id + ')' + (flach ? '' : ' drop-shadow(0 4px 8px rgba(20, 20, 19, .18))');
+    b.goo.style.filter = 'url(#fpG-' + schluessel + ')' + (flach ? '' : ' drop-shadow(0 4px 8px rgba(20, 20, 19, .18))');
   }
+  return b;
+}
+
+function fpBauen(el) {
+  var id = el.getAttribute('data-fp-buehne'), ort = el.querySelector('.fp-ort') || el, technik = fpFuer(id).technik;
+  Array.prototype.slice.call(ort.querySelectorAll('.fp-schicht')).forEach(weg);
+  var b = fpSchichten(ort, id, technik, el.classList.contains('fp-flach'));
+  b.id = id;
+  b.el = el;
+  b.ort = ort;
+  b.W = ort.clientWidth;
+  b.H = ort.clientHeight;
+  b.technik = technik;
+  b.haelse = {};
   FP_BUEHNEN[id](b);
   fpLauf[id] = b;
   fpZeichnen(b);
@@ -5680,36 +5840,52 @@ function fpBuehneHtml(id) {
 }
 
 function fpKarteHtml(s, f) {
-  var id = s[0], e = f.stellen[id] || {}, fuer = ' data-fp-fuer="' + id + '"';
+  var id = s[0], an = !!(f.stellen[id] && f.stellen[id].eigen);
   return '<div class="kachel fp-karte" data-fp-karte="' + id + '">' +
     '<h3 class="fp-name">' + esc(s[1]) + '</h3><p class="fp-text">' + esc(s[2]) + '</p>' +
     fpBuehneHtml(id) +
-    '<div class="fp-wahlen">' +
-      fpWahl('Technik · ' + s[1], 'data-fp-stelle-technik', [['oben', 'Wie oben'], ['pfad', 'Pfad'], ['filter', 'Filter']],
-        e.technik || 'oben', fuer) +
-      fpWahl('Urteil · ' + s[1], 'data-fp-urteil', [['offen', 'Offen'], ['ja', 'Nehmen'], ['nein', 'Nicht']], e.urteil || 'offen', fuer) +
-      '<button type="button" class="knopf fp-eigen" data-fp-eigen="' + id + '" aria-pressed="' + (e.werte ? 'true' : 'false') +
-        '">Eigene Regler</button>' +
-      '<div class="fp-regler-ort"' + fuer + '>' + (e.werte ? fpReglerHtml(e.werte, id) : '') + '</div>' +
-    '</div></div>';
+    fpSchalterHtml(id, 'Eigene Einstellungen', an) +
+    '<div class="fp-eigenes" data-fp-eigenes="' + id + '">' + (an ? fpEigenesHtml(id) : '') + '</div>' +
+    '</div>';
 }
 
+// Ein Umschalter wie in den Einstellungen; `id` leer heißt «für alle».
+function fpSchalterHtml(id, name, an) {
+  var n = 'fpSchalterName-' + (id || 'alle');
+  return '<div class="tm-schalterzeile"><span id="' + n + '">' + esc(name) + '</span>' +
+    '<button type="button" class="schalter" role="switch" data-fp-schalter="' + id + '" aria-labelledby="' + n +
+    '" aria-checked="' + (an ? 'true' : 'false') + '"><span class="schalter-spur"><span class="schalter-knauf"></span>' +
+    '</span></button></div>';
+}
+
+// Was man selbst einstellt: für alle mit Grund, je Stelle Technik und Regler.
+function fpEigenesHtml(id) {
+  var f = fpStand(), e = id ? f.stellen[id] : f, name = id ? fpName(id) : 'alle';
+  return (id ? '' : '<h3 class="fp-name">Grund</h3>' +
+      fpWahl('Flüssig: Grund', 'data-fp-grund', FP_GRUND_REIHE.map(function (k) { return [k, FP_GRUND[k].name]; }), f.grund)) +
+    '<h3 class="fp-name">Technik</h3>' +
+    fpWahl('Technik · ' + name, 'data-fp-technik', [['pfad', 'Pfad'], ['filter', 'Filter']], e.technik, ' data-fp-fuer="' + id + '"') +
+    fpReglerHtml(e.werte, id);
+}
+
+// Der Reiter «Flüssig» der Einstellungen (ADR 0053): oben, was für alle gilt,
+// darunter die Proben, je mit eigenem Umschalter.
 function zeichneFluessigProbe() {
   var f = fpStand();
-  return '<section class="abschnitt" id="fluessigProbe"><h2>Flüssig zur Wahl</h2>' +
-    '<div class="kachel fp-steuer">' +
-      '<p class="fp-text">Tipp in eine Probe, dann läuft sie. Die Regler gelten für alle Proben, außer eine hat eigene. ' +
-        'Ganz unten kopierst du alles als Text.</p>' +
-      '<h3 class="fp-name">Grund <span class="fp-stand" id="fpGrundStand">' + esc(fpGrundText(f)) + '</span></h3>' +
-      fpWahl('Flüssig: Grund', 'data-fp-grund', FP_GRUND_REIHE.map(function (k) { return [k, FP_GRUND[k].name]; }), f.grund) +
-      '<h3 class="fp-name">Technik</h3>' +
-      fpWahl('Flüssig: Technik', 'data-fp-technik', [['pfad', 'Pfad'], ['filter', 'Filter']], f.technik) +
-      '<p class="fp-text">Pfad: scharf, Glas bleibt Glas. Filter: weich wie die Vorlage, ohne Glas.</p>' +
-      '<div class="fp-regler-ort" data-fp-fuer="">' + fpReglerHtml(f.werte, '') + '</div>' +
-    '</div>' +
-    FP_STELLEN.map(function (s) { return fpKarteHtml(s, f); }).join('') +
+  return '<div id="fluessigProbe">' +
+    '<section class="abschnitt"><h2>Für alle</h2><div class="kachel fp-steuer">' +
+      '<p class="fp-text">So fließen Menü, Hinweise, Meldungen und alles, was aus einem Knopf quillt. ' +
+        'Was du einstellst, gilt sofort — in den Proben und in der App.</p>' +
+      fpSchalterHtml('', 'Eigene Einstellungen', f.eigen) +
+      '<p class="fp-text" id="fpGrundStand">' + esc(fpGrundText(f)) + '</p>' +
+      '<div class="fp-eigenes" data-fp-eigenes="">' + (f.eigen ? fpEigenesHtml('') : '') + '</div>' +
+    '</div></section>' +
+    '<section class="abschnitt"><h2>Proben</h2>' +
+      '<p class="fp-text fp-vorab">Tipp in eine Probe, dann läuft sie. Ohne eigene Einstellungen folgt sie «Für alle».</p>' +
+      FP_STELLEN.map(function (s) { return fpKarteHtml(s, f); }).join('') +
+    '</section>' +
     '<div class="knopfreihe"><button type="button" class="knopf" id="fpKopieren">Einstellungen kopieren</button></div>' +
-    '</section>';
+    '</div>';
 }
 
 // Nach einer Änderung: merken, den Stand nennen und neu zeichnen — wer die
@@ -5749,6 +5925,35 @@ function fpReglerBinden(ort) {
   });
 }
 
+// Grund, Technik und Regler in einem aufgeklappten Bereich.
+function fpEigenesBinden(ort) {
+  var gruende = Array.prototype.slice.call(ort.querySelectorAll('[data-fp-grund]'));
+  gruende.forEach(function (k) {
+    k.addEventListener('click', function () {
+      var g = this.getAttribute('data-fp-grund');
+      fpAendern(function (f) { f.grund = g; f.werte = fpWerteLesen(FP_GRUND[g]); });
+      var w = fpStand().werte;
+      Array.prototype.forEach.call(ort.querySelectorAll('input[data-fp-regler]'), function (r) {
+        var k2 = r.getAttribute('data-fp-regler');
+        r.value = String(w[k2]);
+        r.parentNode.querySelector('[data-fp-wert]').textContent = fpWertText(k2, w[k2]);
+      });
+      fpWahlSetzen(gruende, g, 'data-fp-grund');
+      fpGeaendert();
+    });
+  });
+  var techniken = Array.prototype.slice.call(ort.querySelectorAll('[data-fp-technik]'));
+  techniken.forEach(function (k) {
+    k.addEventListener('click', function () {
+      var id = this.getAttribute('data-fp-fuer'), t = this.getAttribute('data-fp-technik');
+      fpAendern(function (f) { (id ? f.stellen[id] : f).technik = t; });
+      fpWahlSetzen(techniken, t, 'data-fp-technik');
+      fpGeaendert(id);
+    });
+  });
+  fpReglerBinden(ort);
+}
+
 function bindeFluessigProbe() {
   fpLauf = {};
   alleIn('#fluessigProbe [data-fp-buehne]').forEach(function (el) {
@@ -5758,70 +5963,28 @@ function bindeFluessigProbe() {
     });
     fpBauen(el);
   });
-  var gruende = alleIn('#fluessigProbe [data-fp-grund]');
-  gruende.forEach(function (k) {
+  // Einschalten übernimmt, was eben galt — so springt nichts. Ausschalten
+  // behält die eigenen Werte für das nächste Mal.
+  alleIn('#fluessigProbe [data-fp-schalter]').forEach(function (k) {
     k.addEventListener('click', function () {
-      var g = this.getAttribute('data-fp-grund');
-      fpAendern(function (f) { f.grund = g; f.werte = fpWerteLesen(FP_GRUND[g]); });
-      var w = fpStand().werte;
-      alleIn('#fluessigProbe .fp-regler-ort[data-fp-fuer=""] input[data-fp-regler]').forEach(function (r) {
-        var k2 = r.getAttribute('data-fp-regler');
-        r.value = String(w[k2]);
-        r.parentNode.querySelector('[data-fp-wert]').textContent = fpWertText(k2, w[k2]);
-      });
-      fpWahlSetzen(gruende, g, 'data-fp-grund');
-      fpGeaendert();
-    });
-  });
-  var techniken = alleIn('#fluessigProbe [data-fp-technik]');
-  techniken.forEach(function (k) {
-    k.addEventListener('click', function () {
-      var t = this.getAttribute('data-fp-technik');
-      fpAendern(function (f) { f.technik = t; });
-      fpWahlSetzen(techniken, t, 'data-fp-technik');
-      fpGeaendert();
-    });
-  });
-  alleIn('#fluessigProbe [data-fp-stelle-technik]').forEach(function (k) {
-    k.addEventListener('click', function () {
-      var id = this.getAttribute('data-fp-fuer'), t = this.getAttribute('data-fp-stelle-technik');
+      var id = this.getAttribute('data-fp-schalter'), an = this.getAttribute('aria-checked') !== 'true';
       fpAendern(function (f) {
-        var e = fpEintrag(f, id);
-        if (t === 'oben') delete e.technik; else e.technik = t;
-        fpAufraeumen(f, id);
+        if (!id) { f.eigen = an; return; }
+        if (!f.stellen[id]) {
+          var a = fpAllgemein(f);
+          f.stellen[id] = { technik: a.technik, werte: fpWerteLesen(a.werte) };
+        }
+        f.stellen[id].eigen = an;
       });
-      fpWahlSetzen(alleIn('#fluessigProbe [data-fp-stelle-technik][data-fp-fuer="' + id + '"]'), t, 'data-fp-stelle-technik');
+      this.setAttribute('aria-checked', an ? 'true' : 'false');
+      var ort = document.querySelector('#fluessigProbe [data-fp-eigenes="' + id + '"]');
+      ort.innerHTML = an ? fpEigenesHtml(id) : '';
+      fpEigenesBinden(ort);
+      wahlenSetzen();
       fpGeaendert(id);
     });
   });
-  alleIn('#fluessigProbe [data-fp-urteil]').forEach(function (k) {
-    k.addEventListener('click', function () {
-      var id = this.getAttribute('data-fp-fuer'), u = this.getAttribute('data-fp-urteil');
-      fpAendern(function (f) {
-        var e = fpEintrag(f, id);
-        if (u === 'offen') delete e.urteil; else e.urteil = u;
-        fpAufraeumen(f, id);
-      });
-      fpWahlSetzen(alleIn('#fluessigProbe [data-fp-urteil][data-fp-fuer="' + id + '"]'), u, 'data-fp-urteil');
-      speichern();
-    });
-  });
-  alleIn('#fluessigProbe [data-fp-eigen]').forEach(function (k) {
-    k.addEventListener('click', function () {
-      var id = this.getAttribute('data-fp-eigen'), an = this.getAttribute('aria-pressed') !== 'true';
-      fpAendern(function (f) {
-        var e = fpEintrag(f, id);
-        if (an) e.werte = fpWerteLesen(f.werte); else delete e.werte;
-        fpAufraeumen(f, id);
-      });
-      this.setAttribute('aria-pressed', an ? 'true' : 'false');
-      var ort = document.querySelector('#fluessigProbe .fp-regler-ort[data-fp-fuer="' + id + '"]');
-      ort.innerHTML = an ? fpReglerHtml(fpFuer(id).werte, id) : '';
-      fpReglerBinden(ort);
-      fpGeaendert(id);
-    });
-  });
-  fpReglerBinden($('fluessigProbe'));
+  alleIn('#fluessigProbe [data-fp-eigenes]').forEach(fpEigenesBinden);
   $('fpKopieren').addEventListener('click', function () {
     kopieren(fpSicherung(), function (ok) {
       if (ok) melden('Einstellungen kopiert.', 'haken');
@@ -8246,9 +8409,19 @@ function bindeEinstellungen() {
   $('esLoeschen').addEventListener('click', allesLoeschenTippen);
 }
 
+// Die Einstellungen haben zwei Reiter: Allgemein und Flüssig (ADR 0053).
+// Welcher offen ist, gilt bis zum Neuladen.
+var esReiter = 'allgemein';
+
 function zeichneEinstellungen() {
+  var reiter = '<div class="wahl es-reiter" role="group" aria-label="Einstellungen: Bereich">' +
+    [['allgemein', 'Allgemein'], ['fluessig', 'Flüssig']].map(function (r) {
+      return '<button type="button" data-es-reiter="' + r[0] + '" aria-pressed="' + (esReiter === r[0] ? 'true' : 'false') +
+        '">' + r[1] + '</button>';
+    }).join('') + '</div>';
+  if (esReiter === 'fluessig') return reiter + zeichneFluessigProbe();
   var wahl = [['auto', 'Automatisch'], ['hell', 'Hell'], ['dunkel', 'Dunkel']];
-  return '<section class="abschnitt"><h2>Darstellung</h2><div class="wahl" role="group" ' +
+  return reiter + '<section class="abschnitt"><h2>Darstellung</h2><div class="wahl" role="group" ' +
       'aria-label="Darstellung">' +
       wahl.map(function (w) {
         return '<button type="button" data-thema="' + w[0] + '" aria-pressed="' +
@@ -8286,6 +8459,14 @@ function bindeAnsicht() {
   var erste = $('ersteGewohnheit') || $('gwAnlegen');
   if (erste) erste.addEventListener('click', function () { zeige('neu'); });
   if ($('fluessigProbe')) bindeFluessigProbe();
+  alleIn('[data-es-reiter]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var r = this.getAttribute('data-es-reiter');
+      if (r === esReiter) return;
+      esReiter = r;
+      render();
+    });
+  });
 
   alleIn('[data-haken]').forEach(function (b) {
     var id = b.getAttribute('data-haken');
@@ -8682,10 +8863,11 @@ function menueOeffnen() {
   // Erst sichtbar, dann einblenden — sonst springt der Schleier ohne Übergang.
   void huelle.offsetWidth;
   huelle.classList.add('offen');
-  var bilder = blattBilder(), fall = menueGastFallen(von);
+  var bilder = blattBilder(), fall = menueGastFallen(von), tk = fluessigTakt('menue'), dauer = Math.round(MENUE_DAUER * tk.faktor);
   if (bilder) {
-    bewegt(b, bilder, { dauer: MENUE_DAUER, warten: fall, kurve: TROPFEN_KURVE, fill: 'backwards' });
-    menueEintraegeTropfen(fall + MENUE_DAUER * 0.4);
+    bewegt(b, bilder, { dauer: dauer, warten: fall, kurve: tk.kurve, fill: 'backwards' });
+    menueEintraegeTropfen(fall + dauer * 0.4);
+    fliessen(b, menueAnker(), { stelle: 'menue', dauer: dauer, warten: fall });
   }
 }
 
@@ -8716,11 +8898,13 @@ function menueSchliessen(sofort) {
   // gespiegelte Zeitpunkte. Der Inhalt geht, bevor das Blatt sich staucht.
   // Nur die eigenen Bilder abräumen: Wer währenddessen wieder öffnet, behält
   // seinen Tropfen.
-  var liste = bewegt($('menueListe'), [{ opacity: 1 }, { opacity: 0 }], { dauer: MENUE_DAUER * 0.35, kurve: 'ease-in',
+  var tk = fluessigTakt('menue', true), dauer = Math.round(MENUE_DAUER * tk.faktor);
+  var liste = bewegt($('menueListe'), [{ opacity: 1 }, { opacity: 0 }], { dauer: dauer * 0.35, kurve: 'ease-in',
     fill: 'forwards' });
   var blatt = null;
+  fliessen(b, menueAnker(), { stelle: 'menue', dauer: dauer });
   blatt = bewegt(b, bilder.reverse().map(function (f) { f.offset = 1 - f.offset; return f; }),
-    { dauer: MENUE_DAUER, kurve: TROPFEN_KURVE, fill: 'forwards' }, function () {
+    { dauer: dauer, kurve: tk.kurve, fill: 'forwards' }, function () {
       if (gast) b.style.visibility = 'hidden';
       hoch();
       if (blatt) blatt.cancel();

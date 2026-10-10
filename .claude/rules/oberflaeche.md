@@ -30,8 +30,9 @@ fest.
 
 ## Aufbau
 
-- **Kopf in zwei Gestalten** (Dashboard, unterwegs), keine Reiterleiste. Die Überschrift
-  führt immer zur Übersicht.
+- **Kopf in zwei Gestalten** (Dashboard, unterwegs), keine Reiterleiste; nur die
+  Einstellungen trennen Allgemein | Flüssig (`esReiter`, ADR 0053). Die Überschrift führt
+  immer zur Übersicht.
 - **Runde Knöpfe** (`.rund`) sind 44 × 44, Symbol aus `ICON`, mit `aria-label`.
 - **Eine neue Ansicht** ist ein Eintrag in `ANSICHTEN`, ihre Ereignisse hängen in
   `bindeAnsicht()`. Das Menü folgt dem Pflichtenheft; ein Eintrag ohne `ziel` trägt «bald».
@@ -53,9 +54,10 @@ fest.
   sich darüber. Was verschwindet, zeigt `geist(el)`; eine Zeile geht über
   `zeileGeht(el, liste, ersatz)`.
 - **Es gibt eine Tropfen-Mechanik**: `tropfenAuf`/`tropfenZu` mit `tropfenQuelle` — rund,
-  ohne Spitze, ohne Überschwingen. Was ein Knopf öffnet, tropft aus ihm und in ihn zurück;
-  ist die Herkunft fort, in den Menüknopf. Nach langem Druck aus dem Fingerpunkt
-  (`punktFlaeche`).
+  ohne Spitze. Sie fließt (ADR 0053): Kurve und Dauer aus `fluessigTakt(stelle)`, hinein
+  ohne Überschwingen, der Hals zur Quelle über `fliessen()`. Was ein Knopf öffnet, tropft
+  aus ihm und in ihn zurück; ist die Herkunft fort, in den Menüknopf. Nach langem Druck aus
+  dem Fingerpunkt (`punktFlaeche`).
 - **Teile über `teilZeigen(el, an, quelle)`, Knöpfe über `teilTropfen(el, an)`**, nie
   `el.hidden = …`. Ein Teil mit eigenem `display` braucht `[hidden] { display: none; }`.
   Eine neue `.wahl` bekommt ihre Marke von `wahlenSetzen()`.

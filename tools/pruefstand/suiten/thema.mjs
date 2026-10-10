@@ -187,36 +187,36 @@ return warte(340).then(function () {
 
   // ── D · Die Wahl in den Einstellungen ─────────────────────
   zeige('einstellungen');
-  var wahl = alle('.wahl [data-thema]');
+  var wahl = alle('.wahl[aria-label="Darstellung"] [data-thema]');
   pruefe('D1 drei Möglichkeiten', wahl.map(function (b) { return b.textContent; }).join(',') ===
     'Automatisch,Hell,Dunkel');
   pruefe('D2 die gewählte ist gedrückt',
-    q('.wahl [aria-pressed="true"]').getAttribute('data-thema') === 'hell');
-  q('.wahl [data-thema="auto"]').click();
+    q('.wahl[aria-label="Darstellung"] [aria-pressed="true"]').getAttribute('data-thema') === 'hell');
+  q('.wahl[aria-label="Darstellung"] [data-thema="auto"]').click();
   pruefe('D3 «Automatisch» führt zurück zum Gerät', state.thema === 'auto' &&
     !document.documentElement.hasAttribute('data-thema'));
   pruefe('D4 und ist gemerkt', gespeichert() === 'auto');
   pruefe('D4a was nichts sichtbar ändert, tropft nicht', !document.documentElement.classList.contains('thema-tropft'));
   // Auch aus den Einstellungen tropft die neue Darstellung aus dem Knopf (ADR 0036).
-  var dk = q('.wahl [data-thema="dunkel"]'), dr = dk.getBoundingClientRect();
-  var ak = q('.wahl [data-thema="auto"]').getBoundingClientRect();
+  var dk = q('.wahl[aria-label="Darstellung"] [data-thema="dunkel"]'), dr = dk.getBoundingClientRect();
+  var ak = q('.wahl[aria-label="Darstellung"] [data-thema="auto"]').getBoundingClientRect();
   dk.click();
   pruefe('D4b «Dunkel» tropft aus seinem Knopf', document.documentElement.classList.contains('thema-tropft') &&
     Math.abs(parseFloat(document.documentElement.style.getPropertyValue('--thema-x')) - (dr.left + dr.width / 2)) < 2 &&
     Math.abs(parseFloat(document.documentElement.style.getPropertyValue('--thema-y')) - (dr.top + dr.height / 2)) < 2);
   // ADR 0037: Die Markierung gleitet von «Automatisch» zu «Dunkel», der Tropfen folgt ihr.
   var d0 = ausSpur(spur(0)), d1 = ausSpur(spur(1));
-  pruefe('D4c der Tropfen folgt der Markierung', q('.wahl .wahl-marke').style.viewTransitionName === 'thema-traeger' &&
-    alle('.wahl button').map(function (el) { return el.style.viewTransitionName; }).join(',') ===
+  pruefe('D4c der Tropfen folgt der Markierung', q('.wahl[aria-label="Darstellung"] .wahl-marke').style.viewTransitionName === 'thema-traeger' &&
+    alle('.wahl[aria-label="Darstellung"] button').map(function (el) { return el.style.viewTransitionName; }).join(',') ===
       'thema-oben-0,thema-oben-1,thema-oben-2' && gleich(d0, ak) && gleich(d1, { left: ak.left, right: dr.right, top: dr.top, bottom: dr.bottom }) && d0.rund === 12,
     spur(0) + ' ' + spur(1));
   return warte(THEMA_TROPFEN + 500);
 }).then(function () {
   pruefe('D4d die Markierung gleitet nicht doppelt und trägt danach keinen Namen',
-    q('.wahl .wahl-marke').getAnimations().length === 0 && !q('.wahl .wahl-marke').style.viewTransitionName &&
-    alle('.wahl button').every(function (el) { return !el.style.viewTransitionName; }));
+    q('.wahl[aria-label="Darstellung"] .wahl-marke').getAnimations().length === 0 && !q('.wahl[aria-label="Darstellung"] .wahl-marke').style.viewTransitionName &&
+    alle('.wahl[aria-label="Darstellung"] button').every(function (el) { return !el.style.viewTransitionName; }));
   pruefe('D5 «Dunkel» wirkt', grund() === 'rgb(20, 20, 19)' &&
-    q('.wahl [aria-pressed="true"]').getAttribute('data-thema') === 'dunkel' &&
+    q('.wahl[aria-label="Darstellung"] [aria-pressed="true"]').getAttribute('data-thema') === 'dunkel' &&
     !document.documentElement.classList.contains('thema-tropft'));
 
   // ── E · Chillingo bleibt liegen ───────────────────────────
