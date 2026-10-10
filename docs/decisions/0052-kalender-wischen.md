@@ -1,7 +1,7 @@
 # 0052 · Der Kalender folgt dem Finger
 
 *2026-10-10 · Wunsch des Nutzers (Ticket aus 0.14.0T), gewählt am Gerät aus der Wischprobe
-in 0.15.0T3 · Version 0.15.0T4 · ergänzt 0016, 0025; löst den Seitentropfen der Woche aus 0028
+in 0.15.0T3 · Version 0.15.0T4, abgenommen als 0.15.0 · ergänzt 0016, 0025; löst den Seitentropfen der Woche aus 0028
 und das Einblenden des Monats ab*
 
 ## Ausgangslage
