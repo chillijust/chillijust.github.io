@@ -1612,7 +1612,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.15.0T';
+var APP_VERSION = '0.15.0T2';
 var APP_STAND = '2026-10-10';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -3969,12 +3969,18 @@ function blattOffen() {
 }
 
 // Über dem Kalender blättert ein Wisch: nach links zur nächsten Woche oder zum
-// nächsten Monat, nach rechts zurück — wie die Pfeile, nur ohne zu zielen. Der
-// Rand bleibt dem Menü und dem Zurück; die Tagesliste wischt nicht, dort
-// liegen Zeilen unter dem Finger.
+// nächsten Monat, nach rechts zurück — wie die Pfeile, nur ohne zu zielen. Er
+// gilt auf der ganzen Karte unter Ring und Umschalter, bis an ihren Rand; nicht
+// auf den Pfeilen, die tippt man. Der Rand des Bildschirms bleibt dem Menü und
+// dem Zurück; die Tagesliste wischt nicht, dort liegen Zeilen unter dem Finger.
 var KAL_WISCH_WEG = 50;     // px waagerecht, ab denen der Kalender blättert
 var KAL_WISCH_STILL = 450;  // ms, in denen nach dem Blättern kein Tipp mehr zählt
 var kalGewischt = 0;        // wann zuletzt geblättert wurde
+
+function kalWischFlaeche(el) {
+  if (!el || !el.closest || !el.closest('.held') || !$('kalRaster')) return false;
+  return !el.closest('.held-kopf, #kalLeiste, #kalZurueck, #kalVor');
+}
 
 // Vom rechten Rand nach links, zum Menüknopf hin, öffnet das Menü — auf dem
 // Dashboard wie unterwegs (ADR 0025).
@@ -3984,7 +3990,7 @@ function wischBeginnen(e) {
   const t = e.touches[0], breite = window.innerWidth || document.documentElement.clientWidth;
   if (t.clientX <= WISCH_RAND) wischVon = { x: t.clientX, y: t.clientY, rechts: false };
   else if (t.clientX >= breite - WISCH_RAND) wischVon = { x: t.clientX, y: t.clientY, rechts: true };
-  else if (e.target.closest && e.target.closest('#kalRaster, .kal-kopf, .kal-wtage')) {
+  else if (kalWischFlaeche(e.target)) {
     wischVon = { x: t.clientX, y: t.clientY, kal: true };
   }
 }
@@ -4011,7 +4017,7 @@ function wischEnden(e) {
 // Browser zum Wisch doch einen Tipp nach, wählte er ihn — der fällt weg.
 function kalTippNachWisch(e) {
   if (Date.now() - kalGewischt > KAL_WISCH_STILL) return;
-  if (!e.target.closest || !e.target.closest('#kalRaster, .kal-kopf')) return;
+  if (!kalWischFlaeche(e.target)) return;
   e.preventDefault();
   e.stopPropagation();
 }

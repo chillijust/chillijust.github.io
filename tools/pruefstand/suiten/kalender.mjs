@@ -207,6 +207,17 @@ wischUeber(q('#kalRaster'), 120, 0);
 pruefe('S2 nach rechts: zurück, auch vor heute', kalVersatz === -1 && /KW 41/.test(q('#kalHeute').textContent), kalVersatz);
 wischUeber(q('.kal-kopf'), -120, 0);
 pruefe('S3 auch über dem Kopf des Kalenders', kalVersatz === 0 && !!q('#kalTitel'));
+// Die ganze Karte unter Ring und Umschalter wischt, bis an ihren Rand (0.15.0T2).
+wischUeber(q('.kal-wtage'), -120, 0);
+pruefe('S3b über den Wochentagen', kalVersatz === 1);
+wischUeber(q('.held'), 120, 0);
+pruefe('S3c auf dem Rand der Karte', kalVersatz === 0);
+wischUeber(q('#kalVor'), -120, 0);
+wischUeber(q('#kalZurueck'), 120, 0);
+pruefe('S3d nicht auf den Pfeilen', kalVersatz === 0);
+wischUeber(q('.held-kopf'), -120, 0);
+pruefe('S3e nicht auf Ring und Umschalter', kalVersatz === 0);
+kalGewischt = 0;
 wischUeber(q('#kalRaster'), -30, 0);
 pruefe('S4 zu kurz: nichts', kalVersatz === 0);
 wischUeber(q('#kalRaster'), -80, 90);

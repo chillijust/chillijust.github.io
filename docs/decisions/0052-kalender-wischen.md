@@ -10,9 +10,11 @@ bisher nur vom Rand: links zurück (0016), rechts zum Menü (0025).
 
 ## Entscheidung
 
-- **Ein waagerechter Wisch über Raster, Kopf oder Wochentage blättert**: nach links zur
-  nächsten Woche oder zum nächsten Monat, nach rechts zurück — genau wie die Pfeile, über
-  `kalBlaettern`, mit derselben Bewegung (0028).
+- **Ein waagerechter Wisch über der Karte blättert** — überall unter Ring und Umschalter,
+  bis an ihren Rand, nur nicht auf den beiden Pfeilen (`kalWischFlaeche`; in 0.15.0T2 vom
+  Nutzer am Gerät so umrissen): nach links zur nächsten Woche oder zum nächsten Monat,
+  nach rechts zurück — genau wie die Pfeile, über `kalBlaettern`, mit derselben Bewegung
+  (0028).
 - **Er wirkt beim Loslassen**, wie der Randwisch: mindestens 50 px waagerecht
   (`KAL_WISCH_WEG`), und waagerecht muß überwiegen (senkrecht höchstens 0,7-mal so weit),
   sonst rollte die Seite.
