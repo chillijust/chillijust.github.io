@@ -1377,15 +1377,18 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 .zeichnet[data-zeichen="hinweis"][data-variante="d"] .zv-punkt { animation: zv-tropfen .5s .12s cubic-bezier(.35, 0, .3, 1) both; }
 .zeichnet[data-zeichen="hinweis"][data-variante="d"] .zv-i { animation: z-zeichnen .26s .56s cubic-bezier(.45, 0, .25, 1) both; }
 .zeichnet[data-zeichen="hinweis"][data-variante="d"] .zv-puls { animation: zv-puls .36s .8s ease-out forwards; }
-.zeichnet[data-zeichen="warnung"][data-variante="d"] .zv-wackeln { animation: zv-wackeln .62s .08s ease-in-out both; }
-.zeichnet[data-zeichen="warnung"][data-variante="d"] .zv-puls { animation: zv-puls .42s .68s ease-out forwards; }
+.zeichnet[data-zeichen="warnung"][data-variante="d"] .zv-dreieck { animation: z-zeichnen .42s cubic-bezier(.45, 0, .25, 1) both; }
+.zeichnet[data-zeichen="warnung"][data-variante="d"] .zv-ausruf { animation: z-zeichnen .22s .38s cubic-bezier(.45, 0, .25, 1) both; }
+.zeichnet[data-zeichen="warnung"][data-variante="d"] .zv-punkt { animation: zv-steigen .2s .58s cubic-bezier(.2, .7, .3, 1) both; }
+.zeichnet[data-zeichen="warnung"][data-variante="d"] .zv-puls { animation: zv-puls .4s .76s ease-out forwards; }
+/* Kopiert D: Beide Blätter zeichnen sich übereinander, erst dann fächern sie auf. */
 .zeichnet[data-zeichen="kopie"][data-variante="d"] .zv-hinten {
-  animation: z-zeichnen .36s cubic-bezier(.45, 0, .25, 1) both, zv-hinten .5s .08s cubic-bezier(.35, 0, .25, 1) both;
+  animation: z-zeichnen .32s cubic-bezier(.45, 0, .25, 1) both, zv-hinten .36s .48s cubic-bezier(.35, 0, .25, 1) both;
 }
 .zeichnet[data-zeichen="kopie"][data-variante="d"] .zv-vorn {
-  animation: z-zeichnen .36s .18s cubic-bezier(.45, 0, .25, 1) both, zv-vorn .5s .08s cubic-bezier(.35, 0, .25, 1) both;
+  animation: z-zeichnen .32s .16s cubic-bezier(.45, 0, .25, 1) both, zv-vorn .36s .48s cubic-bezier(.35, 0, .25, 1) both;
 }
-.zeichnet[data-zeichen="kopie"][data-variante="d"] .zv-puls { animation: zv-puls .42s .6s ease-out forwards; }
+.zeichnet[data-zeichen="kopie"][data-variante="d"] .zv-puls { animation: zv-puls .34s .82s ease-out forwards; }
 .zeichnet[data-zeichen="laden"][data-variante="d"] .zv-schale {
   animation: z-zeichnen .32s cubic-bezier(.45, 0, .25, 1) both, zv-tauchen .28s .66s ease-in-out both;
 }
@@ -1709,7 +1712,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.13.3T2';
+var APP_VERSION = '0.13.3T3';
 var APP_STAND = '2026-10-10';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -3054,14 +3057,15 @@ function zeichenProbe(zeichen, variante) {
       '<path class="zv-strich zv-schale" pathLength="1" d="' + schale + '"/>',
     'laden:c': scheibe + '<circle class="zv-strich zv-fortschritt" pathLength="1" cx="12" cy="12" r="19"/>' + pfeil +
       '<path d="' + schale + '"/>',
-    // D: Haken wie B, Hinweis wie B mit gezeichnetem Kreis, Warnung wie B,
-    // Kopiert wie A mit Zeichnen, Laden: die Schale zeichnet sich, der Pfeil
-    // fliegt hinein wie bei C, die Schale gibt nach wie bei A.
+    // D: Haken wie B, Hinweis wie B mit gezeichnetem Kreis, Warnung wie A,
+    // Kopiert erst gezeichnet, dann gefächert wie A, Laden: die Schale
+    // zeichnet sich, der Pfeil fliegt hinein wie bei C, die Schale gibt nach
+    // wie bei A.
     'haken:d': '<circle class="zv-strich zv-kreis" pathLength="1" cx="12" cy="12" r="21"/>' + scheibe + puls + haken,
     'hinweis:d': scheibe + puls + '<circle class="zv-strich zv-rand" pathLength="1" cx="12" cy="12" r="9"/>' +
       '<path class="zv-strich zv-i" pathLength="1" d="M12 11v5"/>' + punkt(7.5, 'zv-punkt'),
-    'warnung:d': scheibe + puls + '<g class="zv-wackeln"><path d="' + dreieck + '"/><path d="' + ausruf + '"/>' +
-      punkt(16.6) + '</g>',
+    'warnung:d': scheibe + puls + '<path class="zv-strich zv-dreieck" pathLength="1" d="' + dreieck + '"/>' +
+      '<path class="zv-strich zv-ausruf" pathLength="1" d="' + ausruf + '"/>' + punkt(16.6, 'zv-punkt'),
     'kopie:d': scheibe + puls + '<path class="zv-strich zv-hinten" pathLength="1" d="' + hinten + '"/>' +
       '<rect class="zv-strich zv-vorn" pathLength="1" ' + vorn + '/>',
     'laden:d': scheibe + puls + pfeil + '<path class="zv-strich zv-schale" pathLength="1" d="' + schale + '"/>'

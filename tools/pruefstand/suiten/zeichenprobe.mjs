@@ -1,4 +1,4 @@
-// Zeichenprobe (0.13.3T): Am Ende des Dashboards steht je Zeichen das heutige und
+// Zeichenprobe (0.13.3T, D nachgebessert in 0.13.3T3): Am Ende des Dashboards steht je Zeichen das heutige und
 // drei neue Fassungen zur Wahl, dazu D aus der Wahl des Nutzers (0.13.3T2) — Haken, Hinweis, Warnung (neu), Kopiert,
 // Datei geladen. Ein Tipp zeigt die Fassung in einer echten Meldung; jede
 // bewegt sich und ist fertig, bevor die Bestätigung geht. Danach trägt eine
@@ -80,8 +80,22 @@ pruefe('D5 der Puls zeigt sich nicht, solange er wartet', alle('#zeichenProbe .z
 var hd = q('#zeichenProbe [data-probe="hinweis:d"] .hinweis-haken');
 pruefe('D2 Hinweis D: der Kreis um das i zeichnet sich, der Punkt fällt', getComputedStyle(hd.querySelector('.zv-rand')).animationName === 'z-zeichnen' &&
   getComputedStyle(hd.querySelector('.zv-punkt')).animationName === 'zv-tropfen');
-var kd = getComputedStyle(q('#zeichenProbe [data-probe="kopie:d"] .zv-vorn')).animationName;
-pruefe('D3 Kopiert D: das Blatt fächert und zeichnet sich zugleich', /z-zeichnen/.test(kd) && /zv-vorn/.test(kd), kd);
+// Kopiert D zeichnet erst, dann fächert es (0.13.3T3): Jede Verschiebung
+// beginnt, wenn das letzte Blatt gezeichnet ist.
+function laeufe(el) {
+  var st = getComputedStyle(el), w = st.animationDelay.split(','), d = st.animationDuration.split(',');
+  return st.animationName.split(',').map(function (n, i) { return { name: n.trim(), von: parseFloat(w[i]), bis: parseFloat(w[i]) + parseFloat(d[i]) }; });
+}
+var kopieD = ['.zv-hinten', '.zv-vorn'].map(function (sel) { return laeufe(q('#zeichenProbe [data-probe="kopie:d"] ' + sel)); });
+var gezeichnet = Math.max.apply(null, kopieD.map(function (l) { return l.filter(function (x) { return x.name === 'z-zeichnen'; })[0].bis; }));
+pruefe('D3 Kopiert D: erst zeichnen sich beide Blätter, dann fächern sie auf', kopieD.every(function (l) {
+  var f = l.filter(function (x) { return x.name !== 'z-zeichnen'; });
+  return f.length === 1 && f[0].von >= gezeichnet - 0.001;
+}), JSON.stringify(kopieD));
+var wd = q('#zeichenProbe [data-probe="warnung:d"] .hinweis-haken');
+pruefe('D6 Warnung D zeichnet sich wie A, ohne zu wackeln', !wd.querySelector('.zv-wackeln') &&
+  getComputedStyle(wd.querySelector('.zv-dreieck')).animationName === 'z-zeichnen' &&
+  getComputedStyle(wd.querySelector('.zv-ausruf')).animationName === 'z-zeichnen');
 var ld = q('#zeichenProbe [data-probe="laden:d"] .hinweis-haken');
 var schale = getComputedStyle(ld.querySelector('.zv-schale')).animationName;
 pruefe('D4 Laden D: die Schale zeichnet sich und gibt nach, der Pfeil fliegt hinein', /z-zeichnen/.test(schale) &&
