@@ -223,8 +223,8 @@ return durch().then(function () {
   var st = getComputedStyle(kw[1], '::after'), strich = kw[1].querySelector('span').getBoundingClientRect();
   pruefe('K3 der Strich läuft waagrecht durch den ganzen Kalender', st.content !== 'none' && parseFloat(st.height) === 1 &&
     k41.right >= so.right - 4 && k41.width > mo.width * 6, [st.content, st.height, k41.right, so.right].join(' '));
-  pruefe('K4 die Wochentage stehen über ihren Tagen, ohne Spalte davor', alle('.held .kal-wtage .kal-wt').length === 7 &&
-    Math.abs(mitte(alle('.held .kal-wtage .kal-wt')[0].getBoundingClientRect()).x - mitte(mo).x) < 1);
+  pruefe('K4 die Wochentage stehen über ihren Tagen, ohne Spalte davor', alle('#kalSpur [data-rolle="jetzt"] .kal-wt').length === 7 &&
+    Math.abs(mitte(alle('#kalSpur [data-rolle="jetzt"] .kal-wt')[0].getBoundingClientRect()).x - mitte(mo).x) < 1);
   pruefe('K5 Trefferflächen im Monat', zuKlein('#app').length === 0, zuKlein('#app').join());
   pruefe('K6 die Woche nennt die KW im Titel, nicht im Raster', (q('[data-kalender="woche"]').click(),
     !q('#kalRaster .kal-kw-zeile') && /KW 42/.test(q('#kalTitel, #kalHeute').textContent)));
@@ -304,64 +304,67 @@ return durch().then(function () {
   frisch();
   return durch();
 }).then(function () {
-  // ── S · Woche blättern tropft zur Seite (ADR 0028) ─────────
+  // ── S · Blättern tropft zur Seite (ADR 0028, seit 0052 am Finger) ──
+  // Der neue Stand steht sofort; die alte Seite liegt daneben und tropft ab,
+  // die neue quillt vom anderen Rand.
   aufbauen();
   state.kalender = 'woche';
   zeige('home');
   ausbewegt();
+  function rolle(r) { return q('#kalSpur [data-rolle="' + r + '"]'); }
+  function titelVon(r) { return rolle(r).querySelector('.kal-titel').textContent; }
+  var RUHE = KAL_WISCH_DAUER + 300, breiten = [];
   q('#kalVor').click();
-  var g = geistDa(), gb = bilder(g), nb = bilder(q('#kalRaster')), na = q('#kalRaster').getAnimations()[0];
-  pruefe('S1 vor: die alte Woche tropft nach links ab', !!g && seite(gb[gb.length - 1].clipPath) === 'links' &&
-    gb[gb.length - 1].opacity === '0' && /translateX\(-/.test(gb[gb.length - 1].transform), gb.length ? gb[gb.length - 1].clipPath : 'kein Geist');
-  pruefe('S2 die neue tropft von rechts auf, kurz danach', seite((nb[0] || {}).clipPath) === 'rechts' && nb[0].opacity === '0' &&
-    /^inset\(0px( 0px)*( round 0px)?\)$/.test(nb[nb.length - 1].clipPath) && !!na && na.effect.getTiming().delay > 0 &&
-    na.effect.getTiming().fill === 'backwards' && kalVersatz === 1, nb.length ? nb[0].clipPath : 'keine');
-  pruefe('S3 ohne das alte Einblenden', !q('#kalRaster').classList.contains('neu'));
-  // Ticket zu 0.9.1T: Ragt etwas über den Rand, wird die Seite breiter, und iOS
-  // verkleinert die ganze Ansicht, solange es dauert (ADR 0029).
-  var breiten = [0, 0.25, 0.5, 0.75].map(function (t) {
-    document.getAnimations().forEach(function (an) { try { an.currentTime = t * 900; } catch (e) { /* egal */ } });
-    return document.documentElement.scrollWidth;
+  pruefe('S1 vor: der neue Stand steht sofort, die neue Woche ist noch Perle am rechten Rand', kalVersatz === 1 &&
+    seite(rolle('jetzt').style.clipPath) === 'rechts' && rolle('jetzt').style.opacity === '0' &&
+    getComputedStyle(rolle('davor')).visibility === 'visible' && /KW 42/.test(titelVon('davor')), rolle('jetzt').style.clipPath);
+  breiten.push(document.documentElement.scrollWidth);
+  return warten(KAL_WISCH_DAUER * 0.25).then(function () {
+    var alt = rolle('davor');
+    breiten.push(document.documentElement.scrollWidth);
+    pruefe('S2 dann tropft die alte nach links ab', seite(alt.style.clipPath) === 'links' && /translateX\(-/.test(alt.style.transform),
+      alt.style.clipPath);
+    pruefe('S3 ohne Geist und ohne das alte Einblenden', !geistDa() && !q('#kalRaster').getAnimations().length);
+    return warten(KAL_WISCH_DAUER * 0.25);
+  }).then(function () {
+    breiten.push(document.documentElement.scrollWidth);
+    // Ticket zu 0.9.1T: Ragt etwas über den Rand, wird die Seite breiter, und
+    // iOS verkleinert die ganze Ansicht, solange es dauert (ADR 0029).
+    pruefe('S9 beim Blättern wird die Seite nie breiter als der Bildschirm', breiten.every(function (b) {
+      return b <= innerWidth; }), breiten.join() + ' / ' + innerWidth);
+    return warten(RUHE);
+  }).then(function () {
+    pruefe('S4 danach steht alles still', ['jetzt', 'davor', 'danach'].every(function (r) {
+      var e = rolle(r); return !e.style.clipPath && !e.style.transform && !e.style.opacity;
+    }) && !q('#kalSpur').style.height && getComputedStyle(rolle('davor')).visibility === 'hidden');
+    q('#kalZurueck').click();
+    pruefe('S5 zurück: die neue quillt von links, die alte liegt rechts daneben', kalVersatz === 0 &&
+      seite(rolle('jetzt').style.clipPath) === 'links' && getComputedStyle(rolle('danach')).visibility === 'visible');
+    return warten(RUHE);
+  }).then(function () {
+    kalVersatz = 2;
+    render();
+    zuHeute();
+    pruefe('S6 «Heute» aus einer späteren Woche: die alte liegt rechts daneben, auch wenn sie nicht die nächste ist',
+      kalVersatz === 0 && seite(rolle('jetzt').style.clipPath) === 'links' && /KW 44/.test(titelVon('danach')), titelVon('danach'));
+    return warten(RUHE);
+  }).then(function () {
+    state.kalender = 'monat';
+    kalTag = null;
+    render();
+    q('#kalVor').click();
+    pruefe('S7 der Monat tropft genauso', kalVersatz === 1 && seite(rolle('jetzt').style.clipPath) === 'rechts' &&
+      /Oktober/.test(titelVon('davor')));
+    return warten(RUHE);
+  }).then(function () {
+    state.bewegung = 'aus';
+    state.kalender = 'woche';
+    render();
+    q('#kalVor').click();
+    pruefe('S8 bei abgeschalteter Bewegung tropft nichts', !rolle('jetzt').style.clipPath && !geistDa());
+    state.bewegung = 'auto';
+    return durch();
   });
-  pruefe('S9 beim Blättern wird die Seite nie breiter als der Bildschirm', breiten.every(function (b) {
-    return b <= innerWidth; }), breiten.join() + ' / ' + innerWidth);
-  return durch();
-}).then(function () {
-  var g, gb, nb;
-  pruefe('S4 der Geist ist danach fort', !geistDa());
-  q('#kalZurueck').click();
-  g = geistDa(); gb = bilder(g); nb = bilder(q('#kalRaster'));
-  pruefe('S5 zurück: die alte nach rechts ab, die neue von links auf', !!g && seite(gb[gb.length - 1].clipPath) === 'rechts' &&
-    seite((nb[0] || {}).clipPath) === 'links' && kalVersatz === 0);
-  return durch();
-}).then(function () {
-  q('#kalVor').click();
-  return durch();
-}).then(function () {
-  q('#kalVor').click();
-  return durch();
-}).then(function () {
-  var g, gb, nb;
-  zuHeute();
-  g = geistDa(); gb = bilder(g); nb = bilder(q('#kalRaster'));
-  pruefe('S6 «Heute» aus einer späteren Woche blättert zurück: nach rechts ab, von links auf', !!g &&
-    seite(gb[gb.length - 1].clipPath) === 'rechts' && seite((nb[0] || {}).clipPath) === 'links' && kalVersatz === 0);
-  return durch();
-}).then(function () {
-  state.kalender = 'monat';
-  render();
-  ausbewegt();
-  q('#kalVor').click();
-  pruefe('S7 der Monat blendet wie bisher ein, ohne Seitentropfen', !geistDa() && q('#kalRaster').classList.contains('neu'));
-  return durch();
-}).then(function () {
-  state.bewegung = 'aus';
-  state.kalender = 'woche';
-  render();
-  q('#kalVor').click();
-  pruefe('S8 bei abgeschalteter Bewegung tropft nichts', !geistDa() && !q('#kalRaster').getAnimations().length);
-  state.bewegung = 'auto';
-  return durch();
 }).then(function () {
   frisch();
   speichern();

@@ -681,8 +681,6 @@ button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
 }
 .kal-kw-zeile::after { content: ''; flex: 1; height: 1px; background: var(--linie); opacity: .6; }
 .kal-wtage { margin-bottom: 3px; }
-.kal-raster.neu { animation: kalNeu .3s ease; }
-@keyframes kalNeu { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 .kal-wt {
   text-align: center;
   font-family: 'Poppins', system-ui, sans-serif;
@@ -757,41 +755,27 @@ button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
 /* Im Monat steht der Rahmen nicht knapp unter den Punkten (ADR 0026). */
 .kal-raster.monat .kal-tag { padding: 5px 0 9px; }
 .kal-tag.fremd { visibility: hidden; }
-/* ── Wischprobe (0.15.0T3) ─────────────────────────────────── */
-/* Drei kleine Kalender zur Wahl am Ende des Dashboards. Die Pfeile liegen über
-   der Titelzeile und bleiben stehen; darunter gleiten die Seiten. Das Fenster
-   reicht bis an den Rand der Karte und schneidet dort ab — was hinausgleitet,
-   macht die Seite nicht breiter (ADR 0029). */
-.wp-wahlen { display: flex; flex-direction: column; gap: 10px; }
-.wp-text { margin: 0; font-size: 15px; color: var(--text-2); line-height: 1.4; }
-.wp-karte { margin-top: 12px; padding: 16px 14px 14px; }
-.wp-name { margin: 0 4px; font-family: var(--sans); font-size: 15px; font-weight: 600; }
-.wp-karte .wp-text { margin: 2px 4px 10px; font-size: 14px; }
-.wp-rahmen { position: relative; }
-/* Die Pfeile tragen die Farbe der Karte und einen weichen Saum: Der Titel
-   gleitet unter ihnen durch, statt sich mit ihnen zu kreuzen. */
-.wp-pfeil { position: absolute; top: 0; z-index: 2; background: var(--flaeche); box-shadow: 0 0 10px 8px var(--flaeche); }
-.wp-pfeil[data-wp-schritt="-1"] { left: 0; }
-.wp-pfeil[data-wp-schritt="1"] { right: 0; }
-.wp-fenster {
-  overflow: hidden;
-  margin: 0 -14px;
-  padding: 0 14px;
-  touch-action: pan-y;
-  -webkit-user-select: none;
-  user-select: none;
-}
-.wp-spur { position: relative; }
-.wp-seite[data-rolle="davor"], .wp-seite[data-rolle="danach"] {
+/* Blättern (ADR 0052): Die Pfeile tragen die Farbe der Karte und einen weichen
+   Saum — der Titel gleitet unter ihnen durch, statt sich mit ihnen zu kreuzen.
+   Das Fenster reicht bis an den Rand der Karte und schneidet dort ab; was
+   hinausgleitet, macht die Seite nicht breiter (ADR 0029). Senkrecht rollt
+   die Seite, waagerecht zieht der Finger den Kalender. */
+.held { touch-action: pan-y; }
+.kal-rahmen { position: relative; }
+.kal-pfeil { position: absolute; top: 10px; z-index: 2; background: var(--flaeche); box-shadow: 0 0 10px 8px var(--flaeche); }
+#kalZurueck { left: 0; }
+#kalVor { right: 0; }
+.kal-fenster { overflow: hidden; margin: 0 -14px; padding: 0 14px; -webkit-user-select: none; user-select: none; }
+.kal-spur { position: relative; }
+.kal-seite[data-rolle="davor"], .kal-seite[data-rolle="danach"] {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   visibility: hidden;
 }
-.wp-seite { will-change: transform; }
-.wp-titel { display: flex; padding: 0 52px; margin-bottom: 6px; }
-.wp-titel .kal-titel.weg { background: var(--flaeche-2); }
+.kal-titelzeile { display: flex; padding: 10px 48px 0; margin-bottom: 6px; }
+.kal-titel.weg { background: var(--flaeche-2); margin: 0 6px; }
 .kal-leiste { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--flaeche-2); }
 .kal-leiste-kopf { font-family: 'Poppins', system-ui, sans-serif; font-weight: 600; font-size: 15px; margin: 0 4px 6px; }
 .kal-zeile {
@@ -1651,7 +1635,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.15.0T3';
+var APP_VERSION = '0.15.0T4';
 var APP_STAND = '2026-10-10';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -4007,14 +3991,12 @@ function blattOffen() {
   return !$('menue').hidden || !$('hinweisBlatt').hidden || !$('ticketBlatt').hidden;
 }
 
-// Über dem Kalender blättert ein Wisch: nach links zur nächsten Woche oder zum
-// nächsten Monat, nach rechts zurück — wie die Pfeile, nur ohne zu zielen. Er
-// gilt auf der ganzen Karte unter Ring und Umschalter, bis an ihren Rand; nicht
-// auf den Pfeilen, die tippt man. Der Rand des Bildschirms bleibt dem Menü und
-// dem Zurück; die Tagesliste wischt nicht, dort liegen Zeilen unter dem Finger.
-var KAL_WISCH_WEG = 50;     // px waagerecht, ab denen der Kalender blättert
-var KAL_WISCH_STILL = 450;  // ms, in denen nach dem Blättern kein Tipp mehr zählt
-var kalGewischt = 0;        // wann zuletzt geblättert wurde
+// Über dem Kalender zieht ein Wisch die Seite mit (kalDruck, ADR 0052) — auf
+// der ganzen Karte unter Ring und Umschalter, bis an ihren Rand; nicht auf den
+// Pfeilen, die tippt man. Der Rand des Bildschirms bleibt dem Menü und dem
+// Zurück; die Tagesliste wischt nicht, dort liegen Zeilen unter dem Finger.
+var KAL_WISCH_STILL = 450;  // ms, in denen nach dem Ziehen kein Tipp mehr zählt
+var kalGewischt = 0;        // wann zuletzt gezogen wurde
 
 function kalWischFlaeche(el) {
   if (!el || !el.closest || !el.closest('.held') || !$('kalRaster')) return false;
@@ -4029,22 +4011,12 @@ function wischBeginnen(e) {
   const t = e.touches[0], breite = window.innerWidth || document.documentElement.clientWidth;
   if (t.clientX <= WISCH_RAND) wischVon = { x: t.clientX, y: t.clientY, rechts: false };
   else if (t.clientX >= breite - WISCH_RAND) wischVon = { x: t.clientX, y: t.clientY, rechts: true };
-  else if (kalWischFlaeche(e.target)) {
-    wischVon = { x: t.clientX, y: t.clientY, kal: true };
-  }
 }
 
 function wischEnden(e) {
   const von = wischVon, t = e.changedTouches && e.changedTouches[0];
   wischVon = null;
   if (!von || !t || blattOffen()) return;
-  if (von.kal) {
-    const dx = t.clientX - von.x, hoch = Math.abs(t.clientY - von.y);
-    if (Math.abs(dx) < KAL_WISCH_WEG || hoch > Math.abs(dx) * 0.7 || !$('kalRaster')) return;
-    kalGewischt = Date.now();
-    kalBlaettern(kalVersatz + (dx < 0 ? 1 : -1));
-    return;
-  }
   const quer = von.rechts ? von.x - t.clientX : t.clientX - von.x, hoch = Math.abs(t.clientY - von.y);
   // Waagerecht muß deutlich überwiegen, sonst war es ein Blättern.
   if (quer < WISCH_WEG || hoch > quer * 0.7) return;
@@ -4052,8 +4024,8 @@ function wischEnden(e) {
   else zurueckGehen();
 }
 
-// Nach dem Blättern liegt unter dem Finger ein anderer Tag. Schickt der
-// Browser zum Wisch doch einen Tipp nach, wählte er ihn — der fällt weg.
+// Nach dem Ziehen liegt unter dem Finger ein anderer Tag. Schickt der Browser
+// zum Wisch doch einen Tipp nach, wählte er ihn — der fällt weg.
 function kalTippNachWisch(e) {
   if (Date.now() - kalGewischt > KAL_WISCH_STILL) return;
   if (!kalWischFlaeche(e.target)) return;
@@ -4089,8 +4061,7 @@ function zeichneHome() {
     (frei.length ? '<section class="abschnitt"><h2>Heute nicht dran</h2><div class="gw-liste gedimmt">' +
       frei.map(zeichneKachel).join('') + '</div></section>' : '') +
     (laster.length ? '<section class="abschnitt"><h2>Abgewöhnen</h2><div class="gw-liste">' +
-      laster.map(zeichneLasterKachel).join('') + '</div></section>' : '') +
-    zeichneWischProbe(heute);
+      laster.map(zeichneLasterKachel).join('') + '</div></section>' : '');
 }
 
 // Oben eine Karte für heute und die Tage drumherum: die Chili im Tagesring,
@@ -4263,7 +4234,6 @@ function zeichneGewohnheitLeer() {
 // NACHTRAG_TAGE zurück lassen sich die Gewohnheiten nachtragen.
 var kalVersatz = 0;        // Wochen oder Monate von heute aus
 var kalTag = null;         // der angetippte Tag, null = keiner
-var kalGewechselt = false; // das Raster ist eben neu — es darf einblenden
 
 var MON_KURZ = ['Jan.', 'Feb.', 'März', 'Apr.', 'Mai', 'Juni', 'Juli', 'Aug.', 'Sep.', 'Okt.', 'Nov.', 'Dez.'];
 
@@ -4420,53 +4390,194 @@ function kalFliessen(anker, vorher) {
     { dauer: KAL_TAKT.dauer, kurve: KAL_TAKT.kurve, fill: 'forwards' }, function () { weg(g); });
 }
 
-// Woche vor oder zurück: Die alte Woche zieht sich zur Perle zusammen und
-// tropft zur Seite ab, die neue quillt von der anderen Seite als Perle herein
-// und streckt sich zur Zeile — vor nach links, zurück nach rechts (ADR 0028).
-// `vorher`: Geist und Lage der alten Woche, vor dem Neuzeichnen genommen.
-function kalSeitlich(richtung, vorher) {
-  var raster = $('kalRaster');
-  if (!raster || !vorher || bewegungAus()) return;
-  var ab = richtung > 0 ? -1 : 1, her = -ab, r = raster.getBoundingClientRect(), a = vorher.rect, g = vorher.geist;
-  // Eine Perle am Rand der Seite `seite` (-1 links, 1 rechts), so hoch wie die Zeile erlaubt.
-  function perle(w, h, seite) {
-    var d = Math.min(h, 44), rand = px((h - d) / 2);
-    return 'inset(' + rand + ' ' + (seite < 0 ? px(w - d) + ' ' + rand + ' 0px' : '0px ' + rand + ' ' + px(w - d)) +
-      ' round ' + px(d / 2) + ')';
-  }
-  function bauch(seite) { return 'inset(4px ' + (seite < 0 ? '38% 4px 0px' : '0px 4px 38%') + ' round 40px)'; }
-  function schub(w, seite, t) { return 'translateX(' + px(seite * Math.min(48, w * 0.12) * t) + ')'; }
-  var voll = 'inset(0px 0px 0px 0px round 0px)';
-  if (g) {
-    g.style.cssText = 'position: fixed; margin: 0; left: ' + px(a.left) + '; top: ' + px(a.top) + '; width: ' +
-      px(a.width) + '; z-index: 2;';
-    document.body.appendChild(g);
-    bewegt(g, [{ clipPath: voll, transform: 'none', opacity: 1 },
-      { clipPath: bauch(ab), transform: schub(a.width, ab, 0.4), opacity: 1, offset: 0.5 },
-      { clipPath: perle(a.width, a.height, ab), transform: schub(a.width, ab, 1), opacity: 0 }],
-      { dauer: KAL_TAKT.dauer, kurve: KAL_TAKT.kurve, fill: 'forwards' }, function () { weg(g); });
-  }
-  // Die neue Woche rückt nicht von außen herein, sie quillt nur aus der Perle
-  // am Rand: Was über den Rand ragt, macht die Seite breiter, und iOS
-  // verkleinert dann die ganze Ansicht (ADR 0029). Der Geist darf wandern — er
-  // steht fest und zählt nicht zur Breite.
-  bewegt(raster, [{ clipPath: perle(r.width, r.height, her), opacity: 0 },
-    { clipPath: bauch(her), opacity: 1, offset: 0.5 },
-    { clipPath: voll, opacity: 1 }],
-    { dauer: KAL_TAKT.dauer, warten: Math.round(KAL_TAKT.dauer * 0.3), kurve: KAL_TAKT.kurve, fill: 'backwards' });
+// ── Blättern: der Kalender folgt dem Finger (ADR 0052) ──────────
+// Die Seite des Kalenders — Titel, Wochentage, Tage — liegt mit ihren beiden
+// Nachbarn (davor, danach) übereinander in der Spur; die Pfeile liegen
+// darüber und bleiben stehen. Ein Wisch zieht die Seite mit: Sie wird bauchig,
+// zieht sich zur Perle auf der Seite, zu der der Finger zieht, und tropft ab;
+// die neue quillt aus einer Perle am anderen Rand. Losgelassen wird nach Weg
+// oder Schwung geblättert, sonst federt die Seite zurück. Pfeile und «zurück
+// zu heute» spielen dieselbe Bewegung.
+//
+// Gezeichnet wird sofort (ADR 0007): Beim Blättern steht der neue Stand, und
+// die Bewegung legt sich darüber. Das geht, weil die Bewegung symmetrisch ist —
+// eine Seite, die zum Anteil t nach links geht, sieht genau so aus wie eine,
+// die zum Anteil 1 − t von links kommt. Der Versatz `p` (px, nach links
+// negativ) läßt sich so beim Neuzeichnen an der anderen Seite fortsetzen.
+var KAL_WISCH_DAUER = 560;   // ms für eine ganze Seite
+var KAL_ZURUECK = 260;       // ms, mit denen eine nicht geblätterte Seite zurückfedert
+var KAL_WEG = 0.3;           // Anteil der Breite, ab dem Loslassen blättert
+var KAL_SCHWUNG = 0.45;      // px/ms, ab denen auch ein kurzer Schubs blättert
+var kalZiehen = null;        // der Finger, der gerade zieht
+var kalLauf = 0;             // Zähler der laufenden Bewegung; wer neu beginnt, zählt hoch
+var kalLaeuft = false;
+
+// Eine Nachbarseite, nur zum Ansehen.
+function kalBildSeite(versatz, heute, rolle) {
+  var b = kalBereichFuer(state.kalender, versatz, heute);
+  return '<div class="kal-seite" data-rolle="' + rolle + '" aria-hidden="true">' +
+    '<div class="kal-titelzeile"><span class="kal-titel' + (versatz ? ' weg' : '') + '">' + esc(b.titel) + '</span></div>' +
+    kalWtageHtml() +
+    '<div class="kal-raster ' + (b.monat === null ? 'woche' : 'monat') + '">' + kalTageHtml(b, heute, true) + '</div></div>';
 }
 
-// Vor, zurück oder zu «diese Woche»: In der Woche tropft es zur Seite, der
-// Monat blendet wie bisher ein.
+// Was eine Bewegung braucht: die drei Seiten, ihre Höhen, die Breite.
+function kalMessen() {
+  var spur = $('kalSpur');
+  if (!spur) return null;
+  var m = { spur: spur, w: spur.clientWidth, h: {} };
+  ['jetzt', 'davor', 'danach'].forEach(function (r) {
+    m[r] = spur.querySelector('[data-rolle="' + r + '"]');
+    m.h[r] = m[r].offsetHeight;
+  });
+  return m;
+}
+
+// Eine Seite, die zum Anteil `t` zur Seite `seite` (-1 links, 1 rechts) geht.
+// Erst geht sie, dann kommt die neue: Sie blendet zwischen 0,15 und 0,75 aus.
+function kalGehen(el, seite, t, w, h) {
+  if (t <= 0) { el.style.clipPath = ''; el.style.transform = ''; el.style.opacity = ''; return; }
+  el.style.clipPath = kalPerle(w, h, seite, t);
+  el.style.transform = 'translateX(' + px(seite * Math.min(48, w * 0.12) * t) + ')';
+  el.style.opacity = String(Math.max(0, Math.min(1, 1 - (t - 0.15) / 0.6)));
+}
+
+// Auf dem Weg zur Perle am Rand `seite`: bei 0 ganz, bei der Hälfte bauchig
+// zur Seite gezogen, bei 1 die Perle (ADR 0028).
+function kalPerle(w, h, seite, e) {
+  var d = Math.min(h, 44), oben, fern, r;
+  if (e <= 0.5) {
+    var a = e / 0.5;
+    oben = 4 * a; fern = w * 0.38 * a; r = 40 * a;
+  } else {
+    var b = (e - 0.5) / 0.5;
+    oben = 4 + ((h - d) / 2 - 4) * b; fern = w * 0.38 + (w - d - w * 0.38) * b; r = 40 + (d / 2 - 40) * b;
+  }
+  return 'inset(' + px(oben) + ' ' + (seite < 0 ? px(fern) + ' ' + px(oben) + ' 0px' : '0px ' + px(oben) + ' ' + px(fern)) +
+    ' round ' + px(r) + ')';
+}
+
+function kalSetzen(m, p) {
+  var t = Math.min(1, Math.abs(p) / m.w), vor = p < 0;
+  var neu = vor ? m.danach : m.davor, anders = vor ? m.davor : m.danach, seite = vor ? -1 : 1;
+  kalGehen(anders, 0, 0);
+  anders.style.visibility = '';
+  neu.style.visibility = t > 0 ? 'visible' : '';
+  // Die Höhe gleitet mit: Ein Monat hat fünf oder sechs Zeilen.
+  var h0 = m.h.jetzt, h1 = vor ? m.h.danach : m.h.davor;
+  m.spur.style.height = t > 0 ? px(h0 + (h1 - h0) * t) : '';
+  kalGehen(m.jetzt, seite, t, m.w, h0);
+  kalGehen(neu, -seite, t > 0 ? 1 - t : 0, m.w, h1);
+}
+
+// Ein Bild weiter. Am Gerät mit dem nächsten Bild des Bildschirms; der
+// Zeitgeber springt ein, wo es keine Bilder gibt (kopflos im Prüfstand).
+function kalBild(f) {
+  var einmal = false;
+  function los() { if (!einmal) { einmal = true; f(); } }
+  if (window.requestAnimationFrame) requestAnimationFrame(los);
+  setTimeout(los, 34);
+}
+
+// `p` gleitet von `von` nach 0, schnell los und sanft aus.
+function kalGleiten(m, von, dauer) {
+  var lauf = ++kalLauf, start = Date.now();
+  kalLaeuft = true;
+  function schritt() {
+    if (lauf !== kalLauf) return;
+    var k = Math.min(1, (Date.now() - start) / dauer);
+    kalSetzen(m, von * Math.pow(1 - k, 3));
+    if (k < 1) kalBild(schritt);
+    else kalLaeuft = false;
+  }
+  schritt();
+}
+
+// Eine laufende Bewegung sofort ans Ende — wer wieder zieht, zieht am Stand.
+function kalHalt() {
+  if (!kalLaeuft) return;
+  kalLauf++;
+  kalLaeuft = false;
+  var m = kalMessen();
+  if (m) kalSetzen(m, 0);
+}
+
+// Der neue Stand ist gezeichnet; die Bewegung beginnt bei `p` (die alte Seite
+// liegt dann daneben, davor oder danach) und gleitet in die Ruhe. Liegt die
+// alte Seite nicht neben der neuen («zurück zu heute» von weiter weg), tritt
+// sie an die Stelle des Nachbarn.
+function kalWechselZeigen(alt, p) {
+  var m = kalMessen();
+  if (!m || bewegungAus() || alt === kalVersatz) return;
+  var rolle = p > 0 ? 'davor' : 'danach';
+  if (alt !== kalVersatz + (p > 0 ? -1 : 1)) {
+    m[rolle].outerHTML = kalBildSeite(alt, heuteSchluessel(), rolle);
+    m = kalMessen();
+  }
+  if (Math.abs(p) >= m.w) p = p > 0 ? m.w : -m.w;
+  kalSetzen(m, p);
+  kalGleiten(m, p, Math.max(140, KAL_WISCH_DAUER * Math.abs(p) / m.w));
+}
+
+// Vor, zurück oder zu «diese Woche»: Der gewählte Tag geht, seine Liste mit.
 function kalBlaettern(ziel) {
-  var richtung = ziel > kalVersatz ? 1 : ziel < kalVersatz ? -1 : 0, alt = $('kalRaster');
-  var vorher = richtung && state.kalender === 'woche' && alt ? { geist: geist(alt), rect: alt.getBoundingClientRect() } : null;
+  var alt = kalVersatz;
+  if (ziel === alt) return;
+  kalHalt();
   kalVersatz = ziel;
   kalTag = null;
-  kalGewechselt = !vorher;
   render();
-  kalGewechselt = false;
-  if (vorher) kalSeitlich(richtung, vorher);
+  kalWechselZeigen(alt, ziel > alt ? 1e6 : -1e6);
+}
+
+function kalDruck(e) {
+  if (!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0) || blattOffen() || !kalWischFlaeche(e.target)) return;
+  var breite = window.innerWidth || document.documentElement.clientWidth;
+  // Am Rand beginnt der Wisch, der zurückführt oder das Menü öffnet.
+  if (e.clientX <= WISCH_RAND || e.clientX >= breite - WISCH_RAND) return;
+  kalHalt();
+  kalZiehen = { id: e.pointerId, x: e.clientX, y: e.clientY, fest: false, p: 0, m: null,
+    spur: [{ x: e.clientX, t: Date.now() }] };
+}
+
+function kalZug(e) {
+  var z = kalZiehen;
+  if (!z || e.pointerId !== z.id) return;
+  var dx = e.clientX - z.x, dy = e.clientY - z.y;
+  if (!z.fest) {
+    if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+    // Eher nach oben oder unten: Die Seite rollt, der Kalender bleibt.
+    if (Math.abs(dy) >= Math.abs(dx) || !(z.m = kalMessen())) { kalZiehen = null; return; }
+    z.fest = true;
+  }
+  kalGewischt = Date.now();
+  z.p = Math.max(-z.m.w, Math.min(z.m.w, dx));
+  kalSetzen(z.m, z.p);
+  var nun = Date.now();
+  z.spur.push({ x: e.clientX, t: nun });
+  while (z.spur.length > 2 && nun - z.spur[0].t > 100) z.spur.shift();
+}
+
+function kalLos(e) {
+  var z = kalZiehen;
+  if (!z || e.pointerId !== z.id) return;
+  kalZiehen = null;
+  if (!z.fest) return;
+  kalGewischt = Date.now();
+  var dx = e.clientX - z.x, a = z.spur[0], tempo = (e.clientX - a.x) / Math.max(1, Date.now() - a.t);
+  var weit = Math.abs(dx) > z.m.w * KAL_WEG;
+  var schwung = Math.abs(tempo) > KAL_SCHWUNG && Math.abs(dx) > 16 && (tempo < 0) === (dx < 0);
+  if (e.type === 'pointercancel' || !(weit || schwung) || !z.p) {
+    kalGleiten(z.m, z.p, KAL_ZURUECK);
+    return;
+  }
+  // Geblättert: der neue Stand sofort, die Bewegung läuft von der anderen
+  // Seite her weiter, wo sie eben stand.
+  var schritt = z.p < 0 ? 1 : -1, alt = kalVersatz;
+  kalVersatz += schritt;
+  kalTag = null;
+  render();
+  kalWechselZeigen(alt, z.p + schritt * z.m.w);
 }
 
 // Die Tagesliste springt nicht an ihren neuen Platz, sie gleitet im selben
@@ -4481,21 +4592,26 @@ function leisteGleiten(obenVorher) {
 
 function zeichneKalender(heute) {
   var b = kalBereich(heute), woche = b.monat === null;
-  var html = '<div class="kal-kopf">' +
-      '<button type="button" class="rund" id="kalZurueck" aria-label="' + (woche ? 'Woche' : 'Monat') +
+  // Die Pfeile liegen über der Seite und bleiben stehen, wenn sie gleitet;
+  // Titel, Wochentage und Tage gleiten mit (ADR 0052). Die Wochentage stehen
+  // über dem Raster, nicht in ihm: Wenn der Monat aus der Woche quillt,
+  // bleiben sie stehen.
+  var html = '<div class="kal-rahmen">' +
+      '<button type="button" class="rund kal-pfeil" id="kalZurueck" aria-label="' + (woche ? 'Woche' : 'Monat') +
         ' davor">' + ICON.zurueck + '</button>' +
-      (kalVersatz
-        ? '<button type="button" class="kal-titel" id="kalHeute" aria-label="' + esc(b.titel) +
-          ', zurück zu heute">' + esc(b.titel) + '</button>'
-        : '<div class="kal-titel" id="kalTitel">' + esc(b.titel) + '</div>') +
-      '<button type="button" class="rund" id="kalVor" aria-label="' + (woche ? 'Woche' : 'Monat') +
+      '<button type="button" class="rund kal-pfeil" id="kalVor" aria-label="' + (woche ? 'Woche' : 'Monat') +
         ' danach">' + ICON.weiter + '</button>' +
-    '</div>' +
-    // Die Wochentage stehen über dem Raster, nicht in ihm: Wenn der Monat aus
-    // der Woche quillt, bleiben sie stehen.
-    kalWtageHtml() +
-    '<div class="kal-raster ' + (woche ? 'woche' : 'monat') + (kalGewechselt ? ' neu' : '') + '" id="kalRaster">' +
-    kalTageHtml(b, heute, false) + '</div>';
+      '<div class="kal-fenster"><div class="kal-spur" id="kalSpur">' +
+        '<div class="kal-seite" data-rolle="jetzt"><div class="kal-titelzeile">' +
+          (kalVersatz
+            ? '<button type="button" class="kal-titel" id="kalHeute" aria-label="' + esc(b.titel) +
+              ', zurück zu heute">' + esc(b.titel) + '</button>'
+            : '<div class="kal-titel" id="kalTitel">' + esc(b.titel) + '</div>') + '</div>' +
+          kalWtageHtml() +
+          '<div class="kal-raster ' + (woche ? 'woche' : 'monat') + '" id="kalRaster">' + kalTageHtml(b, heute, false) + '</div>' +
+        '</div>' +
+        kalBildSeite(kalVersatz - 1, heute, 'davor') + kalBildSeite(kalVersatz + 1, heute, 'danach') +
+      '</div></div></div>';
   if (kalTag && kalTag >= b.von && kalTag <= b.bis) html += zeichneTagesleiste(kalTag, heute);
   return html;
 }
@@ -4596,239 +4712,6 @@ function zeichneTagVoraus(liste, k) {
         '<span class="kal-haken">' + ICON.haken + '</span>' +
         '<span class="kal-name">' + esc(g.name) + '</span><span class="kal-status">' + w + '</span></div>';
     }).join('');
-}
-
-// ── Wischprobe: drei Arten, den Kalender zu blättern ────────────
-// Der Nutzer will, dass der Kalender dem Finger folgt: Titel, Wochentage und
-// Tage gleiten mit, die Pfeile bleiben stehen (0.15.0T3). Drei kleine Kalender
-// am Ende des Dashboards zeigen je eine Art, darüber gilt für alle drei Woche
-// oder Monat und ob der Kalender 1:1 oder gebremst mitgeht. Ein Pfeil spielt
-// dieselbe Bewegung ab, als würde gewischt. Der echte Kalender bleibt, wie er
-// ist, bis gewählt ist; dann geht die Probe.
-//
-// Jeder Probekalender trägt drei Seiten übereinander: die gezeigte und ihre
-// Nachbarn davor und danach. `wpSetzen` legt sie für einen Versatz `p` (in px,
-// links negativ) so, wie die Art es will; Ziehen, Loslassen und Pfeil führen
-// nur `p`.
-var WP_FASSUNGEN = [
-  ['a', 'Karussell', 'Die Nachbarseite hängt daneben und rutscht mit herein.'],
-  ['b', 'Schieben und Blenden', 'Die Seite zieht mit und blendet aus, die neue gleitet von der Seite herein.'],
-  ['c', 'Tropfen', 'Die Seite zieht sich zur Perle und tropft ab, die neue quillt von der anderen Seite herein.']
-];
-var WP_LUECKE = 20;          // px zwischen zwei Seiten im Karussell
-var WP_DAUER = { a: 320, b: 360, c: 560 };   // ms, die eine ganze Seite zum Einrasten braucht
-var WP_ZURUECK = 260;        // ms, mit denen eine nicht geblätterte Seite zurückfedert
-var WP_WEG = 0.3;            // Anteil der Breite, ab dem Loslassen blättert
-var WP_SCHWUNG = 0.45;       // px/ms, ab denen auch ein kurzer Schubs blättert
-var wpArt = 'woche';         // 'woche' oder 'monat', für alle drei
-var wpGefuehl = 'eins';      // 'eins' (1:1 mit dem Finger) oder 'bremse' (halb so weit)
-var wpVersatz = { a: 0, b: 0, c: 0 };
-var wpLaeuft = {};           // Fassung → eine Seite gleitet eben
-var wpZiehen = null;         // der Finger, der gerade zieht
-
-function wpSeite(versatz, heute, rolle) {
-  var b = kalBereichFuer(wpArt, versatz, heute);
-  return '<div class="wp-seite" data-rolle="' + rolle + '"' + (rolle === 'jetzt' ? '' : ' aria-hidden="true"') + '>' +
-    '<div class="wp-titel"><span class="kal-titel' + (versatz ? ' weg' : '') + '">' + esc(b.titel) + '</span></div>' +
-    kalWtageHtml() +
-    '<div class="kal-raster ' + (b.monat === null ? 'woche' : 'monat') + '">' + kalTageHtml(b, heute, true) + '</div></div>';
-}
-
-function wpSpur(v, heute) {
-  var n = wpVersatz[v];
-  return '<div class="wp-spur">' + wpSeite(n, heute, 'jetzt') + wpSeite(n - 1, heute, 'davor') +
-    wpSeite(n + 1, heute, 'danach') + '</div>';
-}
-
-function zeichneWischProbe(heute) {
-  function wahl(name, attr, liste, wert) {
-    return '<div class="wahl" role="group" aria-label="' + esc(name) + '">' + liste.map(function (w) {
-      return '<button type="button" ' + attr + '="' + w[0] + '" aria-pressed="' + (w[0] === wert ? 'true' : 'false') +
-        '">' + esc(w[1]) + '</button>';
-    }).join('') + '</div>';
-  }
-  return '<section class="abschnitt" id="wischProbe"><h2>Kalender wischen zur Wahl</h2>' +
-    '<div class="kachel wp-wahlen"><p class="wp-text">Wisch über einen der drei Kalender oder tipp auf einen Pfeil. ' +
-      'Die Wahl hier gilt für alle drei.</p>' +
-      wahl('Probe: Woche oder Monat', 'data-wp-art', [['woche', 'Woche'], ['monat', 'Monat']], wpArt) +
-      wahl('Probe: Mitgehen', 'data-wp-gefuehl', [['eins', '1:1'], ['bremse', 'Gebremst']], wpGefuehl) +
-    '</div>' +
-    WP_FASSUNGEN.map(function (f) {
-      return '<div class="kachel wp-karte" data-wp="' + f[0] + '">' +
-        '<h3 class="wp-name">' + esc(f[0].toUpperCase() + ' · ' + f[1]) + '</h3>' +
-        '<p class="wp-text">' + esc(f[2]) + '</p>' +
-        '<div class="wp-rahmen">' +
-          '<button type="button" class="rund wp-pfeil" data-wp-schritt="-1" aria-label="Davor">' + ICON.zurueck + '</button>' +
-          '<button type="button" class="rund wp-pfeil" data-wp-schritt="1" aria-label="Danach">' + ICON.weiter + '</button>' +
-          '<div class="wp-fenster">' + wpSpur(f[0], heute) + '</div>' +
-        '</div></div>';
-    }).join('') + '</section>';
-}
-
-// Was eine Bewegung braucht: die drei Seiten, ihre Höhen, die Breite.
-function wpMessen(karte) {
-  var spur = karte.querySelector('.wp-spur'), m = { spur: spur, w: spur.clientWidth, h: {} };
-  ['jetzt', 'davor', 'danach'].forEach(function (r) {
-    m[r] = spur.querySelector('[data-rolle="' + r + '"]');
-    m.h[r] = m[r].offsetHeight;
-  });
-  return m;
-}
-
-// So weit muß `p` reichen, bis die neue Seite ganz steht.
-function wpVoll(v, m) { return v === 'a' ? m.w + WP_LUECKE : m.w; }
-
-function wpSetzen(v, m, p) {
-  var voll = wpVoll(v, m), t = Math.min(1, Math.abs(p) / voll), vor = p < 0;
-  var neu = vor ? m.danach : m.davor, anders = vor ? m.davor : m.danach, jetzt = m.jetzt;
-  [jetzt, neu, anders].forEach(function (s) { s.style.transform = ''; s.style.opacity = ''; s.style.clipPath = ''; });
-  anders.style.visibility = '';
-  neu.style.visibility = t > 0 ? 'visible' : '';
-  // Die Höhe gleitet mit: Ein Monat hat fünf oder sechs Zeilen.
-  var h0 = m.h.jetzt, h1 = vor ? m.h.danach : m.h.davor;
-  m.spur.style.height = t > 0 ? px(h0 + (h1 - h0) * t) : '';
-  if (!t) return;
-  var her = vor ? 1 : -1;   // von dort kommt die neue Seite
-  if (v === 'a') {
-    jetzt.style.transform = 'translateX(' + px(p) + ')';
-    neu.style.transform = 'translateX(' + px(her * voll + p) + ')';
-  } else if (v === 'b') {
-    // Erst geht die alte, dann kommt die neue — übereinander stünden sie
-    // als Doppelbild da.
-    jetzt.style.transform = 'translateX(' + px(p) + ')';
-    jetzt.style.opacity = String(Math.max(0, 1 - t * 2.2));
-    neu.style.transform = 'translateX(' + px(her * m.w * 0.25 * (1 - t)) + ')';
-    neu.style.opacity = String(Math.max(0, Math.min(1, (t - 0.25) / 0.6)));
-  } else {
-    // Die alte Seite zieht sich zur Perle auf der Seite, zu der der Finger
-    // zieht, und tropft dorthin ab; die neue quillt aus einer Perle am anderen
-    // Rand — wie bisher bei den Pfeilen (ADR 0028), nur am Finger.
-    var u = Math.max(0, Math.min(1, (t - 0.3) / 0.7));
-    jetzt.style.clipPath = wpPerle(m.w, h0, -her, t);
-    jetzt.style.transform = 'translateX(' + px(-her * Math.min(48, m.w * 0.12) * t) + ')';
-    jetzt.style.opacity = String(1 - t);
-    neu.style.clipPath = wpPerle(m.w, h1, her, 1 - u);
-    neu.style.opacity = String(Math.min(1, u * 1.5));
-  }
-}
-
-// Eine Seite auf dem Weg zur Perle am Rand `seite` (-1 links, 1 rechts): bei
-// 0 ganz, bei der Hälfte bauchig zur Seite gezogen, bei 1 die Perle — dieselben
-// Stationen wie beim Blättern mit den Pfeilen (kalSeitlich).
-function wpPerle(w, h, seite, e) {
-  var d = Math.min(h, 44), oben, fern, r;
-  if (e <= 0.5) {
-    var a = e / 0.5;
-    oben = 4 * a; fern = w * 0.38 * a; r = 40 * a;
-  } else {
-    var b = (e - 0.5) / 0.5;
-    oben = 4 + ((h - d) / 2 - 4) * b; fern = w * 0.38 + (w - d - w * 0.38) * b; r = 40 + (d / 2 - 40) * b;
-  }
-  return 'inset(' + px(oben) + ' ' + (seite < 0 ? px(fern) + ' ' + px(oben) + ' 0px' : '0px ' + px(oben) + ' ' + px(fern)) +
-    ' round ' + px(r) + ')';
-}
-
-// Ein Bild weiter. Am Gerät mit dem nächsten Bild des Bildschirms; der
-// Zeitgeber springt ein, wo es keine Bilder gibt (kopflos im Prüfstand).
-function wpBild(f) {
-  var einmal = false;
-  function los() { if (!einmal) { einmal = true; f(); } }
-  if (window.requestAnimationFrame) requestAnimationFrame(los);
-  setTimeout(los, 34);
-}
-
-// `p` gleitet von `von` nach `nach`, schnell los und sanft aus.
-function wpGleiten(v, m, von, nach, dauer, fertig) {
-  wpLaeuft[v] = true;
-  var start = Date.now();
-  function schritt() {
-    var k = bewegungAus() ? 1 : Math.min(1, (Date.now() - start) / dauer);
-    wpSetzen(v, m, von + (nach - von) * (1 - Math.pow(1 - k, 3)));
-    if (k < 1) { wpBild(schritt); return; }
-    wpLaeuft[v] = false;
-    if (fertig) fertig();
-  }
-  schritt();
-}
-
-// Die neue Seite steht: Versatz weiter, die drei Seiten neu gezeichnet. Die
-// neue «jetzt» ist so hoch wie zuletzt die Spur, darum springt nichts.
-function wpUmblaettern(karte, v, schritt) {
-  wpVersatz[v] += schritt;
-  karte.querySelector('.wp-fenster').innerHTML = wpSpur(v, heuteSchluessel());
-}
-
-// Blättern ohne Finger (Pfeil): dieselbe Bewegung, von 0 bis ganz.
-function wpBlaettern(karte, schritt) {
-  var v = karte.getAttribute('data-wp');
-  if (wpLaeuft[v]) return;
-  var m = wpMessen(karte), ziel = -schritt * wpVoll(v, m);
-  wpGleiten(v, m, 0, ziel, WP_DAUER[v], function () { wpUmblaettern(karte, v, schritt); });
-}
-
-function wpDruck(e) {
-  if (!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0) || blattOffen()) return;
-  var karte = this.closest('[data-wp]'), v = karte.getAttribute('data-wp');
-  var breite = window.innerWidth || document.documentElement.clientWidth;
-  // Am Rand beginnt der Wisch, der zurückführt oder das Menü öffnet.
-  if (wpLaeuft[v] || e.clientX <= WISCH_RAND || e.clientX >= breite - WISCH_RAND) return;
-  wpZiehen = { id: e.pointerId, karte: karte, v: v, x: e.clientX, y: e.clientY, fest: false, p: 0, m: null,
-    spur: [{ x: e.clientX, t: Date.now() }] };
-}
-
-function wpZug(e) {
-  var z = wpZiehen;
-  if (!z || e.pointerId !== z.id) return;
-  var dx = e.clientX - z.x, dy = e.clientY - z.y;
-  if (!z.fest) {
-    if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
-    // Eher nach oben oder unten: Die Seite rollt, der Kalender bleibt.
-    if (Math.abs(dy) >= Math.abs(dx)) { wpZiehen = null; return; }
-    z.fest = true;
-    z.m = wpMessen(z.karte);
-  }
-  var voll = wpVoll(z.v, z.m);
-  z.p = Math.max(-voll, Math.min(voll, dx * (wpGefuehl === 'bremse' ? 0.5 : 1)));
-  wpSetzen(z.v, z.m, z.p);
-  var nun = Date.now();
-  z.spur.push({ x: e.clientX, t: nun });
-  while (z.spur.length > 2 && nun - z.spur[0].t > 100) z.spur.shift();
-}
-
-function wpLos(e) {
-  var z = wpZiehen;
-  if (!z || e.pointerId !== z.id) return;
-  wpZiehen = null;
-  if (!z.fest) return;
-  var dx = e.clientX - z.x, a = z.spur[0], dt = Math.max(1, Date.now() - a.t), tempo = (e.clientX - a.x) / dt;
-  var voll = wpVoll(z.v, z.m), weit = Math.abs(dx) > z.m.w * WP_WEG;
-  var schwung = Math.abs(tempo) > WP_SCHWUNG && Math.abs(dx) > 16 && (tempo < 0) === (dx < 0);
-  if (e.type !== 'pointercancel' && (weit || schwung)) {
-    var schritt = dx < 0 ? 1 : -1, ziel = -schritt * voll;
-    var rest = Math.abs(ziel - z.p) / voll;
-    wpGleiten(z.v, z.m, z.p, ziel, Math.max(140, WP_DAUER[z.v] * rest), function () {
-      wpUmblaettern(z.karte, z.v, schritt);
-    });
-  } else {
-    wpGleiten(z.v, z.m, z.p, 0, WP_ZURUECK);
-  }
-}
-
-function bindeWischProbe() {
-  alleIn('#wischProbe [data-wp-art]').forEach(function (b) {
-    b.addEventListener('click', function () {
-      wpArt = this.getAttribute('data-wp-art');
-      wpVersatz = { a: 0, b: 0, c: 0 };
-      render();
-    });
-  });
-  alleIn('#wischProbe [data-wp-gefuehl]').forEach(function (b) {
-    b.addEventListener('click', function () { wpGefuehl = this.getAttribute('data-wp-gefuehl'); render(); });
-  });
-  alleIn('#wischProbe [data-wp-schritt]').forEach(function (b) {
-    b.addEventListener('click', function () { wpBlaettern(this.closest('[data-wp]'), +this.getAttribute('data-wp-schritt')); });
-  });
-  alleIn('#wischProbe .wp-fenster').forEach(function (f) { f.addEventListener('pointerdown', wpDruck); });
 }
 
 // ── Rückblick: Heatmap ─────────────────────────────────────────
@@ -7459,15 +7342,13 @@ function zuHeute() {
   var heute = heuteSchluessel();
   if (kalVersatz === 0 && kalTag === heute) return;
   var leiste = $('kalLeiste'), oben = leiste ? leiste.getBoundingClientRect().top : null;
-  var blaettern = kalVersatz !== 0, richtung = kalVersatz > 0 ? -1 : 1, alt = $('kalRaster');
-  var vorher = blaettern && state.kalender === 'woche' && alt ? { geist: geist(alt), rect: alt.getBoundingClientRect() } : null;
+  var alt = kalVersatz;
+  kalHalt();
   kalVersatz = 0;
   kalTag = heute;
   heldTakt = KAL_TAKT;
-  kalGewechselt = blaettern && !vorher;
   render();
-  kalGewechselt = false;
-  if (vorher) kalSeitlich(richtung, vorher);
+  kalWechselZeigen(alt, alt > 0 ? -1e6 : 1e6);
   var tag = document.querySelector('[data-kaltag="' + heute + '"]');
   if (!leiste && tag) tropfenFallen(tag.getBoundingClientRect(), $('kalLeiste'));
   else leisteGleiten(oben);
@@ -7495,7 +7376,7 @@ function bindeKalender() {
       leisteGleiten(leisteOben);
     });
   });
-  bindeWischProbe();
+  document.querySelector('.held').addEventListener('pointerdown', kalDruck);
   $('kalZurueck').addEventListener('click', function () { kalBlaettern(kalVersatz - 1); });
   $('kalVor').addEventListener('click', function () { kalBlaettern(kalVersatz + 1); });
   if ($('kalHeute')) $('kalHeute').addEventListener('click', function () { kalBlaettern(0); });
@@ -8012,9 +7893,9 @@ function start() {
   document.addEventListener('touchstart', wischBeginnen, { passive: true });
   document.addEventListener('touchend', wischEnden, { passive: true });
   document.addEventListener('touchcancel', function () { wischVon = null; }, { passive: true });
-  window.addEventListener('pointermove', wpZug);
-  window.addEventListener('pointerup', wpLos);
-  window.addEventListener('pointercancel', wpLos);
+  window.addEventListener('pointermove', kalZug);
+  window.addEventListener('pointerup', kalLos);
+  window.addEventListener('pointercancel', kalLos);
   document.addEventListener('click', kalTippNachWisch, true);
 
   $('swLaden').addEventListener('click', function () { swUebernehmen(); });

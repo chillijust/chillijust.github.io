@@ -1,7 +1,7 @@
 # 0028 · Kein Heranzoomen beim Tippen, die Woche tropft zur Seite, «Alle Tickets» so hoch wie das Ticket
 
 *2026-10-06 · drei Tickets vom Gerät (App-Stand 0.9.0) · Version 0.9.1T, abgenommen mit 0.10.0T2 · ändert 0027
-(Höhe der Ticketliste)*
+(Höhe der Ticketliste) · der Seitentropfen der Woche ist seit 0052 am Finger und gilt auch im Monat*
 
 ## Ausgangslage
 

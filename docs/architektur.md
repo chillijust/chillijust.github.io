@@ -132,7 +132,7 @@ state = {
 | Timer, Zähler | `timerOeffnen`, `timerPause`, `timerRest`, `zaehlen`, `zaehlStand` |
 | Abgewöhnen, Welle | `lasterAuswerten`, `rueckfallEintragen`, `welleBeginnen`, `welleGewonnen`, `welleAbbrechen` |
 | Termine | `terminAm`, `termineAm`, `terminAbhaken`, `zeichneTerminZeile`, `zeichneTerminFormular` |
-| Kalender | `zeichneKalender`, `bindeKalender`, `kalZeige`, `kalBlaettern`, `kalFliessen`, `zeichneTagesleiste` |
+| Kalender | `zeichneKalender`, `bindeKalender`, `kalZeige`, `kalBlaettern`, `kalFliessen`, `zeichneTagesleiste`; Ziehen: `kalDruck`/`kalZug`/`kalLos`, `kalSetzen`, `kalWechselZeigen` |
 | Kalender-Export | `kalenderDatei`, `exportAuswahl`, `exportiertMerken`, `icsLaden`, `zeichneExport`, `bindeExport` |
 | Rückblick | `zeichneHeatmap`, `hmWocheWaehlen`, `hmTagZeigen` |
 | Journal | `zeichneReflexionKachel`, `reflexionSpeichern`, `reflexionLoeschen` |

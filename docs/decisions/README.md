@@ -35,7 +35,7 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0025](0025-nachtrag-tickets-kalender-thema.md) | Nachtrag: Wisch von rechts, schmale Bestätigung, Tickets im Blatt, Kalender, Hell/Dunkel als Tropfen | gilt; Hell/Dunkel, Ticketzeilen, KW, Takt seit 0026 |
 | [0026](0026-nachtrag-tropfen-mit-dem-druck.md) | Nachtrag: Hell/Dunkel tropft mit dem Druck, Ticketfeld, Kalender | gilt; Kontrast und Ticketzeilen seit 0027, `knaufGleiten` seit 0037 |
 | [0027](0027-kontrast-ticketzeilen-ticketseite.md) | Nachtrag: Kontrast im Tropfen, Ticketzeilen nach dem Wechsel, Ticketseite | gilt; Listenhöhe seit 0028 |
-| [0028](0028-kein-zoom-wochentropfen-listenhoehe.md) | Kein Heranzoomen beim Tippen, die Woche tropft zur Seite, «Alle Tickets» so hoch wie das Ticket | gilt; Seitentropfen ohne Verschiebung seit 0029 |
+| [0028](0028-kein-zoom-wochentropfen-listenhoehe.md) | Kein Heranzoomen beim Tippen, die Woche tropft zur Seite, «Alle Tickets» so hoch wie das Ticket | gilt; Seitentropfen ohne Verschiebung seit 0029, am Finger seit 0052 |
 | [0029](0029-auftritt-beim-kaltstart.md) | Der Auftritt beim Kaltstart; die Woche rückt nicht über den Rand | gilt; «Neue Fassung» tropft mit seit 0044 |
 | [0030](0030-thema-tropfen-loest-sich-immer.md) | Der Hell/Dunkel-Tropfen löst sich immer | gilt |
 | [0031](0031-kalenderschalter-ticketliste-rollt-innen.md) | Woche \| Monat schaltet bei jedem Tipp; das Ticketblatt rollt innen, die Glaskante bleibt frei | gilt |
@@ -59,4 +59,4 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0049](0049-speicherfehler-zurueck-sperre.md) | Ein Haken, der nicht gespeichert ist, springt zurück; ein unlesbarer Stand sperrt das Schreiben | gilt |
 | [0050](0050-kommunikation-nur-auf-eigenem-branch.md) | `kommunikation/` lebt nur auf `chatgpt/kommunikation`, nie auf `main`; nie zusammenführen | gilt |
 | [0051](0051-zeichen-neu-mit-puls-und-warnung.md) | Zeichen der Meldung neu bewegt, jedes endet mit dem Puls; eine Warnung für Fehlschläge | gilt |
-| [0052](0052-kalender-wischen.md) | Im Kalender blättert ein waagerechter Wisch wie die Pfeile; Rand und Tagesliste bleiben frei | gilt |
+| [0052](0052-kalender-wischen.md) | Der Kalender folgt dem Finger (Tropfen, 1:1); Pfeile und «Heute» spielen dieselbe Bewegung | gilt; löst den Seitentropfen aus 0028 ab |
