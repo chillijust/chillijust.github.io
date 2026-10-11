@@ -1,0 +1,725 @@
+[
+  {
+    "case": "journal-swipe",
+    "opening": {},
+    "before": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "transform": "none",
+      "opacity": "1",
+      "viewAnimations": 0,
+      "temp": [],
+      "calls": [],
+      "warning": false
+    },
+    "duringDrag": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "transform": "none",
+      "opacity": "1",
+      "viewAnimations": 0,
+      "temp": [],
+      "calls": [],
+      "warning": false
+    },
+    "afterReleaseOrClick": {
+      "view": "home",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": null,
+      "point": null,
+      "transform": "matrix(0.986122, 0, 0, 0.986122, 0, 0)",
+      "opacity": "0.583649",
+      "viewAnimations": 1,
+      "temp": [
+        {
+          "cls": "fl-schicht",
+          "flow": false,
+          "progress": null,
+          "animations": 0
+        },
+        {
+          "cls": "tropfen-huelle",
+          "flow": true,
+          "progress": 0.45282104393547323,
+          "animations": 0
+        }
+      ],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 5379.70000000298,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "shrink",
+          "time": 5381.5,
+          "target": "menuKnopf",
+          "targetRect": {
+            "x": 370,
+            "y": 33.21875,
+            "width": 44,
+            "height": 44,
+            "top": 33.21875,
+            "right": 414,
+            "bottom": 77.21875,
+            "left": 370
+          },
+          "oldRect": {
+            "x": 16,
+            "y": 84,
+            "width": 398,
+            "height": 319.46875,
+            "top": 84,
+            "right": 414,
+            "bottom": 403.46875,
+            "left": 16
+          }
+        }
+      ],
+      "warning": false
+    },
+    "end": {
+      "view": "home",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": null,
+      "point": null,
+      "transform": "none",
+      "opacity": "1",
+      "viewAnimations": 0,
+      "temp": [],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 5379.70000000298,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "shrink",
+          "time": 5381.5,
+          "target": "menuKnopf",
+          "targetRect": {
+            "x": 370,
+            "y": 33.21875,
+            "width": 44,
+            "height": 44,
+            "top": 33.21875,
+            "right": 414,
+            "bottom": 77.21875,
+            "left": 370
+          },
+          "oldRect": {
+            "x": 16,
+            "y": 84,
+            "width": 398,
+            "height": 319.46875,
+            "top": 84,
+            "right": 414,
+            "bottom": 403.46875,
+            "left": 16
+          }
+        }
+      ],
+      "warning": false
+    },
+    "errors": []
+  },
+  {
+    "case": "settings-scrolled-swipe",
+    "opening": {},
+    "before": {
+      "view": "einstellungen",
+      "scrollY": 300,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "transform": "none",
+      "opacity": "1",
+      "viewAnimations": 0,
+      "temp": [],
+      "calls": [],
+      "warning": false
+    },
+    "duringDrag": {
+      "view": "einstellungen",
+      "scrollY": 300,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "transform": "none",
+      "opacity": "1",
+      "viewAnimations": 0,
+      "temp": [],
+      "calls": [],
+      "warning": false
+    },
+    "afterReleaseOrClick": {
+      "view": "home",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": null,
+      "point": null,
+      "transform": "matrix(0.98379, 0, 0, 0.98379, 0, 0)",
+      "opacity": "0.513706",
+      "viewAnimations": 1,
+      "temp": [
+        {
+          "cls": "fl-schicht",
+          "flow": false,
+          "progress": null,
+          "animations": 0
+        },
+        {
+          "cls": "tropfen-huelle",
+          "flow": true,
+          "progress": 0.48416211404271847,
+          "animations": 0
+        }
+      ],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 5606.9000000059605,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "shrink",
+          "time": 5609.30000000447,
+          "target": "menuKnopf",
+          "targetRect": {
+            "x": 370,
+            "y": 33.21875,
+            "width": 44,
+            "height": 44,
+            "top": 33.21875,
+            "right": 414,
+            "bottom": 77.21875,
+            "left": 370
+          },
+          "oldRect": {
+            "x": 16,
+            "y": -216,
+            "width": 398,
+            "height": 1200.546875,
+            "top": -216,
+            "right": 414,
+            "bottom": 984.546875,
+            "left": 16
+          }
+        }
+      ],
+      "warning": false
+    },
+    "end": {
+      "view": "home",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": null,
+      "point": null,
+      "transform": "none",
+      "opacity": "1",
+      "viewAnimations": 0,
+      "temp": [],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 5606.9000000059605,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "shrink",
+          "time": 5609.30000000447,
+          "target": "menuKnopf",
+          "targetRect": {
+            "x": 370,
+            "y": 33.21875,
+            "width": 44,
+            "height": 44,
+            "top": 33.21875,
+            "right": 414,
+            "bottom": 77.21875,
+            "left": 370
+          },
+          "oldRect": {
+            "x": 16,
+            "y": -216,
+            "width": 398,
+            "height": 1200.546875,
+            "top": -216,
+            "right": 414,
+            "bottom": 984.546875,
+            "left": 16
+          }
+        }
+      ],
+      "warning": false
+    },
+    "errors": []
+  },
+  {
+    "case": "appointment-swipe",
+    "opening": {
+      "point": {
+        "x": 330.8,
+        "y": 466.171875
+      },
+      "homeBefore": 153,
+      "openedView": "termin"
+    },
+    "before": {
+      "view": "termin",
+      "scrollY": 0,
+      "homeScroll": 153,
+      "origin": "[data-termin=\"t3\"]",
+      "point": {
+        "dx": 303.0172424316406,
+        "dy": 25.220977783203125
+      },
+      "transform": "none",
+      "opacity": "1",
+      "viewAnimations": 0,
+      "temp": [],
+      "calls": [],
+      "warning": false
+    },
+    "duringDrag": {
+      "view": "termin",
+      "scrollY": 0,
+      "homeScroll": 153,
+      "origin": "[data-termin=\"t3\"]",
+      "point": {
+        "dx": 303.0172424316406,
+        "dy": 25.220977783203125
+      },
+      "transform": "none",
+      "opacity": "1",
+      "viewAnimations": 0,
+      "temp": [],
+      "calls": [],
+      "warning": false
+    },
+    "afterReleaseOrClick": {
+      "view": "home",
+      "scrollY": 153,
+      "homeScroll": 153,
+      "origin": null,
+      "point": null,
+      "transform": "matrix(0.982574, 0, 0, 0.982574, 0, 0)",
+      "opacity": "0.477232",
+      "viewAnimations": 1,
+      "temp": [
+        {
+          "cls": "fl-schicht",
+          "flow": false,
+          "progress": null,
+          "animations": 0
+        },
+        {
+          "cls": "tropfen-huelle",
+          "flow": true,
+          "progress": 0.5437125498748441,
+          "animations": 0
+        }
+      ],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 5395.70000000298,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "[data-termin=\"t3\"]",
+          "point": {
+            "dx": 303.0172424316406,
+            "dy": 25.220977783203125
+          }
+        },
+        {
+          "kind": "shrink",
+          "time": 5399,
+          "target": null,
+          "targetRect": {
+            "left": 303.0172424316406,
+            "top": 443.3928527832031,
+            "width": 44,
+            "height": 44,
+            "right": 347.0172424316406,
+            "bottom": 487.3928527832031
+          },
+          "oldRect": {
+            "x": 16,
+            "y": 84,
+            "width": 398,
+            "height": 1079.28125,
+            "top": 84,
+            "right": 414,
+            "bottom": 1163.28125,
+            "left": 16
+          }
+        }
+      ],
+      "warning": false
+    },
+    "end": {
+      "view": "home",
+      "scrollY": 153,
+      "homeScroll": 153,
+      "origin": null,
+      "point": null,
+      "transform": "none",
+      "opacity": "1",
+      "viewAnimations": 0,
+      "temp": [],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 5395.70000000298,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "[data-termin=\"t3\"]",
+          "point": {
+            "dx": 303.0172424316406,
+            "dy": 25.220977783203125
+          }
+        },
+        {
+          "kind": "shrink",
+          "time": 5399,
+          "target": null,
+          "targetRect": {
+            "left": 303.0172424316406,
+            "top": 443.3928527832031,
+            "width": 44,
+            "height": 44,
+            "right": 347.0172424316406,
+            "bottom": 487.3928527832031
+          },
+          "oldRect": {
+            "x": 16,
+            "y": 84,
+            "width": 398,
+            "height": 1079.28125,
+            "top": 84,
+            "right": 414,
+            "bottom": 1163.28125,
+            "left": 16
+          }
+        }
+      ],
+      "warning": false
+    },
+    "errors": []
+  },
+  {
+    "case": "appointment-arrow",
+    "opening": {
+      "point": {
+        "x": 330.8,
+        "y": 466.171875
+      },
+      "homeBefore": 153,
+      "openedView": "termin"
+    },
+    "before": {
+      "view": "termin",
+      "scrollY": 0,
+      "homeScroll": 153,
+      "origin": "[data-termin=\"t3\"]",
+      "point": {
+        "dx": 303.01722717285156,
+        "dy": 25.220977783203125
+      },
+      "transform": "none",
+      "opacity": "1",
+      "viewAnimations": 0,
+      "temp": [],
+      "calls": [],
+      "warning": false
+    },
+    "duringDrag": null,
+    "afterReleaseOrClick": {
+      "view": "home",
+      "scrollY": 153,
+      "homeScroll": 153,
+      "origin": null,
+      "point": null,
+      "transform": "matrix(0.987236, 0, 0, 0.987236, 0, 0)",
+      "opacity": "0.617089",
+      "viewAnimations": 1,
+      "temp": [
+        {
+          "cls": "fl-schicht",
+          "flow": false,
+          "progress": null,
+          "animations": 0
+        },
+        {
+          "cls": "tropfen-huelle",
+          "flow": true,
+          "progress": 0.2920165745672618,
+          "animations": 0
+        }
+      ],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 5041,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "[data-termin=\"t3\"]",
+          "point": {
+            "dx": 303.01722717285156,
+            "dy": 25.220977783203125
+          }
+        },
+        {
+          "kind": "shrink",
+          "time": 5044.70000000298,
+          "target": null,
+          "targetRect": {
+            "left": 303.01722717285156,
+            "top": 443.3928527832031,
+            "width": 44,
+            "height": 44,
+            "right": 347.01722717285156,
+            "bottom": 487.3928527832031
+          },
+          "oldRect": {
+            "x": 16,
+            "y": 84,
+            "width": 398,
+            "height": 1079.28125,
+            "top": 84,
+            "right": 414,
+            "bottom": 1163.28125,
+            "left": 16
+          }
+        }
+      ],
+      "warning": false
+    },
+    "end": {
+      "view": "home",
+      "scrollY": 153,
+      "homeScroll": 153,
+      "origin": null,
+      "point": null,
+      "transform": "none",
+      "opacity": "1",
+      "viewAnimations": 0,
+      "temp": [],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 5041,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "[data-termin=\"t3\"]",
+          "point": {
+            "dx": 303.01722717285156,
+            "dy": 25.220977783203125
+          }
+        },
+        {
+          "kind": "shrink",
+          "time": 5044.70000000298,
+          "target": null,
+          "targetRect": {
+            "left": 303.01722717285156,
+            "top": 443.3928527832031,
+            "width": 44,
+            "height": 44,
+            "right": 347.01722717285156,
+            "bottom": 487.3928527832031
+          },
+          "oldRect": {
+            "x": 16,
+            "y": 84,
+            "width": 398,
+            "height": 1079.28125,
+            "top": 84,
+            "right": 414,
+            "bottom": 1163.28125,
+            "left": 16
+          }
+        }
+      ],
+      "warning": false
+    },
+    "errors": []
+  },
+  {
+    "case": "appointment-save",
+    "opening": {
+      "point": {
+        "x": 330.8,
+        "y": 466.171875
+      },
+      "homeBefore": 153,
+      "openedView": "termin"
+    },
+    "before": {
+      "view": "termin",
+      "scrollY": 319,
+      "homeScroll": 153,
+      "origin": "[data-termin=\"t3\"]",
+      "point": {
+        "dx": 303.0172119140625,
+        "dy": 25.220977783203125
+      },
+      "transform": "none",
+      "opacity": "1",
+      "viewAnimations": 0,
+      "temp": [],
+      "calls": [],
+      "warning": false
+    },
+    "duringDrag": null,
+    "afterReleaseOrClick": {
+      "view": "home",
+      "scrollY": 153,
+      "homeScroll": 153,
+      "origin": null,
+      "point": null,
+      "transform": "matrix(0.986127, 0, 0, 0.986127, 0, 0)",
+      "opacity": "0.58381",
+      "viewAnimations": 1,
+      "temp": [
+        {
+          "cls": "fl-schicht",
+          "flow": false,
+          "progress": null,
+          "animations": 0
+        },
+        {
+          "cls": "tropfen-huelle",
+          "flow": true,
+          "progress": 0.2074528868964455,
+          "animations": 0
+        },
+        {
+          "cls": "fl-schicht",
+          "flow": false,
+          "progress": null,
+          "animations": 0
+        },
+        {
+          "cls": "tropfen-huelle glas",
+          "flow": true,
+          "progress": 0,
+          "animations": 0
+        }
+      ],
+      "calls": [
+        {
+          "kind": "shrink",
+          "time": 5288.79999999702,
+          "target": null,
+          "targetRect": {
+            "left": 193,
+            "top": 444,
+            "width": 44,
+            "height": 44
+          },
+          "oldRect": {
+            "x": 16,
+            "y": -235,
+            "width": 398,
+            "height": 1079.28125,
+            "top": -235,
+            "right": 414,
+            "bottom": 844.28125,
+            "left": 16
+          }
+        },
+        {
+          "kind": "transition",
+          "time": 5313.39999999851,
+          "returnToHome": true,
+          "ghost": false,
+          "alreadyMessage": true,
+          "origin": "[data-termin=\"t3\"]",
+          "point": {
+            "dx": 303.0172119140625,
+            "dy": 25.220977783203125
+          }
+        }
+      ],
+      "warning": true
+    },
+    "end": {
+      "view": "home",
+      "scrollY": 153,
+      "homeScroll": 153,
+      "origin": null,
+      "point": null,
+      "transform": "none",
+      "opacity": "1",
+      "viewAnimations": 0,
+      "temp": [],
+      "calls": [
+        {
+          "kind": "shrink",
+          "time": 5288.79999999702,
+          "target": null,
+          "targetRect": {
+            "left": 193,
+            "top": 444,
+            "width": 44,
+            "height": 44
+          },
+          "oldRect": {
+            "x": 16,
+            "y": -235,
+            "width": 398,
+            "height": 1079.28125,
+            "top": -235,
+            "right": 414,
+            "bottom": 844.28125,
+            "left": 16
+          }
+        },
+        {
+          "kind": "transition",
+          "time": 5313.39999999851,
+          "returnToHome": true,
+          "ghost": false,
+          "alreadyMessage": true,
+          "origin": "[data-termin=\"t3\"]",
+          "point": {
+            "dx": 303.0172119140625,
+            "dy": 25.220977783203125
+          }
+        }
+      ],
+      "warning": true
+    },
+    "errors": []
+  }
+]

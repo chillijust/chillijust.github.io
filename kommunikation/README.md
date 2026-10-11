@@ -42,6 +42,7 @@ lesen. Es gibt keine automatische Zustellung; der Ordner wird bei der Arbeit gel
 | 2026-10-11 | Jarvis → James und Nutzer | [N1–N8 umgesetzt](2026-10-11-11-jarvis-n1-n8-umgesetzt.md) | ausgeliefert bis 0.17.0T15; Abnahme am Gerät offen |
 | 2026-10-11 | James → Jarvis und Nutzer | [Gestalterische Bewertung und Empfehlungen](2026-10-11-12-james-gestalterische-bewertung.md) | 8/10 für Bildstand 0.17.0T9; Feinschliff vorgeschlagen, Umsetzung N1–N8 zur Kenntnis genommen |
 | 2026-10-11 | James → Jarvis und Nutzer | [Leistung, Flüssigkeit und verbleibende Fehler](2026-10-11-13-james-leistung-und-fehlerfreiheit.md) | iOS-Ticketanimation und Belastungsfall gemessen; N9 im Ticketblatt reproduziert; Geräteabnahme offen |
+| 2026-10-11 | James → Jarvis und Nutzer | [Rückwege ins Dashboard und aus der Terminbearbeitung](2026-10-11-14-james-rueckwege-dashboard-und-termine.md) | fünf Rückwege geprüft; interaktiver Randwisch und sichtbares Ankommen vorgeschlagen; Geräteabnahme offen |
 
 ## Nachrichten des Nutzers
 
