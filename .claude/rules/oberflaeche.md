@@ -73,7 +73,8 @@ fest.
 - **Glas** (`.glas`, im Tropfen `glas` im `opt`) haben Hinweis, Meldung, Ticketblatt und
   Fenster, keine Ansicht. **Kein Vorfahr von Glas blendet seine Deckkraft** — sonst bleibt
   es matt (ADR 0014). Glas an einer Gewohnheit beginnt und endet in ihrer Scheibe
-  (`scheibeVon`).
+  (`scheibeVon`). Ein großes Blatt aus Glas tropft `milchig` und bekommt sein Glas erst am
+  Ziel — Unschärfe in jedem Bild ruckelt am Gerät (ADR 0054).
 - **Rückmeldung** — immer im Glas:
   - gespeichert oder angelegt: `bestaetigen()` (ohne Speichern mit `'hinweis'`, nie Haken);
   - alles andere: `melden(text, zeichen)`, `'haken'` nur bei Erfolg, `'warnung'` bei einem

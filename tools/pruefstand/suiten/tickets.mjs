@@ -38,7 +38,18 @@ pruefe('B2 es quillt als Tropfen aus dem Knopf', !!huelle && huelle.getAnimation
 pruefe('B3 die Ansicht darunter bleibt stehen', ansicht === 'einstellungen' && !!q('#swKnopf'));
 pruefe('B4 der Ort ist vorgewählt: wo man stand', q('#tkOrt').value === 'einstellungen');
 pruefe('B5 die Gestik schweigt bei offenem Blatt', blattOffen());
+pruefe('B5b der Tropfen fließt milchig, ohne Unschärfe; die Karte wartet ebenso ohne', !!huelle &&
+  huelle.classList.contains('milchig') && !/blur/.test(getComputedStyle(huelle).backdropFilter || '') &&
+  !/blur/.test(getComputedStyle(q('#ticketKarte')).backdropFilter || ''));
+// Angekommen blendet die Hülle über der Karte aus: eine Bewegung mehr.
 return durch().then(function () {
+  pruefe('B5c angekommen hat die Karte ihr Glas, die Hülle blendet über ihr aus', !!q('body > .tropfen-huelle.milchig') &&
+    /blur/.test(getComputedStyle(q('#ticketKarte')).backdropFilter || '') && q('#ticketKarte').style.opacity === '' &&
+    q('body > .tropfen-huelle.milchig').getAnimations().some(function (a) {
+      var b = a.effect.getKeyframes(); return String(b[b.length - 1].opacity) === '0';
+    }));
+  return durch();
+}).then(function () {
   pruefe('B6 danach ist der Tropfen weg und das Blatt sichtbar', !q('body > .tropfen-huelle') &&
     q('#ticketKarte').style.opacity === '');
   tippen(q('#tkTitel'), 'Knopf klemmt');

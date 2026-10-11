@@ -32,7 +32,19 @@ hart schneiden) rechnet Safari auf dem iPhone teils ohne Grafikchip, Bild für B
   Linse und fließt gedehnt hinüber (`knaufFliesst`). Auftropfen und Zeilen fließen seit
   0.17.0T8 ebenso (`perleFliesst`, `zeileFliesst`, `kleinFliesst`): die Karten beim Start
   aus dem Kopf, eine gelöschte Zeile in den runden Knopf oben, Häkchen aus «Bearbeiten»
-  und zurück — vorher liefen dort nur die Chilli-Bilder auf einer Feder.
+  und zurück — vorher liefen dort nur die Chilli-Bilder auf einer Feder. Seit 0.17.0T9
+  tropfen die Karten als Kette auf, in Chilli wie auf iOS: die erste aus dem Kopf, jede
+  weitere aus der vorigen, sobald die etwa halb gewachsen ist (`perleTakt`); eine
+  Überschrift kommt mit der Karte nach ihr.
+- **Was ankommt, wartet nicht auf die Ruhe der Feder** (0.17.0T9): Der Abhaken-Tropfen
+  fliegt auf der Feder nur bis zum Ziel (`taktBisZiel`) und geht dort auf; ein Teil aus
+  einem Wahlschalter öffnet seinen Platz auf derselben Feder; Schatten und Ring eines Teils
+  kommen, sobald es sichtbar am Ziel ist.
+- **Das Ticketblatt bekommt sein Glas erst am Ziel** (0.17.0T9, Ausnahme zu 0032): Der
+  große Tropfen fließt milchig, ohne Unschärfe (`milchig`), angekommen hat die Karte ihr
+  Glas, und die Hülle blendet über ihr aus (`glasAmZiel`). Die Unschärfe in jedem Bild neu
+  zu rechnen, ließ das Blatt am Gerät ruckeln. Hinweis und Meldung sind klein und bleiben
+  Glas im Tropfen.
   `fliessen` (Marke, Knauf, Abhaken) malt nur Hals und Rest, nie das Teil selbst. In
   0.17.0T3 lief überall die Chilli-Bewegung, und das Flüssige lag als zweites Bild
   darunter — am Gerät sah das aus wie zwei Teile übereinander, mit doppeltem Schatten.

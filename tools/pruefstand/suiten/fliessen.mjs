@@ -1,7 +1,7 @@
 // Flüssig, die übrigen Stellen (ADR 0054): Auf iOS fließen auch Auftropfen und
-// Zeilen wie in ihren Proben — die Karten beim Start als Tropfen aus dem Kopf,
-// eine gelöschte Zeile in den runden Knopf oben, kleine Teile aus «Bearbeiten»
-// und zurück hinein. Bis 0.17.0T7 liefen dort nur die Chilli-Bilder auf einer
+// Zeilen wie in ihren Proben — die Karten beim Start als Kette, die erste aus
+// dem Kopf, jede weitere aus der vorigen; eine gelöschte Zeile in den runden
+// Knopf oben, kleine Teile aus «Bearbeiten» und zurück hinein. Bis 0.17.0T7 liefen dort nur die Chilli-Bilder auf einer
 // Feder, und am Gerät sah man keinen Unterschied.
 import { readFileSync } from 'node:fs';
 import { APP, suite } from '../helfer.mjs';
@@ -26,9 +26,19 @@ pruefe('P1 die Karte fließt als Tropfen aus dem Kopf', !!f && f.p.ziel === 1 &&
 pruefe('P2 ihre Schicht liegt vorn in der Ansicht, nie zwischen zwei Karten', !!f && f.s.parentNode === q('#ansicht') &&
   alle('#ansicht > .fl-schicht').every(function (s) { return !s.previousElementSibling || s.previousElementSibling.classList.contains('fl-schicht'); }));
 pruefe('P3 ohne eigenen Grund blendet ein Teil nur ein', !!titel && !titel._fluss && titel.getAnimations().length === 1);
-return warten(RUHE + 800).then(function () {
+var naechste = alle('#ansicht .abschnitt *').filter(function (k) { return k._fluss; })[0];
+pruefe('P5 die nächste Karte fließt aus der vorigen, wo deren Tropfen gerade ist, nicht aus dem Kopf', !!naechste &&
+  !!f && !!f.jetzt && naechste._fluss.o.quelle() === f.jetzt);
+pruefe('P6 sie löst sich, wenn die vorige halb gewachsen ist', !!naechste &&
+  Math.abs(naechste._fluss.ab - f.ab - perleTakt()) <= 1 && perleTakt() > 0 && perleTakt() < fluessigTakt('perle').dauer * 0.5);
+return warten(Math.round(fpRuhe(FP_IOS) * 0.45)).then(function () {
+  pruefe('P7 sichtbar am Ziel trägt eine Karte ihren Schatten wieder, bevor die Feder ganz ruht', !!held._fluss &&
+    held._fluss.p.x >= 0.97 && held.style.boxShadow === '');
+  return warten(RUHE + 800);
+}).then(function () {
   pruefe('P4 angekommen ist jede Karte wieder sie selbst', !held._fluss && !q('#ansicht .fl-schicht') && !held.style.position &&
-    !held.style.opacity && !held.style.clipPath && !held.style.background);
+    !held.style.opacity && !held.style.clipPath && !held.style.background &&
+    !alle('#ansicht *').some(function (k) { return k._fluss || k.style.clipPath; }));
 
   // ── Z · Eine gelöschte Zeile ─────────────────────────────────
   state.tickets = ['k1', 'k2', 'k3'].map(function (id, i) { return ticketLesen({ id: id, titel: 'Ticket ' + id, erstellt: 5 + i, stand: 'x' }); });
