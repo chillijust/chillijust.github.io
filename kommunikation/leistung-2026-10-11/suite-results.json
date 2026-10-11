@@ -1,0 +1,422 @@
+[
+  {
+    "suite": "abgewoehnen",
+    "title": "ALLE 85 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 85,
+    "failures": []
+  },
+  {
+    "suite": "ankunft",
+    "title": "ALLE 10 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 10,
+    "failures": []
+  },
+  {
+    "suite": "auftritt",
+    "title": "ALLE 19 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 19,
+    "failures": []
+  },
+  {
+    "suite": "beginn",
+    "title": "ALLE 17 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 17,
+    "failures": []
+  },
+  {
+    "suite": "bewegung",
+    "title": "ALLE 70 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 70,
+    "failures": []
+  },
+  {
+    "suite": "dialoge",
+    "title": "ALLE 14 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 14,
+    "failures": []
+  },
+  {
+    "suite": "einlesen",
+    "title": "ALLE 7 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 7,
+    "failures": []
+  },
+  {
+    "suite": "einstellungen",
+    "title": "ALLE 25 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 25,
+    "failures": []
+  },
+  {
+    "suite": "export",
+    "title": "ALLE 52 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 52,
+    "failures": []
+  },
+  {
+    "suite": "exportmarken",
+    "title": "ALLE 29 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 29,
+    "failures": []
+  },
+  {
+    "suite": "exportwahl",
+    "title": "ALLE 27 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 27,
+    "failures": []
+  },
+  {
+    "suite": "exportwege",
+    "title": "ALLE 33 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 33,
+    "failures": []
+  },
+  {
+    "suite": "feinschliff",
+    "title": "ALLE 62 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 62,
+    "failures": []
+  },
+  {
+    "suite": "fliessen",
+    "title": "ALLE 15 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 15,
+    "failures": []
+  },
+  {
+    "suite": "fluessig",
+    "title": "ALLE 79 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 79,
+    "failures": []
+  },
+  {
+    "suite": "geruest",
+    "title": "ALLE 28 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 28,
+    "failures": []
+  },
+  {
+    "suite": "gewohnheiten",
+    "title": "ALLE 81 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 81,
+    "failures": []
+  },
+  {
+    "suite": "journal",
+    "title": "ALLE 73 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 73,
+    "failures": []
+  },
+  {
+    "suite": "kalender",
+    "title": "FEHLGESCHLAGEN: 10",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 82,
+    "failures": [
+      "FAIL S7 kurz und langsam: federt zurück",
+      "FAIL S8 weit genug: die nächste Woche, sofort",
+      "FAIL S10 ein kurzer, schneller Schubs blättert auch — zurück [1]",
+      "FAIL S11 eher nach unten: nichts gleitet, nichts blättert",
+      "FAIL S12 auch über den Wochentagen",
+      "FAIL S13 auch auf dem Rand der Karte",
+      "FAIL S14 nicht auf den Pfeilen, nicht auf Ring und Umschalter",
+      "FAIL S15 am Rand des Bildschirms beginnt kein Ziehen",
+      "FAIL S16 nimmt das System den Finger, federt die Seite zurück",
+      "AUSNAHME: Cannot read properties of null (reading 'click') |     at http://127.0.0.1:45963/tools/pruefstand/bau/t-kalender.html:10350:15"
+    ]
+  },
+  {
+    "suite": "langdruck",
+    "title": "FEHLGESCHLAGEN: 1",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 18,
+    "failures": [
+      "FAIL T3 zurück fließt sie dorthin [{\"offset\":0.9,\"easing\":\"linear\",\"composite\":\"auto\",\"height\":\"44px\",\"left\":\"303.2px\",\"opacity\":\"1\",\"borderRadius\":\"50%\",\"top\":\"437.2px\",\"width\":\"44px\",\"computedOffset\":0.9} {\"x\":331,\"y\":460}]"
+    ]
+  },
+  {
+    "suite": "menue",
+    "title": "ALLE 59 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 59,
+    "failures": []
+  },
+  {
+    "suite": "nachschliff",
+    "title": "ALLE 65 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 65,
+    "failures": []
+  },
+  {
+    "suite": "offline",
+    "title": "ALLE 28 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 28,
+    "failures": []
+  },
+  {
+    "suite": "querformat",
+    "title": "ALLE 7 TESTS BESTANDEN",
+    "viewport": [
+      932,
+      430
+    ],
+    "errors": [],
+    "checks": 7,
+    "failures": []
+  },
+  {
+    "suite": "rueckblick",
+    "title": "ALLE 31 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 31,
+    "failures": []
+  },
+  {
+    "suite": "schriftzug",
+    "title": "ALLE 16 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 16,
+    "failures": []
+  },
+  {
+    "suite": "sicherung",
+    "title": "ALLE 44 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 44,
+    "failures": []
+  },
+  {
+    "suite": "speicher",
+    "title": "ALLE 42 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 42,
+    "failures": []
+  },
+  {
+    "suite": "speicherfehler",
+    "title": "ALLE 17 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 17,
+    "failures": []
+  },
+  {
+    "suite": "termine",
+    "title": "ALLE 83 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 83,
+    "failures": []
+  },
+  {
+    "suite": "thema",
+    "title": "ALLE 51 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 51,
+    "failures": []
+  },
+  {
+    "suite": "tickets",
+    "title": "ALLE 86 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 102,
+    "failures": []
+  },
+  {
+    "suite": "timer",
+    "title": "ALLE 61 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 61,
+    "failures": []
+  },
+  {
+    "suite": "tropfen",
+    "title": "ALLE 21 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 21,
+    "failures": []
+  },
+  {
+    "suite": "wechsel",
+    "title": "ALLE 7 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 7,
+    "failures": []
+  },
+  {
+    "suite": "zeichen",
+    "title": "ALLE 23 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 23,
+    "failures": []
+  },
+  {
+    "suite": "zoom",
+    "title": "ALLE 3 TESTS BESTANDEN",
+    "viewport": [
+      430,
+      932
+    ],
+    "errors": [],
+    "checks": 3,
+    "failures": []
+  }
+]
