@@ -133,7 +133,6 @@ pruefe('W9 zu kurz oder nicht vom Rand: nichts', q('#menue').hidden && ansicht =
 zeige('einstellungen');
 wisch(B - 10, 400, B - 200, 400);
 pruefe('W10 unterwegs führt er nach Hause — dort ist der Menüknopf', ansicht === 'home');
-frisch();
 
 // ── B · Eine Bestätigung ist so breit wie ihr Text (ADR 0025) ─
 bestaetigen('Gelöscht', '', null);
@@ -237,7 +236,28 @@ return new Promise(function (fertig) {
       window.scrollTo(0, 0);
       q('#app').style.minHeight = '';
       frisch();
-      fertig();
+      // Ein offener Timer ist ein Blatt wie die anderen (James, N1): Kein Wisch
+      // vom Rand öffnet hinter seinem Glas das Menü.
+      ganzZu();
+      state.gewohnheiten = [gewohnheitLesen({ id: 'T', name: 'T', rhythmus: { art: 'taeglich' },
+        angelegt: tagPlus(heuteSchluessel(), -3), erledigt: [], timer: { minuten: 10 } })];
+      render();
+      timerStarten('T');
+      var timerAuf = timerOffen();
+      wisch(B - 10, 400, B - 200, 400);
+      wisch(10, 400, 200, 400);
+      pruefe('W11 bei offenem Timer öffnet kein Wisch vom Rand das Menü dahinter', timerAuf && timerOffen() &&
+        q('#menue').hidden && ansicht === 'home');
+      timerSchliessen();
+      ausbewegt();
+      setTimeout(function () {
+        pruefe('W12 nach dem Timer steht kein Menü da', !timerOffen() && q('#timerBlatt').hidden && q('#menue').hidden);
+        wisch(B - 10, 400, B - 200, 400);
+        pruefe('W13 und der Wisch öffnet es wieder wie sonst', !q('#menue').hidden && q('#menue').classList.contains('offen'));
+        state.timer = null;
+        frisch();
+        fertig();
+      }, 30);
     }, 50);
   }, 50);
 });

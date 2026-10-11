@@ -39,8 +39,9 @@ ist. Den Status zeigt der Reiter **Actions** („pages build and deployment") od
 1. Pages liefert mit `Cache-Control: max-age=600`; ein normales Neuladen im Browser zeigt
    bis zu zehn Minuten lang den alten Stand.
 2. **Auf dem iPhone erledigt das der Service Worker.** Die abgelegte App startet aus ihrem
-   eigenen Speicher, sieht im Hintergrund nach und meldet sich mit «Eine neue Fassung ist
-   da · Jetzt laden». Wer nicht warten will: **Menü → Einstellungen → Nach Aktualisierung
+   eigenen Speicher; der Browser findet beim Start den neuen Worker, der richtet sich ein
+   und meldet sich mit «Eine neue Fassung ist da · Jetzt laden». Bis dahin läuft der alte
+   Stand weiter, ganz (ADR 0057). Wer nicht warten will: **Menü → Einstellungen → Nach Aktualisierung
    suchen**. Der Knopf sagt danach, woran er war: «Aktuell», «Kein Netz» oder «Neue
    Fassung laden».
 3. Klemmt etwas, steht am selben Ort der Notausgang **«App neu einrichten»**: Er meldet den

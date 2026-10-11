@@ -13,7 +13,7 @@
 // Speicher an, und jeder andere wird beim Aktivieren restlos gelöscht — auch
 // der von Chillingo, das unter derselben Adresse lief. Den Lernstand im
 // localStorage berührt das nicht.
-var SW_VERSION = '0.17.0T9'; /* == VERSION == */
+var SW_VERSION = '0.17.0T15'; /* == VERSION == */
 var CACHE = 'chillinal-' + SW_VERSION;
 
 // Die App ist **eine** Datei; Schriften, Bilder und Symbol stecken in ihr.
@@ -45,10 +45,14 @@ self.addEventListener('activate', function (e) {
   );
 });
 
-// **Aus dem Speicher sofort, im Hintergrund nachsehen.** «Netz zuerst» hieße,
-// bei jedem Start erst zu warten — im Funkloch bis zum Zeitablauf. «Nur
-// Speicher» wäre eine Falle: Man säße für immer auf dem alten Stand. Dass eine
-// neue Fassung da ist, meldet nicht dieser Weg, sondern der wartende Worker.
+// **Er liefert, was er hat** (ADR 0057): Die Dateien seines Standes kommen aus
+// seinem Speicher, ohne aufs Netz zu warten — auch im Funkloch. Ans Netz geht
+// er nur für das, was fehlt, und legt es abgewartet dazu; was er hat,
+// überschreibt er nie. Eine neue Fassung kommt allein über den neuen Worker:
+// Der Browser findet ihn beim Start, er richtet sich seinen eigenen Speicher
+// ein und wartet auf «Jetzt laden». Bis 0.17.0T14 legte dieser Weg jede frische
+// Netzantwort in den eigenen Speicher — beim zweiten Start lief die neue App
+// schon unter dem alten Worker, bevor jemand «Jetzt laden» getippt hatte.
 self.addEventListener('fetch', function (e) {
   var anfrage = e.request;
   if (anfrage.method !== 'GET') return;
@@ -58,18 +62,15 @@ self.addEventListener('fetch', function (e) {
   e.respondWith(
     caches.open(CACHE).then(function (c) {
       return c.match(anfrage, { ignoreSearch: true }).then(function (treffer) {
-        var netz = fetch(anfrage).then(function (antwort) {
-          if (antwort && antwort.ok && antwort.type === 'basic') {
-            c.put(anfrage, antwort.clone());
-          }
-          return antwort;
-        }).catch(function () { return null; });
-
         if (treffer) return treffer;
-        return netz.then(function (a) {
-          if (a) return a;
-          if (anfrage.mode === 'navigate') return c.match('./index.html');
-          return new Response('', { status: 504, statusText: 'offline' });
+        return fetch(anfrage).then(function (antwort) {
+          if (!antwort || !antwort.ok || antwort.type !== 'basic') return antwort;
+          // Abgewartet: Scheitert das Ablegen, liefert er trotzdem, was kam.
+          return c.put(anfrage, antwort.clone()).then(function () { return antwort; }, function () { return antwort; });
+        }, function () {
+          var offline = new Response('', { status: 504, statusText: 'offline' });
+          if (anfrage.mode !== 'navigate') return offline;
+          return c.match('./index.html').then(function (seite) { return seite || offline; });
         });
       });
     })

@@ -73,7 +73,9 @@ export function testseite(html, test) {
 // · frisch() setzt die App auf den Anfang zurück.
 // · ausbewegt() bringt laufende Animationen ans Ziel, bevor gemessen wird.
 // · blobText(b) liest einen Blob ohne Wartezeit.
-export function suite(name, html, rumpf) {
+// `opt.fenster`: ein anderes Fenster als das Hochformat, etwa '932,430' fürs
+// Querformat (ADR 0056); der Läufer liest es aus der Seite.
+export function suite(name, html, rumpf, opt) {
   const test = String.raw`
 // Der Auftritt beim Kaltstart (ADR 0029) läuft hier nie von selbst zu Ende —
 // der Läufer zeichnet keine Bilder. Gemerkt wird, ob er lief; dann still beendet.
@@ -132,5 +134,6 @@ function ausnahme(e) {
   else abschluss();
 })();
 `;
-  writeFileSync(join(BAU, 't-' + name + '.html'), testseite(html, test));
+  const fenster = opt && opt.fenster ? '\n<!-- pruefstand-fenster:' + opt.fenster + ' -->\n' : '';
+  writeFileSync(join(BAU, 't-' + name + '.html'), testseite(html, test) + fenster);
 }

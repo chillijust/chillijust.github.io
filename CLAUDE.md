@@ -28,7 +28,7 @@ Lies CLAUDE.md.
 **Chillinal**, sichtbar **«Chilli Journal»** — Web-App zum An- und Abgewöhnen von
 Gewohnheiten, mit Terminen, offline, Daten nur auf dem Gerät. Gehostet über GitHub Pages
 unter https://chillijust.github.io/. **Einziges Zielgerät:** iPhone 15 Pro Max, iOS 26,
-Safari als Home-Bildschirm-App im Vollbild.
+Safari als Home-Bildschirm-App im Vollbild, hoch und quer (ADR 0056).
 
 - **Das Pflichtenheft ist `docs/chillinal-plan.md`.** Was dort steht, ist entschieden. Wer
   abweicht, sagt es und hält es in einem ADR fest.
@@ -49,7 +49,7 @@ Safari als Home-Bildschirm-App im Vollbild.
 | 6 · Rückblick: Heatmap, Journal | fertig (0.7.1) |
 | 7 · Sicherung, Einstellungen, Tickets | fertig (0.8.0) |
 | 8 · Feinschliff, Nachbesserungen am Gerät, Timer und Zähler, Termine abhaken | fertig (0.13.1) |
-| 9 · Flüssig wie iOS 26 je Stelle, Chilli als Standard (ADR 0053–0055) | im Bau (0.17.0T9) |
+| 9 · Flüssig wie iOS 26 je Stelle, Chilli als Standard (ADR 0053–0055) | im Bau (0.17.0T15) |
 
 ## Wo was steht
 
@@ -165,6 +165,7 @@ node tools/pruefen.mjs                      # Vor-Push-Prüfung allein
 ## Offen
 
 - Flüssig (ADR 0054): Chilli ist Standard, iOS je Stelle mit Speichern; Timer wie Drang; auf iOS fließt jedes Teil selbst, ohne Chilli darunter; der Reiter sagt je Stelle, wie man testet; Kontrast in Dunkel (ADR 0055); Rückwege von Menü und Ansichten, Knauf beim echten Tipp (0.17.0T7); Auftropfen und Zeilen fließen, Wisch zurück von gerollter Seite (0.17.0T8); Kalenderring, Abhaken, Wahlschalter ohne Warten, Ticketblatt mit Glas erst am Ziel, Auftropfen als Kette (0.17.0T9). Abnahme am Gerät steht aus.
-- Analyse von James (Nachrichten 01–03 auf `chatgpt/kommunikation`). A2/A3 ausgeliefert in 0.13.2T (ADR 0049),
-  Abnahme am Gerät steht aus. Als Nächstes A1 Worker-Cache (ADR nötig); dann Rest von A3
-  (Formulare, Löschen, Rückfall, Drang behalten ihren Stand bis zum Neuladen), A4–A6.
+- Analyse von James (Nachrichten 01–03, 09–10 auf `chatgpt/kommunikation`). A2/A3 ausgeliefert in 0.13.2T
+  (ADR 0049). N1–N8 aus 09 bestätigt, der Nutzer will alles, Block für Block: N1, N6 in 0.17.0T10, N3 in
+  0.17.0T11, N4+N8 in 0.17.0T12, N5 in 0.17.0T13, N7 in 0.17.0T14 (ADR 0056), N2 in 0.17.0T15
+  (ADR 0057). Offen: Prüfstand läuft in 500 × 845 statt 430 × 932; Abnahme am Gerät. Abnahme am Gerät steht aus.

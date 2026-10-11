@@ -13,6 +13,9 @@ und Vorlage: `tools/pruefstand/README.md`; Vorgehen: Skill `pruefstand`.
 - **Immer mit `suite(name, html, rumpf)` oder `testseite()`** aus `helfer.mjs`, nie von
   Hand über `html.replace('</body>', …)`: In einem Ersatztext sind `$&`, `` $` ``, `$'`
   und `$1` Steuerzeichen — ein `'\$&'` wurde still zu `</body>`.
+- **Das Fenster ist 500 × 845, nicht 430 × 932** — kopfloses Chrome hat eine Mindestbreite
+  und zieht 87 Punkte Leiste ab. Ein anderes Fenster: `suite(…, { fenster: 'B,H' })`, die
+  Leiste eingerechnet (Querformat: `'932,517'`).
 - Der Rumpf hat `pruefe`, `q`, `alle`, `frisch()` und läuft im Gültigkeitsbereich der App.
   Gibt er ein Promise zurück, wird erst geurteilt, wenn es erfüllt ist.
 - **Eine Suite bricht mit `throw` ab, nie mit `process.exit()`** — sonst endet der Läufer

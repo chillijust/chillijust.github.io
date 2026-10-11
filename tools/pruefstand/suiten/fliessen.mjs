@@ -30,7 +30,8 @@ var naechste = alle('#ansicht .abschnitt *').filter(function (k) { return k._flu
 pruefe('P5 die nächste Karte fließt aus der vorigen, wo deren Tropfen gerade ist, nicht aus dem Kopf', !!naechste &&
   !!f && !!f.jetzt && naechste._fluss.o.quelle() === f.jetzt);
 pruefe('P6 sie löst sich, wenn die vorige halb gewachsen ist', !!naechste &&
-  Math.abs(naechste._fluss.ab - f.ab - perleTakt()) <= 1 && perleTakt() > 0 && perleTakt() < fluessigTakt('perle').dauer * 0.5);
+  (naechste._fluss.o.warten || 0) - (f.o.warten || 0) === perleTakt() && perleTakt() > 0 &&
+  perleTakt() < fluessigTakt('perle').dauer * 0.5);
 return warten(Math.round(fpRuhe(FP_IOS) * 0.45)).then(function () {
   pruefe('P7 sichtbar am Ziel trägt eine Karte ihren Schatten wieder, bevor die Feder ganz ruht', !!held._fluss &&
     held._fluss.p.x >= 0.97 && held.style.boxShadow === '');
@@ -84,6 +85,24 @@ return warten(Math.round(fpRuhe(FP_IOS) * 0.45)).then(function () {
   return warten(RUHE + 500);
 }).then(function () {
   pruefe('E5 und sind dann fort', !alle('body > .tropfen-huelle').some(function (x) { return x._fluss; }) && !q('body > .fl-schicht'));
+
+  // ── S · Bewegung unterwegs abgeschaltet (James, N6) ──────────
+  var probe = document.createElement('div'), mal = 0, vorher = state.bewegung;
+  probe.style.cssText = 'position: fixed; left: 40px; top: 300px; width: 200px; height: 80px; background: var(--flaeche);';
+  document.body.appendChild(probe);
+  teilFliesst(probe, { quelle: function () { return q('#kopf').getBoundingClientRect(); },
+    ziel: function () { return probe.getBoundingClientRect(); }, rund: 12, d0: 30, auf: true, fertig: function () { mal++; } });
+  return warten(120).then(function () {
+    var lief = !!probe._fluss && probe._fluss.p.x > 0.05 && probe._fluss.p.x < 0.97;
+    state.bewegung = 'aus';
+    return warten(100).then(function () {
+      pruefe('S1 wird die Bewegung unterwegs abgeschaltet, steht das Teil sofort, sein Abschluß kommt einmal', lief &&
+        !probe._fluss && mal === 1 && !probe.style.clipPath && !q('body > .fl-schicht'));
+      state.bewegung = vorher;
+      weg(probe);
+    });
+  });
+}).then(function () {
   state.fluessig = null;
   flDauernSetzen();
 });
