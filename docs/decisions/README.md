@@ -64,3 +64,4 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0054](0054-chilli-standard-ios-je-stelle.md) | Chilli ist Standard; iOS-Flüssig je Stelle im Reiter «Flüssig», mit Speichern; Pfad statt Filter; Drang und Timer mit Flüssigkeit und Chili | gilt |
 | [0055](0055-kontrast-in-dunkel.md) | Kontrast in Dunkel: Erhöhtes heller mit Rand, Saum am Flüssigen, Lichtkante ohne Schleier | gilt |
 | [0056](0056-querformat-zaehlt-mit.md) | Querformat zählt mit: keine Karte höher als das Bild, Timer quer nebeneinander, Menü rollt innen | gilt |
+| [0057](0057-worker-liefert-seinen-stand.md) | Der Worker liefert seinen Stand, holt nur Fehlendes, überschreibt nie; neu nur über «Jetzt laden» | gilt |

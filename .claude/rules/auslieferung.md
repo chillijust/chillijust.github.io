@@ -13,8 +13,9 @@ Gilt für Service Worker, Version und Eingebettetes. Ausführlich in `docs/deplo
 
 ## Service Worker (`sw.js`)
 
-- **Er liefert, was er gespeichert hat** — aus dem Speicher sofort, im Hintergrund
-  nachsehen. Er tut nichts anderes, als die App beiseitezulegen.
+- **Er liefert, was er gespeichert hat** — aus dem Speicher sofort; ans Netz nur für
+  Fehlendes, abgewartet, und nie über einen vorhandenen Eintrag. Eine neue Fassung kommt
+  nur über den neuen Worker (ADR 0057). Er tut nichts anderes, als die App beiseitezulegen.
 - **Der Cache heißt nach der Version** (`chillinal-<Version>`). Wer den Namen von der
   Version entkoppelt, liefert für immer den alten Stand aus. `build.mjs` stempelt
   `SW_VERSION`; `pruefen.mjs` und die Suite `offline` brechen bei Abweichung ab.

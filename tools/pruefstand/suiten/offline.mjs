@@ -4,7 +4,8 @@
 // und der Prüfstand lädt genau so. Ob der Worker wirklich offline trägt, zeigt
 // nur das Gerät. Geprüft wird alles andere:
 //
-//   · dass sw.js tut, was er soll, und nichts darüber hinaus,
+//   · dass sw.js tut, was er soll, und nichts darüber hinaus — den Lebenslauf
+//     eines Updates mit sw.js selbst in einer Nachbildung (ADR 0057),
 //   · dass die App ohne ihn genauso läuft,
 //   · dass der Notausgang existiert und die Auskunft ehrlich ist.
 import { readFileSync } from 'node:fs';
@@ -12,6 +13,71 @@ import { WURZEL, suite } from '../helfer.mjs';
 const html = readFileSync(WURZEL + '/index.html', 'utf8');
 const sw = readFileSync(WURZEL + '/sw.js', 'utf8');
 const version = readFileSync(WURZEL + '/VERSION', 'utf8').trim();
+
+// Eine Nachbildung von CacheStorage, fetch und den Ereignissen eines Workers —
+// genug, um sw.js selbst laufen zu lassen. Ein Pfad ist ein Eintrag; die
+// Anfrage nach «/?x» trifft «/» (ignoreSearch).
+async function updateLauf() {
+  const vm = await import('node:vm');
+  const URSPRUNG = 'https://chillijust.github.io';
+  const pfad = (u) => new URL(typeof u === 'string' ? u : u.url, URSPRUNG + '/').pathname;
+  class Antwort {
+    constructor(text, o) { this.text = text; this.status = (o && o.status) || 200; this.ok = this.status < 300; this.type = 'basic'; }
+    clone() { return new Antwort(this.text, { status: this.status }); }
+  }
+  class Anfrage { constructor(u, o) { this.url = new URL(u, URSPRUNG + '/').href; this.method = 'GET'; this.mode = (o && o.mode) || 'navigate'; } }
+  const speicher = new Map();
+  const caches = {
+    open: async (n) => {
+      if (!speicher.has(n)) speicher.set(n, new Map());
+      const m = speicher.get(n);
+      return {
+        match: async (a) => m.get(pfad(a)),
+        put: async (a, b) => { m.set(pfad(a), b); },
+        addAll: async (liste) => { for (const a of liste) m.set(pfad(a), await netz.fetch(a)); },
+      };
+    },
+    keys: async () => [...speicher.keys()],
+    delete: async (n) => speicher.delete(n),
+  };
+  const netz = { stand: 'v1', aus: false, fetch: async (a) => {
+    if (netz.aus) throw new TypeError('offline');
+    return new Antwort(netz.stand + ':' + pfad(a));
+  } };
+  function worker(v) {
+    const hoerer = {};
+    const self = { location: { origin: URSPRUNG }, addEventListener: (t, f) => { hoerer[t] = f; },
+      skipWaiting: () => {}, clients: { claim: async () => {} } };
+    vm.runInNewContext(sw.replace(/var SW_VERSION = '[^']*';/, "var SW_VERSION = '" + v + "';"),
+      { self, caches, fetch: netz.fetch, Request: Anfrage, Response: Antwort, Promise, URL });
+    async function ereignis(t, mehr) {
+      const warte = [];
+      let antwort = null;
+      hoerer[t](Object.assign({ waitUntil: (p) => warte.push(p), respondWith: (p) => { antwort = p; } }, mehr));
+      await Promise.all(warte);
+      return antwort ? (await antwort).text : null;
+    }
+    return { ereignis, holen: (u, mode) => ereignis('fetch', { request: new Anfrage(u, { mode }) }) };
+  }
+  const v1 = worker('v1');
+  await v1.ereignis('install');
+  await v1.ereignis('activate');
+  netz.stand = 'v2';
+  const vorher = [await v1.holen('./'), await v1.holen('./'), await v1.holen('./')];
+  const speicherV1 = (await (await caches.open('chillinal-v1')).match('./')).text;
+  const v2 = worker('v2');
+  await v2.ereignis('install');
+  const v2wartet = (await (await caches.open('chillinal-v2')).match('./')).text;
+  const unterV1 = await v1.holen('./');
+  await v2.ereignis('message', { data: { art: 'uebernehmen' } });
+  await v2.ereignis('activate');
+  const nachher = await v2.holen('./');
+  const speicherNamen = [...speicher.keys()].join();
+  const fehlt = await v2.holen('./neu', 'no-cors');
+  netz.aus = true;
+  return { vorher, speicherV1, v2wartet, unterV1, nachher, speicherNamen, fehlt,
+    offline: await v2.holen('./'), offlineAnhang: await v2.holen('./?quelle=start'), fehltOffline: await v2.holen('./neu', 'no-cors') };
+}
 
 // ── Dateiprüfung: sw.js und index.html von außen gelesen ─────
 const aussen = [];
@@ -39,7 +105,17 @@ pruefeDatei('S8 nur GET', /\.method\s*!==\s*'GET'/.test(sw));
 pruefeDatei('S9 er lädt nichts nach', !/importScripts/.test(sw));
 pruefeDatei('S10 keine Fremdadresse', !/https?:\/\//.test(sw));
 pruefeDatei('S11 der Speicher antwortet zuerst', /if \(treffer\) return treffer;/.test(sw));
-pruefeDatei('S12 und wird im Hintergrund nachgeführt', /c\.put\(anfrage, antwort\.clone\(\)\)/.test(sw));
+// **Der Lebenslauf eines Updates** (ADR 0057, James N2), mit sw.js selbst in
+// einer Nachbildung von Speicher und Netz: v1 eingerichtet → v2 ausgeliefert
+// → zweimal neu gestartet, weiter v1 → v2 wartet → «Jetzt laden» → v2 → ohne
+// Netz v2. Bis 0.17.0T14 lief beim zweiten Start schon v2 unter v1.
+const lauf = await updateLauf();
+pruefeDatei('S12 vor «Jetzt laden» liefert der alte Worker seinen Stand, auch nach einer neuen Auslieferung',
+  lauf.vorher.every((x) => x === 'v1:/') && lauf.speicherV1 === 'v1:/', lauf.vorher.join() + ' / ' + lauf.speicherV1);
+pruefeDatei('S12a der neue richtet seinen eigenen Speicher ein und wartet', lauf.v2wartet === 'v2:/' && lauf.unterV1 === 'v1:/');
+pruefeDatei('S12c nach «Jetzt laden» kommt v2, der alte Speicher ist fort', lauf.nachher === 'v2:/' && lauf.speicherNamen === 'chillinal-v2');
+pruefeDatei('S12d ohne Netz trägt v2, auch eine Seite mit Anhang', lauf.offline === 'v2:/' && lauf.offlineAnhang === 'v2:/');
+pruefeDatei('S12e was fehlt, holt er und legt es abgewartet ab', lauf.fehlt === 'v2:/neu' && lauf.fehltOffline === 'v2:/neu');
 pruefeDatei('S12b eingerichtet wird am HTTP-Cache vorbei, sonst trüge der neue Worker die alte App',
   /install[\s\S]{0,300}new Request\(d, \{ cache: 'reload' \}\)/.test(sw));
 pruefeDatei('S13 er rührt den localStorage nicht an', !/localStorage\s*\./.test(sw));
