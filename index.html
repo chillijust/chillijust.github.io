@@ -554,6 +554,22 @@ svg.wm { display: block; flex: none; color: var(--text); overflow: visible; }
 .timer-pause { width: 44px; height: 44px; background: var(--flaeche-2); color: var(--text); }
 .timer-pause svg { width: 20px; height: 20px; }
 .timer-karte.pausiert .timer-zeit { opacity: .5; }
+/* Quer (ADR 0056): Der Ring steht links, Name, Zeit und Knöpfe rechts — so
+   paßt der Timer ohne Rollen in die 430 Punkte Höhe des iPhones. */
+@media (orientation: landscape) and (max-height: 560px) {
+  #timerBlatt > .timer-karte {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 24px;
+    align-items: center;
+    max-width: 620px;
+    padding: 18px 22px 16px;
+  }
+  .timer-karte > * { grid-column: 2; }
+  .timer-karte > .timer-bild { grid-column: 1; grid-row: 1 / span 5; width: min(70vh, 200px); margin: 0; }
+  .timer-karte > .timer-pause { justify-self: center; }
+  .timer-karte h2 { margin: 0 44px; }
+}
 .gw-kachel.erledigt .gw-scheibe { background: var(--erledigt); color: var(--grund); }
 .gw-kachel.gerade.erledigt .gw-scheibe { animation: abgehakt var(--fl-haken-dauer, .5s) var(--fl-haken-kurve, cubic-bezier(.3, 1.6, .5, 1)); }
 @keyframes abgehakt {
@@ -1175,6 +1191,9 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
   box-shadow: inset 0 0 0 1px var(--rand-hell), 0 2px 6px rgba(20, 20, 19, .10), 0 16px 40px rgba(20, 20, 19, .18);
   transform-origin: 100% 0;
   overflow: hidden;
+  max-height: calc(100vh - var(--blatt-oben, 72px) - 12px - env(safe-area-inset-bottom));
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 .menue-liste { list-style: none; margin: 0; padding: 0; }
 /* Der Gast des Menüknopfs, wenn der hinausgerollt ist (ADR 0041); solange er
@@ -1263,8 +1282,12 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
+  padding: max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
 }
+/* Keine Karte wird höher als das Bild (ADR 0056): Paßt sie nicht, rollt sie
+   innen, statt oben und unten hinauszuragen — quer ist das Bild 430 hoch. */
+#hinweisBlatt > .hinweis-karte, #timerBlatt > .hinweis-karte { max-height: 100%; overflow-y: auto; overscroll-behavior: contain; }
 /* Der Schleier blendet als eigene Schicht, nie das Blatt: Ein Vorfahr mit
    Deckkraft unter 1 wäre die Grenze des Glases — die Karte sähe dann nur den
    Schleier hinter sich, nicht die Seite, und bliebe matt (ADR 0014). */
@@ -1796,7 +1819,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.17.0T13';
+var APP_VERSION = '0.17.0T14';
 var APP_STAND = '2026-10-11';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -9467,6 +9490,9 @@ function blattLegen() {
   var r = k.getBoundingClientRect();
   b.style.top = px(r.bottom + 8);
   b.style.right = px(Math.max(8, document.documentElement.clientWidth - r.right));
+  // Quer ist unter dem Knopf wenig Platz: Das Blatt endet über dem Rand, die
+  // Liste rollt darin (ADR 0056).
+  b.style.setProperty('--blatt-oben', px(r.bottom + 8));
 }
 
 // Die Bilder des Blatts zwischen Knopf und voller Größe: von oben rechts
@@ -9910,6 +9936,8 @@ function start() {
   document.addEventListener('click', tippMerken, true);
   // Die Marken der Umschalter sitzen erst richtig, wenn die Schriften da sind.
   window.addEventListener('resize', wahlenSetzen);
+  // Gedreht: Das offene Menü hängt wieder unter seinem Knopf (ADR 0056).
+  window.addEventListener('resize', function () { if (!$('menue').hidden) blattLegen(); });
   // Bei offenem Menü rollt sein Knopf nicht davon (ADR 0042).
   window.addEventListener('scroll', menueMitrollen, { passive: true });
   try { document.fonts.ready.then(wahlenSetzen); } catch (e) { /* ohne Schriftereignis bleibt es beim Start */ }

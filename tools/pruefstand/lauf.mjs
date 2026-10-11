@@ -12,7 +12,7 @@
 // zufällig ein Filter etwas gefunden hat — das war einmal die Ursache dafür,
 // dass ein vollständig grüner Lauf als «fehlgeschlagen» dastand.
 
-import { existsSync, readdirSync, rmSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
@@ -93,8 +93,10 @@ for (const name of suiten) {
     // Das Budget ist virtuelle Zeit: Was eine Suite in Summe wartet, muß
     // darunter bleiben, sonst kommt sie ohne Urteil zurück. `thema` wartet
     // mehrmals THEMA_TROPFEN + 500 und sprengte 10 s (ADR 0039).
+    // Eine Suite darf ein anderes Fenster verlangen — das Querformat (ADR 0056).
+    const fenster = (readFileSync(seite, 'utf8').match(/<!-- pruefstand-fenster:(\d+,\d+) -->/) || [])[1] || '430,932';
     dom = execFileSync(chrome, ['--headless', '--disable-gpu', '--no-sandbox',
-      '--window-size=430,932', '--virtual-time-budget=20000',
+      '--window-size=' + fenster, '--virtual-time-budget=20000',
       '--dump-dom', pathToFileURL(seite).href],
     { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] });
   } catch (e) {

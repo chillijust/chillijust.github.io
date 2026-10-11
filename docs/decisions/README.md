@@ -63,3 +63,4 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0053](0053-fluessige-tropfen.md) | Die Tropfen fließen wie in iOS 26: Feder, Hals, Dehnen, Lichtkante, an jeder Stelle; Reiter «Flüssig» in den Einstellungen | Mechanik und Reiter gelten; Voreinstellung, Regler, Filter abgelöst durch 0054 |
 | [0054](0054-chilli-standard-ios-je-stelle.md) | Chilli ist Standard; iOS-Flüssig je Stelle im Reiter «Flüssig», mit Speichern; Pfad statt Filter; Drang und Timer mit Flüssigkeit und Chili | gilt |
 | [0055](0055-kontrast-in-dunkel.md) | Kontrast in Dunkel: Erhöhtes heller mit Rand, Saum am Flüssigen, Lichtkante ohne Schleier | gilt |
+| [0056](0056-querformat-zaehlt-mit.md) | Querformat zählt mit: keine Karte höher als das Bild, Timer quer nebeneinander, Menü rollt innen | gilt |

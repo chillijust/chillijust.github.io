@@ -47,6 +47,8 @@ fest.
 - **Der Rückweg geht nur über `zurueckGehen()`** — Kopf und Wisch vom Rand
   (`wischBeginnen`/`wischEnden`) rufen es.
 - **Was live läuft, schreibt `takt()` an Ort und Stelle** — kein `render()` im Sekundentakt.
+- **Quer ist das Bild 430 hoch** (ADR 0056): Keine Karte wird höher als ihr Blatt; was neu
+  ist, prüft auch die Suite `querformat`.
 - **Was im Fluß steht, rückt nie über den Rand** — sonst wird die Seite breiter, und iOS
   verkleinert die ganze Ansicht (ADR 0029).
 - **Das Ticketblatt legt sich über die Ansicht, ersetzt sie nie**; nur «Verwerfen» wirft
