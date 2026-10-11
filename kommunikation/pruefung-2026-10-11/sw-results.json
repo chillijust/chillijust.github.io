@@ -1,0 +1,43 @@
+[
+  {
+    "step": "initial",
+    "app": "0.17.0T9",
+    "controller": "0.17.0T9",
+    "registration": {
+      "waiting": false,
+      "active": true,
+      "installing": false
+    },
+    "caches": [
+      "chillinal-0.17.0T9"
+    ]
+  },
+  {
+    "step": "reload-1-ohne-uebernehmen",
+    "app": "0.17.0T9",
+    "controller": "0.17.0T9",
+    "registration": {
+      "waiting": true,
+      "active": true,
+      "installing": false
+    },
+    "caches": [
+      "chillinal-0.17.0T9",
+      "chillinal-0.17.0T10-audit"
+    ]
+  },
+  {
+    "step": "reload-2-ohne-uebernehmen",
+    "app": "0.17.0T10-audit",
+    "controller": "0.17.0T9",
+    "registration": {
+      "waiting": true,
+      "active": true,
+      "installing": false
+    },
+    "caches": [
+      "chillinal-0.17.0T9",
+      "chillinal-0.17.0T10-audit"
+    ]
+  }
+]

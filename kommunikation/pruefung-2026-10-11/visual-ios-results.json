@@ -1,0 +1,344 @@
+[
+  {
+    "scene": "home",
+    "theme": "hell",
+    "errors": [],
+    "metrics": {
+      "width": 430,
+      "height": 932,
+      "scrollWidth": 430,
+      "wide": [],
+      "small": [],
+      "duplicateIds": [],
+      "dialogs": [],
+      "chili": 1
+    }
+  },
+  {
+    "scene": "monat",
+    "theme": "hell",
+    "errors": [],
+    "metrics": {
+      "width": 430,
+      "height": 932,
+      "scrollWidth": 430,
+      "wide": [],
+      "small": [],
+      "duplicateIds": [],
+      "dialogs": [],
+      "chili": 1
+    }
+  },
+  {
+    "scene": "neu",
+    "theme": "hell",
+    "errors": [],
+    "metrics": {
+      "width": 430,
+      "height": 932,
+      "scrollWidth": 430,
+      "wide": [],
+      "small": [],
+      "duplicateIds": [],
+      "dialogs": [],
+      "chili": 0
+    }
+  },
+  {
+    "scene": "gewohnheit",
+    "theme": "hell",
+    "errors": [],
+    "metrics": {
+      "width": 430,
+      "height": 932,
+      "scrollWidth": 430,
+      "wide": [],
+      "small": [],
+      "duplicateIds": [],
+      "dialogs": [],
+      "chili": 0
+    }
+  },
+  {
+    "scene": "export",
+    "theme": "hell",
+    "errors": [],
+    "metrics": {
+      "width": 430,
+      "height": 932,
+      "scrollWidth": 430,
+      "wide": [],
+      "small": [],
+      "duplicateIds": [],
+      "dialogs": [],
+      "chili": 0
+    }
+  },
+  {
+    "scene": "fluessig",
+    "theme": "hell",
+    "errors": [],
+    "metrics": {
+      "width": 430,
+      "height": 932,
+      "scrollWidth": 430,
+      "wide": [],
+      "small": [],
+      "duplicateIds": [],
+      "dialogs": [],
+      "chili": 0
+    }
+  },
+  {
+    "scene": "ticket-blatt",
+    "theme": "hell",
+    "errors": [],
+    "metrics": {
+      "width": 430,
+      "height": 932,
+      "scrollWidth": 430,
+      "wide": [],
+      "small": [],
+      "duplicateIds": [],
+      "dialogs": [
+        {
+          "id": "ticketKarte",
+          "rect": {
+            "x": 12,
+            "y": 418.625,
+            "w": 406,
+            "h": 501.375,
+            "bottom": 920,
+            "right": 418
+          }
+        }
+      ],
+      "chili": 1
+    }
+  },
+  {
+    "scene": "timer",
+    "theme": "hell",
+    "errors": [],
+    "metrics": {
+      "width": 430,
+      "height": 932,
+      "scrollWidth": 430,
+      "wide": [],
+      "small": [],
+      "duplicateIds": [],
+      "dialogs": [
+        {
+          "id": "timerKarte",
+          "rect": {
+            "x": 45,
+            "y": 213.25,
+            "w": 340,
+            "h": 505.484375,
+            "bottom": 718.734375,
+            "right": 385
+          }
+        }
+      ],
+      "chili": 1
+    }
+  },
+  {
+    "scene": "menue",
+    "theme": "hell",
+    "errors": [],
+    "metrics": {
+      "width": 430,
+      "height": 932,
+      "scrollWidth": 430,
+      "wide": [],
+      "small": [],
+      "duplicateIds": [],
+      "dialogs": [
+        {
+          "id": "",
+          "rect": {
+            "x": 194,
+            "y": 85.1875,
+            "w": 220,
+            "h": 348,
+            "bottom": 433.1875,
+            "right": 414
+          }
+        }
+      ],
+      "chili": 1
+    }
+  },
+  {
+    "scene": "home",
+    "theme": "dunkel",
+    "errors": [],
+    "metrics": {
+      "width": 430,
+      "height": 932,
+      "scrollWidth": 430,
+      "wide": [],
+      "small": [],
+      "duplicateIds": [],
+      "dialogs": [],
+      "chili": 1
+    }
+  },
+  {
+    "scene": "monat",
+    "theme": "dunkel",
+    "errors": [],
+    "metrics": {
+      "width": 430,
+      "height": 932,
+      "scrollWidth": 430,
+      "wide": [],
+      "small": [],
+      "duplicateIds": [],
+      "dialogs": [],
+      "chili": 1
+    }
+  },
+  {
+    "scene": "neu",
+    "theme": "dunkel",
+    "errors": [],
+    "metrics": {
+      "width": 430,
+      "height": 932,
+      "scrollWidth": 430,
+      "wide": [],
+      "small": [],
+      "duplicateIds": [],
+      "dialogs": [],
+      "chili": 0
+    }
+  },
+  {
+    "scene": "gewohnheit",
+    "theme": "dunkel",
+    "errors": [],
+    "metrics": {
+      "width": 430,
+      "height": 932,
+      "scrollWidth": 430,
+      "wide": [],
+      "small": [],
+      "duplicateIds": [],
+      "dialogs": [],
+      "chili": 0
+    }
+  },
+  {
+    "scene": "export",
+    "theme": "dunkel",
+    "errors": [],
+    "metrics": {
+      "width": 430,
+      "height": 932,
+      "scrollWidth": 430,
+      "wide": [],
+      "small": [],
+      "duplicateIds": [],
+      "dialogs": [],
+      "chili": 0
+    }
+  },
+  {
+    "scene": "fluessig",
+    "theme": "dunkel",
+    "errors": [],
+    "metrics": {
+      "width": 430,
+      "height": 932,
+      "scrollWidth": 430,
+      "wide": [],
+      "small": [],
+      "duplicateIds": [],
+      "dialogs": [],
+      "chili": 0
+    }
+  },
+  {
+    "scene": "ticket-blatt",
+    "theme": "dunkel",
+    "errors": [],
+    "metrics": {
+      "width": 430,
+      "height": 932,
+      "scrollWidth": 430,
+      "wide": [],
+      "small": [],
+      "duplicateIds": [],
+      "dialogs": [
+        {
+          "id": "ticketKarte",
+          "rect": {
+            "x": 12,
+            "y": 418.625,
+            "w": 406,
+            "h": 501.375,
+            "bottom": 920,
+            "right": 418
+          }
+        }
+      ],
+      "chili": 1
+    }
+  },
+  {
+    "scene": "timer",
+    "theme": "dunkel",
+    "errors": [],
+    "metrics": {
+      "width": 430,
+      "height": 932,
+      "scrollWidth": 430,
+      "wide": [],
+      "small": [],
+      "duplicateIds": [],
+      "dialogs": [
+        {
+          "id": "timerKarte",
+          "rect": {
+            "x": 45,
+            "y": 213.25,
+            "w": 340,
+            "h": 505.484375,
+            "bottom": 718.734375,
+            "right": 385
+          }
+        }
+      ],
+      "chili": 1
+    }
+  },
+  {
+    "scene": "menue",
+    "theme": "dunkel",
+    "errors": [],
+    "metrics": {
+      "width": 430,
+      "height": 932,
+      "scrollWidth": 430,
+      "wide": [],
+      "small": [],
+      "duplicateIds": [],
+      "dialogs": [
+        {
+          "id": "",
+          "rect": {
+            "x": 194,
+            "y": 85.1875,
+            "w": 220,
+            "h": 348,
+            "bottom": 433.1875,
+            "right": 414
+          }
+        }
+      ],
+      "chili": 1
+    }
+  }
+]

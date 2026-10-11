@@ -1,0 +1,5 @@
+{
+  "akzeptiertesSchema": 1,
+  "id": "bad\"",
+  "fehler": "SyntaxError: Failed to execute 'querySelector' on 'Document': '[data-haken=\"bad\"\"]' is not a valid selector."
+}

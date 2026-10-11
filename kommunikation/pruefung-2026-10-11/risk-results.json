@@ -1,0 +1,97 @@
+[
+  {
+    "test": "timer-menue-geste",
+    "result": {
+      "timer": true,
+      "menu": true,
+      "blockiert": true,
+      "dialogs": [
+        "blatt",
+        "timerKarte"
+      ]
+    }
+  },
+  {
+    "test": "dialog-fokus",
+    "result": {
+      "tabfolge": [
+        "hinweisNein",
+        "hinweisOk",
+        "ticketKnopf",
+        "",
+        "markeKnopf"
+      ]
+    }
+  },
+  {
+    "test": "hinweis-schnell-False",
+    "result": {
+      "offen": true,
+      "hidden": false,
+      "opacity": "1",
+      "titel": "Zweiter Hinweis",
+      "huellen": 0
+    }
+  },
+  {
+    "test": "hinweis-schnell-True",
+    "result": {
+      "offen": true,
+      "hidden": false,
+      "opacity": "1",
+      "titel": "Zweiter Hinweis",
+      "huellen": 0
+    }
+  },
+  {
+    "test": "speichern-fehlschlag",
+    "result": {
+      "ansicht": "home",
+      "entwurf": null,
+      "angezeigt": [
+        "Lesen",
+        "Neue Gewohnheit"
+      ],
+      "gespeichert": [
+        "Lesen"
+      ],
+      "meldung": "Speichern ging nicht — der Speicher ist voll oder gesperrt."
+    }
+  },
+  {
+    "test": "timer-kurze-hoehe",
+    "result": {
+      "height": 430,
+      "top": -37.734375,
+      "bottom": 467.75,
+      "scroll": 766,
+      "karteScroll": 505,
+      "karteClient": 505
+    }
+  },
+  {
+    "test": "bewegung-waehrenddessen-aus",
+    "result": {
+      "vorher": {
+        "bewegungAus": true,
+        "fluss": true,
+        "p": 0.8779514472905359
+      },
+      "nachher": {
+        "bewegungAus": true,
+        "fluss": true,
+        "p": 1.02809458672157
+      }
+    }
+  },
+  {
+    "test": "menue-richtungswechsel",
+    "result": {
+      "offen": true,
+      "hidden": false,
+      "opacity": "1",
+      "fluss": false,
+      "schichten": 0
+    }
+  }
+]

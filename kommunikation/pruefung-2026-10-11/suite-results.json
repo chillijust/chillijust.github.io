@@ -1,0 +1,248 @@
+[
+  {
+    "suite": "abgewoehnen",
+    "title": "ALLE 85 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 85
+  },
+  {
+    "suite": "ankunft",
+    "title": "ALLE 10 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 10
+  },
+  {
+    "suite": "auftritt",
+    "title": "ALLE 19 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 19
+  },
+  {
+    "suite": "beginn",
+    "title": "ALLE 17 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 17
+  },
+  {
+    "suite": "bewegung",
+    "title": "ALLE 70 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 70
+  },
+  {
+    "suite": "einstellungen",
+    "title": "ALLE 25 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 25
+  },
+  {
+    "suite": "export",
+    "title": "ALLE 52 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 52
+  },
+  {
+    "suite": "exportmarken",
+    "title": "ALLE 29 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 29
+  },
+  {
+    "suite": "exportwahl",
+    "title": "ALLE 27 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 27
+  },
+  {
+    "suite": "exportwege",
+    "title": "ALLE 33 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 33
+  },
+  {
+    "suite": "feinschliff",
+    "title": "ALLE 62 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 62
+  },
+  {
+    "suite": "fliessen",
+    "title": "FEHLGESCHLAGEN: 1",
+    "errors": [],
+    "failures": [
+      "FAIL P6 sie löst sich, wenn die vorige halb gewachsen ist"
+    ],
+    "checks": 14
+  },
+  {
+    "suite": "fluessig",
+    "title": "ALLE 79 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 79
+  },
+  {
+    "suite": "geruest",
+    "title": "ALLE 28 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 28
+  },
+  {
+    "suite": "gewohnheiten",
+    "title": "ALLE 81 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 81
+  },
+  {
+    "suite": "journal",
+    "title": "ALLE 73 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 73
+  },
+  {
+    "suite": "kalender",
+    "title": "FEHLGESCHLAGEN: 10",
+    "errors": [],
+    "failures": [
+      "FAIL S7 kurz und langsam: federt zurück",
+      "FAIL S8 weit genug: die nächste Woche, sofort",
+      "FAIL S10 ein kurzer, schneller Schubs blättert auch — zurück [1]",
+      "FAIL S11 eher nach unten: nichts gleitet, nichts blättert",
+      "FAIL S12 auch über den Wochentagen",
+      "FAIL S13 auch auf dem Rand der Karte",
+      "FAIL S14 nicht auf den Pfeilen, nicht auf Ring und Umschalter",
+      "FAIL S15 am Rand des Bildschirms beginnt kein Ziehen",
+      "FAIL S16 nimmt das System den Finger, federt die Seite zurück",
+      "AUSNAHME: Cannot read properties of null (reading 'click') |     at http://127.0.0.1:46547/tools/pruefstand/bau/t-kalender.html:10200:15"
+    ],
+    "checks": 82
+  },
+  {
+    "suite": "langdruck",
+    "title": "FEHLGESCHLAGEN: 1",
+    "errors": [],
+    "failures": [
+      "FAIL T3 zurück fließt sie dorthin [{\"offset\":0.9,\"easing\":\"linear\",\"composite\":\"auto\",\"height\":\"44px\",\"left\":\"303.2px\",\"opacity\":\"1\",\"borderRadius\":\"50%\",\"top\":\"437.2px\",\"width\":\"44px\",\"computedOffset\":0.9} {\"x\":331,\"y\":460}]"
+    ],
+    "checks": 18
+  },
+  {
+    "suite": "menue",
+    "title": "ALLE 56 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 56
+  },
+  {
+    "suite": "nachschliff",
+    "title": "ALLE 65 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 65
+  },
+  {
+    "suite": "offline",
+    "title": "ALLE 28 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 28
+  },
+  {
+    "suite": "rueckblick",
+    "title": "ALLE 31 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 31
+  },
+  {
+    "suite": "schriftzug",
+    "title": "ALLE 16 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 16
+  },
+  {
+    "suite": "sicherung",
+    "title": "ALLE 44 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 44
+  },
+  {
+    "suite": "speicher",
+    "title": "ALLE 42 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 42
+  },
+  {
+    "suite": "termine",
+    "title": "ALLE 83 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 83
+  },
+  {
+    "suite": "thema",
+    "title": "ALLE 51 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 51
+  },
+  {
+    "suite": "tickets",
+    "title": "ALLE 86 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 102
+  },
+  {
+    "suite": "timer",
+    "title": "ALLE 61 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 61
+  },
+  {
+    "suite": "tropfen",
+    "title": "ALLE 21 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 21
+  },
+  {
+    "suite": "wechsel",
+    "title": "ALLE 7 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 7
+  },
+  {
+    "suite": "zeichen",
+    "title": "ALLE 23 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 23
+  },
+  {
+    "suite": "zoom",
+    "title": "ALLE 3 TESTS BESTANDEN",
+    "errors": [],
+    "failures": [],
+    "checks": 3
+  }
+]
