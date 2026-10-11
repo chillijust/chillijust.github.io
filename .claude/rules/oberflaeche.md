@@ -83,6 +83,8 @@ fest.
     Fehlschlag (ADR 0051), sonst das neutrale «i»;
   - was man lesen muß: `hinweisZeigen` (wartet auf «OK»);
   - geht das Fenster mit: `bestaetigenUndGehen`/`meldenUndGehen` — es wird selbst zur Meldung.
+- **Nur der oberste Dialog ist bedienbar** (`dialogeOrdnen`, James N5): Ein neues Blatt
+  kommt in `DIALOGE` (Reihenfolge von oben) und bekommt `.offen`; den Rest macht es inert.
 - **Was ersetzt oder löscht, fragt im Glas** (`hinweisZeigen` mit `frage`, Einzelnes über
   `loeschenFragen`), verneint mit «Nein», ist bis zum Neuladen rückgängig (`rueckgaengig`).
   Kein zweiter Tipp auf denselben Knopf. Eine Wahl trägt kein «Abbrechen» — ab bricht, wer

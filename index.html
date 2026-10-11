@@ -1316,7 +1316,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 .hinweis-karte p { margin: 0 0 18px; font-size: 16px; color: var(--text-2); }
 .hinweis-karte .knopf { width: 100%; }
 /* Den Fokus trägt die Karte, für Vorleser — ein Ring um «OK» sähe aus wie eine Wahl. */
-.hinweis-karte:focus { outline: none; }
+.hinweis-karte:focus, #menue .blatt:focus, #ticketKarte:focus { outline: none; }
 /* Die Bestätigung: dasselbe Glas, ein Zeichen statt «OK» (ADR 0018). Das
    Zeichen malt seine Scheibe selbst (`.zm-scheibe`), damit es sie füllen und
    über ihren Rand hinaus pulsen kann (ADR 0051): grün für Gelungenes, grau
@@ -1759,7 +1759,7 @@ textarea.eingabe.code {
   <main id="ansicht"></main>
 </div>
 <div id="menue" hidden>
-  <div class="blatt" role="dialog" aria-modal="true" aria-label="Menü">
+  <div class="blatt" tabindex="-1" role="dialog" aria-modal="true" aria-label="Menü">
     <ul class="menue-liste" id="menueListe"></ul>
   </div>
 </div>
@@ -1785,7 +1785,7 @@ textarea.eingabe.code {
 </div>
 <button type="button" id="ticketKnopf" aria-label="Ticket schreiben" aria-haspopup="dialog"></button>
 <div id="ticketBlatt" hidden>
-  <div class="ticket-karte glas" id="ticketKarte" role="dialog" aria-modal="true" aria-labelledby="tkKopf"></div>
+  <div class="ticket-karte glas" id="ticketKarte" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="tkKopf"></div>
 </div>
 <script>
 'use strict';
@@ -1796,7 +1796,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.17.0T12';
+var APP_VERSION = '0.17.0T13';
 var APP_STAND = '2026-10-11';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -4879,6 +4879,63 @@ function zurueckGehen() {
 var WISCH_RAND = 26;   // px vom linken Rand, in denen die Geste beginnen darf
 var WISCH_WEG = 70;    // px, die der Finger mindestens waagerecht zurücklegt
 var wischVon = null;
+
+// ── Der oberste Dialog (James, N5) ──────────────────────────────
+// Nur der oberste ist bedienbar: Alles andere wird «inert» — kein Fokus, kein
+// Tab, keine Pfeile über der iOS-Tastatur dorthin. Geht er auf, holt er den
+// Fokus zu sich; geht er zu, kehrt der Fokus dorthin zurück, wo er vorher war.
+// Bestimmt wird es an einer Stelle, wann immer ein Blatt auf- oder zugeht
+// (`dialogeBeobachten`). Die Meldung bleibt frei: Sie liest nur vor.
+var DIALOGE = ['hinweisBlatt', 'ticketBlatt', 'timerBlatt', 'menue'];   // von oben nach unten
+var dialogOben = null, dialogRueck = [], fokusVerlauf = [];
+
+function obersterDialog() {
+  for (var i = 0; i < DIALOGE.length; i++) {
+    var d = $(DIALOGE[i]);
+    if (d && !d.hidden && d.classList.contains('offen')) return d;
+  }
+  return null;
+}
+
+function dialogKarte(d) { return d.id === 'menue' ? d.querySelector('.blatt') : d.firstElementChild; }
+
+function dialogeOrdnen() {
+  var oben = obersterDialog();
+  Array.prototype.forEach.call(document.body.children, function (el) {
+    if (el.tagName === 'SCRIPT' || el.id === 'meldung') return;
+    el.inert = !!oben && el !== oben;
+  });
+  if (oben === dialogOben) return;
+  var hoeher = oben && (!dialogOben || DIALOGE.indexOf(oben.id) < DIALOGE.indexOf(dialogOben.id));
+  if (hoeher) {
+    // Woher er kam: der letzte Fokus außerhalb dieses Dialogs.
+    var vorher = fokusVerlauf.filter(function (el) { return !oben.contains(el); })[0] || null;
+    dialogRueck.push({ d: oben, el: vorher });
+    var karte = dialogKarte(oben);
+    if (karte && !oben.contains(document.activeElement)) {
+      try { karte.focus({ preventScroll: true }); } catch (e) { /* egal */ }
+    }
+  } else {
+    // Zu: zurück, wo der Fokus war, als der oberste von eben aufging.
+    var rueck = null;
+    while (dialogRueck.length && dialogRueck[dialogRueck.length - 1].d !== oben) rueck = dialogRueck.pop();
+    var el = rueck && rueck.el;
+    if (el && el.isConnected && !el.closest('[inert]')) {
+      try { el.focus({ preventScroll: true }); } catch (e) { /* egal */ }
+    }
+  }
+  dialogOben = oben;
+}
+
+function dialogeBeobachten() {
+  document.addEventListener('focusin', function (e) {
+    fokusVerlauf.unshift(e.target);
+    fokusVerlauf.length = Math.min(fokusVerlauf.length, 8);
+  });
+  if (!window.MutationObserver) return;
+  var b = new MutationObserver(dialogeOrdnen);
+  DIALOGE.forEach(function (id) { if ($(id)) b.observe($(id), { attributes: true, attributeFilter: ['class', 'hidden'] }); });
+}
 
 // Ein Blatt über der Ansicht: Solange eins offen ist, schweigen die Gesten
 // darunter — auch beim Timer, sonst öffnete ein Wisch vom Rand das Menü hinter
@@ -9841,6 +9898,7 @@ function start() {
   render();
   auftritt();
   if (speicherSperre) sperreZeigen();
+  dialogeBeobachten();
   // Ein Tipp irgendwohin überspringt den Auftritt.
   document.addEventListener('pointerdown', function () { if (auftrittLaeuft) auftrittEnde(); }, true);
 
