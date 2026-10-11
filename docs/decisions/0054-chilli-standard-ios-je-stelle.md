@@ -25,7 +25,11 @@ hart schneiden) rechnet Safari auf dem iPhone teils ohne Grafikchip, Bild für B
   löst sich aus der Quelle, wandert, wächst zum Teil; gemalt in einer Schicht unter dem
   beschnittenen Teil, mit dessen Farbe und Schatten (Glas bleibt Glas, die Schicht malt
   dann nur Hals und Schatten). Ist die Quelle fort, quillt er aus einer Perle, die
-  leerläuft. Der Knauf eines Schalters fließt gedehnt hinüber (`knaufFliesst`).
+  leerläuft. Zurück nimmt der Tropfen den Inhalt mit, verkleinert, bis er klein ist —
+  blendete er gleich aus, wäre eine Ansicht fort, bevor der Tropfen den Knopf erreicht
+  (0.17.0T7, in App und Probe); der Knopf schluckt ihn mit einem Nicken, und beim Menü
+  blendet nur der Schleier, nicht das Blatt. Der Knauf eines Schalters hebt sich wie eine
+  Linse und fließt gedehnt hinüber (`knaufFliesst`).
   `fliessen` (Marke, Knauf, Abhaken) malt nur Hals und Rest, nie das Teil selbst. In
   0.17.0T3 lief überall die Chilli-Bewegung, und das Flüssige lag als zweites Bild
   darunter — am Gerät sah das aus wie zwei Teile übereinander, mit doppeltem Schatten.

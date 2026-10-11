@@ -64,7 +64,9 @@ fest.
   Stelle bewegt, fragt `flIos(stelle)` und nimmt dann `fluessigTakt`/`fliessen`. Feste
   Dauern setzt nur `flDauernSetzen` — keine Zahl von Hand. Auf iOS ersetzt das Flüssige
   die Chilli-Bewegung, es legt sich nicht darunter (`teilFliesst`); `fliessen` malt nur
-  Hals und Rest, nie das Teil.
+  Hals und Rest, nie das Teil. Was zurückfließt, blendet kein Vorfahr aus (am Menü nur
+  der Schleier); wer fremde Bewegung abwartet, fragt `eigeneBewegung` — der Übergang vom
+  Drücken zählt nicht.
 - **Teile über `teilZeigen(el, an, quelle)`, Knöpfe über `teilTropfen(el, an)`**, nie
   `el.hidden = …`. Ein Teil mit eigenem `display` braucht `[hidden] { display: none; }`.
   Eine neue `.wahl` bekommt ihre Marke von `wahlenSetzen()`.

@@ -186,7 +186,7 @@ pruefe('W2 der Ring ist ein Drittel so dick wie zuvor', Math.abs(parseFloat(getC
 state.welle = null;
 zeige('home');
 
-var blattFluss = null, stillstand = null;
+var blattFluss = null, stillstand = null, zuGeist = null, zuHuelle = null;
 return Promise.resolve().then(function () {
   // ── M · Das Menü auf iOS, in Bewegung ─────────────────────
   aufbauen();
@@ -199,16 +199,36 @@ return Promise.resolve().then(function () {
   menueSchliessen();
   pruefe('M1 wer mitten im Weg schließt, kehrt mit derselben Feder um', !!blatt._fluss && blatt._fluss === blattFluss &&
     blattFluss.p.ziel === 0 && blattFluss.p.x > 0);
+  return warten(90);
+}).then(function () {
+  var li = q('#menueListe'), sk = /scale\(([\d.]+)\)/.exec(li.style.transform), mc = getComputedStyle(q('#menue'));
+  pruefe('R1 zurück blendet nur der Schleier aus, das Blatt bleibt deckend, bis es im Knopf ist',
+    document.documentElement.classList.contains('fl-menue') && mc.opacity === '1' && mc.transitionProperty.indexOf('background-color') >= 0);
+  pruefe('R2 der Tropfen nimmt die Einträge mit, verkleinert und noch zu sehen', !!sk && +sk[1] < 1 && +li.style.opacity > 0);
   return warten(1500);
 }).then(function () {
   pruefe('M2 zurückgeflossen ist das Menü zu und aufgeräumt', q('#menue').hidden && !blatt._fluss && !q('#menue .fl-schicht') &&
-    !blatt.style.clipPath && !blatt.style.background);
+    !blatt.style.clipPath && !blatt.style.background && !q('#menueListe').style.transform);
   menueOeffnen();
   return warten(1500);
 }).then(function () {
   pruefe('M3 aufgeflossen steht das Blatt als es selbst', !q('#menue').hidden && !blatt._fluss && !q('#menue .fl-schicht') &&
     !blatt.style.clipPath && !blatt.style.boxShadow && !q('#menueListe').style.opacity);
   menueSchliessen(true);
+  // Eine Ansicht fließt zurück in ihren Knopf und nimmt ihren Inhalt mit.
+  state.fluessig = { ios: { ansichten: true } };
+  flDauernSetzen();
+  zuGeist = geist(q('#ansicht'));
+  tropfenZu(zuGeist, q('#ansicht').getBoundingClientRect(), q('#menuKnopf'));
+  return warten(90);
+}).then(function () {
+  var sk = /scale\(([\d.]+)\)/.exec(zuGeist.style.transform), zh = zuHuelle = zuGeist.parentNode;
+  pruefe('R3 eine Ansicht fließt zurück und nimmt ihren Inhalt mit in den Knopf', !!zh && !!zh._fluss && zh._fluss.p.ziel === 0 &&
+    !!sk && +sk[1] < 1 && +zuGeist.style.opacity > 0);
+  return warten(1500);
+}).then(function () {
+  pruefe('R4 angekommen ist die Hülle fort, mit ihrer Schicht', !zuGeist.isConnected && !zuHuelle.isConnected && !zuHuelle._fluss &&
+    !q('body > .fl-schicht'));
   // Hinweis aus Glas: Der Tropfen ist das Glas, die Schicht malt nur Hals
   // und Schatten.
   state.fluessig = { ios: { hinweis: true, schalter: true } };
@@ -234,7 +254,17 @@ return Promise.resolve().then(function () {
   pruefe('M6 der Knauf fließt hinüber, mit Rest und Hals', !!k && k.getAnimations().length === 1 &&
     k.getAnimations()[0].effect.getTiming().easing.indexOf('linear(') === 0 && !!q('#esHinweis .fl-schicht') &&
     getComputedStyle(k).transitionProperty.indexOf('transform') < 0);
+  ausbewegt();
+  // Am Gerät hat der Finger den Knauf gestreckt; kommt der Tipp an, wird er
+  // beim Loslassen noch schmaler — ein Übergang aus CSS, der das Fließen
+  // nicht aufhalten darf. Hier startet kein Übergang ohne Bilder, also steht
+  // einer da, wie ihn Safari meldet.
+  k = q('#esHinweis .schalter-knauf');
+  k.getAnimations = function () { return [Object.create(CSSTransition.prototype)]; };
   q('#esHinweis').click();
+  delete k.getAnimations;
+  pruefe('M7 auch wenn der Knauf vom Drücken noch schmaler wird, fließt er', k === q('#esHinweis .schalter-knauf') &&
+    eigeneBewegung(k) && !eigeneBewegung({ getAnimations: function () { return [Object.create(CSSTransition.prototype)]; } }));
   ausbewegt();
   zeige('home');
   state.fluessig = null;
@@ -262,6 +292,10 @@ return Promise.resolve().then(function () {
   pruefe('B7 der Schalter ist umgelegt', buehne('schalter').querySelector('[role="switch"]').getAttribute('aria-checked') === 'true');
   pruefe('B8 die Ansicht ist aufgequollen', fpLauf.ansichten.offen());
   pruefe('B9 alle Schleifen ruhen', IDS.every(function (id) { return !fpLauf[id].laeuft; }));
+  tipp('menue', 'knopf');
+  var pi = buehne('menue').querySelector('[data-fp-teil="inhalt"]');
+  pruefe('B3b wer wieder öffnet, blendet den Inhalt ein, statt ihn mitzunehmen', !pi.style.transform && pi.style.opacity === '0');
+  tipp('menue', 'flaeche');
   tipp('welle', 'welle');
   return warten(RUHE);
 }).then(function () {
