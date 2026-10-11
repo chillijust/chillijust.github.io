@@ -1796,7 +1796,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.17.0T9';
+var APP_VERSION = '0.17.0T10';
 var APP_STAND = '2026-10-11';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -2800,7 +2800,7 @@ function fliessen(el, quelle, opt) {
     }, 320);
   }
   function schritt() {
-    if (!el.isConnected || Date.now() > ende) { aufraeumen(); return; }
+    if (!el.isConnected || Date.now() > ende || bewegungAus()) { aufraeumen(); return; }
     var qr = opt.rest ? restJetzt() : quelle.getBoundingClientRect(), er = el.getBoundingClientRect();
     if (!er.width || qr.width < 1) { s.style.display = 'none'; fpBild(schritt); return; }
     var dq = Math.min(qr.width, qr.height) / 2;
@@ -2899,6 +2899,14 @@ function teilFliesst(el, o) {
 function teilSchritt(el, weiter) {
   var f = el._fluss, nun = Date.now();
   if (!f) return;
+  // Wird die Bewegung unterwegs abgeschaltet, steht das Teil sofort, wo es
+  // hinwollte; sein Abschluß kommt genau einmal (James, N6).
+  if (bewegungAus()) {
+    var still = f.fertig;
+    teilFliesstEnde(el);
+    if (still) still();
+    return;
+  }
   var o = f.o, qr = el.isConnected ? o.quelle() : null;
   if (!qr || !qr.width) {
     var weg1 = f.fertig;
@@ -4837,8 +4845,11 @@ var WISCH_RAND = 26;   // px vom linken Rand, in denen die Geste beginnen darf
 var WISCH_WEG = 70;    // px, die der Finger mindestens waagerecht zurücklegt
 var wischVon = null;
 
+// Ein Blatt über der Ansicht: Solange eins offen ist, schweigen die Gesten
+// darunter — auch beim Timer, sonst öffnete ein Wisch vom Rand das Menü hinter
+// seinem Glas, und es bliebe nach dem Timer stehen (James, N1).
 function blattOffen() {
-  return !$('menue').hidden || !$('hinweisBlatt').hidden || !$('ticketBlatt').hidden;
+  return !$('menue').hidden || !$('hinweisBlatt').hidden || !$('ticketBlatt').hidden || !$('timerBlatt').hidden;
 }
 
 // Über dem Kalender zieht ein Wisch die Seite mit (kalDruck, ADR 0052) — auf

@@ -104,7 +104,5 @@ return warten(900).then(function () {
   ausbewegt();
   state.fluessig = null;
   flDauernSetzen();
-  state.fluessig = null;
-  flDauernSetzen();
 });
 `);
