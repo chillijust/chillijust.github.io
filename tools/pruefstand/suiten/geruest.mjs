@@ -27,6 +27,14 @@ pruefe('A4 der Menüknopf liegt ganz rechts, der Schalter davor',
 pruefe('A5 der Menüknopf ist rund', getComputedStyle(q('#menuKnopf')).borderRadius === '50%');
 pruefe('A6 auf dem Dashboard kein Rückweg', !q('#zurueckKnopf'));
 
+// Gerollt wird nur, was über den Bildschirm reicht; sonst federte iOS die
+// Seite trotzdem (0.15.0T2).
+pruefe('A7 die Seite federt nicht nach', ['html', 'body'].every(function (t) {
+  return getComputedStyle(document.querySelector(t)).overscrollBehaviorY === 'none';
+}));
+pruefe('A8 bei wenig Inhalt ist nichts zu rollen', document.scrollingElement.scrollHeight <= innerHeight,
+  document.scrollingElement.scrollHeight + ' > ' + innerHeight);
+
 // ── B · Leeres Dashboard ────────────────────────────────────
 pruefe('B1 die Chili steht genau einmal da', alle('#chiliFigur').length === 1);
 pruefe('B2 und ist ein eingebettetes Bild',

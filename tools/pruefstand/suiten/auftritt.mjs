@@ -38,11 +38,19 @@ return Promise.resolve().then(function () {
     Math.abs(r2.left - platz.left) < 1 && Math.abs(r2.width - platz.width) < 1 && deckend('#ansicht') === 1);
   var karten = alle('#ansicht .held, #ansicht .abschnitt > h2, #ansicht .gw-liste > *').filter(function (k) {
     return k.getBoundingClientRect().top < innerHeight; });
-  var warten = karten.map(function (k) { var x = k.getAnimations()[0]; return x ? x.effect.getTiming().delay : -1; });
-  pruefe('A7 das Dashboard tropft Karte für Karte auf, von oben nach unten', karten.length >= 3 && warten[0] === 0 &&
-    warten.every(function (w, i) { return i === 0 || w > warten[i - 1]; }) &&
+  function verzug(k) { var x = k.getAnimations()[0]; return x ? x.effect.getTiming().delay : -1; }
+  var warten = karten.map(verzug), mitGrund = karten.filter(eigenerGrund), wg = mitGrund.map(verzug);
+  pruefe('A7 das Dashboard tropft als Kette auf, Karte für Karte, jede, wenn die vorige halb gewachsen ist',
+    mitGrund.length >= 2 && wg[0] === 0 && wg.every(function (w, i) { return i === 0 || w - wg[i - 1] === perleTakt(); }) &&
     karten.every(function (k) { var x = k.getAnimations()[0]; return x && /round/.test(x.effect.getKeyframes()[0].clipPath) &&
       x.effect.getTiming().fill === 'backwards'; }), warten.join());
+  pruefe('A7b eine Überschrift kommt mit der Karte nach ihr', karten.some(function (k) { return !eigenerGrund(k); }) &&
+    karten.every(function (k, i) {
+      var n = eigenerGrund(k) ? null : karten.slice(i + 1).filter(eigenerGrund)[0];
+      return !n || verzug(k) === verzug(n);
+    }));
+  pruefe('A7c in Chilli löst sich die nächste nach vier Zehnteln, sechs Karten brauchen keine zwei Sekunden',
+    perleTakt() === Math.round(PERLE_DAUER * 0.4) && perleTakt() * 5 + PERLE_DAUER <= 2000);
   pruefe('A8 Datum, Schalter und Knöpfe blenden auf', ['#kopf .datum', '#themaKnopf', '#menuKnopf', '#ticketKnopf'].every(function (s) {
     return q(s).getAnimations().length > 0; }));
   ausbewegt();

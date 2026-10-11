@@ -15,7 +15,7 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0005](0005-chili-und-kalender-eine-karte.md) | Chili und Kalender in einer Karte, Punkte statt Tönung | gilt |
 | [0006](0006-termine-im-einzelnen.md) | Termine: Felder, Wiederholung, Erinnerung, Tagesliste | gilt; «Hinzufügen» statt «Termin an diesem Tag» (0023) |
 | [0007](0007-tropfen-statt-aufploppen.md) | Tropfen statt Aufploppen: Geist, Feder, Zoom aus dem Getippten | gilt; Menü und Schrumpfen in den Menüknopf abgelöst durch 0008 |
-| [0008](0008-tropfenform-menue-kalenderwechsel.md) | Tropfenform, Menü unter dem Knopf, Woche \| Monat hält den Tag | gilt; langer Druck tropft auch aus Kacheln (0020); Spitze abgelöst durch 0023 |
+| [0008](0008-tropfenform-menue-kalenderwechsel.md) | Tropfenform, Menü unter dem Knopf, Woche \| Monat hält den Tag | gilt; langer Druck tropft auch aus Kacheln (0020); Spitze abgelöst durch 0023; «ohne Überschwingen» abgelöst durch 0053 |
 | [0009](0009-kalender-export-im-einzelnen.md) | Kalender-Export: schwebende Zeiten, Teilen und Laden, Erinnerung der Gewohnheit | gilt; Teilen entfällt mit 0013 |
 | [0010](0010-chilli-journal-und-heute.md) | Der Name heißt «Chilli Journal», «Heute» führt den Kalender nach Hause | gilt |
 | [0011](0011-was-schon-im-kalender-steht.md) | Was schon im Kalender steht, geht nicht noch einmal hinaus | gilt; ergänzt durch 0012; Abwahl von Neuem seit 0034 |
@@ -35,20 +35,20 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0025](0025-nachtrag-tickets-kalender-thema.md) | Nachtrag: Wisch von rechts, schmale Bestätigung, Tickets im Blatt, Kalender, Hell/Dunkel als Tropfen | gilt; Hell/Dunkel, Ticketzeilen, KW, Takt seit 0026 |
 | [0026](0026-nachtrag-tropfen-mit-dem-druck.md) | Nachtrag: Hell/Dunkel tropft mit dem Druck, Ticketfeld, Kalender | gilt; Kontrast und Ticketzeilen seit 0027, `knaufGleiten` seit 0037 |
 | [0027](0027-kontrast-ticketzeilen-ticketseite.md) | Nachtrag: Kontrast im Tropfen, Ticketzeilen nach dem Wechsel, Ticketseite | gilt; Listenhöhe seit 0028 |
-| [0028](0028-kein-zoom-wochentropfen-listenhoehe.md) | Kein Heranzoomen beim Tippen, die Woche tropft zur Seite, «Alle Tickets» so hoch wie das Ticket | gilt; Seitentropfen ohne Verschiebung seit 0029 |
+| [0028](0028-kein-zoom-wochentropfen-listenhoehe.md) | Kein Heranzoomen beim Tippen, die Woche tropft zur Seite, «Alle Tickets» so hoch wie das Ticket | gilt; Seitentropfen ohne Verschiebung seit 0029, am Finger seit 0052 |
 | [0029](0029-auftritt-beim-kaltstart.md) | Der Auftritt beim Kaltstart; die Woche rückt nicht über den Rand | gilt; «Neue Fassung» tropft mit seit 0044 |
 | [0030](0030-thema-tropfen-loest-sich-immer.md) | Der Hell/Dunkel-Tropfen löst sich immer | gilt |
 | [0031](0031-kalenderschalter-ticketliste-rollt-innen.md) | Woche \| Monat schaltet bei jedem Tipp; das Ticketblatt rollt innen, die Glaskante bleibt frei | gilt |
 | [0032](0032-was-ein-knopf-oeffnet-tropft.md) | Was ein Knopf öffnet, tropft aus ihm (Formularteile, Heatmap-Woche, Alle Tickets); Glas im Tropfen dicht und gefaßt | gilt |
 | [0033](0033-beginn-zurueckstellen.md) | Der Beginn einer Gewohnheit läßt sich zurückstellen; fällige Tage seitdem gelten als erledigt | gilt |
 | [0034](0034-export-auswaehlen.md) | Im Export wählen: «Bearbeiten» immer, Häkchen je Eintrag, «alle» je Abschnitt; Abwahl von Neuem gemerkt | gilt |
-| [0035](0035-zeichen-bewegen-sich.md) | Zeichen bewegen sich: Haken zeichnet sich, Hinweis-Punkt fällt, Pfeil fällt in die Schale, Blatt schiebt sich heraus | gilt |
-| [0036](0036-tropfen-weicher-mehrmals-alle.md) | Hell/Dunkel tropft weicher, auch mehrmals hintereinander und aus den Einstellungen; «alle» im Export tropft; Zeichen langsamer | gilt; Dauer des Tropfens und Zeiten der Zeichen seit 0037 |
-| [0037](0037-tropfen-folgt-dem-traeger.md) | Der Hell/Dunkel-Tropfen folgt dem Knauf und der Markierung; Zeichen einen Tick flotter | gilt |
+| [0035](0035-zeichen-bewegen-sich.md) | Zeichen bewegen sich: Haken zeichnet sich, Hinweis-Punkt fällt, Pfeil fällt in die Schale, Blatt schiebt sich heraus | gilt für den Haken der Kachel; Zeichen der Meldung seit 0051 |
+| [0036](0036-tropfen-weicher-mehrmals-alle.md) | Hell/Dunkel tropft weicher, auch mehrmals hintereinander und aus den Einstellungen; «alle» im Export tropft; Zeichen langsamer | gilt; Dauer des Tropfens und Zeiten der Zeichen seit 0037, Zeichen der Meldung seit 0051 |
+| [0037](0037-tropfen-folgt-dem-traeger.md) | Der Hell/Dunkel-Tropfen folgt dem Knauf und der Markierung; Zeichen einen Tick flotter | gilt; Zeichen der Meldung seit 0051 |
 | [0038](0038-timer-und-zaehler.md) | Timer und Zähler: abhaken mit Zeit oder durch Zählen | gilt; Glas aus der Scheibe, Pause, Zählschritt seit 0040; Abbrechen fragt im Glas seit 0041 |
 | [0039](0039-pruefstand-wartet-aus-der-konstante.md) | Der Prüfstand wartet aus der Bewegungskonstante, nicht fest; Budget des Läufers 20 s | gilt |
 | [0040](0040-timer-klein-pause-zaehlschritt.md) | Glas aus der Scheibe, Timer mit Pause, Zähler in Schritten mit Einheit | gilt; Pause im Ring seit 0041 |
-| [0041](0041-termine-abhaken-fenster-wird-meldung.md) | Termine abhaken, Fenster wird Meldung, Menüknopf tropft herab, Einträge nacheinander, «Hinzufügen» aus dem Plus, Fragen im Glas | gilt; Termin wie Kachel, «Nein», Menüknopf rollt mit seit 0042 |
+| [0041](0041-termine-abhaken-fenster-wird-meldung.md) | Termine abhaken, Fenster wird Meldung, Menüknopf tropft herab, Einträge nacheinander, «Hinzufügen» aus dem Plus, Fragen im Glas | gilt; Termin wie Kachel, «Nein», Menüknopf rollt mit seit 0042; Aufbau des Timers abgelöst durch 0054 |
 | [0042](0042-termin-wie-kachel-nein-menue-rollt.md) | Termin wie eine Kachel, «Nein» in der Frage, Menüknopf rollt mit, Meldung ohne zweiten Tropfen | gilt; Gast erst aus der Ecke seit 0043; Wahl ohne «Abbrechen» seit 0044 |
 | [0043](0043-langdruck-ohne-markieren-gast-aus-der-ecke.md) | Langer Druck markiert nichts, der Gast des Menüknopfs tropft aus der Ecke, nie zwei Knöpfe | gilt |
 | [0044](0044-wahl-ohne-abbrechen-fassung-tropft-mit.md) | «Hinzufügen» ohne «Abbrechen»; die Zeile «Neue Fassung» tropft mit dem Dashboard auf | gilt |
@@ -58,3 +58,8 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0048](0048-kommunikation-und-namen.md) | Nachrichten in `kommunikation/`; Claude heißt Jarvis, ChatGPT James; James kennzeichnet Commits | gilt; der Ordner liegt seit 0050 nur auf `chatgpt/kommunikation` |
 | [0049](0049-speicherfehler-zurueck-sperre.md) | Ein Haken, der nicht gespeichert ist, springt zurück; ein unlesbarer Stand sperrt das Schreiben | gilt |
 | [0050](0050-kommunikation-nur-auf-eigenem-branch.md) | `kommunikation/` lebt nur auf `chatgpt/kommunikation`, nie auf `main`; nie zusammenführen | gilt |
+| [0051](0051-zeichen-neu-mit-puls-und-warnung.md) | Zeichen der Meldung neu bewegt, jedes endet mit dem Puls; eine Warnung für Fehlschläge | gilt |
+| [0052](0052-kalender-wischen.md) | Der Kalender folgt dem Finger (Tropfen, 1:1); Pfeile und «Heute» spielen dieselbe Bewegung | gilt; löst den Seitentropfen aus 0028 ab |
+| [0053](0053-fluessige-tropfen.md) | Die Tropfen fließen wie in iOS 26: Feder, Hals, Dehnen, Lichtkante, an jeder Stelle; Reiter «Flüssig» in den Einstellungen | Mechanik und Reiter gelten; Voreinstellung, Regler, Filter abgelöst durch 0054 |
+| [0054](0054-chilli-standard-ios-je-stelle.md) | Chilli ist Standard; iOS-Flüssig je Stelle im Reiter «Flüssig», mit Speichern; Pfad statt Filter; Drang und Timer mit Flüssigkeit und Chili | gilt |
+| [0055](0055-kontrast-in-dunkel.md) | Kontrast in Dunkel: Erhöhtes heller mit Rand, Saum am Flüssigen, Lichtkante ohne Schleier | gilt |

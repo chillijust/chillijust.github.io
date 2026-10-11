@@ -1,8 +1,10 @@
-// Zeichen, die sich bewegen (0.11.0T, ADR 0035): Der Haken zeichnet sich —
-// im Glas wie auf der Kachel —, beim Hinweis fällt der Punkt und der Strich
-// wächst, der Pfeil von «Datei geladen» fällt in die Schale, beim Kopieren
-// schiebt sich das zweite Blatt aus dem ersten. Jedes Mal, wenn es erscheint;
-// ohne Bewegung steht es still.
+// Zeichen, die sich bewegen (ADR 0035, neu bewegt in 0.14.0T, ADR 0051): Jedes
+// Zeichen der Meldung malt seine Scheibe selbst und endet mit dem Puls — der
+// Haken schließt erst den Kreis, beim Hinweis zeichnet sich der Kreis und der
+// Punkt fällt, die Warnung zeichnet sich und wackelt, «Kopiert» zeichnet zwei
+// Blätter und fächert sie auf, «Datei geladen» zeichnet die Schale, der Pfeil
+// fliegt hinein, die Schale gibt nach. Ein Fehlschlag trägt die Warnung, ein
+// Eingabehinweis das «i». Auf der Kachel zeichnet sich der Haken wie bisher.
 //
 // Die Uhr steht: «heute» ist Mittwoch, der 14. Oktober 2026, 8 Uhr.
 import { readFileSync } from 'node:fs';
@@ -11,23 +13,44 @@ const html = readFileSync(APP, 'utf8');
 
 suite('zeichen', html, String.raw`
 jetzt = function () { return new Date(2026, 9, 14, 8, 0); };
-var HEUTE = '2026-10-14';
 function zeichen() { return q('#hinweisHaken'); }
 function anim(sel) { var el = q(sel); return el ? getComputedStyle(el).animationName : 'fehlt'; }
-kopieren = function (t, f) { f(true); };
+// Alle Bewegungen eines Teils: Name, Beginn, Ende in Sekunden.
+function laeufe(el) {
+  var st = getComputedStyle(el);
+  if (st.animationName === 'none') return [];
+  var w = st.animationDelay.split(','), d = st.animationDuration.split(','), m = st.animationIterationCount.split(',');
+  return st.animationName.split(',').map(function (n, i) {
+    var mal = parseFloat(m[i % m.length]) || 1, von = parseFloat(w[i % w.length]);
+    return { name: n.trim(), von: von, bis: von + parseFloat(d[i % d.length]) * mal };
+  });
+}
+function ende(el) { return Math.max.apply(null, laeufe(el).map(function (l) { return l.bis; }).concat([0])); }
+var ALLE = ['haken', 'hinweis', 'warnung', 'kopie', 'laden'];
+function probe(name) {
+  var d = document.createElement('span');
+  d.className = 'hinweis-haken zeichnet' + (name === 'hinweis' ? ' neutral' : name === 'warnung' ? ' warnend' : '');
+  d.setAttribute('data-zeichen', name);
+  d.innerHTML = zeichenBild(name);
+  q('#app').appendChild(d);
+  return d;
+}
+var ok = function (t, f) { f(true); };
+kopieren = ok;
 
 // ── G · im Glas ─────────────────────────────────────────────
 frisch();
 bestaetigen('Gespeichert', '', null, null);
-pruefe('G1 «Gespeichert»: der Haken zeichnet sich', zeichen().getAttribute('data-zeichen') === 'haken' &&
-  zeichen().classList.contains('zeichnet') && anim('#hinweisHaken .z-strich') === 'z-zeichnen' &&
-  q('#hinweisHaken .z-strich').getAttribute('pathLength') === '1', anim('#hinweisHaken .z-strich'));
+pruefe('G1 «Gespeichert»: der Kreis schließt sich, der Haken zieht sich, der Puls folgt',
+  zeichen().getAttribute('data-zeichen') === 'haken' && zeichen().classList.contains('zeichnet') &&
+  anim('#hinweisHaken .zm-kreis') === 'z-zeichnen' && anim('#hinweisHaken .zm-haken') === 'z-zeichnen' &&
+  anim('#hinweisHaken .zm-puls') === 'zm-puls' && q('#hinweisHaken .zm-haken').getAttribute('pathLength') === '1');
 hinweisSchliessen();
 melden('Gib ihr noch einen Namen.');
-pruefe('G2 ein Hinweis: der Punkt fällt, dann wächst der Strich', zeichen().getAttribute('data-zeichen') === 'hinweis' &&
-  zeichen().classList.contains('neutral') && anim('#hinweisHaken .z-punkt') === 'z-fallen' &&
-  anim('#hinweisHaken .z-strich') === 'z-zeichnen' &&
-  parseFloat(getComputedStyle(q('#hinweisHaken .z-strich')).animationDelay) >= 0.3);
+pruefe('G2 ein Eingabehinweis: das «i», der Kreis zeichnet sich, der Punkt fällt',
+  zeichen().getAttribute('data-zeichen') === 'hinweis' && zeichen().classList.contains('neutral') &&
+  !zeichen().classList.contains('warnend') && anim('#hinweisHaken .zm-rand') === 'z-zeichnen' &&
+  anim('#hinweisHaken .zm-punkt') === 'zm-tropfen' && anim('#hinweisHaken .zm-i') === 'z-zeichnen');
 hinweisSchliessen();
 bestaetigen('Gespeichert', '', null, null);
 var erst = zeichen().classList.contains('zeichnet');
@@ -36,39 +59,79 @@ bestaetigen('Gespeichert', '', null, null);
 pruefe('G3 jedes Mal von vorn', erst && zeichen().classList.contains('zeichnet'));
 hinweisSchliessen();
 
-// ── W · weich, nicht zu flink und nicht zu träge (ADR 0036, 0037) ─
-// 0.11.0T war am Gerät zu flink, 0.11.0T2 einen Tick zu träge: Jede Bewegung
-// liegt dazwischen, läuft ohne Ruck an — und ist fertig, bevor die kürzeste
-// Bestätigung geht.
-function zeit(sel) {
-  var el = q(sel), st = el && getComputedStyle(el);
-  return st ? { dauer: parseFloat(st.animationDuration), warten: parseFloat(st.animationDelay), kurve: st.animationTimingFunction } : null;
-}
-function allesZeichen(name) { var d = document.createElement('div'); d.className = 'zeichnet'; d.setAttribute('data-zeichen', name);
-  d.innerHTML = ICON[name]; q('#app').appendChild(d); return d; }
-var proben = ['haken', 'hinweis', 'laden', 'kopie'].map(allesZeichen);
-var zeiten = {
-  haken: zeit('[data-zeichen="haken"] .z-strich'), punkt: zeit('[data-zeichen="hinweis"] .z-punkt'),
-  strich: zeit('[data-zeichen="hinweis"] .z-strich'), pfeil: zeit('[data-zeichen="laden"] .z-pfeil'),
-  blatt: zeit('[data-zeichen="kopie"] .z-blatt')
-};
+// ── W · kurz genug, mit dem Puls am Ende ────────────────────
+var proben = ALLE.map(probe), bericht = {};
+pruefe('W1 jedes Zeichen bewegt sich und ist fertig, bevor die kürzeste Bestätigung geht', proben.every(function (d) {
+  var teile = Array.prototype.slice.call(d.querySelectorAll('svg *')).filter(function (el) { return laeufe(el).length; });
+  var laenge = Math.max.apply(null, teile.map(ende).concat([0]));
+  bericht[d.getAttribute('data-zeichen')] = laenge;
+  return teile.length > 0 && laenge * 1000 <= BESTAETIGUNG_MS - 200;
+}), JSON.stringify(bericht));
+pruefe('W2 jedes endet mit dem Puls', proben.every(function (d) {
+  var puls = d.querySelector('.zm-puls');
+  return !!puls && Array.prototype.slice.call(d.querySelectorAll('svg *')).every(function (el) { return ende(el) <= ende(puls) + 0.001; });
+}));
+pruefe('W3 der Puls zeigt sich nicht, solange er wartet', proben.every(function (d) {
+  var st = getComputedStyle(d.querySelector('.zm-puls'));
+  return st.animationFillMode === 'forwards' && st.opacity === '0';
+}));
+function teil(name, sel) { return laeufe(q('#app [data-zeichen="' + name + '"].zeichnet ' + sel)); }
+var w = teil('warnung', '.zm-wackeln')[0];
+var wGezeichnet = Math.max(teil('warnung', '.zm-dreieck')[0].bis, teil('warnung', '.zm-ausruf')[0].bis, teil('warnung', '.zm-punkt')[0].bis);
+pruefe('W4 die Warnung zeichnet sich erst, dann wackelt sie', w && w.name === 'zm-wackeln' && w.von >= wGezeichnet - 0.001,
+  JSON.stringify(w) + ' ' + wGezeichnet);
+var kopie = ['.zm-hinten', '.zm-vorn'].map(function (sel) { return teil('kopie', sel); });
+var kGezeichnet = Math.max.apply(null, kopie.map(function (l) { return l.filter(function (x) { return x.name === 'z-zeichnen'; })[0].bis; }));
+pruefe('W5 «Kopiert»: erst zeichnen sich beide Blätter, dann fächern sie auf', kopie.every(function (l) {
+  var f = l.filter(function (x) { return x.name !== 'z-zeichnen'; });
+  return f.length === 1 && f[0].von >= kGezeichnet - 0.001;
+}), JSON.stringify(kopie));
+var schale = teil('laden', '.zm-schale'), pfeil = teil('laden', '.zm-pfeil')[0];
+pruefe('W6 «Datei geladen»: die Schale zeichnet sich, der Pfeil fliegt hinein, dann gibt sie nach',
+  schale.length === 2 && schale[0].name === 'z-zeichnen' && schale[1].name === 'zm-tauchen' &&
+  pfeil.name === 'zm-fallen' && pfeil.von >= schale[0].bis - 0.1 && schale[1].von >= pfeil.von, JSON.stringify(schale.concat([pfeil])));
 proben.forEach(function (d) { d.remove(); });
-var flink = { haken: 0.42, punkt: 0.34, strich: 0.42, pfeil: 0.62, blatt: 0.5 };   // 0.11.0T
-var traege = { haken: 0.7, punkt: 0.55, strich: 0.7, pfeil: 0.95, blatt: 0.8 };     // 0.11.0T2
-pruefe('W1 jedes Zeichen liegt zwischen zu flink und zu träge', Object.keys(flink).every(function (k) {
-  return zeiten[k] && zeiten[k].dauer >= flink[k] * 1.1 && zeiten[k].dauer <= traege[k] * 0.8; }), JSON.stringify(zeiten));
-pruefe('W2 und ist fertig, bevor die Bestätigung geht', Object.keys(zeiten).every(function (k) {
-  return zeiten[k] && (zeiten[k].dauer + zeiten[k].warten) * 1000 <= BESTAETIGUNG_MS - 200; }));
-pruefe('W3 der Punkt fällt weich, nicht beschleunigt bis zum Aufprall', zeiten.punkt &&
-  /cubic-bezier\(0?\.35, 0, 0?\.3, 1\)/.test(zeiten.punkt.kurve), zeiten.punkt && zeiten.punkt.kurve);
+
+// ── F · ein Fehlschlag trägt die Warnung ────────────────────
+function warnt() { return zeichen().getAttribute('data-zeichen') === 'warnung' && zeichen().classList.contains('warnend') &&
+  !zeichen().classList.contains('neutral') && !zeichen().hidden; }
+frisch();
+var setzen = Storage.prototype.setItem;
+Storage.prototype.setItem = function () { throw new Error('voll'); };
+var gespeichert = speichern();
+Storage.prototype.setItem = setzen;
+pruefe('F1 «Speichern ging nicht»', !gespeichert && warnt() && /Speichern ging nicht/.test(q('#hinweisTitel').textContent));
+hinweisSchliessen();
+// Die Sicherung zeigt den Code von Hand, wenn Kopieren scheitert; eine
+// Meldung bringen der Rohtext gesperrter Daten und die Tickets.
+var sperreWar = speicherSperre;
+speicherSperre = { roh: 'x' };
+kopieren = function (t, f) { f(false); };
+sperreKopieren();
+speicherSperre = sperreWar;
+pruefe('F2 Kopieren ging nicht', warnt() && /Kopieren ging nicht/.test(q('#hinweisTitel').textContent));
+kopieren = ok;
+hinweisSchliessen();
+zeige('sicherung');
+$('scEingabe').value = 'Unsinn';
+sicherungEinlesen();
+pruefe('F3 ein ungültiger Sicherungscode', warnt() && /kein gültiger/.test(q('#hinweisTitel').textContent));
+hinweisSchliessen();
+sperreZeigen();
+pruefe('F4 unlesbare Daten tragen die Warnung', warnt() && !!q('#hinweisWahl [data-sperre="neu"]'));
+hinweisSchliessen();
+bestaetigen('Gespeichert', '', null, null);
+pruefe('F5 danach trägt eine Bestätigung wieder den grünen Haken', zeichen().getAttribute('data-zeichen') === 'haken' &&
+  !zeichen().classList.contains('warnend') && !!q('#hinweisHaken .zm-haken'));
+hinweisSchliessen();
 
 // ── K · Kopieren ────────────────────────────────────────────
 frisch();
 zeige('sicherung');
 sicherungKopieren();
-pruefe('K1 Sicherungscode kopiert: zwei Blätter, das zweite schiebt sich heraus, grün',
-  zeichen().getAttribute('data-zeichen') === 'kopie' && !zeichen().classList.contains('neutral') &&
-  anim('#hinweisHaken .z-blatt') === 'z-blatt' && q('#hinweisTitel').textContent === 'Kopiert');
+pruefe('K1 Sicherungscode kopiert: zwei Blätter, grün', zeichen().getAttribute('data-zeichen') === 'kopie' &&
+  !zeichen().classList.contains('neutral') && /zm-vorn/.test(anim('#hinweisHaken .zm-vorn')) &&
+  q('#hinweisTitel').textContent === 'Kopiert');
 hinweisSchliessen();
 state.tickets = [ticketLesen({ id: 'k1', art: 'fehler', titel: 'Eins', erstellt: 1 })];
 zeige('tickets');
@@ -88,12 +151,17 @@ HTMLAnchorElement.prototype.click = function () {};
 q('#exLaden').click();
 URL.createObjectURL = urlWar;
 HTMLAnchorElement.prototype.click = klickWar;
-pruefe('L1 «Datei geladen»: der Pfeil fällt in die Schale, «OK» bleibt', zeichen().getAttribute('data-zeichen') === 'laden' &&
-  !zeichen().hidden && anim('#hinweisHaken .z-pfeil') === 'z-pfeil' && !q('#hinweisOk').hidden &&
+pruefe('L1 «Datei geladen»: der Pfeil fliegt in die Schale, «OK» bleibt', zeichen().getAttribute('data-zeichen') === 'laden' &&
+  !zeichen().hidden && anim('#hinweisHaken .zm-pfeil') === 'zm-fallen' && !q('#hinweisOk').hidden &&
   !zeichen().classList.contains('neutral'));
 hinweisSchliessen();
+URL.createObjectURL = function () { throw new Error('nein'); };
+q('#exLaden').click();
+URL.createObjectURL = urlWar;
+pruefe('L2 läßt sich die Datei nicht anlegen, warnt es', warnt() && /nicht anlegen/.test(q('#hinweisTitel').textContent));
+hinweisSchliessen();
 hinweisZeigen('Hinweis', 'Ohne Zeichen.', null, null);
-pruefe('L2 ein Hinweis mit «OK», der kein Zeichen nennt, trägt keins', zeichen().hidden);
+pruefe('L3 ein Hinweis mit «OK», der kein Zeichen nennt, trägt keins', zeichen().hidden);
 hinweisSchliessen();
 
 // ── A · auf der Kachel ──────────────────────────────────────
@@ -105,13 +173,16 @@ pruefe('A1 abgehakt: der Haken auf der Kachel zeichnet sich', anim('.gw-kachel.g
   anim('.gw-kachel.gerade .gw-scheibe .z-strich'));
 q('[data-haken="A"]').click();
 pruefe('A2 zurückgenommen: nichts zeichnet sich', anim('[data-haken="A"] .z-strich') !== 'z-zeichnen');
+pruefe('A3 die Wahl der Zeichen steht nicht mehr auf dem Dashboard', !q('#ansicht .zp') && typeof zeichneZeichenProbe === 'undefined');
 hinweisSchliessen();
 
 // ── B · ohne Bewegung ───────────────────────────────────────
 state.bewegung = 'aus';
 themaAnwenden();
 bestaetigen('Gespeichert', '', null, null);
-pruefe('B1 ohne Bewegung steht das Zeichen still', anim('#hinweisHaken .z-strich') === 'none');
+pruefe('B1 ohne Bewegung steht das Zeichen still und ist ganz zu sehen', Array.prototype.slice.call(zeichen().querySelectorAll('svg *')).every(function (el) {
+  return getComputedStyle(el).animationName === 'none'; }) && getComputedStyle(q('#hinweisHaken .zm-scheibe')).opacity === '1' &&
+  getComputedStyle(q('#hinweisHaken .zm-puls')).opacity === '0');
 hinweisSchliessen();
 state.bewegung = 'auto';
 themaAnwenden();

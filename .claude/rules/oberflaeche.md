@@ -15,6 +15,9 @@ fest.
 - **Farben nur über Tokens** (`--grund`, `--text`, `--flaeche`, `--akzent`, `--knopf`,
   `--erledigt`, `--termin`, `--glas…` usw.). Keine Hexzahl außerhalb der drei
   Paletten-Blöcke und `GRUND` im Skript.
+- **Erhöhtes ist in Dunkel heller als der Grund** (`--erhoben`, `--marke`, `--spur`,
+  Rand `--rand-hell`; ADR 0055) — ein Schatten trägt dort nicht. Das Flüssige zeigt im
+  Fließen seinen Saum (`--fl-rand`, `--fl-hebung`), in Ruhe ist es das Teil.
 - **Die dunkle Palette steht zweimal gleich**: unter `prefers-color-scheme: dark` für
   `:root:not([data-thema="hell"])` und unter `:root[data-thema="dunkel"]` — wer einen Wert
   ändert, ändert beide (Suite `thema`); den Grund zusätzlich in `GRUND`.
@@ -30,8 +33,9 @@ fest.
 
 ## Aufbau
 
-- **Kopf in zwei Gestalten** (Dashboard, unterwegs), keine Reiterleiste. Die Überschrift
-  führt immer zur Übersicht.
+- **Kopf in zwei Gestalten** (Dashboard, unterwegs), keine Reiterleiste; nur die
+  Einstellungen trennen Allgemein | Flüssig (`esReiter`, ADR 0053). Die Überschrift führt
+  immer zur Übersicht.
 - **Runde Knöpfe** (`.rund`) sind 44 × 44, Symbol aus `ICON`, mit `aria-label`.
 - **Eine neue Ansicht** ist ein Eintrag in `ANSICHTEN`, ihre Ereignisse hängen in
   `bindeAnsicht()`. Das Menü folgt dem Pflichtenheft; ein Eintrag ohne `ziel` trägt «bald».
@@ -56,16 +60,25 @@ fest.
   ohne Spitze, ohne Überschwingen. Was ein Knopf öffnet, tropft aus ihm und in ihn zurück;
   ist die Herkunft fort, in den Menüknopf. Nach langem Druck aus dem Fingerpunkt
   (`punktFlaeche`).
+- **Standard ist die Chilli-Bewegung; iOS-Flüssig gilt je Stelle** (ADR 0054): Wer an einer
+  Stelle bewegt, fragt `flIos(stelle)` und nimmt dann `fluessigTakt`/`fliessen`. Feste
+  Dauern setzt nur `flDauernSetzen` — keine Zahl von Hand. Auf iOS ersetzt das Flüssige
+  die Chilli-Bewegung, es legt sich nicht darunter (`teilFliesst`); `fliessen` malt nur
+  Hals und Rest, nie das Teil. Was zurückfließt, blendet kein Vorfahr aus (am Menü nur
+  der Schleier); wer fremde Bewegung abwartet, fragt `eigeneBewegung` — der Übergang vom
+  Drücken zählt nicht.
 - **Teile über `teilZeigen(el, an, quelle)`, Knöpfe über `teilTropfen(el, an)`**, nie
   `el.hidden = …`. Ein Teil mit eigenem `display` braucht `[hidden] { display: none; }`.
   Eine neue `.wahl` bekommt ihre Marke von `wahlenSetzen()`.
 - **Glas** (`.glas`, im Tropfen `glas` im `opt`) haben Hinweis, Meldung, Ticketblatt und
   Fenster, keine Ansicht. **Kein Vorfahr von Glas blendet seine Deckkraft** — sonst bleibt
   es matt (ADR 0014). Glas an einer Gewohnheit beginnt und endet in ihrer Scheibe
-  (`scheibeVon`).
+  (`scheibeVon`). Ein großes Blatt aus Glas tropft `milchig` und bekommt sein Glas erst am
+  Ziel — Unschärfe in jedem Bild ruckelt am Gerät (ADR 0054).
 - **Rückmeldung** — immer im Glas:
   - gespeichert oder angelegt: `bestaetigen()` (ohne Speichern mit `'hinweis'`, nie Haken);
-  - alles andere: `melden(text, zeichen)`, `'haken'` nur bei Erfolg;
+  - alles andere: `melden(text, zeichen)`, `'haken'` nur bei Erfolg, `'warnung'` bei einem
+    Fehlschlag (ADR 0051), sonst das neutrale «i»;
   - was man lesen muß: `hinweisZeigen` (wartet auf «OK»);
   - geht das Fenster mit: `bestaetigenUndGehen`/`meldenUndGehen` — es wird selbst zur Meldung.
 - **Was ersetzt oder löscht, fragt im Glas** (`hinweisZeigen` mit `frage`, Einzelnes über
@@ -86,7 +99,8 @@ fest.
 
 ## Chili
 
-- `#chiliFigur` steht **genau einmal** im Dokument; das Bild ist nur `CHILI_BILD`.
+- `#chiliFigur` steht **genau einmal** im Dokument; das Bild ist nur `CHILI_BILD`. Im offenen
+  Timer sitzt sie dort, nicht im Tagesring (`chiliImTimer`, `chiliZurueck`).
 - Ein Haken läßt sie flammen (`chiliFlammt`), ein voller Tag lodern (`lodert`);
   Zurücknehmen ist kein Jubel. Wegmarken jubeln über `jubeln`, jeder Anlaß einmal.
 - **Ein Leerzustand ist ein Wegweiser** (`.kachel.leer`): ein Satz, was fehlt, ein Knopf

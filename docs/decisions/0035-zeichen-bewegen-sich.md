@@ -1,6 +1,6 @@
 # 0035 · Zeichen bewegen sich, wenn sie erscheinen
 
-*2026-10-06 · Ticket «Mitteilung Animation» · Version 0.11.0T · ergänzt 0018, 0019*
+*2026-10-06 · Ticket «Mitteilung Animation» · Version 0.11.0T · ergänzt 0018, 0019 · die Zeichen der Meldung abgelöst durch 0051; der Haken der Kachel gilt*
 
 ## Ausgangslage
 

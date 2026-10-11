@@ -190,6 +190,129 @@ pruefe('H5 «Heute» ist eine Trefferfläche', q('#heuteKnopf').tagName === 'BUT
   q('#heuteKnopf').getBoundingClientRect().height >= 44 && q('#tagesZahl').closest('#heuteKnopf') !== null);
 state.kalender = 'woche';
 
+// ── S · Wischen zieht den Kalender mit (ADR 0052) ────────────
+// Titel, Wochentage und Tage folgen dem Finger 1:1, die Pfeile bleiben stehen.
+// Losgelassen wird nach Weg oder Schwung geblättert, sonst federt die Seite
+// zurück. Läuft am Ende der Suite, nach dem langen Druck.
+function wischPruefen() {
+  var RUHE = KAL_WISCH_DAUER + 300;
+  function rolle(r) { return q('#kalSpur [data-rolle="' + r + '"]'); }
+  function titel() { return q('#kalTitel, #kalHeute').textContent; }
+  function zeiger(typ, el, x, y) {
+    el.dispatchEvent(new PointerEvent(typ, { bubbles: true, pointerId: 5, isPrimary: true, pointerType: 'touch',
+      clientX: x, clientY: y }));
+  }
+  function punkt(el) { var r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + Math.min(20, r.height / 2) }; }
+  // Ein Zug in «n» Schritten, je «dt» ms auseinander; «los» läßt danach los.
+  function ziehen(el, dx, dy, n, dt, los) {
+    var a = punkt(el), i = 0;
+    zeiger('pointerdown', el, a.x, a.y);
+    return new Promise(function (fertig) {
+      (function weiter() {
+        i++;
+        zeiger('pointermove', el, a.x + dx * i / n, a.y + dy * i / n);
+        if (i < n) { setTimeout(weiter, dt); return; }
+        if (los !== false) zeiger('pointerup', el, a.x + dx, a.y + dy);
+        fertig();
+      }());
+    });
+  }
+  function ruhig() {
+    return ['jetzt', 'davor', 'danach'].every(function (r) {
+      var e = rolle(r); return !e.style.clipPath && !e.style.transform && !e.style.opacity;
+    }) && !q('#kalSpur').style.height;
+  }
+  aufbauen();
+  var titelZeile = q('#kalSpur [data-rolle="jetzt"] .kal-titelzeile');
+  pruefe('S1 Titel, Wochentage und Tage liegen in der Seite, die gleitet; die Pfeile nicht', !!titelZeile &&
+    !!rolle('jetzt').querySelector('.kal-wtage') && !!rolle('jetzt').querySelector('#kalRaster') &&
+    !q('#kalSpur #kalVor') && !q('#kalSpur #kalZurueck'));
+  pruefe('S2 die Nachbarn tragen kein Ziel und sind unsichtbar', !q('#kalSpur [data-rolle="davor"] [data-kaltag]') &&
+    getComputedStyle(rolle('davor')).visibility === 'hidden' && rolle('danach').getAttribute('aria-hidden') === 'true');
+  pruefe('S3 senkrecht rollt die Seite, waagerecht zieht der Finger', getComputedStyle(q('.held')).touchAction === 'pan-y');
+  return ziehen(q('#kalRaster'), -100, 4, 10, 60, false).then(function () {
+    var j = rolle('jetzt');
+    pruefe('S4 die Seite folgt dem Finger: zieht sich nach links zusammen', /translateX\(-/.test(j.style.transform) &&
+      +j.style.opacity <= 1 && /inset/.test(j.style.clipPath) && getComputedStyle(rolle('danach')).visibility === 'visible');
+    pruefe('S5 der Stand ändert sich erst beim Loslassen', kalVersatz === 0);
+    pruefe('S6 nichts macht die Seite breiter', document.documentElement.scrollWidth <= innerWidth);
+    var a = punkt(q('#kalRaster'));
+    zeiger('pointerup', q('#kalRaster'), a.x - 100, a.y);
+    return warten(RUHE);
+  }).then(function () {
+    pruefe('S7 kurz und langsam: federt zurück', kalVersatz === 0 && ruhig());
+    return ziehen(q('#kalRaster'), -200, 0, 10, 60);
+  }).then(function () {
+    pruefe('S8 weit genug: die nächste Woche, sofort', kalVersatz === 1 && /KW 43/.test(titel()));
+    return warten(RUHE);
+  }).then(function () {
+    pruefe('S9 und danach steht alles still', ruhig());
+    return ziehen(q('#kalRaster'), 40, 0, 2, 20);
+  }).then(function () {
+    pruefe('S10 ein kurzer, schneller Schubs blättert auch — zurück', kalVersatz === 0, kalVersatz);
+    return warten(RUHE);
+  }).then(function () {
+    return ziehen(q('#kalRaster'), -20, 120, 4, 30);
+  }).then(function () {
+    pruefe('S11 eher nach unten: nichts gleitet, nichts blättert', kalVersatz === 0 && ruhig());
+    return ziehen(q('.kal-wtage'), -200, 0, 10, 60);
+  }).then(function () {
+    pruefe('S12 auch über den Wochentagen', kalVersatz === 1);
+    return ziehen(q('.held'), 200, 0, 10, 60);
+  }).then(function () {
+    pruefe('S13 auch auf dem Rand der Karte', kalVersatz === 0);
+    return ziehen(q('#kalVor'), -200, 0, 10, 60);
+  }).then(function () {
+    return ziehen(q('.held-kopf'), -200, 0, 10, 60);
+  }).then(function () {
+    pruefe('S14 nicht auf den Pfeilen, nicht auf Ring und Umschalter', kalVersatz === 0);
+    var r = q('#kalRaster').getBoundingClientRect();
+    zeiger('pointerdown', q('.held'), 6, r.top + 10);
+    zeiger('pointermove', q('.held'), 200, r.top + 10);
+    zeiger('pointerup', q('.held'), 200, r.top + 10);
+    pruefe('S15 am Rand des Bildschirms beginnt kein Ziehen', kalVersatz === 0 && ruhig());
+    return ziehen(q('#kalRaster'), -220, 0, 6, 30, false);
+  }).then(function () {
+    zeiger('pointercancel', q('#kalRaster'), 0, 0);
+    return warten(RUHE);
+  }).then(function () {
+    pruefe('S16 nimmt das System den Finger, federt die Seite zurück', kalVersatz === 0 && ruhig());
+    // Eine offene Tagesliste geht beim Blättern; über ihr wird nicht gezogen.
+    kalGewischt = 0;
+    tag(HEUTE).click();
+    return ziehen(q('#kalLeiste'), -200, 0, 10, 60);
+  }).then(function () {
+    pruefe('S17 über der Tagesliste zieht nichts', kalVersatz === 0 && kalTag === HEUTE);
+    return ziehen(q('#kalRaster'), -200, 0, 10, 60);
+  }).then(function () {
+    pruefe('S18 geblättert: die Liste geht', kalVersatz === 1 && kalTag === null && !q('#kalLeiste'));
+    var t2 = q('#kalRaster [data-kaltag]');
+    t2.click();
+    pruefe('S19 ein Tipp gleich nach dem Ziehen wählt keinen Tag', kalTag === null);
+    kalGewischt = 0;
+    t2 = q('#kalRaster [data-kaltag]');
+    t2.click();
+    pruefe('S20 danach wählt ein Tipp wieder', kalTag === t2.getAttribute('data-kaltag'));
+    kalTag = null;
+    kalVersatz = 0;
+    state.kalender = 'monat';
+    render();
+    return ziehen(q('#kalRaster'), -200, 0, 10, 60, false);
+  }).then(function () {
+    pruefe('S21 im Monat gleitet die Höhe mit', parseFloat(q('#kalSpur').style.height) > 0);
+    var a = punkt(q('#kalRaster'));
+    zeiger('pointerup', q('#kalRaster'), a.x - 200, a.y);
+    pruefe('S22 im Monat: der nächste', kalVersatz === 1 && titel() === 'November 2026', titel());
+    return warten(RUHE);
+  }).then(function () {
+    pruefe('S23 danach ist die Spur so hoch wie der neue Monat', ruhig() &&
+      Math.abs(q('#kalSpur').offsetHeight - rolle('jetzt').offsetHeight) < 1);
+    state.kalender = 'woche';
+    kalVersatz = 0;
+    render();
+  });
+}
+
 // ── L · Langer Druck ────────────────────────────────────────
 aufbauen();
 pruefe('L1 der Pfeil ist weg', !q('[data-bearbeiten]') && !q('.gw-pfeil'));
@@ -224,6 +347,8 @@ return warten(LANG_MS + 100).then(function () {
   q('[data-haken="B"]').dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
   pruefe('L8 ein Rechtsklick öffnet auch', ansicht === 'bearbeiten' && q('#gwName').value === 'B');
   langGedrueckt = 0;
+  return wischPruefen();
+}).then(function () {
   frisch();
   speichern();
 });

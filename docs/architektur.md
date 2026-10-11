@@ -80,7 +80,9 @@ state = {
   gefeiert: { 'a…': 1791200000000 },     // Abgewöhnen: der Rückfall, nach dem der neue Rekord gefeiert ist
   exportOhne: { 't:…': true },          // Export: Neues, das bewußt draußen bleibt (ADR 0034)
   schwachHinweis: true,                  // der Hinweis ab drei ungefestigten Gewohnheiten
-  bewegung: 'auto'                       // | 'aus' — Bewegung reduzieren
+  bewegung: 'auto',                      // | 'aus' — Bewegung reduzieren
+  fluessig: null                         // | { ios: { stelle: true } } — welche Stellen auf iOS-Flüssig stehen
+                                         //   (ADR 0054); nicht im Sicherungscode, bleibt beim Einlesen
 }
 ```
 
@@ -132,7 +134,7 @@ state = {
 | Timer, Zähler | `timerOeffnen`, `timerPause`, `timerRest`, `zaehlen`, `zaehlStand` |
 | Abgewöhnen, Welle | `lasterAuswerten`, `rueckfallEintragen`, `welleBeginnen`, `welleGewonnen`, `welleAbbrechen` |
 | Termine | `terminAm`, `termineAm`, `terminAbhaken`, `zeichneTerminZeile`, `zeichneTerminFormular` |
-| Kalender | `zeichneKalender`, `bindeKalender`, `kalZeige`, `kalBlaettern`, `kalFliessen`, `zeichneTagesleiste` |
+| Kalender | `zeichneKalender`, `bindeKalender`, `kalZeige`, `kalBlaettern`, `kalFliessen`, `zeichneTagesleiste`; Ziehen: `kalDruck`/`kalZug`/`kalLos`, `kalSetzen`, `kalWechselZeigen` |
 | Kalender-Export | `kalenderDatei`, `exportAuswahl`, `exportiertMerken`, `icsLaden`, `zeichneExport`, `bindeExport` |
 | Rückblick | `zeichneHeatmap`, `hmWocheWaehlen`, `hmTagZeigen` |
 | Journal | `zeichneReflexionKachel`, `reflexionSpeichern`, `reflexionLoeschen` |
