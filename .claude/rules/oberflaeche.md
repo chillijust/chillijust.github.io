@@ -110,3 +110,6 @@ fest.
 
 - Alles im Zustand `state`, gespeichert über `speichern()` unter `chillinal_v1`. Neue
   Felder: Vorgabe in `grundStand()`, Prüfung in `stand()`.
+- **Was der Nutzer ändert, gilt erst gespeichert** (ADR 0049): vorher `standMerken()`,
+  dann `speichernOderZurueck(vorher)`; scheitert es, bleibt das Formular offen. Nur was die
+  App von allein schreibt, nimmt `speichern()` direkt.

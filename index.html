@@ -1796,7 +1796,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.17.0T10';
+var APP_VERSION = '0.17.0T11';
 var APP_STAND = '2026-10-11';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -2273,6 +2273,22 @@ function speichern() {
     melden('Speichern ging nicht — der Speicher ist voll oder gesperrt.', 'warnung');
     return false;
   }
+}
+
+// Was der Nutzer ändert, gilt erst, wenn es gespeichert ist (ADR 0049, James
+// N3): Vor der Änderung `standMerken()`; scheitert das Speichern, setzt
+// `speichernOderZurueck` den Stand von davor wieder ein — am selben Objekt,
+// denn andere halten es — und ein Formular bleibt offen, mit allem, was darin
+// steht. Was die App von allein schreibt (Ende eines Timers, ein Rekord),
+// rollt nicht zurück: Es versuchte es sonst jede Sekunde neu.
+function standMerken() { return JSON.stringify(state); }
+
+function speichernOderZurueck(alt) {
+  if (speichern()) return true;
+  var s = JSON.parse(alt);
+  Object.keys(state).forEach(function (k) { if (!(k in s)) delete state[k]; });
+  Object.keys(s).forEach(function (k) { state[k] = s[k]; });
+  return false;
 }
 
 // ── Schriftzug ─────────────────────────────────────────────────
@@ -4316,11 +4332,11 @@ function welleRest(nun) {
 // Ein Rückfall: Er setzt «frei seit» zurück, der Rekord bleibt stehen. Kam er
 // aus einer Welle, ist die Welle damit vorbei.
 function rueckfallEintragen(id, notiz) {
-  var a = lasterNach(id), nun = zeitJetzt();
+  var a = lasterNach(id), nun = zeitJetzt(), vorher = standMerken();
   if (!a || nun < a.start) return false;
   a.rueckfaelle.push({ zeit: nun, notiz: String(notiz || '').trim().slice(0, NOTIZ_MAX) });
   if (state.welle && state.welle.id === id) state.welle = null;
-  return speichern();
+  return speichernOderZurueck(vorher);
 }
 
 // Ein neuer Rekord: Die laufende Strecke ist eben länger geworden als jede
@@ -4347,27 +4363,29 @@ function rekordFeiern(nun) {
 
 // Gewonnen zählt erst, wenn die zehn Minuten herum sind.
 function welleGewonnen() {
-  var w = state.welle, a = w && lasterNach(w.id), nun = zeitJetzt();
+  var w = state.welle, a = w && lasterNach(w.id), nun = zeitJetzt(), vorher = standMerken();
   if (!a || welleRest(nun) > 0) return false;
   a.draenge.push(nun);
   state.welle = null;
-  return speichern();
+  return speichernOderZurueck(vorher);
 }
 
 // Aus Versehen begonnen: Die Welle endet, ohne daß etwas zählt — weder ein
 // gewonnener Drang noch ein Rückfall.
 function welleAbbrechen() {
   if (!state.welle) return false;
+  var vorher = standMerken();
   state.welle = null;
-  return speichern();
+  return speichernOderZurueck(vorher);
 }
 
 function welleBeginnen(id) {
   var a = lasterNach(id);
   if (!a || a.archiviert) return false;
   if (!state.welle) {
+    var vorher = standMerken();
     state.welle = { id: id, start: zeitJetzt() };
-    speichern();
+    if (!speichernOderZurueck(vorher)) return false;
   }
   return true;
 }
@@ -7015,6 +7033,7 @@ function entwurfSpeichern() {
     $('gwBeginn').focus();
     return;
   }
+  var vorher = standMerken();
   if (g) {
     g.name = name.slice(0, NAME_MAX);
     g.rhythmus = rhythmusLesen(r);
@@ -7033,11 +7052,10 @@ function entwurfSpeichern() {
   }
   beginnVorziehen(g || state.gewohnheiten[state.gewohnheiten.length - 1], entwurf.beginn);
   var id = g ? g.id : state.gewohnheiten[state.gewohnheiten.length - 1].id;
-  if (speichern()) {
-    bestaetigenUndGehen(g ? 'Gespeichert' : 'Angelegt', g ? '' : entwurf.weise === 'timer' ? 'Antippen startet den Timer, lange drücken öffnet sie.'
-      : entwurf.weise === 'zaehler' ? 'Antippen zählt eins, lange drücken öffnet sie.' : 'Antippen heißt erledigt, lange drücken öffnet sie.',
-      '[data-haken="' + id + '"]' + SCHEIBE);
-  }
+  if (!speichernOderZurueck(vorher)) return;
+  bestaetigenUndGehen(g ? 'Gespeichert' : 'Angelegt', g ? '' : entwurf.weise === 'timer' ? 'Antippen startet den Timer, lange drücken öffnet sie.'
+    : entwurf.weise === 'zaehler' ? 'Antippen zählt eins, lange drücken öffnet sie.' : 'Antippen heißt erledigt, lange drücken öffnet sie.',
+    '[data-haken="' + id + '"]' + SCHEIBE);
   zeige('home');
 }
 
@@ -7061,6 +7079,7 @@ function lasterSpeichern(name) {
     melden('Der Start liegt nach deinem ersten Rückfall.');
     return;
   }
+  var vorher = standMerken();
   if (l) {
     l.name = name.slice(0, NAME_MAX);
     l.start = start;
@@ -7069,10 +7088,9 @@ function lasterSpeichern(name) {
       draenge: [], archiviert: null });
   }
   var id = l ? l.id : state.abgewoehnen[state.abgewoehnen.length - 1].id;
-  if (speichern()) {
-    bestaetigenUndGehen(l ? 'Gespeichert' : 'Angelegt', l ? '' : 'Kommt ein Drang, tipp auf «Drang».',
-      '[data-ab="' + id + '"]' + SCHEIBE);
-  }
+  if (!speichernOderZurueck(vorher)) return;
+  bestaetigenUndGehen(l ? 'Gespeichert' : 'Angelegt', l ? '' : 'Kommt ein Drang, tipp auf «Drang».',
+    '[data-ab="' + id + '"]' + SCHEIBE);
   zeige('home');
 }
 
@@ -7083,11 +7101,12 @@ function archivierenTippen() {
 }
 
 function archivieren() {
-  var g = entwurf.richtung === 'ab' ? lasterNach(entwurf.id) : gewohnheitNach(entwurf.id);
+  var g = entwurf.richtung === 'ab' ? lasterNach(entwurf.id) : gewohnheitNach(entwurf.id), vorher = standMerken();
   if (g) g.archiviert = heuteSchluessel();
   if (state.welle && state.welle.id === entwurf.id) state.welle = null;
   if (state.timer && state.timer.id === entwurf.id) state.timer = null;
-  if (speichern()) meldenUndGehen('Archiviert. Deine Einträge bleiben erhalten.', 'haken');
+  if (!speichernOderZurueck(vorher)) return;
+  meldenUndGehen('Archiviert. Deine Einträge bleiben erhalten.', 'haken');
   zeige('home');
 }
 
@@ -7095,11 +7114,12 @@ function archivieren() {
 function rueckfallLoeschenTippen() {
   var i = +this.getAttribute('data-rf-loeschen'), knopf = this;
   loeschenFragen(this, 'Rückfall löschen?', 'Er zählt dann nicht mehr.', 'Löschen', function () {
-    var l = lasterNach(entwurf && entwurf.id);
+    var l = lasterNach(entwurf && entwurf.id), vorher = standMerken();
     if (!l || !l.rueckfaelle[i]) return;
     l.rueckfaelle.splice(i, 1);
+    if (!speichernOderZurueck(vorher)) return;
     var geht = document.contains(knopf) ? zeileGeht(knopf.closest('.rf-zeile'), '.rf-liste') : function () {};
-    if (speichern()) melden('Gelöscht.', 'haken');
+    melden('Gelöscht.', 'haken');
     render();
     geht();
   });
@@ -7190,7 +7210,8 @@ function zeichneRueckfall() {
 function bindeRueckfall() {
   $('rfNotiz').addEventListener('input', function () { rueckfallFuer.notiz = this.value; });
   $('rfEintragen').addEventListener('click', function () {
-    if (rueckfallEintragen(rueckfallFuer.id, rueckfallFuer.notiz)) meldenUndGehen('Eingetragen. Ab jetzt zählt es neu.', 'haken');
+    if (!rueckfallEintragen(rueckfallFuer.id, rueckfallFuer.notiz)) return;
+    meldenUndGehen('Eingetragen. Ab jetzt zählt es neu.', 'haken');
     zeige('home');
   });
   $('rfAbbrechen').addEventListener('click', function () {
@@ -7232,24 +7253,25 @@ function offeneWoche() {
 }
 
 function reflexionLoeschen(woche) {
-  var vorher = state.journal.length;
+  var anzahl = state.journal.length, vorher = standMerken();
   state.journal = state.journal.filter(function (x) { return x.woche !== woche; });
-  return state.journal.length < vorher && speichern();
+  return state.journal.length < anzahl && speichernOderZurueck(vorher);
 }
 
 // Trägt ein, ändert oder entfernt — zwei leere Antworten sind keine Reflexion.
 // Antwortet mit dem, was geschah: 'gespeichert', 'entfernt', 'nichts' oder
-// false, wenn die Woche nicht in Frage kommt.
+// false, wenn die Woche nicht in Frage kommt, und null, wenn das Speichern
+// scheiterte — dann steht alles wie zuvor.
 function reflexionSpeichern(woche, gut, stoerte) {
   if (!reflexionMoeglich(woche)) return false;
   var r = reflexionLesen({ woche: woche, gut: gut, stoerte: stoerte, zeit: zeitJetzt() });
-  var alt = reflexionNach(woche);
+  var alt = reflexionNach(woche), vorher = standMerken();
   state.journal = state.journal.filter(function (x) { return x.woche !== woche; });
   if (r) {
     state.journal.push(r);
     state.journal.sort(function (x, y) { return x.woche < y.woche ? -1 : 1; });
   }
-  speichern();
+  if ((r || alt) && !speichernOderZurueck(vorher)) return null;
   return r ? 'gespeichert' : alt ? 'entfernt' : 'nichts';
 }
 
@@ -7393,6 +7415,7 @@ function bindeReflexion() {
   $('jrAnsehen').addEventListener('click', function () { zeige('lesen', reflexionEntwurf.woche); });
   $('jrSpeichern').addEventListener('click', function () {
     var e = reflexionEntwurf, was = reflexionSpeichern(e.woche, e.gut, e.stoerte);
+    if (was === null) return;
     if (was === 'gespeichert') bestaetigenUndGehen('Gespeichert', 'Nachzulesen im Journal.', '[data-lesen="' + e.woche + '"]');
     else if (was === 'entfernt') bestaetigenUndGehen('Gelöscht', 'Die Reflexion ist entfernt.');
     else if (was === 'nichts') bestaetigenUndGehen('Nichts gespeichert', 'Du hast nichts geschrieben.', null, 'hinweis');
@@ -7407,7 +7430,8 @@ function bindeReflexion() {
   if ($('jrLoeschen')) $('jrLoeschen').addEventListener('click', function () {
     var e = reflexionEntwurf;
     loeschenFragen(this, 'Löschen?', 'Die Reflexion dieser Woche ist danach weg.', 'Löschen', function () {
-      if (reflexionLoeschen(e.woche)) bestaetigenUndGehen('Gelöscht', 'Die Reflexion ist entfernt.');
+      if (!reflexionLoeschen(e.woche)) { if (reflexionNach(e.woche)) return; }
+      else bestaetigenUndGehen('Gelöscht', 'Die Reflexion ist entfernt.');
       zeige('journal');
     });
   });
@@ -7467,12 +7491,12 @@ function timerRest(nun) {
 
 // Pause und weiter (ADR 0040): Weiter schiebt den Start um die Pause nach hinten.
 function timerPause() {
-  var t = state.timer, nun = zeitJetzt();
+  var t = state.timer, nun = zeitJetzt(), vorher = standMerken();
   if (!t) return;
   if (t.pausiert) { t.start += nun - t.pausiert; t.pausiert = null; } else t.pausiert = nun;
-  speichern();
+  speichernOderZurueck(vorher);
   render();
-  timerOeffnen(t.id);
+  timerOeffnen(state.timer.id);
 }
 
 function zaehlStand(g, k) {
@@ -7565,9 +7589,10 @@ function timerStarten(id) {
     return;
   }
   if (!state.timer) {
+    var vorher = standMerken();
     state.timer = { id: id, tag: heuteSchluessel(), start: zeitJetzt(), ms: g.timer.minuten * 60000,
       stumm: g.timer.stumm, pausiert: null };
-    speichern();
+    if (!speichernOderZurueck(vorher)) return;
     render();
   }
   timerOeffnen(id);
@@ -7600,21 +7625,22 @@ function zeichneTimerKarte(g, t) {
 
 function bindeTimerKarte() {
   $('timerTon').addEventListener('click', function () {
-    var t = state.timer;
+    var t = state.timer, vorher = standMerken();
     if (!t) return;
     tonBereit();
     t.stumm = !t.stumm;
-    speichern();
+    if (!speichernOderZurueck(vorher)) return;
     this.setAttribute('aria-pressed', t.stumm ? 'false' : 'true');
     this.innerHTML = t.stumm ? ICON.stumm : ICON.ton;
   });
-  $('timerFertig').addEventListener('click', function () { timerFertig(false); });
+  $('timerFertig').addEventListener('click', function () { timerFertig(false, true); });
   $('timerPause').addEventListener('click', timerPause);
   // Abbrechen fragt im Glas: Ein halber Lauf geht sonst mit einer Handbewegung verloren.
   $('timerAbbrechen').addEventListener('click', function () {
     loeschenFragen(this, 'Timer abbrechen?', 'Die Zeit bis hier zählt nicht.', 'Ja', function () {
+      var vorher = standMerken();
       state.timer = null;
-      speichern();
+      if (!speichernOderZurueck(vorher)) return;
       timerSchliessen();
       render();
     });
@@ -7682,12 +7708,14 @@ function timerSchliessen() {
   } });
 }
 
-// Durch oder «Fertig»: abgehakt für den Tag, an dem er begann.
-function timerFertig(ton) {
-  var t = state.timer;
+// Durch oder «Fertig»: abgehakt für den Tag, an dem er begann. Nur «Fertig»
+// (`vonHand`) rollt bei einem Speicherfehler zurück; das Ende von allein nicht.
+function timerFertig(ton, vonHand) {
+  var t = state.timer, vorher = standMerken();
   if (!t) return;
   state.timer = null;
-  speichern();
+  if (!vonHand) speichern();
+  else if (!speichernOderZurueck(vorher)) return;
   if (ton && !t.stumm) gong();
   timerSchliessen();
   if (!erledigtAm(t.id, t.tag)) {
@@ -7872,12 +7900,12 @@ function terminSpeichern() {
     von: e.ganztags ? null : e.von, bis: e.ganztags ? null : e.bis, wiederholung: e.wiederholung,
     wiederholungBis: e.wiederholungBis, vorlauf: e.vorlauf, ort: e.ort, notiz: e.notiz,
     imKalender: e.id && terminNach(e.id) ? terminNach(e.id).imKalender : null });
-  var alt = e.id ? terminNach(e.id) : null;
+  var alt = e.id ? terminNach(e.id) : null, vorher = standMerken();
   if (alt) t.erledigt = alt.erledigt.filter(function (k) { return terminAm(t, k); });
   if (alt) state.termine[state.termine.indexOf(alt)] = t;
   else state.termine.push(t);
-  if (speichern()) bestaetigenUndGehen(alt ? 'Gespeichert' : 'Angelegt', alt ? '' : 'Für ' + tagKurz(t.tag),
-    '[data-termin="' + t.id + '"]');
+  if (!speichernOderZurueck(vorher)) return;
+  bestaetigenUndGehen(alt ? 'Gespeichert' : 'Angelegt', alt ? '' : 'Für ' + tagKurz(t.tag), '[data-termin="' + t.id + '"]');
   kalZeige(t.tag);
   zeige('home');
 }
@@ -7903,9 +7931,10 @@ function terminLoeschenTippen() {
   var e = terminEntwurf, reihe = e.wiederholung !== 'keine';
   loeschenFragen(this, reihe ? 'Ganze Reihe löschen?' : 'Löschen?',
     reihe ? 'Alle Termine dieser Reihe sind danach weg.' : '«' + e.titel + '» ist danach weg.', 'Löschen', function () {
-      var t = terminNach(e.id);
+      var t = terminNach(e.id), vorher = standMerken();
       if (t) state.termine.splice(state.termine.indexOf(t), 1);
-      if (speichern()) meldenUndGehen('Gelöscht.', 'haken');
+      if (!speichernOderZurueck(vorher)) return;
+      meldenUndGehen('Gelöscht.', 'haken');
       zeige('home');
     });
 }
@@ -8706,17 +8735,18 @@ function bindeTicketBlatt() {
 
 // Gelöscht wird erst nach der Frage im Glas (ADR 0041).
 function ticketLoeschen(e) {
-  var t = ticketNach(e.id), zeile = document.querySelector('#app [data-ticket="' + e.id + '"]');
+  var t = ticketNach(e.id), zeile = document.querySelector('#app [data-ticket="' + e.id + '"]'), vorher = standMerken();
   if (t) state.tickets.splice(state.tickets.indexOf(t), 1);
+  // Nicht gespeichert: Das Ticket bleibt, das Blatt auch.
+  if (!speichernOderZurueck(vorher)) return;
   ticketEntwurf = null;
-  var gut = speichern();
   // Das Blatt fließt in seine Zeile; erst wenn es dort ist, geht sie.
   var geht = ansicht === 'tickets' && zeile ? zeileGeht(zeile, '#' + zeile.closest('section').id + ' .tm-liste',
     '#' + zeile.closest('section').id + ' .klein') : null;
   ticketBlattSchliessen();
   if (ansicht === 'tickets') render();
   if (geht) geht(TROPFEN_DAUER);
-  if (gut) melden('Gelöscht.', 'haken');
+  melden('Gelöscht.', 'haken');
 }
 
 // Das Blatt steht unten. Geht die Tastatur auf, schiebt iOS sie über das
@@ -8794,7 +8824,7 @@ function ticketSichern() {
     melden('Gib dem Ticket einen Titel.');
     return;
   }
-  var t = e.id ? ticketNach(e.id) : null;
+  var t = e.id ? ticketNach(e.id) : null, vorher = standMerken();
   if (t) {
     // Ein geändertes Ticket ist wieder offen: Was abgegeben war, stimmt so nicht mehr.
     t.art = e.art; t.titel = e.titel; t.text = e.text; t.ort = e.ort; t.grund = e.grund;
@@ -8807,14 +8837,16 @@ function ticketSichern() {
       erstellt: nun, stand: ticketStand(), abgegeben: null };
     state.tickets.push(t);
   }
+  // Nicht gespeichert: Das Blatt bleibt offen, mit allem, was darin steht.
+  if (!speichernOderZurueck(vorher)) return;
   ticketEntwurf = null;
-  var gut = speichern(), neu = !e.id;
+  var neu = !e.id;
   if (ansicht === 'tickets') render();
   // Das Blatt wird selbst zur Bestätigung, die danach ins Gespeicherte fließt
   // (ADR 0041) — nicht erst zurück und dann aus dem Knopf.
-  ticketBlattSchliessen(null, gut ? { titel: neu ? 'Ticket gesichert' : 'Gespeichert',
+  ticketBlattSchliessen(null, { titel: neu ? 'Ticket gesichert' : 'Gespeichert',
     text: neu ? 'Es bleibt auf dem Gerät, bis du es kopierst.' : '',
-    ziel: ansicht === 'tickets' ? '[data-ticket="' + t.id + '"]' : $('ticketKnopf') } : null);
+    ziel: ansicht === 'tickets' ? '[data-ticket="' + t.id + '"]' : $('ticketKnopf') });
 }
 
 // ── Die Ticketliste ─────────────────────────────────────────────
@@ -8851,10 +8883,9 @@ function ticketsKopieren() {
   kopieren(text, function (ok) {
     tkAusgabe = ok ? '' : text;
     if (ok) {
-      var nun = zeitJetzt();
+      var nun = zeitJetzt(), vorher = standMerken();
       offen.forEach(function (t) { t.abgegeben = nun; });
-      var gut = speichern();
-      if (gut) melden('Kopiert. ' + anzahl(offen.length, 'Ticket liegt', 'Tickets liegen') + ' in der Zwischenablage.', 'kopie');
+      if (speichernOderZurueck(vorher)) melden('Kopiert. ' + anzahl(offen.length, 'Ticket liegt', 'Tickets liegen') + ' in der Zwischenablage.', 'kopie');
     }
     if (ansicht === 'tickets') render();
     if (!ok && $('tkAusgabe')) { try { $('tkAusgabe').focus(); $('tkAusgabe').select(); } catch (e) { /* egal */ } }
@@ -8875,8 +8906,9 @@ function bindeTickets() {
   if ($('tkKopieren')) $('tkKopieren').addEventListener('click', ticketsKopieren);
   if ($('tkAufraeumen')) $('tkAufraeumen').addEventListener('click', function () {
     loeschenFragen(this, 'Abgegebene löschen?', 'Offene Tickets bleiben.', 'Löschen', function () {
+      var vorher = standMerken();
       state.tickets = offeneTickets();
-      var gut = speichern();
+      var gut = speichernOderZurueck(vorher);
       render();
       if (gut) melden('Gelöscht.', 'haken');
     });
@@ -9018,7 +9050,7 @@ function bindeAnsicht() {
     b.addEventListener('click', function () {
       var id = this.getAttribute('data-drang');
       if (state.welle && state.welle.id !== id) melden('Es läuft schon eine Welle.');
-      else welleBeginnen(id);
+      else if (!welleBeginnen(id)) return;
       zeige('welle');
     });
   });

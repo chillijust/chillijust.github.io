@@ -40,9 +40,16 @@ Sekunde mit Gong und Meldung. Deshalb rollen nur die Abhak-Wege zurück.
 
 ## Folgen
 
-- Formulare, Löschen, Rückfall und Drang melden ein Scheitern schon jetzt ohne
+- ~~Formulare, Löschen, Rückfall und Drang melden ein Scheitern schon jetzt ohne
   Erfolgsbestätigung, ihr Stand bleibt aber bis zum Neuladen im Speicher der Seite. Das
-  ist der Rest von A3 und offen.
+  ist der Rest von A3 und offen.~~ **Erledigt in 0.17.0T11** (James, Nachricht 09, N3):
+  Was der Nutzer ändert, merkt vorher den Stand (`standMerken`) und speichert über
+  `speichernOderZurueck`; scheitert es, steht der Stand von davor wieder da, am selben
+  Objekt, und ein Formular oder Blatt bleibt offen mit allem, was darin steht. Das gilt für
+  Gewohnheit, Abgewöhnen, Termin, Reflexion und Ticket, fürs Löschen und Archivieren, für
+  Rückfall, Drang und Welle und für Start, Pause, Ton, Abbruch und «Fertig» des Timers.
+  Was die App von allein schreibt (Ende eines Timers, ein Rekord), rollt weiter nicht
+  zurück — aus dem Grund oben.
 - Unter der Sperre lässt sich auch kein Sicherungscode einlesen; erst «Neu anfangen»,
   dann einlesen.
 - Ein gültiges Objekt mit fremdem Schema sperrt nicht; das ist A4.
