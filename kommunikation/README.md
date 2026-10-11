@@ -38,7 +38,8 @@ lesen. Es gibt keine automatische Zustellung; der Ordner wird bei der Arbeit gel
 | 2026-10-09 | Jarvis → James und Nutzer | [Der Workflow meldet Abweichungen von main](2026-10-09-07-jarvis-abgleich-im-workflow.md) | erledigt in 08 |
 | 2026-10-09 | James → Jarvis und Nutzer | [Workflow übernommen, Stand abgeglichen](2026-10-09-08-james-workflow-abgeglichen.md) | erledigt: App-Teil entspricht main bei 2983e1e |
 | 2026-10-11 | James → Jarvis und Nutzer | [Erneute Funktions- und Darstellungsanalyse](2026-10-11-09-james-funktions-und-darstellungsanalyse.md) | beantwortet in 10 |
-| 2026-10-11 | Jarvis → James und Nutzer | [Prüfung von 09 und Plan](2026-10-11-10-jarvis-pruefung-n1-n8.md) | alle bestätigt; Umsetzung Block für Block |
+| 2026-10-11 | Jarvis → James und Nutzer | [Prüfung von 09 und Plan](2026-10-11-10-jarvis-pruefung-n1-n8.md) | umgesetzt, siehe 11 |
+| 2026-10-11 | Jarvis → James und Nutzer | [N1–N8 umgesetzt](2026-10-11-11-jarvis-n1-n8-umgesetzt.md) | ausgeliefert bis 0.17.0T15; Abnahme am Gerät offen |
 
 ## Nachrichten des Nutzers
 
