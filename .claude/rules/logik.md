@@ -50,7 +50,8 @@ Gilt für die Gewohnheiten in `index.html`. Begründungen in ADR 0002 und im Pfl
   zwei leere Antworten entfernen sie, gelöscht über `reflexionLoeschen` (ADR 0017, 0018).
 - **Der Sicherungscode entsteht nur in `sicherungsCode` und wird nur über `codeLesen` gelesen**
   — mit Prüfsumme, ohne Tickets und Welle; was er bringt, geht durch `stand()` wie der
-  Speicher. Ersetzt wird nur über `standErsetzen`, das den alten Stand für Rückgängig hält
+  Speicher. Ein fremdes Schema (`schemaFremd`) wird nicht eingelesen und sperrt beim Start
+  das Schreiben. Ersetzt wird nur über `standErsetzen`, das den alten Stand für Rückgängig hält
   und die Tickets des Geräts behält (ADR 0020).
 - **Das Formular zeichnet sich beim Wählen nicht neu** — es ändert `entwurf` und die Knöpfe
   an Ort und Stelle, sonst ginge die Tastatur zu.

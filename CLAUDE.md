@@ -49,7 +49,7 @@ Safari als Home-Bildschirm-App im Vollbild.
 | 6 · Rückblick: Heatmap, Journal | fertig (0.7.1) |
 | 7 · Sicherung, Einstellungen, Tickets | fertig (0.8.0) |
 | 8 · Feinschliff, Nachbesserungen am Gerät, Timer und Zähler, Termine abhaken | fertig (0.13.1) |
-| 9 · Flüssig wie iOS 26 je Stelle, Chilli als Standard (ADR 0053–0055) | im Bau (0.17.0T11) |
+| 9 · Flüssig wie iOS 26 je Stelle, Chilli als Standard (ADR 0053–0055) | im Bau (0.17.0T12) |
 
 ## Wo was steht
 
@@ -167,5 +167,5 @@ node tools/pruefen.mjs                      # Vor-Push-Prüfung allein
 - Flüssig (ADR 0054): Chilli ist Standard, iOS je Stelle mit Speichern; Timer wie Drang; auf iOS fließt jedes Teil selbst, ohne Chilli darunter; der Reiter sagt je Stelle, wie man testet; Kontrast in Dunkel (ADR 0055); Rückwege von Menü und Ansichten, Knauf beim echten Tipp (0.17.0T7); Auftropfen und Zeilen fließen, Wisch zurück von gerollter Seite (0.17.0T8); Kalenderring, Abhaken, Wahlschalter ohne Warten, Ticketblatt mit Glas erst am Ziel, Auftropfen als Kette (0.17.0T9). Abnahme am Gerät steht aus.
 - Analyse von James (Nachrichten 01–03, 09–10 auf `chatgpt/kommunikation`). A2/A3 ausgeliefert in 0.13.2T
   (ADR 0049). N1–N8 aus 09 bestätigt, der Nutzer will alles, Block für Block: N1, N6 in 0.17.0T10, N3 in
-  0.17.0T11; als Nächstes N4+N8 (Import), N5 (Fokus im Dialog), N7 (Querformat, ADR), N2
+  0.17.0T11, N4+N8 in 0.17.0T12; als Nächstes N5 (Fokus im Dialog), N7 (Querformat, ADR), N2
   (Worker-Cache, bisher A1, ADR). Abnahme am Gerät steht aus.

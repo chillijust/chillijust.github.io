@@ -1796,7 +1796,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.17.0T11';
+var APP_VERSION = '0.17.0T12';
 var APP_STAND = '2026-10-11';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -2414,9 +2414,16 @@ function speicherUnlesbar() {
   if (!roh) return null;
   try {
     var wert = JSON.parse(roh);
-    if (wert && typeof wert === 'object' && !Array.isArray(wert)) return null;
+    if (wert && typeof wert === 'object' && !Array.isArray(wert)) return schemaFremd(wert) ? { roh: roh, neuer: true } : null;
   } catch (e) { /* unlesbar */ }
   return { roh: roh };
+}
+
+// Ein Stand aus einer Fassung, die anders speichert (James, N8): Diese App
+// läse davon nur, was sie kennt, und überschriebe den Rest. Ohne Schema gilt
+// er als 1 — so schrieb die App von Anfang an.
+function schemaFremd(roh) {
+  return roh.schema !== undefined && roh.schema !== grundStand().schema;
 }
 
 var speicherSperre = speicherUnlesbar();
@@ -2425,8 +2432,10 @@ function sperreZeigen() {
   var roh = speicherSperre && speicherSperre.roh, knoepfe = [];
   if (roh) knoepfe.push({ text: 'Rohtext kopieren', attr: { 'data-sperre': 'kopieren' }, tun: sperreKopieren });
   knoepfe.push({ text: 'Neu anfangen', attr: { 'data-sperre': 'neu' }, tun: sperreNeuFragen });
-  hinweisZeigen('Deine Daten sind nicht lesbar', roh
-    ? 'Auf diesem Gerät liegt ein gespeicherter Stand, den die App nicht lesen kann. Sie überschreibt ihn nicht. ' +
+  hinweisZeigen('Deine Daten sind nicht lesbar', speicherSperre && speicherSperre.neuer
+    ? 'Auf diesem Gerät liegt ein Stand aus einer neueren Fassung der App. Diese überschreibt ihn nicht. ' +
+      'Lade die App neu, um die neuere Fassung zu holen, oder kopier ihn und fang bewusst neu an.'
+    : roh ? 'Auf diesem Gerät liegt ein gespeicherter Stand, den die App nicht lesen kann. Sie überschreibt ihn nicht. ' +
       'Kopier ihn und heb ihn auf, oder fang bewusst neu an.'
     : 'Der Speicher lässt sich gerade nicht lesen. Die App schreibt nichts, damit nichts verloren geht.',
     null, null, { zeichen: 'warnung', wahl: { knoepfe: knoepfe } });
@@ -2656,6 +2665,14 @@ function bewegt(el, bilder, opt, fertig) {
 }
 
 function weg(el) { if (el && el.parentNode) el.parentNode.removeChild(el); }
+
+// Ein Selektor auf ein Attribut mit einem Wert aus dem Stand, maskiert: Eine
+// ID aus einem veränderten Sicherungscode mit «"» oder «]» bräche sonst den
+// Selektor, und der Timer ließe sich nicht mehr bedienen (James, N4).
+function mitWert(attr, wert) {
+  var w = String(wert);
+  return '[' + attr + '="' + (window.CSS && CSS.escape ? CSS.escape(w) : w.replace(/["\\]/g, '\\$&')) + '"]';
+}
 function px(n) { return Math.round(n * 10) / 10 + 'px'; }
 
 // Der Geist: eine Kopie von `el` hinter einer Schattenwurzel mit dem Stylesheet
@@ -3132,7 +3149,7 @@ function tagGleitet(von, nach) {
 // Nur, wenn beide zu sehen sind.
 function hakenFliesst(id) {
   if (bewegungAus() || ansicht !== 'home') return;
-  var von = document.querySelector('#app [data-haken="' + id + '"] .gw-scheibe'), ziel = document.querySelector('#app .tagesring .tr-bild');
+  var von = document.querySelector('#app ' + mitWert('data-haken', id) + ' .gw-scheibe'), ziel = document.querySelector('#app .tagesring .tr-bild');
   if (!zuSehen(von) || !zuSehen(ziel)) return;
   var a = von.getBoundingClientRect(), z = ziel.getBoundingClientRect(), hoehe = window.innerHeight || 0;
   if (z.bottom < 0 || z.top > hoehe || a.bottom < 0 || a.top > hoehe) return;
@@ -3442,7 +3459,7 @@ function selektorVon(el) {
   if (el.closest('#hinweisWahl')) return hinweisWahlHerkunft;
   if (el.id) return '#' + el.id;
   for (var i = 0; i < HERKUNFT.length; i++) {
-    if (el.hasAttribute(HERKUNFT[i])) return '[' + HERKUNFT[i] + '="' + el.getAttribute(HERKUNFT[i]) + '"]';
+    if (el.hasAttribute(HERKUNFT[i])) return mitWert(HERKUNFT[i], el.getAttribute(HERKUNFT[i]));
   }
   return null;
 }
@@ -4245,7 +4262,7 @@ function hakenJubel(g, vorher, nachher, heute) {
 // Das Glas mit Haken, aus dem, was den Jubel ausgelöst hat, und dorthin zurück:
 // die runde Marke der Tageszeile, sonst die Scheibe der Kachel (ADR 0040).
 function jubeln(titel, text, id) {
-  var el = ['[data-nachtrag="' + id + '"]', '[data-haken="' + id + '"]', '[data-ab="' + id + '"]']
+  var el = [mitWert('data-nachtrag', id), mitWert('data-haken', id), mitWert('data-ab', id)]
     .map(function (s) { return document.querySelector(s); }).filter(zuSehen)[0] || null;
   el = scheibeVon(el);
   bestaetigen(titel, text, el, el, 'haken');
@@ -7055,7 +7072,7 @@ function entwurfSpeichern() {
   if (!speichernOderZurueck(vorher)) return;
   bestaetigenUndGehen(g ? 'Gespeichert' : 'Angelegt', g ? '' : entwurf.weise === 'timer' ? 'Antippen startet den Timer, lange drücken öffnet sie.'
     : entwurf.weise === 'zaehler' ? 'Antippen zählt eins, lange drücken öffnet sie.' : 'Antippen heißt erledigt, lange drücken öffnet sie.',
-    '[data-haken="' + id + '"]' + SCHEIBE);
+    mitWert('data-haken', id) + SCHEIBE);
   zeige('home');
 }
 
@@ -7090,7 +7107,7 @@ function lasterSpeichern(name) {
   var id = l ? l.id : state.abgewoehnen[state.abgewoehnen.length - 1].id;
   if (!speichernOderZurueck(vorher)) return;
   bestaetigenUndGehen(l ? 'Gespeichert' : 'Angelegt', l ? '' : 'Kommt ein Drang, tipp auf «Drang».',
-    '[data-ab="' + id + '"]' + SCHEIBE);
+    mitWert('data-ab', id) + SCHEIBE);
   zeige('home');
 }
 
@@ -7568,7 +7585,7 @@ function gong() {
   } catch (e) { /* dann eben still */ }
 }
 
-function kachelVon(id) { return document.querySelector('[data-haken="' + id + '"]'); }
+function kachelVon(id) { return document.querySelector(mitWert('data-haken', id)); }
 // Jedes Glas, das an einer Gewohnheit hängt, beginnt und endet in ihrer runden
 // Scheibe — nicht in der ganzen Kachel: Der Tropfen nimmt die Größe seiner
 // Quelle, und eine Kachel ist schon fast so breit wie das Fenster (ADR 0040).
@@ -7584,7 +7601,7 @@ function timerStarten(id) {
   if (state.timer && state.timer.id !== id) {
     var alt = gewohnheitNach(state.timer.id);
     hinweisZeigen('Es läuft schon ein Timer', '«' + (alt ? alt.name : '') + '» ist noch nicht durch.',
-      k ? scheibeVon(k).getBoundingClientRect() : null, '[data-haken="' + id + '"]' + SCHEIBE,
+      k ? scheibeVon(k).getBoundingClientRect() : null, mitWert('data-haken', id) + SCHEIBE,
       { frage: { ja: 'Abbrechen, diesen starten', nein: 'Weiterlaufen lassen', beiJa: function () { state.timer = null; timerStarten(id); } } });
     return;
   }
@@ -7905,7 +7922,7 @@ function terminSpeichern() {
   if (alt) state.termine[state.termine.indexOf(alt)] = t;
   else state.termine.push(t);
   if (!speichernOderZurueck(vorher)) return;
-  bestaetigenUndGehen(alt ? 'Gespeichert' : 'Angelegt', alt ? '' : 'Für ' + tagKurz(t.tag), '[data-termin="' + t.id + '"]');
+  bestaetigenUndGehen(alt ? 'Gespeichert' : 'Angelegt', alt ? '' : 'Für ' + tagKurz(t.tag), mitWert('data-termin', t.id));
   kalZeige(t.tag);
   zeige('home');
 }
@@ -8458,6 +8475,10 @@ function sicherungEinlesen() {
     melden('Das ist kein gültiger Sicherungscode. Kopier ihn noch einmal ganz.', 'warnung');
     return;
   }
+  if (schemaFremd(roh)) {
+    melden('Dieser Code stammt aus einer neueren Fassung der App. Lade sie neu, dann lies ihn ein.', 'warnung');
+    return;
+  }
   var neu = stand(roh), wann = istZeit(roh.gesichert) ? datumLang(new Date(roh.gesichert)) : '';
   hinweisZeigen('Diesen Stand einlesen?', standText(neu) + (wann ? ', gesichert am ' + wann : '') +
     '. Was jetzt auf dem Gerät steht, wird ersetzt.', this.getBoundingClientRect(), null,
@@ -8735,7 +8756,7 @@ function bindeTicketBlatt() {
 
 // Gelöscht wird erst nach der Frage im Glas (ADR 0041).
 function ticketLoeschen(e) {
-  var t = ticketNach(e.id), zeile = document.querySelector('#app [data-ticket="' + e.id + '"]'), vorher = standMerken();
+  var t = ticketNach(e.id), zeile = document.querySelector('#app ' + mitWert('data-ticket', e.id)), vorher = standMerken();
   if (t) state.tickets.splice(state.tickets.indexOf(t), 1);
   // Nicht gespeichert: Das Ticket bleibt, das Blatt auch.
   if (!speichernOderZurueck(vorher)) return;
@@ -8846,7 +8867,7 @@ function ticketSichern() {
   // (ADR 0041) — nicht erst zurück und dann aus dem Knopf.
   ticketBlattSchliessen(null, { titel: neu ? 'Ticket gesichert' : 'Gespeichert',
     text: neu ? 'Es bleibt auf dem Gerät, bis du es kopierst.' : '',
-    ziel: ansicht === 'tickets' ? '[data-ticket="' + t.id + '"]' : $('ticketKnopf') });
+    ziel: ansicht === 'tickets' ? mitWert('data-ticket', t.id) : $('ticketKnopf') });
 }
 
 // ── Die Ticketliste ─────────────────────────────────────────────

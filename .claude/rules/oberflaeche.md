@@ -37,6 +37,8 @@ fest.
   Einstellungen trennen Allgemein | Flüssig (`esReiter`, ADR 0053). Die Überschrift führt
   immer zur Übersicht.
 - **Runde Knöpfe** (`.rund`) sind 44 × 44, Symbol aus `ICON`, mit `aria-label`.
+- **Eine ID aus dem Stand geht nur über `mitWert(attr, id)` in einen Selektor** — sie
+  kann aus einem Sicherungscode kommen und Anführungszeichen tragen.
 - **Eine neue Ansicht** ist ein Eintrag in `ANSICHTEN`, ihre Ereignisse hängen in
   `bindeAnsicht()`. Das Menü folgt dem Pflichtenheft; ein Eintrag ohne `ziel` trägt «bald».
 - **Die Kachel kennt zwei Gesten**: tippen hakt ab, lange drücken (`langDruecken`) öffnet.
