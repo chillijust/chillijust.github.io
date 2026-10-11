@@ -102,6 +102,14 @@ var h = alle('body > .tropfen-huelle').filter(function (x) { return vorher.index
 pruefe('C4 eine Ansicht quillt wie in 0.15.0', !!h && h.getAnimations()[0].effect.getTiming().duration === 416 &&
   h.getAnimations()[0].effect.getTiming().easing === 'cubic-bezier(0.3, 0, 0.25, 1)' && !q('.fl-schicht'));
 ausbewegt();
+var cg = geist(q('#ansicht'));
+vorher = alle('body > .tropfen-huelle');
+tropfenZu(cg, { left: 0, top: -800, width: innerWidth, height: 2000, right: innerWidth, bottom: 1200 }, q('#menuKnopf'));
+h = alle('body > .tropfen-huelle').filter(function (x) { return vorher.indexOf(x) < 0; })[0];
+pruefe('C4b auch in Chilli beginnt eine weit gerollte Ansicht am Bildrand und skaliert von dort',
+  !!h && h.getAnimations()[0].effect.getKeyframes()[0].top === '0px' && cg.style.top === '-800px' &&
+  cg.style.transformOrigin === '0px 800px');
+ausbewegt();
 q('[data-kalender="monat"]').click();
 var ma = q('.held .wahl-marke').getAnimations()[0];
 pruefe('C5 die Wahl-Marke streckt sich über beide, ohne Rest', !!ma && ma.effect.getTiming().duration === 580 &&
@@ -154,6 +162,14 @@ tropfenAuf(q('#ansicht'), punktFlaeche(320, 60));
 h = alle('body > .tropfen-huelle').filter(function (x) { return vorher.indexOf(x) < 0; })[0];
 pruefe('I2 eine Ansicht fließt selbst, ohne Chilli-Hülle, mit Schicht darunter', !!h && !!h._fluss && !h.getAnimations().length &&
   !!h.previousElementSibling && h.previousElementSibling.classList.contains('fl-schicht') && h.style.background === 'transparent');
+// Weit gerollt: Die Seite reicht 800 px über den Rand. Gemalt wird nur, was zu
+// sehen ist — eine Hülle von Bildschirmhöhen blieb am Gerät aus.
+var lang = { left: 0, top: -800, width: innerWidth, height: 2000, right: innerWidth, bottom: 1200 }, gl = geist(q('#ansicht'));
+vorher = alle('body > .tropfen-huelle');
+tropfenZu(gl, lang, q('#menuKnopf'));
+h = alle('body > .tropfen-huelle').filter(function (x) { return vorher.indexOf(x) < 0; })[0];
+pruefe('I2b eine weit gerollte Ansicht fließt nur, soweit sie zu sehen ist', !!h && parseFloat(h.style.top) === 0 &&
+  parseFloat(h.style.height) <= innerHeight && gl.style.top === '-800px');
 ausbewegt();
 q('[data-kalender="monat"]').click();
 var marke = q('.held .wahl-marke');

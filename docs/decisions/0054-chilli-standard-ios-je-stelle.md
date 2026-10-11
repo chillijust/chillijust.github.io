@@ -29,7 +29,10 @@ hart schneiden) rechnet Safari auf dem iPhone teils ohne Grafikchip, Bild für B
   blendete er gleich aus, wäre eine Ansicht fort, bevor der Tropfen den Knopf erreicht
   (0.17.0T7, in App und Probe); der Knopf schluckt ihn mit einem Nicken, und beim Menü
   blendet nur der Schleier, nicht das Blatt. Der Knauf eines Schalters hebt sich wie eine
-  Linse und fließt gedehnt hinüber (`knaufFliesst`).
+  Linse und fließt gedehnt hinüber (`knaufFliesst`). Auftropfen und Zeilen fließen seit
+  0.17.0T8 ebenso (`perleFliesst`, `zeileFliesst`, `kleinFliesst`): die Karten beim Start
+  aus dem Kopf, eine gelöschte Zeile in den runden Knopf oben, Häkchen aus «Bearbeiten»
+  und zurück — vorher liefen dort nur die Chilli-Bilder auf einer Feder.
   `fliessen` (Marke, Knauf, Abhaken) malt nur Hals und Rest, nie das Teil selbst. In
   0.17.0T3 lief überall die Chilli-Bewegung, und das Flüssige lag als zweites Bild
   darunter — am Gerät sah das aus wie zwei Teile übereinander, mit doppeltem Schatten.
