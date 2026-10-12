@@ -9,10 +9,9 @@ const html = readFileSync(APP, 'utf8');
 suite('querformat', html, String.raw`
 function warten(ms) { return new Promise(function (f) { setTimeout(f, ms); }); }
 function imBild(el) { var r = el.getBoundingClientRect(); return r.top >= -0.5 && r.bottom <= innerHeight + 0.5 && r.left >= -0.5 && r.right <= innerWidth + 0.5; }
-// Das kopflose Chrome zieht vom Fenster seine Leiste ab (87 Punkte); verlangt
-// sind darum 932 × 517, ankommen sollen etwa 932 × 430.
-pruefe('Q0 der Läufer gibt das Fenster quer, so hoch wie das iPhone', innerWidth === 932 && innerHeight >= 400 &&
-  innerHeight <= 440, innerWidth + 'x' + innerHeight);
+// Der Läufer stellt das Fenster über DevTools genau ein (kopflos.mjs).
+pruefe('Q0 der Läufer gibt das Fenster quer, genau wie das iPhone', innerWidth === 932 && innerHeight === 430,
+  innerWidth + 'x' + innerHeight);
 frisch();
 state.bewegung = 'aus';
 state.gewohnheiten = ['Lesen', 'Wasser', 'Laufen', 'Atmen'].map(function (n, i) {
@@ -53,4 +52,4 @@ return warten(0).then(function () {
   ticketBlattSchliessen();
   frisch();
 });
-`, { fenster: '932,517' });
+`, { fenster: '932,430' });

@@ -59,7 +59,15 @@ export function chromiumFinden() {
 export function testseite(html, test) {
   const skript = '\n<script>\n' +
     'window.addEventListener("error", function (e) { document.title = "SEITENFEHLER: " + e.message; });\n' +
-    'setTimeout(function () {' + test + '}, 150);\n' +
+    // Erst alle Schriften laden, dann prüfen. Eine Schrift lädt sonst erst, wenn
+    // sie zum ersten Mal gebraucht wird — mitten im Test, und was davor gemessen
+    // war, liegt danach woanders (langdruck G3 in 430 Breite, ADR 0058).
+    'setTimeout(function () {\n' +
+    // FontFaceSet hat kein length — slice() gäbe eine leere Liste.
+    '  var schriften = [];\n' +
+    '  if (document.fonts) document.fonts.forEach(function (f) { schriften.push(f.load().catch(function () {})); });\n' +
+    '  Promise.all(schriften).then(function () {' + test + '});\n' +
+    '}, 150);\n' +
     '</scr' + 'ipt>\n';
   return html.replace('</body>', function () { return skript + '</body>'; });
 }

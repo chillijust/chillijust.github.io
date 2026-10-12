@@ -7,6 +7,19 @@ const html = readFileSync(APP, 'utf8');
 suite('geruest', html, String.raw`
 frisch();
 
+// ── 0 · Das Fenster ─────────────────────────────────────────
+// Bis 0.17.0T16 lief der Prüfstand in 500 × 845 — das kopflose Chrome hat eine
+// Mindestbreite. Seitdem stellt der Läufer das iPhone ein (kopflos.mjs).
+pruefe('00 der Läufer gibt das Fenster des iPhones, 430 × 932', innerWidth === 430 && innerHeight === 932,
+  innerWidth + 'x' + innerHeight);
+var schriftenDa = true;
+document.fonts.forEach(function (f) { if (f.status !== 'loaded') schriftenDa = false; });
+pruefe('01 alle Schriften sind geladen, bevor geprüft wird', schriftenDa);
+document.body.style.minHeight = '3000px';
+pruefe('02 die Bildlaufleiste nimmt keinen Platz, wie auf dem iPhone', document.documentElement.scrollHeight > innerHeight &&
+  document.documentElement.clientWidth === innerWidth, document.documentElement.clientWidth);
+document.body.style.minHeight = '';
+
 // ── A · Kopf ────────────────────────────────────────────────
 pruefe('A1 der Kopf nennt die App, «Chilli» vorn und größer', q('#kopf h1') &&
   q('#markeKnopf').getAttribute('aria-label') === 'Chilli Journal' && !!q('#kopf svg.wm .wm-zug') &&

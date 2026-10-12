@@ -171,4 +171,5 @@ node tools/pruefen.mjs                      # Vor-Push-Prüfung allein
   (ADR 0057). Abnahme am Gerät steht aus.
 - James 12–14 (Gestaltung, Leistung, Rückwege): Plan in sieben Blöcken in Nachricht 15 auf
   `chatgpt/kommunikation`, dort auch die Entscheidungen des Nutzers. Block 1 (N9 und dasselbe
-  Muster bei Sicherung und Export) in 0.17.0T16. Als Nächstes Block 2: Prüfstand in 430 × 932.
+  Muster bei Sicherung und Export) in 0.17.0T16. Block 2: Prüfstand in 430 × 932 (ADR 0058).
+  Als Nächstes Block 3: Messanzeige.
