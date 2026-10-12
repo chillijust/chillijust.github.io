@@ -23,7 +23,7 @@ genau diese beiden:
 ## Entscheidung
 
 - **Der Läufer steuert Chromium über das DevTools-Protokoll** (`tools/pruefstand/kopflos.mjs`,
-  `WebSocket` aus Node 22, nichts installiert): ein Browser für alle Suiten, je Suite ein
+  über eine Pipe wie Playwright, nichts installiert): ein Browser für alle Suiten, je Suite ein
   eigener Browserkontext mit eigenem Speicher, das Fenster genau über
   `Emulation.setDeviceMetricsOverride`, die Bildlaufleiste ohne Platz
   (`setScrollbarsHidden`). Die virtuelle Zeit wird vor dem Laden angehalten und danach mit
@@ -46,6 +46,9 @@ Fenster.
   nach `file://` wechselt Chromium den Prozess, und mit virtueller Zeit stürzt der Renderer
   dabei ab.
 - Hängt eine Suite, meldet der Läufer sie nach zwei Minuten und startet den Browser neu.
+- Erst über einen Port: Dessen Adresse liest man aus der Fehlerausgabe, und auf GitHub kam
+  sie dort nie an («Chromium meldet sich nicht», Lauf 293). Die Pipe braucht keine Adresse.
+  Scheitert der Start, nennt der Läufer, was Chromium gesagt hat. Das Profil liegt in `bau/`.
 - Nebenbefund im echten Fenster: «10 von 12» bricht im Tagesring auf zwei Zeilen um, die
   Karte wird höher. Eine Gestaltungsfrage an den Nutzer, kein Teil dieses ADR.
 - Keine neue Version — `index.html` ist unverändert.

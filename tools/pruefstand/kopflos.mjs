@@ -6,17 +6,23 @@
 // auf dem Zielgerät. Die Kopfloshülle kann es genau, fehlt aber auf GitHub —
 // lokal grün und dort rot wäre schlimmer als beides falsch. Über das Protokoll
 // stellt `Emulation.setDeviceMetricsOverride` das Fenster in jedem Chromium
-// exakt ein. Node 22 bringt `WebSocket` mit; installiert wird nichts.
+// exakt ein (ADR 0058).
+//
+// **Über eine Pipe, nicht über einen Port** (`--remote-debugging-pipe`, wie
+// Playwright): Die Adresse eines Ports las der Läufer aus der Fehlerausgabe, und
+// auf GitHub kam sie dort nie an. Die Pipe braucht weder Adresse noch WebSocket;
+// Chromium liest auf Kanal 3 und schreibt auf Kanal 4, je Nachricht JSON mit \0.
 //
 // Wie `--dump-dom --virtual-time-budget`: Die virtuelle Zeit startet mit der
 // Navigation, läuft bis zum Budget, dann wird das DOM gelesen. Jede Seite bekommt
 // einen eigenen Browserkontext — eigener Speicher, wie zuvor ein frischer Prozess.
 
 import { spawn } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { StringDecoder } from 'node:string_decoder';
 import { pathToFileURL } from 'node:url';
+import { BAU } from './helfer.mjs';
 
 function mitFrist(versprechen, ms, was) {
   let uhr;
@@ -25,58 +31,70 @@ function mitFrist(versprechen, ms, was) {
 }
 
 export async function browserStarten(chrome) {
-  const profil = mkdtempSync(join(tmpdir(), 'pruefstand-'));
+  // Das Profil liegt im Arbeitsbaum, nicht unter /tmp — ein abgeschottetes
+  // Chromium (etwa als Snap) sähe dort ein anderes /tmp.
+  mkdirSync(BAU, { recursive: true });
+  const profil = mkdtempSync(join(BAU, 'profil-'));
   // Jede Seite beginnt hier, nicht auf about:blank: Der Weg von dort nach
-  // file:// wechselt den Prozeß, und mit laufender virtueller Zeit stürzt der
-  // Renderer dabei ab. Von file:// nach file:// bleibt er, wo er ist.
+  // file:// wechselt den Prozeß, und mit virtueller Zeit stürzt der Renderer
+  // dabei ab. Von file:// nach file:// bleibt er, wo er ist.
   const leer = join(profil, 'leer.html');
   writeFileSync(leer, '<!DOCTYPE html><title></title>');
   const proc = spawn(chrome, ['--headless', '--disable-gpu', '--no-sandbox', '--no-first-run',
-    '--remote-debugging-port=0', '--user-data-dir=' + profil, 'about:blank'],
-  { stdio: ['ignore', 'ignore', 'pipe'] });
+    '--remote-debugging-pipe', '--user-data-dir=' + profil, 'about:blank'],
+  { stdio: ['ignore', 'ignore', 'pipe', 'pipe', 'pipe'] });
   // Endet Node vorher (ein Wurf, ein Abbruch), bleibt kein Chromium liegen.
   const aufraeumen = () => proc.kill('SIGKILL');
   process.once('exit', aufraeumen);
-  const adresse = await mitFrist(new Promise((ja, nein) => {
-    let gelesen = '';
-    proc.stderr.on('data', (d) => {
-      if (gelesen === null) return;   // weiter abnehmen, damit die Leitung nicht vollläuft
-      gelesen += d;
-      const m = gelesen.match(/DevTools listening on (ws:\/\/\S+)/);
-      if (m) { gelesen = null; ja(m[1]); }
-    });
-    proc.on('exit', (c) => nein(new Error('Chromium endete beim Start mit ' + c)));
-  }), 30000, 'Chromium meldet sich nicht');
+  // Was Chromium sagt, bleibt für die Fehlermeldung — nur das Ende, und die
+  // Leitung wird immer abgenommen, damit sie nicht vollläuft.
+  let gesagt = '';
+  proc.stderr.on('data', (d) => { gesagt = (gesagt + d).slice(-1500); });
 
-  const ws = new WebSocket(adresse);
-  await mitFrist(new Promise((ja, nein) => { ws.onopen = ja; ws.onerror = () => nein(new Error('keine Verbindung')); }),
-    10000, 'DevTools antworten nicht');
-  let zaehler = 0;
+  let zaehler = 0, beendet = null;
   const offen = new Map(), hoerer = new Set();
-  ws.onmessage = (e) => {
-    const m = JSON.parse(e.data);
-    if (m.id && offen.has(m.id)) {
-      const w = offen.get(m.id);
-      offen.delete(m.id);
-      if (m.error) w.nein(new Error(m.error.message)); else w.ja(m.result);
-    } else if (m.method) hoerer.forEach((h) => h(m));
-  };
-  // Reißt die Verbindung, wartet keine Anfrage mehr ewig.
-  ws.onclose = () => {
-    offen.forEach((w) => w.nein(new Error('Verbindung zu Chromium getrennt')));
+  function abbrechen(grund) {
+    beendet = grund;
+    offen.forEach((w) => w.nein(new Error(grund)));
     offen.clear();
-  };
+  }
+  proc.on('exit', (c) => abbrechen('Chromium endete (' + c + '): ' + gesagt.trim().split('\n').slice(-3).join(' | ')));
+  proc.on('error', (e) => abbrechen('Chromium startet nicht: ' + e.message));
+
+  // Eine Nachricht kann über mehrere Stücke gehen, ein Umlaut auch.
+  const dekoder = new StringDecoder('utf8');
+  let rest = '';
+  proc.stdio[4].on('data', (d) => {
+    rest += dekoder.write(d);
+    let i;
+    while ((i = rest.indexOf('\0')) !== -1) {
+      const m = JSON.parse(rest.slice(0, i));
+      rest = rest.slice(i + 1);
+      if (m.id && offen.has(m.id)) {
+        const w = offen.get(m.id);
+        offen.delete(m.id);
+        if (m.error) w.nein(new Error(m.error.message)); else w.ja(m.result);
+      } else if (m.method) hoerer.forEach((h) => h(m));
+    }
+  });
+  proc.stdio[3].on('error', () => { /* Chromium ist fort; exit meldet es */ });
   function senden(method, params = {}, sessionId) {
+    if (beendet) return Promise.reject(new Error(beendet));
     const id = ++zaehler;
-    ws.send(JSON.stringify(sessionId ? { id, method, params, sessionId } : { id, method, params }));
+    proc.stdio[3].write(JSON.stringify(sessionId ? { id, method, params, sessionId } : { id, method, params }) + '\0');
     return new Promise((ja, nein) => offen.set(id, { ja, nein }));
+  }
+  try {
+    await mitFrist(senden('Browser.getVersion'), 30000, 'Chromium meldet sich nicht');
+  } catch (e) {
+    proc.kill('SIGKILL');
+    throw new Error(e.message + (gesagt ? ' — Chromium sagt: ' + gesagt.trim().split('\n').slice(-3).join(' | ') : ''));
   }
   return {
     senden,
     hoerer,
     leer: pathToFileURL(leer).href,
     ende() {
-      try { ws.close(); } catch (e) { /* schon zu */ }
       process.removeListener('exit', aufraeumen);
       proc.kill('SIGKILL');
       try { rmSync(profil, { recursive: true, force: true }); } catch (e) { /* bleibt liegen */ }
