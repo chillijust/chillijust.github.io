@@ -172,4 +172,5 @@ node tools/pruefen.mjs                      # Vor-Push-Prüfung allein
 - James 12–14 (Gestaltung, Leistung, Rückwege): Plan in sieben Blöcken in Nachricht 15 auf
   `chatgpt/kommunikation`, dort auch die Entscheidungen des Nutzers. Block 1 (N9 und dasselbe
   Muster bei Sicherung und Export) in 0.17.0T16. Block 2: Prüfstand in 430 × 932 (ADR 0058).
-  Als Nächstes Block 3: Messanzeige.
+  Als Nächstes Block 3: Messanzeige. Für Block 7 dazu: «10 von 12» bricht im Tagesring um —
+  Varianten als Bildvergleich (Zahl kleiner, Umschalter in die Kalenderzeile, so lassen).
