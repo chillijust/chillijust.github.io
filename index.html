@@ -1819,7 +1819,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.17.0T16';
+var APP_VERSION = '0.17.0T17';
 var APP_STAND = '2026-10-12';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -6509,6 +6509,7 @@ function zeichneFluessigProbe() {
   return '<div id="fluessigProbe">' +
     '<div class="fl-leiste" id="flLeiste"' + (flUngespeichert() ? '' : ' hidden') + '>' +
       '<span>Nicht gespeichert</span><button type="button" class="knopf" id="flSpeichern">Speichern</button></div>' +
+    zeichneRuckler() +
     '<section class="abschnitt"><h2>Chilli oder iOS</h2>' +
       '<p class="fp-text fp-vorab">Standard ist die Chilli-Bewegung. Schaltest du eine Stelle auf iOS-Flüssig, ' +
         'ersetzt das Flüssige dort die Chilli-Bewegung. Die Probe zeigt, wie es aussieht; in der App gilt es erst nach ' +
@@ -6561,6 +6562,117 @@ function bindeFluessigProbe() {
     });
   });
   $('flSpeichern').addEventListener('click', flSpeichern);
+  $('rkKnopf').addEventListener('click', rucklerStarten);
+}
+
+// ── Ruckler messen (Nachricht 15, Block 3) ─────────────────────
+// Zahlen vom echten Gerät statt aus dem Browser am Rechner: Zehn Sekunden
+// lang notiert die App den Abstand jedes Bilds, gleich welche Bewegung
+// gerade läuft — der Nutzer geht derweil ins Menü, öffnet das Ticketblatt,
+// hakt ab. Der Takt ist der Median der Abstände; so gilt die Messung bei
+// 60 Hz, bei 120 Hz und im Stromsparmodus mit 30 Hz. Ein Ruckler ist ein
+// Bild, das mehr als anderthalb Takte nach dem vorigen kam. Das Ergebnis
+// meldet sich, wo der Nutzer gerade ist, und steht im Reiter bis zum Neuladen.
+var RUCKLER_MS = 10000;
+var ruckler = null;          // die laufende Messung: { start, letzt, abst, rest, versteckt, uhr }
+var rucklerLetzte = null;    // das letzte Ergebnis, nur im Arbeitsspeicher
+
+// Aus den Abständen in Millisekunden: Takt, Ruckler, ausgelassene Bilder,
+// längster Abstand. Unter zehn Abständen gibt es nichts zu sagen.
+function rucklerAuswerten(abst) {
+  if (!abst || abst.length < 10) return null;
+  const s = abst.slice().sort((a, b) => a - b), takt = s[Math.floor(s.length / 2)];
+  const lang = abst.filter((a) => a > takt * 1.5);
+  return {
+    bilder: abst.length + 1,
+    hz: Math.round(1000 / takt),
+    ruckler: lang.length,
+    aus: lang.reduce((n, a) => n + Math.max(1, Math.round(a / takt) - 1), 0),
+    laengster: Math.round(s[s.length - 1])
+  };
+}
+
+function zeichneRuckler() {
+  return '<section class="abschnitt"><h2>Ruckler messen</h2>' + zeichneRucklerKarte() + '</section>';
+}
+
+function zeichneRucklerKarte() {
+  const e = rucklerLetzte;
+  const zeilen = e ? [['Ruckler', String(e.ruckler)], ['Ausgelassene Bilder', String(e.aus)],
+    ['Längster Abstand', e.laengster + ' ms'], ['Takt', e.hz + ' Hz, ' + e.bilder + ' Bilder']]
+    : [['Letzte Messung', 'noch keine']];
+  return '<div class="kachel" id="rkKarte">' +
+    '<p>Tippe auf «Messen» und bediene die App zehn Sekunden lang, etwa Menü, Ticketblatt oder ' +
+      'Haken. Gezählt wird jedes Bild, das zu spät kam, gleich bei welcher Bewegung. Das Ergebnis meldet sich, wo du ' +
+      'gerade bist.</p>' +
+    '<div id="rkZeilen">' + zeilen.map(function (z) {
+      return '<div class="zeile"><span>' + esc(z[0]) + '</span><span class="wert">' + esc(z[1]) + '</span></div>';
+    }).join('') + '</div>' +
+    '<div class="knopfreihe"><button type="button" class="knopf" id="rkKnopf">' +
+      esc(rucklerKnopfText()) + '</button></div>' +
+  '</div>';
+}
+
+function rucklerKnopfText() { return ruckler ? 'Misst … ' + ruckler.rest + ' s' : 'Messen'; }
+
+// Der Knopf zählt herunter, solange er zu sehen ist; ein zweiter Tipp
+// darauf tut nichts, bis die Messung um ist.
+function rucklerKnopf() {
+  const k = $('rkKnopf');
+  if (!k) return;
+  k.textContent = rucklerKnopfText();
+}
+
+function rucklerStarten() {
+  if (ruckler) return;
+  ruckler = { start: null, letzt: null, abst: [], rest: RUCKLER_MS / 1000, versteckt: false };
+  // Kommt kein Bild mehr (die App ging in den Hintergrund), endet sie trotzdem.
+  ruckler.uhr = setTimeout(rucklerEnde, RUCKLER_MS + 1000);
+  document.addEventListener('visibilitychange', rucklerVersteckt);
+  requestAnimationFrame(rucklerBild);
+  rucklerKnopf();
+}
+
+function rucklerBild(t) {
+  const m = ruckler;
+  if (!m) return;
+  if (m.start === null) m.start = t; else m.abst.push(t - m.letzt);
+  m.letzt = t;
+  if (t - m.start >= RUCKLER_MS) { rucklerEnde(); return; }
+  const rest = Math.ceil((RUCKLER_MS - (t - m.start)) / 1000);
+  if (rest !== m.rest) { m.rest = rest; rucklerKnopf(); }
+  requestAnimationFrame(rucklerBild);
+}
+
+// Im Hintergrund kommen keine Bilder; die Lücke wäre kein Ruckler.
+function rucklerVersteckt() { if (document.hidden && ruckler) ruckler.versteckt = true; }
+
+function rucklerEnde() {
+  const m = ruckler;
+  if (!m) return;
+  ruckler = null;
+  clearTimeout(m.uhr);
+  document.removeEventListener('visibilitychange', rucklerVersteckt);
+  const e = m.versteckt ? null : rucklerAuswerten(m.abst);
+  if (e) rucklerLetzte = e;
+  const karte = $('rkKarte');
+  if (karte) {
+    karte.outerHTML = zeichneRucklerKarte();
+    $('rkKnopf').addEventListener('click', rucklerStarten);
+  }
+  rucklerMelden(e ? (e.ruckler ? e.ruckler + ' Ruckler' : 'Keine Ruckler')
+    : 'Keine Messung', e ? 'In zehn Sekunden ' + e.aus + ' Bilder ausgelassen, längster Abstand ' + e.laengster +
+      ' ms. Takt ' + e.hz + ' Hz, ' + e.bilder + ' Bilder.'
+    : m.versteckt ? 'Die App war zwischendurch im Hintergrund. Miss noch einmal.' : 'Es kamen zu wenige Bilder an.');
+}
+
+// Steht gerade ein Hinweis da, etwa eine Frage, wartet das Ergebnis, bis er
+// geht — es soll keine offene Entscheidung überschreiben.
+function rucklerMelden(titel, text) {
+  const blatt = $('hinweisBlatt');
+  if (blatt && !blatt.hidden) { setTimeout(function () { rucklerMelden(titel, text); }, 500); return; }
+  const k = $('rkKnopf');
+  hinweisZeigen(titel, text, zuSehen(k) ? k.getBoundingClientRect() : null, zuSehen(k) ? k : null, { zeichen: 'hinweis' });
 }
 
 // ── Rückblick: Heatmap ─────────────────────────────────────────
