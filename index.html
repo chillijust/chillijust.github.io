@@ -1462,6 +1462,9 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 .fl-tagring { position: fixed; z-index: 5; pointer-events: none; box-shadow: inset 0 0 0 2px var(--akzent); }
 .kal-tag.gewaehlt.gleitet { box-shadow: none; transition: none; }
 .fl-welle { position: absolute; inset: 8.5%; border-radius: 50%; overflow: hidden; opacity: .5; --fp-farbe: var(--akzent); }
+.fw-bild { position: absolute; inset: 0; width: 100%; height: 100%; }
+.fw-fluss { fill: var(--fp-farbe); }
+.fw-licht { fill: none; stroke: var(--glas-licht); stroke-width: 3.2; stroke-linejoin: round; stroke-linecap: round; }
 /* Ungespeichertes im Reiter «Flüssig»: oben, bleibt beim Rollen. */
 .fl-leiste {
   position: sticky;
@@ -1819,7 +1822,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.17.0T18';
+var APP_VERSION = '0.17.0T19';
 var APP_STAND = '2026-10-12';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -3224,26 +3227,50 @@ function hakenFliesst(id) {
 // Lichtkante. Gezeichnet wird seltener als jedes Bild — sie läuft Minuten.
 function welleFliesst(bild, pegel) {
   if (!bild) return;
-  var ort = document.createElement('div'), chili = $('chiliFigur');
+  var ort = document.createElement('div'), chili = $('chiliFigur'), ruhig = !flIos('welle'), n = ++flNummer;
   ort.className = 'fl-welle';
   ort.setAttribute('aria-hidden', 'true');
   bild.insertBefore(ort, chili && chili.parentNode === bild ? chili : null);
-  var b = fpSchichten(ort, 'flw', true);
-  b.id = 'welle';
-  b.el = ort;
-  b.ort = ort;
-  b.W = ort.clientWidth;
-  b.H = ort.clientHeight;
-  b.haelse = {};
-  b.frei = true;
-  b.bildAbstand = 50;
-  b.pegel = pegel;
-  b.ruhig = !flIos('welle');
-  b.kante = b.ruhig ? 0 : FP_IOS.kante;
-  if (!b.W) { weg(ort); return; }
+  var W = ort.clientWidth, H = ort.clientHeight;
+  if (!W) { weg(ort); return; }
+  // Ein SVG, kein Filter, keine Maske: Die Welle wird alle 50 ms neu
+  // gezeichnet, Minuten lang. In drei Schichten mit Umriß als clip-path und
+  // einer Lichtkante im Filter verlor das iPhone dabei Bild um Bild, im
+  // Standard wie auf iOS — im Standard sah man von den dreien nur eine.
+  ort.innerHTML = '<svg class="fw-bild" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">' +
+    '<path class="fw-fluss"/>' + (ruhig ? '' : '<path class="fw-kern"/><clipPath id="fwC-' + n + '"><path/></clipPath>' +
+    '<path class="fw-licht" clip-path="url(#fwC-' + n + ')"/>') + '</svg>';
+  var b = { id: 'welle', el: ort, ort: ort, W: W, H: H, haelse: {}, frei: true, bildAbstand: 50, pegel: pegel, ruhig: ruhig,
+    kante: ruhig ? 0 : FP_IOS.kante, zeichnen: welleZeichnen,
+    fluss: ort.querySelector('.fw-fluss'), kern: ort.querySelector('.fw-kern'), licht: ort.querySelector('.fw-licht') };
+  b.rand = b.licht && b.licht.previousElementSibling.firstChild;
+  // Die Farben einmal: im Standard nur der Grund, auf iOS Saum und Kern wie
+  // beim Flüssigen, das sich bewegt (fpZeichnen).
+  var f = flFarben(b);
+  if (f && !ruhig) {
+    b.fluss.style.fill = flMischen(f.rand, f.grund, 1);
+    b.kern.style.fill = flMischen([255, 255, 255, 1], f.grund, f.hebung);
+    b.licht.style.opacity = String(b.kante);
+  }
   fpWelle(b);
-  fpZeichnen(b);
+  welleZeichnen(b);
   if (!bewegungAus()) fpAnstossen(b);
+}
+
+// Die Welle in ihr SVG: der Umriß, auf iOS dazu der Kern um den Saum
+// eingerückt und die Lichtkante als Strich die Oberfläche entlang, innen am
+// Umriß abgeschnitten — wie die Kante aus dem Filter, nur ohne ihn.
+function welleZeichnen(b) {
+  var w = FP_IOS, erg = b.formen(w), jetzt = {}, d = fpPfad(erg, erg.formen, jetzt);
+  b.fluss.setAttribute('d', d);
+  if (b.kern) {
+    b.kern.setAttribute('d', fpPfad(erg, fpInnen(erg.formen), jetzt, true));
+    b.rand.setAttribute('d', d);
+    // Die Perlen steigen in der Flüssigkeit auf; eine Kante tragen sie erst,
+    // wenn sie die Oberfläche heben — und die trägt sie schon.
+    b.licht.setAttribute('d', erg.linie || 'M0 0Z');
+  }
+  fpNachZeichnen(b, jetzt, w);
 }
 
 // ── Tropfen: auf aus einem runden Knopf, zu in ihn hinein (ADR 0008) ──
@@ -5800,7 +5827,7 @@ function fpTakt(b) {
   b.zuletzt = nun;
   var weiter = fpBewegen(b.federn(), dt, w, still);
   if (b.extra && b.extra(dt, w, still)) weiter = true;
-  fpZeichnen(b);
+  (b.zeichnen || fpZeichnen)(b);
   // Ein Riß beim Zeichnen stößt eine Feder an, die eben noch ruhte.
   if (!weiter) weiter = b.federn().some(function (f) { return f.v !== 0 || f.x !== f.ziel; });
   if (weiter && !still) {
@@ -5952,17 +5979,8 @@ function fpGleiterFormen(g, w, liste, haelse, key) {
 // Ein Hals, der eben noch da war, ist gerissen oder aufgegangen — dann zuckt,
 // woran er hing (`riss`).
 function fpZeichnen(b) {
-  var w = FP_IOS, erg = b.formen(w), liste = erg.formen, jetzt = {};
-  function mitte(x) { return typeof x === 'number' ? fpMitte(liste[x]) : x; }
-  function kreis(x, gegen, l) { return typeof x === 'number' ? fpKern((l || liste)[x], gegen) : x; }
-  function umriss(l) { return l.filter(function (f) { return !f.nur; }).map(function (f) { return fpUmriss(fpPunkte(f)); }).join(''); }
-  // Eine Form mit `nur` trägt einen Hals, gemalt wird sie nicht.
-  var d = (erg.pfade || []).join('') + umriss(liste);
-  (erg.haelse || []).forEach(function (h) {
-    var t = fpHalsPfad(kreis(h.a, mitte(h.b)), kreis(h.b, mitte(h.a)), h.weite);
-    if (t) { d += t; jetzt[h.key] = true; }
-  });
-  d = d || 'M0 0Z';
+  var w = FP_IOS, erg = b.formen(w), jetzt = {};
+  var d = fpPfad(erg, erg.formen, jetzt);
   var kante = b.kante === undefined ? w.kante : b.kante, stark = fpKlemme(kante / 0.6, 0, 1);
   b.fluss.style.webkitClipPath = 'path("' + d + '")';
   b.fluss.style.clipPath = 'path("' + d + '")';
@@ -5970,16 +5988,7 @@ function fpZeichnen(b) {
   // darunter trägt die Farbe des Saums. Er leuchtet, solange es fließt, und
   // ist in Ruhe wieder das Teil — so springt am Ende nichts.
   if (b.kern) {
-    var innen = liste.map(function (f) {
-      var s = f.s || 1, k = FP_SAUM / s;
-      return { x: f.x + k, y: f.y + k, w: Math.max(0, f.w - 2 * k), h: Math.max(0, f.h - 2 * k), r: Math.max(0, f.r - k), s: f.s,
-        deh: f.deh, nur: f.nur };
-    }), dk = (erg.pfade || []).join('') + umriss(innen);
-    (erg.haelse || []).forEach(function (h) {
-      if (!jetzt[h.key]) return;
-      dk += fpHalsPfad(kreis(h.a, mitte(h.b), innen), kreis(h.b, mitte(h.a), innen), h.weite) || '';
-    });
-    dk = dk || 'M0 0Z';
+    var dk = fpPfad(erg, fpInnen(erg.formen), jetzt, true);
     b.kern.style.webkitClipPath = 'path("' + dk + '")';
     b.kern.style.clipPath = 'path("' + dk + '")';
     var f = flFarben(b);
@@ -5993,6 +6002,38 @@ function fpZeichnen(b) {
     b.licht.style.opacity = String(kante);
   }
   if (b.schatten) b.schatten.setAttribute('d', d);
+  fpNachZeichnen(b, jetzt, w);
+}
+
+// Der Umriß aus Formen, fertigen Pfaden und Hälsen. Eine Form mit `nur`
+// trägt einen Hals, gemalt wird sie nicht. Jeder Hals, der steht, kommt in
+// `jetzt`; mit `nurBekannte` (der Kern) nur die, die schon dort stehen.
+function fpPfad(erg, liste, jetzt, nurBekannte) {
+  function mitte(x) { return typeof x === 'number' ? fpMitte(liste[x]) : x; }
+  function kreis(x, gegen) { return typeof x === 'number' ? fpKern(liste[x], gegen) : x; }
+  var d = (erg.pfade || []).join('') + liste.filter(function (f) { return !f.nur; }).map(function (f) {
+    return fpUmriss(fpPunkte(f));
+  }).join('');
+  (erg.haelse || []).forEach(function (h) {
+    if (nurBekannte && !jetzt[h.key]) return;
+    var t = fpHalsPfad(kreis(h.a, mitte(h.b)), kreis(h.b, mitte(h.a)), h.weite);
+    if (t) { d += t; jetzt[h.key] = true; }
+  });
+  return d || 'M0 0Z';
+}
+
+// Dieselben Formen, um den Saum eingerückt.
+function fpInnen(liste) {
+  return liste.map(function (f) {
+    var s = f.s || 1, k = FP_SAUM / s;
+    return { x: f.x + k, y: f.y + k, w: Math.max(0, f.w - 2 * k), h: Math.max(0, f.h - 2 * k), r: Math.max(0, f.r - k), s: f.s,
+      deh: f.deh, nur: f.nur };
+  });
+}
+
+// Nach dem Zeichnen: Ein Hals, der eben noch da war, ist gerissen oder
+// aufgegangen — dann zuckt, woran er hing; dann der Inhalt der Bühne.
+function fpNachZeichnen(b, jetzt, w) {
   if (b.riss && !bewegungAus()) Object.keys(b.haelse).forEach(function (k) { if (!jetzt[k]) b.riss(k, w); });
   b.haelse = jetzt;
   if (b.zeigen) b.zeigen(w);
@@ -6296,17 +6337,22 @@ function fpWelle(b) {
     return aktiv || perlen.length > 0 || amp.x > 0.002;
   };
   b.formen = function (w) {
-    var l = [], h = [], s = 'M-2 ' + (D + 2);
+    var l = [], h = [], s = 'M-2 ' + (D + 2), linie = '';
     // Hoch an der linken Seite, die Oberfläche entlang, rechts hinunter: im
-    // Uhrzeigersinn wie jede Form.
-    for (var x = -2; x <= D + 2; x += 6) s += 'L' + fpZ(x) + ' ' + fpZ(oberflaeche(x, w));
+    // Uhrzeigersinn wie jede Form. `linie` ist die Oberfläche allein — dort
+    // liegt in Drang und Timer die Lichtkante (welleZeichnen).
+    for (var x = -2; x <= D + 2; x += 6) {
+      var pt = fpZ(x) + ' ' + fpZ(oberflaeche(x, w));
+      s += 'L' + pt;
+      linie += (linie ? 'L' : 'M') + pt;
+    }
     perlen.forEach(function (p) {
       l.push({ x: p.x - p.r, y: p.y - p.r, w: 2 * p.r, h: 2 * p.r, r: p.r });
       // Die Oberfläche über der Perle als großer Kreis — daran hängt ihr Hals.
       h.push({ a: l.length - 1, b: { x: p.x, y: oberflaeche(p.x, w) + 40, r: 40 }, key: 'p' + p.nr,
         weite: 40 + p.r * (1.6 + 2.4 * w.hals) });
     });
-    return { formen: l, haelse: h, pfade: [s + 'L' + (D + 2) + ' ' + (D + 2) + 'Z'] };
+    return { formen: l, haelse: h, pfade: [s + 'L' + (D + 2) + ' ' + (D + 2) + 'Z'], linie: linie };
   };
   b.zeigen = function () {
     if (!ring) return;

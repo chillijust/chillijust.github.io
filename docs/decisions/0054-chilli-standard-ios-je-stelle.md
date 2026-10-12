@@ -68,7 +68,10 @@ hart schneiden) rechnet Safari auf dem iPhone teils ohne Grafikchip, Bild für B
 - **Drang und Timer zeigen immer Flüssigkeit mit Chili** (`welleFliesst`): Der Pegel sinkt
   mit der Restzeit. Im Standard wiegt die Oberfläche ruhig, ohne Perlen und Lichtkante; mit
   iOS-«Welle» wogt sie, Perlen steigen auf. Der Außenring ist bei beiden ein Drittel so
-  dick wie zuvor.
+  dick wie zuvor. Seit 0.17.0T19 zeichnet sie ein einziges SVG ohne Filter und ohne
+  `clip-path` (`welleZeichnen`), die Lichtkante als Strich die Oberfläche entlang: Sie wird
+  alle 50 ms neu gezeichnet, und am Gerät ruckelte der Drang in drei Schichten mit Filter in
+  beiden Stilen gleich (50 Ruckler in 10 s).
 - **Der Timer ist gebaut wie der Drang**: im Ring Flüssigkeit und Chili, die Zeit groß
   darunter, dann Pause, Abbrechen, Fertig (ersetzt «Pause im Ring» aus 0041). Die Chili
   wandert hinüber, solange er offen ist (`chiliImTimer`, `chiliZurueck`) — sie steht
