@@ -1819,7 +1819,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.17.0T17';
+var APP_VERSION = '0.17.0T18';
 var APP_STAND = '2026-10-12';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -2372,8 +2372,9 @@ var FP_STELLEN = [
     'Tipp auf den Knopf, dann aufs Menü.',
     'Speichern, den Menüknopf oben rechts tippen und mit einem Tipp neben das Menü wieder schließen.'],
   ['hinweis', 'Hinweis aus Glas',
-    'Rückfragen und Hinweise aus Glas, etwa vor dem Löschen, und das Ticketblatt. Mit iOS quillt das Glas als Tropfen aus ' +
-      'dem getippten Knopf und fließt beim Schließen in ihn zurück.',
+    'Rückfragen und Hinweise aus Glas, etwa vor dem Löschen, dazu Ticketblatt und Timer. Mit iOS quillt das Glas als Tropfen ' +
+      'aus dem getippten Knopf und fließt beim Schließen in ihn zurück; die großen Blätter fließen milchig und werden erst ' +
+      'am Ziel zu Glas.',
     'Tipp auf «Speichern», dann auf den Hinweis.',
     'Speichern, dann hier einen anderen Schalter umlegen und über das Menü weggehen: Die Rückfrage «Nicht gespeichert» ' +
       'kommt im Glas.'],
@@ -2927,7 +2928,7 @@ function teilFliesst(el, o) {
   s.style.zIndex = cs.zIndex;
   if (o.schatten) s.style.filter = o.schatten;
   (o.ort || el).parentNode.insertBefore(s, o.ort || el);
-  f = el._fluss = { o: o, p: fpFeder(o.auf ? 0 : 1, o.schnell || 1), s: s, b: fpSchichten(s, 'flt' + (++flNummer), true),
+  f = el._fluss = { o: o, p: fpFeder(o.auf ? 0 : 1, o.schnell || 1), s: s, b: fpSchichten(s, 'flt' + (++flNummer), true, !!o.schlicht),
     formen: [], weite: 0, ab: Date.now() + (o.warten || 0), zuletzt: 0, fertig: o.fertig,
     alt: { background: el.style.background, boxShadow: el.style.boxShadow, transition: el.style.transition,
       position: el.style.position,
@@ -2963,6 +2964,8 @@ function teilSchritt(el, weiter) {
     if (still) still();
     return;
   }
+  // Erst alles messen, dann schreiben: Wer nach dem Schreiben mißt, zwingt
+  // den Browser, mitten im Bild alles neu zu rechnen (P1, Nachricht 15).
   var o = f.o, qr = el.isConnected ? o.quelle() : null;
   if (!qr || !qr.width) {
     var weg1 = f.fertig;
@@ -2971,6 +2974,9 @@ function teilSchritt(el, weiter) {
     return;
   }
   if (nun < f.ab) { fpBild(weiter); return; }
+  // Zurück nimmt der Tropfen den Inhalt mit, auch wenn er unterwegs umkehrt.
+  if (f.p.ziel === 0) f.folgt = true;
+  var zr = o.ziel(), er = el.getBoundingClientRect(), ir = o.inhalt && f.folgt && !f.lage ? o.inhalt.getBoundingClientRect() : null;
   var dt = f.zuletzt ? fpKlemme((nun - f.zuletzt) / 1000, 0.001, 0.05) : 0.016, p = f.p;
   f.zuletzt = nun;
   fpSchwingen(p, dt, FP_IOS);
@@ -2981,7 +2987,10 @@ function teilSchritt(el, weiter) {
     f.da = true;
     if (o.angekommen) o.angekommen();
   }
-  if (!o.leer) el.style.boxShadow = f.da && p.ziel === 1 ? f.alt.boxShadow : 'none';
+  if (!o.leer) {
+    var schatten = f.da && p.ziel === 1 ? f.alt.boxShadow : 'none';
+    if (f.schatten !== schatten) el.style.boxShadow = f.schatten = schatten;
+  }
   var ruht = Math.abs(p.x - p.ziel) < 0.0015 && Math.abs(p.v) < 0.02;
   if (ruht) { p.x = p.ziel; p.v = 0; }
   if ((ruht && p.ziel === 1) || (p.ziel === 0 && p.x < 0.02)) {
@@ -2990,7 +2999,6 @@ function teilSchritt(el, weiter) {
     if (fertig) fertig();
     return;
   }
-  var zr = o.ziel(), er = el.getBoundingClientRect();
   var q = { x: qr.left, y: qr.top, w: qr.width, h: qr.height, r: Math.min(qr.width, qr.height) / 2, nur: !o.rest };
   var z = { x: zr.left, y: zr.top, w: zr.width, h: zr.height, r: o.rund || 0 };
   var t = fpTropfen(q, z, p.x, p.v, o.d0, FP_IOS);
@@ -3002,16 +3010,14 @@ function teilSchritt(el, weiter) {
   // Das Teil: auf den Tropfen beschnitten, in seinen eigenen Maßen.
   var innen = { x: t.x - er.left, y: t.y - er.top, w: t.w, h: t.h, r: t.r, deh: t.deh };
   el.style.clipPath = el.style.webkitClipPath = 'path("' + fpUmriss(fpPunkte(innen)) + '")';
-  // Zurück nimmt der Tropfen den Inhalt mit, auch wenn er unterwegs umkehrt.
-  if (p.ziel === 0) f.folgt = true;
   if (o.inhalt) {
-    if (f.folgt && !f.lage) {
-      var ir = o.inhalt.getBoundingClientRect();
-      f.lage = { x: zr.left - ir.left, y: zr.top - ir.top };
-    }
+    if (ir) f.lage = { x: zr.left - ir.left, y: zr.top - ir.top };
     fpInhalt(o.inhalt, f.folgt, t, z, p.x, f.lage);
   }
-  if (o.glas && o.farbeAmZiel) el.style.backgroundColor = p.ziel === 1 && p.x > 0.8 ? o.farbeAmZiel : o.farbe || '';
+  if (o.glas && o.farbeAmZiel) {
+    var farbe = p.ziel === 1 && p.x > 0.8 ? o.farbeAmZiel : o.farbe || '';
+    if (f.farbe !== farbe) el.style.backgroundColor = f.farbe = farbe;
+  }
   // Die Schicht: Hals und Tropfen in einem Kasten um alle, so breit wie der
   // Schatten. Die Quelle trägt nur den Hals und bleibt ausgespart — sie steht
   // schon da; Glas spart auch den Tropfen aus.
@@ -3020,7 +3026,8 @@ function teilSchritt(el, weiter) {
   q.x -= x0; q.y -= y0; t.x -= x0; t.y -= y0;
   f.formen = o.rest && q.s < 0.03 ? [t] : [q, t];
   f.weite = fpWeite(q.r * (q.s === undefined ? 1 : q.s), o.d0 / 2, FP_IOS);
-  // Die Lichtkante leuchtet, solange er fließt, und ist fort, wenn er steht.
+  // Die Lichtkante leuchtet, solange er fließt, und ist fort, wenn er steht;
+  // ein großes Blatt trägt unterwegs keine (`schlicht`).
   f.b.kante = FP_IOS.kante * fpKlemme(Math.abs(p.ziel - p.x) * 3, 0, 1);
   if (o.leer) f.s.style.opacity = fpAnteil((1 - p.x) / 0.25);
   f.s.style.display = '';
@@ -3078,6 +3085,11 @@ function fpInhalt(inhalt, folgt, t, z, p, lage) {
 // heraus (`auf`) oder hinein. Die Dauer des Aufrufers stimmt die Feder.
 var SCHATTEN_HUELLE = 'drop-shadow(0 10px 15px rgba(20, 20, 19, .16))';
 var SCHATTEN_GLAS = 'drop-shadow(0 4px 5px rgba(20, 20, 19, .14)) drop-shadow(0 14px 16px rgba(20, 20, 19, .28))';
+// Ein großes Blatt (`milchig`) fließt schlicht: ein Schatten statt zwei, keine
+// Lichtkante. Beides rechnete das iPhone in jedem Bild über die ganze Fläche
+// neu — das Ticketblatt verlor je Auf und Zu rund 24 Bilder (P1, Nachricht 15).
+// Am Ziel hat die Karte ihr Glas mit allem.
+var SCHATTEN_SCHLICHT = 'drop-shadow(0 8px 10px rgba(20, 20, 19, .22))';
 function huelleFliesst(h, inhalt, z, quelle, auf, opt, dauer, fertig) {
   var f = glasFarben(opt.glas), rund = opt.rund || (auf ? '0px' : '20px');
   h.style.left = px(z.left);
@@ -3093,7 +3105,8 @@ function huelleFliesst(h, inhalt, z, quelle, auf, opt, dauer, fertig) {
   } : quelle;
   teilFliesst(h, { quelle: q, ziel: function () { return z; }, rund: parseFloat(rund) || 0, d0: 36, inhalt: inhalt,
     glas: !!opt.glas, farbe: f.dicht, farbeAmZiel: opt.milchig ? null : f.duenn,
-    schatten: opt.glas ? SCHATTEN_GLAS : SCHATTEN_HUELLE, auf: auf, leer: !!opt.leer, angekommen: opt.angekommen,
+    schatten: opt.milchig ? SCHATTEN_SCHLICHT : opt.glas ? SCHATTEN_GLAS : SCHATTEN_HUELLE, schlicht: !!opt.milchig,
+    auf: auf, leer: !!opt.leer, angekommen: opt.angekommen,
     warten: opt.warten, schnell: fpKlemme(dauer / fluessigTakt(opt.glas ? 'hinweis' : 'ansichten').dauer, 0.4, 2), fertig: fertig });
 }
 
@@ -5975,8 +5988,10 @@ function fpZeichnen(b) {
       b.kern.style.background = flMischen([255, 255, 255, 1], f.grund, f.hebung * stark);
     }
   }
-  b.licht.setAttribute('d', d);
-  b.licht.style.opacity = String(kante);
+  if (b.licht) {
+    b.licht.setAttribute('d', d);
+    b.licht.style.opacity = String(kante);
+  }
   if (b.schatten) b.schatten.setAttribute('d', d);
   if (b.riss && !bewegungAus()) Object.keys(b.haelse).forEach(function (k) { if (!jetzt[k]) b.riss(k, w); });
   b.haelse = jetzt;
@@ -6027,18 +6042,18 @@ function fpTipp(b, name) { return b.el.querySelector('[data-fp-tipp="' + name + 
 // Die Schichten des Flüssigen in `ort`: Schatten, Umriß und Lichtkante. Der
 // Filter der Proben (weich zeichnen, hart schneiden) ruckelte am Gerät; seit
 // ADR 0054 rechnet alles als Pfad. `schluessel` hält die Filter auseinander,
-// `flach` läßt den Schatten weg.
-function fpSchichten(ort, schluessel, flach) {
+// `flach` läßt den Schatten weg, `ohneLicht` die Lichtkante.
+function fpSchichten(ort, schluessel, flach, ohneLicht) {
   var b = {};
   ort.insertAdjacentHTML('afterbegin', (flach ? '' : '<svg class="fp-schicht" aria-hidden="true">' +
       '<filter id="fpS-' + schluessel + '" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur in="SourceAlpha" stdDeviation="6"/>' +
       '<feOffset dy="5" result="s"/><feComposite in="s" in2="SourceAlpha" operator="out"/></filter>' +
       '<path class="fp-schatten" filter="url(#fpS-' + schluessel + ')"/></svg>') +
     '<div class="fp-schicht fp-fluss"></div><div class="fp-schicht fp-kern"></div>' +
-    '<svg class="fp-schicht fp-oben" aria-hidden="true"><filter id="fpL-' + schluessel + '" x="-10%" y="-10%" width="120%" height="120%">' +
+    (ohneLicht ? '' : '<svg class="fp-schicht fp-oben" aria-hidden="true"><filter id="fpL-' + schluessel + '" x="-10%" y="-10%" width="120%" height="120%">' +
       '<feComponentTransfer in="SourceAlpha" result="voll"><feFuncA type="linear" slope="50"/></feComponentTransfer>' +
       '<feOffset in="voll" dx="0" dy="1.6" result="ver"/><feComposite in="SourceGraphic" in2="ver" operator="out" result="rand"/>' +
-      '<feGaussianBlur in="rand" stdDeviation=".5"/></filter><path class="fp-licht" filter="url(#fpL-' + schluessel + ')"/></svg>');
+      '<feGaussianBlur in="rand" stdDeviation=".5"/></filter><path class="fp-licht" filter="url(#fpL-' + schluessel + ')"/></svg>'));
   b.fluss = ort.querySelector('.fp-fluss');
   b.kern = ort.querySelector('.fp-kern');
   b.licht = ort.querySelector('.fp-licht');
@@ -7902,7 +7917,9 @@ function timerOeffnen(id) {
   fluessig();
   blatt.classList.add('offen');
   var k = scheibeVon(kachelVon(id));
-  if (zuSehen(k)) tropfenAuf(karte, k.getBoundingClientRect(), { rund: '18px', glas: true });
+  // Ein großes Blatt aus Glas: unterwegs milchig und schlicht, Glas erst am
+  // Ziel — wie das Ticketblatt (P1, Nachricht 15).
+  if (zuSehen(k)) tropfenAuf(karte, k.getBoundingClientRect(), { rund: '18px', glas: true, milchig: true });
 }
 
 // Zu: in die Kachel zurück. Der Timer läuft weiter, wenn er noch läuft.
@@ -7915,7 +7932,7 @@ function timerSchliessen() {
   if (!g) { blatt.hidden = true; return; }
   var r = karte.getBoundingClientRect();
   karte.style.opacity = '0';
-  tropfenZu(g, r, ziel, { rund: '18px', frueh: true, glas: true, fertig: function () {
+  tropfenZu(g, r, ziel, { rund: '18px', frueh: true, glas: true, milchig: true, fertig: function () {
     karte.style.opacity = '';
     if (!timerOffen()) blatt.hidden = true;
   } });

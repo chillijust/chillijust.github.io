@@ -49,7 +49,7 @@ Safari als Home-Bildschirm-App im Vollbild, hoch und quer (ADR 0056).
 | 6 · Rückblick: Heatmap, Journal | fertig (0.7.1) |
 | 7 · Sicherung, Einstellungen, Tickets | fertig (0.8.0) |
 | 8 · Feinschliff, Nachbesserungen am Gerät, Timer und Zähler, Termine abhaken | fertig (0.13.1) |
-| 9 · Flüssig wie iOS 26 je Stelle, Chilli als Standard (ADR 0053–0055) | im Bau (0.17.0T17) |
+| 9 · Flüssig wie iOS 26 je Stelle, Chilli als Standard (ADR 0053–0055) | im Bau (0.17.0T18) |
 
 ## Wo was steht
 
@@ -173,5 +173,6 @@ node tools/pruefen.mjs                      # Vor-Push-Prüfung allein
   `chatgpt/kommunikation`, dort auch die Entscheidungen des Nutzers. Block 1 (N9 und dasselbe
   Muster bei Sicherung und Export) in 0.17.0T16. Block 2: Prüfstand in 430 × 932 (ADR 0058).
   Block 3: «Ruckler messen» im Reiter Flüssig in 0.17.0T17 — der Nutzer nimmt damit den Vorher-Wert am
-  iPhone. Als Nächstes Block 4: P1. Für Block 7 dazu: «10 von 12» bricht im Tagesring um —
+  iPhone. Block 4 (P1) in 0.17.0T18: Ticketblatt und Timer fließen schlicht, Glas am Ziel; Abnahme mit
+  «Ruckler messen», 4 × auf und zu (vorher iOS 45/97, Chilli 18/18). Als Nächstes Block 5: P2. Für Block 7 dazu: «10 von 12» bricht im Tagesring um —
   Varianten als Bildvergleich (Zahl kleiner, Umschalter in die Kalenderzeile, so lassen).

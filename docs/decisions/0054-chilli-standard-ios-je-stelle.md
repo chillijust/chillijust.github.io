@@ -2,7 +2,8 @@
 
 *2026-10-10 · Planänderung des Nutzers nach 0.17.0T2 · Version 0.17.0T3 · löst in 0053 die
 Voreinstellung «iOS 26 im Filter», die eigenen Einstellungen (Grund, Technik, Regler),
-«Einstellungen kopieren» und den Filter ab; ändert in 0041 den Aufbau des Timers; ergänzt durch 0055 (Kontrast in Dunkel)*
+«Einstellungen kopieren» und den Filter ab; ändert in 0041 den Aufbau des Timers; ergänzt durch 0055 (Kontrast in Dunkel) und in 0.17.0T18
+(große Blätter fließen schlicht)*
 
 ## Ausgangslage
 
@@ -45,6 +46,14 @@ hart schneiden) rechnet Safari auf dem iPhone teils ohne Grafikchip, Bild für B
   Glas, und die Hülle blendet über ihr aus (`glasAmZiel`). Die Unschärfe in jedem Bild neu
   zu rechnen, ließ das Blatt am Gerät ruckeln. Hinweis und Meldung sind klein und bleiben
   Glas im Tropfen.
+- **Große Blätter fließen schlicht** (0.17.0T18, P1 aus Nachricht 15): Ticketblatt und
+  Timer fließen milchig, auf iOS mit einem Schatten statt zwei und ohne Lichtkante
+  (`SCHATTEN_SCHLICHT`, `schlicht`); am Ziel hat die Karte ihr Glas mit allem. Am Gerät
+  verlor das Ticketblatt auf iOS je Auf und Zu rund 24 Bilder, auf Chilli 4–5 (Messung
+  «Ruckler messen», 4 × auf und zu): Doppelschatten und Lichtkante entstanden als Filter
+  über die ganze Fläche in jedem Bild neu. Der Timer floß bis dahin sogar mit Unschärfe.
+  Je Bild wird erst gemessen, dann geschrieben (`teilSchritt`). Hinweis und Meldung bleiben,
+  wie sie sind.
   `fliessen` (Marke, Knauf, Abhaken) malt nur Hals und Rest, nie das Teil selbst. In
   0.17.0T3 lief überall die Chilli-Bewegung, und das Flüssige lag als zweites Bild
   darunter — am Gerät sah das aus wie zwei Teile übereinander, mit doppeltem Schatten.
