@@ -50,6 +50,11 @@ Sekunde mit Gong und Meldung. Deshalb rollen nur die Abhak-Wege zurück.
   Rückfall, Drang und Welle und für Start, Pause, Ton, Abbruch und «Fertig» des Timers.
   Was die App von allein schreibt (Ende eines Timers, ein Rekord), rollt weiter nicht
   zurück — aus dem Grund oben.
+- Seit 0.17.0T16 (James, Nachricht 13, N9) rollt auch zurück, was nach dem Kopieren etwas
+  merkt: «Alle kopieren» im Ticketblatt wie auf der Seite «Tickets», der Stempel einer
+  kopierten Sicherung, die Markierung «im Kalender» nach dem Export und ihr Aufheben.
+  Einstellungen (Thema, Bewegung, Hinweis, Kalenderansicht, Exportwahl) speichern weiter
+  direkt: ein Scheitern meldet sich, der Schalter bleibt bis zum Neuladen.
 - Unter der Sperre lässt sich auch kein Sicherungscode einlesen; erst «Neu anfangen»,
   dann einlesen.
 - Ein gültiges Objekt mit fremdem Schema sperrt nicht; das ist A4.

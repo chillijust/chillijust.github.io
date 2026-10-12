@@ -49,7 +49,7 @@ Safari als Home-Bildschirm-App im Vollbild, hoch und quer (ADR 0056).
 | 6 · Rückblick: Heatmap, Journal | fertig (0.7.1) |
 | 7 · Sicherung, Einstellungen, Tickets | fertig (0.8.0) |
 | 8 · Feinschliff, Nachbesserungen am Gerät, Timer und Zähler, Termine abhaken | fertig (0.13.1) |
-| 9 · Flüssig wie iOS 26 je Stelle, Chilli als Standard (ADR 0053–0055) | im Bau (0.17.0T15) |
+| 9 · Flüssig wie iOS 26 je Stelle, Chilli als Standard (ADR 0053–0055) | im Bau (0.17.0T16) |
 
 ## Wo was steht
 
@@ -168,4 +168,7 @@ node tools/pruefen.mjs                      # Vor-Push-Prüfung allein
 - Analyse von James (Nachrichten 01–03, 09–10 auf `chatgpt/kommunikation`). A2/A3 ausgeliefert in 0.13.2T
   (ADR 0049). N1–N8 aus 09 bestätigt, der Nutzer will alles, Block für Block: N1, N6 in 0.17.0T10, N3 in
   0.17.0T11, N4+N8 in 0.17.0T12, N5 in 0.17.0T13, N7 in 0.17.0T14 (ADR 0056), N2 in 0.17.0T15
-  (ADR 0057). Offen: Prüfstand läuft in 500 × 845 statt 430 × 932; Abnahme am Gerät. Abnahme am Gerät steht aus.
+  (ADR 0057). Abnahme am Gerät steht aus.
+- James 12–14 (Gestaltung, Leistung, Rückwege): Plan in sieben Blöcken in Nachricht 15 auf
+  `chatgpt/kommunikation`, dort auch die Entscheidungen des Nutzers. Block 1 (N9 und dasselbe
+  Muster bei Sicherung und Export) in 0.17.0T16. Als Nächstes Block 2: Prüfstand in 430 × 932.

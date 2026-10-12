@@ -136,5 +136,74 @@ pruefe('K3 ein Löschen, das nicht gespeichert ist, läßt Ticket und Blatt steh
 frei();
 ticketBlattSchliessen();
 ausbewegt();
+
+// Kopieren gibt ab — beide Wege (James, N9): Die Seite «Tickets» nahm den
+// Stand schon zurück, das Blatt unter «Alle Tickets» zeigte bis 0.17.0T15
+// «Abgegeben», und nach dem Neuladen war das Ticket wieder offen.
+var echtKopieren = kopieren;
+kopieren = function (t, f) { f(true); };
+state.tickets = [ticketLesen({ id: 'k9', art: 'fehler', titel: 'Offen', erstellt: 1 })];
+speichern();
+anfang = JSON.stringify(state);
+zeige('tickets');
+ausbewegt();
+voll();
+q('#tkKopieren').click();
+pruefe('K4 «Alle kopieren» auf der Seite, nicht gespeichert, läßt das Ticket offen',
+  !ticketNach('k9').abgegeben && JSON.stringify(state) === anfang && !!q('#tkKopieren'));
+frei();
+zeige('home');
+ausbewegt();
+ticketBlattOeffnen(q('#ticketKnopf'));
+ausbewegt();
+q('#tkAlle').click();
+ausbewegt();
+q('#meldung').textContent = '';
+voll();
+q('#tkListeKopieren').click();
+ausbewegt();
+pruefe('K5 im Blatt ebenso: das Ticket bleibt offen, das Blatt zeigt es offen, und die App sagt es',
+  !ticketNach('k9').abgegeben && JSON.stringify(state) === anfang && !!q('#tkListeKopieren') &&
+  !q('#ticketKarte .tk-liste-blatt.gedimmt [data-ticket="k9"]') && warnt(),
+  JSON.stringify(ticketNach('k9')));
+frei();
+q('#tkListeKopieren').click();
+ausbewegt();
+pruefe('K6 geht es wieder, ist es abgegeben und gespeichert', !!ticketNach('k9').abgegeben &&
+  !!gespeichert().tickets[0].abgegeben);
+ticketBlattSchliessen();
+ausbewegt();
+
+// ── S, E · Kopieren und Exportieren merken sich etwas ───────
+// Dasselbe Muster wie N9: Die Sicherung merkt «gesichert», der Export
+// «im Kalender». Nicht gespeichert, gilt keins davon.
+state.termine = [terminLesen({ id: 't2', titel: 'Zahnarzt', tag: '2026-10-21', von: '09:00', wiederholung: 'keine' })];
+state.gesichert = null;
+speichern();
+anfang = JSON.stringify(state);
+zeige('sicherung');
+ausbewegt();
+voll();
+q('#scKopieren').click();
+pruefe('S1 eine Sicherung, deren Stempel nicht gespeichert ist, gilt nicht als gesichert',
+  !state.gesichert && JSON.stringify(state) === anfang);
+frei();
+zeige('home');
+ausbewegt();
+voll();
+var gemerkt = exportiertMerken(exportAuswahl(heuteSchluessel()));
+pruefe('E1 ein Export, der nicht gespeichert ist, markiert nichts', gemerkt === false &&
+  !terminNach('t2').imKalender && !state.exportiert && JSON.stringify(state) === anfang);
+frei();
+exportiertMerken(exportAuswahl(heuteSchluessel()));
+anfang = JSON.stringify(state);
+exportWahl['t:t2'] = true;
+voll();
+exAufheben();
+pruefe('E2 eine aufgehobene Markierung, nicht gespeichert, bleibt markiert',
+  !!terminNach('t2').imKalender && JSON.stringify(state) === anfang);
+frei();
+kopieren = echtKopieren;
+exportWahl = {};
 frisch();
 `);
