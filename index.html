@@ -1823,7 +1823,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.17.0T24';
+var APP_VERSION = '0.17.0T25';
 var APP_STAND = '2026-10-13';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -4148,12 +4148,29 @@ function faelligAm(g, k) {
 
 // Was die Kachel braucht: staerke (0–1), serie, warnen, faelligHeute,
 // erledigtHeute, punkte (die letzten 7 Tage) und, je Woche, treffer/ziel.
+//
+// Gemerkt je Gewohnheit (P2, Nachricht 15): Die Rechnung läuft vom Anlegen
+// bis heute, und ein Haken fragte sie über tagVoll, umschaltenUndZeichnen und
+// das Zeichnen mehrfach. Der Schlüssel ist alles, wovon sie abhängt — Tag,
+// Beginn, Rhythmus, die erledigten Tage —, so verfällt sie bei jeder Änderung,
+// bei Rücknahme, Import und Tageswechsel von selbst; eine neue Gewohnheit (aus
+// Import oder Rücknahme) ist ein neues Objekt und wird ohnehin neu gerechnet.
+// Das Ergebnis ist geteilt und darum eingefroren: Niemand schreibt hinein.
+var auswertungen = new WeakMap();
+var auswertungenGerechnet = 0;   // wie oft wirklich gerechnet wurde — für den Prüfstand
+
 function auswerten(g, heute) {
+  var schluessel = heute + '|' + g.angelegt + '|' + JSON.stringify(g.rhythmus) + '|' + g.erledigt.join(',');
+  var gemerkt = auswertungen.get(g);
+  if (gemerkt && gemerkt.schluessel === schluessel) return gemerkt.a;
+  auswertungenGerechnet++;
   var erl = {};
   g.erledigt.forEach(function (k) { erl[k] = true; });
   var a = g.rhythmus.art === 'proWoche' ? wochenRechnung(g, heute, erl) : tagesRechnung(g, heute, erl);
   a.erledigtHeute = !!erl[heute];
-  a.punkte = punkte(g, heute, erl);
+  a.punkte = Object.freeze(punkte(g, heute, erl));
+  Object.freeze(a);
+  auswertungen.set(g, { schluessel: schluessel, a: a });
   return a;
 }
 

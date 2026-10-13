@@ -101,7 +101,9 @@ state = {
   vorhandener Stand **anders gelesen** werden muß, steigt das Schema — mit neuem Schlüssel
   und Migration — und die erste Ziffer der Version.
 - **Gespeichert sind nur Tatsachen** (Tage, Zeitpunkte). Stärke, Serie, Rekord rechnen
-  `auswerten(g, heute)` und `lasterAuswerten(a, nun)` bei jedem Zeichnen neu.
+  `auswerten(g, heute)` und `lasterAuswerten(a, nun)` bei jedem Zeichnen; `auswerten` merkt
+  sich das Ergebnis je Gewohnheit (`auswertungen`, Schlüssel: Tag, Beginn, Rhythmus,
+  erledigte Tage) und rechnet nur neu, wenn sich davon etwas änderte (P2, Suite `auswertung`).
 - Nur im Speicher der Seite, nie in `state`: `kalVersatz`, `kalTag`, `hm`, `entwurf`,
   `terminEntwurf`, `reflexionEntwurf`, `ticketEntwurf`, `rueckgaengig`, `flEntwurf`, `rucklerLetzte`, `rucklerAlle`.
 
