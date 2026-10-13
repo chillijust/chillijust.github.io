@@ -120,7 +120,8 @@ state = {
 - **Was `render()` überlebt**, liegt außerhalb von `#app`: Hinweis (`#hinweisBlatt`),
   Menü (`#menue`), Ticketblatt (`#ticketBlatt`).
 - **Was sich an Ort und Stelle ändert, ohne `render()`**: der Sekundentakt `takt()`
-  («frei seit», Welle, Timer), das Formular beim Wählen, Heatmap-Woche und -Tag.
+  («frei seit», Welle, Timer), die Kachel beim Timer-Start (`kachelNeu`), das Formular beim
+  Wählen, Heatmap-Woche und -Tag.
 - `visibilitychange` zeichnet neu — nach Mitternacht ist ein anderer Tag, nach zehn
   Minuten im Hintergrund ist die Welle durch.
 
@@ -131,7 +132,7 @@ state = {
 | Ansichten, Rückweg | `zeige`, `ANSICHTEN`, `bindeAnsicht`, `zurueckGehen`, `rueckZiel` |
 | Dashboard, Karte oben | `zeichneHome`, `zeichneHeld`, `tagesStand` |
 | Gewohnheiten | `auswerten`, `umschalten`, `umschaltenUndZeichnen`, `beginnVorziehen`, `zeichneFormular`, `bindeFormular`, `entwurfSpeichern` |
-| Timer, Zähler | `timerOeffnen`, `timerPause`, `timerRest`, `zaehlen`, `zaehlStand` |
+| Timer, Zähler | `timerStarten` (frischt nur die Kachel auf: `kachelNeu`), `timerOeffnen`, `timerPause`, `timerRest`, `zaehlen`, `zaehlStand` |
 | Abgewöhnen, Welle | `lasterAuswerten`, `rueckfallEintragen`, `welleBeginnen`, `welleGewonnen`, `welleAbbrechen` |
 | Termine | `terminAm`, `termineAm`, `terminAbhaken`, `zeichneTerminZeile`, `zeichneTerminFormular` |
 | Kalender | `zeichneKalender`, `bindeKalender`, `kalZeige`, `kalBlaettern`, `kalFliessen`, `zeichneTagesleiste`; Ziehen: `kalDruck`/`kalZug`/`kalLos`, `kalSetzen`, `kalWechselZeigen` |

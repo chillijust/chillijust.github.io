@@ -1822,7 +1822,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.17.0T21';
+var APP_VERSION = '0.17.0T22';
 var APP_STAND = '2026-10-13';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -7987,9 +7987,28 @@ function timerStarten(id) {
     state.timer = { id: id, tag: heuteSchluessel(), start: zeitJetzt(), ms: g.timer.minuten * 60000,
       stumm: g.timer.stumm, pausiert: null };
     if (!speichernOderZurueck(vorher)) return;
-    render();
+    kachelNeu(id);
   }
   timerOeffnen(id);
+}
+
+// Beim Start ändert sich auf dem Dashboard nur die eine Kachel. Alles neu zu
+// zeichnen kostete am Gerät 6–10 ms in dem Bild, in dem das Timerfenster
+// aufgeht. Der Knopf bleibt derselbe samt Zuhörern; Klassen, Ring und Text
+// kommen aus zeichneKachel. Steht die Kachel nicht da oder läuft noch eine
+// andere, zeichnet render() wie bisher.
+function kachelNeu(id) {
+  var knopf = kachelVon(id), alt = knopf && knopf.closest('.gw-kachel'), g = gewohnheitNach(id);
+  var andere = alleIn('#app [data-timerkachel]').some(function (k) { return k.getAttribute('data-timerkachel') !== id; });
+  if (ansicht !== 'home' || !alt || !g || andere) { render(); return; }
+  var ort = document.createElement('div');
+  ort.innerHTML = zeichneKachel({ g: g, a: auswerten(g, heuteSchluessel()) });
+  var neu = ort.firstChild, neuKnopf = neu.querySelector('.gw-haken');
+  alt.className = neu.className;
+  if (neu.hasAttribute('data-timerkachel')) alt.setAttribute('data-timerkachel', neu.getAttribute('data-timerkachel'));
+  else alt.removeAttribute('data-timerkachel');
+  knopf.setAttribute('aria-pressed', neuKnopf.getAttribute('aria-pressed'));
+  knopf.innerHTML = neuKnopf.innerHTML;
 }
 
 function timerRing(anteil, id) {
