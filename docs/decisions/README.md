@@ -23,7 +23,7 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0013](0013-nur-laden-hinweis-tropft-wie-ansichten.md) | Nur «Als Datei laden»; der Hinweis tropft wie die Ansichten | gilt |
 | [0014](0014-hinweis-aus-glas.md) | Der Hinweis ist aus Glas | gilt |
 | [0015](0015-heatmap-im-rueckblick.md) | Heatmap: sechs Monate, Tageszustand; Raster wählt die Woche, Streifen den Tag | gilt |
-| [0016](0016-vom-rand-wischen.md) | Vom linken Rand wischen heißt zurück | gilt; auf dem Dashboard öffnet er das Menü (0023) |
+| [0016](0016-vom-rand-wischen.md) | Vom linken Rand wischen heißt zurück | gilt; auf dem Dashboard öffnet er das Menü (0023); auf iOS-Ansichten abgelöst durch 0060 |
 | [0017](0017-journal-wochenreflexion.md) | Journal: eine Wochenreflexion je Woche, sonntags auf dem Dashboard | gilt; Lesen, Löschen und Nachholen geändert durch 0018 |
 | [0018](0018-bestaetigung-lesen-woche-waehlen.md) | Bestätigung im Glas, Reflexion lesen, Woche wählen | gilt; Bestätigung aus dem Fenster seit 0041 |
 | [0019](0019-alle-meldungen-im-glas.md) | Alle Meldungen im Glas | gilt |
@@ -67,3 +67,4 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0057](0057-worker-liefert-seinen-stand.md) | Der Worker liefert seinen Stand, holt nur Fehlendes, überschreibt nie; neu nur über «Jetzt laden» | gilt |
 | [0058](0058-pruefstand-im-fenster-des-iphones.md) | Der Prüfstand läuft im Fenster des iPhones (430 × 932) über DevTools, Bildlaufleiste ohne Platz, Schriften geladen | gilt |
 | [0059](0059-drang-als-blatt.md) | Der Drang ist ein Blatt aus Glas wie der Timer, keine eigene Ansicht; läuft geschlossen weiter, geht am Ende von selbst auf | gilt |
+| [0060](0060-rueckwisch-folgt-dem-finger.md) | Der Rückwisch folgt auf iOS dem Finger, darunter ein stilles Abbild des Dashboards; eine Terminzeile leuchtet bei der Rückkehr | gilt |

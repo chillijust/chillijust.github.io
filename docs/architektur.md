@@ -146,7 +146,7 @@ state = {
 | Sicherung | `sicherungsCode`, `codeLesen`, `standErsetzen`, `sicherungZurueck`, `kopieren` |
 | Tickets | `ticketBlattOeffnen`, `ticketBlattSchliessen`, `ticketSichern`, `ticketBlattWechseln`, `ticketTastatur` |
 | Meldungen, Fragen, Jubel | `melden`, `bestaetigen`, `hinweisZeigen`, `loeschenFragen`, `jubeln`, `hakenJubel`, `rekordFeiern` |
-| Bewegung | `tropfenAuf`, `tropfenZu`, `teilZeigen`, `teilTropfen`, `geist`, `zeileGeht`, `langDruecken`, `punktFlaeche`; iOS-Flüssig: `teilFliesst`, alle fließenden Teile messen und schreiben in einem Bild (`teilBild`) |
+| Bewegung | `tropfenAuf`, `tropfenZu`, `teilZeigen`, `teilTropfen`, `geist`, `zeileGeht`, `langDruecken`, `punktFlaeche`; iOS-Flüssig: `teilFliesst`, alle fließenden Teile messen und schreiben in einem Bild (`teilBild`); Rückwisch, der dem Finger folgt: `wischZiehen`, `zugBeginnen`/`zugLoslassen`, darunter `abbildDashboard`; `zeileLeuchtet` |
 | Menü | `MENUE`, `menueOeffnen`, `menueSchliessen`, `menueAnker`, `menueMitrollen` |
 | Hell/Dunkel | `themaSetzen`, `themaAnwenden` |
 | Ruckler messen | `rucklerStarten`, `rucklerBild`, `rucklerAuswerten`, `rucklerEnde`, `rucklerMelden`, `rucklerKopieren`; Spur: `RUCKLER_SPUR`, `rucklerUhrenAn` (Uhr um Funktionen und Ereignisse, nur während der Messung), `rucklerSpurAuswerten` |

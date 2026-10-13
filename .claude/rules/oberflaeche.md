@@ -45,7 +45,8 @@ fest.
   Ein zweites Ziel gibt es nicht, außer dem «−» des Zählers. Nach einem langen Druck ist
   nichts markierbar, bis der Finger sich hebt (`langHalten`).
 - **Der Rückweg geht nur über `zurueckGehen()`** — Kopf und Wisch vom Rand
-  (`wischBeginnen`/`wischEnden`) rufen es.
+  (`wischBeginnen`/`wischEnden`, auf iOS der Zug `zugLoslassen`) rufen es. Was unter dem
+  Zug liegt, ist ein Abbild ohne Ids im Dokument, nie eine zweite bedienbare Seite (ADR 0060).
 - **Was live läuft, schreibt `takt()` an Ort und Stelle** — kein `render()` im Sekundentakt.
 - **Quer ist das Bild 430 hoch** (ADR 0056): Keine Karte wird höher als ihr Blatt; was neu
   ist, prüft auch die Suite `querformat`.

@@ -1,6 +1,6 @@
 # 0016 · Vom linken Rand wischen heißt zurück
 
-*2026-10-06 · Ansicht von 0.6.0T · Version 0.6.0T2 · ergänzt durch 0023: auf dem Dashboard öffnet der Wisch das Menü*
+*2026-10-06 · Ansicht von 0.6.0T · Version 0.6.0T2 · ergänzt durch 0023: auf dem Dashboard öffnet der Wisch das Menü; für Ansichten auf iOS abgelöst durch 0060: dort folgt die Ansicht dem Finger*
 
 ## Ausgangslage
 

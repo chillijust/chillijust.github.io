@@ -30,7 +30,16 @@ ist. Die Begründungen stehen in den ADRs, das Verhalten in den Suiten.
   einem Bild (0.17.0T26) — Abnahme am Gerät steht aus. Als Nächstes Block 6. Für Block 7 dazu: «10 von 12» bricht im Tagesring um —
   Varianten als Bildvergleich (Zahl kleiner, Umschalter in die Kalenderzeile, so lassen).
 
+Block 6 in 0.17.0T27 (ADR 0060): Auf iOS folgt die Ansicht beim Rückwisch dem Finger, darunter
+ein stilles Abbild des Dashboards, gebaut schon beim Auflegen am Rand; über 70 px wird sie, wo
+sie steht, zum Tropfen. Terminzeile leuchtet bei der Rückkehr (Wisch, Pfeil, Titelknopf, nach
+der Meldung beim Speichern). Geister teilen ein Stylesheet: Rückweg in Chromium, CPU 6-fach
+gedrosselt, 119 statt 125 ms, beim ersten Mal 119 statt 159 ms; der Zug selbst beginnt in
+0,1 ms; das Abbild (72 ms) entsteht beim Auflegen am Rand, bevor sich etwas bewegt.
+
 ## Abgenommen
 
 - 0.17.0T26 · Auftropfen beim Start auf iOS (kurzer Hals aus einer Perle, ohne Lichtkante,
   alle Teile in einem Bild) — am Gerät abgenommen am 2026-10-13.
+- 0.17.0T24 · Drang als Blatt aus Glas, auch das Ende nach zehn Minuten — abgenommen am
+  2026-10-13.

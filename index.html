@@ -871,6 +871,11 @@ button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
   transition: transform .15s ease;
 }
 .tm-zeile:active { transform: scale(.98); }
+/* Zurück an einer Terminzeile: Sie leuchtet kurz in Blau auf (ADR 0060). */
+.tm-zeile { position: relative; }
+.tm-zeile.leuchtet::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: var(--termin);
+  opacity: 0; pointer-events: none; animation: zeile-leuchtet .9s ease-out; }
+@keyframes zeile-leuchtet { 20% { opacity: .24; } to { opacity: 0; } }
 /* Lange drücken öffnet den Termin, wie bei der Kachel: kein markierter Text,
    kein Menü von iOS, und wer hält, sieht die Zeile einsinken (ADR 0043). */
 .tm-zeile { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
@@ -1566,6 +1571,11 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
    Nichts ploppt (ADR 0007). Die Ansicht liegt über dem Geist der alten; der
    Tropfen liegt in der Karte hinter ihrem Inhalt. `--feder` setzt das Skript. */
 #ansicht { position: relative; z-index: 1; }
+/* Der Rückwisch folgt dem Finger (ADR 0060): Die Ansicht liegt über dem Abbild
+   des Dashboards und wirft links ihren Schatten darauf. */
+#app.bereit { position: relative; z-index: 1; background: var(--grund); will-change: transform; }
+#app.zieht { box-shadow: -10px 0 28px rgba(20, 20, 19, .16); }
+.abbild { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: var(--grund); pointer-events: none; }
 .geist { pointer-events: none; }
 .tropfen { position: absolute; z-index: -1; background: var(--flaeche-2); pointer-events: none; }
 /* Die Hülle eines Tropfens zwischen Ansicht und rundem Knopf: Sie ändert Lage,
@@ -1823,7 +1833,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.17.0T26';
+var APP_VERSION = '0.17.0T27';
 var APP_STAND = '2026-10-13';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -2706,23 +2716,39 @@ function px(n) { return Math.round(n * 10) / 10 + 'px'; }
 // Der Geist: eine Kopie von `el` hinter einer Schattenwurzel mit dem Stylesheet
 // der Seite (ohne die Schriften — die gelten ohnehin überall). Ids und
 // data-Attribute bleiben darin, ohne mit der lebenden Seite zu kollidieren.
-var geistStil = null;
+var geistStil = null, geistBlatt = null;
 function geist(el) {
   if (!el || bewegungAus() || !el.attachShadow) return null;
+  var wirt = document.createElement('div'), wurzel, kopie = el.cloneNode(true);
+  try { wurzel = wirt.attachShadow({ mode: 'open' }); } catch (e) { return null; }
+  wirt.className = 'geist';
+  wirt.setAttribute('aria-hidden', 'true');
+  kopie.removeAttribute('hidden');
+  geistStilGeben(wurzel);
+  wurzel.appendChild(kopie);
+  return wirt;
+}
+
+// Das Stylesheet der Seite in eine Schattenwurzel. Einmal gelesen und von
+// allen geteilt: Jeder Geist las es sonst neu ein, rund 180 KB, in dem Bild,
+// in dem er entsteht — beim Rückwisch 28–35 ms Skript.
+function geistStilGeben(wurzel) {
   if (geistStil === null) {
     var s = document.querySelector('style');
     geistStil = (s ? s.textContent : '').replace(/\/\* == SCHRIFTEN:START[\s\S]*?SCHRIFTEN:ENDE == \*\//, '') +
       ':host { display: block; pointer-events: none; }';
+    try {
+      geistBlatt = new CSSStyleSheet();
+      geistBlatt.replaceSync(geistStil);
+    } catch (e) { geistBlatt = null; }
   }
-  var wirt = document.createElement('div'), wurzel, stil = document.createElement('style'), kopie = el.cloneNode(true);
-  try { wurzel = wirt.attachShadow({ mode: 'open' }); } catch (e) { return null; }
-  wirt.className = 'geist';
-  wirt.setAttribute('aria-hidden', 'true');
+  if (geistBlatt && 'adoptedStyleSheets' in wurzel) {
+    wurzel.adoptedStyleSheets = [geistBlatt];
+    return;
+  }
+  var stil = document.createElement('style');
   stil.textContent = geistStil;
-  kopie.removeAttribute('hidden');
   wurzel.appendChild(stil);
-  wurzel.appendChild(kopie);
-  return wirt;
 }
 
 // Eine Fläche `q` auf die Fläche `n` abbilden: verschoben, gleichmäßig
@@ -3422,6 +3448,22 @@ function grundUnter(el) {
 var TROPFEN_ZU_TAKT = [0.38, 0.7, 0.9];
 var TROPFEN_ZU_FRUEH = [0.18, 0.4, 0.86];
 
+// Eine Terminzeile, in die eine Ansicht oder Meldung zurückkam, leuchtet kurz
+// auf — so sieht man, wo man wieder ist (ADR 0060). Ist sie inzwischen neu
+// gezeichnet, leuchtet die neue.
+var LEUCHT_DAUER = 900;
+function zeileLeuchtet(el, warten) {
+  if (!el || bewegungAus()) return;
+  setTimeout(function () {
+    var z = el.isConnected ? el : document.querySelector('#ansicht ' + mitWert('data-termin', el.getAttribute('data-termin')));
+    if (!z) return;
+    z.classList.remove('leuchtet');
+    void z.offsetWidth;
+    z.classList.add('leuchtet');
+    setTimeout(function () { z.classList.remove('leuchtet'); }, LEUCHT_DAUER);
+  }, warten || 0);
+}
+
 // Ein Knopf schluckt einen Tropfen mit einem kleinen Nicken.
 function knopfNickt(el, warten) {
   bewegt(el, [{ transform: 'scale(1)' }, { transform: 'scale(1.14)', offset: 0.45 }, { transform: 'scale(1)' }],
@@ -3432,7 +3474,8 @@ function knopfNickt(el, warten) {
 // der ihn mit einem kleinen Nicken schluckt. `opt` ist frei: `rund` die Ecken
 // der Fläche (eine Ansicht 20px), `dauer` die eigene Dauer, `frueh` den Tropfen
 // früh formen und halten, `glas` die Hülle aus Glas, `fertig` kommt, wenn er
-// geschluckt ist.
+// geschluckt ist. `leuchtet`: eine Terminzeile, die ihn aufnimmt — sie
+// leuchtet kurz, statt zu nicken (ADR 0060).
 function tropfenZu(g, r, ziel, opt) {
   opt = opt || {};
   var k = ziel.getBoundingClientRect(), s = sichtbar(r), w = tropfenWeg(s, k), h = tropfenHuelle(g, r.width, opt.glas);
@@ -3441,7 +3484,7 @@ function tropfenZu(g, r, ziel, opt) {
   var dauer = opt.dauer || TROPFEN_DAUER, t = opt.frueh ? TROPFEN_ZU_FRUEH : TROPFEN_ZU_TAKT;
   var f = glasFarben(opt.glas);
   function sk(b, off) { return { transform: 'scale(' + (b.width / r.width).toFixed(4) + ')', offset: off }; }
-  function nicken(warten) { knopfNickt(ziel, warten); }
+  function nicken(warten) { if (opt.leuchtet) zeileLeuchtet(opt.leuchtet, warten); else knopfNickt(ziel, warten); }
   if (opt.grund) h.style.background = opt.grund;
   // Auf iOS fließt die Hülle selbst in den Knopf (ADR 0054); er nickt, wenn
   // sie in ihm aufgegangen ist.
@@ -3602,8 +3645,9 @@ function uebergangVorbereiten(von, nach) {
 // alte weicht zurück; zurück schrumpft die alte in ihre Kachel hinein.
 function uebergangAusfuehren(u) {
   if (!u) return;
-  var neu = $('ansicht'), g = u.geist, a = u.altRect, n = neu.getBoundingClientRect();
-  bewegt($('kopf'), [{ opacity: 0 }, { opacity: 1 }], { dauer: 320, kurve: 'ease-out' });
+  var neu = $('ansicht'), g = u.geist, a = u.altRect, n = neu.getBoundingClientRect(), stand = u.zurueck && zugZurueck;
+  // Aus einem Zug stand das Dashboard schon unter der Ansicht — es kommt nicht noch einmal.
+  if (!stand) bewegt($('kopf'), [{ opacity: 0 }, { opacity: 1 }], { dauer: 320, kurve: 'ease-out' });
   if (g) {
     g.style.cssText = 'position: fixed; margin: 0; left: ' + px(a.left) + '; top: ' + px(a.top) + '; width: ' +
       px(a.width) + '; z-index: ' + (u.zurueck ? 5 : 0) + '; background: var(--grund); transform-origin: 0 0;';
@@ -3639,21 +3683,22 @@ function uebergangAusfuehren(u) {
     ziel = $('menuKnopf');
     hp = null;
   }
+  var leuchtet = ziel && ziel.matches('.tm-zeile') ? ziel : null;
   // Gemessen, bevor die Übersicht heranwächst — sonst zielt der Tropfen auf
   // die verkleinerte Kachel.
   var fl = ziel && hp && ziel.getClientRects().length ? tippFlaeche(ziel).getBoundingClientRect() : null;
-  bewegt(neu, [{ opacity: 0.4, transform: 'scale(.98)' }, { opacity: 1, transform: 'none' }], { dauer: 420, kurve: 'ease-out' });
+  if (!stand) bewegt(neu, [{ opacity: 0.4, transform: 'scale(.98)' }, { opacity: 1, transform: 'none' }], { dauer: 420, kurve: 'ease-out' });
   if (!g) return;
   if (fl) {
     // Zurück an die Stelle, an der der Finger lag. Die Kachel nickt nicht —
     // sie nimmt nur auf.
     var stelle = punktFlaeche(fl.left + hp.dx, fl.top + hp.dy);
-    tropfenZu(g, a, { getBoundingClientRect: function () { return stelle; } }, { gross: true });
+    tropfenZu(g, a, { getBoundingClientRect: function () { return stelle; } }, { gross: true, leuchtet: leuchtet });
   } else if (ziel && ziel.getClientRects().length && tropfenQuelle(ziel)) {
-    tropfenZu(g, a, ziel, { gross: true });
+    tropfenZu(g, a, ziel, { gross: true, leuchtet: leuchtet });
   } else if (ziel && ziel.getClientRects().length) {
     bewegt(g, [ZOOM_VOLL, zoomBild(tippFlaeche(ziel).getBoundingClientRect(), a)], { dauer: 520, fill: 'forwards' },
-      function () { weg(g); });
+      function () { weg(g); zeileLeuchtet(leuchtet); });
     bewegt(g, [{ opacity: 1 }, { opacity: 0 }], { dauer: 220, warten: 220, kurve: 'ease-in', fill: 'both' });
   } else {
     bewegt(g, [{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(.92)' }],
@@ -3993,7 +4038,8 @@ function hinweisSchliessen() {
   if (!g) { blatt.hidden = true; return; }
   var r = karte.getBoundingClientRect();
   karte.style.opacity = '0';
-  tropfenZu(g, r, ziel, { rund: '18px', dauer: hinweisDauer, frueh: true, glas: true, fertig: function () {
+  tropfenZu(g, r, ziel, { rund: '18px', dauer: hinweisDauer, frueh: true, glas: true,
+    leuchtet: ziel.matches && ziel.matches('.tm-zeile') ? ziel : null, fertig: function () {
     karte.style.opacity = '';
     if (!blatt.classList.contains('offen')) blatt.hidden = true;
   } });
@@ -4952,17 +4998,7 @@ var markeLos = true;   // der Schriftzug läuft beim Start einmal ab, dann nur a
 function renderKopf() {
   var kopf = $('kopf');
   if (ansicht === 'home') {
-    var dunkel = themaWirksam() === 'dunkel';
-    kopf.innerHTML =
-      '<div class="kopf-titel"><h1><button type="button" class="kopf-heim" id="markeKnopf" aria-label="Chilli Journal">' +
-        zeichneMarke(markeLos) + '</button></h1>' +
-      '<div class="datum">' + esc(datumLang(jetzt())) + '</div></div>' +
-      '<button type="button" class="thema-schalter" id="themaKnopf" role="switch" ' +
-        'aria-checked="' + (dunkel ? 'true' : 'false') + '" aria-label="Dunkle Darstellung">' +
-        '<span class="knauf"></span><span class="seite hell">' + ICON.sonne + '</span>' +
-        '<span class="seite dunkel">' + ICON.mond + '</span></button>' +
-      '<button type="button" class="rund" id="menuKnopf" aria-label="Menü" aria-haspopup="dialog">' +
-        ICON.menue + '</button>';
+    kopf.innerHTML = kopfHeimHtml(markeLos);
     markeLos = false;
     $('markeKnopf').addEventListener('click', function () {
       try { window.scrollTo({ top: 0, behavior: bewegungAus() ? 'auto' : 'smooth' }); } catch (e) { window.scrollTo(0, 0); }
@@ -4980,6 +5016,20 @@ function renderKopf() {
     // einen Schritt zurück geht (aus dem Export).
     $('titelHeim').addEventListener('click', function () { rueckZiel = null; zeige('home'); });
   }
+}
+
+// Der Kopf des Dashboards; `los`: der Schriftzug schreibt sich.
+function kopfHeimHtml(los) {
+  var dunkel = themaWirksam() === 'dunkel';
+  return '<div class="kopf-titel"><h1><button type="button" class="kopf-heim" id="markeKnopf" aria-label="Chilli Journal">' +
+      zeichneMarke(los) + '</button></h1>' +
+    '<div class="datum">' + esc(datumLang(jetzt())) + '</div></div>' +
+    '<button type="button" class="thema-schalter" id="themaKnopf" role="switch" ' +
+      'aria-checked="' + (dunkel ? 'true' : 'false') + '" aria-label="Dunkle Darstellung">' +
+      '<span class="knauf"></span><span class="seite hell">' + ICON.sonne + '</span>' +
+      '<span class="seite dunkel">' + ICON.mond + '</span></button>' +
+    '<button type="button" class="rund" id="menuKnopf" aria-label="Menü" aria-haspopup="dialog">' +
+      ICON.menue + '</button>';
 }
 
 // Der Rückweg: nach Hause, oder über `rueckZiel` dorthin, woher man kam.
@@ -5021,7 +5071,8 @@ function dialogKarte(d) { return d.id === 'menue' ? d.querySelector('.blatt') : 
 function dialogeOrdnen() {
   var oben = obersterDialog();
   Array.prototype.forEach.call(document.body.children, function (el) {
-    if (el.tagName === 'SCRIPT' || el.id === 'meldung') return;
+    // Das Abbild unter einem Rückwisch ist nie bedienbar (ADR 0060).
+    if (el.tagName === 'SCRIPT' || el.id === 'meldung' || el.classList.contains('abbild')) return;
     el.inert = !!oben && el !== oben;
   });
   if (oben === dialogOben) return;
@@ -5084,17 +5135,155 @@ function wischBeginnen(e) {
   const t = e.touches[0], breite = window.innerWidth || document.documentElement.clientWidth;
   if (t.clientX <= WISCH_RAND) wischVon = { x: t.clientX, y: t.clientY, rechts: false };
   else if (t.clientX >= breite - WISCH_RAND) wischVon = { x: t.clientX, y: t.clientY, rechts: true };
+  // Ein neuer Finger, während die Ansicht noch zurückfedert: Sie steht sofort.
+  if (wischVon && rueckZug && rueckZug.federt) zugAbraeumen();
+  // Das Abbild entsteht, wenn der Finger aufliegt, noch unsichtbar: Gebaut,
+  // wenn die Ansicht schon losläuft, kostete es dort ein Bild.
+  // Ebenso legt sich die Ansicht schon als eigene Ebene darüber; der erste
+  // Schritt verschiebt dann nur noch.
+  if (wischVon && !wischVon.rechts && zugMoeglich()) {
+    wischVon.abbild = abbildDashboard();
+    if (wischVon.abbild) $('app').classList.add('bereit');
+  }
+}
+
+// Ein Abbild, das kein Zug gebraucht hat, geht wieder.
+function wischVergessen() {
+  if (wischVon && wischVon.abbild && (!rueckZug || rueckZug.abbild !== wischVon.abbild)) {
+    weg(wischVon.abbild);
+    $('app').classList.remove('bereit');
+  }
+  wischVon = null;
 }
 
 function wischEnden(e) {
   const von = wischVon, t = e.changedTouches && e.changedTouches[0];
-  wischVon = null;
-  if (!von || !t || blattOffen()) return;
+  wischVergessen();
+  if (rueckZug && !rueckZug.federt) { zugLoslassen(t); return; }
+  if (!von || von.senkrecht || !t || blattOffen()) return;
   const quer = von.rechts ? von.x - t.clientX : t.clientX - von.x, hoch = Math.abs(t.clientY - von.y);
   // Waagerecht muß deutlich überwiegen, sonst war es ein Blättern.
   if (quer < WISCH_WEG || hoch > quer * 0.7) return;
   if (von.rechts || ansicht === 'home') { if ($('menuKnopf')) menueOeffnen(); else zeige('home'); }
   else zurueckGehen();
+}
+
+// ── Der Rückwisch folgt dem Finger (ADR 0060) ──────────────────
+// Steht «Ansichten» auf iOS, schiebt sich die Ansicht mit dem Finger zur
+// Seite, und darunter liegt das Dashboard — ein stilles Abbild, gerollt wie
+// beim Weggehen. Losgelassen über der Schwelle wird sie dort, wo sie steht,
+// zum Tropfen und fließt in ihre Herkunft; darunter federt sie zurück. Erst
+// die bestätigte Geste wechselt die Ansicht. Wo der Rückweg nicht nach Hause
+// führt, etwas fragt oder die Tastatur offen ist, bleibt es beim Wisch, der
+// beim Loslassen wirkt (ADR 0016).
+var ZUG_AB = 12;         // px waagerecht, ab denen die Ansicht dem Finger folgt
+var ZUG_SCHWUNG = 0.6;   // px/ms: so schnell nach rechts zählt auch ein kurzer Zug
+var rueckZug = null;     // { x, dx, t, v, abbild, bild, federt }
+var zugZurueck = false;  // der nächste Rückweg kommt aus einem Zug: das Dashboard steht schon
+
+function zugMoeglich() {
+  if (ansicht === 'home' || rueckZiel || !flIos('ansichten') || bewegungAus() || blattOffen()) return false;
+  if (ansicht === 'einstellungen' && flUngespeichert()) return false;
+  var f = document.activeElement;
+  return !(f && f !== document.body && f.matches && f.matches('input, textarea, select, [contenteditable="true"]'));
+}
+
+function wischZiehen(e) {
+  var von = wischVon, t = e.touches && e.touches[0];
+  if (rueckZug && !rueckZug.federt) {
+    if (e.touches.length !== 1 || blattOffen()) { zugLoslassen(null); return; }
+    zugFolgen(t.clientX);
+    return;
+  }
+  if (!von || von.rechts || von.kein || !t || e.touches.length !== 1) return;
+  var dx = t.clientX - von.x, dy = Math.abs(t.clientY - von.y);
+  if (!zugMoeglich()) { von.kein = true; wischVergessen(); wischVon = von; return; }
+  // Senkrecht zuerst: Das ist Blättern — dieser Finger zieht nichts mehr und
+  // führt auch beim Loslassen nicht zurück.
+  if (dy > ZUG_AB && dy > dx * 0.7) { von.kein = von.senkrecht = true; wischVergessen(); wischVon = von; return; }
+  if (dx < ZUG_AB || dy > dx * 0.7) return;
+  zugBeginnen(von.x, von.abbild);
+  zugFolgen(t.clientX);
+}
+
+function zugBeginnen(x0, abbild) {
+  if (rueckZug) zugAbraeumen();
+  abbild = abbild && abbild.isConnected ? abbild : abbildDashboard();
+  $('app').classList.add('bereit');
+  rueckZug = { x: x0, dx: 0, t: Date.now(), v: 0, abbild: abbild, bild: false, federt: null };
+  $('app').classList.add('zieht');
+}
+
+// Der Finger setzt nur, wohin; geschrieben wird einmal je Bild.
+function zugFolgen(x) {
+  var z = rueckZug, nun = Date.now(), dx = Math.max(0, x - z.x), dt = nun - z.t;
+  if (dt > 0) z.v = z.v * 0.4 + (dx - z.dx) / dt * 0.6;
+  z.dx = dx;
+  z.t = nun;
+  if (z.bild) return;
+  z.bild = true;
+  fpBild(function () {
+    if (rueckZug !== z || z.federt) return;
+    z.bild = false;
+    $('app').style.transform = 'translate3d(' + px(z.dx) + ', 0, 0)';
+  });
+}
+
+// `t`: der Finger beim Loslassen; ohne ihn (touchcancel, Drehung, ein zweiter
+// Finger, ein Blatt ging auf) federt die Ansicht zurück.
+function zugLoslassen(t) {
+  var z = rueckZug;
+  if (!z || z.federt) return;
+  // Was abbricht, wirkt auch beim Loslassen danach nicht mehr.
+  wischVergessen();
+  if (t) zugFolgen(t.clientX);
+  var weit = z.dx >= WISCH_WEG && z.v > -0.2, schwung = z.v > ZUG_SCHWUNG && z.dx > ZUG_AB * 2;
+  $('app').style.transform = 'translate3d(' + px(z.dx) + ', 0, 0)';
+  if (t && (weit || schwung) && !blattOffen()) {
+    // Gemessen wird die Ansicht, wie sie unter dem Finger steht: Von dort
+    // fließt sie als Tropfen.
+    zugZurueck = true;
+    zurueckGehen();
+    zugZurueck = false;
+    if (ansicht === 'home') { zugAbraeumen(); return; }
+  }
+  zugFedern();
+}
+
+function zugFedern() {
+  var z = rueckZug, tk = fluessigTakt('ansichten', true);
+  z.federt = bewegt($('app'), [{ transform: 'translate3d(' + px(z.dx) + ', 0, 0)' }, { transform: 'translate3d(0, 0, 0)' }],
+    { dauer: Math.round(tk.dauer * 0.8), kurve: tk.kurve }, function () { if (rueckZug === z) zugAbraeumen(); }) || true;
+}
+
+function zugAbraeumen() {
+  var z = rueckZug, app = $('app');
+  rueckZug = null;
+  if (!z) return;
+  if (z.federt && z.federt.cancel) { try { z.federt.cancel(); } catch (e) { /* schon fort */ } }
+  app.classList.remove('zieht', 'bereit');
+  app.style.transform = '';
+  weg(z.abbild);
+}
+
+// Das Dashboard unter der Ansicht: gezeichnet wie zu Hause, in einer
+// Schattenwurzel — seine Ids stoßen nicht mit der Seite zusammen, nichts
+// darin ist bedienbar —, und so weit gerollt, wie es beim Weggehen war.
+function abbildDashboard() {
+  var wirt = document.createElement('div'), wurzel, inhalt = document.createElement('div');
+  wirt.className = 'abbild';
+  wirt.setAttribute('aria-hidden', 'true');
+  wirt.inert = true;
+  try { wurzel = wirt.attachShadow({ mode: 'open' }); } catch (e) { return null; }
+  geistStilGeben(wurzel);
+  inhalt.id = 'app';
+  inhalt.innerHTML = '<header id="kopf">' + kopfHeimHtml(false) + '</header><main id="ansicht">' +
+    ANSICHTEN.home.zeichnen() + '</main>';
+  wurzel.appendChild(inhalt);
+  document.body.appendChild(wirt);
+  var hoch = window.innerHeight || document.documentElement.clientHeight;
+  inhalt.style.transform = 'translateY(' + px(-Math.max(0, Math.min(homeScroll, inhalt.offsetHeight - hoch))) + ')';
+  return wirt;
 }
 
 // Nach dem Ziehen liegt unter dem Finger ein anderer Tag. Schickt der Browser
@@ -10442,8 +10631,11 @@ function start() {
   try { document.fonts.ready.then(function () { hmRahmenSetzen(false); }); } catch (e) { /* wie oben */ }
 
   document.addEventListener('touchstart', wischBeginnen, { passive: true });
+  document.addEventListener('touchmove', wischZiehen, { passive: true });
   document.addEventListener('touchend', wischEnden, { passive: true });
-  document.addEventListener('touchcancel', function () { wischVon = null; }, { passive: true });
+  document.addEventListener('touchcancel', function () { zugLoslassen(null); wischVergessen(); }, { passive: true });
+  // Gedreht, während die Ansicht dem Finger folgt: Sie federt zurück.
+  window.addEventListener('resize', function () { zugLoslassen(null); });
   window.addEventListener('pointermove', kalZug);
   window.addEventListener('pointerup', kalLos);
   window.addEventListener('pointercancel', kalLos);
