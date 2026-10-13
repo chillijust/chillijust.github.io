@@ -49,7 +49,7 @@ Safari als Home-Bildschirm-App im Vollbild, hoch und quer (ADR 0056).
 | 6 · Rückblick: Heatmap, Journal | fertig (0.7.1) |
 | 7 · Sicherung, Einstellungen, Tickets | fertig (0.8.0) |
 | 8 · Feinschliff, Nachbesserungen am Gerät, Timer und Zähler, Termine abhaken | fertig (0.13.1) |
-| 9 · Flüssig wie iOS 26 je Stelle, Chilli als Standard (ADR 0053–0055) | im Bau (0.17.0T23) |
+| 9 · Flüssig wie iOS 26 je Stelle, Chilli als Standard (ADR 0053–0055) | im Bau (0.17.0T24) |
 
 ## Wo was steht
 
@@ -181,6 +181,7 @@ node tools/pruefen.mjs                      # Vor-Push-Prüfung allein
   Ruckler (0.17.0T21). Befund der Spur: Der ~110-ms-Hänger kommt vom Rückwisch aus den Einstellungen
   («kein Skript» nach Ansicht/Tropfen zu), nicht vom Timer; Gegenprobe bestätigt (Chilli 39 ms, iOS 132 ms).
   Timer-Start frischt nur die Kachel auf statt render() (0.17.0T22; Timer 4 × auf und zu 16/16). Ansichten
-  fließen auf iOS ohne Lichtkante (0.17.0T23) — Gerätemessung Rückwisch steht aus. Später: Jedes Auflegen
-  des Fingers kostet ein Bild (30–39 ms, kein Skript), vermutlich die Druckrückmeldung. Danach Drang als Glasblatt, dann Block 5: P2. Für Block 7 dazu: «10 von 12» bricht im Tagesring um —
+  fließen auf iOS ohne Lichtkante (0.17.0T23, am Gerät «viel geschmeidiger»). Drang als Blatt aus Glas wie
+  der Timer (0.17.0T24, ADR 0059) — Abnahme am Gerät steht aus. Später: Jedes Auflegen des Fingers kostet
+  ein Bild (30–39 ms, kein Skript), vermutlich die Druckrückmeldung. Danach Block 5: P2. Für Block 7 dazu: «10 von 12» bricht im Tagesring um —
   Varianten als Bildvergleich (Zahl kleiner, Umschalter in die Kalenderzeile, so lassen).

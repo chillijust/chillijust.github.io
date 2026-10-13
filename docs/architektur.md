@@ -118,12 +118,14 @@ state = {
   `uebergangVorbereiten` nimmt die alte Ansicht als Geist, `uebergangAusfuehren` läßt die
   neue aus dem Getippten wachsen (`tippMerken`).
 - **Was `render()` überlebt**, liegt außerhalb von `#app`: Hinweis (`#hinweisBlatt`),
-  Menü (`#menue`), Ticketblatt (`#ticketBlatt`).
+  Menü (`#menue`), Ticketblatt (`#ticketBlatt`), Timer (`#timerBlatt`) und Drang
+  (`#drangBlatt`, ADR 0059).
 - **Was sich an Ort und Stelle ändert, ohne `render()`**: der Sekundentakt `takt()`
-  («frei seit», Welle, Timer), die Kachel beim Timer-Start (`kachelNeu`), das Formular beim
+  («frei seit», Welle, Timer), die Kachel beim Start von Timer und Drang (`kachelNeu`,
+  `drangKachelLaeuft`), das Formular beim
   Wählen, Heatmap-Woche und -Tag.
-- `visibilitychange` zeichnet neu — nach Mitternacht ist ein anderer Tag, nach zehn
-  Minuten im Hintergrund ist die Welle durch.
+- `visibilitychange` zeichnet das Dashboard neu — nach Mitternacht ist ein anderer Tag,
+  nach zehn Minuten im Hintergrund ist die Welle durch.
 
 ## Wegweiser
 
@@ -133,7 +135,7 @@ state = {
 | Dashboard, Karte oben | `zeichneHome`, `zeichneHeld`, `tagesStand` |
 | Gewohnheiten | `auswerten`, `umschalten`, `umschaltenUndZeichnen`, `beginnVorziehen`, `zeichneFormular`, `bindeFormular`, `entwurfSpeichern` |
 | Timer, Zähler | `timerStarten` (frischt nur die Kachel auf: `kachelNeu`), `timerOeffnen`, `timerPause`, `timerRest`, `zaehlen`, `zaehlStand` |
-| Abgewöhnen, Welle | `lasterAuswerten`, `rueckfallEintragen`, `welleBeginnen`, `welleGewonnen`, `welleAbbrechen` |
+| Abgewöhnen, Welle | `lasterAuswerten`, `rueckfallEintragen`, `welleBeginnen`, `welleGewonnen`, `welleAbbrechen`; das Blatt (ADR 0059): `drangOeffnen`, `drangSchliessen`, `drangTakt`, `zeichneDrangKarte` |
 | Termine | `terminAm`, `termineAm`, `terminAbhaken`, `zeichneTerminZeile`, `zeichneTerminFormular` |
 | Kalender | `zeichneKalender`, `bindeKalender`, `kalZeige`, `kalBlaettern`, `kalFliessen`, `zeichneTagesleiste`; Ziehen: `kalDruck`/`kalZug`/`kalLos`, `kalSetzen`, `kalWechselZeigen` |
 | Kalender-Export | `kalenderDatei`, `exportAuswahl`, `exportiertMerken`, `icsLaden`, `zeichneExport`, `bindeExport` |

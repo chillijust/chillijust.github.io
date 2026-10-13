@@ -33,6 +33,20 @@ return warten(0).then(function () {
   state.timer = null;
   timerSchliessen();
 
+  // ── Drang: dasselbe Blatt wie der Timer (ADR 0059) ────────────
+  state.abgewoehnen = [lasterLesen({ id: 'z', name: 'Zucker', start: zeitJetzt() - 864e5, rueckfaelle: [], draenge: [] })];
+  render();
+  q('[data-drang="z"]').click();
+  var dk = q('#drangKarte'), dbild = dk.querySelector('.timer-bild').getBoundingClientRect(), dname = q('#drangName').getBoundingClientRect();
+  pruefe('Q2b der Drang paßt ganz ins Bild, ohne zu rollen', imBild(dk) && dk.scrollHeight <= dk.clientHeight + 1 &&
+    imBild(q('#welleAbbrechen')), JSON.stringify(dk.getBoundingClientRect()) + ' ' + dk.scrollHeight + '/' + dk.clientHeight);
+  pruefe('Q3b Ring links, Name und Knöpfe rechts daneben', getComputedStyle(dk).display === 'grid' && dbild.right <= dname.left &&
+    dbild.right <= q('#welleNachgegeben').getBoundingClientRect().left);
+  drangSchliessen(true);
+  welleAbbrechen();
+  state.abgewoehnen = [];
+  render();
+
   // ── Menü ─────────────────────────────────────────────────────
   menueOeffnen();
   var b = q('#menue .blatt'), letzter = alle('#menueListe .menue-eintrag').pop();

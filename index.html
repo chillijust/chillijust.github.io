@@ -557,7 +557,7 @@ svg.wm { display: block; flex: none; color: var(--text); overflow: visible; }
 /* Quer (ADR 0056): Der Ring steht links, Name, Zeit und Knöpfe rechts — so
    paßt der Timer ohne Rollen in die 430 Punkte Höhe des iPhones. */
 @media (orientation: landscape) and (max-height: 560px) {
-  #timerBlatt > .timer-karte {
+  #timerBlatt > .timer-karte, #drangBlatt > .timer-karte {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
     column-gap: 24px;
@@ -614,15 +614,12 @@ svg.wm { display: block; flex: none; color: var(--text); overflow: visible; }
 .ab-knopf svg { width: 18px; height: 18px; color: var(--akzent); }
 
 /* ── Drang: die Welle ──────────────────────────────────────────
-   Der Ring läuft in zehn Minuten leer, Sekunde für Sekunde, linear. */
-.welle { text-align: center; padding-top: 4px; }
-.welle-bild { position: relative; width: min(72vw, 300px); aspect-ratio: 1; margin: 10px auto 8px; }
-.welle-ring circle { stroke-width: .73; }
+   Ein Blatt aus Glas wie der Timer (ADR 0059); der Ring läuft in zehn
+   Minuten leer, Sekunde für Sekunde, linear. */
 .welle-fuell { transition: stroke-dashoffset 1s linear; }
-.welle #chiliFigur { position: absolute; left: 28%; top: 26%; width: 44%; height: 44%; margin: 0; }
-.welle-zeit { font-family: var(--sans); font-size: 44px; font-weight: 600; line-height: 1.15; font-variant-numeric: tabular-nums; }
-.welle-satz { max-width: 32ch; margin: 8px auto 20px; color: var(--text-2); font-style: italic; }
-.welle .knopfreihe { max-width: 380px; margin: 0 auto; }
+.welle-satz { max-width: 32ch; margin: 6px auto 4px; color: var(--text-2); font-style: italic; text-align: center; }
+.drang-karte .knopfreihe { margin-top: 10px; }
+.drang-karte .welle-ab { display: block; }
 /* Abbrechen ist kein dritter Ausgang neben Gewonnen und Nachgegeben — es
    steht leise darunter, für den Tipp aus Versehen. */
 .welle-ab {
@@ -1275,7 +1272,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 /* ── Hinweis ───────────────────────────────────────────────── */
 /* Was man lesen muß, bevor es weitergeht: mittig, wartet auf «OK». Quillt als
    Tropfen aus dem Getippten (hinweisZeigen); der Schleier wie beim Menü. */
-#hinweisBlatt, #timerBlatt {
+#hinweisBlatt, #timerBlatt, #drangBlatt {
   position: fixed;
   inset: 0;
   z-index: 22;
@@ -1287,11 +1284,11 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 }
 /* Keine Karte wird höher als das Bild (ADR 0056): Paßt sie nicht, rollt sie
    innen, statt oben und unten hinauszuragen — quer ist das Bild 430 hoch. */
-#hinweisBlatt > .hinweis-karte, #timerBlatt > .hinweis-karte { max-height: 100%; overflow-y: auto; overscroll-behavior: contain; }
+#hinweisBlatt > .hinweis-karte, #timerBlatt > .hinweis-karte, #drangBlatt > .hinweis-karte { max-height: 100%; overflow-y: auto; overscroll-behavior: contain; }
 /* Der Schleier blendet als eigene Schicht, nie das Blatt: Ein Vorfahr mit
    Deckkraft unter 1 wäre die Grenze des Glases — die Karte sähe dann nur den
    Schleier hinter sich, nicht die Seite, und bliebe matt (ADR 0014). */
-#hinweisBlatt::before, #timerBlatt::before {
+#hinweisBlatt::before, #timerBlatt::before, #drangBlatt::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -1299,9 +1296,9 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
   opacity: 0;
   transition: opacity .22s ease;
 }
-#hinweisBlatt[hidden], #timerBlatt[hidden] { display: none; }
-#hinweisBlatt.offen::before, #timerBlatt.offen::before { opacity: 1; }
-#hinweisBlatt:not(.offen), #timerBlatt:not(.offen) { pointer-events: none; }
+#hinweisBlatt[hidden], #timerBlatt[hidden], #drangBlatt[hidden] { display: none; }
+#hinweisBlatt.offen::before, #timerBlatt.offen::before, #drangBlatt.offen::before { opacity: 1; }
+#hinweisBlatt:not(.offen), #timerBlatt:not(.offen), #drangBlatt:not(.offen) { pointer-events: none; }
 .hinweis-karte { position: relative; }
 .hinweis-karte {
   width: 100%;
@@ -1794,6 +1791,10 @@ textarea.eingabe.code {
   <div class="hinweis-karte glas timer-karte" id="timerKarte" tabindex="-1" role="dialog" aria-modal="true"
     aria-labelledby="timerName"></div>
 </div>
+<div id="drangBlatt" hidden>
+  <div class="hinweis-karte glas timer-karte drang-karte" id="drangKarte" tabindex="-1" role="dialog" aria-modal="true"
+    aria-labelledby="drangName"></div>
+</div>
 <div id="hinweisBlatt" hidden>
   <div class="hinweis-karte glas" id="hinweisKarte" tabindex="-1" role="alertdialog" aria-modal="true" aria-labelledby="hinweisTitel"
     aria-describedby="hinweisText">
@@ -1822,7 +1823,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.17.0T23';
+var APP_VERSION = '0.17.0T24';
 var APP_STAND = '2026-10-13';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -4768,7 +4769,6 @@ var ANSICHTEN = {
   neu: { titel: 'Neue Gewohnheit', zeichnen: zeichneFormular },
   bearbeiten: { titel: 'Gewohnheit', zeichnen: zeichneFormular },
   abgewoehnen: { titel: 'Abgewöhnen', zeichnen: zeichneFormular },
-  welle: { titel: 'Drang', zeichnen: zeichneWelle },
   rueckfall: { titel: 'Rückfall', zeichnen: zeichneRueckfall },
   terminNeu: { titel: 'Neuer Termin', zeichnen: zeichneTerminFormular },
   termin: { titel: 'Termin', zeichnen: zeichneTerminFormular },
@@ -4833,7 +4833,6 @@ function zeige(name, id) {
   if (name === 'bearbeiten' && !gewohnheitNach(id)) name = 'home';
   if (name === 'termin' && !terminNach(id)) name = 'home';
   if ((name === 'abgewoehnen' || name === 'rueckfall') && !lasterNach(id)) name = 'home';
-  if (name === 'welle' && !state.welle) name = 'home';
   if (name === 'reflexion' && !reflexionMoeglich(id)) name = 'home';
   reflexionEntwurf = name === 'reflexion' ? reflexionEntwurfAus(id) : null;
   entwurf = name === 'neu' ? entwurfNeu(id) : name === 'bearbeiten' ? entwurfAus(gewohnheitNach(id))
@@ -4842,7 +4841,7 @@ function zeige(name, id) {
     : name === 'terminNeu' ? terminEntwurfAus(null, istSchluessel(id) ? id : null) : null;
   // Wer aus der Welle zum Rückfall kommt, kann zur Welle zurück.
   rueckfallFuer = name === 'rueckfall' ? { id: id, notiz: '',
-    ausWelle: ansicht === 'welle' && !!state.welle && state.welle.id === id } : null;
+    ausWelle: drangOffen() && !!state.welle && state.welle.id === id } : null;
   // Das Bild folgt weich (Bewegung: Tropfen); das Dashboard kommt dorthin
   // zurück, wo man es verlassen hat.
   var uebergang = uebergangVorbereiten(ansicht, name), heim = name === 'home' && ansicht !== 'home';
@@ -4858,7 +4857,7 @@ function zeige(name, id) {
 function render() {
   if (auftrittLaeuft) auftrittEnde(true);
   if ((ansicht === 'neu' || ansicht === 'bearbeiten' || ansicht === 'abgewoehnen') && !entwurf) ansicht = 'home';
-  if ((ansicht === 'rueckfall' && !rueckfallFuer) || (ansicht === 'welle' && !state.welle)) ansicht = 'home';
+  if (ansicht === 'rueckfall' && !rueckfallFuer) ansicht = 'home';
   if ((ansicht === 'termin' || ansicht === 'terminNeu') && !terminEntwurf) ansicht = 'home';
   if (ansicht === 'reflexion' && !reflexionEntwurf) ansicht = 'home';
   if (ansicht === 'lesen' && !reflexionNach(lesenWoche)) ansicht = 'journal';
@@ -4955,7 +4954,7 @@ var wischVon = null;
 // Fokus zu sich; geht er zu, kehrt der Fokus dorthin zurück, wo er vorher war.
 // Bestimmt wird es an einer Stelle, wann immer ein Blatt auf- oder zugeht
 // (`dialogeBeobachten`). Die Meldung bleibt frei: Sie liest nur vor.
-var DIALOGE = ['hinweisBlatt', 'ticketBlatt', 'timerBlatt', 'menue'];   // von oben nach unten
+var DIALOGE = ['hinweisBlatt', 'ticketBlatt', 'timerBlatt', 'drangBlatt', 'menue'];   // von oben nach unten
 var dialogOben = null, dialogRueck = [], fokusVerlauf = [];
 
 function obersterDialog() {
@@ -5010,7 +5009,8 @@ function dialogeBeobachten() {
 // darunter — auch beim Timer, sonst öffnete ein Wisch vom Rand das Menü hinter
 // seinem Glas, und es bliebe nach dem Timer stehen (James, N1).
 function blattOffen() {
-  return !$('menue').hidden || !$('hinweisBlatt').hidden || !$('ticketBlatt').hidden || !$('timerBlatt').hidden;
+  return !$('menue').hidden || !$('hinweisBlatt').hidden || !$('ticketBlatt').hidden || !$('timerBlatt').hidden ||
+    !$('drangBlatt').hidden;
 }
 
 // Über dem Kalender zieht ein Wisch die Seite mit (kalDruck, ADR 0052) — auf
@@ -5061,7 +5061,7 @@ function kalTippNachWisch(e) {
 // gedimmt, was heute nicht dran ist. Die Kacheln bleiben beim Abhaken stehen,
 // wo sie sind — nichts springt unter dem Finger weg.
 var ringZuletzt = {};          // id → zuletzt gezeigter Anteil, für die Animation
-var chiliImTimer = false;     // die Chili sitzt im offenen Timer, nicht im Tagesring
+var chiliImBlatt = false;     // 'timer' oder 'drang': die Chili sitzt in diesem Blatt, nicht im Tagesring
 var geradeAbgehakt = null;     // die Kachel, die eben getippt wurde
 var chiliFlammt = false;       // false, 'flammt' oder 'lodert' (Tag eben voll geworden)
 
@@ -5122,7 +5122,7 @@ function zeichneTagesring(fertig, von) {
   }
   return '<div class="tagesring" role="group" aria-label="Heute ' + esc(zahl) + '">' +
     '<div class="tr-bild">' + ring(von ? fertig / von : 0, '#tag') +
-      (chiliImTimer ? '' : '<img id="chiliFigur"' + (chiliFlammt ? ' class="' + chiliFlammt + '"' : '') + ' src="' + CHILI_BILD +
+      (chiliImBlatt ? '' : '<img id="chiliFigur"' + (chiliFlammt ? ' class="' + chiliFlammt + '"' : '') + ' src="' + CHILI_BILD +
         '" alt="">') + '</div>' +
     '<button type="button" class="tr-text" id="heuteKnopf" aria-label="Heute, ' + esc(zahl) +
       ' — Kalender auf heute"><span class="etikett heute-pille">Heute</span>' +
@@ -6648,7 +6648,8 @@ var rucklerAlle = [];        // jede Messung seit dem Start, zum Kopieren: { e, 
 // Glas. Kopiert werden die fünf längsten Ruckler mit ihrer Spur.
 var RUCKLER_SPUR = [['render', 'Zeichnen'], ['zeige', 'Ansicht'], ['speichern', 'Speichern'],
   ['hinweisZeigen', 'Hinweis'], ['ticketBlattOeffnen', 'Ticketblatt auf'], ['ticketBlattSchliessen', 'Ticketblatt zu'],
-  ['timerOeffnen', 'Timer auf'], ['timerSchliessen', 'Timer zu'], ['umschaltenUndZeichnen', 'Abhaken'],
+  ['timerOeffnen', 'Timer auf'], ['timerSchliessen', 'Timer zu'], ['drangOeffnen', 'Drang auf'], ['drangSchliessen', 'Drang zu'],
+  ['umschaltenUndZeichnen', 'Abhaken'],
   ['tropfenAuf', 'Tropfen auf'], ['tropfenZu', 'Tropfen zu'], ['glasAmZiel', 'Glas am Ziel'],
   ['welleFliesst', 'Welle'], ['fpTakt', 'Flüssiges']];
 var RUCKLER_EREIGNISSE = { pointerdown: 'Finger drauf', pointerup: 'Finger weg', click: 'Tipp', touchmove: 'Wisch' };
@@ -7534,48 +7535,152 @@ var WELLE_SAETZE = [
   'Trink ein Glas Wasser, geh ein paar Schritte. Die Welle zieht auch ohne dich vorbei.'
 ];
 
-function zeichneWelle() {
+// ── Drang: das Blatt ────────────────────────────────────────────
+//
+// Ein Fenster aus Glas wie der Timer, keine eigene Ansicht (ADR 0059): Es
+// tropft aus dem Drang-Knopf und fließt dorthin zurück. Danebentippen
+// schließt es; die Welle läuft weiter, der Knopf trägt die Restzeit. Ist sie
+// eben durch und das Dashboard frei, geht es von selbst auf; wer die App erst
+// später öffnet, findet «Welle vorbei» auf dem Knopf.
+var drangQuelle = null;     // das Laster, aus dessen Drang-Knopf das Blatt tropfte
+var drangGemeldet = null;   // der Start der Welle, deren Ende das Blatt schon öffnete
+
+function drangKnopf(id) { return id ? document.querySelector('#app ' + mitWert('data-drang', id)) : null; }
+function drangOffen() { return !$('drangBlatt').hidden && $('drangBlatt').classList.contains('offen'); }
+
+function zeichneDrangKarte() {
   var w = state.welle, a = lasterNach(w.id), rest = welleRest(zeitJetzt()), durch = rest === 0;
   var u = 2 * Math.PI * 15.5;
-  return '<section class="welle' + (durch ? ' durch' : '') + '" id="welle">' +
-    '<div class="etikett">' + esc(a ? a.name : '') + '</div>' +
-    '<div class="welle-bild">' +
-      '<svg class="ring welle-ring" viewBox="0 0 36 36" aria-hidden="true">' +
+  return '<h2 id="drangName">' + esc(a ? a.name : '') + '</h2>' +
+    '<div class="timer-bild">' +
+      '<svg class="ring" viewBox="0 0 36 36" aria-hidden="true">' +
         '<circle class="ring-spur" cx="18" cy="18" r="15.5"/>' +
         '<circle class="ring-fuell welle-fuell" id="welleFuell" cx="18" cy="18" r="15.5" stroke-dasharray="' +
           u.toFixed(2) + '" stroke-dashoffset="' + (u * (1 - rest / WELLE_MS)).toFixed(2) + '"/>' +
       '</svg>' +
-      '<img id="chiliFigur"' + (chiliFlammt ? ' class="' + chiliFlammt + '"' : '') + ' src="' + CHILI_BILD + '" alt="">' +
     '</div>' +
-    '<div class="welle-zeit" id="welleZeit" role="timer">' + esc(restText(rest)) + '</div>' +
+    '<div class="timer-zeit" id="welleZeit" role="timer">' + esc(restText(rest)) + '</div>' +
     '<p class="welle-satz">' + esc(durch ? 'Die Welle ist durch. Wie ist es ausgegangen?'
       : WELLE_SAETZE[Math.floor(w.start / 1000) % WELLE_SAETZE.length]) + '</p>' +
     '<div class="knopfreihe">' +
       (durch ? '<div id="welleUrteil"><button type="button" class="knopf" id="welleGewonnen">Gewonnen</button></div>' : '') +
       '<button type="button" class="knopf zart" id="welleNachgegeben">Nachgegeben</button>' +
     '</div>' +
-    (durch ? '' : '<p class="klein">Die Welle läuft weiter, auch wenn du die App schließt.</p>') +
-    '<button type="button" class="welle-ab" id="welleAbbrechen">Abbrechen, zählt nicht</button>' +
-    '</section>';
+    (durch ? '' : '<p class="klein">Die Welle läuft weiter, auch wenn du das Fenster schließt.</p>') +
+    '<button type="button" class="welle-ab" id="welleAbbrechen">Abbrechen, zählt nicht</button>';
 }
 
-function bindeWelle() {
+// Die Karte neu, mit der Chili darin; die Welle mißt ihren Ring erst, wenn
+// das Blatt zu sehen ist. `flammt`: Die Chili flammt auf (durch).
+function drangKarteZeichnen(flammt) {
+  var karte = $('drangKarte'), chili = $('chiliFigur'), durch = welleRest(zeitJetzt()) === 0;
+  if (chili) weg(chili);
+  karte.innerHTML = zeichneDrangKarte();
+  karte.classList.toggle('durch', durch);
+  var bild = karte.querySelector('.timer-bild');
+  chili = chiliIn(bild, 'drang', chili);
+  chili.className = flammt || '';
+  bindeDrang();
+  if (!$('drangBlatt').hidden) {
+    welleFliesst(bild, function () { return state.welle ? fpKlemme(welleRest(zeitJetzt()) / WELLE_MS, 0, 1) : 0; });
+  }
+}
+
+function drangOeffnen(id) {
+  var blatt = $('drangBlatt'), karte = $('drangKarte'), w = state.welle;
+  if (!w || !lasterNach(w.id)) return;
+  drangQuelle = w.id;
+  if (drangOffen()) { drangKarteZeichnen(); return; }
+  blatt.hidden = false;
+  void blatt.offsetWidth;
+  drangKarteZeichnen(welleRest(zeitJetzt()) === 0 ? 'flammt' : '');
+  blatt.classList.add('offen');
+  // Ein großes Blatt aus Glas: unterwegs milchig und schlicht, Glas erst am
+  // Ziel — wie Timer und Ticketblatt (P1, Nachricht 15).
+  var k = drangKnopf(id || w.id);
+  if (zuSehen(k)) tropfenAuf(karte, k.getBoundingClientRect(), { rund: '18px', glas: true, milchig: true });
+}
+
+// Zu: in den Drang-Knopf zurück. `sofort`: ohne Fließen, etwa wenn eine
+// Ansicht an seine Stelle tritt.
+function drangSchliessen(sofort) {
+  var blatt = $('drangBlatt'), karte = $('drangKarte');
+  if (!drangOffen()) return;
+  blatt.classList.remove('offen');
+  chiliZurueck('drang');
+  var ziel = sofort ? null : drangKnopf(drangQuelle), g = zuSehen(ziel) ? geist(karte) : null;
+  if (!g) { blatt.hidden = true; welleWeg(karte); return; }
+  var r = karte.getBoundingClientRect();
+  karte.style.opacity = '0';
+  tropfenZu(g, r, ziel, { rund: '18px', frueh: true, glas: true, milchig: true, fertig: function () {
+    karte.style.opacity = '';
+    if (!drangOffen()) { blatt.hidden = true; welleWeg(karte); }
+  } });
+}
+
+// Beim Start ändert sich nur die eine Kachel: Rahmen und Restzeit auf dem
+// Knopf. Den Rest zeichnet erst das Ende der Welle neu.
+function drangKachelLaeuft(knopf) {
+  var kachel = knopf.closest('.ab-kachel'), text = knopf.querySelector('span');
+  if (kachel) kachel.classList.add('welle');
+  if (text) {
+    text.setAttribute('data-wellerest', '');
+    text.textContent = welleKnopfText(welleRest(zeitJetzt()));
+  }
+}
+
+// Jede Sekunde: Zeit und Ring im offenen Blatt; ist die Welle eben durch,
+// flammt die Chili und «Gewonnen» tropft herein, statt dazustehen.
+function drangTakt(rest, nun) {
+  var w = state.welle;
+  if (!w) return;
+  if (!drangOffen()) {
+    if (rest === 0 && drangGemeldet !== w.start && nun - w.start - WELLE_MS < 5000 && !document.hidden &&
+      ansicht === 'home' && !blattOffen()) {
+      drangGemeldet = w.start;
+      drangOeffnen(w.id);
+    }
+    return;
+  }
+  var karte = $('drangKarte');
+  if ((rest === 0) !== karte.classList.contains('durch')) {
+    drangKarteZeichnen(rest === 0 ? 'flammt' : '');
+    var urteil = $('welleUrteil');
+    if (urteil && !bewegungAus()) { urteil.hidden = true; teilTropfen(urteil, true); }
+    return;
+  }
+  $('welleZeit').textContent = restText(rest);
+  var u = 2 * Math.PI * 15.5;
+  $('welleFuell').setAttribute('stroke-dashoffset', (u * (1 - rest / WELLE_MS)).toFixed(2));
+}
+
+// Gewonnen und Abbrechen zeichnen erst das Dashboard neu, dann fließt das
+// Blatt in den neuen Knopf. Nachgegeben öffnet den Rückfall; der Weg zurück
+// führt in den Drang-Knopf, nicht in das Blatt, das dann fort ist.
+function bindeDrang() {
   if ($('welleGewonnen')) {
     $('welleGewonnen').addEventListener('click', function () {
       if (!welleGewonnen()) return;
-      meldenUndGehen('Gewonnen. Die Welle ist durch.', 'haken');
-      chiliFlammt = 'flammt';
-      zeige('home');
-      chiliFlammt = false;
+      render();
+      drangSchliessen();
+      var c = $('chiliFigur');
+      if (c) { c.className = ''; void c.offsetWidth; c.className = 'flammt'; }
+      melden('Gewonnen. Die Welle ist durch.', 'haken');
     });
   }
   $('welleNachgegeben').addEventListener('click', function () {
-    if (state.welle) zeige('rueckfall', state.welle.id);
+    var w = state.welle;
+    if (!w) return;
+    zeige('rueckfall', w.id);
+    herkunft = mitWert('data-drang', w.id);
+    herkunftPunkt = null;
+    drangSchliessen(true);
   });
   $('welleAbbrechen').addEventListener('click', function () {
     if (!welleAbbrechen()) return;
-    meldenUndGehen('Abgebrochen. Die Welle zählt nicht.');
-    zeige('home');
+    render();
+    drangSchliessen();
+    melden('Abgebrochen. Die Welle zählt nicht.');
   });
 }
 
@@ -7610,8 +7715,14 @@ function bindeRueckfall() {
     meldenUndGehen('Eingetragen. Ab jetzt zählt es neu.', 'haken');
     zeige('home');
   });
+  // Zurück zur Welle: Die Ansicht fließt in den Drang-Knopf, dann tropft
+  // das Blatt wieder heraus.
   $('rfAbbrechen').addEventListener('click', function () {
-    zeige(rueckfallFuer.ausWelle && state.welle ? 'welle' : 'home');
+    var zurWelle = rueckfallFuer.ausWelle && state.welle;
+    zeige('home');
+    if (!zurWelle) return;
+    var auf = function () { if (state.welle && ansicht === 'home' && !blattOffen()) drangOeffnen(state.welle.id); };
+    if (bewegungAus()) auf(); else setTimeout(auf, TROPFEN_DAUER);
   });
 }
 
@@ -7852,20 +7963,7 @@ function takt() {
   });
   alleIn('[data-wellerest]').forEach(function (el) { el.textContent = welleKnopfText(rest); });
   if (ansicht === 'home' && rekordFaellig(nun).length) { render(); return; }
-  var welle = ansicht === 'welle' && $('welle');
-  if (!welle) return;
-  if ((rest === 0) !== welle.classList.contains('durch')) {
-    // Durch: Die Chili flammt, «Gewonnen» tropft herein, statt dazustehen.
-    if (rest === 0) chiliFlammt = 'flammt';
-    render();
-    chiliFlammt = false;
-    var urteil = $('welleUrteil');
-    if (urteil && !bewegungAus()) { urteil.hidden = true; teilTropfen(urteil, true); }
-    return;
-  }
-  $('welleZeit').textContent = restText(rest);
-  var u = 2 * Math.PI * 15.5;
-  $('welleFuell').setAttribute('stroke-dashoffset', (u * (1 - rest / WELLE_MS)).toFixed(2));
+  drangTakt(rest, nun);
 }
 
 // ── Timer und Zähler ────────────────────────────────────────────
@@ -8062,15 +8160,33 @@ function bindeTimerKarte() {
   });
 }
 
-// Die Chili kehrt aus dem Timer in den Tagesring zurück; gibt es den nicht,
-// zeichnet ihn das nächste render() samt Chili.
-function chiliZurueck() {
-  if (!chiliImTimer) return;
-  chiliImTimer = false;
+// Die Chili kehrt aus ihrem Blatt (`von`) in den Tagesring zurück; gibt es
+// den nicht, zeichnet ihn das nächste render() samt Chili.
+function chiliZurueck(von) {
+  if (chiliImBlatt !== von) return;
+  chiliImBlatt = false;
   var chili = $('chiliFigur'), ring = document.querySelector('#app .tagesring .tr-bild');
   if (chili && ring) ring.appendChild(chili);
   else if (chili) weg(chili);
 }
+
+// Die Chili zieht in ein Blatt: Sie steht nur einmal im Dokument (ADR 0054).
+// `chili` ist die vorher gerettete, sonst kommt eine neue.
+function chiliIn(bild, wer, chili) {
+  if (!chili) {
+    chili = document.createElement('img');
+    chili.id = 'chiliFigur';
+    chili.alt = '';
+    chili.src = CHILI_BILD;
+  }
+  chiliImBlatt = wer;
+  bild.appendChild(chili);
+  return chili;
+}
+
+// Ein geschlossenes Blatt zeichnet seine Welle nicht weiter: Sie lief sonst
+// alle 50 ms in einem Blatt, das niemand sieht.
+function welleWeg(karte) { weg(karte.querySelector('.fl-welle')); }
 
 function timerOffen() { return !$('timerBlatt').hidden && $('timerBlatt').classList.contains('offen'); }
 
@@ -8084,15 +8200,8 @@ function timerOeffnen(id) {
   var chili = $('chiliFigur');
   if (chili) weg(chili);
   karte.innerHTML = zeichneTimerKarte(g, t);
-  chiliImTimer = true;
   var bild = karte.querySelector('.timer-bild');
-  if (!chili) {
-    chili = document.createElement('img');
-    chili.id = 'chiliFigur';
-    chili.alt = '';
-    chili.src = CHILI_BILD;
-  }
-  bild.appendChild(chili);
+  chiliIn(bild, 'timer', chili);
   bindeTimerKarte();
   // Die Flüssigkeit mißt ihren Ring — erst, wenn das Blatt zu sehen ist.
   function fluessig() {
@@ -8114,14 +8223,14 @@ function timerSchliessen() {
   var blatt = $('timerBlatt'), karte = $('timerKarte');
   if (!timerOffen()) return;
   blatt.classList.remove('offen');
-  chiliZurueck();
+  chiliZurueck('timer');
   var ziel = scheibeVon(kachelVon(timerQuelle)), g = zuSehen(ziel) ? geist(karte) : null;
-  if (!g) { blatt.hidden = true; return; }
+  if (!g) { blatt.hidden = true; welleWeg(karte); return; }
   var r = karte.getBoundingClientRect();
   karte.style.opacity = '0';
   tropfenZu(g, r, ziel, { rund: '18px', frueh: true, glas: true, milchig: true, fertig: function () {
     karte.style.opacity = '';
-    if (!timerOffen()) blatt.hidden = true;
+    if (!timerOffen()) { blatt.hidden = true; welleWeg(karte); }
   } });
 }
 
@@ -8925,7 +9034,7 @@ var tkAusgabe = '';         // der gebündelte Text zum Kopieren von Hand
 
 // Woher ein neues Ticket kommt: die Ansicht, über der man steht.
 var ORT_VON = { home: 'uebersicht', neu: 'gewohnheit', bearbeiten: 'gewohnheit', abgewoehnen: 'abgewoehnen',
-  welle: 'abgewoehnen', rueckfall: 'abgewoehnen', terminNeu: 'termin', termin: 'termin', journal: 'journal',
+  rueckfall: 'abgewoehnen', terminNeu: 'termin', termin: 'termin', journal: 'journal',
   reflexion: 'journal', lesen: 'journal', export: 'export', einstellungen: 'einstellungen',
   sicherung: 'sicherung', tickets: 'tickets' };
 
@@ -9476,9 +9585,12 @@ function bindeAnsicht() {
   alleIn('[data-drang]').forEach(function (b) {
     b.addEventListener('click', function () {
       var id = this.getAttribute('data-drang');
-      if (state.welle && state.welle.id !== id) melden('Es läuft schon eine Welle.');
-      else if (!welleBeginnen(id)) return;
-      zeige('welle');
+      if (state.welle && state.welle.id !== id) { melden('Es läuft schon eine Welle.'); return; }
+      if (!state.welle) {
+        if (!welleBeginnen(id)) return;
+        drangKachelLaeuft(this);
+      }
+      drangOeffnen(id);
     });
   });
   alleIn('[data-rueckfall]').forEach(function (b) {
@@ -9519,12 +9631,6 @@ function bindeAnsicht() {
   bindeKalender();
   if ($('gwName')) bindeFormular();
   if ($('hmRaster')) bindeHeatmap();
-  if ($('welle')) {
-    bindeWelle();
-    welleFliesst(document.querySelector('#welle .welle-bild'), function () {
-      return state.welle ? fpKlemme(welleRest(zeitJetzt()) / WELLE_MS, 0, 1) : 0;
-    });
-  }
   if ($('rfNotiz')) bindeRueckfall();
   alleIn('[data-reflexion]').forEach(function (b) {
     b.addEventListener('click', function () { zeige('reflexion', this.getAttribute('data-reflexion')); });
@@ -10302,6 +10408,8 @@ function start() {
   });
   // Danebentippen schließt das Timerfenster; der Timer läuft weiter (ADR 0038).
   $('timerBlatt').addEventListener('click', function (e) { if (e.target === this) timerSchliessen(); });
+  // Ebenso beim Drang: Die Welle läuft weiter, der Knopf trägt die Restzeit (ADR 0059).
+  $('drangBlatt').addEventListener('click', function (e) { if (e.target === this) drangSchliessen(); });
   $('swSpaeter').addEventListener('click', function () {
     swStand.gemeldet = true;
     $('swNeu').hidden = true;
@@ -10337,7 +10445,7 @@ function start() {
   // Nach Mitternacht ist ein anderer Tag: Datum, Tagesring und Kacheln stimmen
   // auch dann, wenn die App über Nacht offen blieb.
   document.addEventListener('visibilitychange', function () {
-    if (!document.hidden && (ansicht === 'home' || ansicht === 'welle')) render();
+    if (!document.hidden && ansicht === 'home') render();
   });
   setInterval(takt, 1000);
 

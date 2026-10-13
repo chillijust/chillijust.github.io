@@ -66,3 +66,4 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0056](0056-querformat-zaehlt-mit.md) | Querformat zählt mit: keine Karte höher als das Bild, Timer quer nebeneinander, Menü rollt innen | gilt |
 | [0057](0057-worker-liefert-seinen-stand.md) | Der Worker liefert seinen Stand, holt nur Fehlendes, überschreibt nie; neu nur über «Jetzt laden» | gilt |
 | [0058](0058-pruefstand-im-fenster-des-iphones.md) | Der Prüfstand läuft im Fenster des iPhones (430 × 932) über DevTools, Bildlaufleiste ohne Platz, Schriften geladen | gilt |
+| [0059](0059-drang-als-blatt.md) | Der Drang ist ein Blatt aus Glas wie der Timer, keine eigene Ansicht; läuft geschlossen weiter, geht am Ende von selbst auf | gilt |

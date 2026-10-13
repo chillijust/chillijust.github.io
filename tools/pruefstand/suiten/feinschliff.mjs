@@ -257,7 +257,7 @@ neu();
 laster('aw', UHR - 5 * T);
 render();
 q('[data-drang="aw"]').click();
-pruefe('D1 die Welle läuft, die Chili wippt nur', ansicht === 'welle' && chili() === '');
+pruefe('D1 die Welle läuft im Blatt, die Chili wippt nur', drangOffen() && ansicht === 'home' && chili() === '');
 UHR += WELLE_MS;
 takt();
 pruefe('D2 durch: die Chili flammt', chili() === 'flammt' && !!q('#welleGewonnen'));
@@ -265,7 +265,7 @@ pruefe('D3 «Gewonnen» kommt in seinem Teil, sichtbar', !!q('#welleUrteil') && 
   q('#welleUrteil').contains(q('#welleGewonnen')));
 ausbewegt();
 pruefe('D4 ausbewegt ist der Knopf groß genug', zuKlein('#welleGewonnen').length === 0);
-render();
+drangOeffnen('aw');
 pruefe('D5 neu gezeichnet flammt sie nicht wieder', chili() === '');
 q('#welleGewonnen').click();
 hinweisSchliessen();
