@@ -144,7 +144,7 @@ state = {
 | Bewegung | `tropfenAuf`, `tropfenZu`, `teilZeigen`, `teilTropfen`, `geist`, `zeileGeht`, `langDruecken`, `punktFlaeche` |
 | Menü | `MENUE`, `menueOeffnen`, `menueSchliessen`, `menueAnker`, `menueMitrollen` |
 | Hell/Dunkel | `themaSetzen`, `themaAnwenden` |
-| Ruckler messen | `rucklerStarten`, `rucklerBild`, `rucklerAuswerten`, `rucklerEnde`, `rucklerMelden`, `rucklerKopieren` |
+| Ruckler messen | `rucklerStarten`, `rucklerBild`, `rucklerAuswerten`, `rucklerEnde`, `rucklerMelden`, `rucklerKopieren`; Spur: `RUCKLER_SPUR`, `rucklerUhrenAn` (Uhr um Funktionen und Ereignisse, nur während der Messung), `rucklerSpurAuswerten` |
 | Kaltstart, Schriftzug | `start`, `auftritt`, `auftrittEnde`, `dashboardAuftropfen`, `zeichneMarke` |
 | Service Worker | `swAnmelden`, `swNachsehen`, `swAuskunft`, `swAufraeumen`, `perleAuf` |
 | Uhr, Tage | `jetzt`, `tagSchluessel`, `tagPlus`, `wochenAnfang` |

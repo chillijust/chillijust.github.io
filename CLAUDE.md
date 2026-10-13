@@ -49,7 +49,7 @@ Safari als Home-Bildschirm-App im Vollbild, hoch und quer (ADR 0056).
 | 6 · Rückblick: Heatmap, Journal | fertig (0.7.1) |
 | 7 · Sicherung, Einstellungen, Tickets | fertig (0.8.0) |
 | 8 · Feinschliff, Nachbesserungen am Gerät, Timer und Zähler, Termine abhaken | fertig (0.13.1) |
-| 9 · Flüssig wie iOS 26 je Stelle, Chilli als Standard (ADR 0053–0055) | im Bau (0.17.0T20) |
+| 9 · Flüssig wie iOS 26 je Stelle, Chilli als Standard (ADR 0053–0055) | im Bau (0.17.0T21) |
 
 ## Wo was steht
 
@@ -176,5 +176,7 @@ node tools/pruefen.mjs                      # Vor-Push-Prüfung allein
   iPhone. Block 4 (P1) in 0.17.0T18: Ticketblatt und Timer fließen schlicht, Glas am Ziel; Abnahme mit
   «Ruckler messen», 4 × auf und zu (vorher iOS 45/97, Chilli 18/18; nachher iOS 16/16). Auf Wunsch des
   Nutzers vor Block 5: Timer, dann Drang als Glasblatt wie der Timer. Welle als ein SVG ohne Filter in
-  0.17.0T19 (vorher Timer iOS 44/51, Chilli 39/44; Drang iOS 50/131, Chilli 44/115). Danach Block 5: P2. Für Block 7 dazu: «10 von 12» bricht im Tagesring um —
+  0.17.0T19 (vorher Timer iOS 44/51, Chilli 39/44; Drang iOS 50/131, Chilli 44/115; nachher Timer offen 6/13,
+  4 × auf und zu iOS 27/33, Chilli 22/27, längster stets ~107 ms). Messwerte kopierbar (0.17.0T20), mit Spur je
+  Ruckler (0.17.0T21) — damit den 107-ms-Hänger am Gerät zuordnen. Danach Block 5: P2. Für Block 7 dazu: «10 von 12» bricht im Tagesring um —
   Varianten als Bildvergleich (Zahl kleiner, Umschalter in die Kalenderzeile, so lassen).

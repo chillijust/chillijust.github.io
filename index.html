@@ -1822,7 +1822,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.17.0T20';
+var APP_VERSION = '0.17.0T21';
 var APP_STAND = '2026-10-13';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -6637,7 +6637,20 @@ function bindeFluessigProbe() {
 var RUCKLER_MS = 10000;
 var ruckler = null;          // die laufende Messung: { start, letzt, abst, rest, versteckt, uhr }
 var rucklerLetzte = null;    // das letzte Ergebnis, nur im Arbeitsspeicher
-var rucklerAlle = [];        // jede Messung seit dem Start, zum Kopieren: { e, zeit, ios }
+var rucklerAlle = [];        // jede Messung seit dem Start, zum Kopieren: { e, zeit, ios, lang }
+
+// Die Spur: Was tat die App, während ein Bild zu spät kam? Für die Dauer der
+// Messung legt sich um diese Funktionen eine Uhr, danach ist alles wie
+// vorher. Dazu Tipp und Wisch, gemessen vom ersten bis zum letzten Zuhörer.
+// Was in einer Lücke kein Skript zeigt, kostete Safari selbst: Stil, Malen,
+// Glas. Kopiert werden die fünf längsten Ruckler mit ihrer Spur.
+var RUCKLER_SPUR = [['render', 'Zeichnen'], ['zeige', 'Ansicht'], ['speichern', 'Speichern'],
+  ['hinweisZeigen', 'Hinweis'], ['ticketBlattOeffnen', 'Ticketblatt auf'], ['ticketBlattSchliessen', 'Ticketblatt zu'],
+  ['timerOeffnen', 'Timer auf'], ['timerSchliessen', 'Timer zu'], ['umschaltenUndZeichnen', 'Abhaken'],
+  ['tropfenAuf', 'Tropfen auf'], ['tropfenZu', 'Tropfen zu'], ['glasAmZiel', 'Glas am Ziel'],
+  ['welleFliesst', 'Welle'], ['fpTakt', 'Flüssiges']];
+var RUCKLER_EREIGNISSE = { pointerdown: 'Finger drauf', pointerup: 'Finger weg', click: 'Tipp', touchmove: 'Wisch' };
+var RUCKLER_LANG = 5;
 
 // Aus den Abständen in Millisekunden: Takt, Ruckler, ausgelassene Bilder,
 // längster Abstand. Unter zehn Abständen gibt es nichts zu sagen.
@@ -6666,7 +6679,7 @@ function zeichneRucklerKarte() {
   return '<div class="kachel" id="rkKarte">' +
     '<p>Tippe auf «Messen» und bediene die App zehn Sekunden lang, etwa Menü, Ticketblatt oder ' +
       'Haken. Gezählt wird jedes Bild, das zu spät kam, gleich bei welcher Bewegung. Das Ergebnis meldet sich, wo du ' +
-      'gerade bist.</p>' +
+      'gerade bist. «Kopieren» nimmt zu den fünf längsten Rucklern mit, was die App dabei gerade tat.</p>' +
     '<div id="rkZeilen">' + zeilen.map(function (z) {
       return '<div class="zeile"><span>' + esc(z[0]) + '</span><span class="wert">' + esc(z[1]) + '</span></div>';
     }).join('') + '</div>' +
@@ -6681,14 +6694,21 @@ function bindeRuckler() {
   if ($('rkKopieren')) $('rkKopieren').addEventListener('click', rucklerKopieren);
 }
 
-// Die Messungen als Text, eine je Zeile, mit Uhrzeit und den Stellen auf iOS —
-// so lassen sie sich am Stück in eine Nachricht einfügen.
+// Die Messungen als Text, eine je Zeile, mit Uhrzeit und den Stellen auf iOS,
+// darunter eingerückt die längsten Ruckler mit ihrer Spur — so lassen sie
+// sich am Stück in eine Nachricht einfügen.
 function rucklerText() {
   const zwei = (n) => String(n).padStart(2, '0');
+  const ms = (n) => n < 1 ? '<1 ms' : Math.round(n) + ' ms';
   return 'Chilli Journal ' + APP_VERSION + ' · Ruckler messen\n' + rucklerAlle.map(function (m) {
     const d = new Date(m.zeit), e = m.e;
     return zwei(d.getHours()) + ':' + zwei(d.getMinutes()) + ' · ' + e.ruckler + ' Ruckler · ' + e.aus + ' ausgelassen · längster ' +
-      e.laengster + ' ms · ' + e.hz + ' Hz, ' + e.bilder + ' Bilder · ' + (m.ios.length ? 'iOS: ' + m.ios.join(', ') : 'alles Chilli');
+      e.laengster + ' ms · ' + e.hz + ' Hz, ' + e.bilder + ' Bilder · ' + (m.ios.length ? 'iOS: ' + m.ios.join(', ') : 'alles Chilli') +
+      (m.lang || []).map(function (l) {
+        return '\n  bei ' + (l.bei / 1000).toFixed(1).replace('.', ',') + ' s · ' + l.ms + ' ms · ' + (l.was.length ? l.was.map(function (w) {
+          return w[0] + (w[1] > 1 ? ' ' + w[1] + '×' : '') + ' ' + ms(w[2]);
+        }).join(', ') : 'kein Skript');
+      }).join('');
   }).join('\n');
 }
 
@@ -6713,7 +6733,8 @@ function rucklerKnopf() {
 
 function rucklerStarten() {
   if (ruckler) return;
-  ruckler = { start: null, letzt: null, abst: [], rest: RUCKLER_MS / 1000, versteckt: false };
+  ruckler = { start: null, letzt: null, abst: [], zeiten: [], spur: [], rest: RUCKLER_MS / 1000, versteckt: false };
+  rucklerUhrenAn(ruckler);
   // Kommt kein Bild mehr (die App ging in den Hintergrund), endet sie trotzdem.
   ruckler.uhr = setTimeout(rucklerEnde, RUCKLER_MS + 1000);
   document.addEventListener('visibilitychange', rucklerVersteckt);
@@ -6726,6 +6747,7 @@ function rucklerBild(t) {
   if (!m) return;
   if (m.start === null) m.start = t; else m.abst.push(t - m.letzt);
   m.letzt = t;
+  m.zeiten.push(t);
   if (t - m.start >= RUCKLER_MS) { rucklerEnde(); return; }
   const rest = Math.ceil((RUCKLER_MS - (t - m.start)) / 1000);
   if (rest !== m.rest) { m.rest = rest; rucklerKnopf(); }
@@ -6735,18 +6757,82 @@ function rucklerBild(t) {
 // Im Hintergrund kommen keine Bilder; die Lücke wäre kein Ruckler.
 function rucklerVersteckt() { if (document.hidden && ruckler) ruckler.versteckt = true; }
 
+// Dieselbe Uhr wie die Bilder: requestAnimationFrame zählt ab demselben Nullpunkt.
+function rucklerJetzt() { return performance.now(); }
+
+function rucklerSpur(name, t0) { if (ruckler) ruckler.spur.push([t0, rucklerJetzt() - t0, name]); }
+
+function rucklerUhrenAn(m) {
+  m.echt = {};
+  m.uhren = {};
+  RUCKLER_SPUR.forEach(function (s) {
+    const f = window[s[0]];
+    if (typeof f !== 'function') return;
+    m.echt[s[0]] = f;
+    m.uhren[s[0]] = window[s[0]] = function () {
+      const t0 = rucklerJetzt();
+      try { return f.apply(this, arguments); } finally { rucklerSpur(s[1], t0); }
+    };
+  });
+  // Ein Ereignis beginnt beim ersten Zuhörer (Einfangen am Fenster) und
+  // endet beim letzten (Aufsteigen zum Fenster).
+  m.ereignis = {};
+  m.drauf = function (ev) { m.ereignis[ev.type] = rucklerJetzt(); };
+  m.weg = function (ev) {
+    const t0 = m.ereignis[ev.type];
+    if (t0 == null) return;
+    m.ereignis[ev.type] = null;
+    rucklerSpur(RUCKLER_EREIGNISSE[ev.type], t0);
+  };
+  Object.keys(RUCKLER_EREIGNISSE).forEach(function (art) {
+    window.addEventListener(art, m.drauf, { capture: true, passive: true });
+    window.addEventListener(art, m.weg, { passive: true });
+  });
+}
+
+// Zurück, was noch die eigene Uhr trägt — wer derweil eine Funktion ersetzt
+// hat, behält seine.
+function rucklerUhrenAus(m) {
+  Object.keys(m.uhren || {}).forEach(function (n) { if (window[n] === m.uhren[n]) window[n] = m.echt[n]; });
+  Object.keys(RUCKLER_EREIGNISSE).forEach(function (art) {
+    window.removeEventListener(art, m.drauf, { capture: true });
+    window.removeEventListener(art, m.weg);
+  });
+}
+
+// Die längsten Ruckler, in der Reihenfolge, in der sie kamen: wann, wie lang
+// und was in der Lücke lief — je Name gezählt und die Zeit addiert.
+function rucklerSpurAuswerten(m, e) {
+  if (!e) return [];
+  const takt = 1000 / e.hz, lang = [];
+  for (let i = 1; i < m.zeiten.length; i++) {
+    const von = m.zeiten[i - 1], bis = m.zeiten[i];
+    if (bis - von > takt * 1.5) lang.push({ von: von, ms: bis - von, bis: bis });
+  }
+  return lang.sort((a, b) => b.ms - a.ms).slice(0, RUCKLER_LANG).sort((a, b) => a.von - b.von).map(function (l) {
+    const was = [];
+    // Nach Beginn; bei gleichem Beginn das Äußere zuerst — es endet später, steht also weiter hinten.
+    m.spur.map((s, i) => s.concat(i)).filter((s) => s[0] >= l.von && s[0] < l.bis).sort((a, b) => a[0] - b[0] || b[3] - a[3]).forEach(function (s) {
+      const da = was.find((w) => w[0] === s[2]);
+      if (da) { da[1]++; da[2] += s[1]; } else was.push([s[2], 1, s[1]]);
+    });
+    return { bei: l.von - m.start, ms: Math.round(l.ms), was: was };
+  });
+}
+
 function rucklerEnde() {
   const m = ruckler;
   if (!m) return;
   ruckler = null;
   clearTimeout(m.uhr);
   document.removeEventListener('visibilitychange', rucklerVersteckt);
+  rucklerUhrenAus(m);
   const e = m.versteckt ? null : rucklerAuswerten(m.abst);
   if (e) {
     rucklerLetzte = e;
     rucklerAlle.push({ e: e, zeit: zeitJetzt(), ios: FP_STELLEN.filter(function (st) { return flIos(st[0]); }).map(function (st) {
       return st[1];
-    }) });
+    }), lang: rucklerSpurAuswerten(m, e) });
   }
   const karte = $('rkKarte');
   if (karte) {

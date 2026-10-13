@@ -139,9 +139,12 @@ return warten(700).then(function () {
   pruefe('R24 nach einer Messung steht «Kopieren» im Reiter', !!q('#rkKopieren') && n >= 3, n);
   q('#rkKopieren').click();
   zeilen = (kopiert || '').split(String.fromCharCode(10));
-  pruefe('R25 kopiert wird jede Messung mit Version, Werten und den Stellen auf iOS', zeilen.length === n + 1 &&
-    zeilen[0].indexOf(APP_VERSION) !== -1 && zeilen.slice(1).every(function (z) {
+  var kopf = zeilen.slice(1).filter(function (z) { return z.charAt(0) !== ' '; });
+  pruefe('R25 kopiert wird jede Messung mit Version, Werten und den Stellen auf iOS', kopf.length === n &&
+    zeilen[0].indexOf(APP_VERSION) !== -1 && kopf.every(function (z) {
       return /^\d\d:\d\d · \d+ Ruckler · \d+ ausgelassen · längster \d+ ms · \d+ Hz, \d+ Bilder · (alles Chilli|iOS: .+)$/.test(z);
+    }) && zeilen.slice(1).filter(function (z) { return z.charAt(0) === ' '; }).every(function (z) {
+      return /^  bei \d+,\d s · \d+ ms · .+$/.test(z);
     }), kopiert);
   pruefe('R26 und die App sagt, daß es kopiert ist', !q('#hinweisBlatt').hidden && /^Kopiert/.test(q('#hinweisTitel').textContent));
   hinweisSchliessen();
@@ -154,5 +157,37 @@ return warten(700).then(function () {
   pruefe('R27 «Kopieren» im Ergebnis kopiert alle Messungen', !!kopiert && /iOS: Hinweis aus Glas$/.test(kopiert), kopiert);
   hinweisSchliessen();
   state.fluessig = null;
+
+  // ── Die Spur: was in der Lücke lief ─────────────────────────
+  // Die Uhr der Spur geht mit dem eigenen Bildtakt; ein langsames Speichern
+  // kostet 60 ms, ein Tipp löst es aus.
+  window.requestAnimationFrame = function (f) { bestellt.push(f); return bestellt.length; };
+  var jetztEcht = rucklerJetzt, renderEcht = render, speichernEcht = speichern;
+  rucklerJetzt = function () { return uhr; };
+  var langsam = speichern = function () { uhr += 60; return speichernEcht.apply(this, arguments); };
+  labor();
+  rucklerStarten();
+  pruefe('R28 während der Messung trägt render eine Uhr', render !== renderEcht && speichern !== langsam);
+  bilder(50, 1000 / 60);
+  var knopfSpur = document.createElement('button');
+  knopfSpur.addEventListener('click', function () { speichern(); render(); });
+  q('#app').appendChild(knopfSpur);
+  uhr += 2;
+  knopfSpur.click();
+  bilder(1, 1000 / 60 - 2);   // das nächste Bild kommt 60 ms zu spät
+  bilder(600, 1000 / 60);
+  pruefe('R29 danach ist alles wie vorher', render === renderEcht && speichern === langsam && ruckler === null);
+  var l = (rucklerAlle[rucklerAlle.length - 1].lang || [])[0] || { was: [] };
+  var name = function (n) { return (l.was.find(function (w) { return w[0] === n; }) || [])[2]; };
+  pruefe('R30 der Ruckler kennt seine Spur: Tipp, darin Speichern 60 ms und Zeichnen', l.ms > 70 &&
+    Math.round(name('Speichern')) === 60 && name('Tipp') >= 60 && name('Zeichnen') !== undefined, JSON.stringify(l));
+  kopiert = null;
+  q('#hinweisOk').click();
+  pruefe('R31 kopiert steht er eingerückt unter seiner Messung', /\n  bei 0,\d s · \d+ ms · Tipp \d+ ms, Speichern 60 ms, Zeichnen/.test(kopiert || ''), JSON.stringify(kopiert));
+  hinweisSchliessen();
+  knopfSpur.remove();
+  speichern = speichernEcht;
+  rucklerJetzt = jetztEcht;
+  window.requestAnimationFrame = rafEcht;
 });
 `);
