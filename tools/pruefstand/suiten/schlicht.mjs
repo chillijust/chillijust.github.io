@@ -3,7 +3,9 @@
 // milchig, Glas erst am Ziel. Am Gerät verlor das Ticketblatt je Auf und Zu
 // rund 24 Bilder, weil Doppelschatten und Lichtkante als Filter über die
 // ganze Fläche in jedem Bild neu entstanden. Der kleine Hinweis aus Glas
-// behält beides — dort ist die Fläche klein.
+// behält beides — dort ist die Fläche klein. Eine Ansicht ist das größte
+// Blatt: Sie behält ihren einen Schatten und fließt ohne Lichtkante; mit ihr
+// stand der Rückwisch am Gerät ein Bild lang 110–130 ms still (0.17.0T23).
 import { readFileSync } from 'node:fs';
 import { APP, suite } from '../helfer.mjs';
 const html = readFileSync(APP, 'utf8');
@@ -85,5 +87,40 @@ return warten(bis()).then(function () {
   timerSchliessen();
   ausbewegt();
   state.timer = null;
+
+  // ── Eine Ansicht fließt auf iOS ohne Lichtkante ──────────────
+  aufbauen(true);
+  state.fluessig = { ios: { ansichten: true } };
+  flDauernSetzen();
+  zeige('einstellungen');
+  ausbewegt();
+  var vorher = alle('body > .tropfen-huelle');
+  zurueckGehen();
+  var h7 = alle('body > .tropfen-huelle').filter(function (x) { return vorher.indexOf(x) < 0; })[0], s7 = schicht(h7);
+  pruefe('S13 zurück fließt die Ansicht mit einem Schatten und ohne Lichtkante', !!h7 && !!h7._fluss && !!s7 &&
+    schatten(s7) === 1 && !s7.querySelector('.fp-licht') && !s7.querySelector('.fp-oben'), s7 && s7.innerHTML.slice(0, 120));
+  ausbewegt();
+  // Auf: aus der getippten Stelle quillt sie ebenso schlicht.
+  vorher = alle('body > .tropfen-huelle');
+  letzterTipp = { el: q('#menuKnopf'), zeit: Date.now() };
+  zeige('einstellungen');
+  var h8 = alle('body > .tropfen-huelle').filter(function (x) { return vorher.indexOf(x) < 0; })[0], s8 = schicht(h8);
+  pruefe('S14 auf fließt sie ebenso schlicht, wenn sie aus dem Getippten quillt', ansicht === 'einstellungen' && !!h8 && !!s8 &&
+    schatten(s8) === 1 && !s8.querySelector('.fp-licht'), ansicht + ' / ' + (s8 && s8.innerHTML.slice(0, 120)));
+  ausbewegt();
+  // Der kleine Hinweis aus Glas behält seine Lichtkante (S7); der Wochenstreifen
+  // der Heatmap ist klein und behält sie auch.
+  var w = document.createElement('div');
+  w.style.cssText = 'position: fixed; left: 40px; top: 300px; width: 200px; height: 80px;';
+  document.body.appendChild(w);
+  vorher = alle('body > .tropfen-huelle');
+  tropfenAuf(w, punktFlaeche(140, 340), { rund: '14px' });
+  var h9 = alle('body > .tropfen-huelle').filter(function (x) { return vorher.indexOf(x) < 0; })[0], s9 = schicht(h9);
+  pruefe('S15 ein kleines Blatt ohne Glas behält seine Lichtkante', !!s9 && !!s9.querySelector('.fp-licht'));
+  ausbewegt();
+  w.remove();
+  zeige('home');
+  ausbewegt();
+  state.fluessig = null;
 });
 `);

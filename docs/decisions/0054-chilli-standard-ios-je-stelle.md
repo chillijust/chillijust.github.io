@@ -53,7 +53,9 @@ hart schneiden) rechnet Safari auf dem iPhone teils ohne Grafikchip, Bild für B
   «Ruckler messen», 4 × auf und zu): Doppelschatten und Lichtkante entstanden als Filter
   über die ganze Fläche in jedem Bild neu. Der Timer floß bis dahin sogar mit Unschärfe.
   Je Bild wird erst gemessen, dann geschrieben (`teilSchritt`). Hinweis und Meldung bleiben,
-  wie sie sind.
+  wie sie sind. Seit 0.17.0T23 fließt auch eine Ansicht (`gross`) ohne Lichtkante, mit
+  ihrem einen Schatten: Die Spur von «Ruckler messen» zeigte nach jedem Rückwisch auf iOS
+  ein Bild von 110–130 ms ohne Skript, auf Chilli höchstens 39 ms.
   `fliessen` (Marke, Knauf, Abhaken) malt nur Hals und Rest, nie das Teil selbst. In
   0.17.0T3 lief überall die Chilli-Bewegung, und das Flüssige lag als zweites Bild
   darunter — am Gerät sah das aus wie zwei Teile übereinander, mit doppeltem Schatten.

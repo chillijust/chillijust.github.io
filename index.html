@@ -1822,7 +1822,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.17.0T22';
+var APP_VERSION = '0.17.0T23';
 var APP_STAND = '2026-10-13';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -3091,7 +3091,9 @@ var SCHATTEN_GLAS = 'drop-shadow(0 4px 5px rgba(20, 20, 19, .14)) drop-shadow(0 
 // Ein großes Blatt (`milchig`) fließt schlicht: ein Schatten statt zwei, keine
 // Lichtkante. Beides rechnete das iPhone in jedem Bild über die ganze Fläche
 // neu — das Ticketblatt verlor je Auf und Zu rund 24 Bilder (P1, Nachricht 15).
-// Am Ziel hat die Karte ihr Glas mit allem.
+// Am Ziel hat die Karte ihr Glas mit allem. Eine Ansicht (`gross`) ist das
+// größte Blatt: Sie behält ihren einen Schatten und läßt die Lichtkante weg —
+// mit ihr stand der Rückwisch am Gerät ein Bild lang 110–130 ms still.
 var SCHATTEN_SCHLICHT = 'drop-shadow(0 8px 10px rgba(20, 20, 19, .22))';
 function huelleFliesst(h, inhalt, z, quelle, auf, opt, dauer, fertig) {
   var f = glasFarben(opt.glas), rund = opt.rund || (auf ? '0px' : '20px');
@@ -3108,7 +3110,7 @@ function huelleFliesst(h, inhalt, z, quelle, auf, opt, dauer, fertig) {
   } : quelle;
   teilFliesst(h, { quelle: q, ziel: function () { return z; }, rund: parseFloat(rund) || 0, d0: 36, inhalt: inhalt,
     glas: !!opt.glas, farbe: f.dicht, farbeAmZiel: opt.milchig ? null : f.duenn,
-    schatten: opt.milchig ? SCHATTEN_SCHLICHT : opt.glas ? SCHATTEN_GLAS : SCHATTEN_HUELLE, schlicht: !!opt.milchig,
+    schatten: opt.milchig ? SCHATTEN_SCHLICHT : opt.glas ? SCHATTEN_GLAS : SCHATTEN_HUELLE, schlicht: !!(opt.milchig || opt.gross),
     auf: auf, leer: !!opt.leer, angekommen: opt.angekommen,
     warten: opt.warten, schnell: fpKlemme(dauer / fluessigTakt(opt.glas ? 'hinweis' : 'ansichten').dauer, 0.4, 2), fertig: fertig });
 }
@@ -3579,7 +3581,7 @@ function uebergangAusfuehren(u) {
   if (!u.zurueck) {
     if (g) bewegt(g, [{ opacity: 1 }, { opacity: 0 }], { dauer: 360, kurve: 'ease-in', fill: 'forwards' },
       function () { weg(g); });
-    if (u.quelle && u.rund && tropfenAuf(neu, u.quelle)) return;
+    if (u.quelle && u.rund && tropfenAuf(neu, u.quelle, { gross: true })) return;
     if (u.quelle) {
       neu.style.transformOrigin = '0 0';
       neu.style.background = 'var(--grund)';
@@ -3611,9 +3613,9 @@ function uebergangAusfuehren(u) {
     // Zurück an die Stelle, an der der Finger lag. Die Kachel nickt nicht —
     // sie nimmt nur auf.
     var stelle = punktFlaeche(fl.left + hp.dx, fl.top + hp.dy);
-    tropfenZu(g, a, { getBoundingClientRect: function () { return stelle; } });
+    tropfenZu(g, a, { getBoundingClientRect: function () { return stelle; } }, { gross: true });
   } else if (ziel && ziel.getClientRects().length && tropfenQuelle(ziel)) {
-    tropfenZu(g, a, ziel);
+    tropfenZu(g, a, ziel, { gross: true });
   } else if (ziel && ziel.getClientRects().length) {
     bewegt(g, [ZOOM_VOLL, zoomBild(tippFlaeche(ziel).getBoundingClientRect(), a)], { dauer: 520, fill: 'forwards' },
       function () { weg(g); });
@@ -4008,7 +4010,7 @@ function fensterWirdMeldung(g, r, glas, titel, text, ziel, zeichen) {
   var p = meldePunkt(), opt = { bestaetigung: true, zeichen: zeichen };
   if (g) {
     tropfenZu(g, r, { getBoundingClientRect: function () { return p; } },
-      { rund: glas ? '18px' : '20px', glas: glas, frueh: true, dauer: MELDE_ZU });
+      { rund: glas ? '18px' : '20px', glas: glas, gross: !glas, frueh: true, dauer: MELDE_ZU });
     // Die Meldung quillt, wenn das Fenster Tropfen geworden ist — beide
     // blenden sich dort ineinander.
     opt.warten = Math.round(MELDE_ZU * TROPFEN_ZU_FRUEH[2]);
