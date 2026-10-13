@@ -1,6 +1,6 @@
 # 0060 · Der Rückwisch folgt dem Finger, die Terminzeile leuchtet
 
-*2026-10-13 · Stand 0.17.0T27 · Block 6 aus Nachricht 15 (James, 14) · löst 0016 für
+*2026-10-13 · Stand 0.17.0T27, Gestalt beim Ziehen 0.17.0T28 · Block 6 aus Nachricht 15 (James, 14) · löst 0016 für
 Ansichten auf iOS ab; ergänzt 0041*
 
 ## Ausgangslage
@@ -12,14 +12,18 @@ lange gedrückt hatte, sah bei der Rückkehr auch nicht, an welche Zeile er zur�
 
 ## Entscheidung
 
-- **Steht «Ansichten» auf iOS, folgt die Ansicht dem Finger.** Ab `ZUG_AB` = 12 px
-  waagerecht schiebt sie sich mit dem Finger nach rechts und wirft links ihren Schatten.
+- **Steht «Ansichten» auf iOS, folgt die Ansicht dem Finger und wird dabei schon zum
+  Tropfen.** Ab `ZUG_AB` = 12 px waagerecht zieht sie sich zum rechten Rand hin zusammen —
+  zum Menüknopf —, bis auf gut die Hälfte (`ZUG_KLEIN`), und rundet ihre Ecken (`ZUG_RUND`);
+  sie bleibt dabei ganz im Bild. Ihren Schatten trägt eine eigene Fläche darunter. In
+  0.17.0T27 schob sie sich nur zur Seite: Wer bis an den Rand zog, ließ sie draußen los, und
+  am Gerät sah man keinen Tropfen mehr (Wahl des Nutzers in 0.17.0T28).
   Darunter liegt das Dashboard als **stilles Abbild** (`abbildDashboard`): gezeichnet wie zu
   Hause, in einer Schattenwurzel — keine doppelten IDs, `inert`, ohne Zeiger —, so weit
   gerollt, wie es beim Weggehen war. Es entsteht schon, wenn der Finger am Rand aufliegt,
   verdeckt von der Ansicht; der erste Schritt verschiebt nur noch.
 - **Losgelassen über `WISCH_WEG` = 70 px** (oder schnell nach rechts, `ZUG_SCHWUNG`) wird
-  die Ansicht dort, wo sie steht, zum Tropfen und fließt in ihre Herkunft — Menüknopf,
+  die Ansicht so, wie sie steht — geschrumpft, mit ihrem Kopf — weiter als Tropfen in ihre Herkunft: Menüknopf,
   Kachel oder Terminzeile, wie beim Pfeil. Das Dashboard blendet nicht noch einmal ein; es
   stand schon da. **Darunter federt sie zurück**, ebenso bei `touchcancel`, einem zweiten
   Finger, einer Drehung oder einem Blatt, das unterdessen aufgeht. Erst die bestätigte

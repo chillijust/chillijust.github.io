@@ -49,7 +49,7 @@ Safari als Home-Bildschirm-App im Vollbild, hoch und quer (ADR 0056).
 | 6 · Rückblick: Heatmap, Journal | fertig (0.7.1) |
 | 7 · Sicherung, Einstellungen, Tickets | fertig (0.8.0) |
 | 8 · Feinschliff, Nachbesserungen am Gerät, Timer und Zähler, Termine abhaken | fertig (0.13.1) |
-| 9 · Flüssig wie iOS 26 je Stelle, Chilli als Standard (ADR 0053–0055) | im Bau (0.17.0T27) |
+| 9 · Flüssig wie iOS 26 je Stelle, Chilli als Standard (ADR 0053–0055) | im Bau (0.17.0T28) |
 
 ## Wo was steht
 
@@ -168,8 +168,8 @@ node tools/pruefen.mjs                      # Vor-Push-Prüfung allein
 Was erledigt ist und was es am Gerät gemessen hat, steht in `docs/verlauf.md`.
 
 - **Abnahme am Gerät steht aus** für Flüssig 0.17.0T7–T25 (ADR 0054, 0055), James' N1–N9
-  (0.17.0T10–T16) und Block 6 (0.17.0T27, ADR 0060): Rückwisch folgt dem Finger auf iOS,
-  Terminzeile leuchtet. Abgenommen: T24 (Drangblatt), T26 (Auftropfen).
+  (0.17.0T10–T16) und Block 6 (0.17.0T28, ADR 0060): Rückwisch folgt dem Finger auf iOS und
+  wird dabei zum Tropfen, Terminzeile leuchtet. Abgenommen: T24 (Drangblatt), T26 (Auftropfen).
 - **Danach** James bitten, die fünf Rückwege aus 14 erneut zu prüfen (dazu Abbruch vor der
   Schwelle, senkrechter Zug); dann Block 7 (Gestaltung), dazu «10 von 12» bricht im
   Tagesring um — Varianten als Bildvergleich. Plan: Nachricht 15 auf `chatgpt/kommunikation`.

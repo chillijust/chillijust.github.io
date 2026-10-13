@@ -1574,7 +1574,10 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 /* Der Rückwisch folgt dem Finger (ADR 0060): Die Ansicht liegt über dem Abbild
    des Dashboards und wirft links ihren Schatten darauf. */
 #app.bereit { position: relative; z-index: 1; background: var(--grund); will-change: transform; }
-#app.zieht { box-shadow: -10px 0 28px rgba(20, 20, 19, .16); }
+/* Den Schatten trägt eine eigene Fläche darunter: Die Ansicht ist auf ihren
+   sichtbaren Teil beschnitten, ein eigener Schatten fiele mit weg. */
+.zug-schatten { position: fixed; top: 0; z-index: 0; pointer-events: none; background: var(--grund);
+  transform-origin: 100% 50%; box-shadow: 0 12px 36px rgba(20, 20, 19, .22); }
 .abbild { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: var(--grund); pointer-events: none; }
 .geist { pointer-events: none; }
 .tropfen { position: absolute; z-index: -1; background: var(--flaeche-2); pointer-events: none; }
@@ -1833,7 +1836,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.17.0T27';
+var APP_VERSION = '0.17.0T28';
 var APP_STAND = '2026-10-13';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -3372,6 +3375,12 @@ function sichtbar(r) {
   return h ? { left: r.left, top: oben, width: r.width, height: h } : { left: r.left, top: r.top, width: r.width, height: r.height };
 }
 
+// Was von `r` innerhalb der Zeile `sicht` liegt (oben, Höhe).
+function imSchnitt(r, sicht) {
+  var oben = Math.max(r.top, sicht.top), unten = Math.min(r.top + r.height, sicht.top + sicht.height);
+  return unten > oben ? { left: r.left, top: oben, width: r.width, height: unten - oben } : sichtbar(r);
+}
+
 // Der Geist in seiner Hülle: um das versetzt, was über dem Rand liegt, und von
 // der Ecke der Hülle aus skaliert, nicht von seiner eigenen.
 function geistVersetzen(g, r, s) {
@@ -3478,7 +3487,15 @@ function knopfNickt(el, warten) {
 // leuchtet kurz, statt zu nicken (ADR 0060).
 function tropfenZu(g, r, ziel, opt) {
   opt = opt || {};
-  var k = ziel.getBoundingClientRect(), s = sichtbar(r), w = tropfenWeg(s, k), h = tropfenHuelle(g, r.width, opt.glas);
+  // `form` (aus einem Zug, ADR 0060): Die Fläche ist schon geschrumpft, und
+  // zu sehen ist nur ihr Teil `sicht`.
+  var fo = opt.form, skala = fo ? fo.skala : 1, k = ziel.getBoundingClientRect();
+  if (fo && !opt.rund) opt.rund = px(fo.ecken);
+  var s = fo ? imSchnitt(r, fo.sicht) : sichtbar(r), w = tropfenWeg(s, k), h = tropfenHuelle(g, r.width / skala, opt.glas);
+  if (skala !== 1 && g.shadowRoot) {
+    g.shadowRoot.lastChild.style.transformOrigin = '0 0';
+    g.shadowRoot.lastChild.style.transform = 'scale(' + skala.toFixed(4) + ')';
+  }
   if (opt.glas && opt.milchig) h.classList.add('milchig');
   geistVersetzen(g, r, s);
   var dauer = opt.dauer || TROPFEN_DAUER, t = opt.frueh ? TROPFEN_ZU_FRUEH : TROPFEN_ZU_TAKT;
@@ -3632,11 +3649,18 @@ function uebergangVorbereiten(von, nach) {
   var gemeldet = fensterIstMeldung;
   fensterIstMeldung = false;
   if (von === nach || bewegungAus()) return null;
-  var alt = $('ansicht');
+  // Aus einem Zug fließt die ganze Ansicht mit ihrem Kopf, so geschrumpft,
+  // wie sie unter dem Finger stand (ADR 0060).
+  var alt = zugForm && nach === 'home' ? $('app') : $('ansicht'), g = gemeldet ? null : geist(alt);
+  if (g && alt.id === 'app') {
+    var kopie = g.shadowRoot.lastChild;
+    kopie.removeAttribute('style');
+    kopie.classList.remove('zieht', 'bereit');
+  }
   // Ist das Fenster schon zur Meldung geworden, tropft die nächste Ansicht
   // auch nicht aus dem getippten «Speichern» — sie steht still dahinter, wohin
   // sie auch führt (ADR 0042).
-  return { zurueck: nach === 'home', altRect: alt.getBoundingClientRect(), geist: gemeldet ? null : geist(alt),
+  return { zurueck: nach === 'home', altRect: alt.getBoundingClientRect(), geist: g, form: nach === 'home' ? zugForm : null,
     gemeldet: gemeldet, quelle: gemeldet ? null : punkt ? punktFlaeche(punkt.x, punkt.y) : flaeche,
     rund: !!punkt || (mitTipp && tropfenQuelle(tipp)) };
 }
@@ -3693,9 +3717,9 @@ function uebergangAusfuehren(u) {
     // Zurück an die Stelle, an der der Finger lag. Die Kachel nickt nicht —
     // sie nimmt nur auf.
     var stelle = punktFlaeche(fl.left + hp.dx, fl.top + hp.dy);
-    tropfenZu(g, a, { getBoundingClientRect: function () { return stelle; } }, { gross: true, leuchtet: leuchtet });
-  } else if (ziel && ziel.getClientRects().length && tropfenQuelle(ziel)) {
-    tropfenZu(g, a, ziel, { gross: true, leuchtet: leuchtet });
+    tropfenZu(g, a, { getBoundingClientRect: function () { return stelle; } }, { gross: true, leuchtet: leuchtet, form: u.form });
+  } else if (ziel && ziel.getClientRects().length && (tropfenQuelle(ziel) || u.form)) {
+    tropfenZu(g, a, ziel, { gross: true, leuchtet: leuchtet, form: u.form });
   } else if (ziel && ziel.getClientRects().length) {
     bewegt(g, [ZOOM_VOLL, zoomBild(tippFlaeche(ziel).getBoundingClientRect(), a)], { dauer: 520, fill: 'forwards' },
       function () { weg(g); zeileLeuchtet(leuchtet); });
@@ -5169,17 +5193,23 @@ function wischEnden(e) {
 }
 
 // ── Der Rückwisch folgt dem Finger (ADR 0060) ──────────────────
-// Steht «Ansichten» auf iOS, schiebt sich die Ansicht mit dem Finger zur
-// Seite, und darunter liegt das Dashboard — ein stilles Abbild, gerollt wie
-// beim Weggehen. Losgelassen über der Schwelle wird sie dort, wo sie steht,
-// zum Tropfen und fließt in ihre Herkunft; darunter federt sie zurück. Erst
-// die bestätigte Geste wechselt die Ansicht. Wo der Rückweg nicht nach Hause
-// führt, etwas fragt oder die Tastatur offen ist, bleibt es beim Wisch, der
-// beim Loslassen wirkt (ADR 0016).
+// Steht «Ansichten» auf iOS, folgt die Ansicht dem Finger und wird dabei
+// schon zum Tropfen: Sie zieht sich zum rechten Rand hin zusammen, zum
+// Menüknopf, und rundet sich, bleibt aber ganz im Bild. Darunter liegt das
+// Dashboard — ein stilles Abbild, gerollt wie beim Weggehen. Losgelassen
+// über der Schwelle fließt sie von dort, wie sie steht, in ihre Herkunft;
+// darunter federt sie zurück. Erst die bestätigte Geste wechselt die
+// Ansicht. Wo der Rückweg nicht nach Hause führt, etwas fragt oder die
+// Tastatur offen ist, bleibt es beim Wisch, der beim Loslassen wirkt (ADR
+// 0016). Am Gerät schob sie sich zuerst nur zur Seite: Wer bis an den Rand
+// zog, ließ sie draußen los, und den Tropfen sah man nicht.
 var ZUG_AB = 12;         // px waagerecht, ab denen die Ansicht dem Finger folgt
 var ZUG_SCHWUNG = 0.6;   // px/ms: so schnell nach rechts zählt auch ein kurzer Zug
-var rueckZug = null;     // { x, dx, t, v, abbild, bild, federt }
+var ZUG_KLEIN = 0.45;    // so viel kleiner ist sie, wenn der Finger am rechten Rand ist
+var ZUG_RUND = 38;       // px: so rund werden ihre Ecken
+var rueckZug = null;     // { x, dx, t, v, abbild, schatten, mass, bild, federt }
 var zugZurueck = false;  // der nächste Rückweg kommt aus einem Zug: das Dashboard steht schon
+var zugForm = null;      // dabei: { skala, sicht } — wie groß sie war und welcher Teil zu sehen
 
 function zugMoeglich() {
   if (ansicht === 'home' || rueckZiel || !flIos('ansichten') || bewegungAus() || blattOffen()) return false;
@@ -5206,12 +5236,46 @@ function wischZiehen(e) {
   zugFolgen(t.clientX);
 }
 
+// Gemessen wird einmal, beim Beginn: wo die Ansicht steht und welcher Teil
+// von ihr zu sehen ist. Danach wird je Bild nur geschrieben.
 function zugBeginnen(x0, abbild) {
   if (rueckZug) zugAbraeumen();
   abbild = abbild && abbild.isConnected ? abbild : abbildDashboard();
-  $('app').classList.add('bereit');
-  rueckZug = { x: x0, dx: 0, t: Date.now(), v: 0, abbild: abbild, bild: false, federt: null };
-  $('app').classList.add('zieht');
+  var app = $('app'), schatten = document.createElement('div');
+  app.classList.add('bereit');
+  var r = app.getBoundingClientRect(), hoch = window.innerHeight || document.documentElement.clientHeight;
+  var mass = { links: r.left, breite: r.width, oben: -r.top, hoehe: app.offsetHeight, bild: hoch };
+  schatten.className = 'zug-schatten';
+  schatten.setAttribute('aria-hidden', 'true');
+  schatten.style.left = px(r.left);
+  schatten.style.width = px(r.width);
+  schatten.style.height = px(hoch);
+  document.body.appendChild(schatten);
+  // Sie schrumpft auf den rechten Rand zu, mitten im Bild.
+  app.style.transformOrigin = px(r.width) + ' ' + px(mass.oben + hoch / 2);
+  rueckZug = { x: x0, dx: 0, t: Date.now(), v: 0, abbild: abbild, schatten: schatten, mass: mass, bild: false, federt: null };
+  app.classList.add('zieht');
+}
+
+// Wie groß und wie rund sie bei `dx` ist.
+function zugSkala(dx, breite) { return 1 - ZUG_KLEIN * fpKlemme(dx / (breite || 1), 0, 1); }
+function zugEcken(dx) { return ZUG_RUND * fpKlemme(dx / 120, 0, 1); }
+
+// Ihre Gestalt bei Skala `s` und Ecken `e`: Gezeigt wird nur, was im Bild
+// war, mit runden Ecken — in ihren eigenen Maßen, vor dem Schrumpfen.
+function zugBilder(z, s, e) {
+  var m = z.mass, unten = Math.max(0, m.hoehe - m.oben - m.bild), ecke = px(e / s);
+  return { app: { transform: 'scale(' + s.toFixed(4) + ')',
+    clipPath: 'inset(' + px(m.oben) + ' 0px ' + px(unten) + ' 0px round ' + ecke + ')' },
+  schatten: { transform: 'scale(' + s.toFixed(4) + ')', borderRadius: ecke } };
+}
+
+function zugSetzen(z) {
+  var b = zugBilder(z, zugSkala(z.dx, z.mass.breite), zugEcken(z.dx)), app = $('app');
+  app.style.transform = b.app.transform;
+  app.style.clipPath = app.style.webkitClipPath = b.app.clipPath;
+  z.schatten.style.transform = b.schatten.transform;
+  z.schatten.style.borderRadius = b.schatten.borderRadius;
 }
 
 // Der Finger setzt nur, wohin; geschrieben wird einmal je Bild.
@@ -5225,7 +5289,7 @@ function zugFolgen(x) {
   fpBild(function () {
     if (rueckZug !== z || z.federt) return;
     z.bild = false;
-    $('app').style.transform = 'translate3d(' + px(z.dx) + ', 0, 0)';
+    zugSetzen(z);
   });
 }
 
@@ -5238,22 +5302,26 @@ function zugLoslassen(t) {
   wischVergessen();
   if (t) zugFolgen(t.clientX);
   var weit = z.dx >= WISCH_WEG && z.v > -0.2, schwung = z.v > ZUG_SCHWUNG && z.dx > ZUG_AB * 2;
-  $('app').style.transform = 'translate3d(' + px(z.dx) + ', 0, 0)';
+  zugSetzen(z);
   if (t && (weit || schwung) && !blattOffen()) {
-    // Gemessen wird die Ansicht, wie sie unter dem Finger steht: Von dort
-    // fließt sie als Tropfen.
+    // Sie fließt von dort, wie sie unter dem Finger steht: so groß, und nur
+    // der Teil, der zu sehen war.
+    var s = zugSkala(z.dx, z.mass.breite), h = z.mass.bild;
+    zugForm = { skala: s, ecken: zugEcken(z.dx), sicht: { top: h / 2 * (1 - s), height: h * s } };
     zugZurueck = true;
     zurueckGehen();
     zugZurueck = false;
+    zugForm = null;
     if (ansicht === 'home') { zugAbraeumen(); return; }
   }
   zugFedern();
 }
 
 function zugFedern() {
-  var z = rueckZug, tk = fluessigTakt('ansichten', true);
-  z.federt = bewegt($('app'), [{ transform: 'translate3d(' + px(z.dx) + ', 0, 0)' }, { transform: 'translate3d(0, 0, 0)' }],
-    { dauer: Math.round(tk.dauer * 0.8), kurve: tk.kurve }, function () { if (rueckZug === z) zugAbraeumen(); }) || true;
+  var z = rueckZug, tk = fluessigTakt('ansichten', true), opt = { dauer: Math.round(tk.dauer * 0.8), kurve: tk.kurve };
+  var von = zugBilder(z, zugSkala(z.dx, z.mass.breite), zugEcken(z.dx)), nach = zugBilder(z, 1, 0);
+  bewegt(z.schatten, [von.schatten, nach.schatten], opt);
+  z.federt = bewegt($('app'), [von.app, nach.app], opt, function () { if (rueckZug === z) zugAbraeumen(); }) || true;
 }
 
 function zugAbraeumen() {
@@ -5262,7 +5330,8 @@ function zugAbraeumen() {
   if (!z) return;
   if (z.federt && z.federt.cancel) { try { z.federt.cancel(); } catch (e) { /* schon fort */ } }
   app.classList.remove('zieht', 'bereit');
-  app.style.transform = '';
+  app.style.transform = app.style.transformOrigin = app.style.clipPath = app.style.webkitClipPath = '';
+  weg(z.schatten);
   weg(z.abbild);
 }
 

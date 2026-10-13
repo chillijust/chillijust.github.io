@@ -37,6 +37,11 @@ der Meldung beim Speichern). Geister teilen ein Stylesheet: Rückweg in Chromium
 gedrosselt, 119 statt 125 ms, beim ersten Mal 119 statt 159 ms; der Zug selbst beginnt in
 0,1 ms; das Abbild (72 ms) entsteht beim Auflegen am Rand, bevor sich etwas bewegt.
 
+0.17.0T28: Am Gerät schob der Rückwisch die Seite nur nach rechts; bis an den Rand gezogen,
+fiel der Tropfen außerhalb des Bilds. Jetzt wird die Ansicht beim Ziehen schon zum Tropfen —
+kleiner zum rechten Rand hin, runder, ganz im Bild — und fließt von dort in den Knopf (Wahl
+des Nutzers).
+
 ## Abgenommen
 
 - 0.17.0T26 · Auftropfen beim Start auf iOS (kurzer Hals aus einer Perle, ohne Lichtkante,

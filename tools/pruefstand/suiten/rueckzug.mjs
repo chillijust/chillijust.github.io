@@ -21,13 +21,13 @@ function finger(typ, x, y) {
     changedTouches: [t] }));
 }
 function abbild() { return q('body > .abbild'); }
-function verschoben() {
-  var m = /translate3d\(([-\d.]+)px/.exec(q('#app').style.transform);
-  return m ? parseFloat(m[1]) : 0;
+function skala() {
+  var m = /scale\(([-\d.]+)\)/.exec(q('#app').style.transform);
+  return m ? parseFloat(m[1]) : 1;
 }
 function sauber() {
   return !abbild() && !q('#app').classList.contains('zieht') && !q('#app').classList.contains('bereit') &&
-    !q('#app').style.transform && !rueckZug;
+    !q('#app').style.transform && !q('#app').style.clipPath && !q('body > .zug-schatten') && !rueckZug;
 }
 function aufbauen(ios) {
   frisch();
@@ -73,8 +73,23 @@ return warten(50).then(function () {
   var a = abbild(), w = a && a.shadowRoot;
   pruefe('Z2a es ist dasselbe Abbild', abbild() === frueh &&
     alle('body > .abbild').length === 1);
-  pruefe('Z2 darüber schiebt sich die Ansicht mit dem Finger', !!rueckZug && q('#app').classList.contains('zieht') &&
-    Math.abs(verschoben() - 100) < 0.5, q('#app').style.transform);
+  var app = q('#app').getBoundingClientRect();
+  pruefe('Z2 darüber folgt die Ansicht dem Finger und wird zum Tropfen: kleiner, zum rechten Rand hin, runder',
+    !!rueckZug && q('#app').classList.contains('zieht') && Math.abs(skala() - zugSkala(100, 430)) < 0.001 && skala() < 0.95 &&
+    Math.abs(app.right - 430) < 0.5 && /round [1-9]/.test(q('#app').style.clipPath), q('#app').style.transform + ' ' + q('#app').style.clipPath);
+  var sch = q('body > .zug-schatten');
+  pruefe('Z2b ihr Schatten liegt als eigene Fläche darunter, gleich groß', !!sch && sch.style.transform === q('#app').style.transform);
+  // Bis an den Rand gezogen bleibt sie ganz im Bild.
+  finger('touchmove', 428, 404);
+  return warten(50);
+}).then(function () {
+  var app = q('#app').getBoundingClientRect(), s = skala(), sicht = 932 * s;
+  pruefe('Z2c bis an den Rand gezogen bleibt sie ganz im Bild', s < 0.6 && app.right <= 430.5 &&
+    430 - 430 * s > 0, s);
+  finger('touchmove', 108, 404);
+  return warten(50);
+}).then(function () {
+  var a = abbild(), w = a && a.shadowRoot;
   pruefe('Z3 darunter liegt das Dashboard als stilles Abbild', !!w && !!w.querySelector('#ansicht .held') &&
     !!w.querySelector('#kopf #menuKnopf') && a.inert === true && a.getAttribute('aria-hidden') === 'true' &&
     getComputedStyle(a).pointerEvents === 'none', [!!w, w && !!w.querySelector('#ansicht .held'), w && !!w.querySelector('#kopf #menuKnopf'),
@@ -107,8 +122,10 @@ return warten(50).then(function () {
   var h = alle('body > .tropfen-huelle').filter(function (x) { return x._fluss && x._fluss.p.ziel === 0; }).pop();
   pruefe('Z9 über der Schwelle losgelassen: Das Dashboard steht', ansicht === 'home' && sauber() &&
     !!q('#ansicht .held'), ansicht);
-  pruefe('Z10 die Ansicht fließt von ihrer verschobenen Lage als Tropfen in den Menüknopf', !!h &&
-    Math.abs(parseFloat(h.style.left) - (16 + 152)) < 2 && h._fluss.p.ziel === 0 &&
+  var sl = zugSkala(152, 430);
+  pruefe('Z10 die Ansicht fließt so geschrumpft, wie sie stand, als Tropfen in den Menüknopf', !!h &&
+    Math.abs(parseFloat(h.style.left) - 430 * (1 - sl)) < 2 && Math.abs(parseFloat(h.style.width) - 430 * sl) < 2 &&
+    Math.abs(parseFloat(h.style.top) - 466 * (1 - sl)) < 2 && h._fluss.p.ziel === 0 &&
     h._fluss.o.quelle().left === q('#menuKnopf').getBoundingClientRect().left, h && h.style.left);
   pruefe('Z11 das Dashboard blendet nicht noch einmal ein', !q('#ansicht').getAnimations().some(function (an) {
     return an.effect.getKeyframes().some(function (k) { return k.opacity !== undefined; });
