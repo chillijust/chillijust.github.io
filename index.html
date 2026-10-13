@@ -1823,7 +1823,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.17.0T25';
+var APP_VERSION = '0.17.0T26';
 var APP_STAND = '2026-10-13';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
@@ -2913,6 +2913,7 @@ function fliessen(el, quelle, opt) {
 // sonst dazwischen. `farbe` gilt auch ohne Glas; `leer`: Das Teil hat keinen
 // eigenen Grund (ein leeres Häkchen) — das Flüssige blendet am Ziel aus, sein
 // Ring bleibt. `angekommen`: einmal, sobald er auf dem Weg hin am Ziel ist.
+// `hals`: eigene Zähigkeit statt der von iOS — wie früh der Hals reißt.
 function teilFliesst(el, o) {
   var f = el._fluss;
   if (bewegungAus()) {
@@ -2954,11 +2955,45 @@ function teilFliesst(el, o) {
   if (o.inhalt) o.inhalt.style.opacity = '0';
   // Das erste Bild gleich: Ein Teil, das zufließt, verschwände sonst einen
   // Augenblick lang.
-  teilSchritt(el, function schritt() { teilSchritt(el, schritt); });
+  teilSchritt(el);
 }
 
-function teilSchritt(el, weiter) {
-  var f = el._fluss, nun = Date.now();
+// Alle Teile, die fließen, gehen im selben Bild: erst messen alle, dann
+// schreiben alle. Ging jedes in seinem eigenen Bild, maß das zweite nach dem
+// Schreiben des ersten und zwang den Browser, alles neu zu rechnen — beim
+// Auftropfen viermal je Bild.
+var teilReihe = [], teilBildKommt = false;
+function teilWeiter(el) {
+  if (teilReihe.indexOf(el) < 0) teilReihe.push(el);
+  if (teilBildKommt) return;
+  teilBildKommt = true;
+  fpBild(teilBild);
+}
+
+function teilBild() {
+  teilBildKommt = false;
+  var liste = teilReihe, nun = Date.now();
+  teilReihe = [];
+  var masse = liste.map(function (el) { return teilMessen(el, nun); });
+  liste.forEach(function (el, i) { teilSchritt(el, masse[i], nun); });
+}
+
+// Was ein Schritt mißt — nichts, solange das Teil noch wartet.
+function teilMessen(el, nun) {
+  var f = el._fluss;
+  if (!f || nun < f.ab || bewegungAus()) return null;
+  var o = f.o, qr = el.isConnected ? o.quelle() : null;
+  if (!qr || !qr.width) return { weg: true };
+  // Zurück nimmt der Tropfen den Inhalt mit, auch wenn er unterwegs umkehrt.
+  if (f.p.ziel === 0) f.folgt = true;
+  return { qr: qr, zr: o.ziel(), er: el.getBoundingClientRect(),
+    ir: o.inhalt && f.folgt && !f.lage ? o.inhalt.getBoundingClientRect() : null };
+}
+
+// `m`: was teilMessen() gemessen hat; ohne mißt der Schritt selbst.
+function teilSchritt(el, m, nun) {
+  var f = el._fluss;
+  nun = nun || Date.now();
   if (!f) return;
   // Wird die Bewegung unterwegs abgeschaltet, steht das Teil sofort, wo es
   // hinwollte; sein Abschluß kommt genau einmal (James, N6).
@@ -2968,19 +3003,18 @@ function teilSchritt(el, weiter) {
     if (still) still();
     return;
   }
+  // Wer noch wartet, mißt nicht (teilMessen).
+  if (nun < f.ab) { teilWeiter(el); return; }
   // Erst alles messen, dann schreiben: Wer nach dem Schreiben mißt, zwingt
   // den Browser, mitten im Bild alles neu zu rechnen (P1, Nachricht 15).
-  var o = f.o, qr = el.isConnected ? o.quelle() : null;
-  if (!qr || !qr.width) {
+  m = m || teilMessen(el, nun);
+  if (!m || m.weg) {
     var weg1 = f.fertig;
     teilFliesstEnde(el);
     if (weg1) weg1();
     return;
   }
-  if (nun < f.ab) { fpBild(weiter); return; }
-  // Zurück nimmt der Tropfen den Inhalt mit, auch wenn er unterwegs umkehrt.
-  if (f.p.ziel === 0) f.folgt = true;
-  var zr = o.ziel(), er = el.getBoundingClientRect(), ir = o.inhalt && f.folgt && !f.lage ? o.inhalt.getBoundingClientRect() : null;
+  var o = f.o, qr = m.qr, zr = m.zr, er = m.er, ir = m.ir;
   var dt = f.zuletzt ? fpKlemme((nun - f.zuletzt) / 1000, 0.001, 0.05) : 0.016, p = f.p;
   f.zuletzt = nun;
   fpSchwingen(p, dt, FP_IOS);
@@ -3029,7 +3063,7 @@ function teilSchritt(el, weiter) {
   var x1 = Math.max(q.x + q.w, t.x + t.w, z.x + z.w) + 60, y1 = Math.max(q.y + q.h, t.y + t.h, z.y + z.h) + 80;
   q.x -= x0; q.y -= y0; t.x -= x0; t.y -= y0;
   f.formen = o.rest && q.s < 0.03 ? [t] : [q, t];
-  f.weite = fpWeite(q.r * (q.s === undefined ? 1 : q.s), o.d0 / 2, FP_IOS);
+  f.weite = fpWeite(q.r * (q.s === undefined ? 1 : q.s), o.d0 / 2, o.hals === undefined ? FP_IOS : { hals: o.hals });
   // Die Lichtkante leuchtet, solange er fließt, und ist fort, wenn er steht;
   // ein großes Blatt trägt unterwegs keine (`schlicht`).
   f.b.kante = FP_IOS.kante * fpKlemme(Math.abs(p.ziel - p.x) * 3, 0, 1);
@@ -3044,7 +3078,7 @@ function teilSchritt(el, weiter) {
     glasLoch + '")';
   f.s.style.clipPath = f.s.style.webkitClipPath = loch;
   fpZeichnen(f.b);
-  fpBild(weiter);
+  teilWeiter(el);
 }
 
 // Räumt ab: Das Teil ist wieder ganz es selbst.
@@ -10355,11 +10389,24 @@ function perleFliesst(el, warten, aus) {
   teilFliesst(el, { quelle: function () {
     if (!von.isConnected) return null;
     var f = von._fluss;
-    return f && f.jetzt ? f.jetzt : von.getBoundingClientRect();
+    return perleQuelle(f && f.jetzt ? f.jetzt : von.getBoundingClientRect(), el.getBoundingClientRect());
   },
     ziel: function () { return el.getBoundingClientRect(); }, rund: parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0,
-    d0: 30, inhalt: el, ort: feld ? feld.firstChild : el, auf: true, warten: warten });
+    d0: PERLE_D0, inhalt: el, ort: feld ? feld.firstChild : el, auf: true, warten: warten, schlicht: true,
+    hals: PERLE_HALS });
   return true;
+}
+
+// Woraus die Karte tropft: eine Perle unten am Rand der vorigen, über der
+// Mitte des Ziels, soweit die vorige reicht. Hing der Hals an der ganzen
+// vorigen Karte, stand zwischen zwei Karten eine Brücke, so breit wie sie
+// hoch sind, bis die Feder ruhte — am Gerät «zäh».
+var PERLE_D0 = 30;
+var PERLE_HALS = 0.15;   // iOS: 0.35
+function perleQuelle(r, z) {
+  var d = Math.min(PERLE_D0, r.width, r.height), mx = z.left + z.width / 2;
+  var x = fpKlemme(mx - d / 2, r.left, r.left + r.width - d);
+  return { left: x, top: r.top + r.height - d, width: d, height: d };
 }
 
 // ════════════════════════════════════════════════════════════════

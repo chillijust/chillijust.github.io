@@ -49,7 +49,7 @@ Safari als Home-Bildschirm-App im Vollbild, hoch und quer (ADR 0056).
 | 6 · Rückblick: Heatmap, Journal | fertig (0.7.1) |
 | 7 · Sicherung, Einstellungen, Tickets | fertig (0.8.0) |
 | 8 · Feinschliff, Nachbesserungen am Gerät, Timer und Zähler, Termine abhaken | fertig (0.13.1) |
-| 9 · Flüssig wie iOS 26 je Stelle, Chilli als Standard (ADR 0053–0055) | im Bau (0.17.0T25) |
+| 9 · Flüssig wie iOS 26 je Stelle, Chilli als Standard (ADR 0053–0055) | im Bau (0.17.0T26) |
 
 ## Wo was steht
 
@@ -186,5 +186,6 @@ node tools/pruefen.mjs                      # Vor-Push-Prüfung allein
   ein Bild (30–39 ms, kein Skript), vermutlich die Druckrückmeldung. Drangblatt am Gerät: auf und zu je ein
   Bild, längster 53 ms; das Ende nach zehn Minuten ist noch ungetestet. Block 5 (P2) in 0.17.0T25:
   `auswerten` merkt sich je Gewohnheit, ein Haken rechnet einmal statt 122-mal (40 Gewohnheiten, drei
-  Jahre). Als Nächstes Block 6. Für Block 7 dazu: «10 von 12» bricht im Tagesring um —
+  Jahre). Auftropfen beim Start auf iOS: kurzer Hals aus einer Perle, ohne Lichtkante, alle Teile in
+  einem Bild (0.17.0T26) — Abnahme am Gerät steht aus. Als Nächstes Block 6. Für Block 7 dazu: «10 von 12» bricht im Tagesring um —
   Varianten als Bildvergleich (Zahl kleiner, Umschalter in die Kalenderzeile, so lassen).
