@@ -54,7 +54,8 @@ var knopf = q('#rkKnopf'), kopf = q('#rkKarte') && q('#rkKarte').parentNode.quer
 pruefe('R6 der Reiter «Flüssig» trägt «Ruckler messen» mit Knopf', !!knopf && !!kopf && /Ruckler/.test(kopf.textContent) &&
   knopf.textContent === 'Messen');
 pruefe('R7 der Knopf ist groß genug', knopf.getBoundingClientRect().height >= 44 && knopf.getBoundingClientRect().width >= 44);
-pruefe('R8 ohne Messung steht «noch keine» da', wert('Letzte Messung') === 'noch keine');
+pruefe('R8 ohne Messung steht «noch keine» da, und es gibt nichts zu kopieren', wert('Letzte Messung') === 'noch keine' &&
+  !q('#rkKopieren'));
 pruefe('R9 die Messung steht über den Proben', !!q('#app [data-fp-karte]') &&
   (q('#rkKarte').compareDocumentPosition(q('#app [data-fp-karte]')) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0);
 
@@ -74,10 +75,11 @@ bilder(1, 1000 / 60 * 3);
 pruefe('R13 die Messung läuft weiter, wenn man den Reiter verläßt', ruckler === lauf);
 bilder(400, 1000 / 60);
 pruefe('R14 nach zehn Sekunden ist sie fertig', ruckler === null && bestellt.length === 0, bestellt.length);
-pruefe('R15 das Ergebnis meldet sich mit «OK», wo man ist', !q('#hinweisBlatt').hidden && q('#hinweisTitel').textContent === '2 Ruckler' &&
-  !q('#hinweisOk').hidden && /längster Abstand 100 ms/.test(q('#hinweisText').textContent), q('#hinweisTitel').textContent + ' / ' + q('#hinweisText').textContent);
+pruefe('R15 das Ergebnis meldet sich mit «Kopieren» und «OK», wo man ist', !q('#hinweisBlatt').hidden && q('#hinweisTitel').textContent === '2 Ruckler' &&
+  !q('#hinweisOk').hidden && q('#hinweisOk').textContent === 'Kopieren' && !q('#hinweisNein').hidden && q('#hinweisNein').textContent === 'OK' &&
+  /längster Abstand 100 ms/.test(q('#hinweisText').textContent), q('#hinweisTitel').textContent + ' / ' + q('#hinweisText').textContent);
 pruefe('R16 im neutralen Zeichen, nicht im Haken', q('#hinweisHaken').getAttribute('data-zeichen') === 'hinweis');
-q('#hinweisOk').click();
+q('#hinweisNein').click();
 labor();
 pruefe('R17 der Reiter zeigt die letzte Messung', wert('Ruckler') === '2' && wert('Ausgelassene Bilder') === '7' &&
   wert('Längster Abstand') === '100 ms' && /^60 Hz/.test(wert('Takt')), [wert('Ruckler'), wert('Ausgelassene Bilder'), wert('Längster Abstand'), wert('Takt')].join(' | '));
@@ -85,13 +87,13 @@ pruefe('R17 der Reiter zeigt die letzte Messung', wert('Ruckler') === '2' && wer
 // ── Im Reiter fertig: die Karte zeichnet sich an Ort und Stelle neu ──
 q('#rkKnopf').click();
 bilder(10, 1000 / 60); bilder(1, 50); bilder(600, 1000 / 60);
-q('#hinweisOk').click();
+q('#hinweisNein').click();
 pruefe('R18 endet sie im Reiter, steht das neue Ergebnis gleich da, der Knopf geht wieder',
   wert('Ruckler') === '1' && q('#rkKnopf').textContent === 'Messen' && !ruckler, wert('Ruckler'));
 q('#rkKnopf').click();
 pruefe('R19 der neue Knopf ist gebunden', !!ruckler);
 bilder(700, 1000 / 60);
-q('#hinweisOk').click();
+q('#hinweisNein').click();
 
 // ── Hintergrund: die Lücke ist kein Ruckler ──────────────────
 var vorher = rucklerLetzte;
@@ -101,8 +103,9 @@ Object.defineProperty(document, 'hidden', { configurable: true, get: function ()
 document.dispatchEvent(new Event('visibilitychange'));
 delete document.hidden;
 bilder(1, 5000); bilder(400, 1000 / 60);
-pruefe('R20 war die App im Hintergrund, gibt es kein Ergebnis', ruckler === null && rucklerLetzte === vorher &&
-  q('#hinweisTitel').textContent === 'Keine Messung' && /Hintergrund/.test(q('#hinweisText').textContent), q('#hinweisTitel').textContent);
+pruefe('R20 war die App im Hintergrund, gibt es kein Ergebnis und nichts zu kopieren', ruckler === null && rucklerLetzte === vorher &&
+  q('#hinweisTitel').textContent === 'Keine Messung' && /Hintergrund/.test(q('#hinweisText').textContent) &&
+  q('#hinweisOk').textContent === 'OK' && q('#hinweisNein').hidden, q('#hinweisTitel').textContent);
 q('#hinweisOk').click();
 
 // ── Eine offene Frage wird nicht überschrieben ───────────────
@@ -116,7 +119,7 @@ window.requestAnimationFrame = rafEcht;
 return warten(700).then(function () {
   pruefe('R22 nach der Frage kommt das Ergebnis', !q('#hinweisBlatt').hidden && q('#hinweisTitel').textContent === 'Keine Ruckler',
     q('#hinweisTitel').textContent);
-  q('#hinweisOk').click();
+  q('#hinweisNein').click();
 
   // ── Kein Bild mehr: die Messung endet trotzdem ─────────────
   window.requestAnimationFrame = function (f) { return 0; };
@@ -127,5 +130,29 @@ return warten(700).then(function () {
   pruefe('R23 kommt kein Bild, endet sie nach der Frist ohne Ergebnis', ruckler === null &&
     q('#hinweisTitel').textContent === 'Keine Messung', q('#hinweisTitel').textContent);
   q('#hinweisOk').click();
+
+  // ── Kopieren: alle Messungen seit dem Start, eine je Zeile ──
+  var kopiert = null;
+  kopieren = function (text, fertig) { kopiert = text; fertig(true); };
+  var n = rucklerAlle.length, zeilen;
+  labor();
+  pruefe('R24 nach einer Messung steht «Kopieren» im Reiter', !!q('#rkKopieren') && n >= 3, n);
+  q('#rkKopieren').click();
+  zeilen = (kopiert || '').split(String.fromCharCode(10));
+  pruefe('R25 kopiert wird jede Messung mit Version, Werten und den Stellen auf iOS', zeilen.length === n + 1 &&
+    zeilen[0].indexOf(APP_VERSION) !== -1 && zeilen.slice(1).every(function (z) {
+      return /^\d\d:\d\d · \d+ Ruckler · \d+ ausgelassen · längster \d+ ms · \d+ Hz, \d+ Bilder · (alles Chilli|iOS: .+)$/.test(z);
+    }), kopiert);
+  pruefe('R26 und die App sagt, daß es kopiert ist', !q('#hinweisBlatt').hidden && /^Kopiert/.test(q('#hinweisTitel').textContent));
+  hinweisSchliessen();
+  // Im Ergebnis-Hinweis kopiert «Kopieren» dasselbe, gleich dort.
+  state.fluessig = { ios: { hinweis: true } };
+  kopiert = null;
+  rucklerAlle.push({ e: rucklerLetzte, zeit: zeitJetzt(), ios: ['Hinweis aus Glas'] });
+  rucklerMelden(true, '1 Ruckler', 'Probe');
+  q('#hinweisOk').click();
+  pruefe('R27 «Kopieren» im Ergebnis kopiert alle Messungen', !!kopiert && /iOS: Hinweis aus Glas$/.test(kopiert), kopiert);
+  hinweisSchliessen();
+  state.fluessig = null;
 });
 `);

@@ -103,7 +103,7 @@ state = {
 - **Gespeichert sind nur Tatsachen** (Tage, Zeitpunkte). Stärke, Serie, Rekord rechnen
   `auswerten(g, heute)` und `lasterAuswerten(a, nun)` bei jedem Zeichnen neu.
 - Nur im Speicher der Seite, nie in `state`: `kalVersatz`, `kalTag`, `hm`, `entwurf`,
-  `terminEntwurf`, `reflexionEntwurf`, `ticketEntwurf`, `rueckgaengig`, `flEntwurf`, `rucklerLetzte`.
+  `terminEntwurf`, `reflexionEntwurf`, `ticketEntwurf`, `rueckgaengig`, `flEntwurf`, `rucklerLetzte`, `rucklerAlle`.
 
 ## Render-Zyklus
 
@@ -144,7 +144,7 @@ state = {
 | Bewegung | `tropfenAuf`, `tropfenZu`, `teilZeigen`, `teilTropfen`, `geist`, `zeileGeht`, `langDruecken`, `punktFlaeche` |
 | Menü | `MENUE`, `menueOeffnen`, `menueSchliessen`, `menueAnker`, `menueMitrollen` |
 | Hell/Dunkel | `themaSetzen`, `themaAnwenden` |
-| Ruckler messen | `rucklerStarten`, `rucklerBild`, `rucklerAuswerten`, `rucklerEnde`, `rucklerMelden` |
+| Ruckler messen | `rucklerStarten`, `rucklerBild`, `rucklerAuswerten`, `rucklerEnde`, `rucklerMelden`, `rucklerKopieren` |
 | Kaltstart, Schriftzug | `start`, `auftritt`, `auftrittEnde`, `dashboardAuftropfen`, `zeichneMarke` |
 | Service Worker | `swAnmelden`, `swNachsehen`, `swAuskunft`, `swAufraeumen`, `perleAuf` |
 | Uhr, Tage | `jetzt`, `tagSchluessel`, `tagPlus`, `wochenAnfang` |
