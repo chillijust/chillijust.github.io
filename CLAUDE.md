@@ -169,7 +169,9 @@ Was erledigt ist und was es am Gerät gemessen hat, steht in `docs/verlauf.md`.
 
 - **Abnahme am Gerät steht aus** für Flüssig 0.17.0T7–T25 (ADR 0054, 0055) und James' N1–N9
   (0.17.0T10–T16). Abgenommen: T24 (Drangblatt), T26 (Auftropfen), T28 (Block 6, Rückwisch).
-- **James prüft** die Rückwege erneut (Nachricht 16 auf `chatgpt/kommunikation`).
+- **James prüft vor der Freigabe** in einem Durchgang: Rückwege, Leistung vorher/nachher,
+  Block 7 (Nachrichten 16 und 17 auf `chatgpt/kommunikation`). Danach gibt der Nutzer
+  0.17.0 frei: T weg, Abschnitt 9 «fertig».
 - **Block 7 (Gestaltung) ist ausgeliefert** (0.17.0T29–T30): Timer-Glas dichter, Titel auf
   zwei Zeilen, «10 von 12» kleiner, Kalenderpunkte größer, Schalter aus in Hell gefaßt.
   Abnahme am Gerät steht aus. Damit ist der Plan aus Nachricht 15 umgesetzt.
