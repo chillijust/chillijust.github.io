@@ -49,7 +49,7 @@ Safari als Home-Bildschirm-App im Vollbild, hoch und quer (ADR 0056).
 | 6 · Rückblick: Heatmap, Journal | fertig (0.7.1) |
 | 7 · Sicherung, Einstellungen, Tickets | fertig (0.8.0) |
 | 8 · Feinschliff, Nachbesserungen am Gerät, Timer und Zähler, Termine abhaken | fertig (0.13.1) |
-| 9 · Flüssig wie iOS 26 je Stelle, Chilli als Standard (ADR 0053–0055) | im Bau (0.17.0T28) |
+| 9 · Flüssig wie iOS 26 je Stelle, Chilli als Standard (ADR 0053–0055) | im Bau (0.17.0T29) |
 
 ## Wo was steht
 
@@ -170,6 +170,7 @@ Was erledigt ist und was es am Gerät gemessen hat, steht in `docs/verlauf.md`.
 - **Abnahme am Gerät steht aus** für Flüssig 0.17.0T7–T25 (ADR 0054, 0055) und James' N1–N9
   (0.17.0T10–T16). Abgenommen: T24 (Drangblatt), T26 (Auftropfen), T28 (Block 6, Rückwisch).
 - **James prüft** die Rückwege erneut (Nachricht 16 auf `chatgpt/kommunikation`).
-- **Block 7 (Gestaltung):** Timer-Glas dichter, lange Titel zwei Zeilen dann «…», Kleinteile
-  und «10 von 12» im Tagesring als Bildvergleich zur Wahl. Plan: Nachricht 15.
+- **Block 7 (Gestaltung):** Timer-Glas dichter und Titel auf zwei Zeilen sind ausgeliefert
+  (0.17.0T29, Abnahme am Gerät steht aus). Offen: Kleinteile (Schalter aus in Hell,
+  Kalenderpunkte) und «10 von 12» im Tagesring als Bildvergleich zur Wahl. Plan: Nachricht 15.
 - **Vorgemerkt:** Jedes Auflegen des Fingers kostet ein Bild (30–39 ms, kein Skript).

@@ -42,6 +42,12 @@ fiel der Tropfen außerhalb des Bilds. Jetzt wird die Ansicht beim Ziehen schon 
 kleiner zum rechten Rand hin, runder, ganz im Bild — und fließt von dort in den Knopf (Wahl
 des Nutzers).
 
+Block 7, erster Teil, in 0.17.0T29: Timer und Drang tragen dichteres Glas (`--glas-dicht`, Hell
+.78, Dunkel .8 statt .42/.40) bei gleicher Unschärfe — über einer vollen Terminliste schien
+der Text dahinter deutlich durch (James, 12). Lange Titel auf dem Dashboard brechen nach zwei
+Zeilen mit «…» ab; ganz stehen sie beim Bearbeiten, im Vorlesetext und in der Exportliste.
+Suite `gestaltung`. Offen in Block 7: Kleinteile und «10 von 12» als Bildvergleich zur Wahl.
+
 ## Abgenommen
 
 - 0.17.0T28 · Block 6: Rückwisch folgt dem Finger auf iOS und wird dabei zum Tropfen, fließt
