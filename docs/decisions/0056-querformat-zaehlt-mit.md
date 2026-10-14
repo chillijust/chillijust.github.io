@@ -37,4 +37,5 @@ nicht eigens gestaltet ist.
 - Safe-Area quer (Dynamic Island links oder rechts, Home-Leiste unten) zeigt nur das Gerät;
   die Blätter halten dafür `env(safe-area-inset-*)` an allen vier Seiten ein.
 - Nebenbefund beim Bau: Der Prüfstand gibt den Suiten im Hochformat 500 × 845 statt
-  430 × 932 — kopfloses Chrome hat eine Mindestbreite und zieht seine Leiste ab. Offen.
+  430 × 932 — kopfloses Chrome hat eine Mindestbreite und zieht seine Leiste ab.
+  **Erledigt** (ADR 0058, am Stand 0.17.0T16); das Querformat verlangt seitdem `'932,430'`.

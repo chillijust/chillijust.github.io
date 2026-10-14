@@ -9,6 +9,8 @@ Gilt für die Gewohnheiten in `index.html`. Begründungen in ADR 0002 und im Pfl
 
 - **Nichts Abgeleitetes wird gespeichert.** Stärke, Serie, Warnung, Punkte entstehen in
   `auswerten(g, heute)` aus `erledigt` und `rhythmus` — gespeichert sind nur die Tage.
+  `auswerten` merkt sich sein Ergebnis je Gewohnheit, geschlüsselt nach allem, wovon es
+  abhängt; das Ergebnis ist geteilt und eingefroren — nie hineinschreiben (P2).
 - **Ein Tag ist ein Schlüssel `JJJJ-MM-TT` in lokaler Zeit.** Gerechnet wird mit `tagPlus`
   (über `setDate`), nie mit Millisekunden; verglichen als Text.
 - **Die Uhr ist `jetzt()`**, sonst nirgends `new Date()` für «heute» — der Prüfstand stellt sie.

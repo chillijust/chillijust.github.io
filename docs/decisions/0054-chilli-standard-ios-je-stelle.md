@@ -2,7 +2,8 @@
 
 *2026-10-10 · Planänderung des Nutzers nach 0.17.0T2 · Version 0.17.0T3 · löst in 0053 die
 Voreinstellung «iOS 26 im Filter», die eigenen Einstellungen (Grund, Technik, Regler),
-«Einstellungen kopieren» und den Filter ab; ändert in 0041 den Aufbau des Timers; ergänzt durch 0055 (Kontrast in Dunkel)*
+«Einstellungen kopieren» und den Filter ab; ändert in 0041 den Aufbau des Timers; ergänzt durch 0055 (Kontrast in Dunkel), in 0.17.0T18
+(große Blätter fließen schlicht) und in 0.17.0T26 (Auftropfen: kurzer Hals, ein Bild für alle)*
 
 ## Ausgangslage
 
@@ -45,6 +46,23 @@ hart schneiden) rechnet Safari auf dem iPhone teils ohne Grafikchip, Bild für B
   Glas, und die Hülle blendet über ihr aus (`glasAmZiel`). Die Unschärfe in jedem Bild neu
   zu rechnen, ließ das Blatt am Gerät ruckeln. Hinweis und Meldung sind klein und bleiben
   Glas im Tropfen.
+- **Große Blätter fließen schlicht** (0.17.0T18, P1 aus Nachricht 15): Ticketblatt und
+  Timer fließen milchig, auf iOS mit einem Schatten statt zwei und ohne Lichtkante
+  (`SCHATTEN_SCHLICHT`, `schlicht`); am Ziel hat die Karte ihr Glas mit allem. Am Gerät
+  verlor das Ticketblatt auf iOS je Auf und Zu rund 24 Bilder, auf Chilli 4–5 (Messung
+  «Ruckler messen», 4 × auf und zu): Doppelschatten und Lichtkante entstanden als Filter
+  über die ganze Fläche in jedem Bild neu. Der Timer floß bis dahin sogar mit Unschärfe.
+  Je Bild wird erst gemessen, dann geschrieben (`teilSchritt`). Hinweis und Meldung bleiben,
+  wie sie sind. Seit 0.17.0T23 fließt auch eine Ansicht (`gross`) ohne Lichtkante, mit
+  ihrem einen Schatten: Die Spur von «Ruckler messen» zeigte nach jedem Rückwisch auf iOS
+  ein Bild von 110–130 ms ohne Skript, auf Chilli höchstens 39 ms. Seit 0.17.0T26 tropfen
+  auch die Karten beim Start ohne Lichtkante, und ihr Hals ist zäher als der von iOS
+  (`PERLE_HALS` 0,15 statt 0,35) und hängt an einer Perle unten an der vorigen Karte
+  (`perleQuelle`), nicht an der ganzen: Zwischen zwei Karten stand sonst eine Brücke, bis
+  die Feder ruhte, rund eine Sekunde je Karte — am Gerät «zu zäh». Alle Teile, die
+  fließen, messen und schreiben im selben Bild (`teilBild`); bis zu sechs Karten maßen
+  vorher jede in ihrem eigenen und zwangen den Browser, alles viermal je Bild neu zu
+  rechnen.
   `fliessen` (Marke, Knauf, Abhaken) malt nur Hals und Rest, nie das Teil selbst. In
   0.17.0T3 lief überall die Chilli-Bewegung, und das Flüssige lag als zweites Bild
   darunter — am Gerät sah das aus wie zwei Teile übereinander, mit doppeltem Schatten.
@@ -59,7 +77,10 @@ hart schneiden) rechnet Safari auf dem iPhone teils ohne Grafikchip, Bild für B
 - **Drang und Timer zeigen immer Flüssigkeit mit Chili** (`welleFliesst`): Der Pegel sinkt
   mit der Restzeit. Im Standard wiegt die Oberfläche ruhig, ohne Perlen und Lichtkante; mit
   iOS-«Welle» wogt sie, Perlen steigen auf. Der Außenring ist bei beiden ein Drittel so
-  dick wie zuvor.
+  dick wie zuvor. Seit 0.17.0T19 zeichnet sie ein einziges SVG ohne Filter und ohne
+  `clip-path` (`welleZeichnen`), die Lichtkante als Strich die Oberfläche entlang: Sie wird
+  alle 50 ms neu gezeichnet, und am Gerät ruckelte der Drang in drei Schichten mit Filter in
+  beiden Stilen gleich (50 Ruckler in 10 s).
 - **Der Timer ist gebaut wie der Drang**: im Ring Flüssigkeit und Chili, die Zeit groß
   darunter, dann Pause, Abbrechen, Fertig (ersetzt «Pause im Ring» aus 0041). Die Chili
   wandert hinüber, solange er offen ist (`chiliImTimer`, `chiliZurueck`) — sie steht

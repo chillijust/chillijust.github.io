@@ -45,7 +45,8 @@ fest.
   Ein zweites Ziel gibt es nicht, außer dem «−» des Zählers. Nach einem langen Druck ist
   nichts markierbar, bis der Finger sich hebt (`langHalten`).
 - **Der Rückweg geht nur über `zurueckGehen()`** — Kopf und Wisch vom Rand
-  (`wischBeginnen`/`wischEnden`) rufen es.
+  (`wischBeginnen`/`wischEnden`, auf iOS der Zug `zugLoslassen`) rufen es. Was unter dem
+  Zug liegt, ist ein Abbild ohne Ids im Dokument, nie eine zweite bedienbare Seite (ADR 0060).
 - **Was live läuft, schreibt `takt()` an Ort und Stelle** — kein `render()` im Sekundentakt.
 - **Quer ist das Bild 430 hoch** (ADR 0056): Keine Karte wird höher als ihr Blatt; was neu
   ist, prüft auch die Suite `querformat`.
@@ -77,8 +78,11 @@ fest.
 - **Glas** (`.glas`, im Tropfen `glas` im `opt`) haben Hinweis, Meldung, Ticketblatt und
   Fenster, keine Ansicht. **Kein Vorfahr von Glas blendet seine Deckkraft** — sonst bleibt
   es matt (ADR 0014). Glas an einer Gewohnheit beginnt und endet in ihrer Scheibe
-  (`scheibeVon`). Ein großes Blatt aus Glas tropft `milchig` und bekommt sein Glas erst am
-  Ziel — Unschärfe in jedem Bild ruckelt am Gerät (ADR 0054).
+  (`scheibeVon`). Ein großes Blatt aus Glas (Ticketblatt, Timer) tropft `milchig`, auf iOS
+  schlicht, und bekommt sein Glas erst am Ziel — Unschärfe, Doppelschatten und Lichtkante
+  in jedem Bild ruckeln am Gerät (ADR 0054). Eine Ansicht fließt auf iOS ohne Lichtkante
+  (`gross`). Timer und Drang sind Blätter, keine Ansichten (ADR 0059). Ein Bildschritt mißt
+  erst, dann schreibt er.
 - **Rückmeldung** — immer im Glas:
   - gespeichert oder angelegt: `bestaetigen()` (ohne Speichern mit `'hinweis'`, nie Haken);
   - alles andere: `melden(text, zeichen)`, `'haken'` nur bei Erfolg, `'warnung'` bei einem

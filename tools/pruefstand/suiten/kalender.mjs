@@ -204,8 +204,12 @@ function wischPruefen() {
   }
   function punkt(el) { var r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + Math.min(20, r.height / 2) }; }
   // Ein Zug in «n» Schritten, je «dt» ms auseinander; «los» läßt danach los.
+  // Wo der Finger zuletzt war, merkt «finger» — die Seite darunter ist mit ihm
+  // gewandert, an ihr läßt sich der Loslaßpunkt nicht mehr ablesen.
+  var finger = null;
   function ziehen(el, dx, dy, n, dt, los) {
     var a = punkt(el), i = 0;
+    finger = { x: a.x + dx, y: a.y + dy };
     zeiger('pointerdown', el, a.x, a.y);
     return new Promise(function (fertig) {
       (function weiter() {
@@ -236,8 +240,10 @@ function wischPruefen() {
       +j.style.opacity <= 1 && /inset/.test(j.style.clipPath) && getComputedStyle(rolle('danach')).visibility === 'visible');
     pruefe('S5 der Stand ändert sich erst beim Loslassen', kalVersatz === 0);
     pruefe('S6 nichts macht die Seite breiter', document.documentElement.scrollWidth <= innerWidth);
-    var a = punkt(q('#kalRaster'));
-    zeiger('pointerup', q('#kalRaster'), a.x - 100, a.y);
+    // Bis 0.17.0T16 las die Suite den Punkt an der verschobenen Seite ab und
+    // ließ 100 Punkte weiter links los; in 500 Breite federte das zufällig
+    // zurück, in den 430 des iPhones blätterte es (James, Nachricht 13).
+    zeiger('pointerup', q('#kalRaster'), finger.x, finger.y);
     return warten(RUHE);
   }).then(function () {
     pruefe('S7 kurz und langsam: federt zurück', kalVersatz === 0 && ruhig());

@@ -22,6 +22,7 @@ vor jedem `git push` und hält den Push an, wenn etwas rot ist.
 | | |
 | --- | --- |
 | `lauf.mjs` | der Läufer |
+| `kopflos.mjs` | Chromium über DevTools: Fenster genau 430 × 932, eigener Speicher je Suite, virtuelle Zeit (ADR 0058) |
 | `helfer.mjs` | Wege (`WURZEL`, `APP`, `BAU`), Browsersuche, `testseite()`, `suite()` |
 | `bild.mjs` | Bildschirmfotos in Handybreite (430 × 932) |
 | `suiten/*.mjs` | die Suiten — eine Datei, ein Thema; der Kopfkommentar sagt, was sie prüft |

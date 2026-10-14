@@ -14,9 +14,9 @@
 
 import { existsSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
-import { execFileSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 import { HIER, BAU, chromiumFinden } from './helfer.mjs';
+import { browserStarten, domLesen } from './kopflos.mjs';
 
 const SUITEN_ORDNER = join(HIER, 'suiten');
 
@@ -43,6 +43,10 @@ if (!chrome) {
     'oder als chromium/google-chrome im Pfad.');
   process.exit(2);
 }
+
+// Ein Browser für alle Suiten; jede bekommt ihren eigenen Kontext (kopflos.mjs).
+// Hängt eine, wird er neu gestartet, damit die nächste nicht mit hängt.
+let browser = await browserStarten(chrome);
 
 let gruen = 0;
 let rot = 0;
@@ -94,13 +98,13 @@ for (const name of suiten) {
     // darunter bleiben, sonst kommt sie ohne Urteil zurück. `thema` wartet
     // mehrmals THEMA_TROPFEN + 500 und sprengte 10 s (ADR 0039).
     // Eine Suite darf ein anderes Fenster verlangen — das Querformat (ADR 0056).
-    const fenster = (readFileSync(seite, 'utf8').match(/<!-- pruefstand-fenster:(\d+,\d+) -->/) || [])[1] || '430,932';
-    dom = execFileSync(chrome, ['--headless', '--disable-gpu', '--no-sandbox',
-      '--window-size=' + fenster, '--virtual-time-budget=20000',
-      '--dump-dom', pathToFileURL(seite).href],
-    { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] });
+    // Das Fenster ist genau das, was die Seite sieht; keine Leiste mehr dazu.
+    const fenster = (readFileSync(seite, 'utf8').match(/<!-- pruefstand-fenster:(\d+),(\d+) -->/) || [0, 430, 932]);
+    dom = await domLesen(browser, pathToFileURL(seite).href, +fenster[1], +fenster[2]);
   } catch (e) {
-    dom = e.stdout || '';
+    gesagt.push('Läufer: ' + e.message);
+    browser.ende();
+    browser = await browserStarten(chrome);
   }
   const titel = (dom.match(/<title>([^<]*)<\/title>/) || [])[1] || '';
 
@@ -119,6 +123,8 @@ for (const name of suiten) {
     gesagt.forEach((z) => console.log('    · ' + z));
   }
 }
+
+browser.ende();
 
 console.log(`--- ${gruen} grün (${pruefungen} Prüfungen) · ${rot} rot` +
   (kaputt.length ? ' · ' + kaputt.join(' ') : ''));

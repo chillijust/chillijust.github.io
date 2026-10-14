@@ -194,12 +194,31 @@ aufbauen();
 var nun = zeitJetzt();
 state.abgewoehnen = [lasterLesen({ id: 'w1', name: 'Zucker', start: nun - 86400000, rueckfaelle: [], draenge: [] })];
 welleBeginnen('w1');
-zeige('welle');
-var fl = q('#welle .fl-welle');
+zeige('home');
+drangOeffnen('w1');
+var fl = q('#drangKarte .fl-welle');
 pruefe('W1 im Drang steht Flüssigkeit unter der Chili, auch im Standard', !!fl && fl.nextElementSibling === q('#chiliFigur') &&
-  /path\(/.test(fl.querySelector('.fp-fluss').style.clipPath) && fl.querySelector('.fp-licht').style.opacity === '0');
-pruefe('W2 der Ring ist ein Drittel so dick wie zuvor', Math.abs(parseFloat(getComputedStyle(q('#welle .welle-ring circle')).strokeWidth) - 0.73) < 0.01);
+  /^M/.test(fl.querySelector('svg .fw-fluss').getAttribute('d') || ''));
+// Sie wird alle 50 ms neu gezeichnet, Minuten lang: ein SVG, kein Filter, keine
+// Maske — im Standard nur der Umriß, den man sieht (Nachricht 15, Timer).
+pruefe('W1b die Welle zeichnet ohne Filter und ohne clip-path, im Standard nur eine Fläche',
+  !fl.querySelector('filter') && !fl.querySelector('[style*="clip-path"]') && alle('#drangKarte .fl-welle path').length === 1);
+pruefe('W2 der Ring ist ein Drittel so dick wie zuvor', Math.abs(parseFloat(getComputedStyle(q('#drangKarte .ring circle')).strokeWidth) - 0.73) < 0.01);
+drangSchliessen(true);
+pruefe('W1d zu zeichnet die Welle nicht weiter: sie ist fort', !q('#drangKarte .fl-welle'));
 state.welle = null;
+state.fluessig = { ios: { welle: true } };
+welleBeginnen('w1');
+render();
+drangOeffnen('w1');
+fl = q('#drangKarte .fl-welle');
+var licht = fl && fl.querySelector('.fw-licht');
+pruefe('W1c auf iOS: Saum, Kern und Lichtkante als Strich, am Umriß abgeschnitten, ohne Filter', !!licht &&
+  !!fl.querySelector('.fw-kern') && /^M/.test(licht.getAttribute('d') || '') && !fl.querySelector('filter') &&
+  /url\(#fwC-/.test(licht.getAttribute('clip-path') || '') && licht.style.opacity === String(FP_IOS.kante));
+drangSchliessen(true);
+state.welle = null;
+state.fluessig = null;
 zeige('home');
 
 var blattFluss = null, stillstand = null, zuGeist = null, zuHuelle = null;

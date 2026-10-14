@@ -182,17 +182,19 @@ return durch().then(function () {
   aufbauen();
   state.abgewoehnen = [lasterLesen({ id: 'r', name: 'Rauchen', start: UHR - 864e5, rueckfaelle: [], draenge: [] })];
   welleBeginnen('r');
-  zeige('welle');
+  render();
+  drangOeffnen('r');
   var ab = q('#welleAbbrechen');
-  pruefe('W1 die Welle hat «Abbrechen»', !!ab && /Abbrechen/.test(ab.textContent) && zuKlein('#app').length === 0,
-    zuKlein('#app').join());
+  pruefe('W1 die Welle hat «Abbrechen»', !!ab && /Abbrechen/.test(ab.textContent) && zuKlein('#drangKarte').length === 0,
+    zuKlein('#drangKarte').join());
   ab.click();
   var a = lasterNach('r'), gesp = JSON.parse(localStorage.getItem(SPEICHER));
   pruefe('W2 abgebrochen: keine Welle mehr, nichts gezählt', state.welle === null && a.draenge.length === 0 &&
-    a.rueckfaelle.length === 0 && gesp.welle === null && ansicht === 'home');
+    a.rueckfaelle.length === 0 && gesp.welle === null && ansicht === 'home' && !drangOffen());
   pruefe('W3 und es wird gesagt', /Abgebrochen/.test(q('#meldung').textContent));
   state.welle = { id: 'r', start: UHR - WELLE_MS - 1000 };
-  zeige('welle');
+  render();
+  drangOeffnen('r');
   pruefe('W4 auch wenn die Welle durch ist', !!q('#welleGewonnen') && !!q('#welleAbbrechen'));
   q('#welleAbbrechen').click();
   pruefe('W5 dann ebenso ohne Zählung', state.welle === null && lasterNach('r').draenge.length === 0);

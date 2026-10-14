@@ -101,9 +101,11 @@ state = {
   vorhandener Stand **anders gelesen** werden muß, steigt das Schema — mit neuem Schlüssel
   und Migration — und die erste Ziffer der Version.
 - **Gespeichert sind nur Tatsachen** (Tage, Zeitpunkte). Stärke, Serie, Rekord rechnen
-  `auswerten(g, heute)` und `lasterAuswerten(a, nun)` bei jedem Zeichnen neu.
+  `auswerten(g, heute)` und `lasterAuswerten(a, nun)` bei jedem Zeichnen; `auswerten` merkt
+  sich das Ergebnis je Gewohnheit (`auswertungen`, Schlüssel: Tag, Beginn, Rhythmus,
+  erledigte Tage) und rechnet nur neu, wenn sich davon etwas änderte (P2, Suite `auswertung`).
 - Nur im Speicher der Seite, nie in `state`: `kalVersatz`, `kalTag`, `hm`, `entwurf`,
-  `terminEntwurf`, `reflexionEntwurf`, `ticketEntwurf`, `rueckgaengig`.
+  `terminEntwurf`, `reflexionEntwurf`, `ticketEntwurf`, `rueckgaengig`, `flEntwurf`, `rucklerLetzte`, `rucklerAlle`.
 
 ## Render-Zyklus
 
@@ -118,11 +120,14 @@ state = {
   `uebergangVorbereiten` nimmt die alte Ansicht als Geist, `uebergangAusfuehren` läßt die
   neue aus dem Getippten wachsen (`tippMerken`).
 - **Was `render()` überlebt**, liegt außerhalb von `#app`: Hinweis (`#hinweisBlatt`),
-  Menü (`#menue`), Ticketblatt (`#ticketBlatt`).
+  Menü (`#menue`), Ticketblatt (`#ticketBlatt`), Timer (`#timerBlatt`) und Drang
+  (`#drangBlatt`, ADR 0059).
 - **Was sich an Ort und Stelle ändert, ohne `render()`**: der Sekundentakt `takt()`
-  («frei seit», Welle, Timer), das Formular beim Wählen, Heatmap-Woche und -Tag.
-- `visibilitychange` zeichnet neu — nach Mitternacht ist ein anderer Tag, nach zehn
-  Minuten im Hintergrund ist die Welle durch.
+  («frei seit», Welle, Timer), die Kachel beim Start von Timer und Drang (`kachelNeu`,
+  `drangKachelLaeuft`), das Formular beim
+  Wählen, Heatmap-Woche und -Tag.
+- `visibilitychange` zeichnet das Dashboard neu — nach Mitternacht ist ein anderer Tag,
+  nach zehn Minuten im Hintergrund ist die Welle durch.
 
 ## Wegweiser
 
@@ -131,8 +136,8 @@ state = {
 | Ansichten, Rückweg | `zeige`, `ANSICHTEN`, `bindeAnsicht`, `zurueckGehen`, `rueckZiel` |
 | Dashboard, Karte oben | `zeichneHome`, `zeichneHeld`, `tagesStand` |
 | Gewohnheiten | `auswerten`, `umschalten`, `umschaltenUndZeichnen`, `beginnVorziehen`, `zeichneFormular`, `bindeFormular`, `entwurfSpeichern` |
-| Timer, Zähler | `timerOeffnen`, `timerPause`, `timerRest`, `zaehlen`, `zaehlStand` |
-| Abgewöhnen, Welle | `lasterAuswerten`, `rueckfallEintragen`, `welleBeginnen`, `welleGewonnen`, `welleAbbrechen` |
+| Timer, Zähler | `timerStarten` (frischt nur die Kachel auf: `kachelNeu`), `timerOeffnen`, `timerPause`, `timerRest`, `zaehlen`, `zaehlStand` |
+| Abgewöhnen, Welle | `lasterAuswerten`, `rueckfallEintragen`, `welleBeginnen`, `welleGewonnen`, `welleAbbrechen`; das Blatt (ADR 0059): `drangOeffnen`, `drangSchliessen`, `drangTakt`, `zeichneDrangKarte` |
 | Termine | `terminAm`, `termineAm`, `terminAbhaken`, `zeichneTerminZeile`, `zeichneTerminFormular` |
 | Kalender | `zeichneKalender`, `bindeKalender`, `kalZeige`, `kalBlaettern`, `kalFliessen`, `zeichneTagesleiste`; Ziehen: `kalDruck`/`kalZug`/`kalLos`, `kalSetzen`, `kalWechselZeigen` |
 | Kalender-Export | `kalenderDatei`, `exportAuswahl`, `exportiertMerken`, `icsLaden`, `zeichneExport`, `bindeExport` |
@@ -141,9 +146,10 @@ state = {
 | Sicherung | `sicherungsCode`, `codeLesen`, `standErsetzen`, `sicherungZurueck`, `kopieren` |
 | Tickets | `ticketBlattOeffnen`, `ticketBlattSchliessen`, `ticketSichern`, `ticketBlattWechseln`, `ticketTastatur` |
 | Meldungen, Fragen, Jubel | `melden`, `bestaetigen`, `hinweisZeigen`, `loeschenFragen`, `jubeln`, `hakenJubel`, `rekordFeiern` |
-| Bewegung | `tropfenAuf`, `tropfenZu`, `teilZeigen`, `teilTropfen`, `geist`, `zeileGeht`, `langDruecken`, `punktFlaeche` |
+| Bewegung | `tropfenAuf`, `tropfenZu`, `teilZeigen`, `teilTropfen`, `geist`, `zeileGeht`, `langDruecken`, `punktFlaeche`; iOS-Flüssig: `teilFliesst`, alle fließenden Teile messen und schreiben in einem Bild (`teilBild`); Rückwisch, der dem Finger folgt: `wischZiehen`, `zugBeginnen`/`zugLoslassen`, darunter `abbildDashboard`; `zeileLeuchtet` |
 | Menü | `MENUE`, `menueOeffnen`, `menueSchliessen`, `menueAnker`, `menueMitrollen` |
 | Hell/Dunkel | `themaSetzen`, `themaAnwenden` |
+| Ruckler messen | `rucklerStarten`, `rucklerBild`, `rucklerAuswerten`, `rucklerEnde`, `rucklerMelden`, `rucklerKopieren`; Spur: `RUCKLER_SPUR`, `rucklerUhrenAn` (Uhr um Funktionen und Ereignisse, nur während der Messung), `rucklerSpurAuswerten` |
 | Kaltstart, Schriftzug | `start`, `auftritt`, `auftrittEnde`, `dashboardAuftropfen`, `zeichneMarke` |
 | Service Worker | `swAnmelden`, `swNachsehen`, `swAuskunft`, `swAufraeumen`, `perleAuf` |
 | Uhr, Tage | `jetzt`, `tagSchluessel`, `tagPlus`, `wochenAnfang` |

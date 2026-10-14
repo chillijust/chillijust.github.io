@@ -49,7 +49,7 @@ Safari als Home-Bildschirm-App im Vollbild, hoch und quer (ADR 0056).
 | 6 · Rückblick: Heatmap, Journal | fertig (0.7.1) |
 | 7 · Sicherung, Einstellungen, Tickets | fertig (0.8.0) |
 | 8 · Feinschliff, Nachbesserungen am Gerät, Timer und Zähler, Termine abhaken | fertig (0.13.1) |
-| 9 · Flüssig wie iOS 26 je Stelle, Chilli als Standard (ADR 0053–0055) | im Bau (0.17.0T15) |
+| 9 · Flüssig wie iOS 26 je Stelle, Chilli als Standard (ADR 0053–0055) | im Bau (0.17.0T30) |
 
 ## Wo was steht
 
@@ -69,6 +69,7 @@ Nachschlagen **nur bei Bedarf**, nicht vorab:
 - `docs/architektur.md` — Zustand (`state`), Render-Zyklus, Wegweiser zu den Funktionen
 - `docs/deploy.md` — Pages, Cache, Versionswechsel
 - `docs/decisions/README.md` — Index der ADRs; die Begründung jeder Regel steht im ADR
+- `docs/verlauf.md` — was jede Fassung von Abschnitt 9 brachte, mit Messwerten vom Gerät
 - `tools/pruefstand/README.md` — Aufbau des Prüfstands, Vorlage für eine Suite
 - `docs/stil-vorlage.md` — der Stil zum Übertragen auf andere Apps
 - Nachrichten zwischen Nutzer, Jarvis und James: Ordner `kommunikation/` **nur auf Branch
@@ -164,8 +165,14 @@ node tools/pruefen.mjs                      # Vor-Push-Prüfung allein
 
 ## Offen
 
-- Flüssig (ADR 0054): Chilli ist Standard, iOS je Stelle mit Speichern; Timer wie Drang; auf iOS fließt jedes Teil selbst, ohne Chilli darunter; der Reiter sagt je Stelle, wie man testet; Kontrast in Dunkel (ADR 0055); Rückwege von Menü und Ansichten, Knauf beim echten Tipp (0.17.0T7); Auftropfen und Zeilen fließen, Wisch zurück von gerollter Seite (0.17.0T8); Kalenderring, Abhaken, Wahlschalter ohne Warten, Ticketblatt mit Glas erst am Ziel, Auftropfen als Kette (0.17.0T9). Abnahme am Gerät steht aus.
-- Analyse von James (Nachrichten 01–03, 09–10 auf `chatgpt/kommunikation`). A2/A3 ausgeliefert in 0.13.2T
-  (ADR 0049). N1–N8 aus 09 bestätigt, der Nutzer will alles, Block für Block: N1, N6 in 0.17.0T10, N3 in
-  0.17.0T11, N4+N8 in 0.17.0T12, N5 in 0.17.0T13, N7 in 0.17.0T14 (ADR 0056), N2 in 0.17.0T15
-  (ADR 0057). Offen: Prüfstand läuft in 500 × 845 statt 430 × 932; Abnahme am Gerät. Abnahme am Gerät steht aus.
+Was erledigt ist und was es am Gerät gemessen hat, steht in `docs/verlauf.md`.
+
+- **Abnahme am Gerät steht aus** für Flüssig 0.17.0T7–T25 (ADR 0054, 0055) und James' N1–N9
+  (0.17.0T10–T16). Abgenommen: T24 (Drangblatt), T26 (Auftropfen), T28 (Block 6, Rückwisch).
+- **James prüft vor der Freigabe** in einem Durchgang: Rückwege, Leistung vorher/nachher,
+  Block 7 (Nachrichten 16 und 17 auf `chatgpt/kommunikation`). Danach gibt der Nutzer
+  0.17.0 frei: T weg, Abschnitt 9 «fertig».
+- **Block 7 (Gestaltung) ist ausgeliefert** (0.17.0T29–T30): Timer-Glas dichter, Titel auf
+  zwei Zeilen, «10 von 12» kleiner, Kalenderpunkte größer, Schalter aus in Hell gefaßt.
+  Abnahme am Gerät steht aus. Damit ist der Plan aus Nachricht 15 umgesetzt.
+- **Vorgemerkt:** Jedes Auflegen des Fingers kostet ein Bild (30–39 ms, kein Skript).

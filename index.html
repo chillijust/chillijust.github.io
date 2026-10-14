@@ -64,6 +64,9 @@
      kurzen Weg nicht (ADR 0032). */
   --glas-tropfen: rgba(250, 249, 245, .86);
   --glas-rand: rgba(20, 20, 19, .16);
+  /* Timer und Drang: dichter, damit Zeit und Knöpfe vor einer vollen Liste
+     stehen — ohne mehr Unschärfe, die ruckelt am Gerät (James, 12). */
+  --glas-dicht: rgba(250, 249, 245, .78);
   /* Erhöht (Menü), Marke einer Wahl und ihr Rand: in Hell wie der Grund, in
      Dunkel heller als er — ein Schatten trägt dort nicht. Das Flüssige zeigt
      im Fließen einen Saum (`--fl-rand`) und hebt sich um `--fl-hebung` Prozent
@@ -71,6 +74,9 @@
   --erhoben: #FAF9F5;
   --marke: #FAF9F5;
   --spur: #E8E6DC;
+  /* Ein Schalter aus: in Hell gefaßt, sonst verschwindet er im Grund (Block 7). */
+  --spur-rand: #B0AEA5;
+  --knauf-schatten: 0 1px 3px rgba(20, 20, 19, .25), 0 0 0 .5px rgba(20, 20, 19, .12);
   --rand-hell: rgba(255, 255, 255, 0);
   --fl-rand: #D6D3C9;
   --fl-hebung: 0;
@@ -99,9 +105,12 @@
     --glas-schleier: rgba(0, 0, 0, .38);
     --glas-tropfen: rgba(43, 43, 40, .9);
     --glas-rand: rgba(255, 255, 255, .2);
+    --glas-dicht: rgba(43, 43, 40, .8);
     --erhoben: #2C2C29;
     --marke: #4A4A44;
     --spur: #4A4A44;
+    --spur-rand: rgba(255, 255, 255, 0);
+    --knauf-schatten: 0 1px 2px rgba(0, 0, 0, .3);
     --rand-hell: rgba(255, 255, 255, .12);
     --fl-rand: #85837B;
     --fl-hebung: 9;
@@ -127,9 +136,12 @@
   --glas-schleier: rgba(0, 0, 0, .38);
   --glas-tropfen: rgba(43, 43, 40, .9);
   --glas-rand: rgba(255, 255, 255, .2);
+  --glas-dicht: rgba(43, 43, 40, .8);
   --erhoben: #2C2C29;
   --marke: #4A4A44;
   --spur: #4A4A44;
+  --spur-rand: rgba(255, 255, 255, 0);
+  --knauf-schatten: 0 1px 2px rgba(0, 0, 0, .3);
   --rand-hell: rgba(255, 255, 255, .12);
   --fl-rand: #85837B;
   --fl-hebung: 9;
@@ -474,11 +486,13 @@ svg.wm { display: block; flex: none; color: var(--text); overflow: visible; }
   letter-spacing: .06em;
   color: var(--text-2);
 }
+/* 22 px: «10 von 12» brach mit 26 px neben Woche/Monat um (Block 7). */
 .tr-zahl {
   font-family: var(--sans);
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 600;
   line-height: 1.2;
+  white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 .tr-satz { margin: 2px 0 0; font-size: 15px; color: var(--text-2); font-family: var(--serif, inherit); }
@@ -557,7 +571,7 @@ svg.wm { display: block; flex: none; color: var(--text); overflow: visible; }
 /* Quer (ADR 0056): Der Ring steht links, Name, Zeit und Knöpfe rechts — so
    paßt der Timer ohne Rollen in die 430 Punkte Höhe des iPhones. */
 @media (orientation: landscape) and (max-height: 560px) {
-  #timerBlatt > .timer-karte {
+  #timerBlatt > .timer-karte, #drangBlatt > .timer-karte {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
     column-gap: 24px;
@@ -614,15 +628,12 @@ svg.wm { display: block; flex: none; color: var(--text); overflow: visible; }
 .ab-knopf svg { width: 18px; height: 18px; color: var(--akzent); }
 
 /* ── Drang: die Welle ──────────────────────────────────────────
-   Der Ring läuft in zehn Minuten leer, Sekunde für Sekunde, linear. */
-.welle { text-align: center; padding-top: 4px; }
-.welle-bild { position: relative; width: min(72vw, 300px); aspect-ratio: 1; margin: 10px auto 8px; }
-.welle-ring circle { stroke-width: .73; }
+   Ein Blatt aus Glas wie der Timer (ADR 0059); der Ring läuft in zehn
+   Minuten leer, Sekunde für Sekunde, linear. */
 .welle-fuell { transition: stroke-dashoffset 1s linear; }
-.welle #chiliFigur { position: absolute; left: 28%; top: 26%; width: 44%; height: 44%; margin: 0; }
-.welle-zeit { font-family: var(--sans); font-size: 44px; font-weight: 600; line-height: 1.15; font-variant-numeric: tabular-nums; }
-.welle-satz { max-width: 32ch; margin: 8px auto 20px; color: var(--text-2); font-style: italic; }
-.welle .knopfreihe { max-width: 380px; margin: 0 auto; }
+.welle-satz { max-width: 32ch; margin: 6px auto 4px; color: var(--text-2); font-style: italic; text-align: center; }
+.drang-karte .knopfreihe { margin-top: 10px; }
+.drang-karte .welle-ab { display: block; }
 /* Abbrechen ist kein dritter Ausgang neben Gewonnen und Nachgegeben — es
    steht leise darunter, für den Tipp aus Versehen. */
 .welle-ab {
@@ -760,15 +771,16 @@ button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
   flex-wrap: wrap;
   justify-content: center;
   gap: 3px;
-  max-width: 42px;
-  min-height: 6px;
+  max-width: 46px;
+  min-height: 7px;
 }
-.kp { width: 6px; height: 6px; border-radius: 50%; }
-.kal-raster.woche .kp { width: 8px; height: 8px; }
+/* Am Gerät waren sie zu zart: eine Stufe größer, der Ring 2 px (Block 7). */
+.kp { width: 7px; height: 7px; border-radius: 50%; }
+.kal-raster.woche .kp { width: 9px; height: 9px; }
 .kp.erledigt { background: var(--erledigt); }
-.kp.offen { box-shadow: inset 0 0 0 1.5px var(--text-2); }
-.kp.verpasst { box-shadow: inset 0 0 0 1.5px var(--linie); }
-.kp.kommt { box-shadow: inset 0 0 0 1.5px var(--linie); opacity: .45; }
+.kp.offen { box-shadow: inset 0 0 0 2px var(--text-2); }
+.kp.verpasst { box-shadow: inset 0 0 0 2px var(--linie); }
+.kp.kommt { box-shadow: inset 0 0 0 2px var(--linie); opacity: .45; }
 /* Ein Tag, an dem alles erledigt ist, trägt seine Zahl in Grün. */
 .kal-tag.voll .kal-zahl { color: var(--erledigt); font-weight: 600; }
 .kal-tag.zukunft { color: var(--text-2); }
@@ -874,6 +886,11 @@ button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
   transition: transform .15s ease;
 }
 .tm-zeile:active { transform: scale(.98); }
+/* Zurück an einer Terminzeile: Sie leuchtet kurz in Blau auf (ADR 0060). */
+.tm-zeile { position: relative; }
+.tm-zeile.leuchtet::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: var(--termin);
+  opacity: 0; pointer-events: none; animation: zeile-leuchtet .9s ease-out; }
+@keyframes zeile-leuchtet { 20% { opacity: .24; } to { opacity: 0; } }
 /* Lange drücken öffnet den Termin, wie bei der Kachel: kein markierter Text,
    kein Menü von iOS, und wer hält, sieht die Zeile einsinken (ADR 0043). */
 .tm-zeile { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
@@ -916,6 +933,12 @@ button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
 .tm-bis { font-size: 13px; font-weight: 500; color: var(--text-2); }
 .tm-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .tm-titel { font-size: 17px; font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
+/* Auf dem Dashboard höchstens zwei Zeilen, dann «…»; ganz steht er beim
+   Bearbeiten und im Vorlesetext (James, 12). Die Exportliste bleibt ganz. */
+.tm-liste > .tm-zeile .tm-titel, .tm-reihe .tm-titel, .gw-kachel .gw-name {
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden;
+}
+.tm-liste > .ex-zeile .tm-titel, .tm-liste > .ex-gw .tm-titel { display: block; -webkit-line-clamp: none; line-clamp: none; }
 .tm-mehr { font-size: 13px; color: var(--text-2); overflow-wrap: anywhere; }
 .kp.termin { background: var(--termin); }
 /* Export: Was schon im Kalender steht, tritt zurück (ADR 0011). */
@@ -995,7 +1018,8 @@ button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
   height: 31px;
   border-radius: 16px;
   background: var(--spur);
-  transition: background-color .2s ease;
+  box-shadow: inset 0 0 0 1.5px var(--spur-rand);
+  transition: background-color .2s ease, box-shadow .2s ease;
 }
 .schalter-knauf {
   position: absolute;
@@ -1005,10 +1029,10 @@ button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
   height: 27px;
   border-radius: 50%;
   background: var(--grund);
-  box-shadow: var(--schatten);
+  box-shadow: var(--knauf-schatten);
   transition: transform .25s cubic-bezier(.3, 1.4, .5, 1);
 }
-.schalter[aria-checked="true"] .schalter-spur { background: var(--knopf); }
+.schalter[aria-checked="true"] .schalter-spur { background: var(--knopf); box-shadow: none; }
 .schalter[aria-checked="true"] .schalter-knauf { transform: translateX(20px); }
 .tm-zeiten { margin-top: 6px; align-items: center; }
 .tm-zeiten[hidden], .klein[hidden] { display: none; }
@@ -1275,7 +1299,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 /* ── Hinweis ───────────────────────────────────────────────── */
 /* Was man lesen muß, bevor es weitergeht: mittig, wartet auf «OK». Quillt als
    Tropfen aus dem Getippten (hinweisZeigen); der Schleier wie beim Menü. */
-#hinweisBlatt, #timerBlatt {
+#hinweisBlatt, #timerBlatt, #drangBlatt {
   position: fixed;
   inset: 0;
   z-index: 22;
@@ -1287,11 +1311,11 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 }
 /* Keine Karte wird höher als das Bild (ADR 0056): Paßt sie nicht, rollt sie
    innen, statt oben und unten hinauszuragen — quer ist das Bild 430 hoch. */
-#hinweisBlatt > .hinweis-karte, #timerBlatt > .hinweis-karte { max-height: 100%; overflow-y: auto; overscroll-behavior: contain; }
+#hinweisBlatt > .hinweis-karte, #timerBlatt > .hinweis-karte, #drangBlatt > .hinweis-karte { max-height: 100%; overflow-y: auto; overscroll-behavior: contain; }
 /* Der Schleier blendet als eigene Schicht, nie das Blatt: Ein Vorfahr mit
    Deckkraft unter 1 wäre die Grenze des Glases — die Karte sähe dann nur den
    Schleier hinter sich, nicht die Seite, und bliebe matt (ADR 0014). */
-#hinweisBlatt::before, #timerBlatt::before {
+#hinweisBlatt::before, #timerBlatt::before, #drangBlatt::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -1299,9 +1323,9 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
   opacity: 0;
   transition: opacity .22s ease;
 }
-#hinweisBlatt[hidden], #timerBlatt[hidden] { display: none; }
-#hinweisBlatt.offen::before, #timerBlatt.offen::before { opacity: 1; }
-#hinweisBlatt:not(.offen), #timerBlatt:not(.offen) { pointer-events: none; }
+#hinweisBlatt[hidden], #timerBlatt[hidden], #drangBlatt[hidden] { display: none; }
+#hinweisBlatt.offen::before, #timerBlatt.offen::before, #drangBlatt.offen::before { opacity: 1; }
+#hinweisBlatt:not(.offen), #timerBlatt:not(.offen), #drangBlatt:not(.offen) { pointer-events: none; }
 .hinweis-karte { position: relative; }
 .hinweis-karte {
   width: 100%;
@@ -1330,6 +1354,7 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
     0 4px 10px rgba(20, 20, 19, .14), 0 14px 32px rgba(20, 20, 19, .28);
 }
 .glas.im-tropfen { background: none; -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none; }
+.glas.timer-karte:not(.im-tropfen) { background: var(--glas-dicht); }
 /* Glas erst am Ziel (Ticketblatt): Der große Tropfen fließt milchig, ohne
    Unschärfe — die rechnete das iPhone in jedem Bild neu, und das Blatt ruckelte.
    Die Karte wartet darunter ebenso ohne; angekommen bekommt sie ihr Glas, und
@@ -1462,6 +1487,9 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
 .fl-tagring { position: fixed; z-index: 5; pointer-events: none; box-shadow: inset 0 0 0 2px var(--akzent); }
 .kal-tag.gewaehlt.gleitet { box-shadow: none; transition: none; }
 .fl-welle { position: absolute; inset: 8.5%; border-radius: 50%; overflow: hidden; opacity: .5; --fp-farbe: var(--akzent); }
+.fw-bild { position: absolute; inset: 0; width: 100%; height: 100%; }
+.fw-fluss { fill: var(--fp-farbe); }
+.fw-licht { fill: none; stroke: var(--glas-licht); stroke-width: 3.2; stroke-linejoin: round; stroke-linecap: round; }
 /* Ungespeichertes im Reiter «Flüssig»: oben, bleibt beim Rollen. */
 .fl-leiste {
   position: sticky;
@@ -1566,6 +1594,14 @@ textarea.eingabe { display: block; min-height: 96px; resize: vertical; }
    Nichts ploppt (ADR 0007). Die Ansicht liegt über dem Geist der alten; der
    Tropfen liegt in der Karte hinter ihrem Inhalt. `--feder` setzt das Skript. */
 #ansicht { position: relative; z-index: 1; }
+/* Der Rückwisch folgt dem Finger (ADR 0060): Die Ansicht liegt über dem Abbild
+   des Dashboards und wirft links ihren Schatten darauf. */
+#app.bereit { position: relative; z-index: 1; background: var(--grund); will-change: transform; }
+/* Den Schatten trägt eine eigene Fläche darunter: Die Ansicht ist auf ihren
+   sichtbaren Teil beschnitten, ein eigener Schatten fiele mit weg. */
+.zug-schatten { position: fixed; top: 0; z-index: 0; pointer-events: none; background: var(--grund);
+  transform-origin: 100% 50%; box-shadow: 0 12px 36px rgba(20, 20, 19, .22); }
+.abbild { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: var(--grund); pointer-events: none; }
 .geist { pointer-events: none; }
 .tropfen { position: absolute; z-index: -1; background: var(--flaeche-2); pointer-events: none; }
 /* Die Hülle eines Tropfens zwischen Ansicht und rundem Knopf: Sie ändert Lage,
@@ -1791,6 +1827,10 @@ textarea.eingabe.code {
   <div class="hinweis-karte glas timer-karte" id="timerKarte" tabindex="-1" role="dialog" aria-modal="true"
     aria-labelledby="timerName"></div>
 </div>
+<div id="drangBlatt" hidden>
+  <div class="hinweis-karte glas timer-karte drang-karte" id="drangKarte" tabindex="-1" role="dialog" aria-modal="true"
+    aria-labelledby="drangName"></div>
+</div>
 <div id="hinweisBlatt" hidden>
   <div class="hinweis-karte glas" id="hinweisKarte" tabindex="-1" role="alertdialog" aria-modal="true" aria-labelledby="hinweisTitel"
     aria-describedby="hinweisText">
@@ -1819,8 +1859,8 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.17.0T15';
-var APP_STAND = '2026-10-11';
+var APP_VERSION = '0.17.0T30';
+var APP_STAND = '2026-10-14';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
 var CHILI_BILD = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAA6eklEQVR42u2dB3STZRv333PkyOH7vsN7Xl6hoviqb63s3dJ0pDPdK907TdOMppQRVkvZQzYulKViVRSNggiCDEFcQVDEF6uI4iBsLcjsYlzffadJm6YZz/PkSWma63/O/6iAhYfmd437up/7/sc/UCgUCoVCoVAW6i0t7tFbKmt1Mf1nsZlb/rsb/m2hUO4Me1FxNwJyT6MFfYqLBUOmSbRRT+dp017K0Ra9namVv5ehLd2ari3WZmjzXs/Uxq/K1vrPz9P6TCzU9Ca/3mjvB4plPfFvFIVyD/B7Env/p7RIErE8X1v6fqa2bFsGzD8khkVHqFPgqW9SYOHXzV5wOBnmUx9KhnlfJcFc6oNJMHVfMkg2pUHmhowawYI8bW+ZTEACwaDeGAxQqE4HfQ9iH5Ldq4o2Zes0uzL0cw+mwZJvxbCY+kgz/BT8p8zAX2AC/1BSM/wE/DkHE2GOLhFmE8/6MgFmfZEAM4krDySAYktKbcaGdF3i6owq7wmSCBIUvIixXUCh7hH43b2KpYLsDTnaSXsyYel3qbD0aCosIV5shL8F/Jas3wr+fBP4JviN4M/+shn+mUb4Z3weD1WfNXv6p3EGa3bHQ/orqTUjZuSRdoFUBrKS7vgdQaE6Dv5+gQsKNBM/yoRl36UZ4F9iDv+R9vBbzfpfWcn6JvgJ+JbwVx5odsUnsTCNeOr+WMh+TawfXFGgIUHAmxgrAhTKRdDfR+wVMK+gqnx71omlR9PaZ30j+IsYZf1Es6xvDn6CDfBjDeAb4CfgT90XY/CUj2Ng0p4YkL2boI9dlbaqj1zm07uk5H57z/IA+XniHtS9m42BA4Wyp37KInHJu9k1NOMvo+Cbsr5ZuW/K+rYW+Rz1+jPMsr6p3Ddk/AOt4Jvgn2KEf/LeaJhEvScaNHuioOidePCfn72wt0zm3S6IEdAJ9N6PjUtfOHxGmHb0nCDtkOki7cPqXA35OW8MBChU+8zvFfxUQVXF/oxaE/hLHZX7XztT7sdZLfen7Y8xAz8aJn9sBH9vM/ia3VEwkXjCLhGU74iCtFeS9EFLMqoI8L1M8A+YEl8hWOCnD1k6BEKXtZr+N/3xAVPjK2hFgN91FMoIf/Ka3Jol1sr9bx2V+8mMF/lmfGYl65uX+/vNMj6F3wr4E3c1wz/+IxGM2xlpcPmOSEhZn6Sj2d17olgTvGR4G/AtLVwyDAZMidOSX++F332Up8PfPbs6p9q0yLeUh0U+Zr2+eda3KPdN8O9pn/XN4S83wj92RwSM/TAC8t+MrQlbPrrGHvwt1QDxkEpRde8SOU4WUB4Kv1T6z8K3squf+jqtBfy2vb6VrH/YyiLfQeajPWtZ3wR/u6y/pz344z9qzfom8Muot4eDels4KLeGgXi9LzAJAsIlQ8F3bkB1X5VETALBffiJQHkS/N2zX82uthzttVnk4zjaa7PIZ7PXb5/1m8GPbgHfBP94KyU/hb8Z/AhQE/hLtzVb9UGYIQjkbQyAsOVDGAWCMfP9oV9Zrhg/FSiPCgCSt7KqOff6B53r9aey6PVbSv4dRviNWV9N4TeCX/pBK/zK98NA8X4o5LwhYBQAqEfPCdL3lsu98ZOB8hg9WCLtJ30nS29e7tvt9Z0Z7dlb4W+T9UXtwd/ZCv5Yy6xvBF+1tRl+Cj61fEsolGwOgYK3AiHm+RGMggBpB/SPjc8Q95aXYDuA8gw9IC32Lv8wXd9utHe4bbnPptev/NRKuW8v6++xUu636fUjzXr91qyvMsv6CmPWN4BvhF/2XrOL3xWC6JlhjIJAwFOj4T/l2dgOoDxHIUvzBFP3peq5LPLN4GGRb6L56r4Z+OVtFvnsl/sUfFPWl21uBb/onWBIXDOKcStgXBOofbi0UNxHjguDKE9pBxRSUgmk1bBd5Ktiucg3ycoin63RnvkiX5usb7Xcb836xWbwRz83ghX8LZXAQt+aB5VS3CeA8hz1VRV7a3an6Nss8nHYxtsu69uB31avX8ag17ea9Y3wS7VCSFozmhP8Jo+YGVbdR67AfQIoz5Fgfp5A/l6q3lTuOwK/0uYiXwxj8MfZAF/NYJGvNesLW8DPfzOU9PzhOuHSoU4FgODFw+HJyYkLSSuA24ZRnqPexTJv0dPZ2umfOl7kq2C5yNfa6zse7akc9fpmi3xSE/xvhcCoORkL+yjkPQdXRlU7EwBM24Z9JqVo+igU+AIRyqOCQM+4VVnV0z9l0Ovvt5L199rv9dvt5rPb61uHv9gM/iICf9qGSBg+I4vA2pyxCbReA6Ym1IQ4WQkIFvrBg6piH/xUoDwrCMhK/hm2LEcs1abU2gLf0YYeJuC3XeFvLfeVZuW+vaxfsCkEop6LP9C3VOZjmalJMPAaXBktJuV8rTNBYNRs4QEaUPBTgfLAQCAbFPVclnbshwntFvnY9PrlDHp9pdVFPitZX0uzfjAkr4+q8Zmcr3EE58Bp8WJaznMNALSKeGKSmPw+SlwURHlkEOjRT10kTlmXtlm+JYHnct/xIp/MtMhHLHlHCCnro/R+89NXUfCZ9Ofk19w3cFqcOGjRSD3XIEA3CT0+IVPSR6nA/QEoz5TxeC3BmPk52sJNiRYbepzfv2+v3Kd9fvzqWBg2M3thH6Xcm5jVwhwJAt0fLpVoKMhcg4DfvADwUspxPQDl4RVBSUnPPooSgXBZpjb15RQCexSDrG8B/9b28Fsr9yXvhEDsC3H6ARV5GgK9gJjzWI6W8IMrY5yaDgyqjK3CTwAK1RwIaEXgM2BagSR5XUpVxquJupzXEwjMUTY29ITZ6fWboc96LRJSX4nWi55N1AUvFVc9Nr5ITKDvxzbj25KXUvHP0XOE1ZZHhrHZKky+xiD87qNQ7QKCvGdvuVxA7TO5cGHw0nRt4tokbfZrsdq8jdHagk2iFudtFJEfj9KmbYjRxqxK1I6ak6V9dLxU0kdBsrzCUOK77IYgL6XS23duEOf1gIEV8VoSBPAGIxTKZjCQy3sQ9zS5j1xBLG+1wmSFuTtsw82gijgx1yqA7g3wIu0IfpdRKDcVbQWGzYjk3AoMnxmu66NU9sK/SRTKXYOASuk9cnZoDbe9AUPgsYlZeHYACuXO6quWCYIWc3ttePis8Oo+KhVuDkKh3LcKUPUYOStsM8e1gNo+KiVOBFAod9bDZUV0lyCnKuDJKWJNn1IVvi2IQrmrSBa/f/D02IVcFgT9F4zRe5Uq++HfIgrlzkGgVOXtNy+Q04Kgz2Qx7g5Eodx6LaBU1f2JSekaLlXAyNlh1fT/x79FFMqdg4BK1U+w0O8E++3BgloSAHAxEIVy9ypg6Az2R4nRquGRcfkar1I8LwCFcms9NjFXzOUYseGzIrQkgOD7ASiUW1cB6tJevvOCdOz3BIwBUgHg+wEolJu3Ad0e12RxWgx8YnI6rQLwGHEUys2DwCC6y4/14aFzQvRepaW4JwCFcvM2oOfwWZGs2wDh0mHQV12CR4ahUO6uIVUxVZy2Bk9NwU1BKJS7q9+4oojgJcPZ3yEwJ3QVqSDw3QAUys3bAK/Rc4Nr2L8b4K+jLQT+DaJQ7h0AegysTNSyDwAC8CpT4zgQhXJ39S1XCNi2AXQTUb9xxRJsA1Aot68C1N6+84JYtwEDK5O0XmXYBqBQ7h0AytQ9B01PYN0GjJ4r1JHggfsBUCh314NjlQK27wYEPOUHJADgOgAK1QWqAEHAU77s1gGIHx5XjAEAhXL7ADBW3W/MAgHrMwIGTk/UkuCB7wWgUO68BkDce8TsCB37Q0ICaQAQEHuTINLT4LI2xrMDUKjOA3tZT6MHUXD7lpcKhs+Ra6NfkGoL307W0ZuN6e3HU/fFwIzP4mHuwUSYfygJFhxOhqe+SYHF34ph4dcp5MeSDT8364skmLQ3nfw/GTUT96Rrx+7I0Ba/l6VNXJevHTVfpn1sklJjDBACU1DA7wIK1TGwdyPuRezTf7pKnLqhqCr3zULduI9ydBN359RWfZYFS46mwfL/pcEy6u9SYSn10VTy49RiA/DUi45QpxiCADUNAgu/ToYF1CQ4zKcmgWIe9VfNnnswCeaQIDFlXwoo3k8H5dY0XeorObqM17KrRs4vlpBg4EPs5VVWii0ECsUT9N2NGV4war5CU/xevm7G51mw8vt0WEF9jAB/zAr035mgT7WAXmwBvRH8w0bwDxnBp8CbbAR/ji4RZlN/mQCzqL9IgJlGz/g8Hsp3JEPeW+k1/oskWi91qYC4HzG2DCgUh0zvNXimMoJk+eqyD/N0VSboj9mB3mamb4W+TbZvyfSt0LeAT4G3C328AXrqqs+o42D6p82uPBBHWohEKHw79UTsi9nVw2ZLxcZggLsMUSi78I8t6zdkllJT8HZhzaIjGbYzPfFSC/CZQr/AJvSWmT6xGfov22b6Vujj20Df7Fio+CQWplHvj4Wp+2MM6w/Zr6fqB88o1pD2wJsYAwEKZQF+j77lakGRtkC39GgGi2zvuMRfYJHt5x1qC73jbO8YfAq9NfCnUH8cA5M/joaJu2Mg783kmmGziyS45RiF+gfdsVfW479TVOKSLfmb5xzMZAb9t2wX8yyyPRPoP7df4reHPsYq9JP3RsMkozV7ogxWb4+FjGqxzndBQdWDZaW98FOA8lD41V6RzxdrZ36RZQX6NMaLebZK/HlMoWdR4lccsJ/pLcHX7GkGf+LuVk/YJTKYjidjXsjQkSDgjZ8GlKfB7y3R5lcvdzrbMyzxda3gW0I/83N+Snxr2d4SehP446h3RkI5cfqryTUPj8MbilCeUfLfF7CkRCx/P0+/9Dv+SnxL6Ntkensl/me2SvxYziV+u0zfAn2kAXoD+DuoI2Dsh83O3RhXO3xOofhBtRoXCFFdV6ErZeI5BzNaS3wmi3nf2M/08/hczDvAINN/bBt6yxJ/vFmmb4Y+sgX6MurtEaDeHg50x2LxuyLwXZCneRDHhagumv29x3+Urbea7Y9wL/Edje5sZftKriX+HjvZ/qP2Jb4BerNsT6E3gV+6rdmqD6jDQPKOCAbPKBTjpwXVpdS3XN0vf1Oenhn0Zot5FltyrW7S0dmGvoqvEt8IvH3oI61C3ybTG7O9AXwj9KqtYaCkfj8MFO+HQuorcbVeZbgmgOo6C37dY1+UVHOd18+z0dfPatfXJzge3R1wbjFv4q4oi77eTom/vW2JbxX6rc3QU8u3NLtkcwgEL0uv8cLpAKqLBIBBE3dn1jrO9DbKe6fm9bG8reCbMv14O4t5zdmeWaa3hJ5a9l6zJW+HwdDZ+QtJELgfP0Eod+77e/oulGntLeY53qST6CDTx/OW6TUWmd5ybDeOwWIe80zfDL7MCH4x9btCkFJrhRD7YgI9qhyvLEO598Jf3lu5NQbwD7Mb3c1yMLqb7nB3HpfFvCi7fb1lia+2WMzjku0twS+ificYCjYJ4ZGJclwQRLlxACgvE0zYnW5/Me+gbehnsJnX77e2mBfNusR3tJjHuMTfYgd6Antb6IMN0Euo3w6GwreDDPZbmIl3FqLcOwBM/jjVal8/22aJbwk9/yX+BBuLeZxLfHuZfrP9TN8KfTP4BZuMfisIApakYQBAuXUA8C6pLKhZ9onj0Z2tvt5qib+fp3n9TstsH2kBPcMS36lsT7ypFfz8t6gDYc6cSOhfqsAWAOWG4I8b2y1PLZUcUKbqbyli4dy0WFi7zfbLNzNsQs+yxGcyr9/JbF7fCn2YAXplC/ShzKHX2i/xW6EPNDjvzUCYsC4QDpUI4UZcKBxNjqqVF+VVeZWp/4mfKpTbZH1ZWZHmD2Ui3CHwGyyPhdvEH62Js7JJx3Uv31j29ZYlfpnRamdKfJuLecEOS3wT9NS5GwNh4fIgOJ8aYoDf5CuxIbAsJ62anlSMny5Up5agTCF4pTRLf0MR1wK+ybdLYuAW8R8VMbB9bSzM+9jFi3k2Mv1Yxot5oY6hZ7iYZ1nem6DPI9DnvxEAKxYFwbFCIVyPbwX/OgHf5EuxobA2M0UfJC8We41V34efNFSn00Plau8vlGK9edY3h99gWauvTkqFD97Mgdkfx3N++cbW2M4l8/r3GCzmvWM70+ebQZ+7McDgZYuD4LcskvHNwLeE/3pMq48nREKRJA/XBVCdquTv9p+xaoFOJa6xC795ABifBbfnj4M7CydA/aJxsG9DAczdFc+9xGe4mGcLfAWTEp/JYp6dbJ9rBF+2IQBemhUEPxQIm8FnCP/16GZ/nyDSP6JWCUglgCcOo+49/Dll0opvlSnMwFclwu2ZCgP41LcXtPrW/PHw+9NK2PNKPry2KQMWbE9wfjFvWyv0KuNiHqcS395i3iZ70AdAyYZAWLQsCN6ZFgxfyYVQmxLSCj5L+KmvRQnhYGIUqQRyq0kQwMVB1L2D33esUvOLMgkYZX5FAtyeW2YV/tvzjZ7X6lvzxsPFSWL4emYUVK8RwezNBPydbUt8tpmeUYnfLtPbL/EtoVcQ4JcS4LdNEsLJPAJ7IoE7wcxOwm+wSAiXiVUFhiCAlQCq4zV0rFKsM2V+Rz2/PA5uz1Hbh99KAGhSp0NTYRQ0FTT7olIEh6eL4MPFIli3JhLmvBUB4z+wgN7s/XollxJfy2xeL9kYBJPWBcHiFUHwxsxgODA2BH4pICAnhcLNpDC4mdhqqwGABfwt4BvhN/loXCQMUSk0JAjgISKojsv8PmNV4r3K1FpGZX8J+fEZclbgm9xUltkCf1N+qxvzRM3OFUED8SVpJPxeGgk/jI+Ew1Mi4NPpEbB7Vjh8MC8c3n0qHN5cHAbVy8LgleVhsHZlGKxZGQovPh0Kq4xevSIEVi8PgbVLQ+DlRSFQvSAE3pwTAu/NCIFtFSGwZ1IofFEeCkeUoXBCGgrnssPgupjAnWx0kpkdgc8E/mjH8F+LbPY3cSJILSqswCCA6hA9XK72Pqg0Lvg5gp96uoxx5jeH/9ZcswBgA/4W57S6ITuy1Vlmzmx1fUZEq9ONTmt1XWp4q8VmTml1C/w2AgAr+GO4wU99NSIYvo+J0D+E5wegXC1RWYngkDJFz2TMZ3BFMafMT+E3BIDS9Pbg8wV/ugP4OYLPR8nPBn6Dw0kLEh+lj5QVib3KcJ8AyjWlv/ebqkw948w/PrN95mcB/605JAAo03iD32rWdybz30P4W8A3wm/y53FR8KQK3x9A8Q9/d7W6UHOT7vBjAn8x8SwV58zfEgBKUriX/Zn8ws858/NR9kc6hv9qWLPfTE6o9irDW4lR/MH/T5laUn1OkeC47C82emIuozGfLfBNbiyKZw5/Fs/wu6rfZzjm4wI/9amIECjMz6VBwAs/vSinJVYXiy8r4pnDr0om0I/nXPab3DR7HDSasr8V+Dkv9nXCnp9Vv28H/iuhQQbrw4WQLCnQ4E3EKGezf8/3VOk6RiW/yZUy5vDPtQ1/04wyl5b9fKz0t4E/vuN7fkvwDQ5p9t7YaHhIrcIzBVGc4b9/amn+wmvyOMbw36LZf/54xmM+m/DT7F+hwDGfLfjD7MNvsDAIXhAnHcBWAMVJgWVy8UV5AnP4pdFwa3KBUz2/CX5DAJgkda7sT+cZ/sR72POHs4ef+nSoEIJlUg0uCqJYr/q/r0yvZgU/9UwVL/A3zSIBYEJB5+n5eYaf757fGvzUfwcHwu6YKLxkBMUK/m4JZTLJGZL9HcHfAj61KqW5/HcG/lmtbizNwjEfx8xPwTf5MvHT4mQdCQK98NONYhIABNuV6dbhL7YBfxHx1CLe4DcEAJnYtWV/SieBn8ee3xL+v4OafYlYXJCPJwyj7MurvKzXSlWOjnHJb4K/OA5uzx3HesxnC35DACiIwzEfh5LfEn7qy8RbYmNOeKlL++GnHGVTOWqpuK4klh381OWZvMLfVFXW+cZ8CZ1rzMcGfuo/AwMhOy9PQ4IA7g1AWc3+3bcq06pZlf0mTyliN+O3Bz/N/hpp5+r5+Z7xu7Dnbwd/YLMvEe+OiqohAQDHgqh28HfzHlsq+UmeyC7zS5p9e9ZYTiv97Tyz3OAGZUbHj/mS7uFKP0fwbcF/2Qz+S2b+i7goN2eVl1qFVQCqTQDwXqHKqeEC/y1ZPK/wGwJAfmzHlv1uPOZjCn+t0dqYGD0JADgWRLXqkbGlAj0d+7Ep+00BQJHCK/yN05Tut7U3ml/4ne75A9sGABP8tQGB8EuwEB5RKQT4qUe1rPy/pszQ2Z3xWwOf2HBenzqd05jPGvxNM0j2V+fwXvZ39TEfk8z/VwB1gMFrEhJ0pArAiQDqH/8IKZOLr8tibWd+e/BTj8+xCj+TxT5L+A0BoDC+023tdcUJPh3R85tnfhP8fxLrya8Nkko0uBbg6dl/bFmPdcqszaxKfnP4qSfkc1rptwZ/4zSV2834eV/p57nk/8sCfoMFAfBqXJweqwCPDwBq76MlSXpO8JtO69VIeIG/qYoEgPLCDjvEoyuN+S6xhP8i8Vnyc6FFEjw+zIPh7zaoTKm5VhzLLfObAsBkKTf4Z7SFn7pBkdHx8PNR9ovu/Yy/TQBwAL/J88Qp1aQKwDcFPTQA9NqgyNQ5HPPZAt90XPfkYtYr/dbgp67Pj8MxHy/9fnv4zcG/YPR2kegEtgEeqr5jS31O0xm+g8xvF37qKTJe4G+cosAxHy89f4DdzG+C/4J/APwUGAx9S5U4EvREKVWFVZx6fouLOtoEAA5lvwF+Wv6rst3r+K57CD+Xnt8S/vNGl2RlaUkV0BOJ8Kzyv8eWkrTNrPv9Ais39NAAMMuJzE/hnz4W6nOiO/as/i405mPS75vgP28G/zni7ZEiOg0YhFR42Or/EVmSnlPPbxkAJhdzgr/RzA0aWec7vssd4A+wUfbbgN8885sCwGniAKkU9wR40ur/wDKl5JI0llPJ3+6WnknFjMd81uBvnF4O9fJMHPO5suS3kvkNHhMAZ4mXJybRnYF4YpCHBICe8xS5WsaZ3x781Joi1v2+OfyGAJAT2+Fbez1hzGct858z81ljANgXGgFeeIS455T/O2TiGs49v+VZ/RMknMp+E/wNkxWde8bP8RAPm/ALndzXH+Bcz2+e+U0+TRxYVISbgjxBD9E3/6Rx3Pr9PCuXdIwrYLzYZwm/IfsXiXnb2tvh/f492dobwGjGb63fN8/61GfMvCgpCc8M9ITV/yKVROtUz28ZAMpyOcPfoJG3gp8hgvppamhctQyaNrwITW+8BI1rn4XGpXOhXpHjVmO+q8kJcKNiCtQ9swLq162B+tUvws3Fi+D6+HFwJSaqQ8d89jJ/M/wCOO0ngOfj4nU4DvSAALBVlqp1KvNb3NTTqMrkBH9jJcn+sgxonDMZbn+2D+42NoI93Tl/Fpo2VcPNAnGnvJzzWmoS1K96Fm4f/9Huc9y91QRNh76Cm88+A39HRzkF/0WO8J+xgJ/645BwDAAeEAB89hWnsIPf0d188lTH8FuA37igEm7v3w13L/0FbHX39m24/eP30LB8AQkC4fd2zBchhBsTx0HTZwcI2LfYP8u1a9CwfTtclRS6bMxnu+xvhZ96X0gYeJWqcFdgV1a/slKfa5IY53p+y7P6i5KYZ/6qcXB793YCMXtYrFYFv/4MdeWye9LzX8tMhdu//MzLc9CgVvfyy3BJKLT7Hr+r4NcTnyQ//rAStwV3aUmUkirWYz5Hl3PmxTIr+RfPgDu//AR8i2bextdf7tAZ/835c+DOpUu8P8vt06fhilrNz0q/DfgtwTf5lK8A8rOytaQK6IGkdFFtkqVVsR7zMbiZt7GyzD78KxfA3bo6cKVufbqPVALhLh/z1a9e5dLnoH9PV0rVvI75WjK/HfipXxNFYwDowv1/z2dKMnW8ZX6zgzsbNTLb8JOy/87vJ6Ej1Lj+RZfu67+hVsDdhgaXP8fdmzfhb4WiQ+GnXhUTT9cBcENQVw0AO6RiHVv4mdzN16DMsg7/3Clw56cfoKNEJwn1C2a6ZKX/5qwql1cxlpXA5ZISHsZ89st+k/8g3i0MxwDQlQPAcUm8jnPmt3dRR26s1dV+ukjX4bpzB+oqNbzCf71YYvi6Ha1bv/0GFwMCeRnzOYKf+iRxP6UCA0AXDQCCL+iKPd/wG90wRdkG/qZX18C90p2LF+B6chRvM/7Gj3bes2e59syzjF/qsdzd5wj+P8z8++hmhxRKcEdgVw0AJwrj2Y/5mF7RVZLePOOnnk76/jN6uJdq2LCel7P6b0wo5zTj57Ot+Ssn1+kxn8G+9uGnlqdnYADoqgHgUn6MU4t9do/sziA/N1VtCAC3trwF91p3/74M1+MjndvaKwqHO+fP3fNnufn++4zHfOaLfacdlPyW8P9GvDQuAQNAV9TjZSpBA5+ZP6P90V0N6nxoINn/7uVL0BlU//RSp27pqVu+pFM8x53Lf8P5gCBeen578FM/FZ9Y7VWqxJOCu9oCYLSqWMtb5rdxXHd9diw0bdkEnUV3LpyHa0lRnE7wuRoVbvj/O4uurljp9JjPGvy/mflX4gXxSToSAPCdgK4WAGSKAi1X+Nmc1X+39k/oTKp/ehmn9/iva8Z3que4ffEinBMEOjXmswv/qGY/Gx2HAaArBoBZshwtY/g53spbP0XlfO9+9y5cvXIFNq3fAHPGTYYpUhVMK1HD0umzYevGt+HiOXZZ+fZPxzm9x9/w5hvOQ3vrFvz0/Q/w7LxFUKkYC5MkCpipngirF6+A3e9vgyuktGejS5rJTo35rJX85vBTb4iIxgDQFQPAWmmG1pkxH5NbehrXP8dbxtP/9jvEDB0Dg/5fn3aWJ2fCmT9OMf5a19OTWJ/gc+u7o7w9y5Y33rL6HL4PPg4vrXwebjGcMtz8cKfTYz578J8c5Q/vhkZgAOhyAaBM3XNjUZrWZfAbT++5tWMLr2XvudNnIPDRAVbhiRw4Cn478QszcCaMZX2CD98v+6yYOc/qc1BPlanhDoONRrf0p/nt+S3gp/5AGI4BoCsGgM0SsdaplX4GF3Xc/u4bTiW/PW1/+z2b4Izu8xi89sI6h1+jbsVSVhd1XE1Npn8wXp+lqbEJknyDbT5LQVSSoepx8BvA2Ygop8Z8lvCfNIP/F+IdwWEYALpiANhZmKx1dszn6MTeO2dOsYbmLMlq9nTj+nWb0Ji8e+t2+5uCXn+V1Ym9NyZNZP0cl/78C+rr6+3+GrqOYe85Qp8YCteuXLX7NS7k5DsF/6924P9lpD/sDgzV9cEA0PUCwL6CJK0r4ae+e/UKK2h+OlYDK2fNt9+/X7vmMADkRsTZf0tw6xZWV3TR8/vYSlNYYghWdgNA5WyHz1K9yv4W6j9Ly3jt+c3hp/44QIgBoOsFgNKee00BwMkxn71Te9m8KksXvtICI0hZLLS7CLb97XcdQmOoAt63XQU07trJ6qz+ulXPs4L/6KGvDX8G2q7YbgEa7bYAJkcN9oWmpiabX+eviZN46PfN4B/Z6p8NASAEA0BXDADbCkgL4CL4Taf1wl3mb8wd/epwy4feFjjnSHsQ+J8BjAJAsp/QNnz7P2Z1UUf9S+tZBYAlFbMMf4agRwfA5dpLrBcBLb1ryzbbAWBaJX89vwX81HswAHTNAPBGYarW2TGfo7P62VQAG559seUD7//QE4Zx2Onf/zBUA7Wkn37vtY0g/O9gxtBQn7OxnmCqAJhe1MG2AsgOjWn5M2SFRMMnO3fD1b+vQH1dPfz8w3GYP3Eaq+eYkFdsuwUgFQDXGb+1kv9nM58g3hWIAaBLBoClRZlaZ8d8ji7qYLMGQDf5sIGCiXWffGpzDYDNRR03Fz/FKgAI+vnw+hxhPsNsLwKqylwG/4kR/rADFwG7ZgCYXJyrdSX81HdOM58C0B1+fAeAvdt2WN8O/NqrrK7ouj5xAqsAMPSffXl9juG9+tneG5Gdz0vPbw1+6g8xAHTNAJAgL9LysdJv74qu20e/ZgwN3d7LdwDY9+FH1vcBLF/C6oquK8lJrPYBDO/1MK/PMarPozb3AejDRE6N+drBbwT/J6O3BIdjAOiKelStFNS5EH56Q0/Tts2MoWEyEmPr/x0+Yn2UWK5mDL/pYs47tbWMnyWi/whenyPFP9T6YuYpPb9l/4j2AeBtYYSujwoDQFesAgQXMkW8l/3md/M1rnmWMTRvrdvAewC4/Jd1aOldfWwv57x1lPm7AEWxYl6fY0ap9TcRr2//kPee3xz+48RvhETq+igxAHTJAPBNTpxTYz5HF3PWjVcwhubk8RO8QiNLSLf+Rt6PP7Yb8zG5krvu9dcZP8uLi5bz+izffHHQ6u9zccIk62X/KOZjPmvgm+A/PtwfXgkVYQDokgFAXer9aU683lXwm3znr4uMwVGl5vAGzbFvvrX+ItDSxdYzvx34qa+OG8f4Of44+Stvz5EeFGl949T5C/C7L/89vzn81KvDozEAdNEA0HNzXrLO6ZLfDvz0eq6G1czbAPoegGjgKKeh0RTKrZ8IdO4cXImKZFTyX7a8mDMsDG6fO9fhVcCuLR9Y/fq1S5a7pOQ3gf+j0StEcRgAumgA6L66IK3alfAbnMjuKC36Sq+v1+OcgaEzeFuHhNxcsphV2W95Mef1RezeCVigqXAKfrphyGobc/ky/O4X6BB+1mX/8PYBYH50AgaArqrpkuwq3st+K7fyNjy3nBU4b6xezxn+7w5/Y+MgzctwJSKMVea/1OZWXuKQELh99izzE4Bu34bCmGROz0LHovT/t6Zrm7fwMuP/yUH2/4F4ozACTwXuqhqtlEVcNgUAjpnfata3vJk3npTPv5xg9R79nq0fQuKoIFZlv73jwerXrbU75rMKvjn8xss5/1arWd0LQI/5ou8GMK1q/B9+Al63c6YBvRfgdHqO/bJ/JPMxnzXwTfD/MMwfXhWKMAB03TZA5bM9J5HzmI8R/MaLOetmTWP9Sm1DfQO8/uI6SPIT2twhN7W4FL796rD904DPn4crkeF2Mz8T+E2Xc9Z/+CGnI82mkD/rqN6P2tzss2z6HLhxzf4rxLXLVrq05zeH/4dhY+CFsCgMAF04APR4PTdFy2vPbwV+k29/9y3nI7RO1PwI7776Bqxb/gy88swqQ4Vga87fJmPeuQPXJ45nt+BnB356OeelvHzD1+WixoYG+Hzvfqh+fg2sWbIS3lr3ChzRfWX4cYf/78lf4TffALsn+PAJfw3xguh4DABdOADcHyqXLvxbHOE8+LbgN7+VNzUObh0+2GFHZ9Ny+cb0SkaLfebw2wLf/Eruvysq4e7Njrsd+M7Nm3CmUMb7mK8N/MPawk89LjEFA0AXDwKCd3OSeOv522R9a1dyx4TB7e+PdQg09DVebj1/QNsAYAG/6WLOWlkJq1eenYH/rFRuG34OG3xsZf4aM/i/J85Ow7sBu3oA6FlelKPlveS3Br/xcs7rOWK49fUh12X+ujqoe+5Z+JuO/FiM+ZhkfssruS9PmgJ3rl512bM0/vwLnE7PdtmYz7LkN4f/+6FjIDw3FwOAJ1QBJ1KjOI/52MBvfjln0/atLin7r0+dzG3MZwd+e1dyX0hMNhzRzbcavq+BP0SxLh3z2YOf+kmp1AcJ8YAq4GB6jI73nt8O/AZHhUDDK+vhrp0z71jdvHPiJ7gmlfAOf5sAYOVKblMQaPrpBD9B7NYtuLz2JfhtTBCv8P/IEv4j5Of7KOQYADwgAHRbmpe+yinwbcBvFXyLizmvpyVBw8bX4M6fFznBcuvYMbgxd05zye/EjN8EvyPwz9u4kvusf6DhlN66/Z+QoHaLfa9/7Rpc27oNzuQUdNiYzxr8x4ze5RtMAoACA4An6L8quVifEul8zx/NDv42V3QR39CMg6a9ux0urt05cxrqX3kZribGs9/X70TP7/hK7uYrus5GxcLfy1dAY02N/QBGqp+6L3VQu3QF/BES4fCijo6Cn3pjYDgGAA+qArxeyU6pcWXPbxd+y1t6IsnvoZLDzSVPQd0Lz0H9+rVQ9/QKuDlrBlzNTGP8Hv8ljvBfYAH/WQeXc56JioGL4zVwacky+HvVarj87Cr4a94COK8qgz+EEYxe6jk5ir/dfT9Ygm8F/v8RPxcWhQHAgwLAfYFyqeRMUoR1+KmTI+BmRjTU5cRCXV481BUkQH1BosF1+QlQlxsPNzNj4IZYZNj+yyjzM7iYk83xXXyO+Wz1+9au5OZ6Nx+jV3mtrPT/Qr7Gr0FC+CMiDE7HiOB0fBScSYyBs8kxhn/q46LgVLQIfgsPh58DhHCcfD1rYz5Tv28J//+GjIFVoVE6EgB6IR0etBi4Kz1O1wb+pHACdhw0KlKhSZ0BjeYutWJVeovrZWISMGLhWkzovYc/wEbmF3Dv+R1ey+2Cs/p/F4bA+dQ4qC0Ut/Nf1AXt/Sd1vhjOpMTBzyRoOMr8FP7viJ+KiNX2Uch7IBkepEW5aVUm+A3gl6YbwGcLv7kblGkkEMQ4LvvZwh/ELfP/ycOCnyP4+bqc0wT/SfJ7UfAvWQHfIfwWPpeZCD8Jgm3CbwoAqkQxBgBPU79Spc+hghRokItbwG9yBL4t+JWtbiCul6bA9RRRW/hZZH6nXuV1csznbNnP7Ny+9pn/pB/5PROjoTY/xSr4tuD/04YvUpNq4EJeCvxB2oSakYJm8M0yv8kR2bkYADyqBShVdi+boqpeU6GEOqZZ307mtwwABivS4UZaNDP4hezP7nMGfuaLfR3X81/MSLCZ9bnCb+7TqfFW4T9C/FCJTIBUeA7894snKBcuriyF5dNLYedkKeeS3yr4Rvip60vS4Hp8RHv4QzjAb3fMF+CyMZ9L+n1z+Mm/nxfH8lLy24L/gtGnkmINQcAE/1HivSMDoY9cjgHAY0p/ldJnXkUz/CafKs9xuuy3hL8lCBSLeYG/Y8d8NuC3Vfb7Mj+u23LMpxdF8AL/RQfwm/xzWHgL/EcHj4G3/UMxAHiSoserqpZXtg0AOydJXQK/yVejQ53q+Z2GX8Am8wvYwT/auSu6LmTE2y77ecr85j4tjm+Bn3qTf6ieBABvJMNDJJtkDABmfrpSBafG5jjV71u1PM3ga6QN8JQxH9tXef+ysujnisxPfZ74XG6KAfxvjX4tIFxHAgAeBuopyp7YPgBQr65QwlV1plM9v60AcDU23LVjvs4+47ezu+/PnCTn4M9nDj/1mcykFvipF4bHkgBQggHAU+Q3VileZiUAUO+grQAf8BvBp6YLgVfChTz2/AG8vdTjaMHvlIvhpz6bGONy+FsCQJ4YfouLboH/CPHciNhqEgC6IxmeMgVQKnspJ6l0LeBPbxsEjpfn8lL2m3wjLYbVmO+9AUOh8iFvqLB037aexsBTrfnBVk9p8X+terI1e7V6kh0veNjH4am9dD//z2MC4c/cJKfHfBccZH4KP83+/xsZYAD/yGA/gyfjWYCepweVSu+qqSq9tSpg7TQF3OQJ/pv5iax7/m0Dh4Hw/zzo9l7+SH/GJ/j8EhAMf+anuKzsp/Cfy0mB732DjJmfwD+o2WFZORgAPFFx45WCyVNUemvtwLuTi6FOxa3kN5X9N3MSmkt/liX/72P8Ifz/ujf89M//1ZDRrN7mOxkcAhdzknlZ7DMv+Q2ZPysJfggQtmZ+Av43xJ8N9Ye+smJ8C9Bj2wGV0ls8XqWZPU3VrhU4PD6f9WKfAf6iFLgWE+7UmG/mw0+4dQCYRtqKn1mc3Wd6jff4SAGcio0iYKc4X/Yb4f89IRaOEtAt4afeIAiD3iUlGAA8PAh0H1GmlCgnq2oWVpBAUKkyTgUUcF2VwRj+elkq3EiPbZP1ue7r/2zYKLcOADsHDHfq+K6fSUtwNi3eAD3Xnv9USjwcDwptWeyzhJ/6+eDIGhIAvJACjw8CqvtIIPCiLwilT1RWSTVKXeVUle7VScW6i/LmLb3m5X29VAx1BUlwIyserqdGwzUXjPnKvR53S/hz//WIAXo+DvE47hcIJ8PC4PcYEeiT4+BsRiKcz06GC7kpzbCTf54j/32G/Pgp8vMno0XwU0gYHBsV0Gal3xL+r42uEMVre5fI8CUglGVAUPRstrJnWU6m5s8IIfdXeTmO+Y6MHO2WAeDFRweyv6jD1gk+dg7xsHypx7S7z3zGbyvzmwLAmJw8DAAoB8GgVOn9WkqCvmPgb7vJp/jfj7pdANANGc0P/LYO8bB4o+8oF/gH+sH+IQLoLSvGdwBQjhUjKRDoYkR6V53gY2tP/zv9h7gV/HT2z+WKrhqOmd82/K1jPsusT+E/TLwqMIIEAHwNGMVQD6kUgvcTYvk9wSfA/tbe8/4CyCE9tTvAn9TzYfhxxBjmF3UMt39Wv63juxhlfgfwU68IFmlJAMAtwCjG04Jug+TF4s+jI2s78lXeg8NHgej/9u30AWAN6f0djfmYXtRhr+Tn2u8fNoP/EHF0WiYGABR7iQvyxD9FhHbo8V3LH+3fqeHP/9d/COhjeLmlh+li31EW8JtnfupPhvhD72Ls/1Ec1IdUArLcbM2ZUCGr47tqnTi+69hIv067O5D+ufYNHMlisc/f4UUd/2NR9rOB/5DRb/oKoXcJBgCUE0Hg5aT4iosWV3S56m0++hbfrkEjIOb/PdSp4I8grckWn2H3cMznxxr+QwP84HXfEB2pALD8RzkVBLykuVk1F4ODuPf8AnbHd+0ZPAJCO1EAWPlI/0475jtsA/6viKdFxGEAQPESBLzl2Vk1f3XA5Zym47sWP/Jkp4C/gPT9FGJnFvy4j/nYLfiZw09dGR6LbwCi+KsEZqeKD/wZxH7Mx+UQj998/WHOwz73FP7pDz4BR4f6deoxny34dcQBmTkS/OSi+AsCSqWXIiur5kJQEC/HdzG5qOMtnyEQcg/gn/OQD8MZv78L4G/u+b/hCP9B2v+PDqETAHwDEMV3EFB4F5MgcJ4EAVfDbzq6a+3jAzsUfnoKUI1x3Odod98PrtjdN5h75j9o9OJgUU3vYim+AYhySRDwWpKcvOp0YFCH3dKzbcAwyLOzWzDuX4/BlEEB8HpUJujyx8KpsplwfcoiaJq+HO7MWAkNlcugVjMfjsunwZ50OTwXlACSR9pWF3T6sO6xQc3Q89Xvu2DMZw7/V1bgP9jfD1KS07S9pVJ8AQjlsiDQTZOWpjkZHMwr/PbO6j8xagws6PckhJlBK+rZDzbF5cKtqhUAM59m7QsT5sLMYSEwq+8T8K2x3zdf7DvOcYPPMRfP+O3Bv31oABD4cf6Pcn0QKMnMEB8KDa3leksPm4s6TKf1Hh3uCyv+0x/WC5Pg6uSnOIFPfYVUBGfzSuF4cLRbjvmswa8jfloQoSMBoB9+QlEdorCCAvGnYeEuhd/aLT30iO4aYRScKRwL9RVLGUHfNH0ZnJZp4LgoxQA8133933eCMZ85/Lr+JvtCbEq6Fuf/qA6tBEYXSTRfhobZLfvPuvByzl9GB8AxYQzoxflwJl8Np6QT4FTJJDhVPBFOF5TB2TQJ1BDof/ANsnp813EXzfj52NfPpOw3BYC9g8ZAHyz/UfciCGRkZ0u+CA3Tc1np5/2iDgZn9bvzmM9a5v+SeL1fSO0DUukg/ESi7k0gUCi8VyQk1HQE/L9yvKWHzSEenWHM95VD+P0M8FNPD43WkQCA5T/q3gaB1bHxerY9/ykXXs7J5fiumo7s+Qdy7/m/NHN5JN4AhOoEekwmE7whiq7+kR59zXDMZw9+Nldy/8LirP7jrjjEY0jH9Pvm8H/xpC/sGuQPA3LzI/DTh+oklYC8uygvX/NVcAhr+H/nCP/PHDM/b/v6B9s+u88VPb/BTzYHgBX+ETUPFOHuP1TnCgLdMrKyJJ8Iw/Rsx3z24WfW73fFMd+XFpmf+nPixMS0hQ9Iiu7HTx2qMwYC7zdEUXquYz5W8HexMZ+1xT5z+KnfHB4EBH4c/6E6r56USsXbQyNquGb+k/cafp4O7vyaw+4+az2/efZ/aZRQ94BEgqv/qE5cBcjl93nJ5V4zEpOrvxEE45jPiX7fBL7JE8NiVj1QVNQNP2UodwgE3VMzsxeagoCzY76fPWjM94WVAPAx+fX9c/LE+MlCuVEQKOkRmZur+TAknHnPP5L5gh+f8H/HEf6vOwD+z3x8YZEggvT/Ejz8A+VuC4Ml3R6XSsUbw0UHfsUxn034v7BR9lP4DxCnxSUvJAEAV/9R7il6d700Nb3mR98A3uBnc1Y/1w0+3/J5iAfLnp/CT71yTBjN/rj6j3L/IDAlIbnik4AQTiv9P3XxMV8L/D6t8H9KnB+dSLM/nvyD6hJBoNtjUqlmY2hkDY757Gd+6ldHBMMDhZj9UV0qCMi6E3uvjYjSs93dd9yN4f+SJfw0+y8dE657oLAQZ/+orqdHi4oEz0dGV385Jsjjx3yW4H9qXPzLiEnCN/9QXbgakMm6D8sv0HwQGNYp4e+IMd/nVuCnXjU6hJT/hTj6Q3X9lkCUlS3ZJRBy7/mdvpzTDvyDuI75/DhlfkP2f8IXpJEJ2n8XFuLiH8oTgkDxfQMLC8TaoLAD7jDmO8TjmM8a/NXDgvQPFBTgsV8oDwsExTKviXFJNcdGCKzu63fJWf2D+bmogy/4PyEOT0rT/rsAF/9QHhkEir3EqelVH/kLa7v6mM8cfJPXjhDWEvgx+6M8WyNy88TVwRFdesxnWu03wU+zf1lobDUJAN3xE4Dy7EpAKu3Wt6hIsDoksoZzz+/Evv5DLLb2soH/UxuZn8K/vb8/DMjIxrf+UCizQOA1MyruwLekHehKYz5L+KmLI+J1/84v6IXfdRTKTA+QIKCMT9IcGBXYZcZ8lvA/PToU/p2fj9t+USgbQaB7dFqGZu/oQKfh7+ie3xH8+4lj4lO0JADgyj8KZScIdEtOSavYMypQ765jPnPwTfCvGx58gsCPt/2iUA6DQFFRt4cKCr23+Ar1TDb4uOzsvv78wL/fezRIw2Nxzz8KxUaJKWninaODbJf9HQQ/157/EyP8q4cHwwP5+bjnH4ViWQncJ0zPFL8QFKE/4ooxHx8zfpvgN8O//Uk/CElMXUjKfzzuC4XiFAgkEu9ngiP1R/g8vsuVPb8RfuqlvqE6XPhDoZzUsKxswUoSBL7hOOb7qgNLfup9xJsHjKHZX4LfPRSKj0qgsNB7vCiu5utOOuYzh/9j4mxRgvbfeXn4ui8KxWcQeNk/VM9ld5+r4DfP/KYAsGpEcA2B3xu/YygUz0pMEgs2jwzSu/KsfrZjPhP41O8NGFM7JC1DTAIAXvOFQvGtfxcWdnskL0+zZURgpxjzmcNPXSqMru6Vk4dv+6FQLgwC3SeFx1Y7e4IPV/j324D/xeFB0Ds7F2f+KJTL1wPyC/rNEkbp7+WYb5/Zot9LQwPBPylV0is37z787qBQHVEJ5Bd4b/AV1vB9gg+bnp9665N+MCo5VUPgx9IfherAANBtSHqWeOcQQS3blX4+Sn6a+T/+72gYGxS1mfT9OPJDoe5BEOg+Mziq2rVbe0dbLfsp/ItGh9YQ+L3wO4FC3SMNS88U7x3k76IZv69N+F8dHABeWTl4yAcKdU+rgLz8XhNCY3QdMeaj4FNv8/GDvPC4il45uTjvR6HutR7IzRVsHhbg0jGfKfPvID9fGBqjQfhRqE6iXnl53jODImu4rPSzgX8PcVpEfE2v7Bzc6otCdZoAkJvXbZg4XfLRwDG8j/lMZf9e4qn+EQcI/Ljoh0J1viCQ2/Npv1Adm4s67C32WYGfZP5shB+F6qyKjE+RvD9YwNuYz7DgR37NuMDI6l5ZmPlRqM5dBeTkdUuOTtTs7e/n9JjPlPnVQSIKP+7yQ6HcIwjkdl/kF1bNacxnBv8u8u95YbE12POjUG6m3pk5/xwfHFVdPTSQ9Uo/zfqvDRLopSHRFf/Cnh+FctNKIDunO7FgUqBI99GTfozgf35YEETEJmr/lZXtTeDHOT8K5faBICunX/+UdM3UgEjtilEhsLW/Xwv4u0hAWE+qhJl+YTXJongKvoAYT/JFobpYNdCNuAfJ6j7UD2Zk+jyemu7TKyvLhwBP7UWMb/ShUCgUCoVCuVz/H4ZBc6YvEGTDAAAAAElFTkSuQmCC'; /* == CHILI == */
@@ -2372,8 +2412,9 @@ var FP_STELLEN = [
     'Tipp auf den Knopf, dann aufs Menü.',
     'Speichern, den Menüknopf oben rechts tippen und mit einem Tipp neben das Menü wieder schließen.'],
   ['hinweis', 'Hinweis aus Glas',
-    'Rückfragen und Hinweise aus Glas, etwa vor dem Löschen, und das Ticketblatt. Mit iOS quillt das Glas als Tropfen aus ' +
-      'dem getippten Knopf und fließt beim Schließen in ihn zurück.',
+    'Rückfragen und Hinweise aus Glas, etwa vor dem Löschen, dazu Ticketblatt und Timer. Mit iOS quillt das Glas als Tropfen ' +
+      'aus dem getippten Knopf und fließt beim Schließen in ihn zurück; die großen Blätter fließen milchig und werden erst ' +
+      'am Ziel zu Glas.',
     'Tipp auf «Speichern», dann auf den Hinweis.',
     'Speichern, dann hier einen anderen Schalter umlegen und über das Menü weggehen: Die Rückfrage «Nicht gespeichert» ' +
       'kommt im Glas.'],
@@ -2701,23 +2742,39 @@ function px(n) { return Math.round(n * 10) / 10 + 'px'; }
 // Der Geist: eine Kopie von `el` hinter einer Schattenwurzel mit dem Stylesheet
 // der Seite (ohne die Schriften — die gelten ohnehin überall). Ids und
 // data-Attribute bleiben darin, ohne mit der lebenden Seite zu kollidieren.
-var geistStil = null;
+var geistStil = null, geistBlatt = null;
 function geist(el) {
   if (!el || bewegungAus() || !el.attachShadow) return null;
+  var wirt = document.createElement('div'), wurzel, kopie = el.cloneNode(true);
+  try { wurzel = wirt.attachShadow({ mode: 'open' }); } catch (e) { return null; }
+  wirt.className = 'geist';
+  wirt.setAttribute('aria-hidden', 'true');
+  kopie.removeAttribute('hidden');
+  geistStilGeben(wurzel);
+  wurzel.appendChild(kopie);
+  return wirt;
+}
+
+// Das Stylesheet der Seite in eine Schattenwurzel. Einmal gelesen und von
+// allen geteilt: Jeder Geist las es sonst neu ein, rund 180 KB, in dem Bild,
+// in dem er entsteht — beim Rückwisch 28–35 ms Skript.
+function geistStilGeben(wurzel) {
   if (geistStil === null) {
     var s = document.querySelector('style');
     geistStil = (s ? s.textContent : '').replace(/\/\* == SCHRIFTEN:START[\s\S]*?SCHRIFTEN:ENDE == \*\//, '') +
       ':host { display: block; pointer-events: none; }';
+    try {
+      geistBlatt = new CSSStyleSheet();
+      geistBlatt.replaceSync(geistStil);
+    } catch (e) { geistBlatt = null; }
   }
-  var wirt = document.createElement('div'), wurzel, stil = document.createElement('style'), kopie = el.cloneNode(true);
-  try { wurzel = wirt.attachShadow({ mode: 'open' }); } catch (e) { return null; }
-  wirt.className = 'geist';
-  wirt.setAttribute('aria-hidden', 'true');
+  if (geistBlatt && 'adoptedStyleSheets' in wurzel) {
+    wurzel.adoptedStyleSheets = [geistBlatt];
+    return;
+  }
+  var stil = document.createElement('style');
   stil.textContent = geistStil;
-  kopie.removeAttribute('hidden');
   wurzel.appendChild(stil);
-  wurzel.appendChild(kopie);
-  return wirt;
 }
 
 // Eine Fläche `q` auf die Fläche `n` abbilden: verschoben, gleichmäßig
@@ -2908,6 +2965,7 @@ function fliessen(el, quelle, opt) {
 // sonst dazwischen. `farbe` gilt auch ohne Glas; `leer`: Das Teil hat keinen
 // eigenen Grund (ein leeres Häkchen) — das Flüssige blendet am Ziel aus, sein
 // Ring bleibt. `angekommen`: einmal, sobald er auf dem Weg hin am Ziel ist.
+// `hals`: eigene Zähigkeit statt der von iOS — wie früh der Hals reißt.
 function teilFliesst(el, o) {
   var f = el._fluss;
   if (bewegungAus()) {
@@ -2927,7 +2985,7 @@ function teilFliesst(el, o) {
   s.style.zIndex = cs.zIndex;
   if (o.schatten) s.style.filter = o.schatten;
   (o.ort || el).parentNode.insertBefore(s, o.ort || el);
-  f = el._fluss = { o: o, p: fpFeder(o.auf ? 0 : 1, o.schnell || 1), s: s, b: fpSchichten(s, 'flt' + (++flNummer), true),
+  f = el._fluss = { o: o, p: fpFeder(o.auf ? 0 : 1, o.schnell || 1), s: s, b: fpSchichten(s, 'flt' + (++flNummer), true, !!o.schlicht),
     formen: [], weite: 0, ab: Date.now() + (o.warten || 0), zuletzt: 0, fertig: o.fertig,
     alt: { background: el.style.background, boxShadow: el.style.boxShadow, transition: el.style.transition,
       position: el.style.position,
@@ -2949,11 +3007,45 @@ function teilFliesst(el, o) {
   if (o.inhalt) o.inhalt.style.opacity = '0';
   // Das erste Bild gleich: Ein Teil, das zufließt, verschwände sonst einen
   // Augenblick lang.
-  teilSchritt(el, function schritt() { teilSchritt(el, schritt); });
+  teilSchritt(el);
 }
 
-function teilSchritt(el, weiter) {
-  var f = el._fluss, nun = Date.now();
+// Alle Teile, die fließen, gehen im selben Bild: erst messen alle, dann
+// schreiben alle. Ging jedes in seinem eigenen Bild, maß das zweite nach dem
+// Schreiben des ersten und zwang den Browser, alles neu zu rechnen — beim
+// Auftropfen viermal je Bild.
+var teilReihe = [], teilBildKommt = false;
+function teilWeiter(el) {
+  if (teilReihe.indexOf(el) < 0) teilReihe.push(el);
+  if (teilBildKommt) return;
+  teilBildKommt = true;
+  fpBild(teilBild);
+}
+
+function teilBild() {
+  teilBildKommt = false;
+  var liste = teilReihe, nun = Date.now();
+  teilReihe = [];
+  var masse = liste.map(function (el) { return teilMessen(el, nun); });
+  liste.forEach(function (el, i) { teilSchritt(el, masse[i], nun); });
+}
+
+// Was ein Schritt mißt — nichts, solange das Teil noch wartet.
+function teilMessen(el, nun) {
+  var f = el._fluss;
+  if (!f || nun < f.ab || bewegungAus()) return null;
+  var o = f.o, qr = el.isConnected ? o.quelle() : null;
+  if (!qr || !qr.width) return { weg: true };
+  // Zurück nimmt der Tropfen den Inhalt mit, auch wenn er unterwegs umkehrt.
+  if (f.p.ziel === 0) f.folgt = true;
+  return { qr: qr, zr: o.ziel(), er: el.getBoundingClientRect(),
+    ir: o.inhalt && f.folgt && !f.lage ? o.inhalt.getBoundingClientRect() : null };
+}
+
+// `m`: was teilMessen() gemessen hat; ohne mißt der Schritt selbst.
+function teilSchritt(el, m, nun) {
+  var f = el._fluss;
+  nun = nun || Date.now();
   if (!f) return;
   // Wird die Bewegung unterwegs abgeschaltet, steht das Teil sofort, wo es
   // hinwollte; sein Abschluß kommt genau einmal (James, N6).
@@ -2963,14 +3055,18 @@ function teilSchritt(el, weiter) {
     if (still) still();
     return;
   }
-  var o = f.o, qr = el.isConnected ? o.quelle() : null;
-  if (!qr || !qr.width) {
+  // Wer noch wartet, mißt nicht (teilMessen).
+  if (nun < f.ab) { teilWeiter(el); return; }
+  // Erst alles messen, dann schreiben: Wer nach dem Schreiben mißt, zwingt
+  // den Browser, mitten im Bild alles neu zu rechnen (P1, Nachricht 15).
+  m = m || teilMessen(el, nun);
+  if (!m || m.weg) {
     var weg1 = f.fertig;
     teilFliesstEnde(el);
     if (weg1) weg1();
     return;
   }
-  if (nun < f.ab) { fpBild(weiter); return; }
+  var o = f.o, qr = m.qr, zr = m.zr, er = m.er, ir = m.ir;
   var dt = f.zuletzt ? fpKlemme((nun - f.zuletzt) / 1000, 0.001, 0.05) : 0.016, p = f.p;
   f.zuletzt = nun;
   fpSchwingen(p, dt, FP_IOS);
@@ -2981,7 +3077,10 @@ function teilSchritt(el, weiter) {
     f.da = true;
     if (o.angekommen) o.angekommen();
   }
-  if (!o.leer) el.style.boxShadow = f.da && p.ziel === 1 ? f.alt.boxShadow : 'none';
+  if (!o.leer) {
+    var schatten = f.da && p.ziel === 1 ? f.alt.boxShadow : 'none';
+    if (f.schatten !== schatten) el.style.boxShadow = f.schatten = schatten;
+  }
   var ruht = Math.abs(p.x - p.ziel) < 0.0015 && Math.abs(p.v) < 0.02;
   if (ruht) { p.x = p.ziel; p.v = 0; }
   if ((ruht && p.ziel === 1) || (p.ziel === 0 && p.x < 0.02)) {
@@ -2990,7 +3089,6 @@ function teilSchritt(el, weiter) {
     if (fertig) fertig();
     return;
   }
-  var zr = o.ziel(), er = el.getBoundingClientRect();
   var q = { x: qr.left, y: qr.top, w: qr.width, h: qr.height, r: Math.min(qr.width, qr.height) / 2, nur: !o.rest };
   var z = { x: zr.left, y: zr.top, w: zr.width, h: zr.height, r: o.rund || 0 };
   var t = fpTropfen(q, z, p.x, p.v, o.d0, FP_IOS);
@@ -3002,16 +3100,14 @@ function teilSchritt(el, weiter) {
   // Das Teil: auf den Tropfen beschnitten, in seinen eigenen Maßen.
   var innen = { x: t.x - er.left, y: t.y - er.top, w: t.w, h: t.h, r: t.r, deh: t.deh };
   el.style.clipPath = el.style.webkitClipPath = 'path("' + fpUmriss(fpPunkte(innen)) + '")';
-  // Zurück nimmt der Tropfen den Inhalt mit, auch wenn er unterwegs umkehrt.
-  if (p.ziel === 0) f.folgt = true;
   if (o.inhalt) {
-    if (f.folgt && !f.lage) {
-      var ir = o.inhalt.getBoundingClientRect();
-      f.lage = { x: zr.left - ir.left, y: zr.top - ir.top };
-    }
+    if (ir) f.lage = { x: zr.left - ir.left, y: zr.top - ir.top };
     fpInhalt(o.inhalt, f.folgt, t, z, p.x, f.lage);
   }
-  if (o.glas && o.farbeAmZiel) el.style.backgroundColor = p.ziel === 1 && p.x > 0.8 ? o.farbeAmZiel : o.farbe || '';
+  if (o.glas && o.farbeAmZiel) {
+    var farbe = p.ziel === 1 && p.x > 0.8 ? o.farbeAmZiel : o.farbe || '';
+    if (f.farbe !== farbe) el.style.backgroundColor = f.farbe = farbe;
+  }
   // Die Schicht: Hals und Tropfen in einem Kasten um alle, so breit wie der
   // Schatten. Die Quelle trägt nur den Hals und bleibt ausgespart — sie steht
   // schon da; Glas spart auch den Tropfen aus.
@@ -3019,8 +3115,9 @@ function teilSchritt(el, weiter) {
   var x1 = Math.max(q.x + q.w, t.x + t.w, z.x + z.w) + 60, y1 = Math.max(q.y + q.h, t.y + t.h, z.y + z.h) + 80;
   q.x -= x0; q.y -= y0; t.x -= x0; t.y -= y0;
   f.formen = o.rest && q.s < 0.03 ? [t] : [q, t];
-  f.weite = fpWeite(q.r * (q.s === undefined ? 1 : q.s), o.d0 / 2, FP_IOS);
-  // Die Lichtkante leuchtet, solange er fließt, und ist fort, wenn er steht.
+  f.weite = fpWeite(q.r * (q.s === undefined ? 1 : q.s), o.d0 / 2, o.hals === undefined ? FP_IOS : { hals: o.hals });
+  // Die Lichtkante leuchtet, solange er fließt, und ist fort, wenn er steht;
+  // ein großes Blatt trägt unterwegs keine (`schlicht`).
   f.b.kante = FP_IOS.kante * fpKlemme(Math.abs(p.ziel - p.x) * 3, 0, 1);
   if (o.leer) f.s.style.opacity = fpAnteil((1 - p.x) / 0.25);
   f.s.style.display = '';
@@ -3033,7 +3130,7 @@ function teilSchritt(el, weiter) {
     glasLoch + '")';
   f.s.style.clipPath = f.s.style.webkitClipPath = loch;
   fpZeichnen(f.b);
-  fpBild(weiter);
+  teilWeiter(el);
 }
 
 // Räumt ab: Das Teil ist wieder ganz es selbst.
@@ -3078,6 +3175,13 @@ function fpInhalt(inhalt, folgt, t, z, p, lage) {
 // heraus (`auf`) oder hinein. Die Dauer des Aufrufers stimmt die Feder.
 var SCHATTEN_HUELLE = 'drop-shadow(0 10px 15px rgba(20, 20, 19, .16))';
 var SCHATTEN_GLAS = 'drop-shadow(0 4px 5px rgba(20, 20, 19, .14)) drop-shadow(0 14px 16px rgba(20, 20, 19, .28))';
+// Ein großes Blatt (`milchig`) fließt schlicht: ein Schatten statt zwei, keine
+// Lichtkante. Beides rechnete das iPhone in jedem Bild über die ganze Fläche
+// neu — das Ticketblatt verlor je Auf und Zu rund 24 Bilder (P1, Nachricht 15).
+// Am Ziel hat die Karte ihr Glas mit allem. Eine Ansicht (`gross`) ist das
+// größte Blatt: Sie behält ihren einen Schatten und läßt die Lichtkante weg —
+// mit ihr stand der Rückwisch am Gerät ein Bild lang 110–130 ms still.
+var SCHATTEN_SCHLICHT = 'drop-shadow(0 8px 10px rgba(20, 20, 19, .22))';
 function huelleFliesst(h, inhalt, z, quelle, auf, opt, dauer, fertig) {
   var f = glasFarben(opt.glas), rund = opt.rund || (auf ? '0px' : '20px');
   h.style.left = px(z.left);
@@ -3093,7 +3197,8 @@ function huelleFliesst(h, inhalt, z, quelle, auf, opt, dauer, fertig) {
   } : quelle;
   teilFliesst(h, { quelle: q, ziel: function () { return z; }, rund: parseFloat(rund) || 0, d0: 36, inhalt: inhalt,
     glas: !!opt.glas, farbe: f.dicht, farbeAmZiel: opt.milchig ? null : f.duenn,
-    schatten: opt.glas ? SCHATTEN_GLAS : SCHATTEN_HUELLE, auf: auf, leer: !!opt.leer, angekommen: opt.angekommen,
+    schatten: opt.milchig ? SCHATTEN_SCHLICHT : opt.glas ? SCHATTEN_GLAS : SCHATTEN_HUELLE, schlicht: !!(opt.milchig || opt.gross),
+    auf: auf, leer: !!opt.leer, angekommen: opt.angekommen,
     warten: opt.warten, schnell: fpKlemme(dauer / fluessigTakt(opt.glas ? 'hinweis' : 'ansichten').dauer, 0.4, 2), fertig: fertig });
 }
 
@@ -3211,26 +3316,50 @@ function hakenFliesst(id) {
 // Lichtkante. Gezeichnet wird seltener als jedes Bild — sie läuft Minuten.
 function welleFliesst(bild, pegel) {
   if (!bild) return;
-  var ort = document.createElement('div'), chili = $('chiliFigur');
+  var ort = document.createElement('div'), chili = $('chiliFigur'), ruhig = !flIos('welle'), n = ++flNummer;
   ort.className = 'fl-welle';
   ort.setAttribute('aria-hidden', 'true');
   bild.insertBefore(ort, chili && chili.parentNode === bild ? chili : null);
-  var b = fpSchichten(ort, 'flw', true);
-  b.id = 'welle';
-  b.el = ort;
-  b.ort = ort;
-  b.W = ort.clientWidth;
-  b.H = ort.clientHeight;
-  b.haelse = {};
-  b.frei = true;
-  b.bildAbstand = 50;
-  b.pegel = pegel;
-  b.ruhig = !flIos('welle');
-  b.kante = b.ruhig ? 0 : FP_IOS.kante;
-  if (!b.W) { weg(ort); return; }
+  var W = ort.clientWidth, H = ort.clientHeight;
+  if (!W) { weg(ort); return; }
+  // Ein SVG, kein Filter, keine Maske: Die Welle wird alle 50 ms neu
+  // gezeichnet, Minuten lang. In drei Schichten mit Umriß als clip-path und
+  // einer Lichtkante im Filter verlor das iPhone dabei Bild um Bild, im
+  // Standard wie auf iOS — im Standard sah man von den dreien nur eine.
+  ort.innerHTML = '<svg class="fw-bild" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">' +
+    '<path class="fw-fluss"/>' + (ruhig ? '' : '<path class="fw-kern"/><clipPath id="fwC-' + n + '"><path/></clipPath>' +
+    '<path class="fw-licht" clip-path="url(#fwC-' + n + ')"/>') + '</svg>';
+  var b = { id: 'welle', el: ort, ort: ort, W: W, H: H, haelse: {}, frei: true, bildAbstand: 50, pegel: pegel, ruhig: ruhig,
+    kante: ruhig ? 0 : FP_IOS.kante, zeichnen: welleZeichnen,
+    fluss: ort.querySelector('.fw-fluss'), kern: ort.querySelector('.fw-kern'), licht: ort.querySelector('.fw-licht') };
+  b.rand = b.licht && b.licht.previousElementSibling.firstChild;
+  // Die Farben einmal: im Standard nur der Grund, auf iOS Saum und Kern wie
+  // beim Flüssigen, das sich bewegt (fpZeichnen).
+  var f = flFarben(b);
+  if (f && !ruhig) {
+    b.fluss.style.fill = flMischen(f.rand, f.grund, 1);
+    b.kern.style.fill = flMischen([255, 255, 255, 1], f.grund, f.hebung);
+    b.licht.style.opacity = String(b.kante);
+  }
   fpWelle(b);
-  fpZeichnen(b);
+  welleZeichnen(b);
   if (!bewegungAus()) fpAnstossen(b);
+}
+
+// Die Welle in ihr SVG: der Umriß, auf iOS dazu der Kern um den Saum
+// eingerückt und die Lichtkante als Strich die Oberfläche entlang, innen am
+// Umriß abgeschnitten — wie die Kante aus dem Filter, nur ohne ihn.
+function welleZeichnen(b) {
+  var w = FP_IOS, erg = b.formen(w), jetzt = {}, d = fpPfad(erg, erg.formen, jetzt);
+  b.fluss.setAttribute('d', d);
+  if (b.kern) {
+    b.kern.setAttribute('d', fpPfad(erg, fpInnen(erg.formen), jetzt, true));
+    b.rand.setAttribute('d', d);
+    // Die Perlen steigen in der Flüssigkeit auf; eine Kante tragen sie erst,
+    // wenn sie die Oberfläche heben — und die trägt sie schon.
+    b.licht.setAttribute('d', erg.linie || 'M0 0Z');
+  }
+  fpNachZeichnen(b, jetzt, w);
 }
 
 // ── Tropfen: auf aus einem runden Knopf, zu in ihn hinein (ADR 0008) ──
@@ -3267,6 +3396,12 @@ function mischen(a, b, t) { return a + (b - a) * t; }
 function sichtbar(r) {
   var oben = Math.max(r.top, 0), h = Math.max(0, Math.min(r.top + r.height, window.innerHeight || r.height) - oben);
   return h ? { left: r.left, top: oben, width: r.width, height: h } : { left: r.left, top: r.top, width: r.width, height: r.height };
+}
+
+// Was von `r` innerhalb der Zeile `sicht` liegt (oben, Höhe).
+function imSchnitt(r, sicht) {
+  var oben = Math.max(r.top, sicht.top), unten = Math.min(r.top + r.height, sicht.top + sicht.height);
+  return unten > oben ? { left: r.left, top: oben, width: r.width, height: unten - oben } : sichtbar(r);
 }
 
 // Der Geist in seiner Hülle: um das versetzt, was über dem Rand liegt, und von
@@ -3345,6 +3480,22 @@ function grundUnter(el) {
 var TROPFEN_ZU_TAKT = [0.38, 0.7, 0.9];
 var TROPFEN_ZU_FRUEH = [0.18, 0.4, 0.86];
 
+// Eine Terminzeile, in die eine Ansicht oder Meldung zurückkam, leuchtet kurz
+// auf — so sieht man, wo man wieder ist (ADR 0060). Ist sie inzwischen neu
+// gezeichnet, leuchtet die neue.
+var LEUCHT_DAUER = 900;
+function zeileLeuchtet(el, warten) {
+  if (!el || bewegungAus()) return;
+  setTimeout(function () {
+    var z = el.isConnected ? el : document.querySelector('#ansicht ' + mitWert('data-termin', el.getAttribute('data-termin')));
+    if (!z) return;
+    z.classList.remove('leuchtet');
+    void z.offsetWidth;
+    z.classList.add('leuchtet');
+    setTimeout(function () { z.classList.remove('leuchtet'); }, LEUCHT_DAUER);
+  }, warten || 0);
+}
+
 // Ein Knopf schluckt einen Tropfen mit einem kleinen Nicken.
 function knopfNickt(el, warten) {
   bewegt(el, [{ transform: 'scale(1)' }, { transform: 'scale(1.14)', offset: 0.45 }, { transform: 'scale(1)' }],
@@ -3355,16 +3506,25 @@ function knopfNickt(el, warten) {
 // der ihn mit einem kleinen Nicken schluckt. `opt` ist frei: `rund` die Ecken
 // der Fläche (eine Ansicht 20px), `dauer` die eigene Dauer, `frueh` den Tropfen
 // früh formen und halten, `glas` die Hülle aus Glas, `fertig` kommt, wenn er
-// geschluckt ist.
+// geschluckt ist. `leuchtet`: eine Terminzeile, die ihn aufnimmt — sie
+// leuchtet kurz, statt zu nicken (ADR 0060).
 function tropfenZu(g, r, ziel, opt) {
   opt = opt || {};
-  var k = ziel.getBoundingClientRect(), s = sichtbar(r), w = tropfenWeg(s, k), h = tropfenHuelle(g, r.width, opt.glas);
+  // `form` (aus einem Zug, ADR 0060): Die Fläche ist schon geschrumpft, und
+  // zu sehen ist nur ihr Teil `sicht`.
+  var fo = opt.form, skala = fo ? fo.skala : 1, k = ziel.getBoundingClientRect();
+  if (fo && !opt.rund) opt.rund = px(fo.ecken);
+  var s = fo ? imSchnitt(r, fo.sicht) : sichtbar(r), w = tropfenWeg(s, k), h = tropfenHuelle(g, r.width / skala, opt.glas);
+  if (skala !== 1 && g.shadowRoot) {
+    g.shadowRoot.lastChild.style.transformOrigin = '0 0';
+    g.shadowRoot.lastChild.style.transform = 'scale(' + skala.toFixed(4) + ')';
+  }
   if (opt.glas && opt.milchig) h.classList.add('milchig');
   geistVersetzen(g, r, s);
   var dauer = opt.dauer || TROPFEN_DAUER, t = opt.frueh ? TROPFEN_ZU_FRUEH : TROPFEN_ZU_TAKT;
   var f = glasFarben(opt.glas);
   function sk(b, off) { return { transform: 'scale(' + (b.width / r.width).toFixed(4) + ')', offset: off }; }
-  function nicken(warten) { knopfNickt(ziel, warten); }
+  function nicken(warten) { if (opt.leuchtet) zeileLeuchtet(opt.leuchtet, warten); else knopfNickt(ziel, warten); }
   if (opt.grund) h.style.background = opt.grund;
   // Auf iOS fließt die Hülle selbst in den Knopf (ADR 0054); er nickt, wenn
   // sie in ihm aufgegangen ist.
@@ -3512,11 +3672,18 @@ function uebergangVorbereiten(von, nach) {
   var gemeldet = fensterIstMeldung;
   fensterIstMeldung = false;
   if (von === nach || bewegungAus()) return null;
-  var alt = $('ansicht');
+  // Aus einem Zug fließt die ganze Ansicht mit ihrem Kopf, so geschrumpft,
+  // wie sie unter dem Finger stand (ADR 0060).
+  var alt = zugForm && nach === 'home' ? $('app') : $('ansicht'), g = gemeldet ? null : geist(alt);
+  if (g && alt.id === 'app') {
+    var kopie = g.shadowRoot.lastChild;
+    kopie.removeAttribute('style');
+    kopie.classList.remove('zieht', 'bereit');
+  }
   // Ist das Fenster schon zur Meldung geworden, tropft die nächste Ansicht
   // auch nicht aus dem getippten «Speichern» — sie steht still dahinter, wohin
   // sie auch führt (ADR 0042).
-  return { zurueck: nach === 'home', altRect: alt.getBoundingClientRect(), geist: gemeldet ? null : geist(alt),
+  return { zurueck: nach === 'home', altRect: alt.getBoundingClientRect(), geist: g, form: nach === 'home' ? zugForm : null,
     gemeldet: gemeldet, quelle: gemeldet ? null : punkt ? punktFlaeche(punkt.x, punkt.y) : flaeche,
     rund: !!punkt || (mitTipp && tropfenQuelle(tipp)) };
 }
@@ -3525,8 +3692,9 @@ function uebergangVorbereiten(von, nach) {
 // alte weicht zurück; zurück schrumpft die alte in ihre Kachel hinein.
 function uebergangAusfuehren(u) {
   if (!u) return;
-  var neu = $('ansicht'), g = u.geist, a = u.altRect, n = neu.getBoundingClientRect();
-  bewegt($('kopf'), [{ opacity: 0 }, { opacity: 1 }], { dauer: 320, kurve: 'ease-out' });
+  var neu = $('ansicht'), g = u.geist, a = u.altRect, n = neu.getBoundingClientRect(), stand = u.zurueck && zugZurueck;
+  // Aus einem Zug stand das Dashboard schon unter der Ansicht — es kommt nicht noch einmal.
+  if (!stand) bewegt($('kopf'), [{ opacity: 0 }, { opacity: 1 }], { dauer: 320, kurve: 'ease-out' });
   if (g) {
     g.style.cssText = 'position: fixed; margin: 0; left: ' + px(a.left) + '; top: ' + px(a.top) + '; width: ' +
       px(a.width) + '; z-index: ' + (u.zurueck ? 5 : 0) + '; background: var(--grund); transform-origin: 0 0;';
@@ -3539,7 +3707,7 @@ function uebergangAusfuehren(u) {
   if (!u.zurueck) {
     if (g) bewegt(g, [{ opacity: 1 }, { opacity: 0 }], { dauer: 360, kurve: 'ease-in', fill: 'forwards' },
       function () { weg(g); });
-    if (u.quelle && u.rund && tropfenAuf(neu, u.quelle)) return;
+    if (u.quelle && u.rund && tropfenAuf(neu, u.quelle, { gross: true })) return;
     if (u.quelle) {
       neu.style.transformOrigin = '0 0';
       neu.style.background = 'var(--grund)';
@@ -3562,21 +3730,22 @@ function uebergangAusfuehren(u) {
     ziel = $('menuKnopf');
     hp = null;
   }
+  var leuchtet = ziel && ziel.matches('.tm-zeile') ? ziel : null;
   // Gemessen, bevor die Übersicht heranwächst — sonst zielt der Tropfen auf
   // die verkleinerte Kachel.
   var fl = ziel && hp && ziel.getClientRects().length ? tippFlaeche(ziel).getBoundingClientRect() : null;
-  bewegt(neu, [{ opacity: 0.4, transform: 'scale(.98)' }, { opacity: 1, transform: 'none' }], { dauer: 420, kurve: 'ease-out' });
+  if (!stand) bewegt(neu, [{ opacity: 0.4, transform: 'scale(.98)' }, { opacity: 1, transform: 'none' }], { dauer: 420, kurve: 'ease-out' });
   if (!g) return;
   if (fl) {
     // Zurück an die Stelle, an der der Finger lag. Die Kachel nickt nicht —
     // sie nimmt nur auf.
     var stelle = punktFlaeche(fl.left + hp.dx, fl.top + hp.dy);
-    tropfenZu(g, a, { getBoundingClientRect: function () { return stelle; } });
-  } else if (ziel && ziel.getClientRects().length && tropfenQuelle(ziel)) {
-    tropfenZu(g, a, ziel);
+    tropfenZu(g, a, { getBoundingClientRect: function () { return stelle; } }, { gross: true, leuchtet: leuchtet, form: u.form });
+  } else if (ziel && ziel.getClientRects().length && (tropfenQuelle(ziel) || u.form)) {
+    tropfenZu(g, a, ziel, { gross: true, leuchtet: leuchtet, form: u.form });
   } else if (ziel && ziel.getClientRects().length) {
     bewegt(g, [ZOOM_VOLL, zoomBild(tippFlaeche(ziel).getBoundingClientRect(), a)], { dauer: 520, fill: 'forwards' },
-      function () { weg(g); });
+      function () { weg(g); zeileLeuchtet(leuchtet); });
     bewegt(g, [{ opacity: 1 }, { opacity: 0 }], { dauer: 220, warten: 220, kurve: 'ease-in', fill: 'both' });
   } else {
     bewegt(g, [{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(.92)' }],
@@ -3916,7 +4085,8 @@ function hinweisSchliessen() {
   if (!g) { blatt.hidden = true; return; }
   var r = karte.getBoundingClientRect();
   karte.style.opacity = '0';
-  tropfenZu(g, r, ziel, { rund: '18px', dauer: hinweisDauer, frueh: true, glas: true, fertig: function () {
+  tropfenZu(g, r, ziel, { rund: '18px', dauer: hinweisDauer, frueh: true, glas: true,
+    leuchtet: ziel.matches && ziel.matches('.tm-zeile') ? ziel : null, fertig: function () {
     karte.style.opacity = '';
     if (!blatt.classList.contains('offen')) blatt.hidden = true;
   } });
@@ -3968,7 +4138,7 @@ function fensterWirdMeldung(g, r, glas, titel, text, ziel, zeichen) {
   var p = meldePunkt(), opt = { bestaetigung: true, zeichen: zeichen };
   if (g) {
     tropfenZu(g, r, { getBoundingClientRect: function () { return p; } },
-      { rund: glas ? '18px' : '20px', glas: glas, frueh: true, dauer: MELDE_ZU });
+      { rund: glas ? '18px' : '20px', glas: glas, gross: !glas, frueh: true, dauer: MELDE_ZU });
     // Die Meldung quillt, wenn das Fenster Tropfen geworden ist — beide
     // blenden sich dort ineinander.
     opt.warten = Math.round(MELDE_ZU * TROPFEN_ZU_FRUEH[2]);
@@ -4105,12 +4275,29 @@ function faelligAm(g, k) {
 
 // Was die Kachel braucht: staerke (0–1), serie, warnen, faelligHeute,
 // erledigtHeute, punkte (die letzten 7 Tage) und, je Woche, treffer/ziel.
+//
+// Gemerkt je Gewohnheit (P2, Nachricht 15): Die Rechnung läuft vom Anlegen
+// bis heute, und ein Haken fragte sie über tagVoll, umschaltenUndZeichnen und
+// das Zeichnen mehrfach. Der Schlüssel ist alles, wovon sie abhängt — Tag,
+// Beginn, Rhythmus, die erledigten Tage —, so verfällt sie bei jeder Änderung,
+// bei Rücknahme, Import und Tageswechsel von selbst; eine neue Gewohnheit (aus
+// Import oder Rücknahme) ist ein neues Objekt und wird ohnehin neu gerechnet.
+// Das Ergebnis ist geteilt und darum eingefroren: Niemand schreibt hinein.
+var auswertungen = new WeakMap();
+var auswertungenGerechnet = 0;   // wie oft wirklich gerechnet wurde — für den Prüfstand
+
 function auswerten(g, heute) {
+  var schluessel = heute + '|' + g.angelegt + '|' + JSON.stringify(g.rhythmus) + '|' + g.erledigt.join(',');
+  var gemerkt = auswertungen.get(g);
+  if (gemerkt && gemerkt.schluessel === schluessel) return gemerkt.a;
+  auswertungenGerechnet++;
   var erl = {};
   g.erledigt.forEach(function (k) { erl[k] = true; });
   var a = g.rhythmus.art === 'proWoche' ? wochenRechnung(g, heute, erl) : tagesRechnung(g, heute, erl);
   a.erledigtHeute = !!erl[heute];
-  a.punkte = punkte(g, heute, erl);
+  a.punkte = Object.freeze(punkte(g, heute, erl));
+  Object.freeze(a);
+  auswertungen.set(g, { schluessel: schluessel, a: a });
   return a;
 }
 
@@ -4667,15 +4854,18 @@ function icsBlob(auswahl) {
 }
 
 // Gemerkt wird genau, was in der Datei stand — die Auswahl von vor dem Laden.
+// Nicht gespeichert, gilt nichts als exportiert: Der nächste Export bringt es
+// noch einmal, und die UID hält den Kalender frei von Doppelten (ADR 0009).
 function exportiertMerken(auswahl) {
-  var nun = zeitJetzt();
+  var nun = zeitJetzt(), vorher = standMerken();
   state.exportiert = nun;
   auswahl.termine.forEach(function (t) { t.imKalender = { am: nun, abdruck: exAbdruck('t', t) }; });
   auswahl.gewohnheiten.forEach(function (g) { g.imKalender = { am: nun, abdruck: exAbdruck('g', g) }; });
   exportWahl = {};
   exBearbeiten = false;
-  speichern();
+  var gut = speichernOderZurueck(vorher);
   if (ansicht === 'export') render();
+  return gut;
 }
 
 function icsLaden() {
@@ -4690,7 +4880,8 @@ function icsLaden() {
   a.click();
   document.body.removeChild(a);
   setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
-  exportiertMerken(auswahl);
+  // Ging das Merken schief, bleibt die Warnung stehen, nicht der Hinweis.
+  if (!exportiertMerken(auswahl)) return;
   // Kein Verschwinden nach Zeit: iOS legt gleichzeitig sein eigenes Blatt
   // darüber, und wer zurückkommt, soll den Satz noch finden.
   hinweisZeigen('Datei geladen', 'Öffne sie, um sie in den Kalender zu holen.', quelle, $('exZuletzt'), { zeichen: 'laden' });
@@ -4700,11 +4891,11 @@ function icsLaden() {
 // Kalender steht, und gilt wieder als neu — ohne Export. Für Einträge, die im
 // Kalender von Hand gelöscht wurden und später wieder hinaus sollen.
 function exAufheben() {
-  var a = exportAuswahl(heuteSchluessel()), n = a.termine.length + a.gewohnheiten.length;
+  var a = exportAuswahl(heuteSchluessel()), n = a.termine.length + a.gewohnheiten.length, vorher = standMerken();
   a.termine.concat(a.gewohnheiten).forEach(function (e) { e.imKalender = null; });
   exportWahl = {};
   exBearbeiten = false;
-  if (speichern()) melden(n === 1 ? 'Gilt wieder als neu.' : n + ' Einträge gelten wieder als neu.', 'haken');
+  if (speichernOderZurueck(vorher)) melden(n === 1 ? 'Gilt wieder als neu.' : n + ' Einträge gelten wieder als neu.', 'haken');
   if (ansicht === 'export') render();
 }
 
@@ -4722,7 +4913,6 @@ var ANSICHTEN = {
   neu: { titel: 'Neue Gewohnheit', zeichnen: zeichneFormular },
   bearbeiten: { titel: 'Gewohnheit', zeichnen: zeichneFormular },
   abgewoehnen: { titel: 'Abgewöhnen', zeichnen: zeichneFormular },
-  welle: { titel: 'Drang', zeichnen: zeichneWelle },
   rueckfall: { titel: 'Rückfall', zeichnen: zeichneRueckfall },
   terminNeu: { titel: 'Neuer Termin', zeichnen: zeichneTerminFormular },
   termin: { titel: 'Termin', zeichnen: zeichneTerminFormular },
@@ -4787,7 +4977,6 @@ function zeige(name, id) {
   if (name === 'bearbeiten' && !gewohnheitNach(id)) name = 'home';
   if (name === 'termin' && !terminNach(id)) name = 'home';
   if ((name === 'abgewoehnen' || name === 'rueckfall') && !lasterNach(id)) name = 'home';
-  if (name === 'welle' && !state.welle) name = 'home';
   if (name === 'reflexion' && !reflexionMoeglich(id)) name = 'home';
   reflexionEntwurf = name === 'reflexion' ? reflexionEntwurfAus(id) : null;
   entwurf = name === 'neu' ? entwurfNeu(id) : name === 'bearbeiten' ? entwurfAus(gewohnheitNach(id))
@@ -4796,7 +4985,7 @@ function zeige(name, id) {
     : name === 'terminNeu' ? terminEntwurfAus(null, istSchluessel(id) ? id : null) : null;
   // Wer aus der Welle zum Rückfall kommt, kann zur Welle zurück.
   rueckfallFuer = name === 'rueckfall' ? { id: id, notiz: '',
-    ausWelle: ansicht === 'welle' && !!state.welle && state.welle.id === id } : null;
+    ausWelle: drangOffen() && !!state.welle && state.welle.id === id } : null;
   // Das Bild folgt weich (Bewegung: Tropfen); das Dashboard kommt dorthin
   // zurück, wo man es verlassen hat.
   var uebergang = uebergangVorbereiten(ansicht, name), heim = name === 'home' && ansicht !== 'home';
@@ -4812,7 +5001,7 @@ function zeige(name, id) {
 function render() {
   if (auftrittLaeuft) auftrittEnde(true);
   if ((ansicht === 'neu' || ansicht === 'bearbeiten' || ansicht === 'abgewoehnen') && !entwurf) ansicht = 'home';
-  if ((ansicht === 'rueckfall' && !rueckfallFuer) || (ansicht === 'welle' && !state.welle)) ansicht = 'home';
+  if (ansicht === 'rueckfall' && !rueckfallFuer) ansicht = 'home';
   if ((ansicht === 'termin' || ansicht === 'terminNeu') && !terminEntwurf) ansicht = 'home';
   if (ansicht === 'reflexion' && !reflexionEntwurf) ansicht = 'home';
   if (ansicht === 'lesen' && !reflexionNach(lesenWoche)) ansicht = 'journal';
@@ -4856,17 +5045,7 @@ var markeLos = true;   // der Schriftzug läuft beim Start einmal ab, dann nur a
 function renderKopf() {
   var kopf = $('kopf');
   if (ansicht === 'home') {
-    var dunkel = themaWirksam() === 'dunkel';
-    kopf.innerHTML =
-      '<div class="kopf-titel"><h1><button type="button" class="kopf-heim" id="markeKnopf" aria-label="Chilli Journal">' +
-        zeichneMarke(markeLos) + '</button></h1>' +
-      '<div class="datum">' + esc(datumLang(jetzt())) + '</div></div>' +
-      '<button type="button" class="thema-schalter" id="themaKnopf" role="switch" ' +
-        'aria-checked="' + (dunkel ? 'true' : 'false') + '" aria-label="Dunkle Darstellung">' +
-        '<span class="knauf"></span><span class="seite hell">' + ICON.sonne + '</span>' +
-        '<span class="seite dunkel">' + ICON.mond + '</span></button>' +
-      '<button type="button" class="rund" id="menuKnopf" aria-label="Menü" aria-haspopup="dialog">' +
-        ICON.menue + '</button>';
+    kopf.innerHTML = kopfHeimHtml(markeLos);
     markeLos = false;
     $('markeKnopf').addEventListener('click', function () {
       try { window.scrollTo({ top: 0, behavior: bewegungAus() ? 'auto' : 'smooth' }); } catch (e) { window.scrollTo(0, 0); }
@@ -4884,6 +5063,20 @@ function renderKopf() {
     // einen Schritt zurück geht (aus dem Export).
     $('titelHeim').addEventListener('click', function () { rueckZiel = null; zeige('home'); });
   }
+}
+
+// Der Kopf des Dashboards; `los`: der Schriftzug schreibt sich.
+function kopfHeimHtml(los) {
+  var dunkel = themaWirksam() === 'dunkel';
+  return '<div class="kopf-titel"><h1><button type="button" class="kopf-heim" id="markeKnopf" aria-label="Chilli Journal">' +
+      zeichneMarke(los) + '</button></h1>' +
+    '<div class="datum">' + esc(datumLang(jetzt())) + '</div></div>' +
+    '<button type="button" class="thema-schalter" id="themaKnopf" role="switch" ' +
+      'aria-checked="' + (dunkel ? 'true' : 'false') + '" aria-label="Dunkle Darstellung">' +
+      '<span class="knauf"></span><span class="seite hell">' + ICON.sonne + '</span>' +
+      '<span class="seite dunkel">' + ICON.mond + '</span></button>' +
+    '<button type="button" class="rund" id="menuKnopf" aria-label="Menü" aria-haspopup="dialog">' +
+      ICON.menue + '</button>';
 }
 
 // Der Rückweg: nach Hause, oder über `rueckZiel` dorthin, woher man kam.
@@ -4909,7 +5102,7 @@ var wischVon = null;
 // Fokus zu sich; geht er zu, kehrt der Fokus dorthin zurück, wo er vorher war.
 // Bestimmt wird es an einer Stelle, wann immer ein Blatt auf- oder zugeht
 // (`dialogeBeobachten`). Die Meldung bleibt frei: Sie liest nur vor.
-var DIALOGE = ['hinweisBlatt', 'ticketBlatt', 'timerBlatt', 'menue'];   // von oben nach unten
+var DIALOGE = ['hinweisBlatt', 'ticketBlatt', 'timerBlatt', 'drangBlatt', 'menue'];   // von oben nach unten
 var dialogOben = null, dialogRueck = [], fokusVerlauf = [];
 
 function obersterDialog() {
@@ -4925,7 +5118,8 @@ function dialogKarte(d) { return d.id === 'menue' ? d.querySelector('.blatt') : 
 function dialogeOrdnen() {
   var oben = obersterDialog();
   Array.prototype.forEach.call(document.body.children, function (el) {
-    if (el.tagName === 'SCRIPT' || el.id === 'meldung') return;
+    // Das Abbild unter einem Rückwisch ist nie bedienbar (ADR 0060).
+    if (el.tagName === 'SCRIPT' || el.id === 'meldung' || el.classList.contains('abbild')) return;
     el.inert = !!oben && el !== oben;
   });
   if (oben === dialogOben) return;
@@ -4964,7 +5158,8 @@ function dialogeBeobachten() {
 // darunter — auch beim Timer, sonst öffnete ein Wisch vom Rand das Menü hinter
 // seinem Glas, und es bliebe nach dem Timer stehen (James, N1).
 function blattOffen() {
-  return !$('menue').hidden || !$('hinweisBlatt').hidden || !$('ticketBlatt').hidden || !$('timerBlatt').hidden;
+  return !$('menue').hidden || !$('hinweisBlatt').hidden || !$('ticketBlatt').hidden || !$('timerBlatt').hidden ||
+    !$('drangBlatt').hidden;
 }
 
 // Über dem Kalender zieht ein Wisch die Seite mit (kalDruck, ADR 0052) — auf
@@ -4987,17 +5182,200 @@ function wischBeginnen(e) {
   const t = e.touches[0], breite = window.innerWidth || document.documentElement.clientWidth;
   if (t.clientX <= WISCH_RAND) wischVon = { x: t.clientX, y: t.clientY, rechts: false };
   else if (t.clientX >= breite - WISCH_RAND) wischVon = { x: t.clientX, y: t.clientY, rechts: true };
+  // Ein neuer Finger, während die Ansicht noch zurückfedert: Sie steht sofort.
+  if (wischVon && rueckZug && rueckZug.federt) zugAbraeumen();
+  // Das Abbild entsteht, wenn der Finger aufliegt, noch unsichtbar: Gebaut,
+  // wenn die Ansicht schon losläuft, kostete es dort ein Bild.
+  // Ebenso legt sich die Ansicht schon als eigene Ebene darüber; der erste
+  // Schritt verschiebt dann nur noch.
+  if (wischVon && !wischVon.rechts && zugMoeglich()) {
+    wischVon.abbild = abbildDashboard();
+    if (wischVon.abbild) $('app').classList.add('bereit');
+  }
+}
+
+// Ein Abbild, das kein Zug gebraucht hat, geht wieder.
+function wischVergessen() {
+  if (wischVon && wischVon.abbild && (!rueckZug || rueckZug.abbild !== wischVon.abbild)) {
+    weg(wischVon.abbild);
+    $('app').classList.remove('bereit');
+  }
+  wischVon = null;
 }
 
 function wischEnden(e) {
   const von = wischVon, t = e.changedTouches && e.changedTouches[0];
-  wischVon = null;
-  if (!von || !t || blattOffen()) return;
+  wischVergessen();
+  if (rueckZug && !rueckZug.federt) { zugLoslassen(t); return; }
+  if (!von || von.senkrecht || !t || blattOffen()) return;
   const quer = von.rechts ? von.x - t.clientX : t.clientX - von.x, hoch = Math.abs(t.clientY - von.y);
   // Waagerecht muß deutlich überwiegen, sonst war es ein Blättern.
   if (quer < WISCH_WEG || hoch > quer * 0.7) return;
   if (von.rechts || ansicht === 'home') { if ($('menuKnopf')) menueOeffnen(); else zeige('home'); }
   else zurueckGehen();
+}
+
+// ── Der Rückwisch folgt dem Finger (ADR 0060) ──────────────────
+// Steht «Ansichten» auf iOS, folgt die Ansicht dem Finger und wird dabei
+// schon zum Tropfen: Sie zieht sich zum rechten Rand hin zusammen, zum
+// Menüknopf, und rundet sich, bleibt aber ganz im Bild. Darunter liegt das
+// Dashboard — ein stilles Abbild, gerollt wie beim Weggehen. Losgelassen
+// über der Schwelle fließt sie von dort, wie sie steht, in ihre Herkunft;
+// darunter federt sie zurück. Erst die bestätigte Geste wechselt die
+// Ansicht. Wo der Rückweg nicht nach Hause führt, etwas fragt oder die
+// Tastatur offen ist, bleibt es beim Wisch, der beim Loslassen wirkt (ADR
+// 0016). Am Gerät schob sie sich zuerst nur zur Seite: Wer bis an den Rand
+// zog, ließ sie draußen los, und den Tropfen sah man nicht.
+var ZUG_AB = 12;         // px waagerecht, ab denen die Ansicht dem Finger folgt
+var ZUG_SCHWUNG = 0.6;   // px/ms: so schnell nach rechts zählt auch ein kurzer Zug
+var ZUG_KLEIN = 0.45;    // so viel kleiner ist sie, wenn der Finger am rechten Rand ist
+var ZUG_RUND = 38;       // px: so rund werden ihre Ecken
+var rueckZug = null;     // { x, dx, t, v, abbild, schatten, mass, bild, federt }
+var zugZurueck = false;  // der nächste Rückweg kommt aus einem Zug: das Dashboard steht schon
+var zugForm = null;      // dabei: { skala, sicht } — wie groß sie war und welcher Teil zu sehen
+
+function zugMoeglich() {
+  if (ansicht === 'home' || rueckZiel || !flIos('ansichten') || bewegungAus() || blattOffen()) return false;
+  if (ansicht === 'einstellungen' && flUngespeichert()) return false;
+  var f = document.activeElement;
+  return !(f && f !== document.body && f.matches && f.matches('input, textarea, select, [contenteditable="true"]'));
+}
+
+function wischZiehen(e) {
+  var von = wischVon, t = e.touches && e.touches[0];
+  if (rueckZug && !rueckZug.federt) {
+    if (e.touches.length !== 1 || blattOffen()) { zugLoslassen(null); return; }
+    zugFolgen(t.clientX);
+    return;
+  }
+  if (!von || von.rechts || von.kein || !t || e.touches.length !== 1) return;
+  var dx = t.clientX - von.x, dy = Math.abs(t.clientY - von.y);
+  if (!zugMoeglich()) { von.kein = true; wischVergessen(); wischVon = von; return; }
+  // Senkrecht zuerst: Das ist Blättern — dieser Finger zieht nichts mehr und
+  // führt auch beim Loslassen nicht zurück.
+  if (dy > ZUG_AB && dy > dx * 0.7) { von.kein = von.senkrecht = true; wischVergessen(); wischVon = von; return; }
+  if (dx < ZUG_AB || dy > dx * 0.7) return;
+  zugBeginnen(von.x, von.abbild);
+  zugFolgen(t.clientX);
+}
+
+// Gemessen wird einmal, beim Beginn: wo die Ansicht steht und welcher Teil
+// von ihr zu sehen ist. Danach wird je Bild nur geschrieben.
+function zugBeginnen(x0, abbild) {
+  if (rueckZug) zugAbraeumen();
+  abbild = abbild && abbild.isConnected ? abbild : abbildDashboard();
+  var app = $('app'), schatten = document.createElement('div');
+  app.classList.add('bereit');
+  var r = app.getBoundingClientRect(), hoch = window.innerHeight || document.documentElement.clientHeight;
+  var mass = { links: r.left, breite: r.width, oben: -r.top, hoehe: app.offsetHeight, bild: hoch };
+  schatten.className = 'zug-schatten';
+  schatten.setAttribute('aria-hidden', 'true');
+  schatten.style.left = px(r.left);
+  schatten.style.width = px(r.width);
+  schatten.style.height = px(hoch);
+  document.body.appendChild(schatten);
+  // Sie schrumpft auf den rechten Rand zu, mitten im Bild.
+  app.style.transformOrigin = px(r.width) + ' ' + px(mass.oben + hoch / 2);
+  rueckZug = { x: x0, dx: 0, t: Date.now(), v: 0, abbild: abbild, schatten: schatten, mass: mass, bild: false, federt: null };
+  app.classList.add('zieht');
+}
+
+// Wie groß und wie rund sie bei `dx` ist.
+function zugSkala(dx, breite) { return 1 - ZUG_KLEIN * fpKlemme(dx / (breite || 1), 0, 1); }
+function zugEcken(dx) { return ZUG_RUND * fpKlemme(dx / 120, 0, 1); }
+
+// Ihre Gestalt bei Skala `s` und Ecken `e`: Gezeigt wird nur, was im Bild
+// war, mit runden Ecken — in ihren eigenen Maßen, vor dem Schrumpfen.
+function zugBilder(z, s, e) {
+  var m = z.mass, unten = Math.max(0, m.hoehe - m.oben - m.bild), ecke = px(e / s);
+  return { app: { transform: 'scale(' + s.toFixed(4) + ')',
+    clipPath: 'inset(' + px(m.oben) + ' 0px ' + px(unten) + ' 0px round ' + ecke + ')' },
+  schatten: { transform: 'scale(' + s.toFixed(4) + ')', borderRadius: ecke } };
+}
+
+function zugSetzen(z) {
+  var b = zugBilder(z, zugSkala(z.dx, z.mass.breite), zugEcken(z.dx)), app = $('app');
+  app.style.transform = b.app.transform;
+  app.style.clipPath = app.style.webkitClipPath = b.app.clipPath;
+  z.schatten.style.transform = b.schatten.transform;
+  z.schatten.style.borderRadius = b.schatten.borderRadius;
+}
+
+// Der Finger setzt nur, wohin; geschrieben wird einmal je Bild.
+function zugFolgen(x) {
+  var z = rueckZug, nun = Date.now(), dx = Math.max(0, x - z.x), dt = nun - z.t;
+  if (dt > 0) z.v = z.v * 0.4 + (dx - z.dx) / dt * 0.6;
+  z.dx = dx;
+  z.t = nun;
+  if (z.bild) return;
+  z.bild = true;
+  fpBild(function () {
+    if (rueckZug !== z || z.federt) return;
+    z.bild = false;
+    zugSetzen(z);
+  });
+}
+
+// `t`: der Finger beim Loslassen; ohne ihn (touchcancel, Drehung, ein zweiter
+// Finger, ein Blatt ging auf) federt die Ansicht zurück.
+function zugLoslassen(t) {
+  var z = rueckZug;
+  if (!z || z.federt) return;
+  // Was abbricht, wirkt auch beim Loslassen danach nicht mehr.
+  wischVergessen();
+  if (t) zugFolgen(t.clientX);
+  var weit = z.dx >= WISCH_WEG && z.v > -0.2, schwung = z.v > ZUG_SCHWUNG && z.dx > ZUG_AB * 2;
+  zugSetzen(z);
+  if (t && (weit || schwung) && !blattOffen()) {
+    // Sie fließt von dort, wie sie unter dem Finger steht: so groß, und nur
+    // der Teil, der zu sehen war.
+    var s = zugSkala(z.dx, z.mass.breite), h = z.mass.bild;
+    zugForm = { skala: s, ecken: zugEcken(z.dx), sicht: { top: h / 2 * (1 - s), height: h * s } };
+    zugZurueck = true;
+    zurueckGehen();
+    zugZurueck = false;
+    zugForm = null;
+    if (ansicht === 'home') { zugAbraeumen(); return; }
+  }
+  zugFedern();
+}
+
+function zugFedern() {
+  var z = rueckZug, tk = fluessigTakt('ansichten', true), opt = { dauer: Math.round(tk.dauer * 0.8), kurve: tk.kurve };
+  var von = zugBilder(z, zugSkala(z.dx, z.mass.breite), zugEcken(z.dx)), nach = zugBilder(z, 1, 0);
+  bewegt(z.schatten, [von.schatten, nach.schatten], opt);
+  z.federt = bewegt($('app'), [von.app, nach.app], opt, function () { if (rueckZug === z) zugAbraeumen(); }) || true;
+}
+
+function zugAbraeumen() {
+  var z = rueckZug, app = $('app');
+  rueckZug = null;
+  if (!z) return;
+  if (z.federt && z.federt.cancel) { try { z.federt.cancel(); } catch (e) { /* schon fort */ } }
+  app.classList.remove('zieht', 'bereit');
+  app.style.transform = app.style.transformOrigin = app.style.clipPath = app.style.webkitClipPath = '';
+  weg(z.schatten);
+  weg(z.abbild);
+}
+
+// Das Dashboard unter der Ansicht: gezeichnet wie zu Hause, in einer
+// Schattenwurzel — seine Ids stoßen nicht mit der Seite zusammen, nichts
+// darin ist bedienbar —, und so weit gerollt, wie es beim Weggehen war.
+function abbildDashboard() {
+  var wirt = document.createElement('div'), wurzel, inhalt = document.createElement('div');
+  wirt.className = 'abbild';
+  wirt.setAttribute('aria-hidden', 'true');
+  wirt.inert = true;
+  try { wurzel = wirt.attachShadow({ mode: 'open' }); } catch (e) { return null; }
+  geistStilGeben(wurzel);
+  inhalt.id = 'app';
+  inhalt.innerHTML = '<header id="kopf">' + kopfHeimHtml(false) + '</header><main id="ansicht">' +
+    ANSICHTEN.home.zeichnen() + '</main>';
+  wurzel.appendChild(inhalt);
+  document.body.appendChild(wirt);
+  var hoch = window.innerHeight || document.documentElement.clientHeight;
+  inhalt.style.transform = 'translateY(' + px(-Math.max(0, Math.min(homeScroll, inhalt.offsetHeight - hoch))) + ')';
+  return wirt;
 }
 
 // Nach dem Ziehen liegt unter dem Finger ein anderer Tag. Schickt der Browser
@@ -5015,7 +5393,7 @@ function kalTippNachWisch(e) {
 // gedimmt, was heute nicht dran ist. Die Kacheln bleiben beim Abhaken stehen,
 // wo sie sind — nichts springt unter dem Finger weg.
 var ringZuletzt = {};          // id → zuletzt gezeigter Anteil, für die Animation
-var chiliImTimer = false;     // die Chili sitzt im offenen Timer, nicht im Tagesring
+var chiliImBlatt = false;     // 'timer' oder 'drang': die Chili sitzt in diesem Blatt, nicht im Tagesring
 var geradeAbgehakt = null;     // die Kachel, die eben getippt wurde
 var chiliFlammt = false;       // false, 'flammt' oder 'lodert' (Tag eben voll geworden)
 
@@ -5076,7 +5454,7 @@ function zeichneTagesring(fertig, von) {
   }
   return '<div class="tagesring" role="group" aria-label="Heute ' + esc(zahl) + '">' +
     '<div class="tr-bild">' + ring(von ? fertig / von : 0, '#tag') +
-      (chiliImTimer ? '' : '<img id="chiliFigur"' + (chiliFlammt ? ' class="' + chiliFlammt + '"' : '') + ' src="' + CHILI_BILD +
+      (chiliImBlatt ? '' : '<img id="chiliFigur"' + (chiliFlammt ? ' class="' + chiliFlammt + '"' : '') + ' src="' + CHILI_BILD +
         '" alt="">') + '</div>' +
     '<button type="button" class="tr-text" id="heuteKnopf" aria-label="Heute, ' + esc(zahl) +
       ' — Kalender auf heute"><span class="etikett heute-pille">Heute</span>' +
@@ -5783,7 +6161,7 @@ function fpTakt(b) {
   b.zuletzt = nun;
   var weiter = fpBewegen(b.federn(), dt, w, still);
   if (b.extra && b.extra(dt, w, still)) weiter = true;
-  fpZeichnen(b);
+  (b.zeichnen || fpZeichnen)(b);
   // Ein Riß beim Zeichnen stößt eine Feder an, die eben noch ruhte.
   if (!weiter) weiter = b.federn().some(function (f) { return f.v !== 0 || f.x !== f.ziel; });
   if (weiter && !still) {
@@ -5935,17 +6313,8 @@ function fpGleiterFormen(g, w, liste, haelse, key) {
 // Ein Hals, der eben noch da war, ist gerissen oder aufgegangen — dann zuckt,
 // woran er hing (`riss`).
 function fpZeichnen(b) {
-  var w = FP_IOS, erg = b.formen(w), liste = erg.formen, jetzt = {};
-  function mitte(x) { return typeof x === 'number' ? fpMitte(liste[x]) : x; }
-  function kreis(x, gegen, l) { return typeof x === 'number' ? fpKern((l || liste)[x], gegen) : x; }
-  function umriss(l) { return l.filter(function (f) { return !f.nur; }).map(function (f) { return fpUmriss(fpPunkte(f)); }).join(''); }
-  // Eine Form mit `nur` trägt einen Hals, gemalt wird sie nicht.
-  var d = (erg.pfade || []).join('') + umriss(liste);
-  (erg.haelse || []).forEach(function (h) {
-    var t = fpHalsPfad(kreis(h.a, mitte(h.b)), kreis(h.b, mitte(h.a)), h.weite);
-    if (t) { d += t; jetzt[h.key] = true; }
-  });
-  d = d || 'M0 0Z';
+  var w = FP_IOS, erg = b.formen(w), jetzt = {};
+  var d = fpPfad(erg, erg.formen, jetzt);
   var kante = b.kante === undefined ? w.kante : b.kante, stark = fpKlemme(kante / 0.6, 0, 1);
   b.fluss.style.webkitClipPath = 'path("' + d + '")';
   b.fluss.style.clipPath = 'path("' + d + '")';
@@ -5953,16 +6322,7 @@ function fpZeichnen(b) {
   // darunter trägt die Farbe des Saums. Er leuchtet, solange es fließt, und
   // ist in Ruhe wieder das Teil — so springt am Ende nichts.
   if (b.kern) {
-    var innen = liste.map(function (f) {
-      var s = f.s || 1, k = FP_SAUM / s;
-      return { x: f.x + k, y: f.y + k, w: Math.max(0, f.w - 2 * k), h: Math.max(0, f.h - 2 * k), r: Math.max(0, f.r - k), s: f.s,
-        deh: f.deh, nur: f.nur };
-    }), dk = (erg.pfade || []).join('') + umriss(innen);
-    (erg.haelse || []).forEach(function (h) {
-      if (!jetzt[h.key]) return;
-      dk += fpHalsPfad(kreis(h.a, mitte(h.b), innen), kreis(h.b, mitte(h.a), innen), h.weite) || '';
-    });
-    dk = dk || 'M0 0Z';
+    var dk = fpPfad(erg, fpInnen(erg.formen), jetzt, true);
     b.kern.style.webkitClipPath = 'path("' + dk + '")';
     b.kern.style.clipPath = 'path("' + dk + '")';
     var f = flFarben(b);
@@ -5971,9 +6331,43 @@ function fpZeichnen(b) {
       b.kern.style.background = flMischen([255, 255, 255, 1], f.grund, f.hebung * stark);
     }
   }
-  b.licht.setAttribute('d', d);
-  b.licht.style.opacity = String(kante);
+  if (b.licht) {
+    b.licht.setAttribute('d', d);
+    b.licht.style.opacity = String(kante);
+  }
   if (b.schatten) b.schatten.setAttribute('d', d);
+  fpNachZeichnen(b, jetzt, w);
+}
+
+// Der Umriß aus Formen, fertigen Pfaden und Hälsen. Eine Form mit `nur`
+// trägt einen Hals, gemalt wird sie nicht. Jeder Hals, der steht, kommt in
+// `jetzt`; mit `nurBekannte` (der Kern) nur die, die schon dort stehen.
+function fpPfad(erg, liste, jetzt, nurBekannte) {
+  function mitte(x) { return typeof x === 'number' ? fpMitte(liste[x]) : x; }
+  function kreis(x, gegen) { return typeof x === 'number' ? fpKern(liste[x], gegen) : x; }
+  var d = (erg.pfade || []).join('') + liste.filter(function (f) { return !f.nur; }).map(function (f) {
+    return fpUmriss(fpPunkte(f));
+  }).join('');
+  (erg.haelse || []).forEach(function (h) {
+    if (nurBekannte && !jetzt[h.key]) return;
+    var t = fpHalsPfad(kreis(h.a, mitte(h.b)), kreis(h.b, mitte(h.a)), h.weite);
+    if (t) { d += t; jetzt[h.key] = true; }
+  });
+  return d || 'M0 0Z';
+}
+
+// Dieselben Formen, um den Saum eingerückt.
+function fpInnen(liste) {
+  return liste.map(function (f) {
+    var s = f.s || 1, k = FP_SAUM / s;
+    return { x: f.x + k, y: f.y + k, w: Math.max(0, f.w - 2 * k), h: Math.max(0, f.h - 2 * k), r: Math.max(0, f.r - k), s: f.s,
+      deh: f.deh, nur: f.nur };
+  });
+}
+
+// Nach dem Zeichnen: Ein Hals, der eben noch da war, ist gerissen oder
+// aufgegangen — dann zuckt, woran er hing; dann der Inhalt der Bühne.
+function fpNachZeichnen(b, jetzt, w) {
   if (b.riss && !bewegungAus()) Object.keys(b.haelse).forEach(function (k) { if (!jetzt[k]) b.riss(k, w); });
   b.haelse = jetzt;
   if (b.zeigen) b.zeigen(w);
@@ -6023,18 +6417,18 @@ function fpTipp(b, name) { return b.el.querySelector('[data-fp-tipp="' + name + 
 // Die Schichten des Flüssigen in `ort`: Schatten, Umriß und Lichtkante. Der
 // Filter der Proben (weich zeichnen, hart schneiden) ruckelte am Gerät; seit
 // ADR 0054 rechnet alles als Pfad. `schluessel` hält die Filter auseinander,
-// `flach` läßt den Schatten weg.
-function fpSchichten(ort, schluessel, flach) {
+// `flach` läßt den Schatten weg, `ohneLicht` die Lichtkante.
+function fpSchichten(ort, schluessel, flach, ohneLicht) {
   var b = {};
   ort.insertAdjacentHTML('afterbegin', (flach ? '' : '<svg class="fp-schicht" aria-hidden="true">' +
       '<filter id="fpS-' + schluessel + '" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur in="SourceAlpha" stdDeviation="6"/>' +
       '<feOffset dy="5" result="s"/><feComposite in="s" in2="SourceAlpha" operator="out"/></filter>' +
       '<path class="fp-schatten" filter="url(#fpS-' + schluessel + ')"/></svg>') +
     '<div class="fp-schicht fp-fluss"></div><div class="fp-schicht fp-kern"></div>' +
-    '<svg class="fp-schicht fp-oben" aria-hidden="true"><filter id="fpL-' + schluessel + '" x="-10%" y="-10%" width="120%" height="120%">' +
+    (ohneLicht ? '' : '<svg class="fp-schicht fp-oben" aria-hidden="true"><filter id="fpL-' + schluessel + '" x="-10%" y="-10%" width="120%" height="120%">' +
       '<feComponentTransfer in="SourceAlpha" result="voll"><feFuncA type="linear" slope="50"/></feComponentTransfer>' +
       '<feOffset in="voll" dx="0" dy="1.6" result="ver"/><feComposite in="SourceGraphic" in2="ver" operator="out" result="rand"/>' +
-      '<feGaussianBlur in="rand" stdDeviation=".5"/></filter><path class="fp-licht" filter="url(#fpL-' + schluessel + ')"/></svg>');
+      '<feGaussianBlur in="rand" stdDeviation=".5"/></filter><path class="fp-licht" filter="url(#fpL-' + schluessel + ')"/></svg>'));
   b.fluss = ort.querySelector('.fp-fluss');
   b.kern = ort.querySelector('.fp-kern');
   b.licht = ort.querySelector('.fp-licht');
@@ -6277,17 +6671,22 @@ function fpWelle(b) {
     return aktiv || perlen.length > 0 || amp.x > 0.002;
   };
   b.formen = function (w) {
-    var l = [], h = [], s = 'M-2 ' + (D + 2);
+    var l = [], h = [], s = 'M-2 ' + (D + 2), linie = '';
     // Hoch an der linken Seite, die Oberfläche entlang, rechts hinunter: im
-    // Uhrzeigersinn wie jede Form.
-    for (var x = -2; x <= D + 2; x += 6) s += 'L' + fpZ(x) + ' ' + fpZ(oberflaeche(x, w));
+    // Uhrzeigersinn wie jede Form. `linie` ist die Oberfläche allein — dort
+    // liegt in Drang und Timer die Lichtkante (welleZeichnen).
+    for (var x = -2; x <= D + 2; x += 6) {
+      var pt = fpZ(x) + ' ' + fpZ(oberflaeche(x, w));
+      s += 'L' + pt;
+      linie += (linie ? 'L' : 'M') + pt;
+    }
     perlen.forEach(function (p) {
       l.push({ x: p.x - p.r, y: p.y - p.r, w: 2 * p.r, h: 2 * p.r, r: p.r });
       // Die Oberfläche über der Perle als großer Kreis — daran hängt ihr Hals.
       h.push({ a: l.length - 1, b: { x: p.x, y: oberflaeche(p.x, w) + 40, r: 40 }, key: 'p' + p.nr,
         weite: 40 + p.r * (1.6 + 2.4 * w.hals) });
     });
-    return { formen: l, haelse: h, pfade: [s + 'L' + (D + 2) + ' ' + (D + 2) + 'Z'] };
+    return { formen: l, haelse: h, pfade: [s + 'L' + (D + 2) + ' ' + (D + 2) + 'Z'], linie: linie };
   };
   b.zeigen = function () {
     if (!ring) return;
@@ -6505,6 +6904,7 @@ function zeichneFluessigProbe() {
   return '<div id="fluessigProbe">' +
     '<div class="fl-leiste" id="flLeiste"' + (flUngespeichert() ? '' : ' hidden') + '>' +
       '<span>Nicht gespeichert</span><button type="button" class="knopf" id="flSpeichern">Speichern</button></div>' +
+    zeichneRuckler() +
     '<section class="abschnitt"><h2>Chilli oder iOS</h2>' +
       '<p class="fp-text fp-vorab">Standard ist die Chilli-Bewegung. Schaltest du eine Stelle auf iOS-Flüssig, ' +
         'ersetzt das Flüssige dort die Chilli-Bewegung. Die Probe zeigt, wie es aussieht; in der App gilt es erst nach ' +
@@ -6557,6 +6957,238 @@ function bindeFluessigProbe() {
     });
   });
   $('flSpeichern').addEventListener('click', flSpeichern);
+  bindeRuckler();
+}
+
+// ── Ruckler messen (Nachricht 15, Block 3) ─────────────────────
+// Zahlen vom echten Gerät statt aus dem Browser am Rechner: Zehn Sekunden
+// lang notiert die App den Abstand jedes Bilds, gleich welche Bewegung
+// gerade läuft — der Nutzer geht derweil ins Menü, öffnet das Ticketblatt,
+// hakt ab. Der Takt ist der Median der Abstände; so gilt die Messung bei
+// 60 Hz, bei 120 Hz und im Stromsparmodus mit 30 Hz. Ein Ruckler ist ein
+// Bild, das mehr als anderthalb Takte nach dem vorigen kam. Das Ergebnis
+// meldet sich, wo der Nutzer gerade ist, und steht im Reiter bis zum Neuladen.
+var RUCKLER_MS = 10000;
+var ruckler = null;          // die laufende Messung: { start, letzt, abst, rest, versteckt, uhr }
+var rucklerLetzte = null;    // das letzte Ergebnis, nur im Arbeitsspeicher
+var rucklerAlle = [];        // jede Messung seit dem Start, zum Kopieren: { e, zeit, ios, lang }
+
+// Die Spur: Was tat die App, während ein Bild zu spät kam? Für die Dauer der
+// Messung legt sich um diese Funktionen eine Uhr, danach ist alles wie
+// vorher. Dazu Tipp und Wisch, gemessen vom ersten bis zum letzten Zuhörer.
+// Was in einer Lücke kein Skript zeigt, kostete Safari selbst: Stil, Malen,
+// Glas. Kopiert werden die fünf längsten Ruckler mit ihrer Spur.
+var RUCKLER_SPUR = [['render', 'Zeichnen'], ['zeige', 'Ansicht'], ['speichern', 'Speichern'],
+  ['hinweisZeigen', 'Hinweis'], ['ticketBlattOeffnen', 'Ticketblatt auf'], ['ticketBlattSchliessen', 'Ticketblatt zu'],
+  ['timerOeffnen', 'Timer auf'], ['timerSchliessen', 'Timer zu'], ['drangOeffnen', 'Drang auf'], ['drangSchliessen', 'Drang zu'],
+  ['umschaltenUndZeichnen', 'Abhaken'],
+  ['tropfenAuf', 'Tropfen auf'], ['tropfenZu', 'Tropfen zu'], ['glasAmZiel', 'Glas am Ziel'],
+  ['welleFliesst', 'Welle'], ['fpTakt', 'Flüssiges']];
+var RUCKLER_EREIGNISSE = { pointerdown: 'Finger drauf', pointerup: 'Finger weg', click: 'Tipp', touchmove: 'Wisch' };
+var RUCKLER_LANG = 5;
+
+// Aus den Abständen in Millisekunden: Takt, Ruckler, ausgelassene Bilder,
+// längster Abstand. Unter zehn Abständen gibt es nichts zu sagen.
+function rucklerAuswerten(abst) {
+  if (!abst || abst.length < 10) return null;
+  const s = abst.slice().sort((a, b) => a - b), takt = s[Math.floor(s.length / 2)];
+  const lang = abst.filter((a) => a > takt * 1.5);
+  return {
+    bilder: abst.length + 1,
+    hz: Math.round(1000 / takt),
+    ruckler: lang.length,
+    aus: lang.reduce((n, a) => n + Math.max(1, Math.round(a / takt) - 1), 0),
+    laengster: Math.round(s[s.length - 1])
+  };
+}
+
+function zeichneRuckler() {
+  return '<section class="abschnitt"><h2>Ruckler messen</h2>' + zeichneRucklerKarte() + '</section>';
+}
+
+function zeichneRucklerKarte() {
+  const e = rucklerLetzte;
+  const zeilen = e ? [['Ruckler', String(e.ruckler)], ['Ausgelassene Bilder', String(e.aus)],
+    ['Längster Abstand', e.laengster + ' ms'], ['Takt', e.hz + ' Hz, ' + e.bilder + ' Bilder']]
+    : [['Letzte Messung', 'noch keine']];
+  return '<div class="kachel" id="rkKarte">' +
+    '<p>Tippe auf «Messen» und bediene die App zehn Sekunden lang, etwa Menü, Ticketblatt oder ' +
+      'Haken. Gezählt wird jedes Bild, das zu spät kam, gleich bei welcher Bewegung. Das Ergebnis meldet sich, wo du ' +
+      'gerade bist. «Kopieren» nimmt zu den fünf längsten Rucklern mit, was die App dabei gerade tat.</p>' +
+    '<div id="rkZeilen">' + zeilen.map(function (z) {
+      return '<div class="zeile"><span>' + esc(z[0]) + '</span><span class="wert">' + esc(z[1]) + '</span></div>';
+    }).join('') + '</div>' +
+    '<div class="knopfreihe"><button type="button" class="knopf" id="rkKnopf">' + esc(rucklerKnopfText()) + '</button>' +
+      (rucklerAlle.length ? '<button type="button" class="knopf zart" id="rkKopieren">Kopieren</button>' : '') + '</div>' +
+    (rucklerAlle.length > 1 ? '<p class="klein">Kopiert werden alle ' + rucklerAlle.length + ' Messungen seit dem Start.</p>' : '') +
+  '</div>';
+}
+
+function bindeRuckler() {
+  $('rkKnopf').addEventListener('click', rucklerStarten);
+  if ($('rkKopieren')) $('rkKopieren').addEventListener('click', rucklerKopieren);
+}
+
+// Die Messungen als Text, eine je Zeile, mit Uhrzeit und den Stellen auf iOS,
+// darunter eingerückt die längsten Ruckler mit ihrer Spur — so lassen sie
+// sich am Stück in eine Nachricht einfügen.
+function rucklerText() {
+  const zwei = (n) => String(n).padStart(2, '0');
+  const ms = (n) => n < 1 ? '<1 ms' : Math.round(n) + ' ms';
+  return 'Chilli Journal ' + APP_VERSION + ' · Ruckler messen\n' + rucklerAlle.map(function (m) {
+    const d = new Date(m.zeit), e = m.e;
+    return zwei(d.getHours()) + ':' + zwei(d.getMinutes()) + ' · ' + e.ruckler + ' Ruckler · ' + e.aus + ' ausgelassen · längster ' +
+      e.laengster + ' ms · ' + e.hz + ' Hz, ' + e.bilder + ' Bilder · ' + (m.ios.length ? 'iOS: ' + m.ios.join(', ') : 'alles Chilli') +
+      (m.lang || []).map(function (l) {
+        return '\n  bei ' + (l.bei / 1000).toFixed(1).replace('.', ',') + ' s · ' + l.ms + ' ms · ' + (l.was.length ? l.was.map(function (w) {
+          return w[0] + (w[1] > 1 ? ' ' + w[1] + '×' : '') + ' ' + ms(w[2]);
+        }).join(', ') : 'kein Skript');
+      }).join('');
+  }).join('\n');
+}
+
+function rucklerKopieren() {
+  if (!rucklerAlle.length) return;
+  kopieren(rucklerText(), function (ok) {
+    if (ok) melden('Kopiert. ' + (rucklerAlle.length === 1 ? 'Die Messung liegt' : 'Alle ' + rucklerAlle.length +
+      ' Messungen liegen') + ' in der Zwischenablage.', 'kopie');
+    else melden('Kopieren ging nicht. Versuch es noch einmal.', 'warnung');
+  });
+}
+
+function rucklerKnopfText() { return ruckler ? 'Misst … ' + ruckler.rest + ' s' : 'Messen'; }
+
+// Der Knopf zählt herunter, solange er zu sehen ist; ein zweiter Tipp
+// darauf tut nichts, bis die Messung um ist.
+function rucklerKnopf() {
+  const k = $('rkKnopf');
+  if (!k) return;
+  k.textContent = rucklerKnopfText();
+}
+
+function rucklerStarten() {
+  if (ruckler) return;
+  ruckler = { start: null, letzt: null, abst: [], zeiten: [], spur: [], rest: RUCKLER_MS / 1000, versteckt: false };
+  rucklerUhrenAn(ruckler);
+  // Kommt kein Bild mehr (die App ging in den Hintergrund), endet sie trotzdem.
+  ruckler.uhr = setTimeout(rucklerEnde, RUCKLER_MS + 1000);
+  document.addEventListener('visibilitychange', rucklerVersteckt);
+  requestAnimationFrame(rucklerBild);
+  rucklerKnopf();
+}
+
+function rucklerBild(t) {
+  const m = ruckler;
+  if (!m) return;
+  if (m.start === null) m.start = t; else m.abst.push(t - m.letzt);
+  m.letzt = t;
+  m.zeiten.push(t);
+  if (t - m.start >= RUCKLER_MS) { rucklerEnde(); return; }
+  const rest = Math.ceil((RUCKLER_MS - (t - m.start)) / 1000);
+  if (rest !== m.rest) { m.rest = rest; rucklerKnopf(); }
+  requestAnimationFrame(rucklerBild);
+}
+
+// Im Hintergrund kommen keine Bilder; die Lücke wäre kein Ruckler.
+function rucklerVersteckt() { if (document.hidden && ruckler) ruckler.versteckt = true; }
+
+// Dieselbe Uhr wie die Bilder: requestAnimationFrame zählt ab demselben Nullpunkt.
+function rucklerJetzt() { return performance.now(); }
+
+function rucklerSpur(name, t0) { if (ruckler) ruckler.spur.push([t0, rucklerJetzt() - t0, name]); }
+
+function rucklerUhrenAn(m) {
+  m.echt = {};
+  m.uhren = {};
+  RUCKLER_SPUR.forEach(function (s) {
+    const f = window[s[0]];
+    if (typeof f !== 'function') return;
+    m.echt[s[0]] = f;
+    m.uhren[s[0]] = window[s[0]] = function () {
+      const t0 = rucklerJetzt();
+      try { return f.apply(this, arguments); } finally { rucklerSpur(s[1], t0); }
+    };
+  });
+  // Ein Ereignis beginnt beim ersten Zuhörer (Einfangen am Fenster) und
+  // endet beim letzten (Aufsteigen zum Fenster).
+  m.ereignis = {};
+  m.drauf = function (ev) { m.ereignis[ev.type] = rucklerJetzt(); };
+  m.weg = function (ev) {
+    const t0 = m.ereignis[ev.type];
+    if (t0 == null) return;
+    m.ereignis[ev.type] = null;
+    rucklerSpur(RUCKLER_EREIGNISSE[ev.type], t0);
+  };
+  Object.keys(RUCKLER_EREIGNISSE).forEach(function (art) {
+    window.addEventListener(art, m.drauf, { capture: true, passive: true });
+    window.addEventListener(art, m.weg, { passive: true });
+  });
+}
+
+// Zurück, was noch die eigene Uhr trägt — wer derweil eine Funktion ersetzt
+// hat, behält seine.
+function rucklerUhrenAus(m) {
+  Object.keys(m.uhren || {}).forEach(function (n) { if (window[n] === m.uhren[n]) window[n] = m.echt[n]; });
+  Object.keys(RUCKLER_EREIGNISSE).forEach(function (art) {
+    window.removeEventListener(art, m.drauf, { capture: true });
+    window.removeEventListener(art, m.weg);
+  });
+}
+
+// Die längsten Ruckler, in der Reihenfolge, in der sie kamen: wann, wie lang
+// und was in der Lücke lief — je Name gezählt und die Zeit addiert.
+function rucklerSpurAuswerten(m, e) {
+  if (!e) return [];
+  const takt = 1000 / e.hz, lang = [];
+  for (let i = 1; i < m.zeiten.length; i++) {
+    const von = m.zeiten[i - 1], bis = m.zeiten[i];
+    if (bis - von > takt * 1.5) lang.push({ von: von, ms: bis - von, bis: bis });
+  }
+  return lang.sort((a, b) => b.ms - a.ms).slice(0, RUCKLER_LANG).sort((a, b) => a.von - b.von).map(function (l) {
+    const was = [];
+    // Nach Beginn; bei gleichem Beginn das Äußere zuerst — es endet später, steht also weiter hinten.
+    m.spur.map((s, i) => s.concat(i)).filter((s) => s[0] >= l.von && s[0] < l.bis).sort((a, b) => a[0] - b[0] || b[3] - a[3]).forEach(function (s) {
+      const da = was.find((w) => w[0] === s[2]);
+      if (da) { da[1]++; da[2] += s[1]; } else was.push([s[2], 1, s[1]]);
+    });
+    return { bei: l.von - m.start, ms: Math.round(l.ms), was: was };
+  });
+}
+
+function rucklerEnde() {
+  const m = ruckler;
+  if (!m) return;
+  ruckler = null;
+  clearTimeout(m.uhr);
+  document.removeEventListener('visibilitychange', rucklerVersteckt);
+  rucklerUhrenAus(m);
+  const e = m.versteckt ? null : rucklerAuswerten(m.abst);
+  if (e) {
+    rucklerLetzte = e;
+    rucklerAlle.push({ e: e, zeit: zeitJetzt(), ios: FP_STELLEN.filter(function (st) { return flIos(st[0]); }).map(function (st) {
+      return st[1];
+    }), lang: rucklerSpurAuswerten(m, e) });
+  }
+  const karte = $('rkKarte');
+  if (karte) {
+    karte.outerHTML = zeichneRucklerKarte();
+    bindeRuckler();
+  }
+  rucklerMelden(!!e, e ? (e.ruckler ? e.ruckler + ' Ruckler' : 'Keine Ruckler')
+    : 'Keine Messung', e ? 'In zehn Sekunden ' + e.aus + ' Bilder ausgelassen, längster Abstand ' + e.laengster +
+      ' ms. Takt ' + e.hz + ' Hz, ' + e.bilder + ' Bilder.'
+    : m.versteckt ? 'Die App war zwischendurch im Hintergrund. Miss noch einmal.' : 'Es kamen zu wenige Bilder an.');
+}
+
+// Steht gerade ein Hinweis da, etwa eine Frage, wartet das Ergebnis, bis er
+// geht — es soll keine offene Entscheidung überschreiben. Ein Ergebnis läßt
+// sich gleich hier kopieren, ohne zurück in den Reiter.
+function rucklerMelden(mitKopie, titel, text) {
+  const blatt = $('hinweisBlatt');
+  if (blatt && !blatt.hidden) { setTimeout(function () { rucklerMelden(mitKopie, titel, text); }, 500); return; }
+  const k = $('rkKnopf');
+  hinweisZeigen(titel, text, zuSehen(k) ? k.getBoundingClientRect() : null, zuSehen(k) ? k : null, { zeichen: 'hinweis',
+    frage: mitKopie ? { ja: 'Kopieren', nein: 'OK', beiJa: rucklerKopieren } : null });
 }
 
 // ── Rückblick: Heatmap ─────────────────────────────────────────
@@ -7235,48 +7867,152 @@ var WELLE_SAETZE = [
   'Trink ein Glas Wasser, geh ein paar Schritte. Die Welle zieht auch ohne dich vorbei.'
 ];
 
-function zeichneWelle() {
+// ── Drang: das Blatt ────────────────────────────────────────────
+//
+// Ein Fenster aus Glas wie der Timer, keine eigene Ansicht (ADR 0059): Es
+// tropft aus dem Drang-Knopf und fließt dorthin zurück. Danebentippen
+// schließt es; die Welle läuft weiter, der Knopf trägt die Restzeit. Ist sie
+// eben durch und das Dashboard frei, geht es von selbst auf; wer die App erst
+// später öffnet, findet «Welle vorbei» auf dem Knopf.
+var drangQuelle = null;     // das Laster, aus dessen Drang-Knopf das Blatt tropfte
+var drangGemeldet = null;   // der Start der Welle, deren Ende das Blatt schon öffnete
+
+function drangKnopf(id) { return id ? document.querySelector('#app ' + mitWert('data-drang', id)) : null; }
+function drangOffen() { return !$('drangBlatt').hidden && $('drangBlatt').classList.contains('offen'); }
+
+function zeichneDrangKarte() {
   var w = state.welle, a = lasterNach(w.id), rest = welleRest(zeitJetzt()), durch = rest === 0;
   var u = 2 * Math.PI * 15.5;
-  return '<section class="welle' + (durch ? ' durch' : '') + '" id="welle">' +
-    '<div class="etikett">' + esc(a ? a.name : '') + '</div>' +
-    '<div class="welle-bild">' +
-      '<svg class="ring welle-ring" viewBox="0 0 36 36" aria-hidden="true">' +
+  return '<h2 id="drangName">' + esc(a ? a.name : '') + '</h2>' +
+    '<div class="timer-bild">' +
+      '<svg class="ring" viewBox="0 0 36 36" aria-hidden="true">' +
         '<circle class="ring-spur" cx="18" cy="18" r="15.5"/>' +
         '<circle class="ring-fuell welle-fuell" id="welleFuell" cx="18" cy="18" r="15.5" stroke-dasharray="' +
           u.toFixed(2) + '" stroke-dashoffset="' + (u * (1 - rest / WELLE_MS)).toFixed(2) + '"/>' +
       '</svg>' +
-      '<img id="chiliFigur"' + (chiliFlammt ? ' class="' + chiliFlammt + '"' : '') + ' src="' + CHILI_BILD + '" alt="">' +
     '</div>' +
-    '<div class="welle-zeit" id="welleZeit" role="timer">' + esc(restText(rest)) + '</div>' +
+    '<div class="timer-zeit" id="welleZeit" role="timer">' + esc(restText(rest)) + '</div>' +
     '<p class="welle-satz">' + esc(durch ? 'Die Welle ist durch. Wie ist es ausgegangen?'
       : WELLE_SAETZE[Math.floor(w.start / 1000) % WELLE_SAETZE.length]) + '</p>' +
     '<div class="knopfreihe">' +
       (durch ? '<div id="welleUrteil"><button type="button" class="knopf" id="welleGewonnen">Gewonnen</button></div>' : '') +
       '<button type="button" class="knopf zart" id="welleNachgegeben">Nachgegeben</button>' +
     '</div>' +
-    (durch ? '' : '<p class="klein">Die Welle läuft weiter, auch wenn du die App schließt.</p>') +
-    '<button type="button" class="welle-ab" id="welleAbbrechen">Abbrechen, zählt nicht</button>' +
-    '</section>';
+    (durch ? '' : '<p class="klein">Die Welle läuft weiter, auch wenn du das Fenster schließt.</p>') +
+    '<button type="button" class="welle-ab" id="welleAbbrechen">Abbrechen, zählt nicht</button>';
 }
 
-function bindeWelle() {
+// Die Karte neu, mit der Chili darin; die Welle mißt ihren Ring erst, wenn
+// das Blatt zu sehen ist. `flammt`: Die Chili flammt auf (durch).
+function drangKarteZeichnen(flammt) {
+  var karte = $('drangKarte'), chili = $('chiliFigur'), durch = welleRest(zeitJetzt()) === 0;
+  if (chili) weg(chili);
+  karte.innerHTML = zeichneDrangKarte();
+  karte.classList.toggle('durch', durch);
+  var bild = karte.querySelector('.timer-bild');
+  chili = chiliIn(bild, 'drang', chili);
+  chili.className = flammt || '';
+  bindeDrang();
+  if (!$('drangBlatt').hidden) {
+    welleFliesst(bild, function () { return state.welle ? fpKlemme(welleRest(zeitJetzt()) / WELLE_MS, 0, 1) : 0; });
+  }
+}
+
+function drangOeffnen(id) {
+  var blatt = $('drangBlatt'), karte = $('drangKarte'), w = state.welle;
+  if (!w || !lasterNach(w.id)) return;
+  drangQuelle = w.id;
+  if (drangOffen()) { drangKarteZeichnen(); return; }
+  blatt.hidden = false;
+  void blatt.offsetWidth;
+  drangKarteZeichnen(welleRest(zeitJetzt()) === 0 ? 'flammt' : '');
+  blatt.classList.add('offen');
+  // Ein großes Blatt aus Glas: unterwegs milchig und schlicht, Glas erst am
+  // Ziel — wie Timer und Ticketblatt (P1, Nachricht 15).
+  var k = drangKnopf(id || w.id);
+  if (zuSehen(k)) tropfenAuf(karte, k.getBoundingClientRect(), { rund: '18px', glas: true, milchig: true });
+}
+
+// Zu: in den Drang-Knopf zurück. `sofort`: ohne Fließen, etwa wenn eine
+// Ansicht an seine Stelle tritt.
+function drangSchliessen(sofort) {
+  var blatt = $('drangBlatt'), karte = $('drangKarte');
+  if (!drangOffen()) return;
+  blatt.classList.remove('offen');
+  chiliZurueck('drang');
+  var ziel = sofort ? null : drangKnopf(drangQuelle), g = zuSehen(ziel) ? geist(karte) : null;
+  if (!g) { blatt.hidden = true; welleWeg(karte); return; }
+  var r = karte.getBoundingClientRect();
+  karte.style.opacity = '0';
+  tropfenZu(g, r, ziel, { rund: '18px', frueh: true, glas: true, milchig: true, fertig: function () {
+    karte.style.opacity = '';
+    if (!drangOffen()) { blatt.hidden = true; welleWeg(karte); }
+  } });
+}
+
+// Beim Start ändert sich nur die eine Kachel: Rahmen und Restzeit auf dem
+// Knopf. Den Rest zeichnet erst das Ende der Welle neu.
+function drangKachelLaeuft(knopf) {
+  var kachel = knopf.closest('.ab-kachel'), text = knopf.querySelector('span');
+  if (kachel) kachel.classList.add('welle');
+  if (text) {
+    text.setAttribute('data-wellerest', '');
+    text.textContent = welleKnopfText(welleRest(zeitJetzt()));
+  }
+}
+
+// Jede Sekunde: Zeit und Ring im offenen Blatt; ist die Welle eben durch,
+// flammt die Chili und «Gewonnen» tropft herein, statt dazustehen.
+function drangTakt(rest, nun) {
+  var w = state.welle;
+  if (!w) return;
+  if (!drangOffen()) {
+    if (rest === 0 && drangGemeldet !== w.start && nun - w.start - WELLE_MS < 5000 && !document.hidden &&
+      ansicht === 'home' && !blattOffen()) {
+      drangGemeldet = w.start;
+      drangOeffnen(w.id);
+    }
+    return;
+  }
+  var karte = $('drangKarte');
+  if ((rest === 0) !== karte.classList.contains('durch')) {
+    drangKarteZeichnen(rest === 0 ? 'flammt' : '');
+    var urteil = $('welleUrteil');
+    if (urteil && !bewegungAus()) { urteil.hidden = true; teilTropfen(urteil, true); }
+    return;
+  }
+  $('welleZeit').textContent = restText(rest);
+  var u = 2 * Math.PI * 15.5;
+  $('welleFuell').setAttribute('stroke-dashoffset', (u * (1 - rest / WELLE_MS)).toFixed(2));
+}
+
+// Gewonnen und Abbrechen zeichnen erst das Dashboard neu, dann fließt das
+// Blatt in den neuen Knopf. Nachgegeben öffnet den Rückfall; der Weg zurück
+// führt in den Drang-Knopf, nicht in das Blatt, das dann fort ist.
+function bindeDrang() {
   if ($('welleGewonnen')) {
     $('welleGewonnen').addEventListener('click', function () {
       if (!welleGewonnen()) return;
-      meldenUndGehen('Gewonnen. Die Welle ist durch.', 'haken');
-      chiliFlammt = 'flammt';
-      zeige('home');
-      chiliFlammt = false;
+      render();
+      drangSchliessen();
+      var c = $('chiliFigur');
+      if (c) { c.className = ''; void c.offsetWidth; c.className = 'flammt'; }
+      melden('Gewonnen. Die Welle ist durch.', 'haken');
     });
   }
   $('welleNachgegeben').addEventListener('click', function () {
-    if (state.welle) zeige('rueckfall', state.welle.id);
+    var w = state.welle;
+    if (!w) return;
+    zeige('rueckfall', w.id);
+    herkunft = mitWert('data-drang', w.id);
+    herkunftPunkt = null;
+    drangSchliessen(true);
   });
   $('welleAbbrechen').addEventListener('click', function () {
     if (!welleAbbrechen()) return;
-    meldenUndGehen('Abgebrochen. Die Welle zählt nicht.');
-    zeige('home');
+    render();
+    drangSchliessen();
+    melden('Abgebrochen. Die Welle zählt nicht.');
   });
 }
 
@@ -7311,8 +8047,14 @@ function bindeRueckfall() {
     meldenUndGehen('Eingetragen. Ab jetzt zählt es neu.', 'haken');
     zeige('home');
   });
+  // Zurück zur Welle: Die Ansicht fließt in den Drang-Knopf, dann tropft
+  // das Blatt wieder heraus.
   $('rfAbbrechen').addEventListener('click', function () {
-    zeige(rueckfallFuer.ausWelle && state.welle ? 'welle' : 'home');
+    var zurWelle = rueckfallFuer.ausWelle && state.welle;
+    zeige('home');
+    if (!zurWelle) return;
+    var auf = function () { if (state.welle && ansicht === 'home' && !blattOffen()) drangOeffnen(state.welle.id); };
+    if (bewegungAus()) auf(); else setTimeout(auf, TROPFEN_DAUER);
   });
 }
 
@@ -7553,20 +8295,7 @@ function takt() {
   });
   alleIn('[data-wellerest]').forEach(function (el) { el.textContent = welleKnopfText(rest); });
   if (ansicht === 'home' && rekordFaellig(nun).length) { render(); return; }
-  var welle = ansicht === 'welle' && $('welle');
-  if (!welle) return;
-  if ((rest === 0) !== welle.classList.contains('durch')) {
-    // Durch: Die Chili flammt, «Gewonnen» tropft herein, statt dazustehen.
-    if (rest === 0) chiliFlammt = 'flammt';
-    render();
-    chiliFlammt = false;
-    var urteil = $('welleUrteil');
-    if (urteil && !bewegungAus()) { urteil.hidden = true; teilTropfen(urteil, true); }
-    return;
-  }
-  $('welleZeit').textContent = restText(rest);
-  var u = 2 * Math.PI * 15.5;
-  $('welleFuell').setAttribute('stroke-dashoffset', (u * (1 - rest / WELLE_MS)).toFixed(2));
+  drangTakt(rest, nun);
 }
 
 // ── Timer und Zähler ────────────────────────────────────────────
@@ -7690,9 +8419,28 @@ function timerStarten(id) {
     state.timer = { id: id, tag: heuteSchluessel(), start: zeitJetzt(), ms: g.timer.minuten * 60000,
       stumm: g.timer.stumm, pausiert: null };
     if (!speichernOderZurueck(vorher)) return;
-    render();
+    kachelNeu(id);
   }
   timerOeffnen(id);
+}
+
+// Beim Start ändert sich auf dem Dashboard nur die eine Kachel. Alles neu zu
+// zeichnen kostete am Gerät 6–10 ms in dem Bild, in dem das Timerfenster
+// aufgeht. Der Knopf bleibt derselbe samt Zuhörern; Klassen, Ring und Text
+// kommen aus zeichneKachel. Steht die Kachel nicht da oder läuft noch eine
+// andere, zeichnet render() wie bisher.
+function kachelNeu(id) {
+  var knopf = kachelVon(id), alt = knopf && knopf.closest('.gw-kachel'), g = gewohnheitNach(id);
+  var andere = alleIn('#app [data-timerkachel]').some(function (k) { return k.getAttribute('data-timerkachel') !== id; });
+  if (ansicht !== 'home' || !alt || !g || andere) { render(); return; }
+  var ort = document.createElement('div');
+  ort.innerHTML = zeichneKachel({ g: g, a: auswerten(g, heuteSchluessel()) });
+  var neu = ort.firstChild, neuKnopf = neu.querySelector('.gw-haken');
+  alt.className = neu.className;
+  if (neu.hasAttribute('data-timerkachel')) alt.setAttribute('data-timerkachel', neu.getAttribute('data-timerkachel'));
+  else alt.removeAttribute('data-timerkachel');
+  knopf.setAttribute('aria-pressed', neuKnopf.getAttribute('aria-pressed'));
+  knopf.innerHTML = neuKnopf.innerHTML;
 }
 
 function timerRing(anteil, id) {
@@ -7744,15 +8492,33 @@ function bindeTimerKarte() {
   });
 }
 
-// Die Chili kehrt aus dem Timer in den Tagesring zurück; gibt es den nicht,
-// zeichnet ihn das nächste render() samt Chili.
-function chiliZurueck() {
-  if (!chiliImTimer) return;
-  chiliImTimer = false;
+// Die Chili kehrt aus ihrem Blatt (`von`) in den Tagesring zurück; gibt es
+// den nicht, zeichnet ihn das nächste render() samt Chili.
+function chiliZurueck(von) {
+  if (chiliImBlatt !== von) return;
+  chiliImBlatt = false;
   var chili = $('chiliFigur'), ring = document.querySelector('#app .tagesring .tr-bild');
   if (chili && ring) ring.appendChild(chili);
   else if (chili) weg(chili);
 }
+
+// Die Chili zieht in ein Blatt: Sie steht nur einmal im Dokument (ADR 0054).
+// `chili` ist die vorher gerettete, sonst kommt eine neue.
+function chiliIn(bild, wer, chili) {
+  if (!chili) {
+    chili = document.createElement('img');
+    chili.id = 'chiliFigur';
+    chili.alt = '';
+    chili.src = CHILI_BILD;
+  }
+  chiliImBlatt = wer;
+  bild.appendChild(chili);
+  return chili;
+}
+
+// Ein geschlossenes Blatt zeichnet seine Welle nicht weiter: Sie lief sonst
+// alle 50 ms in einem Blatt, das niemand sieht.
+function welleWeg(karte) { weg(karte.querySelector('.fl-welle')); }
 
 function timerOffen() { return !$('timerBlatt').hidden && $('timerBlatt').classList.contains('offen'); }
 
@@ -7766,15 +8532,8 @@ function timerOeffnen(id) {
   var chili = $('chiliFigur');
   if (chili) weg(chili);
   karte.innerHTML = zeichneTimerKarte(g, t);
-  chiliImTimer = true;
   var bild = karte.querySelector('.timer-bild');
-  if (!chili) {
-    chili = document.createElement('img');
-    chili.id = 'chiliFigur';
-    chili.alt = '';
-    chili.src = CHILI_BILD;
-  }
-  bild.appendChild(chili);
+  chiliIn(bild, 'timer', chili);
   bindeTimerKarte();
   // Die Flüssigkeit mißt ihren Ring — erst, wenn das Blatt zu sehen ist.
   function fluessig() {
@@ -7786,7 +8545,9 @@ function timerOeffnen(id) {
   fluessig();
   blatt.classList.add('offen');
   var k = scheibeVon(kachelVon(id));
-  if (zuSehen(k)) tropfenAuf(karte, k.getBoundingClientRect(), { rund: '18px', glas: true });
+  // Ein großes Blatt aus Glas: unterwegs milchig und schlicht, Glas erst am
+  // Ziel — wie das Ticketblatt (P1, Nachricht 15).
+  if (zuSehen(k)) tropfenAuf(karte, k.getBoundingClientRect(), { rund: '18px', glas: true, milchig: true });
 }
 
 // Zu: in die Kachel zurück. Der Timer läuft weiter, wenn er noch läuft.
@@ -7794,14 +8555,14 @@ function timerSchliessen() {
   var blatt = $('timerBlatt'), karte = $('timerKarte');
   if (!timerOffen()) return;
   blatt.classList.remove('offen');
-  chiliZurueck();
+  chiliZurueck('timer');
   var ziel = scheibeVon(kachelVon(timerQuelle)), g = zuSehen(ziel) ? geist(karte) : null;
-  if (!g) { blatt.hidden = true; return; }
+  if (!g) { blatt.hidden = true; welleWeg(karte); return; }
   var r = karte.getBoundingClientRect();
   karte.style.opacity = '0';
-  tropfenZu(g, r, ziel, { rund: '18px', frueh: true, glas: true, fertig: function () {
+  tropfenZu(g, r, ziel, { rund: '18px', frueh: true, glas: true, milchig: true, fertig: function () {
     karte.style.opacity = '';
-    if (!timerOffen()) blatt.hidden = true;
+    if (!timerOffen()) { blatt.hidden = true; welleWeg(karte); }
   } });
 }
 
@@ -8541,8 +9302,11 @@ function sicherungKopieren() {
   kopieren(code, function (ok) {
     scZeigen = ok ? '' : code;
     if (ok) {
+      // Wie bei den Tickets (N9): Nicht gespeichert, gilt nichts als gesichert —
+      // sonst wäre die Erinnerung bis zum Neustart fort.
+      var vorher = standMerken();
       state.gesichert = nun;
-      if (speichern()) bestaetigen('Kopiert', 'Leg den Code an einen sicheren Ort.', knopf, '#scAlter', 'kopie');
+      if (speichernOderZurueck(vorher)) bestaetigen('Kopiert', 'Leg den Code an einen sicheren Ort.', knopf, '#scAlter', 'kopie');
     }
     if (ansicht === 'sicherung') render();
     if (!ok && $('scCode')) { try { $('scCode').focus(); $('scCode').select(); } catch (e) { /* egal */ } }
@@ -8602,7 +9366,7 @@ var tkAusgabe = '';         // der gebündelte Text zum Kopieren von Hand
 
 // Woher ein neues Ticket kommt: die Ansicht, über der man steht.
 var ORT_VON = { home: 'uebersicht', neu: 'gewohnheit', bearbeiten: 'gewohnheit', abgewoehnen: 'abgewoehnen',
-  welle: 'abgewoehnen', rueckfall: 'abgewoehnen', terminNeu: 'termin', termin: 'termin', journal: 'journal',
+  rueckfall: 'abgewoehnen', terminNeu: 'termin', termin: 'termin', journal: 'journal',
   reflexion: 'journal', lesen: 'journal', export: 'export', einstellungen: 'einstellungen',
   sicherung: 'sicherung', tickets: 'tickets' };
 
@@ -8785,9 +9549,12 @@ function bindeTicketListe() {
     var offen = offeneTickets(), text = ticketsAlsText(offen);
     kopieren(text, function (ok) {
       if (ok) {
-        var nun = zeitJetzt();
+        // Wie auf der Seite «Tickets»: Was nicht gespeichert ist, ist nicht
+        // abgegeben — sonst stünde es hier unter «Abgegeben» und nach dem
+        // Neustart wieder offen (James, N9).
+        var nun = zeitJetzt(), vorher = standMerken();
         offen.forEach(function (t) { t.abgegeben = nun; });
-        if (speichern()) melden('Kopiert. ' + anzahl(offen.length, 'Ticket liegt', 'Tickets liegen') + ' in der Zwischenablage.', 'kopie');
+        if (speichernOderZurueck(vorher)) melden('Kopiert. ' + anzahl(offen.length, 'Ticket liegt', 'Tickets liegen') + ' in der Zwischenablage.', 'kopie');
         if (ticketListe) ticketBlattWechseln(true);
         if (ansicht === 'tickets') render();
       } else {
@@ -9150,9 +9917,12 @@ function bindeAnsicht() {
   alleIn('[data-drang]').forEach(function (b) {
     b.addEventListener('click', function () {
       var id = this.getAttribute('data-drang');
-      if (state.welle && state.welle.id !== id) melden('Es läuft schon eine Welle.');
-      else if (!welleBeginnen(id)) return;
-      zeige('welle');
+      if (state.welle && state.welle.id !== id) { melden('Es läuft schon eine Welle.'); return; }
+      if (!state.welle) {
+        if (!welleBeginnen(id)) return;
+        drangKachelLaeuft(this);
+      }
+      drangOeffnen(id);
     });
   });
   alleIn('[data-rueckfall]').forEach(function (b) {
@@ -9193,12 +9963,6 @@ function bindeAnsicht() {
   bindeKalender();
   if ($('gwName')) bindeFormular();
   if ($('hmRaster')) bindeHeatmap();
-  if ($('welle')) {
-    bindeWelle();
-    welleFliesst(document.querySelector('#welle .welle-bild'), function () {
-      return state.welle ? fpKlemme(welleRest(zeitJetzt()) / WELLE_MS, 0, 1) : 0;
-    });
-  }
   if ($('rfNotiz')) bindeRueckfall();
   alleIn('[data-reflexion]').forEach(function (b) {
     b.addEventListener('click', function () { zeige('reflexion', this.getAttribute('data-reflexion')); });
@@ -9906,11 +10670,24 @@ function perleFliesst(el, warten, aus) {
   teilFliesst(el, { quelle: function () {
     if (!von.isConnected) return null;
     var f = von._fluss;
-    return f && f.jetzt ? f.jetzt : von.getBoundingClientRect();
+    return perleQuelle(f && f.jetzt ? f.jetzt : von.getBoundingClientRect(), el.getBoundingClientRect());
   },
     ziel: function () { return el.getBoundingClientRect(); }, rund: parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0,
-    d0: 30, inhalt: el, ort: feld ? feld.firstChild : el, auf: true, warten: warten });
+    d0: PERLE_D0, inhalt: el, ort: feld ? feld.firstChild : el, auf: true, warten: warten, schlicht: true,
+    hals: PERLE_HALS });
   return true;
+}
+
+// Woraus die Karte tropft: eine Perle unten am Rand der vorigen, über der
+// Mitte des Ziels, soweit die vorige reicht. Hing der Hals an der ganzen
+// vorigen Karte, stand zwischen zwei Karten eine Brücke, so breit wie sie
+// hoch sind, bis die Feder ruhte — am Gerät «zäh».
+var PERLE_D0 = 30;
+var PERLE_HALS = 0.15;   // iOS: 0.35
+function perleQuelle(r, z) {
+  var d = Math.min(PERLE_D0, r.width, r.height), mx = z.left + z.width / 2;
+  var x = fpKlemme(mx - d / 2, r.left, r.left + r.width - d);
+  return { left: x, top: r.top + r.height - d, width: d, height: d };
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -9946,8 +10723,11 @@ function start() {
   try { document.fonts.ready.then(function () { hmRahmenSetzen(false); }); } catch (e) { /* wie oben */ }
 
   document.addEventListener('touchstart', wischBeginnen, { passive: true });
+  document.addEventListener('touchmove', wischZiehen, { passive: true });
   document.addEventListener('touchend', wischEnden, { passive: true });
-  document.addEventListener('touchcancel', function () { wischVon = null; }, { passive: true });
+  document.addEventListener('touchcancel', function () { zugLoslassen(null); wischVergessen(); }, { passive: true });
+  // Gedreht, während die Ansicht dem Finger folgt: Sie federt zurück.
+  window.addEventListener('resize', function () { zugLoslassen(null); });
   window.addEventListener('pointermove', kalZug);
   window.addEventListener('pointerup', kalLos);
   window.addEventListener('pointercancel', kalLos);
@@ -9976,6 +10756,8 @@ function start() {
   });
   // Danebentippen schließt das Timerfenster; der Timer läuft weiter (ADR 0038).
   $('timerBlatt').addEventListener('click', function (e) { if (e.target === this) timerSchliessen(); });
+  // Ebenso beim Drang: Die Welle läuft weiter, der Knopf trägt die Restzeit (ADR 0059).
+  $('drangBlatt').addEventListener('click', function (e) { if (e.target === this) drangSchliessen(); });
   $('swSpaeter').addEventListener('click', function () {
     swStand.gemeldet = true;
     $('swNeu').hidden = true;
@@ -10011,7 +10793,7 @@ function start() {
   // Nach Mitternacht ist ein anderer Tag: Datum, Tagesring und Kacheln stimmen
   // auch dann, wenn die App über Nacht offen blieb.
   document.addEventListener('visibilitychange', function () {
-    if (!document.hidden && (ansicht === 'home' || ansicht === 'welle')) render();
+    if (!document.hidden && ansicht === 'home') render();
   });
   setInterval(takt, 1000);
 

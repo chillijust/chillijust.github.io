@@ -186,16 +186,18 @@ hinweisSchliessen();
 pruefe('E6 der Rekord steht auf der Kachel', /Rekord 3 h 1 min/.test(q('[data-ab="' + a1.id + '"]').textContent));
 pruefe('E7 gespeichert', JSON.parse(localStorage.getItem(SPEICHER)).abgewoehnen[0].rueckfaelle.length === 1);
 
-// ── F · Die Welle ───────────────────────────────────────────
+// ── F · Die Welle, ein Blatt aus Glas (ADR 0059) ────────────
 UHR += H;
+state.bewegung = 'aus';
 render();
 q('[data-drang="' + a1.id + '"]').click();
-pruefe('F1 «Drang» startet die Welle', ansicht === 'welle' && state.welle && state.welle.id === a1.id &&
-  state.welle.start === UHR && q('#kopf h1').textContent === 'Drang');
+pruefe('F1 «Drang» startet die Welle im Blatt über dem Dashboard, keine eigene Ansicht', ansicht === 'home' &&
+  drangOffen() && state.welle && state.welle.id === a1.id && state.welle.start === UHR && q('#drangName').textContent === 'Rauchen');
 pruefe('F2 zehn Minuten, «Gewonnen» noch nicht', q('#welleZeit').textContent === '10:00' && !q('#welleGewonnen') &&
   !!q('#welleNachgegeben'));
-pruefe('F3 die Chili sitzt im Ring, genau einmal', alle('#chiliFigur').length === 1 && !!q('.welle-bild #chiliFigur'));
+pruefe('F3 die Chili sitzt im Ring des Blatts, genau einmal', alle('#chiliFigur').length === 1 && !!q('#drangKarte .timer-bild #chiliFigur'));
 pruefe('F4 ein Satz zum Aussitzen', q('.welle-satz').textContent.length > 20);
+var startWelle = state.welle.start;
 pruefe('F5 die Welle ist gespeichert', JSON.parse(localStorage.getItem(SPEICHER)).welle.id === a1.id);
 var u = 2 * Math.PI * 15.5;
 UHR += 5 * M;
@@ -203,36 +205,58 @@ takt();
 pruefe('F6 nach fünf Minuten ist der Ring halb leer', q('#welleZeit').textContent === '5:00' &&
   Math.abs(+q('#welleFuell').getAttribute('stroke-dashoffset') - u / 2) < 0.02);
 pruefe('F7 vorzeitig gewinnt man nicht', welleGewonnen() === false && state.welle !== null);
-q('#zurueckKnopf').click();
+q('#drangBlatt').click();
 var dk = q('[data-drang="' + a1.id + '"]');
-pruefe('F8 zurück: die Welle läuft weiter, der Knopf trägt die Restzeit',
-  ansicht === 'home' && state.welle && /Welle 5:00/.test(dk.textContent) && q('.ab-kachel.welle') !== null);
+pruefe('F8 danebentippen schließt: die Welle läuft weiter, der Knopf trägt die Restzeit',
+  !drangOffen() && q('#drangBlatt').hidden && state.welle && /Welle 5:00/.test(dk.textContent) && q('.ab-kachel.welle') !== null &&
+  !!q('#app .tagesring #chiliFigur') && alle('#chiliFigur').length === 1);
 UHR += 61e3;
 takt();
 pruefe('F9 der Takt zählt sie herunter', /Welle 3:59/.test(dk.textContent), dk.textContent);
 q('[data-drang="' + a2.id + '"]').click();
-pruefe('F10 eine Welle zur Zeit', ansicht === 'welle' && state.welle.id === a1.id && /schon eine Welle/.test(meldung()));
-pruefe('F11 nach einem Neuladen ist sie noch da', laden().welle && laden().welle.id === a1.id);
+pruefe('F10 eine Welle zur Zeit: der andere Knopf sagt es nur', !drangOffen() && state.welle.id === a1.id &&
+  /schon eine Welle/.test(meldung()));
+hinweisSchliessen();
+dk.click();
+pruefe('F11 der eigene Knopf öffnet sie wieder, sie läuft weiter', drangOffen() && q('#welleZeit').textContent === '3:59' &&
+  state.welle.start === startWelle && laden().welle.id === a1.id);
+q('#drangBlatt').click();
 UHR += 4 * M;
 takt();
-pruefe('F12 ist sie durch, fragt sie nach dem Ausgang', !!q('#welleGewonnen') && q('#welleZeit').textContent === '0:00' &&
-  q('#welle').classList.contains('durch'));
+pruefe('F12 eben durch: das Blatt geht von selbst auf und fragt nach dem Ausgang', drangOffen() && !!q('#welleGewonnen') &&
+  q('#welleZeit').textContent === '0:00' && q('#drangKarte').classList.contains('durch') &&
+  q('#chiliFigur').classList.contains('flammt'));
 q('#welleGewonnen').click();
-pruefe('F13 Gewonnen zählt und beendet die Welle', a1.draenge.length === 1 && a1.draenge[0] === UHR && state.welle === null);
-pruefe('F14 die Chili flammt auf dem Dashboard', ansicht === 'home' && q('#chiliFigur').classList.contains('flammt'));
+pruefe('F13 Gewonnen zählt und beendet die Welle', a1.draenge.length === 1 && a1.draenge[0] === UHR && state.welle === null &&
+  !drangOffen());
+pruefe('F14 die Chili flammt auf dem Dashboard', ansicht === 'home' && !!q('#app .tagesring #chiliFigur') &&
+  q('#chiliFigur').classList.contains('flammt') && alle('#chiliFigur').length === 1);
 pruefe('F15 die Kachel zählt den Drang', /1 Drang besiegt/.test(q('[data-ab="' + a1.id + '"]').textContent));
+hinweisSchliessen();
 q('[data-drang="' + a1.id + '"]').click();
 UHR += 2 * M;
 q('#welleNachgegeben').click();
-pruefe('F16 Nachgegeben geht jederzeit und führt zum Rückfall', ansicht === 'rueckfall' &&
-  /Zurück zur Welle/.test(q('#rfAbbrechen').textContent));
+pruefe('F16 Nachgegeben geht jederzeit und führt zum Rückfall, das Blatt ist zu', ansicht === 'rueckfall' && !drangOffen() &&
+  /Zurück zur Welle/.test(q('#rfAbbrechen').textContent) && alle('#chiliFigur').length <= 1);
 q('#rfAbbrechen').click();
-pruefe('F17 von dort zurück zur Welle', ansicht === 'welle' && state.welle !== null);
+pruefe('F17 von dort zurück zur Welle: Dashboard mit offenem Blatt', ansicht === 'home' && drangOffen() && state.welle !== null);
 q('#welleNachgegeben').click();
 q('#rfEintragen').click();
-pruefe('F18 eingetragen ist die Welle vorbei', state.welle === null && a1.rueckfaelle.length === 2 && ansicht === 'home');
+pruefe('F18 eingetragen ist die Welle vorbei', state.welle === null && a1.rueckfaelle.length === 2 && ansicht === 'home' &&
+  !drangOffen());
+hinweisSchliessen();
 zeige('welle');
-pruefe('F19 ohne Welle führt «welle» nach Hause', ansicht === 'home');
+pruefe('F19 «welle» ist keine Ansicht mehr und führt nach Hause', ansicht === 'home');
+// Wer die App erst nach dem Ende öffnet, findet den Knopf, kein Blatt.
+welleBeginnen(a1.id);
+render();
+UHR += 11 * M;
+takt();
+pruefe('F20 lange nach dem Ende geht das Blatt nicht von selbst auf; der Knopf sagt es', !drangOffen() &&
+  /Welle vorbei/.test(q('[data-drang="' + a1.id + '"]').textContent));
+welleAbbrechen();
+render();
+state.bewegung = 'auto';
 
 // ── G · Bearbeiten ──────────────────────────────────────────
 var startVorher = a1.start;
@@ -275,9 +299,11 @@ pruefe('G11 Unbekanntes führt nach Hause', ansicht === 'home');
 
 // ── H · Duzen ───────────────────────────────────────────────
 welleBeginnen(a2.id);
-zeige('welle');
-pruefe('H1 die Welle duzt', siezt() === '', siezt());
-pruefe('H2 und ist groß genug', zuKlein('#app').length === 0, zuKlein('#app').join(', '));
+render();
+drangOeffnen(a2.id);
+pruefe('H1 die Welle duzt', !/(^|[.!?:]\s+|\s)(Sie|Ihnen|Ihre?[mnrs]?)\b/.test(q('#drangKarte').innerText), q('#drangKarte').innerText);
+pruefe('H2 und ist groß genug', zuKlein('#drangKarte').length === 0, zuKlein('#drangKarte').join(', '));
+drangSchliessen(true);
 zeige('rueckfall', a2.id);
 pruefe('H3 der Rückfall duzt', siezt() === '', siezt());
 pruefe('H4 und ist groß genug', zuKlein('#app').length === 0, zuKlein('#app').join(', '));

@@ -9,10 +9,9 @@ const html = readFileSync(APP, 'utf8');
 suite('querformat', html, String.raw`
 function warten(ms) { return new Promise(function (f) { setTimeout(f, ms); }); }
 function imBild(el) { var r = el.getBoundingClientRect(); return r.top >= -0.5 && r.bottom <= innerHeight + 0.5 && r.left >= -0.5 && r.right <= innerWidth + 0.5; }
-// Das kopflose Chrome zieht vom Fenster seine Leiste ab (87 Punkte); verlangt
-// sind darum 932 × 517, ankommen sollen etwa 932 × 430.
-pruefe('Q0 der Läufer gibt das Fenster quer, so hoch wie das iPhone', innerWidth === 932 && innerHeight >= 400 &&
-  innerHeight <= 440, innerWidth + 'x' + innerHeight);
+// Der Läufer stellt das Fenster über DevTools genau ein (kopflos.mjs).
+pruefe('Q0 der Läufer gibt das Fenster quer, genau wie das iPhone', innerWidth === 932 && innerHeight === 430,
+  innerWidth + 'x' + innerHeight);
 frisch();
 state.bewegung = 'aus';
 state.gewohnheiten = ['Lesen', 'Wasser', 'Laufen', 'Atmen'].map(function (n, i) {
@@ -34,6 +33,20 @@ return warten(0).then(function () {
   state.timer = null;
   timerSchliessen();
 
+  // ── Drang: dasselbe Blatt wie der Timer (ADR 0059) ────────────
+  state.abgewoehnen = [lasterLesen({ id: 'z', name: 'Zucker', start: zeitJetzt() - 864e5, rueckfaelle: [], draenge: [] })];
+  render();
+  q('[data-drang="z"]').click();
+  var dk = q('#drangKarte'), dbild = dk.querySelector('.timer-bild').getBoundingClientRect(), dname = q('#drangName').getBoundingClientRect();
+  pruefe('Q2b der Drang paßt ganz ins Bild, ohne zu rollen', imBild(dk) && dk.scrollHeight <= dk.clientHeight + 1 &&
+    imBild(q('#welleAbbrechen')), JSON.stringify(dk.getBoundingClientRect()) + ' ' + dk.scrollHeight + '/' + dk.clientHeight);
+  pruefe('Q3b Ring links, Name und Knöpfe rechts daneben', getComputedStyle(dk).display === 'grid' && dbild.right <= dname.left &&
+    dbild.right <= q('#welleNachgegeben').getBoundingClientRect().left);
+  drangSchliessen(true);
+  welleAbbrechen();
+  state.abgewoehnen = [];
+  render();
+
   // ── Menü ─────────────────────────────────────────────────────
   menueOeffnen();
   var b = q('#menue .blatt'), letzter = alle('#menueListe .menue-eintrag').pop();
@@ -53,4 +66,4 @@ return warten(0).then(function () {
   ticketBlattSchliessen();
   frisch();
 });
-`, { fenster: '932,517' });
+`, { fenster: '932,430' });
