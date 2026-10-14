@@ -44,6 +44,8 @@ des Nutzers).
 
 ## Abgenommen
 
+- 0.17.0T28 · Block 6: Rückwisch folgt dem Finger auf iOS und wird dabei zum Tropfen, fließt
+  in den Knopf; Terminzeile leuchtet bei der Rückkehr — am Gerät abgenommen am 2026-10-14.
 - 0.17.0T26 · Auftropfen beim Start auf iOS (kurzer Hals aus einer Perle, ohne Lichtkante,
   alle Teile in einem Bild) — am Gerät abgenommen am 2026-10-13.
 - 0.17.0T24 · Drang als Blatt aus Glas, auch das Ende nach zehn Minuten — abgenommen am

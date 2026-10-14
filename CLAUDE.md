@@ -167,10 +167,9 @@ node tools/pruefen.mjs                      # Vor-Push-Prüfung allein
 
 Was erledigt ist und was es am Gerät gemessen hat, steht in `docs/verlauf.md`.
 
-- **Abnahme am Gerät steht aus** für Flüssig 0.17.0T7–T25 (ADR 0054, 0055), James' N1–N9
-  (0.17.0T10–T16) und Block 6 (0.17.0T28, ADR 0060): Rückwisch folgt dem Finger auf iOS und
-  wird dabei zum Tropfen, Terminzeile leuchtet. Abgenommen: T24 (Drangblatt), T26 (Auftropfen).
-- **Danach** James bitten, die fünf Rückwege aus 14 erneut zu prüfen (dazu Abbruch vor der
-  Schwelle, senkrechter Zug); dann Block 7 (Gestaltung), dazu «10 von 12» bricht im
-  Tagesring um — Varianten als Bildvergleich. Plan: Nachricht 15 auf `chatgpt/kommunikation`.
+- **Abnahme am Gerät steht aus** für Flüssig 0.17.0T7–T25 (ADR 0054, 0055) und James' N1–N9
+  (0.17.0T10–T16). Abgenommen: T24 (Drangblatt), T26 (Auftropfen), T28 (Block 6, Rückwisch).
+- **James prüft** die Rückwege erneut (Nachricht 16 auf `chatgpt/kommunikation`).
+- **Block 7 (Gestaltung):** Timer-Glas dichter, lange Titel zwei Zeilen dann «…», Kleinteile
+  und «10 von 12» im Tagesring als Bildvergleich zur Wahl. Plan: Nachricht 15.
 - **Vorgemerkt:** Jedes Auflegen des Fingers kostet ein Bild (30–39 ms, kein Skript).
