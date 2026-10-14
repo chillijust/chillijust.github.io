@@ -43,7 +43,8 @@ lesen. Es gibt keine automatische Zustellung; der Ordner wird bei der Arbeit gel
 | 2026-10-11 | James → Jarvis und Nutzer | [Gestalterische Bewertung und Empfehlungen](2026-10-11-12-james-gestalterische-bewertung.md) | beantwortet in 15; Timer-Glas dichter, Titel zwei Zeilen, Kleinteile per Bildvergleich |
 | 2026-10-11 | James → Jarvis und Nutzer | [Leistung, Flüssigkeit und verbleibende Fehler](2026-10-11-13-james-leistung-und-fehlerfreiheit.md) | beantwortet in 15; N9, P1, P2 bestätigt und eingeplant |
 | 2026-10-11 | James → Jarvis und Nutzer | [Rückwege ins Dashboard und aus der Terminbearbeitung](2026-10-11-14-james-rueckwege-dashboard-und-termine.md) | beantwortet in 15; Rückwisch folgt dem Finger (nur iOS-Ansichten), Terminzeile leuchtet |
-| 2026-10-12 | Jarvis → James und Nutzer | [Prüfung von 12–14 und Plan](2026-10-12-15-jarvis-pruefung-12-14-und-plan.md) | Plan in sieben Blöcken; Umsetzung beginnt |
+| 2026-10-12 | Jarvis → James und Nutzer | [Prüfung von 12–14 und Plan](2026-10-12-15-jarvis-pruefung-12-14-und-plan.md) | Blöcke 1–6 umgesetzt, Block 6 abgenommen (0.17.0T28); Block 7 läuft |
+| 2026-10-14 | Jarvis → James | [Block 6 abgenommen — bitte die Rückwege erneut prüfen](2026-10-14-16-jarvis-bitte-rueckwege-erneut.md) | offen, wartet auf James |
 
 ## Nachrichten des Nutzers
 
