@@ -1,0 +1,68 @@
+=== abgewoehnen === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-abgewoehnen.html
+=== ankunft === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-ankunft.html
+=== auftritt === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-auftritt.html
+=== auswertung === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-auswertung.html
+=== beginn === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-beginn.html
+=== bewegung === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-bewegung.html
+=== dialoge === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-dialoge.html
+=== drangblatt === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-drangblatt.html
+=== einlesen === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-einlesen.html
+=== einstellungen === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-einstellungen.html
+=== export === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-export.html
+=== exportmarken === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-exportmarken.html
+=== exportwahl === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-exportwahl.html
+=== exportwege === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-exportwege.html
+=== feinschliff === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-feinschliff.html
+=== fliessen === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-fliessen.html
+=== fluessig === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-fluessig.html
+=== geruest === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-geruest.html
+=== gestaltung === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-gestaltung.html
+=== gewohnheiten === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-gewohnheiten.html
+=== journal === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-journal.html
+=== kalender === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-kalender.html
+=== langdruck === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-langdruck.html
+=== menue === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-menue.html
+=== nachschliff === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-nachschliff.html
+=== offline === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-offline.html
+    · PASS S1 sw.js trägt dieselbe Version wie die App [0.17.0T30]
+PASS S2 der Cache heißt nach Chillinal und der Version
+PASS S3 der neue Worker drängt sich nicht vor [1]
+PASS S4 er lässt sich nur auf Ansage vor, mit Chillingos Wort
+PASS S5 und antwortet auf die Frage nach der Version, wie Chillingo sie stellt
+PASS S6 beim Aktivieren fällt jeder fremde Speicher weg, Chillingos eingeschlossen
+PASS S7 fremde Adressen fängt er nicht ab
+PASS S8 nur GET
+PASS S9 er lädt nichts nach
+PASS S10 keine Fremdadresse
+PASS S11 der Speicher antwortet zuerst
+PASS S12 vor «Jetzt laden» liefert der alte Worker seinen Stand, auch nach einer neuen Auslieferung [v1:/,v1:/,v1:/ / v1:/]
+PASS S12a der neue richtet seinen eigenen Speicher ein und wartet
+PASS S12c nach «Jetzt laden» kommt v2, der alte Speicher ist fort
+PASS S12d ohne Netz trägt v2, auch eine Seite mit Anhang
+PASS S12e was fehlt, holt er und legt es abgewartet ab
+PASS S12b eingerichtet wird am HTTP-Cache vorbei, sonst trüge der neue Worker die alte App
+PASS S13 er rührt den localStorage nicht an
+PASS S14 die CSP öffnet genau eine Tür [default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; worker-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none']
+PASS S15 und bleibt sonst zu
+PASS S16 übernommen wird nur auf Ansage
+PASS S17 nach dem Nachsehen wird auf den neuen Worker gewartet, aber nicht ewig
+PASS S18 ohne Netz kein Urteil
+=== querformat === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-querformat.html
+=== ruckler === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-ruckler.html
+=== rueckblick === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-rueckblick.html
+=== rueckzug === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-rueckzug.html
+=== schlicht === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-schlicht.html
+=== schriftzug === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-schriftzug.html
+=== sicherung === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-sicherung.html
+=== speicher === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-speicher.html
+=== speicherfehler === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-speicherfehler.html
+=== termine === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-termine.html
+=== thema === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-thema.html
+=== tickets === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-tickets.html
+=== timer === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-timer.html
+=== timerkachel === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-timerkachel.html
+=== tropfen === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-tropfen.html
+=== wechsel === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-wechsel.html
+=== zeichen === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-zeichen.html
+=== zoom === file:///workspace/chillijust.github.io/tools/pruefstand/bau/t-zoom.html
+--- 0 grün (0 Prüfungen) · 44 rot · abgewoehnen ankunft auftritt auswertung beginn bewegung dialoge drangblatt einlesen einstellungen export exportmarken exportwahl exportwege feinschliff fliessen fluessig geruest gestaltung gewohnheiten journal kalender langdruck menue nachschliff offline querformat ruckler rueckblick rueckzug schlicht schriftzug sicherung speicher speicherfehler termine thema tickets timer timerkachel tropfen wechsel zeichen zoom

@@ -1,0 +1,122 @@
+[
+  {
+    "dispatchMs": 1084.7000000001863,
+    "historyCalculations": 122,
+    "checked": true,
+    "nodes": 3118,
+    "label": "old",
+    "repeat": 0,
+    "action": "check",
+    "cpu": 4
+  },
+  {
+    "dispatchMs": 847.5,
+    "historyCalculations": 81,
+    "checked": false,
+    "nodes": 3118,
+    "label": "old",
+    "repeat": 0,
+    "action": "uncheck",
+    "cpu": 4
+  },
+  {
+    "dispatchMs": 414.70000000018626,
+    "historyCalculations": 1,
+    "checked": true,
+    "nodes": 3120,
+    "label": "new",
+    "repeat": 0,
+    "action": "check",
+    "cpu": 4
+  },
+  {
+    "dispatchMs": 297.29999999981374,
+    "historyCalculations": 1,
+    "checked": false,
+    "nodes": 3120,
+    "label": "new",
+    "repeat": 0,
+    "action": "uncheck",
+    "cpu": 4
+  },
+  {
+    "dispatchMs": 446,
+    "historyCalculations": 1,
+    "checked": true,
+    "nodes": 3120,
+    "label": "new",
+    "repeat": 1,
+    "action": "check",
+    "cpu": 4
+  },
+  {
+    "dispatchMs": 367.19999999925494,
+    "historyCalculations": 1,
+    "checked": false,
+    "nodes": 3120,
+    "label": "new",
+    "repeat": 1,
+    "action": "uncheck",
+    "cpu": 4
+  },
+  {
+    "dispatchMs": 1108.7000000001863,
+    "historyCalculations": 122,
+    "checked": true,
+    "nodes": 3118,
+    "label": "old",
+    "repeat": 1,
+    "action": "check",
+    "cpu": 4
+  },
+  {
+    "dispatchMs": 1167.8999999994412,
+    "historyCalculations": 81,
+    "checked": false,
+    "nodes": 3118,
+    "label": "old",
+    "repeat": 1,
+    "action": "uncheck",
+    "cpu": 4
+  },
+  {
+    "dispatchMs": 961.2000000001863,
+    "historyCalculations": 122,
+    "checked": true,
+    "nodes": 3118,
+    "label": "old",
+    "repeat": 2,
+    "action": "check",
+    "cpu": 4
+  },
+  {
+    "dispatchMs": 700.5999999996275,
+    "historyCalculations": 81,
+    "checked": false,
+    "nodes": 3118,
+    "label": "old",
+    "repeat": 2,
+    "action": "uncheck",
+    "cpu": 4
+  },
+  {
+    "dispatchMs": 387.20000000018626,
+    "historyCalculations": 1,
+    "checked": true,
+    "nodes": 3120,
+    "label": "new",
+    "repeat": 2,
+    "action": "check",
+    "cpu": 4
+  },
+  {
+    "dispatchMs": 297.5,
+    "historyCalculations": 1,
+    "checked": false,
+    "nodes": 3120,
+    "label": "new",
+    "repeat": 2,
+    "action": "uncheck",
+    "cpu": 4
+  }
+]

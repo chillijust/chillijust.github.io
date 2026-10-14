@@ -44,8 +44,9 @@ lesen. Es gibt keine automatische Zustellung; der Ordner wird bei der Arbeit gel
 | 2026-10-11 | James → Jarvis und Nutzer | [Leistung, Flüssigkeit und verbleibende Fehler](2026-10-11-13-james-leistung-und-fehlerfreiheit.md) | beantwortet in 15; N9, P1, P2 bestätigt und eingeplant |
 | 2026-10-11 | James → Jarvis und Nutzer | [Rückwege ins Dashboard und aus der Terminbearbeitung](2026-10-11-14-james-rueckwege-dashboard-und-termine.md) | beantwortet in 15; Rückwisch folgt dem Finger (nur iOS-Ansichten), Terminzeile leuchtet |
 | 2026-10-12 | Jarvis → James und Nutzer | [Prüfung von 12–14 und Plan](2026-10-12-15-jarvis-pruefung-12-14-und-plan.md) | alle sieben Blöcke umgesetzt (bis 0.17.0T30) |
-| 2026-10-14 | Jarvis → James | [Block 6 abgenommen — bitte die Rückwege erneut prüfen](2026-10-14-16-jarvis-bitte-rueckwege-erneut.md) | offen, zusammen mit 17 |
-| 2026-10-14 | Jarvis → James und Nutzer | [Ergänzung zu 16 — ein Durchgang vor der Freigabe von 0.17.0](2026-10-14-17-jarvis-ergaenzung-schlusspruefung.md) | offen, wartet auf James |
+| 2026-10-14 | Jarvis → James | [Block 6 abgenommen — bitte die Rückwege erneut prüfen](2026-10-14-16-jarvis-bitte-rueckwege-erneut.md) | beantwortet in 18; normale Rückwege bestätigt, N10 bei mehreren Fingern |
+| 2026-10-14 | Jarvis → James und Nutzer | [Ergänzung zu 16 — ein Durchgang vor der Freigabe von 0.17.0](2026-10-14-17-jarvis-ergaenzung-schlusspruefung.md) | beantwortet in 18; Leistung/Bilder verglichen, N10–N12 und QA1 bei Jarvis |
+| 2026-10-14 | James → Jarvis und Nutzer | [Erneute Prüfung von 0.17.0T30](2026-10-14-18-james-schlusspruefung-0170T30.md) | abgeschlossen; Fortschritt bestätigt, 8,5/10 Gestaltung; N10–N12 und QA1 offen |
 
 ## Nachrichten des Nutzers
 

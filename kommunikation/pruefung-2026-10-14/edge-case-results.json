@@ -1,0 +1,352 @@
+[
+  {
+    "label": "old",
+    "holdMs": 650,
+    "point": {
+      "x": 330.8,
+      "y": 466.171875
+    },
+    "originalRepeat": "keine",
+    "beforeRelease": {
+      "view": "termin",
+      "repeat": "keine",
+      "target": {
+        "id": "",
+        "tag": "BUTTON",
+        "repeat": "monatlich",
+        "text": "Monatlich"
+      }
+    },
+    "afterRelease": {
+      "view": "termin",
+      "repeat": "monatlich",
+      "events": [
+        {
+          "type": "pointerdown",
+          "id": "",
+          "tag": "SPAN",
+          "repeat": null,
+          "trusted": true,
+          "sinceHold": 1791997477451
+        },
+        {
+          "type": "pointerup",
+          "id": "",
+          "tag": "BUTTON",
+          "repeat": "monatlich",
+          "trusted": true,
+          "sinceHold": 246
+        },
+        {
+          "type": "click",
+          "id": "",
+          "tag": "BUTTON",
+          "repeat": "monatlich",
+          "trusted": true,
+          "sinceHold": 260
+        }
+      ]
+    },
+    "saved": {
+      "memory": "monatlich",
+      "stored": "monatlich"
+    }
+  },
+  {
+    "label": "old",
+    "holdMs": 1000,
+    "point": {
+      "x": 330.8,
+      "y": 466.171875
+    },
+    "originalRepeat": "keine",
+    "beforeRelease": {
+      "view": "termin",
+      "repeat": "keine",
+      "target": {
+        "id": "",
+        "tag": "BUTTON",
+        "repeat": "monatlich",
+        "text": "Monatlich"
+      }
+    },
+    "afterRelease": {
+      "view": "termin",
+      "repeat": "monatlich",
+      "events": [
+        {
+          "type": "pointerdown",
+          "id": "",
+          "tag": "SPAN",
+          "repeat": null,
+          "trusted": true,
+          "sinceHold": 1791997483534
+        },
+        {
+          "type": "pointerup",
+          "id": "",
+          "tag": "BUTTON",
+          "repeat": "monatlich",
+          "trusted": true,
+          "sinceHold": 561
+        },
+        {
+          "type": "click",
+          "id": "",
+          "tag": "BUTTON",
+          "repeat": "monatlich",
+          "trusted": true,
+          "sinceHold": 586
+        }
+      ]
+    },
+    "saved": {
+      "memory": "monatlich",
+      "stored": "monatlich"
+    }
+  },
+  {
+    "label": "old",
+    "holdMs": 1500,
+    "point": {
+      "x": 330.8,
+      "y": 466.171875
+    },
+    "originalRepeat": "keine",
+    "beforeRelease": {
+      "view": "termin",
+      "repeat": "keine",
+      "target": {
+        "id": "",
+        "tag": "BUTTON",
+        "repeat": "monatlich",
+        "text": "Monatlich"
+      }
+    },
+    "afterRelease": {
+      "view": "termin",
+      "repeat": "monatlich",
+      "events": [
+        {
+          "type": "pointerdown",
+          "id": "",
+          "tag": "SPAN",
+          "repeat": null,
+          "trusted": true,
+          "sinceHold": 1791997490116
+        },
+        {
+          "type": "pointerup",
+          "id": "",
+          "tag": "BUTTON",
+          "repeat": "monatlich",
+          "trusted": true,
+          "sinceHold": 1007
+        },
+        {
+          "type": "click",
+          "id": "",
+          "tag": "BUTTON",
+          "repeat": "monatlich",
+          "trusted": true,
+          "sinceHold": 1013
+        }
+      ]
+    },
+    "saved": {
+      "memory": "monatlich",
+      "stored": "monatlich"
+    }
+  },
+  {
+    "label": "new",
+    "holdMs": 650,
+    "point": {
+      "x": 330.8,
+      "y": 466.171875
+    },
+    "originalRepeat": "keine",
+    "beforeRelease": {
+      "view": "termin",
+      "repeat": "keine",
+      "target": {
+        "id": "",
+        "tag": "BUTTON",
+        "repeat": "monatlich",
+        "text": "Monatlich"
+      }
+    },
+    "afterRelease": {
+      "view": "termin",
+      "repeat": "monatlich",
+      "events": [
+        {
+          "type": "pointerdown",
+          "id": "",
+          "tag": "SPAN",
+          "repeat": null,
+          "trusted": true,
+          "sinceHold": 1791997496949
+        },
+        {
+          "type": "pointerup",
+          "id": "",
+          "tag": "BUTTON",
+          "repeat": "monatlich",
+          "trusted": true,
+          "sinceHold": 203
+        },
+        {
+          "type": "click",
+          "id": "",
+          "tag": "BUTTON",
+          "repeat": "monatlich",
+          "trusted": true,
+          "sinceHold": 215
+        }
+      ]
+    },
+    "saved": {
+      "memory": "monatlich",
+      "stored": "monatlich"
+    }
+  },
+  {
+    "label": "new",
+    "holdMs": 1000,
+    "point": {
+      "x": 330.8,
+      "y": 466.171875
+    },
+    "originalRepeat": "keine",
+    "beforeRelease": {
+      "view": "termin",
+      "repeat": "keine",
+      "target": {
+        "id": "",
+        "tag": "BUTTON",
+        "repeat": "monatlich",
+        "text": "Monatlich"
+      }
+    },
+    "afterRelease": {
+      "view": "termin",
+      "repeat": "monatlich",
+      "events": [
+        {
+          "type": "pointerdown",
+          "id": "",
+          "tag": "SPAN",
+          "repeat": null,
+          "trusted": true,
+          "sinceHold": 1791997502750
+        },
+        {
+          "type": "pointerup",
+          "id": "",
+          "tag": "BUTTON",
+          "repeat": "monatlich",
+          "trusted": true,
+          "sinceHold": 531
+        },
+        {
+          "type": "click",
+          "id": "",
+          "tag": "BUTTON",
+          "repeat": "monatlich",
+          "trusted": true,
+          "sinceHold": 543
+        }
+      ]
+    },
+    "saved": {
+      "memory": "monatlich",
+      "stored": "monatlich"
+    }
+  },
+  {
+    "label": "new",
+    "holdMs": 1500,
+    "point": {
+      "x": 330.8,
+      "y": 466.171875
+    },
+    "originalRepeat": "keine",
+    "beforeRelease": {
+      "view": "termin",
+      "repeat": "keine",
+      "target": {
+        "id": "",
+        "tag": "BUTTON",
+        "repeat": "monatlich",
+        "text": "Monatlich"
+      }
+    },
+    "afterRelease": {
+      "view": "termin",
+      "repeat": "monatlich",
+      "events": [
+        {
+          "type": "pointerdown",
+          "id": "",
+          "tag": "SPAN",
+          "repeat": null,
+          "trusted": true,
+          "sinceHold": 1791997509172
+        },
+        {
+          "type": "pointerup",
+          "id": "",
+          "tag": "BUTTON",
+          "repeat": "monatlich",
+          "trusted": true,
+          "sinceHold": 1025
+        },
+        {
+          "type": "click",
+          "id": "",
+          "tag": "BUTTON",
+          "repeat": "monatlich",
+          "trusted": true,
+          "sinceHold": 1034
+        }
+      ]
+    },
+    "saved": {
+      "memory": "monatlich",
+      "stored": "monatlich"
+    }
+  },
+  {
+    "case": "second-finger-before-drag-repeated",
+    "states": [
+      {
+        "view": "journal",
+        "previews": 1,
+        "ready": true,
+        "drag": false,
+        "prepared": false
+      },
+      {
+        "view": "journal",
+        "previews": 2,
+        "ready": true,
+        "drag": false,
+        "prepared": false
+      },
+      {
+        "view": "journal",
+        "previews": 3,
+        "ready": true,
+        "drag": false,
+        "prepared": false
+      }
+    ],
+    "afterNormalReturn": {
+      "view": "home",
+      "previews": 3,
+      "ready": false,
+      "drag": false
+    }
+  }
+]

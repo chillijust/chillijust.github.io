@@ -1,0 +1,852 @@
+[
+  {
+    "style": "chilli",
+    "cpu": 4,
+    "frames": {
+      "windowMs": 2045.9000000003725,
+      "frames": 108,
+      "frameMedianMs": 16.699999999999818,
+      "frameP95Ms": 16.800000000000182,
+      "frameMaxMs": 183.39999999999964,
+      "gapsOver34Ms": 3,
+      "longTasks": 1,
+      "longTaskTotalMs": 177,
+      "longTaskMaxMs": 177
+    },
+    "calls": {
+      "textWachsen": {
+        "count": 2,
+        "totalMs": 5.999999999068677,
+        "maxMs": 3.2999999998137355
+      },
+      "wahlenSetzen": {
+        "count": 1,
+        "totalMs": 11.100000000558794,
+        "maxMs": 11.100000000558794
+      },
+      "geist": {
+        "count": 1,
+        "totalMs": 6.300000000745058,
+        "maxMs": 6.300000000745058
+      },
+      "tropfenAuf": {
+        "count": 1,
+        "totalMs": 46.60000000055879,
+        "maxMs": 46.60000000055879
+      },
+      "ticketBlattOeffnen": {
+        "count": 1,
+        "totalMs": 98.20000000018626,
+        "maxMs": 98.20000000018626
+      },
+      "glasAmZiel": {
+        "count": 1,
+        "totalMs": 3.2000000001862645,
+        "maxMs": 3.2000000001862645
+      }
+    },
+    "samples": [
+      {
+        "ms": 130.3999999994412,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 210.29999999981374,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 464.69999999925494,
+        "opacity": "0",
+        "waiting": true,
+        "cardBackdrop": "none",
+        "temp": [
+          {
+            "cls": "tropfen-huelle glas milchig",
+            "backdrop": "none",
+            "shadow": "rgba(255, 255, 255, 0.38) 0px 1px 0px 0px inset, rgba(255, 255, 255, 0.22) 0px 0px 0px 1.5px inset, rgba(255, 255, 255, 0.2) 0px 0px 0px 1px, rgba(20, 20, 19, 0.14) 0px 4px 10px 0px, rgba(20, 20, 19, 0.28) 0px 14px 32px 0px",
+            "filter": "none"
+          }
+        ]
+      },
+      {
+        "ms": 509.3999999994412,
+        "opacity": "0",
+        "waiting": true,
+        "cardBackdrop": "none",
+        "temp": [
+          {
+            "cls": "tropfen-huelle glas milchig",
+            "backdrop": "none",
+            "shadow": "rgba(255, 255, 255, 0.38) 0px 1px 0px 0px inset, rgba(255, 255, 255, 0.22) 0px 0px 0px 1.5px inset, rgba(255, 255, 255, 0.2) 0px 0px 0px 1px, rgba(20, 20, 19, 0.14) 0px 4px 10px 0px, rgba(20, 20, 19, 0.28) 0px 14px 32px 0px",
+            "filter": "none"
+          }
+        ]
+      },
+      {
+        "ms": 612.6999999992549,
+        "opacity": "0",
+        "waiting": true,
+        "cardBackdrop": "none",
+        "temp": [
+          {
+            "cls": "tropfen-huelle glas milchig",
+            "backdrop": "none",
+            "shadow": "rgba(255, 255, 255, 0.38) 0px 1px 0px 0px inset, rgba(255, 255, 255, 0.22) 0px 0px 0px 1.5px inset, rgba(255, 255, 255, 0.2) 0px 0px 0px 1px, rgba(20, 20, 19, 0.14) 0px 4px 10px 0px, rgba(20, 20, 19, 0.28) 0px 14px 32px 0px",
+            "filter": "none"
+          }
+        ]
+      },
+      {
+        "ms": 709.3999999994412,
+        "opacity": "0",
+        "waiting": true,
+        "cardBackdrop": "none",
+        "temp": [
+          {
+            "cls": "tropfen-huelle glas milchig",
+            "backdrop": "none",
+            "shadow": "rgba(255, 255, 255, 0.38) 0px 1px 0px 0px inset, rgba(255, 255, 255, 0.22) 0px 0px 0px 1.5px inset, rgba(255, 255, 255, 0.2) 0px 0px 0px 1px, rgba(20, 20, 19, 0.14) 0px 4px 10px 0px, rgba(20, 20, 19, 0.28) 0px 14px 32px 0px",
+            "filter": "none"
+          }
+        ]
+      },
+      {
+        "ms": 811.5999999996275,
+        "opacity": "0",
+        "waiting": true,
+        "cardBackdrop": "none",
+        "temp": [
+          {
+            "cls": "tropfen-huelle glas milchig",
+            "backdrop": "none",
+            "shadow": "rgba(255, 255, 255, 0.38) 0px 1px 0px 0px inset, rgba(255, 255, 255, 0.22) 0px 0px 0px 1.5px inset, rgba(255, 255, 255, 0.2) 0px 0px 0px 1px, rgba(20, 20, 19, 0.14) 0px 4px 10px 0px, rgba(20, 20, 19, 0.28) 0px 14px 32px 0px",
+            "filter": "none"
+          }
+        ]
+      },
+      {
+        "ms": 903.7999999998137,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": [
+          {
+            "cls": "tropfen-huelle glas milchig",
+            "backdrop": "none",
+            "shadow": "rgba(255, 255, 255, 0.38) 0px 1px 0px 0px inset, rgba(255, 255, 255, 0.22) 0px 0px 0px 1.5px inset, rgba(255, 255, 255, 0.2) 0px 0px 0px 1px, rgba(20, 20, 19, 0.14) 0px 4px 10px 0px, rgba(20, 20, 19, 0.28) 0px 14px 32px 0px",
+            "filter": "none"
+          }
+        ]
+      },
+      {
+        "ms": 1005,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": [
+          {
+            "cls": "tropfen-huelle glas milchig",
+            "backdrop": "none",
+            "shadow": "rgba(255, 255, 255, 0.38) 0px 1px 0px 0px inset, rgba(255, 255, 255, 0.22) 0px 0px 0px 1.5px inset, rgba(255, 255, 255, 0.2) 0px 0px 0px 1px, rgba(20, 20, 19, 0.14) 0px 4px 10px 0px, rgba(20, 20, 19, 0.28) 0px 14px 32px 0px",
+            "filter": "none"
+          }
+        ]
+      },
+      {
+        "ms": 1111.0999999996275,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 1202.8999999994412,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 1307.0999999996275,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 1404,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 1503.699999999255,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 1604.3999999994412,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 1703.699999999255,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 1803,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 1911,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 2002.8999999994412,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      }
+    ],
+    "traceSummary": {
+      "RunTask": {
+        "count": 2556,
+        "totalMs": 1423.1449999999886,
+        "maxMs": 176.536
+      },
+      "FunctionCall": {
+        "count": 156,
+        "totalMs": 205.42600000000004,
+        "maxMs": 98.305
+      },
+      "UpdateLayoutTree": {
+        "count": 126,
+        "totalMs": 170.95600000000002,
+        "maxMs": 32.794
+      },
+      "Layout": {
+        "count": 118,
+        "totalMs": 117.95199999999996,
+        "maxMs": 10.117
+      },
+      "PrePaint": {
+        "count": 124,
+        "totalMs": 119.83400000000003,
+        "maxMs": 5.62
+      },
+      "Paint": {
+        "count": 242,
+        "totalMs": 124.558,
+        "maxMs": 8.685
+      }
+    },
+    "errors": [],
+    "endState": {
+      "nodes": 732,
+      "temporary": 0,
+      "open": [
+        "ticketKarte"
+      ],
+      "ticketOpen": true,
+      "ticketOpacity": "",
+      "flows": 0
+    }
+  },
+  {
+    "style": "ios",
+    "cpu": 4,
+    "frames": {
+      "windowMs": 2156.5999999996275,
+      "frames": 75,
+      "frameMedianMs": 16.699999999999818,
+      "frameP95Ms": 100,
+      "frameMaxMs": 216.60000000000036,
+      "gapsOver34Ms": 10,
+      "longTasks": 2,
+      "longTaskTotalMs": 247,
+      "longTaskMaxMs": 197
+    },
+    "calls": {
+      "textWachsen": {
+        "count": 2,
+        "totalMs": 4.099999999627471,
+        "maxMs": 2.599999999627471
+      },
+      "wahlenSetzen": {
+        "count": 1,
+        "totalMs": 7.699999999254942,
+        "maxMs": 7.699999999254942
+      },
+      "geist": {
+        "count": 1,
+        "totalMs": 5.2000000001862645,
+        "maxMs": 5.2000000001862645
+      },
+      "fpPunkte": {
+        "count": 95,
+        "totalMs": 12.900000000372529,
+        "maxMs": 4.2999999998137355
+      },
+      "fpHalsPfad": {
+        "count": 21,
+        "totalMs": 5.599999999627471,
+        "maxMs": 3.7999999998137355
+      },
+      "fpZeichnen": {
+        "count": 19,
+        "totalMs": 44.899999998509884,
+        "maxMs": 11.300000000745058
+      },
+      "teilSchritt": {
+        "count": 20,
+        "totalMs": 173.50000000186265,
+        "maxMs": 29
+      },
+      "huelleFliesst": {
+        "count": 1,
+        "totalMs": 36,
+        "maxMs": 36
+      },
+      "tropfenAuf": {
+        "count": 1,
+        "totalMs": 77.40000000037253,
+        "maxMs": 77.40000000037253
+      },
+      "ticketBlattOeffnen": {
+        "count": 1,
+        "totalMs": 125.70000000018626,
+        "maxMs": 125.70000000018626
+      },
+      "glasAmZiel": {
+        "count": 1,
+        "totalMs": 5.3999999994412065,
+        "maxMs": 5.3999999994412065
+      }
+    },
+    "samples": [
+      {
+        "ms": 124.30000000074506,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 210.20000000018626,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 541.1000000005588,
+        "opacity": "0",
+        "waiting": true,
+        "cardBackdrop": "none",
+        "temp": [
+          {
+            "cls": "fl-schicht",
+            "backdrop": "none",
+            "shadow": "none",
+            "filter": "drop-shadow(rgba(20, 20, 19, 0.14) 0px 4px 5px) drop-shadow(rgba(20, 20, 19, 0.28) 0px 14px 16px)"
+          },
+          {
+            "cls": "tropfen-huelle glas milchig",
+            "backdrop": "none",
+            "shadow": "none",
+            "filter": "none"
+          }
+        ]
+      },
+      {
+        "ms": 617,
+        "opacity": "0",
+        "waiting": true,
+        "cardBackdrop": "none",
+        "temp": [
+          {
+            "cls": "fl-schicht",
+            "backdrop": "none",
+            "shadow": "none",
+            "filter": "drop-shadow(rgba(20, 20, 19, 0.14) 0px 4px 5px) drop-shadow(rgba(20, 20, 19, 0.28) 0px 14px 16px)"
+          },
+          {
+            "cls": "tropfen-huelle glas milchig",
+            "backdrop": "none",
+            "shadow": "none",
+            "filter": "none"
+          }
+        ]
+      },
+      {
+        "ms": 702.2000000001863,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": [
+          {
+            "cls": "fl-schicht",
+            "backdrop": "none",
+            "shadow": "none",
+            "filter": "drop-shadow(rgba(20, 20, 19, 0.14) 0px 4px 5px) drop-shadow(rgba(20, 20, 19, 0.28) 0px 14px 16px)"
+          },
+          {
+            "cls": "tropfen-huelle glas milchig",
+            "backdrop": "none",
+            "shadow": "rgba(255, 255, 255, 0.38) 0px 1px 0px 0px inset, rgba(255, 255, 255, 0.22) 0px 0px 0px 1.5px inset, rgba(255, 255, 255, 0.2) 0px 0px 0px 1px, rgba(20, 20, 19, 0.14) 0px 4px 10px 0px, rgba(20, 20, 19, 0.28) 0px 14px 32px 0px",
+            "filter": "none"
+          }
+        ]
+      },
+      {
+        "ms": 805.8000000007451,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": [
+          {
+            "cls": "fl-schicht",
+            "backdrop": "none",
+            "shadow": "none",
+            "filter": "drop-shadow(rgba(20, 20, 19, 0.14) 0px 4px 5px) drop-shadow(rgba(20, 20, 19, 0.28) 0px 14px 16px)"
+          },
+          {
+            "cls": "tropfen-huelle glas milchig",
+            "backdrop": "none",
+            "shadow": "rgba(255, 255, 255, 0.38) 0px 1px 0px 0px inset, rgba(255, 255, 255, 0.22) 0px 0px 0px 1.5px inset, rgba(255, 255, 255, 0.2) 0px 0px 0px 1px, rgba(20, 20, 19, 0.14) 0px 4px 10px 0px, rgba(20, 20, 19, 0.28) 0px 14px 32px 0px",
+            "filter": "none"
+          }
+        ]
+      },
+      {
+        "ms": 916.1000000005588,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": [
+          {
+            "cls": "fl-schicht",
+            "backdrop": "none",
+            "shadow": "none",
+            "filter": "drop-shadow(rgba(20, 20, 19, 0.14) 0px 4px 5px) drop-shadow(rgba(20, 20, 19, 0.28) 0px 14px 16px)"
+          },
+          {
+            "cls": "tropfen-huelle glas milchig",
+            "backdrop": "none",
+            "shadow": "rgba(255, 255, 255, 0.38) 0px 1px 0px 0px inset, rgba(255, 255, 255, 0.22) 0px 0px 0px 1.5px inset, rgba(255, 255, 255, 0.2) 0px 0px 0px 1px, rgba(20, 20, 19, 0.14) 0px 4px 10px 0px, rgba(20, 20, 19, 0.28) 0px 14px 32px 0px",
+            "filter": "none"
+          }
+        ]
+      },
+      {
+        "ms": 1013.5,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": [
+          {
+            "cls": "fl-schicht",
+            "backdrop": "none",
+            "shadow": "none",
+            "filter": "drop-shadow(rgba(20, 20, 19, 0.14) 0px 4px 5px) drop-shadow(rgba(20, 20, 19, 0.28) 0px 14px 16px)"
+          },
+          {
+            "cls": "tropfen-huelle glas milchig",
+            "backdrop": "none",
+            "shadow": "rgba(255, 255, 255, 0.38) 0px 1px 0px 0px inset, rgba(255, 255, 255, 0.22) 0px 0px 0px 1.5px inset, rgba(255, 255, 255, 0.2) 0px 0px 0px 1px, rgba(20, 20, 19, 0.14) 0px 4px 10px 0px, rgba(20, 20, 19, 0.28) 0px 14px 32px 0px",
+            "filter": "none"
+          }
+        ]
+      },
+      {
+        "ms": 1108.6000000005588,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 1207.6000000005588,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 1306.9000000003725,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 1410.2000000001863,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 1507.9000000003725,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 1609.800000000745,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 1708.800000000745,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 1809,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 1909.2000000001863,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 2008.300000000745,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 2116.7000000001863,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      }
+    ],
+    "traceSummary": {
+      "RunTask": {
+        "count": 2469,
+        "totalMs": 1732.6449999999822,
+        "maxMs": 196.616
+      },
+      "FunctionCall": {
+        "count": 159,
+        "totalMs": 389.634,
+        "maxMs": 125.806
+      },
+      "UpdateLayoutTree": {
+        "count": 112,
+        "totalMs": 214.63700000000006,
+        "maxMs": 35.454
+      },
+      "Layout": {
+        "count": 99,
+        "totalMs": 120.68499999999996,
+        "maxMs": 10.25
+      },
+      "PrePaint": {
+        "count": 92,
+        "totalMs": 92.80099999999997,
+        "maxMs": 7.057
+      },
+      "Paint": {
+        "count": 155,
+        "totalMs": 130.92599999999996,
+        "maxMs": 9.922
+      }
+    },
+    "errors": [],
+    "endState": {
+      "nodes": 732,
+      "temporary": 0,
+      "open": [
+        "ticketKarte"
+      ],
+      "ticketOpen": true,
+      "ticketOpacity": "",
+      "flows": 0
+    }
+  },
+  {
+    "style": "aus",
+    "cpu": 4,
+    "frames": {
+      "windowMs": 1956,
+      "frames": 107,
+      "frameMedianMs": 16.699999999999818,
+      "frameP95Ms": 16.800000000000182,
+      "frameMaxMs": 116.70000000000073,
+      "gapsOver34Ms": 2,
+      "longTasks": 1,
+      "longTaskTotalMs": 113,
+      "longTaskMaxMs": 113
+    },
+    "calls": {
+      "textWachsen": {
+        "count": 2,
+        "totalMs": 8.400000001303852,
+        "maxMs": 6.300000000745058
+      },
+      "wahlenSetzen": {
+        "count": 1,
+        "totalMs": 9.799999999813735,
+        "maxMs": 9.799999999813735
+      },
+      "geist": {
+        "count": 1,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "tropfenAuf": {
+        "count": 1,
+        "totalMs": 0.7000000001862645,
+        "maxMs": 0.7000000001862645
+      },
+      "ticketBlattOeffnen": {
+        "count": 1,
+        "totalMs": 65.29999999981374,
+        "maxMs": 65.29999999981374
+      }
+    },
+    "samples": [
+      {
+        "ms": 107.5,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 200.29999999981374,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 345.59999999962747,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 400.69999999925494,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 505.59999999962747,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 601,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 700.5999999996275,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 802.0999999996275,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 901.5999999996275,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 1001.8999999994412,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 1101.699999999255,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 1201.199999999255,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 1301.2999999998137,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 1401.5999999996275,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 1501.5999999996275,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 1600.5,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 1701.2999999998137,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 1800.8999999994412,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      },
+      {
+        "ms": 1901.199999999255,
+        "opacity": "1",
+        "waiting": false,
+        "cardBackdrop": "blur(3px) saturate(1.9)",
+        "temp": []
+      }
+    ],
+    "traceSummary": {
+      "RunTask": {
+        "count": 1483,
+        "totalMs": 541.0819999999964,
+        "maxMs": 113.796
+      },
+      "FunctionCall": {
+        "count": 152,
+        "totalMs": 154.25599999999994,
+        "maxMs": 65.378
+      },
+      "PrePaint": {
+        "count": 125,
+        "totalMs": 9.902000000000022,
+        "maxMs": 3.181
+      },
+      "Paint": {
+        "count": 9,
+        "totalMs": 26.828,
+        "maxMs": 6.318
+      },
+      "UpdateLayoutTree": {
+        "count": 19,
+        "totalMs": 62.13400000000001,
+        "maxMs": 28.003
+      },
+      "Layout": {
+        "count": 12,
+        "totalMs": 16.014,
+        "maxMs": 6.005
+      }
+    },
+    "errors": [],
+    "endState": {
+      "nodes": 732,
+      "temporary": 0,
+      "open": [
+        "ticketKarte"
+      ],
+      "ticketOpen": true,
+      "ticketOpacity": "",
+      "flows": 0
+    }
+  },
+  {
+    "style": "ios-first-touch-attempt",
+    "cpu": 4,
+    "launchWasRunning": true,
+    "includesPlaywrightActionabilityWait": true,
+    "usableAsTicketBenchmark": false,
+    "frames": {
+      "windowMs": 5631.4000000003725,
+      "frames": 268,
+      "frameMedianMs": 16.699999999999818,
+      "frameP95Ms": 33.40000000000009,
+      "frameMaxMs": 299.89999999999964,
+      "gapsOver34Ms": 11,
+      "longTasks": 4,
+      "longTaskTotalMs": 388,
+      "longTaskMaxMs": 138
+    },
+    "endState": {
+      "nodes": 732,
+      "temporary": 0,
+      "open": [
+        "ticketKarte"
+      ],
+      "ticketOpen": true,
+      "ticketOpacity": "",
+      "flows": 0
+    }
+  }
+]

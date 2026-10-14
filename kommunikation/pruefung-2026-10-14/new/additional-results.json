@@ -1,0 +1,154 @@
+[
+  {
+    "scenario": "timer-open",
+    "cpu": 1,
+    "frames": {
+      "windowMs": 1804.2999999998137,
+      "frames": 105,
+      "frameMedianMs": 16.699999999999818,
+      "frameP95Ms": 16.700000000000728,
+      "frameMaxMs": 83.30000000000018,
+      "gapsOver34Ms": 1,
+      "longTasks": 1,
+      "longTaskTotalMs": 97,
+      "longTaskMaxMs": 97
+    },
+    "errors": []
+  },
+  {
+    "scenario": "timer-running",
+    "cpu": 1,
+    "frames": {
+      "windowMs": 2144.9000000003725,
+      "frames": 113,
+      "frameMedianMs": 16.699999999999818,
+      "frameP95Ms": 33.30000000000018,
+      "frameMaxMs": 99.89999999999964,
+      "gapsOver34Ms": 4,
+      "longTasks": 1,
+      "longTaskTotalMs": 63,
+      "longTaskMaxMs": 63
+    },
+    "errors": []
+  },
+  {
+    "scenario": "settings-fluid-open",
+    "cpu": 1,
+    "frames": {
+      "windowMs": 1858.7999999998137,
+      "frames": 108,
+      "frameMedianMs": 16.69999999999891,
+      "frameP95Ms": 16.700000000000728,
+      "frameMaxMs": 50,
+      "gapsOver34Ms": 1,
+      "longTasks": 0,
+      "longTaskTotalMs": 0,
+      "longTaskMaxMs": 0
+    },
+    "errors": []
+  },
+  {
+    "scenario": "timer-open",
+    "cpu": 4,
+    "frames": {
+      "windowMs": 2243,
+      "frames": 68,
+      "frameMedianMs": 16.699999999999818,
+      "frameP95Ms": 66.70000000000073,
+      "frameMaxMs": 333.39999999999964,
+      "gapsOver34Ms": 8,
+      "longTasks": 3,
+      "longTaskTotalMs": 592,
+      "longTaskMaxMs": 329
+    },
+    "errors": []
+  },
+  {
+    "scenario": "timer-running",
+    "cpu": 4,
+    "frames": {
+      "windowMs": 2014.199999999255,
+      "frames": 107,
+      "frameMedianMs": 16.699999999999818,
+      "frameP95Ms": 33.29999999999927,
+      "frameMaxMs": 116.59999999999854,
+      "gapsOver34Ms": 1,
+      "longTasks": 1,
+      "longTaskTotalMs": 121,
+      "longTaskMaxMs": 121
+    },
+    "errors": []
+  },
+  {
+    "scenario": "settings-fluid-open",
+    "cpu": 4,
+    "frames": {
+      "windowMs": 2013.800000000745,
+      "frames": 105,
+      "frameMedianMs": 16.69999999999891,
+      "frameP95Ms": 16.799999999999272,
+      "frameMaxMs": 266.60000000000036,
+      "gapsOver34Ms": 1,
+      "longTasks": 1,
+      "longTaskTotalMs": 78,
+      "longTaskMaxMs": 78
+    },
+    "errors": []
+  },
+  {
+    "scenario": "ticket-copy-write-failure",
+    "path": "ticket-sheet",
+    "before": null,
+    "memory": null,
+    "stored": null,
+    "openTickets": 1,
+    "visibleList": "Alle Tickets\nTicketseite\nFEHLER\nSynthetisches Ticket\nAnderswo · Do, 1. Jan.\nTicket kopieren",
+    "warning": "Speichern ging nicht — der Speicher ist voll oder gesperrt"
+  },
+  {
+    "scenario": "ticket-copy-write-failure",
+    "path": "ticket-page",
+    "before": null,
+    "memory": null,
+    "stored": null,
+    "openTickets": 1,
+    "visibleList": "Neues Ticket\nOFFEN\nFEHLER\nSynthetisches Ticket\nAnderswo · Do, 1. Jan.\nTicket kopieren\n\nKopiert gelten sie als abgegeben. Leg den Text Claude Code vor.",
+    "warning": "Speichern ging nicht — der Speicher ist voll oder gesperrt"
+  },
+  {
+    "scenario": "calendar-real-touch",
+    "dx": -100,
+    "dy": 0,
+    "before": 0,
+    "after": 0,
+    "expectedDelta": 0,
+    "pass": true
+  },
+  {
+    "scenario": "calendar-real-touch",
+    "dx": -160,
+    "dy": 0,
+    "before": 0,
+    "after": 1,
+    "expectedDelta": 1,
+    "pass": true
+  },
+  {
+    "scenario": "calendar-real-touch",
+    "dx": 40,
+    "dy": 0,
+    "before": 1,
+    "after": 0,
+    "expectedDelta": -1,
+    "pass": true
+  },
+  {
+    "scenario": "calendar-real-touch",
+    "dx": 0,
+    "dy": 90,
+    "before": 0,
+    "after": 0,
+    "expectedDelta": 0,
+    "pass": true
+  }
+]

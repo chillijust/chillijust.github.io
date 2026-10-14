@@ -1,0 +1,200 @@
+{
+  "old": {
+    "commit": "2dcfd420cf9364ea2897cdd6788912942d75299b",
+    "version": "0.17.0T15"
+  },
+  "new": {
+    "commit": "b89fc042c3c72aeeec32a48e164754d9ba551a13",
+    "version": "0.17.0T30"
+  },
+  "notes": [
+    "rAF callback intervals, not displayed frames or iPhone FPS",
+    "CPU throttling is a comparison, not an iPhone simulation",
+    "Median of three ticket opens; max across these three",
+    "P2 diagnostic wraps only the two history calculation functions in both versions; diagnostic times separate from uninstrumented replay"
+  ],
+  "ticket": [
+    {
+      "group": "normal-ios-hell-cpu1",
+      "old": {
+        "p95MedianMs": 49.9,
+        "maxMs": 116.7,
+        "samples": 3
+      },
+      "new": {
+        "p95MedianMs": 16.8,
+        "maxMs": 33.4,
+        "samples": 3
+      }
+    },
+    {
+      "group": "normal-ios-dunkel-cpu1",
+      "old": {
+        "p95MedianMs": 33.4,
+        "maxMs": 166.7,
+        "samples": 3
+      },
+      "new": {
+        "p95MedianMs": 33.2,
+        "maxMs": 66.7,
+        "samples": 3
+      }
+    },
+    {
+      "group": "normal-ios-hell-cpu4",
+      "old": {
+        "p95MedianMs": 66.7,
+        "maxMs": 250,
+        "samples": 3
+      },
+      "new": {
+        "p95MedianMs": 50,
+        "maxMs": 216.6,
+        "samples": 3
+      }
+    },
+    {
+      "group": "normal-ios-dunkel-cpu4",
+      "old": {
+        "p95MedianMs": 99.9,
+        "maxMs": 283.3,
+        "samples": 3
+      },
+      "new": {
+        "p95MedianMs": 50,
+        "maxMs": 266.6,
+        "samples": 3
+      }
+    }
+  ],
+  "flows": [
+    {
+      "group": "normal-ios-dunkel-cpu1-flows",
+      "scenario": "home-return",
+      "old": 116,
+      "new": 95.9
+    },
+    {
+      "group": "normal-ios-dunkel-cpu1-flows",
+      "scenario": "habit-check",
+      "old": 34.3,
+      "new": 16.3
+    },
+    {
+      "group": "normal-ios-dunkel-cpu1-flows",
+      "scenario": "habit-uncheck",
+      "old": 22.7,
+      "new": 23.4
+    },
+    {
+      "group": "normal-ios-dunkel-cpu4-flows",
+      "scenario": "home-return",
+      "old": 369.5,
+      "new": 248.4
+    },
+    {
+      "group": "normal-ios-dunkel-cpu4-flows",
+      "scenario": "habit-check",
+      "old": 139.7,
+      "new": 92.7
+    },
+    {
+      "group": "normal-ios-dunkel-cpu4-flows",
+      "scenario": "habit-uncheck",
+      "old": 96.9,
+      "new": 83.2
+    },
+    {
+      "group": "gross-ios-dunkel-cpu4-flows",
+      "scenario": "home-return",
+      "old": 861.9,
+      "new": 1289.1
+    },
+    {
+      "group": "gross-ios-dunkel-cpu4-flows",
+      "scenario": "habit-check",
+      "old": 1033.9,
+      "new": 985.9
+    },
+    {
+      "group": "gross-ios-dunkel-cpu4-flows",
+      "scenario": "habit-uncheck",
+      "old": 679.6,
+      "new": 805.2
+    }
+  ],
+  "timerProbe": [
+    {
+      "cpu": 1,
+      "old": {
+        "samples": 3,
+        "openP95MedianMs": 66.7,
+        "runningP95MedianMs": 16.7
+      },
+      "new": {
+        "samples": 3,
+        "openP95MedianMs": 33.2,
+        "runningP95MedianMs": 16.7
+      }
+    },
+    {
+      "cpu": 4,
+      "old": {
+        "samples": 1,
+        "openP95MedianMs": 133.3,
+        "runningP95MedianMs": 16.8
+      },
+      "new": {
+        "samples": 1,
+        "openP95MedianMs": 66.7,
+        "runningP95MedianMs": 16.8
+      }
+    }
+  ],
+  "stressDiagnostic": [
+    {
+      "action": "check",
+      "cpu": 4,
+      "old": {
+        "samples": 3,
+        "dispatchMedianMs": 1084.7,
+        "historyCalculations": [
+          122,
+          122,
+          122
+        ]
+      },
+      "new": {
+        "samples": 3,
+        "dispatchMedianMs": 414.7,
+        "historyCalculations": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "action": "uncheck",
+      "cpu": 4,
+      "old": {
+        "samples": 3,
+        "dispatchMedianMs": 847.5,
+        "historyCalculations": [
+          81,
+          81,
+          81
+        ]
+      },
+      "new": {
+        "samples": 3,
+        "dispatchMedianMs": 297.5,
+        "historyCalculations": [
+          1,
+          1,
+          1
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+[
+  {
+    "case": "second-finger-before-drag-repeated",
+    "states": [
+      {
+        "view": "journal",
+        "previews": 1,
+        "ready": true,
+        "drag": false,
+        "prepared": false
+      },
+      {
+        "view": "journal",
+        "previews": 2,
+        "ready": true,
+        "drag": false,
+        "prepared": false
+      },
+      {
+        "view": "journal",
+        "previews": 3,
+        "ready": true,
+        "drag": false,
+        "prepared": false
+      }
+    ],
+    "afterNormalReturn": {
+      "view": "home",
+      "previews": 3,
+      "ready": false,
+      "drag": false
+    }
+  },
+  {
+    "case": "second-finger-during-drag-no-further-move",
+    "beforeRelease": {
+      "view": "journal",
+      "drag": true,
+      "spring": false
+    },
+    "afterRelease": {
+      "view": "home",
+      "previews": 0,
+      "drag": false
+    }
+  }
+]

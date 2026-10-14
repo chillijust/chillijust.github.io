@@ -1,0 +1,5596 @@
+[
+  {
+    "case": "journal-swipe",
+    "style": "ios",
+    "opening": {},
+    "before": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 932,
+        "top": 0,
+        "right": 430,
+        "bottom": 932,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "during": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "matrix(0.843, 0, 0, 0.843, 0, 0)",
+      "appInlineTransform": "scale(0.843)",
+      "clip": "inset(0px round 45.1px)",
+      "appClass": "bereit zieht",
+      "appRect": {
+        "x": 67.510009765625,
+        "y": 73.1619873046875,
+        "width": 362.489990234375,
+        "height": 785.676025390625,
+        "top": 73.1619873046875,
+        "right": 430,
+        "bottom": 858.8380126953125,
+        "left": 67.510009765625
+      },
+      "viewTransform": "none",
+      "preview": {
+        "inert": true,
+        "aria": "true",
+        "pointer": "none",
+        "shadow": true,
+        "home": true,
+        "scroll": "translateY(0px)"
+      },
+      "drag": {
+        "dx": 150,
+        "v": 0.3813990977937087,
+        "spring": false
+      },
+      "temp": [
+        "abbild",
+        "zug-schatten"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "after": {
+      "view": "home",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": null,
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 1440.3125,
+        "top": 0,
+        "right": 430,
+        "bottom": 1440.3125,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [
+        "fl-schicht",
+        "tropfen-huelle"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 5625.799999998882,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "shrink",
+          "time": 5627.299999998882,
+          "target": "menuKnopf",
+          "targetRect": {
+            "x": 381.30401611328125,
+            "y": 114.75471496582031,
+            "width": 35.71038818359375,
+            "height": 35.71040344238281,
+            "top": 114.75471496582031,
+            "right": 417.014404296875,
+            "bottom": 150.46511840820312,
+            "left": 381.30401611328125
+          },
+          "oldRect": {
+            "x": 81.01199340820312,
+            "y": 87.79437255859375,
+            "width": 348.9880065917969,
+            "height": 756.4112548828125,
+            "top": 87.79437255859375,
+            "right": 430,
+            "bottom": 844.2056274414062,
+            "left": 81.01199340820312
+          }
+        }
+      ],
+      "warning": false,
+      "title": null
+    },
+    "end": {
+      "view": "home",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": null,
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 1440.3125,
+        "top": 0,
+        "right": 430,
+        "bottom": 1440.3125,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 5625.799999998882,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "shrink",
+          "time": 5627.299999998882,
+          "target": "menuKnopf",
+          "targetRect": {
+            "x": 381.30401611328125,
+            "y": 114.75471496582031,
+            "width": 35.71038818359375,
+            "height": 35.71040344238281,
+            "top": 114.75471496582031,
+            "right": 417.014404296875,
+            "bottom": 150.46511840820312,
+            "left": 381.30401611328125
+          },
+          "oldRect": {
+            "x": 81.01199340820312,
+            "y": 87.79437255859375,
+            "width": 348.9880065917969,
+            "height": 756.4112548828125,
+            "top": 87.79437255859375,
+            "right": 430,
+            "bottom": 844.2056274414062,
+            "left": 81.01199340820312
+          }
+        }
+      ],
+      "warning": false,
+      "title": null
+    },
+    "highlights": [],
+    "iterations": [],
+    "checks": {
+      "expectedView": true,
+      "noRest": true,
+      "uniqueIDs": true,
+      "noErrors": true,
+      "fingerFollowing": true,
+      "uniqueIDsDuring": true,
+      "inertPreview": true
+    },
+    "errors": []
+  },
+  {
+    "case": "settings-scrolled-swipe",
+    "style": "ios",
+    "opening": {},
+    "before": {
+      "view": "einstellungen",
+      "scrollY": 300,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": -300,
+        "width": 430,
+        "height": 1394.546875,
+        "top": -300,
+        "right": 430,
+        "bottom": 1094.546875,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "during": {
+      "view": "einstellungen",
+      "scrollY": 300,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "matrix(0.843, 0, 0, 0.843, 0, 0)",
+      "appInlineTransform": "scale(0.843)",
+      "clip": "inset(300px 0px 163px round 45.1px)",
+      "appClass": "bereit zieht",
+      "appRect": {
+        "x": 67.510009765625,
+        "y": -179.73797607421875,
+        "width": 362.489990234375,
+        "height": 1175.60302734375,
+        "top": -179.73797607421875,
+        "right": 430,
+        "bottom": 995.8650512695312,
+        "left": 67.510009765625
+      },
+      "viewTransform": "none",
+      "preview": {
+        "inert": true,
+        "aria": "true",
+        "pointer": "none",
+        "shadow": true,
+        "home": true,
+        "scroll": "translateY(0px)"
+      },
+      "drag": {
+        "dx": 150,
+        "v": 0.3773198702681444,
+        "spring": false
+      },
+      "temp": [
+        "abbild",
+        "zug-schatten"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "after": {
+      "view": "home",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": null,
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 1440.3125,
+        "top": 0,
+        "right": 430,
+        "bottom": 1440.3125,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [
+        "fl-schicht",
+        "tropfen-huelle"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 5459.800000000745,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "shrink",
+          "time": 5461.5,
+          "target": "menuKnopf",
+          "targetRect": {
+            "x": 381.30401611328125,
+            "y": 171.2747344970703,
+            "width": 35.71038818359375,
+            "height": 35.71040344238281,
+            "top": 171.2747344970703,
+            "right": 417.014404296875,
+            "bottom": 206.98513793945312,
+            "left": 381.30401611328125
+          },
+          "oldRect": {
+            "x": 81.01199340820312,
+            "y": -155.68560791015625,
+            "width": 348.9880065917969,
+            "height": 1131.814208984375,
+            "top": -155.68560791015625,
+            "right": 430,
+            "bottom": 976.1286010742188,
+            "left": 81.01199340820312
+          }
+        }
+      ],
+      "warning": false,
+      "title": null
+    },
+    "end": {
+      "view": "home",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": null,
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 1440.3125,
+        "top": 0,
+        "right": 430,
+        "bottom": 1440.3125,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 5459.800000000745,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "shrink",
+          "time": 5461.5,
+          "target": "menuKnopf",
+          "targetRect": {
+            "x": 381.30401611328125,
+            "y": 171.2747344970703,
+            "width": 35.71038818359375,
+            "height": 35.71040344238281,
+            "top": 171.2747344970703,
+            "right": 417.014404296875,
+            "bottom": 206.98513793945312,
+            "left": 381.30401611328125
+          },
+          "oldRect": {
+            "x": 81.01199340820312,
+            "y": -155.68560791015625,
+            "width": 348.9880065917969,
+            "height": 1131.814208984375,
+            "top": -155.68560791015625,
+            "right": 430,
+            "bottom": 976.1286010742188,
+            "left": 81.01199340820312
+          }
+        }
+      ],
+      "warning": false,
+      "title": null
+    },
+    "highlights": [],
+    "iterations": [],
+    "checks": {
+      "expectedView": true,
+      "noRest": true,
+      "uniqueIDs": true,
+      "noErrors": true,
+      "fingerFollowing": true,
+      "uniqueIDsDuring": true,
+      "inertPreview": true
+    },
+    "errors": []
+  },
+  {
+    "case": "appointment-swipe",
+    "style": "ios",
+    "opening": {
+      "point": {
+        "x": 330.8,
+        "y": 466.171875
+      },
+      "homeBefore": 153,
+      "openedView": "termin"
+    },
+    "before": {
+      "view": "termin",
+      "scrollY": 0,
+      "homeScroll": 153,
+      "origin": "[data-termin=\"t3\"]",
+      "point": {
+        "dx": 303.0171813964844,
+        "dy": 25.220977783203125
+      },
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 1251.28125,
+        "top": 0,
+        "right": 430,
+        "bottom": 1251.28125,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": "Termin 3"
+    },
+    "during": {
+      "view": "termin",
+      "scrollY": 0,
+      "homeScroll": 153,
+      "origin": "[data-termin=\"t3\"]",
+      "point": {
+        "dx": 303.0171813964844,
+        "dy": 25.220977783203125
+      },
+      "appTransform": "matrix(0.843, 0, 0, 0.843, 0, 0)",
+      "appInlineTransform": "scale(0.843)",
+      "clip": "inset(0px 0px 319px round 45.1px)",
+      "appClass": "bereit zieht",
+      "appRect": {
+        "x": 67.510009765625,
+        "y": 73.1619873046875,
+        "width": 362.489990234375,
+        "height": 1054.830078125,
+        "top": 73.1619873046875,
+        "right": 430,
+        "bottom": 1127.9920654296875,
+        "left": 67.510009765625
+      },
+      "viewTransform": "none",
+      "preview": {
+        "inert": true,
+        "aria": "true",
+        "pointer": "none",
+        "shadow": true,
+        "home": true,
+        "scroll": "translateY(-153px)"
+      },
+      "drag": {
+        "dx": 150,
+        "v": 0.38110099727704466,
+        "spring": false
+      },
+      "temp": [
+        "abbild",
+        "zug-schatten"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": "Termin 3"
+    },
+    "after": {
+      "view": "home",
+      "scrollY": 153,
+      "homeScroll": 153,
+      "origin": null,
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": -153,
+        "width": 430,
+        "height": 1440.3125,
+        "top": -153,
+        "right": 430,
+        "bottom": 1287.3125,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [
+        "fl-schicht",
+        "tropfen-huelle"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 5662.5,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "[data-termin=\"t3\"]",
+          "point": {
+            "dx": 303.0171813964844,
+            "dy": 25.220977783203125
+          }
+        },
+        {
+          "kind": "shrink",
+          "time": 5665.300000000745,
+          "target": null,
+          "targetRect": {
+            "left": 379.8843765258789,
+            "top": 419.4336242675781,
+            "width": 44,
+            "height": 44,
+            "right": 423.8843765258789,
+            "bottom": 463.4336242675781
+          },
+          "oldRect": {
+            "x": 81.01199340820312,
+            "y": 87.79437255859375,
+            "width": 348.9880065917969,
+            "height": 1015.5398559570312,
+            "top": 87.79437255859375,
+            "right": 430,
+            "bottom": 1103.334228515625,
+            "left": 81.01199340820312
+          }
+        }
+      ],
+      "warning": false,
+      "title": null
+    },
+    "end": {
+      "view": "home",
+      "scrollY": 153,
+      "homeScroll": 153,
+      "origin": null,
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": -153,
+        "width": 430,
+        "height": 1440.3125,
+        "top": -153,
+        "right": 430,
+        "bottom": 1287.3125,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 5662.5,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "[data-termin=\"t3\"]",
+          "point": {
+            "dx": 303.0171813964844,
+            "dy": 25.220977783203125
+          }
+        },
+        {
+          "kind": "shrink",
+          "time": 5665.300000000745,
+          "target": null,
+          "targetRect": {
+            "left": 379.8843765258789,
+            "top": 419.4336242675781,
+            "width": 44,
+            "height": 44,
+            "right": 423.8843765258789,
+            "bottom": 463.4336242675781
+          },
+          "oldRect": {
+            "x": 81.01199340820312,
+            "y": 87.79437255859375,
+            "width": 348.9880065917969,
+            "height": 1015.5398559570312,
+            "top": 87.79437255859375,
+            "right": 430,
+            "bottom": 1103.334228515625,
+            "left": 81.01199340820312
+          }
+        }
+      ],
+      "warning": false,
+      "title": null
+    },
+    "highlights": [
+      {
+        "time": 5926.9000000003725,
+        "id": "t3",
+        "temp": 0
+      },
+      {
+        "time": 5926.9000000003725,
+        "id": "t3",
+        "temp": 0
+      }
+    ],
+    "iterations": [],
+    "checks": {
+      "expectedView": true,
+      "noRest": true,
+      "uniqueIDs": true,
+      "noErrors": true,
+      "fingerFollowing": true,
+      "uniqueIDsDuring": true,
+      "inertPreview": true,
+      "homeScroll": true,
+      "rowHighlighted": true
+    },
+    "errors": []
+  },
+  {
+    "case": "appointment-arrow",
+    "style": "ios",
+    "opening": {
+      "point": {
+        "x": 330.8,
+        "y": 466.171875
+      },
+      "homeBefore": 153,
+      "openedView": "termin"
+    },
+    "before": {
+      "view": "termin",
+      "scrollY": 0,
+      "homeScroll": 153,
+      "origin": "[data-termin=\"t3\"]",
+      "point": {
+        "dx": 303.0172424316406,
+        "dy": 25.220977783203125
+      },
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 1251.28125,
+        "top": 0,
+        "right": 430,
+        "bottom": 1251.28125,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": "Termin 3"
+    },
+    "during": null,
+    "after": {
+      "view": "home",
+      "scrollY": 153,
+      "homeScroll": 153,
+      "origin": null,
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": -153,
+        "width": 430,
+        "height": 1440.3125,
+        "top": -153,
+        "right": 430,
+        "bottom": 1287.3125,
+        "left": 0
+      },
+      "viewTransform": "matrix(0.987235, 0, 0, 0.987235, 0, 0)",
+      "preview": null,
+      "drag": null,
+      "temp": [
+        "fl-schicht",
+        "tropfen-huelle"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 4844.5,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "[data-termin=\"t3\"]",
+          "point": {
+            "dx": 303.0172424316406,
+            "dy": 25.220977783203125
+          }
+        },
+        {
+          "kind": "shrink",
+          "time": 4847.199999999255,
+          "target": null,
+          "targetRect": {
+            "left": 303.0172424316406,
+            "top": 443.3928527832031,
+            "width": 44,
+            "height": 44,
+            "right": 347.0172424316406,
+            "bottom": 487.3928527832031
+          },
+          "oldRect": {
+            "x": 16,
+            "y": 84,
+            "width": 398,
+            "height": 1079.28125,
+            "top": 84,
+            "right": 414,
+            "bottom": 1163.28125,
+            "left": 16
+          }
+        }
+      ],
+      "warning": false,
+      "title": null
+    },
+    "end": {
+      "view": "home",
+      "scrollY": 153,
+      "homeScroll": 153,
+      "origin": null,
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": -153,
+        "width": 430,
+        "height": 1440.3125,
+        "top": -153,
+        "right": 430,
+        "bottom": 1287.3125,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 4844.5,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "[data-termin=\"t3\"]",
+          "point": {
+            "dx": 303.0172424316406,
+            "dy": 25.220977783203125
+          }
+        },
+        {
+          "kind": "shrink",
+          "time": 4847.199999999255,
+          "target": null,
+          "targetRect": {
+            "left": 303.0172424316406,
+            "top": 443.3928527832031,
+            "width": 44,
+            "height": 44,
+            "right": 347.0172424316406,
+            "bottom": 487.3928527832031
+          },
+          "oldRect": {
+            "x": 16,
+            "y": 84,
+            "width": 398,
+            "height": 1079.28125,
+            "top": 84,
+            "right": 414,
+            "bottom": 1163.28125,
+            "left": 16
+          }
+        }
+      ],
+      "warning": false,
+      "title": null
+    },
+    "highlights": [
+      {
+        "time": 5101.199999999255,
+        "id": "t3",
+        "temp": 0
+      },
+      {
+        "time": 5101.199999999255,
+        "id": "t3",
+        "temp": 0
+      }
+    ],
+    "iterations": [],
+    "checks": {
+      "expectedView": true,
+      "noRest": true,
+      "uniqueIDs": true,
+      "noErrors": true,
+      "homeScroll": true,
+      "rowHighlighted": true
+    },
+    "errors": []
+  },
+  {
+    "case": "appointment-save",
+    "style": "ios",
+    "opening": {
+      "point": {
+        "x": 330.8,
+        "y": 466.171875
+      },
+      "homeBefore": 153,
+      "openedView": "termin"
+    },
+    "before": {
+      "view": "termin",
+      "scrollY": 319,
+      "homeScroll": 153,
+      "origin": "[data-termin=\"t3\"]",
+      "point": {
+        "dx": 303.0171813964844,
+        "dy": 25.220977783203125
+      },
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": -319,
+        "width": 430,
+        "height": 1251.28125,
+        "top": -319,
+        "right": 430,
+        "bottom": 932.28125,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": "Termin 3"
+    },
+    "during": null,
+    "after": {
+      "view": "home",
+      "scrollY": 153,
+      "homeScroll": 153,
+      "origin": null,
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": -153,
+        "width": 430,
+        "height": 2081.03125,
+        "top": -153,
+        "right": 430,
+        "bottom": 1928.03125,
+        "left": 0
+      },
+      "viewTransform": "matrix(0.988319, 0, 0, 0.988319, 0, 0)",
+      "preview": null,
+      "drag": null,
+      "temp": [
+        "fl-schicht",
+        "tropfen-huelle",
+        "fl-schicht",
+        "tropfen-huelle glas"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [
+        {
+          "kind": "shrink",
+          "time": 5076.9000000003725,
+          "target": null,
+          "targetRect": {
+            "left": 193,
+            "top": 444,
+            "width": 44,
+            "height": 44
+          },
+          "oldRect": {
+            "x": 16,
+            "y": -235,
+            "width": 398,
+            "height": 1079.28125,
+            "top": -235,
+            "right": 414,
+            "bottom": 844.28125,
+            "left": 16
+          }
+        },
+        {
+          "kind": "transition",
+          "time": 5097.200000001118,
+          "returnToHome": true,
+          "ghost": false,
+          "alreadyMessage": true,
+          "origin": "[data-termin=\"t3\"]",
+          "point": {
+            "dx": 303.0171813964844,
+            "dy": 25.220977783203125
+          }
+        }
+      ],
+      "warning": true,
+      "title": null
+    },
+    "end": {
+      "view": "home",
+      "scrollY": 153,
+      "homeScroll": 153,
+      "origin": null,
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": -153,
+        "width": 430,
+        "height": 2081.03125,
+        "top": -153,
+        "right": 430,
+        "bottom": 1928.03125,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [
+        {
+          "kind": "shrink",
+          "time": 5076.9000000003725,
+          "target": null,
+          "targetRect": {
+            "left": 193,
+            "top": 444,
+            "width": 44,
+            "height": 44
+          },
+          "oldRect": {
+            "x": 16,
+            "y": -235,
+            "width": 398,
+            "height": 1079.28125,
+            "top": -235,
+            "right": 414,
+            "bottom": 844.28125,
+            "left": 16
+          }
+        },
+        {
+          "kind": "transition",
+          "time": 5097.200000001118,
+          "returnToHome": true,
+          "ghost": false,
+          "alreadyMessage": true,
+          "origin": "[data-termin=\"t3\"]",
+          "point": {
+            "dx": 303.0171813964844,
+            "dy": 25.220977783203125
+          }
+        },
+        {
+          "kind": "shrink",
+          "time": 6462.300000000745,
+          "target": null,
+          "targetRect": {
+            "x": 30,
+            "y": 426.28125,
+            "width": 370,
+            "height": 54.234375,
+            "top": 426.28125,
+            "right": 400,
+            "bottom": 480.515625,
+            "left": 30
+          },
+          "oldRect": {
+            "x": 125,
+            "y": 402.046875,
+            "width": 180,
+            "height": 127.890625,
+            "top": 402.046875,
+            "right": 305,
+            "bottom": 529.9375,
+            "left": 125
+          }
+        }
+      ],
+      "warning": false,
+      "title": null
+    },
+    "highlights": [
+      {
+        "time": 6556.60000000149,
+        "id": "t3",
+        "temp": 0
+      },
+      {
+        "time": 6556.60000000149,
+        "id": "t3",
+        "temp": 0
+      }
+    ],
+    "iterations": [],
+    "checks": {
+      "expectedView": true,
+      "noRest": true,
+      "uniqueIDs": true,
+      "noErrors": true,
+      "rowHighlighted": true
+    },
+    "errors": []
+  },
+  {
+    "case": "appointment-title",
+    "style": "ios",
+    "opening": {
+      "point": {
+        "x": 330.8,
+        "y": 466.171875
+      },
+      "homeBefore": 153,
+      "openedView": "termin"
+    },
+    "before": {
+      "view": "termin",
+      "scrollY": 0,
+      "homeScroll": 153,
+      "origin": "[data-termin=\"t3\"]",
+      "point": {
+        "dx": 303.0172576904297,
+        "dy": 25.220977783203125
+      },
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 1251.28125,
+        "top": 0,
+        "right": 430,
+        "bottom": 1251.28125,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": "Termin 3"
+    },
+    "during": null,
+    "after": {
+      "view": "home",
+      "scrollY": 153,
+      "homeScroll": 153,
+      "origin": null,
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": -153,
+        "width": 430,
+        "height": 1440.3125,
+        "top": -153,
+        "right": 430,
+        "bottom": 1287.3125,
+        "left": 0
+      },
+      "viewTransform": "matrix(0.987236, 0, 0, 0.987236, 0, 0)",
+      "preview": null,
+      "drag": null,
+      "temp": [
+        "fl-schicht",
+        "tropfen-huelle"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 4839.5999999996275,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "[data-termin=\"t3\"]",
+          "point": {
+            "dx": 303.0172576904297,
+            "dy": 25.220977783203125
+          }
+        },
+        {
+          "kind": "shrink",
+          "time": 4842.699999999255,
+          "target": null,
+          "targetRect": {
+            "left": 303.0172576904297,
+            "top": 443.3928527832031,
+            "width": 44,
+            "height": 44,
+            "right": 347.0172576904297,
+            "bottom": 487.3928527832031
+          },
+          "oldRect": {
+            "x": 16,
+            "y": 84,
+            "width": 398,
+            "height": 1079.28125,
+            "top": 84,
+            "right": 414,
+            "bottom": 1163.28125,
+            "left": 16
+          }
+        }
+      ],
+      "warning": false,
+      "title": null
+    },
+    "end": {
+      "view": "home",
+      "scrollY": 153,
+      "homeScroll": 153,
+      "origin": null,
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": -153,
+        "width": 430,
+        "height": 1440.3125,
+        "top": -153,
+        "right": 430,
+        "bottom": 1287.3125,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 4839.5999999996275,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "[data-termin=\"t3\"]",
+          "point": {
+            "dx": 303.0172576904297,
+            "dy": 25.220977783203125
+          }
+        },
+        {
+          "kind": "shrink",
+          "time": 4842.699999999255,
+          "target": null,
+          "targetRect": {
+            "left": 303.0172576904297,
+            "top": 443.3928527832031,
+            "width": 44,
+            "height": 44,
+            "right": 347.0172576904297,
+            "bottom": 487.3928527832031
+          },
+          "oldRect": {
+            "x": 16,
+            "y": 84,
+            "width": 398,
+            "height": 1079.28125,
+            "top": 84,
+            "right": 414,
+            "bottom": 1163.28125,
+            "left": 16
+          }
+        }
+      ],
+      "warning": false,
+      "title": null
+    },
+    "highlights": [
+      {
+        "time": 5106.699999999255,
+        "id": "t3",
+        "temp": 0
+      },
+      {
+        "time": 5106.699999999255,
+        "id": "t3",
+        "temp": 0
+      }
+    ],
+    "iterations": [],
+    "checks": {
+      "expectedView": true,
+      "noRest": true,
+      "uniqueIDs": true,
+      "noErrors": true,
+      "homeScroll": true,
+      "rowHighlighted": true
+    },
+    "errors": []
+  },
+  {
+    "case": "journal-short",
+    "style": "ios",
+    "opening": {},
+    "before": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 932,
+        "top": 0,
+        "right": 430,
+        "bottom": 932,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "during": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "matrix(0.9498, 0, 0, 0.9498, 0, 0)",
+      "appInlineTransform": "scale(0.9498)",
+      "clip": "inset(0px round 16px)",
+      "appClass": "bereit zieht",
+      "appRect": {
+        "x": 21.58599853515625,
+        "y": 23.3931884765625,
+        "width": 408.41400146484375,
+        "height": 885.213623046875,
+        "top": 23.3931884765625,
+        "right": 430,
+        "bottom": 908.6068115234375,
+        "left": 21.58599853515625
+      },
+      "viewTransform": "none",
+      "preview": {
+        "inert": true,
+        "aria": "true",
+        "pointer": "none",
+        "shadow": true,
+        "home": true,
+        "scroll": "translateY(0px)"
+      },
+      "drag": {
+        "dx": 48,
+        "v": 0.3124800308463467,
+        "spring": false
+      },
+      "temp": [
+        "abbild",
+        "zug-schatten"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "after": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "matrix(0.983028, 0, 0, 0.983028, 0, 0)",
+      "appInlineTransform": "scale(0.9498)",
+      "clip": "inset(0px round 16px)",
+      "appClass": "bereit zieht",
+      "appRect": {
+        "x": 7.298095703125,
+        "y": 7.909088134765625,
+        "width": 422.701904296875,
+        "height": 916.181884765625,
+        "top": 7.909088134765625,
+        "right": 430,
+        "bottom": 924.0909729003906,
+        "left": 7.298095703125
+      },
+      "viewTransform": "none",
+      "preview": {
+        "inert": true,
+        "aria": "true",
+        "pointer": "none",
+        "shadow": true,
+        "home": true,
+        "scroll": "translateY(0px)"
+      },
+      "drag": {
+        "dx": 48,
+        "v": 0.12499201233853868,
+        "spring": true
+      },
+      "temp": [
+        "abbild",
+        "zug-schatten"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "end": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 932,
+        "top": 0,
+        "right": 430,
+        "bottom": 932,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "highlights": [],
+    "iterations": [],
+    "checks": {
+      "expectedView": true,
+      "noRest": true,
+      "uniqueIDs": true,
+      "noErrors": true,
+      "fingerFollowing": true,
+      "uniqueIDsDuring": true,
+      "inertPreview": true
+    },
+    "errors": []
+  },
+  {
+    "case": "appointment-short",
+    "style": "ios",
+    "opening": {
+      "point": {
+        "x": 330.8,
+        "y": 466.171875
+      },
+      "homeBefore": 153,
+      "openedView": "termin"
+    },
+    "before": {
+      "view": "termin",
+      "scrollY": 0,
+      "homeScroll": 153,
+      "origin": "[data-termin=\"t3\"]",
+      "point": {
+        "dx": 303.0172119140625,
+        "dy": 25.220977783203125
+      },
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 1251.28125,
+        "top": 0,
+        "right": 430,
+        "bottom": 1251.28125,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": "Unfertiger synthetischer Entwurf"
+    },
+    "during": {
+      "view": "termin",
+      "scrollY": 0,
+      "homeScroll": 153,
+      "origin": "[data-termin=\"t3\"]",
+      "point": {
+        "dx": 303.0172119140625,
+        "dy": 25.220977783203125
+      },
+      "appTransform": "matrix(0.9498, 0, 0, 0.9498, 0, 0)",
+      "appInlineTransform": "scale(0.9498)",
+      "clip": "inset(0px 0px 319px round 16px)",
+      "appClass": "bereit zieht",
+      "appRect": {
+        "x": 21.58599853515625,
+        "y": 23.3931884765625,
+        "width": 408.41400146484375,
+        "height": 1188.4669189453125,
+        "top": 23.3931884765625,
+        "right": 430,
+        "bottom": 1211.860107421875,
+        "left": 21.58599853515625
+      },
+      "viewTransform": "none",
+      "preview": {
+        "inert": true,
+        "aria": "true",
+        "pointer": "none",
+        "shadow": true,
+        "home": true,
+        "scroll": "translateY(-153px)"
+      },
+      "drag": {
+        "dx": 48,
+        "v": 0.06646874045494736,
+        "spring": false
+      },
+      "temp": [
+        "abbild",
+        "zug-schatten"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": "Unfertiger synthetischer Entwurf"
+    },
+    "after": {
+      "view": "termin",
+      "scrollY": 0,
+      "homeScroll": 153,
+      "origin": "[data-termin=\"t3\"]",
+      "point": {
+        "dx": 303.0172119140625,
+        "dy": 25.220977783203125
+      },
+      "appTransform": "matrix(0.977997, 0, 0, 0.977997, 0, 0)",
+      "appInlineTransform": "scale(0.9498)",
+      "clip": "inset(0px 0px 319px round 16px)",
+      "appClass": "bereit zieht",
+      "appRect": {
+        "x": 9.461334228515625,
+        "y": 10.253448486328125,
+        "width": 420.5386657714844,
+        "height": 1223.7491455078125,
+        "top": 10.253448486328125,
+        "right": 430,
+        "bottom": 1234.0025939941406,
+        "left": 9.461334228515625
+      },
+      "viewTransform": "none",
+      "preview": {
+        "inert": true,
+        "aria": "true",
+        "pointer": "none",
+        "shadow": true,
+        "home": true,
+        "scroll": "translateY(-153px)"
+      },
+      "drag": {
+        "dx": 48,
+        "v": 0.026587496181978944,
+        "spring": true
+      },
+      "temp": [
+        "abbild",
+        "zug-schatten"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": "Unfertiger synthetischer Entwurf"
+    },
+    "end": {
+      "view": "termin",
+      "scrollY": 0,
+      "homeScroll": 153,
+      "origin": "[data-termin=\"t3\"]",
+      "point": {
+        "dx": 303.0172119140625,
+        "dy": 25.220977783203125
+      },
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 1251.28125,
+        "top": 0,
+        "right": 430,
+        "bottom": 1251.28125,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": "Unfertiger synthetischer Entwurf"
+    },
+    "highlights": [],
+    "iterations": [],
+    "checks": {
+      "expectedView": true,
+      "noRest": true,
+      "uniqueIDs": true,
+      "noErrors": true,
+      "fingerFollowing": true,
+      "uniqueIDsDuring": true,
+      "inertPreview": true,
+      "draftKept": true
+    },
+    "errors": []
+  },
+  {
+    "case": "settings-vertical",
+    "style": "ios",
+    "opening": {},
+    "before": {
+      "view": "einstellungen",
+      "scrollY": 300,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": -300,
+        "width": 430,
+        "height": 1394.546875,
+        "top": -300,
+        "right": 430,
+        "bottom": 1094.546875,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "during": {
+      "view": "einstellungen",
+      "scrollY": 463,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": -463,
+        "width": 430,
+        "height": 1394.546875,
+        "top": -463,
+        "right": 430,
+        "bottom": 931.546875,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "after": {
+      "view": "einstellungen",
+      "scrollY": 463,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": -463,
+        "width": 430,
+        "height": 1394.546875,
+        "top": -463,
+        "right": 430,
+        "bottom": 931.546875,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "end": {
+      "view": "einstellungen",
+      "scrollY": 463,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": -463,
+        "width": 430,
+        "height": 1394.546875,
+        "top": -463,
+        "right": 430,
+        "bottom": 931.546875,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "highlights": [],
+    "iterations": [],
+    "checks": {
+      "expectedView": true,
+      "noRest": true,
+      "uniqueIDs": true,
+      "noErrors": true,
+      "fingerFollowing": true,
+      "uniqueIDsDuring": true,
+      "nativeScroll": true
+    },
+    "errors": []
+  },
+  {
+    "case": "journal-cancel",
+    "style": "ios",
+    "opening": {},
+    "before": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 932,
+        "top": 0,
+        "right": 430,
+        "bottom": 932,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "during": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "matrix(0.843, 0, 0, 0.843, 0, 0)",
+      "appInlineTransform": "scale(0.843)",
+      "clip": "inset(0px round 45.1px)",
+      "appClass": "bereit zieht",
+      "appRect": {
+        "x": 67.510009765625,
+        "y": 73.1619873046875,
+        "width": 362.489990234375,
+        "height": 785.676025390625,
+        "top": 73.1619873046875,
+        "right": 430,
+        "bottom": 858.8380126953125,
+        "left": 67.510009765625
+      },
+      "viewTransform": "none",
+      "preview": {
+        "inert": true,
+        "aria": "true",
+        "pointer": "none",
+        "shadow": true,
+        "home": true,
+        "scroll": "translateY(0px)"
+      },
+      "drag": {
+        "dx": 150,
+        "v": 0.47152276295133444,
+        "spring": false
+      },
+      "temp": [
+        "abbild",
+        "zug-schatten"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "after": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "matrix(0.946893, 0, 0, 0.946893, 0, 0)",
+      "appInlineTransform": "scale(0.843)",
+      "clip": "inset(0px round 45.1px)",
+      "appClass": "bereit zieht",
+      "appRect": {
+        "x": 22.836090087890625,
+        "y": 24.747955322265625,
+        "width": 407.1639099121094,
+        "height": 882.504150390625,
+        "top": 24.747955322265625,
+        "right": 430,
+        "bottom": 907.2521057128906,
+        "left": 22.836090087890625
+      },
+      "viewTransform": "none",
+      "preview": {
+        "inert": true,
+        "aria": "true",
+        "pointer": "none",
+        "shadow": true,
+        "home": true,
+        "scroll": "translateY(0px)"
+      },
+      "drag": {
+        "dx": 150,
+        "v": 0.47152276295133444,
+        "spring": true
+      },
+      "temp": [
+        "abbild",
+        "zug-schatten"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "end": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 932,
+        "top": 0,
+        "right": 430,
+        "bottom": 932,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "highlights": [],
+    "iterations": [],
+    "checks": {
+      "expectedView": true,
+      "noRest": true,
+      "uniqueIDs": true,
+      "noErrors": true,
+      "fingerFollowing": true,
+      "uniqueIDsDuring": true,
+      "inertPreview": true
+    },
+    "errors": []
+  },
+  {
+    "case": "journal-two-fingers",
+    "style": "ios",
+    "opening": {},
+    "before": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 932,
+        "top": 0,
+        "right": 430,
+        "bottom": 932,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "during": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "matrix(0.843, 0, 0, 0.843, 0, 0)",
+      "appInlineTransform": "scale(0.843)",
+      "clip": "inset(0px round 45.1px)",
+      "appClass": "bereit zieht",
+      "appRect": {
+        "x": 67.510009765625,
+        "y": 73.1619873046875,
+        "width": 362.489990234375,
+        "height": 785.676025390625,
+        "top": 73.1619873046875,
+        "right": 430,
+        "bottom": 858.8380126953125,
+        "left": 67.510009765625
+      },
+      "viewTransform": "none",
+      "preview": {
+        "inert": true,
+        "aria": "true",
+        "pointer": "none",
+        "shadow": true,
+        "home": true,
+        "scroll": "translateY(0px)"
+      },
+      "drag": {
+        "dx": 150,
+        "v": 0.37748913268366013,
+        "spring": false
+      },
+      "temp": [
+        "abbild",
+        "zug-schatten"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "after": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "matrix(0.96032, 0, 0, 0.96032, 0, 0)",
+      "appInlineTransform": "scale(0.843)",
+      "clip": "inset(0px round 45.1px)",
+      "appClass": "bereit zieht",
+      "appRect": {
+        "x": 17.062286376953125,
+        "y": 18.49078369140625,
+        "width": 412.9377136230469,
+        "height": 895.0184326171875,
+        "top": 18.49078369140625,
+        "right": 430,
+        "bottom": 913.5092163085938,
+        "left": 17.062286376953125
+      },
+      "viewTransform": "none",
+      "preview": {
+        "inert": true,
+        "aria": "true",
+        "pointer": "none",
+        "shadow": true,
+        "home": true,
+        "scroll": "translateY(0px)"
+      },
+      "drag": {
+        "dx": 150,
+        "v": 0.37748913268366013,
+        "spring": true
+      },
+      "temp": [
+        "abbild",
+        "zug-schatten"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "end": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 932,
+        "top": 0,
+        "right": 430,
+        "bottom": 932,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "highlights": [],
+    "iterations": [],
+    "checks": {
+      "expectedView": true,
+      "noRest": true,
+      "uniqueIDs": true,
+      "noErrors": true,
+      "fingerFollowing": true,
+      "uniqueIDsDuring": true,
+      "inertPreview": true
+    },
+    "errors": []
+  },
+  {
+    "case": "journal-rotate",
+    "style": "ios",
+    "opening": {},
+    "before": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 932,
+        "top": 0,
+        "right": 430,
+        "bottom": 932,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "during": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "matrix(0.843, 0, 0, 0.843, 0, 0)",
+      "appInlineTransform": "scale(0.843)",
+      "clip": "inset(0px round 45.1px)",
+      "appClass": "bereit zieht",
+      "appRect": {
+        "x": 67.510009765625,
+        "y": 73.1619873046875,
+        "width": 362.489990234375,
+        "height": 785.676025390625,
+        "top": 73.1619873046875,
+        "right": 430,
+        "bottom": 858.8380126953125,
+        "left": 67.510009765625
+      },
+      "viewTransform": "none",
+      "preview": {
+        "inert": true,
+        "aria": "true",
+        "pointer": "none",
+        "shadow": true,
+        "home": true,
+        "scroll": "translateY(0px)"
+      },
+      "drag": {
+        "dx": 150,
+        "v": 0.37748913268366013,
+        "spring": false
+      },
+      "temp": [
+        "abbild",
+        "zug-schatten"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "after": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "matrix(1, 0, 0, 1, 0, 0)",
+      "appInlineTransform": "scale(0.843)",
+      "clip": "inset(0px round 45.1px)",
+      "appClass": "bereit zieht",
+      "appRect": {
+        "x": 186,
+        "y": 0,
+        "width": 560,
+        "height": 510.375,
+        "top": 0,
+        "right": 746,
+        "bottom": 510.375,
+        "left": 186
+      },
+      "viewTransform": "none",
+      "preview": {
+        "inert": true,
+        "aria": "true",
+        "pointer": "none",
+        "shadow": true,
+        "home": true,
+        "scroll": "translateY(0px)"
+      },
+      "drag": {
+        "dx": 150,
+        "v": 0.37748913268366013,
+        "spring": true
+      },
+      "temp": [
+        "abbild",
+        "zug-schatten"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "end": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 186,
+        "y": 0,
+        "width": 560,
+        "height": 510.375,
+        "top": 0,
+        "right": 746,
+        "bottom": 510.375,
+        "left": 186
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "highlights": [],
+    "iterations": [],
+    "checks": {
+      "expectedView": true,
+      "noRest": true,
+      "uniqueIDs": true,
+      "noErrors": true,
+      "fingerFollowing": true,
+      "uniqueIDsDuring": true,
+      "inertPreview": true
+    },
+    "errors": []
+  },
+  {
+    "case": "journal-sheet",
+    "style": "ios",
+    "opening": {},
+    "before": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 932,
+        "top": 0,
+        "right": 430,
+        "bottom": 932,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "during": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "matrix(0.843, 0, 0, 0.843, 0, 0)",
+      "appInlineTransform": "scale(0.843)",
+      "clip": "inset(0px round 45.1px)",
+      "appClass": "bereit zieht",
+      "appRect": {
+        "x": 67.510009765625,
+        "y": 73.1619873046875,
+        "width": 362.489990234375,
+        "height": 785.676025390625,
+        "top": 73.1619873046875,
+        "right": 430,
+        "bottom": 858.8380126953125,
+        "left": 67.510009765625
+      },
+      "viewTransform": "none",
+      "preview": {
+        "inert": true,
+        "aria": "true",
+        "pointer": "none",
+        "shadow": true,
+        "home": true,
+        "scroll": "translateY(0px)"
+      },
+      "drag": {
+        "dx": 150,
+        "v": 0.3746194710735785,
+        "spring": false
+      },
+      "temp": [
+        "abbild",
+        "zug-schatten"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "after": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "matrix(0.936271, 0, 0, 0.936271, 0, 0)",
+      "appInlineTransform": "scale(0.8116)",
+      "clip": "inset(0px round 46.8px)",
+      "appClass": "bereit zieht",
+      "appRect": {
+        "x": 27.403350830078125,
+        "y": 29.69757080078125,
+        "width": 402.5966491699219,
+        "height": 872.6048583984375,
+        "top": 29.69757080078125,
+        "right": 430,
+        "bottom": 902.3024291992188,
+        "left": 27.403350830078125
+      },
+      "viewTransform": "none",
+      "preview": {
+        "inert": true,
+        "aria": "true",
+        "pointer": "none",
+        "shadow": true,
+        "home": true,
+        "scroll": "translateY(0px)"
+      },
+      "drag": {
+        "dx": 180,
+        "v": 0.2498477884294314,
+        "spring": true
+      },
+      "temp": [
+        "abbild",
+        "zug-schatten"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "end": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 932,
+        "top": 0,
+        "right": 430,
+        "bottom": 932,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "highlights": [],
+    "iterations": [],
+    "checks": {
+      "expectedView": true,
+      "noRest": true,
+      "uniqueIDs": true,
+      "noErrors": true,
+      "fingerFollowing": true,
+      "uniqueIDsDuring": true,
+      "inertPreview": true
+    },
+    "errors": []
+  },
+  {
+    "case": "journal-full-width",
+    "style": "ios",
+    "opening": {},
+    "before": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 932,
+        "top": 0,
+        "right": 430,
+        "bottom": 932,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "during": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "matrix(0.6337, 0, 0, 0.6337, 0, 0)",
+      "appInlineTransform": "scale(0.6337)",
+      "clip": "inset(0px round 60px)",
+      "appClass": "bereit zieht",
+      "appRect": {
+        "x": 157.50900268554688,
+        "y": 170.69580078125,
+        "width": 272.4909973144531,
+        "height": 590.6083984375,
+        "top": 170.69580078125,
+        "right": 430,
+        "bottom": 761.30419921875,
+        "left": 157.50900268554688
+      },
+      "viewTransform": "none",
+      "preview": {
+        "inert": true,
+        "aria": "true",
+        "pointer": "none",
+        "shadow": true,
+        "home": true,
+        "scroll": "translateY(0px)"
+      },
+      "drag": {
+        "dx": 350,
+        "v": 0.7717433247369608,
+        "spring": false
+      },
+      "temp": [
+        "abbild",
+        "zug-schatten"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "after": {
+      "view": "home",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": null,
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 1440.3125,
+        "top": 0,
+        "right": 430,
+        "bottom": 1440.3125,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [
+        "fl-schicht",
+        "tropfen-huelle"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 6046.4000000003725,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "shrink",
+          "time": 6053.300000000745,
+          "target": "menuKnopf",
+          "targetRect": {
+            "x": 396.3699951171875,
+            "y": 223.42608642578125,
+            "width": 24.6619873046875,
+            "height": 24.662002563476562,
+            "top": 223.42608642578125,
+            "right": 421.031982421875,
+            "bottom": 248.0880889892578,
+            "left": 396.3699951171875
+          },
+          "oldRect": {
+            "x": 188.9849853515625,
+            "y": 204.80697631835938,
+            "width": 241.0150146484375,
+            "height": 522.385986328125,
+            "top": 204.80697631835938,
+            "right": 430,
+            "bottom": 727.1929626464844,
+            "left": 188.9849853515625
+          }
+        }
+      ],
+      "warning": false,
+      "title": null
+    },
+    "end": {
+      "view": "home",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": null,
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 1440.3125,
+        "top": 0,
+        "right": 430,
+        "bottom": 1440.3125,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 6046.4000000003725,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "shrink",
+          "time": 6053.300000000745,
+          "target": "menuKnopf",
+          "targetRect": {
+            "x": 396.3699951171875,
+            "y": 223.42608642578125,
+            "width": 24.6619873046875,
+            "height": 24.662002563476562,
+            "top": 223.42608642578125,
+            "right": 421.031982421875,
+            "bottom": 248.0880889892578,
+            "left": 396.3699951171875
+          },
+          "oldRect": {
+            "x": 188.9849853515625,
+            "y": 204.80697631835938,
+            "width": 241.0150146484375,
+            "height": 522.385986328125,
+            "top": 204.80697631835938,
+            "right": 430,
+            "bottom": 727.1929626464844,
+            "left": 188.9849853515625
+          }
+        }
+      ],
+      "warning": false,
+      "title": null
+    },
+    "highlights": [],
+    "iterations": [],
+    "checks": {
+      "expectedView": true,
+      "noRest": true,
+      "uniqueIDs": true,
+      "noErrors": true,
+      "fingerFollowing": true,
+      "uniqueIDsDuring": true,
+      "inertPreview": true
+    },
+    "errors": []
+  },
+  {
+    "case": "journal-swipe",
+    "style": "chilli",
+    "opening": {},
+    "before": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 932,
+        "top": 0,
+        "right": 430,
+        "bottom": 932,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "during": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 932,
+        "top": 0,
+        "right": 430,
+        "bottom": 932,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "after": {
+      "view": "home",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": null,
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 1440.3125,
+        "top": 0,
+        "right": 430,
+        "bottom": 1440.3125,
+        "left": 0
+      },
+      "viewTransform": "matrix(0.987235, 0, 0, 0.987235, 0, 0)",
+      "preview": null,
+      "drag": null,
+      "temp": [
+        "tropfen-huelle"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 5451.5,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "shrink",
+          "time": 5453.699999999255,
+          "target": "menuKnopf",
+          "targetRect": {
+            "x": 370,
+            "y": 33.21875,
+            "width": 44,
+            "height": 44,
+            "top": 33.21875,
+            "right": 414,
+            "bottom": 77.21875,
+            "left": 370
+          },
+          "oldRect": {
+            "x": 16,
+            "y": 84,
+            "width": 398,
+            "height": 342.71875,
+            "top": 84,
+            "right": 414,
+            "bottom": 426.71875,
+            "left": 16
+          }
+        }
+      ],
+      "warning": false,
+      "title": null
+    },
+    "end": {
+      "view": "home",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": null,
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 1440.3125,
+        "top": 0,
+        "right": 430,
+        "bottom": 1440.3125,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 5451.5,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "shrink",
+          "time": 5453.699999999255,
+          "target": "menuKnopf",
+          "targetRect": {
+            "x": 370,
+            "y": 33.21875,
+            "width": 44,
+            "height": 44,
+            "top": 33.21875,
+            "right": 414,
+            "bottom": 77.21875,
+            "left": 370
+          },
+          "oldRect": {
+            "x": 16,
+            "y": 84,
+            "width": 398,
+            "height": 342.71875,
+            "top": 84,
+            "right": 414,
+            "bottom": 426.71875,
+            "left": 16
+          }
+        }
+      ],
+      "warning": false,
+      "title": null
+    },
+    "highlights": [],
+    "iterations": [],
+    "checks": {
+      "expectedView": true,
+      "noRest": true,
+      "uniqueIDs": true,
+      "noErrors": true,
+      "fingerFollowing": true,
+      "uniqueIDsDuring": true
+    },
+    "errors": []
+  },
+  {
+    "case": "journal-two-before",
+    "style": "ios",
+    "opening": {},
+    "before": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 932,
+        "top": 0,
+        "right": 430,
+        "bottom": 932,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "during": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "bereit",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 932,
+        "top": 0,
+        "right": 430,
+        "bottom": 932,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": {
+        "inert": true,
+        "aria": "true",
+        "pointer": "none",
+        "shadow": true,
+        "home": true,
+        "scroll": "translateY(0px)"
+      },
+      "drag": null,
+      "temp": [
+        "abbild"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "after": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "bereit",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 932,
+        "top": 0,
+        "right": 430,
+        "bottom": 932,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": {
+        "inert": true,
+        "aria": "true",
+        "pointer": "none",
+        "shadow": true,
+        "home": true,
+        "scroll": "translateY(0px)"
+      },
+      "drag": null,
+      "temp": [
+        "abbild"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "end": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "bereit",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 932,
+        "top": 0,
+        "right": 430,
+        "bottom": 932,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": {
+        "inert": true,
+        "aria": "true",
+        "pointer": "none",
+        "shadow": true,
+        "home": true,
+        "scroll": "translateY(0px)"
+      },
+      "drag": null,
+      "temp": [
+        "abbild"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "highlights": [],
+    "iterations": [],
+    "checks": {
+      "expectedView": true,
+      "noRest": false,
+      "uniqueIDs": true,
+      "noErrors": true,
+      "fingerFollowing": true,
+      "uniqueIDsDuring": true
+    },
+    "errors": []
+  },
+  {
+    "case": "journal-swipe",
+    "style": "aus",
+    "opening": {},
+    "before": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 932,
+        "top": 0,
+        "right": 430,
+        "bottom": 932,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "during": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 932,
+        "top": 0,
+        "right": 430,
+        "bottom": 932,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "after": {
+      "view": "home",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 1440.3125,
+        "top": 0,
+        "right": 430,
+        "bottom": 1440.3125,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 5580.699999999255,
+          "returnToHome": null,
+          "ghost": false,
+          "alreadyMessage": null,
+          "origin": "#menuKnopf",
+          "point": null
+        }
+      ],
+      "warning": false,
+      "title": null
+    },
+    "end": {
+      "view": "home",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 1440.3125,
+        "top": 0,
+        "right": 430,
+        "bottom": 1440.3125,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 5580.699999999255,
+          "returnToHome": null,
+          "ghost": false,
+          "alreadyMessage": null,
+          "origin": "#menuKnopf",
+          "point": null
+        }
+      ],
+      "warning": false,
+      "title": null
+    },
+    "highlights": [],
+    "iterations": [],
+    "checks": {
+      "expectedView": true,
+      "noRest": true,
+      "uniqueIDs": true,
+      "noErrors": true,
+      "fingerFollowing": true,
+      "uniqueIDsDuring": true
+    },
+    "errors": []
+  },
+  {
+    "case": "appointment-arrow",
+    "style": "chilli",
+    "opening": {
+      "point": {
+        "x": 330.8,
+        "y": 466.171875
+      },
+      "homeBefore": 153,
+      "openedView": "termin"
+    },
+    "before": {
+      "view": "termin",
+      "scrollY": 0,
+      "homeScroll": 153,
+      "origin": "[data-termin=\"t3\"]",
+      "point": {
+        "dx": 303.0172424316406,
+        "dy": 25.220977783203125
+      },
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 1251.28125,
+        "top": 0,
+        "right": 430,
+        "bottom": 1251.28125,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": "Termin 3"
+    },
+    "during": null,
+    "after": {
+      "view": "home",
+      "scrollY": 153,
+      "homeScroll": 153,
+      "origin": null,
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": -153,
+        "width": 430,
+        "height": 1440.3125,
+        "top": -153,
+        "right": 430,
+        "bottom": 1287.3125,
+        "left": 0
+      },
+      "viewTransform": "matrix(0.988319, 0, 0, 0.988319, 0, 0)",
+      "preview": null,
+      "drag": null,
+      "temp": [
+        "tropfen-huelle"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 4811.5,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "[data-termin=\"t3\"]",
+          "point": {
+            "dx": 303.0172424316406,
+            "dy": 25.220977783203125
+          }
+        },
+        {
+          "kind": "shrink",
+          "time": 4815.0999999996275,
+          "target": null,
+          "targetRect": {
+            "left": 303.0172424316406,
+            "top": 443.3928527832031,
+            "width": 44,
+            "height": 44,
+            "right": 347.0172424316406,
+            "bottom": 487.3928527832031
+          },
+          "oldRect": {
+            "x": 16,
+            "y": 84,
+            "width": 398,
+            "height": 1079.28125,
+            "top": 84,
+            "right": 414,
+            "bottom": 1163.28125,
+            "left": 16
+          }
+        }
+      ],
+      "warning": false,
+      "title": null
+    },
+    "end": {
+      "view": "home",
+      "scrollY": 153,
+      "homeScroll": 153,
+      "origin": null,
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": -153,
+        "width": 430,
+        "height": 1440.3125,
+        "top": -153,
+        "right": 430,
+        "bottom": 1287.3125,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 4811.5,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "[data-termin=\"t3\"]",
+          "point": {
+            "dx": 303.0172424316406,
+            "dy": 25.220977783203125
+          }
+        },
+        {
+          "kind": "shrink",
+          "time": 4815.0999999996275,
+          "target": null,
+          "targetRect": {
+            "left": 303.0172424316406,
+            "top": 443.3928527832031,
+            "width": 44,
+            "height": 44,
+            "right": 347.0172424316406,
+            "bottom": 487.3928527832031
+          },
+          "oldRect": {
+            "x": 16,
+            "y": 84,
+            "width": 398,
+            "height": 1079.28125,
+            "top": 84,
+            "right": 414,
+            "bottom": 1163.28125,
+            "left": 16
+          }
+        }
+      ],
+      "warning": false,
+      "title": null
+    },
+    "highlights": [
+      {
+        "time": 5150,
+        "id": "t3",
+        "temp": 1
+      },
+      {
+        "time": 5150.199999999255,
+        "id": "t3",
+        "temp": 1
+      }
+    ],
+    "iterations": [],
+    "checks": {
+      "expectedView": true,
+      "noRest": true,
+      "uniqueIDs": true,
+      "noErrors": true,
+      "homeScroll": true,
+      "rowHighlighted": true
+    },
+    "errors": []
+  },
+  {
+    "case": "appointment-save",
+    "style": "chilli",
+    "opening": {
+      "point": {
+        "x": 330.8,
+        "y": 466.171875
+      },
+      "homeBefore": 153,
+      "openedView": "termin"
+    },
+    "before": {
+      "view": "termin",
+      "scrollY": 319,
+      "homeScroll": 153,
+      "origin": "[data-termin=\"t3\"]",
+      "point": {
+        "dx": 303.0172424316406,
+        "dy": 25.220977783203125
+      },
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": -319,
+        "width": 430,
+        "height": 1251.28125,
+        "top": -319,
+        "right": 430,
+        "bottom": 932.28125,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": "Termin 3"
+    },
+    "during": null,
+    "after": {
+      "view": "home",
+      "scrollY": 153,
+      "homeScroll": 153,
+      "origin": null,
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": -153,
+        "width": 430,
+        "height": 2081.03125,
+        "top": -153,
+        "right": 430,
+        "bottom": 1928.03125,
+        "left": 0
+      },
+      "viewTransform": "matrix(0.98831, 0, 0, 0.98831, 0, 0)",
+      "preview": null,
+      "drag": null,
+      "temp": [
+        "tropfen-huelle",
+        "tropfen-huelle glas"
+      ],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [
+        {
+          "kind": "shrink",
+          "time": 5076.9000000003725,
+          "target": null,
+          "targetRect": {
+            "left": 193,
+            "top": 444,
+            "width": 44,
+            "height": 44
+          },
+          "oldRect": {
+            "x": 16,
+            "y": -235,
+            "width": 398,
+            "height": 1079.28125,
+            "top": -235,
+            "right": 414,
+            "bottom": 844.28125,
+            "left": 16
+          }
+        },
+        {
+          "kind": "transition",
+          "time": 5105.299999998882,
+          "returnToHome": true,
+          "ghost": false,
+          "alreadyMessage": true,
+          "origin": "[data-termin=\"t3\"]",
+          "point": {
+            "dx": 303.0172424316406,
+            "dy": 25.220977783203125
+          }
+        }
+      ],
+      "warning": true,
+      "title": null
+    },
+    "end": {
+      "view": "home",
+      "scrollY": 153,
+      "homeScroll": 153,
+      "origin": null,
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": -153,
+        "width": 430,
+        "height": 2081.03125,
+        "top": -153,
+        "right": 430,
+        "bottom": 1928.03125,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [
+        {
+          "kind": "shrink",
+          "time": 5076.9000000003725,
+          "target": null,
+          "targetRect": {
+            "left": 193,
+            "top": 444,
+            "width": 44,
+            "height": 44
+          },
+          "oldRect": {
+            "x": 16,
+            "y": -235,
+            "width": 398,
+            "height": 1079.28125,
+            "top": -235,
+            "right": 414,
+            "bottom": 844.28125,
+            "left": 16
+          }
+        },
+        {
+          "kind": "transition",
+          "time": 5105.299999998882,
+          "returnToHome": true,
+          "ghost": false,
+          "alreadyMessage": true,
+          "origin": "[data-termin=\"t3\"]",
+          "point": {
+            "dx": 303.0172424316406,
+            "dy": 25.220977783203125
+          }
+        },
+        {
+          "kind": "shrink",
+          "time": 6462,
+          "target": null,
+          "targetRect": {
+            "x": 30,
+            "y": 426.28125,
+            "width": 370,
+            "height": 54.234375,
+            "top": 426.28125,
+            "right": 400,
+            "bottom": 480.515625,
+            "left": 30
+          },
+          "oldRect": {
+            "x": 125,
+            "y": 402.046875,
+            "width": 180,
+            "height": 127.890625,
+            "top": 402.046875,
+            "right": 305,
+            "bottom": 529.9375,
+            "left": 125
+          }
+        }
+      ],
+      "warning": false,
+      "title": null
+    },
+    "highlights": [
+      {
+        "time": 6596,
+        "id": "t3",
+        "temp": 1
+      },
+      {
+        "time": 6596.0999999996275,
+        "id": "t3",
+        "temp": 1
+      }
+    ],
+    "iterations": [],
+    "checks": {
+      "expectedView": true,
+      "noRest": true,
+      "uniqueIDs": true,
+      "noErrors": true,
+      "rowHighlighted": true
+    },
+    "errors": []
+  },
+  {
+    "case": "journal-repeat",
+    "style": "ios",
+    "opening": {},
+    "before": {
+      "view": "journal",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": "#menuKnopf",
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 932,
+        "top": 0,
+        "right": 430,
+        "bottom": 932,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [],
+      "warning": false,
+      "title": null
+    },
+    "during": null,
+    "after": {
+      "view": "home",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": null,
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 1440.3125,
+        "top": 0,
+        "right": 430,
+        "bottom": 1440.3125,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 5232.700000001118,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "shrink",
+          "time": 5236,
+          "target": "menuKnopf",
+          "targetRect": {
+            "x": 381.30401611328125,
+            "y": 114.75471496582031,
+            "width": 35.71038818359375,
+            "height": 35.71040344238281,
+            "top": 114.75471496582031,
+            "right": 417.014404296875,
+            "bottom": 150.46511840820312,
+            "left": 381.30401611328125
+          },
+          "oldRect": {
+            "x": 81.01199340820312,
+            "y": 87.79437255859375,
+            "width": 348.9880065917969,
+            "height": 756.4112548828125,
+            "top": 87.79437255859375,
+            "right": 430,
+            "bottom": 844.2056274414062,
+            "left": 81.01199340820312
+          }
+        },
+        {
+          "kind": "transition",
+          "time": 7563.5999999996275,
+          "returnToHome": false,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "transition",
+          "time": 10224.099999999627,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "shrink",
+          "time": 10225.400000000373,
+          "target": "menuKnopf",
+          "targetRect": {
+            "x": 381.30401611328125,
+            "y": 114.75471496582031,
+            "width": 35.71038818359375,
+            "height": 35.71040344238281,
+            "top": 114.75471496582031,
+            "right": 417.014404296875,
+            "bottom": 150.46511840820312,
+            "left": 381.30401611328125
+          },
+          "oldRect": {
+            "x": 81.01199340820312,
+            "y": 87.79437255859375,
+            "width": 348.9880065917969,
+            "height": 756.4112548828125,
+            "top": 87.79437255859375,
+            "right": 430,
+            "bottom": 844.2056274414062,
+            "left": 81.01199340820312
+          }
+        },
+        {
+          "kind": "transition",
+          "time": 12543.400000000373,
+          "returnToHome": false,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "transition",
+          "time": 15138.099999999627,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "shrink",
+          "time": 15139,
+          "target": "menuKnopf",
+          "targetRect": {
+            "x": 381.30401611328125,
+            "y": 114.75471496582031,
+            "width": 35.71038818359375,
+            "height": 35.71040344238281,
+            "top": 114.75471496582031,
+            "right": 417.014404296875,
+            "bottom": 150.46511840820312,
+            "left": 381.30401611328125
+          },
+          "oldRect": {
+            "x": 81.01199340820312,
+            "y": 87.79437255859375,
+            "width": 348.9880065917969,
+            "height": 756.4112548828125,
+            "top": 87.79437255859375,
+            "right": 430,
+            "bottom": 844.2056274414062,
+            "left": 81.01199340820312
+          }
+        },
+        {
+          "kind": "transition",
+          "time": 17461.400000000373,
+          "returnToHome": false,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "transition",
+          "time": 20107,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "shrink",
+          "time": 20108.099999999627,
+          "target": "menuKnopf",
+          "targetRect": {
+            "x": 381.30401611328125,
+            "y": 114.75471496582031,
+            "width": 35.71038818359375,
+            "height": 35.71040344238281,
+            "top": 114.75471496582031,
+            "right": 417.014404296875,
+            "bottom": 150.46511840820312,
+            "left": 381.30401611328125
+          },
+          "oldRect": {
+            "x": 81.01199340820312,
+            "y": 87.79437255859375,
+            "width": 348.9880065917969,
+            "height": 756.4112548828125,
+            "top": 87.79437255859375,
+            "right": 430,
+            "bottom": 844.2056274414062,
+            "left": 81.01199340820312
+          }
+        },
+        {
+          "kind": "transition",
+          "time": 22428,
+          "returnToHome": false,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "transition",
+          "time": 25036.700000001118,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "shrink",
+          "time": 25038.099999999627,
+          "target": "menuKnopf",
+          "targetRect": {
+            "x": 381.30401611328125,
+            "y": 114.75471496582031,
+            "width": 35.71038818359375,
+            "height": 35.71040344238281,
+            "top": 114.75471496582031,
+            "right": 417.014404296875,
+            "bottom": 150.46511840820312,
+            "left": 381.30401611328125
+          },
+          "oldRect": {
+            "x": 81.01199340820312,
+            "y": 87.79437255859375,
+            "width": 348.9880065917969,
+            "height": 756.4112548828125,
+            "top": 87.79437255859375,
+            "right": 430,
+            "bottom": 844.2056274414062,
+            "left": 81.01199340820312
+          }
+        }
+      ],
+      "warning": false,
+      "title": null
+    },
+    "end": {
+      "view": "home",
+      "scrollY": 0,
+      "homeScroll": 0,
+      "origin": null,
+      "point": null,
+      "appTransform": "none",
+      "appInlineTransform": "",
+      "clip": "",
+      "appClass": "",
+      "appRect": {
+        "x": 0,
+        "y": 0,
+        "width": 430,
+        "height": 1440.3125,
+        "top": 0,
+        "right": 430,
+        "bottom": 1440.3125,
+        "left": 0
+      },
+      "viewTransform": "none",
+      "preview": null,
+      "drag": null,
+      "temp": [],
+      "duplicates": [],
+      "highlighted": [],
+      "calls": [
+        {
+          "kind": "transition",
+          "time": 5232.700000001118,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "shrink",
+          "time": 5236,
+          "target": "menuKnopf",
+          "targetRect": {
+            "x": 381.30401611328125,
+            "y": 114.75471496582031,
+            "width": 35.71038818359375,
+            "height": 35.71040344238281,
+            "top": 114.75471496582031,
+            "right": 417.014404296875,
+            "bottom": 150.46511840820312,
+            "left": 381.30401611328125
+          },
+          "oldRect": {
+            "x": 81.01199340820312,
+            "y": 87.79437255859375,
+            "width": 348.9880065917969,
+            "height": 756.4112548828125,
+            "top": 87.79437255859375,
+            "right": 430,
+            "bottom": 844.2056274414062,
+            "left": 81.01199340820312
+          }
+        },
+        {
+          "kind": "transition",
+          "time": 7563.5999999996275,
+          "returnToHome": false,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "transition",
+          "time": 10224.099999999627,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "shrink",
+          "time": 10225.400000000373,
+          "target": "menuKnopf",
+          "targetRect": {
+            "x": 381.30401611328125,
+            "y": 114.75471496582031,
+            "width": 35.71038818359375,
+            "height": 35.71040344238281,
+            "top": 114.75471496582031,
+            "right": 417.014404296875,
+            "bottom": 150.46511840820312,
+            "left": 381.30401611328125
+          },
+          "oldRect": {
+            "x": 81.01199340820312,
+            "y": 87.79437255859375,
+            "width": 348.9880065917969,
+            "height": 756.4112548828125,
+            "top": 87.79437255859375,
+            "right": 430,
+            "bottom": 844.2056274414062,
+            "left": 81.01199340820312
+          }
+        },
+        {
+          "kind": "transition",
+          "time": 12543.400000000373,
+          "returnToHome": false,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "transition",
+          "time": 15138.099999999627,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "shrink",
+          "time": 15139,
+          "target": "menuKnopf",
+          "targetRect": {
+            "x": 381.30401611328125,
+            "y": 114.75471496582031,
+            "width": 35.71038818359375,
+            "height": 35.71040344238281,
+            "top": 114.75471496582031,
+            "right": 417.014404296875,
+            "bottom": 150.46511840820312,
+            "left": 381.30401611328125
+          },
+          "oldRect": {
+            "x": 81.01199340820312,
+            "y": 87.79437255859375,
+            "width": 348.9880065917969,
+            "height": 756.4112548828125,
+            "top": 87.79437255859375,
+            "right": 430,
+            "bottom": 844.2056274414062,
+            "left": 81.01199340820312
+          }
+        },
+        {
+          "kind": "transition",
+          "time": 17461.400000000373,
+          "returnToHome": false,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "transition",
+          "time": 20107,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "shrink",
+          "time": 20108.099999999627,
+          "target": "menuKnopf",
+          "targetRect": {
+            "x": 381.30401611328125,
+            "y": 114.75471496582031,
+            "width": 35.71038818359375,
+            "height": 35.71040344238281,
+            "top": 114.75471496582031,
+            "right": 417.014404296875,
+            "bottom": 150.46511840820312,
+            "left": 381.30401611328125
+          },
+          "oldRect": {
+            "x": 81.01199340820312,
+            "y": 87.79437255859375,
+            "width": 348.9880065917969,
+            "height": 756.4112548828125,
+            "top": 87.79437255859375,
+            "right": 430,
+            "bottom": 844.2056274414062,
+            "left": 81.01199340820312
+          }
+        },
+        {
+          "kind": "transition",
+          "time": 22428,
+          "returnToHome": false,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "transition",
+          "time": 25036.700000001118,
+          "returnToHome": true,
+          "ghost": true,
+          "alreadyMessage": false,
+          "origin": "#menuKnopf",
+          "point": null
+        },
+        {
+          "kind": "shrink",
+          "time": 25038.099999999627,
+          "target": "menuKnopf",
+          "targetRect": {
+            "x": 381.30401611328125,
+            "y": 114.75471496582031,
+            "width": 35.71038818359375,
+            "height": 35.71040344238281,
+            "top": 114.75471496582031,
+            "right": 417.014404296875,
+            "bottom": 150.46511840820312,
+            "left": 381.30401611328125
+          },
+          "oldRect": {
+            "x": 81.01199340820312,
+            "y": 87.79437255859375,
+            "width": 348.9880065917969,
+            "height": 756.4112548828125,
+            "top": 87.79437255859375,
+            "right": 430,
+            "bottom": 844.2056274414062,
+            "left": 81.01199340820312
+          }
+        }
+      ],
+      "warning": false,
+      "title": null
+    },
+    "highlights": [],
+    "iterations": [
+      {
+        "during": {
+          "view": "journal",
+          "scrollY": 0,
+          "homeScroll": 0,
+          "origin": "#menuKnopf",
+          "point": null,
+          "appTransform": "matrix(0.843, 0, 0, 0.843, 0, 0)",
+          "appInlineTransform": "scale(0.843)",
+          "clip": "inset(0px round 45.1px)",
+          "appClass": "bereit zieht",
+          "appRect": {
+            "x": 67.510009765625,
+            "y": 73.1619873046875,
+            "width": 362.489990234375,
+            "height": 785.676025390625,
+            "top": 73.1619873046875,
+            "right": 430,
+            "bottom": 858.8380126953125,
+            "left": 67.510009765625
+          },
+          "viewTransform": "none",
+          "preview": {
+            "inert": true,
+            "aria": "true",
+            "pointer": "none",
+            "shadow": true,
+            "home": true,
+            "scroll": "translateY(0px)"
+          },
+          "drag": {
+            "dx": 150,
+            "v": 0.3775299898025401,
+            "spring": false
+          },
+          "temp": [
+            "abbild",
+            "zug-schatten"
+          ],
+          "duplicates": [],
+          "highlighted": [],
+          "calls": [],
+          "warning": false,
+          "title": null
+        },
+        "end": {
+          "view": "home",
+          "scrollY": 0,
+          "homeScroll": 0,
+          "origin": null,
+          "point": null,
+          "appTransform": "none",
+          "appInlineTransform": "",
+          "clip": "",
+          "appClass": "",
+          "appRect": {
+            "x": 0,
+            "y": 0,
+            "width": 430,
+            "height": 1440.3125,
+            "top": 0,
+            "right": 430,
+            "bottom": 1440.3125,
+            "left": 0
+          },
+          "viewTransform": "none",
+          "preview": null,
+          "drag": null,
+          "temp": [],
+          "duplicates": [],
+          "highlighted": [],
+          "calls": [
+            {
+              "kind": "transition",
+              "time": 5232.700000001118,
+              "returnToHome": true,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "shrink",
+              "time": 5236,
+              "target": "menuKnopf",
+              "targetRect": {
+                "x": 381.30401611328125,
+                "y": 114.75471496582031,
+                "width": 35.71038818359375,
+                "height": 35.71040344238281,
+                "top": 114.75471496582031,
+                "right": 417.014404296875,
+                "bottom": 150.46511840820312,
+                "left": 381.30401611328125
+              },
+              "oldRect": {
+                "x": 81.01199340820312,
+                "y": 87.79437255859375,
+                "width": 348.9880065917969,
+                "height": 756.4112548828125,
+                "top": 87.79437255859375,
+                "right": 430,
+                "bottom": 844.2056274414062,
+                "left": 81.01199340820312
+              }
+            }
+          ],
+          "warning": false,
+          "title": null
+        }
+      },
+      {
+        "during": {
+          "view": "journal",
+          "scrollY": 0,
+          "homeScroll": 0,
+          "origin": "#menuKnopf",
+          "point": null,
+          "appTransform": "matrix(0.843, 0, 0, 0.843, 0, 0)",
+          "appInlineTransform": "scale(0.843)",
+          "clip": "inset(0px round 45.1px)",
+          "appClass": "bereit zieht",
+          "appRect": {
+            "x": 67.510009765625,
+            "y": 73.1619873046875,
+            "width": 362.489990234375,
+            "height": 785.676025390625,
+            "top": 73.1619873046875,
+            "right": 430,
+            "bottom": 858.8380126953125,
+            "left": 67.510009765625
+          },
+          "viewTransform": "none",
+          "preview": {
+            "inert": true,
+            "aria": "true",
+            "pointer": "none",
+            "shadow": true,
+            "home": true,
+            "scroll": "translateY(0px)"
+          },
+          "drag": {
+            "dx": 150,
+            "v": 0.3697718117810461,
+            "spring": false
+          },
+          "temp": [
+            "abbild",
+            "zug-schatten"
+          ],
+          "duplicates": [],
+          "highlighted": [],
+          "calls": [
+            {
+              "kind": "transition",
+              "time": 5232.700000001118,
+              "returnToHome": true,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "shrink",
+              "time": 5236,
+              "target": "menuKnopf",
+              "targetRect": {
+                "x": 381.30401611328125,
+                "y": 114.75471496582031,
+                "width": 35.71038818359375,
+                "height": 35.71040344238281,
+                "top": 114.75471496582031,
+                "right": 417.014404296875,
+                "bottom": 150.46511840820312,
+                "left": 381.30401611328125
+              },
+              "oldRect": {
+                "x": 81.01199340820312,
+                "y": 87.79437255859375,
+                "width": 348.9880065917969,
+                "height": 756.4112548828125,
+                "top": 87.79437255859375,
+                "right": 430,
+                "bottom": 844.2056274414062,
+                "left": 81.01199340820312
+              }
+            },
+            {
+              "kind": "transition",
+              "time": 7563.5999999996275,
+              "returnToHome": false,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            }
+          ],
+          "warning": false,
+          "title": null
+        },
+        "end": {
+          "view": "home",
+          "scrollY": 0,
+          "homeScroll": 0,
+          "origin": null,
+          "point": null,
+          "appTransform": "none",
+          "appInlineTransform": "",
+          "clip": "",
+          "appClass": "",
+          "appRect": {
+            "x": 0,
+            "y": 0,
+            "width": 430,
+            "height": 1440.3125,
+            "top": 0,
+            "right": 430,
+            "bottom": 1440.3125,
+            "left": 0
+          },
+          "viewTransform": "none",
+          "preview": null,
+          "drag": null,
+          "temp": [],
+          "duplicates": [],
+          "highlighted": [],
+          "calls": [
+            {
+              "kind": "transition",
+              "time": 5232.700000001118,
+              "returnToHome": true,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "shrink",
+              "time": 5236,
+              "target": "menuKnopf",
+              "targetRect": {
+                "x": 381.30401611328125,
+                "y": 114.75471496582031,
+                "width": 35.71038818359375,
+                "height": 35.71040344238281,
+                "top": 114.75471496582031,
+                "right": 417.014404296875,
+                "bottom": 150.46511840820312,
+                "left": 381.30401611328125
+              },
+              "oldRect": {
+                "x": 81.01199340820312,
+                "y": 87.79437255859375,
+                "width": 348.9880065917969,
+                "height": 756.4112548828125,
+                "top": 87.79437255859375,
+                "right": 430,
+                "bottom": 844.2056274414062,
+                "left": 81.01199340820312
+              }
+            },
+            {
+              "kind": "transition",
+              "time": 7563.5999999996275,
+              "returnToHome": false,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "transition",
+              "time": 10224.099999999627,
+              "returnToHome": true,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "shrink",
+              "time": 10225.400000000373,
+              "target": "menuKnopf",
+              "targetRect": {
+                "x": 381.30401611328125,
+                "y": 114.75471496582031,
+                "width": 35.71038818359375,
+                "height": 35.71040344238281,
+                "top": 114.75471496582031,
+                "right": 417.014404296875,
+                "bottom": 150.46511840820312,
+                "left": 381.30401611328125
+              },
+              "oldRect": {
+                "x": 81.01199340820312,
+                "y": 87.79437255859375,
+                "width": 348.9880065917969,
+                "height": 756.4112548828125,
+                "top": 87.79437255859375,
+                "right": 430,
+                "bottom": 844.2056274414062,
+                "left": 81.01199340820312
+              }
+            }
+          ],
+          "warning": false,
+          "title": null
+        }
+      },
+      {
+        "during": {
+          "view": "journal",
+          "scrollY": 0,
+          "homeScroll": 0,
+          "origin": "#menuKnopf",
+          "point": null,
+          "appTransform": "matrix(0.843, 0, 0, 0.843, 0, 0)",
+          "appInlineTransform": "scale(0.843)",
+          "clip": "inset(0px round 45.1px)",
+          "appClass": "bereit zieht",
+          "appRect": {
+            "x": 67.510009765625,
+            "y": 73.1619873046875,
+            "width": 362.489990234375,
+            "height": 785.676025390625,
+            "top": 73.1619873046875,
+            "right": 430,
+            "bottom": 858.8380126953125,
+            "left": 67.510009765625
+          },
+          "viewTransform": "none",
+          "preview": {
+            "inert": true,
+            "aria": "true",
+            "pointer": "none",
+            "shadow": true,
+            "home": true,
+            "scroll": "translateY(0px)"
+          },
+          "drag": {
+            "dx": 150,
+            "v": 0.38091568133359177,
+            "spring": false
+          },
+          "temp": [
+            "abbild",
+            "zug-schatten"
+          ],
+          "duplicates": [],
+          "highlighted": [],
+          "calls": [
+            {
+              "kind": "transition",
+              "time": 5232.700000001118,
+              "returnToHome": true,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "shrink",
+              "time": 5236,
+              "target": "menuKnopf",
+              "targetRect": {
+                "x": 381.30401611328125,
+                "y": 114.75471496582031,
+                "width": 35.71038818359375,
+                "height": 35.71040344238281,
+                "top": 114.75471496582031,
+                "right": 417.014404296875,
+                "bottom": 150.46511840820312,
+                "left": 381.30401611328125
+              },
+              "oldRect": {
+                "x": 81.01199340820312,
+                "y": 87.79437255859375,
+                "width": 348.9880065917969,
+                "height": 756.4112548828125,
+                "top": 87.79437255859375,
+                "right": 430,
+                "bottom": 844.2056274414062,
+                "left": 81.01199340820312
+              }
+            },
+            {
+              "kind": "transition",
+              "time": 7563.5999999996275,
+              "returnToHome": false,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "transition",
+              "time": 10224.099999999627,
+              "returnToHome": true,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "shrink",
+              "time": 10225.400000000373,
+              "target": "menuKnopf",
+              "targetRect": {
+                "x": 381.30401611328125,
+                "y": 114.75471496582031,
+                "width": 35.71038818359375,
+                "height": 35.71040344238281,
+                "top": 114.75471496582031,
+                "right": 417.014404296875,
+                "bottom": 150.46511840820312,
+                "left": 381.30401611328125
+              },
+              "oldRect": {
+                "x": 81.01199340820312,
+                "y": 87.79437255859375,
+                "width": 348.9880065917969,
+                "height": 756.4112548828125,
+                "top": 87.79437255859375,
+                "right": 430,
+                "bottom": 844.2056274414062,
+                "left": 81.01199340820312
+              }
+            },
+            {
+              "kind": "transition",
+              "time": 12543.400000000373,
+              "returnToHome": false,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            }
+          ],
+          "warning": false,
+          "title": null
+        },
+        "end": {
+          "view": "home",
+          "scrollY": 0,
+          "homeScroll": 0,
+          "origin": null,
+          "point": null,
+          "appTransform": "none",
+          "appInlineTransform": "",
+          "clip": "",
+          "appClass": "",
+          "appRect": {
+            "x": 0,
+            "y": 0,
+            "width": 430,
+            "height": 1440.3125,
+            "top": 0,
+            "right": 430,
+            "bottom": 1440.3125,
+            "left": 0
+          },
+          "viewTransform": "none",
+          "preview": null,
+          "drag": null,
+          "temp": [],
+          "duplicates": [],
+          "highlighted": [],
+          "calls": [
+            {
+              "kind": "transition",
+              "time": 5232.700000001118,
+              "returnToHome": true,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "shrink",
+              "time": 5236,
+              "target": "menuKnopf",
+              "targetRect": {
+                "x": 381.30401611328125,
+                "y": 114.75471496582031,
+                "width": 35.71038818359375,
+                "height": 35.71040344238281,
+                "top": 114.75471496582031,
+                "right": 417.014404296875,
+                "bottom": 150.46511840820312,
+                "left": 381.30401611328125
+              },
+              "oldRect": {
+                "x": 81.01199340820312,
+                "y": 87.79437255859375,
+                "width": 348.9880065917969,
+                "height": 756.4112548828125,
+                "top": 87.79437255859375,
+                "right": 430,
+                "bottom": 844.2056274414062,
+                "left": 81.01199340820312
+              }
+            },
+            {
+              "kind": "transition",
+              "time": 7563.5999999996275,
+              "returnToHome": false,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "transition",
+              "time": 10224.099999999627,
+              "returnToHome": true,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "shrink",
+              "time": 10225.400000000373,
+              "target": "menuKnopf",
+              "targetRect": {
+                "x": 381.30401611328125,
+                "y": 114.75471496582031,
+                "width": 35.71038818359375,
+                "height": 35.71040344238281,
+                "top": 114.75471496582031,
+                "right": 417.014404296875,
+                "bottom": 150.46511840820312,
+                "left": 381.30401611328125
+              },
+              "oldRect": {
+                "x": 81.01199340820312,
+                "y": 87.79437255859375,
+                "width": 348.9880065917969,
+                "height": 756.4112548828125,
+                "top": 87.79437255859375,
+                "right": 430,
+                "bottom": 844.2056274414062,
+                "left": 81.01199340820312
+              }
+            },
+            {
+              "kind": "transition",
+              "time": 12543.400000000373,
+              "returnToHome": false,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "transition",
+              "time": 15138.099999999627,
+              "returnToHome": true,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "shrink",
+              "time": 15139,
+              "target": "menuKnopf",
+              "targetRect": {
+                "x": 381.30401611328125,
+                "y": 114.75471496582031,
+                "width": 35.71038818359375,
+                "height": 35.71040344238281,
+                "top": 114.75471496582031,
+                "right": 417.014404296875,
+                "bottom": 150.46511840820312,
+                "left": 381.30401611328125
+              },
+              "oldRect": {
+                "x": 81.01199340820312,
+                "y": 87.79437255859375,
+                "width": 348.9880065917969,
+                "height": 756.4112548828125,
+                "top": 87.79437255859375,
+                "right": 430,
+                "bottom": 844.2056274414062,
+                "left": 81.01199340820312
+              }
+            }
+          ],
+          "warning": false,
+          "title": null
+        }
+      },
+      {
+        "during": {
+          "view": "journal",
+          "scrollY": 0,
+          "homeScroll": 0,
+          "origin": "#menuKnopf",
+          "point": null,
+          "appTransform": "matrix(0.843, 0, 0, 0.843, 0, 0)",
+          "appInlineTransform": "scale(0.843)",
+          "clip": "inset(0px round 45.1px)",
+          "appClass": "bereit zieht",
+          "appRect": {
+            "x": 67.510009765625,
+            "y": 73.1619873046875,
+            "width": 362.489990234375,
+            "height": 785.676025390625,
+            "top": 73.1619873046875,
+            "right": 430,
+            "bottom": 858.8380126953125,
+            "left": 67.510009765625
+          },
+          "viewTransform": "none",
+          "preview": {
+            "inert": true,
+            "aria": "true",
+            "pointer": "none",
+            "shadow": true,
+            "home": true,
+            "scroll": "translateY(0px)"
+          },
+          "drag": {
+            "dx": 150,
+            "v": 0.37784035219585527,
+            "spring": false
+          },
+          "temp": [
+            "abbild",
+            "zug-schatten"
+          ],
+          "duplicates": [],
+          "highlighted": [],
+          "calls": [
+            {
+              "kind": "transition",
+              "time": 5232.700000001118,
+              "returnToHome": true,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "shrink",
+              "time": 5236,
+              "target": "menuKnopf",
+              "targetRect": {
+                "x": 381.30401611328125,
+                "y": 114.75471496582031,
+                "width": 35.71038818359375,
+                "height": 35.71040344238281,
+                "top": 114.75471496582031,
+                "right": 417.014404296875,
+                "bottom": 150.46511840820312,
+                "left": 381.30401611328125
+              },
+              "oldRect": {
+                "x": 81.01199340820312,
+                "y": 87.79437255859375,
+                "width": 348.9880065917969,
+                "height": 756.4112548828125,
+                "top": 87.79437255859375,
+                "right": 430,
+                "bottom": 844.2056274414062,
+                "left": 81.01199340820312
+              }
+            },
+            {
+              "kind": "transition",
+              "time": 7563.5999999996275,
+              "returnToHome": false,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "transition",
+              "time": 10224.099999999627,
+              "returnToHome": true,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "shrink",
+              "time": 10225.400000000373,
+              "target": "menuKnopf",
+              "targetRect": {
+                "x": 381.30401611328125,
+                "y": 114.75471496582031,
+                "width": 35.71038818359375,
+                "height": 35.71040344238281,
+                "top": 114.75471496582031,
+                "right": 417.014404296875,
+                "bottom": 150.46511840820312,
+                "left": 381.30401611328125
+              },
+              "oldRect": {
+                "x": 81.01199340820312,
+                "y": 87.79437255859375,
+                "width": 348.9880065917969,
+                "height": 756.4112548828125,
+                "top": 87.79437255859375,
+                "right": 430,
+                "bottom": 844.2056274414062,
+                "left": 81.01199340820312
+              }
+            },
+            {
+              "kind": "transition",
+              "time": 12543.400000000373,
+              "returnToHome": false,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "transition",
+              "time": 15138.099999999627,
+              "returnToHome": true,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "shrink",
+              "time": 15139,
+              "target": "menuKnopf",
+              "targetRect": {
+                "x": 381.30401611328125,
+                "y": 114.75471496582031,
+                "width": 35.71038818359375,
+                "height": 35.71040344238281,
+                "top": 114.75471496582031,
+                "right": 417.014404296875,
+                "bottom": 150.46511840820312,
+                "left": 381.30401611328125
+              },
+              "oldRect": {
+                "x": 81.01199340820312,
+                "y": 87.79437255859375,
+                "width": 348.9880065917969,
+                "height": 756.4112548828125,
+                "top": 87.79437255859375,
+                "right": 430,
+                "bottom": 844.2056274414062,
+                "left": 81.01199340820312
+              }
+            },
+            {
+              "kind": "transition",
+              "time": 17461.400000000373,
+              "returnToHome": false,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            }
+          ],
+          "warning": false,
+          "title": null
+        },
+        "end": {
+          "view": "home",
+          "scrollY": 0,
+          "homeScroll": 0,
+          "origin": null,
+          "point": null,
+          "appTransform": "none",
+          "appInlineTransform": "",
+          "clip": "",
+          "appClass": "",
+          "appRect": {
+            "x": 0,
+            "y": 0,
+            "width": 430,
+            "height": 1440.3125,
+            "top": 0,
+            "right": 430,
+            "bottom": 1440.3125,
+            "left": 0
+          },
+          "viewTransform": "none",
+          "preview": null,
+          "drag": null,
+          "temp": [],
+          "duplicates": [],
+          "highlighted": [],
+          "calls": [
+            {
+              "kind": "transition",
+              "time": 5232.700000001118,
+              "returnToHome": true,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "shrink",
+              "time": 5236,
+              "target": "menuKnopf",
+              "targetRect": {
+                "x": 381.30401611328125,
+                "y": 114.75471496582031,
+                "width": 35.71038818359375,
+                "height": 35.71040344238281,
+                "top": 114.75471496582031,
+                "right": 417.014404296875,
+                "bottom": 150.46511840820312,
+                "left": 381.30401611328125
+              },
+              "oldRect": {
+                "x": 81.01199340820312,
+                "y": 87.79437255859375,
+                "width": 348.9880065917969,
+                "height": 756.4112548828125,
+                "top": 87.79437255859375,
+                "right": 430,
+                "bottom": 844.2056274414062,
+                "left": 81.01199340820312
+              }
+            },
+            {
+              "kind": "transition",
+              "time": 7563.5999999996275,
+              "returnToHome": false,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "transition",
+              "time": 10224.099999999627,
+              "returnToHome": true,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "shrink",
+              "time": 10225.400000000373,
+              "target": "menuKnopf",
+              "targetRect": {
+                "x": 381.30401611328125,
+                "y": 114.75471496582031,
+                "width": 35.71038818359375,
+                "height": 35.71040344238281,
+                "top": 114.75471496582031,
+                "right": 417.014404296875,
+                "bottom": 150.46511840820312,
+                "left": 381.30401611328125
+              },
+              "oldRect": {
+                "x": 81.01199340820312,
+                "y": 87.79437255859375,
+                "width": 348.9880065917969,
+                "height": 756.4112548828125,
+                "top": 87.79437255859375,
+                "right": 430,
+                "bottom": 844.2056274414062,
+                "left": 81.01199340820312
+              }
+            },
+            {
+              "kind": "transition",
+              "time": 12543.400000000373,
+              "returnToHome": false,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "transition",
+              "time": 15138.099999999627,
+              "returnToHome": true,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "shrink",
+              "time": 15139,
+              "target": "menuKnopf",
+              "targetRect": {
+                "x": 381.30401611328125,
+                "y": 114.75471496582031,
+                "width": 35.71038818359375,
+                "height": 35.71040344238281,
+                "top": 114.75471496582031,
+                "right": 417.014404296875,
+                "bottom": 150.46511840820312,
+                "left": 381.30401611328125
+              },
+              "oldRect": {
+                "x": 81.01199340820312,
+                "y": 87.79437255859375,
+                "width": 348.9880065917969,
+                "height": 756.4112548828125,
+                "top": 87.79437255859375,
+                "right": 430,
+                "bottom": 844.2056274414062,
+                "left": 81.01199340820312
+              }
+            },
+            {
+              "kind": "transition",
+              "time": 17461.400000000373,
+              "returnToHome": false,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "transition",
+              "time": 20107,
+              "returnToHome": true,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "shrink",
+              "time": 20108.099999999627,
+              "target": "menuKnopf",
+              "targetRect": {
+                "x": 381.30401611328125,
+                "y": 114.75471496582031,
+                "width": 35.71038818359375,
+                "height": 35.71040344238281,
+                "top": 114.75471496582031,
+                "right": 417.014404296875,
+                "bottom": 150.46511840820312,
+                "left": 381.30401611328125
+              },
+              "oldRect": {
+                "x": 81.01199340820312,
+                "y": 87.79437255859375,
+                "width": 348.9880065917969,
+                "height": 756.4112548828125,
+                "top": 87.79437255859375,
+                "right": 430,
+                "bottom": 844.2056274414062,
+                "left": 81.01199340820312
+              }
+            }
+          ],
+          "warning": false,
+          "title": null
+        }
+      },
+      {
+        "during": {
+          "view": "journal",
+          "scrollY": 0,
+          "homeScroll": 0,
+          "origin": "#menuKnopf",
+          "point": null,
+          "appTransform": "matrix(0.843, 0, 0, 0.843, 0, 0)",
+          "appInlineTransform": "scale(0.843)",
+          "clip": "inset(0px round 45.1px)",
+          "appClass": "bereit zieht",
+          "appRect": {
+            "x": 67.510009765625,
+            "y": 73.1619873046875,
+            "width": 362.489990234375,
+            "height": 785.676025390625,
+            "top": 73.1619873046875,
+            "right": 430,
+            "bottom": 858.8380126953125,
+            "left": 67.510009765625
+          },
+          "viewTransform": "none",
+          "preview": {
+            "inert": true,
+            "aria": "true",
+            "pointer": "none",
+            "shadow": true,
+            "home": true,
+            "scroll": "translateY(0px)"
+          },
+          "drag": {
+            "dx": 150,
+            "v": 0.38063438204660155,
+            "spring": false
+          },
+          "temp": [
+            "abbild",
+            "zug-schatten"
+          ],
+          "duplicates": [],
+          "highlighted": [],
+          "calls": [
+            {
+              "kind": "transition",
+              "time": 5232.700000001118,
+              "returnToHome": true,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "shrink",
+              "time": 5236,
+              "target": "menuKnopf",
+              "targetRect": {
+                "x": 381.30401611328125,
+                "y": 114.75471496582031,
+                "width": 35.71038818359375,
+                "height": 35.71040344238281,
+                "top": 114.75471496582031,
+                "right": 417.014404296875,
+                "bottom": 150.46511840820312,
+                "left": 381.30401611328125
+              },
+              "oldRect": {
+                "x": 81.01199340820312,
+                "y": 87.79437255859375,
+                "width": 348.9880065917969,
+                "height": 756.4112548828125,
+                "top": 87.79437255859375,
+                "right": 430,
+                "bottom": 844.2056274414062,
+                "left": 81.01199340820312
+              }
+            },
+            {
+              "kind": "transition",
+              "time": 7563.5999999996275,
+              "returnToHome": false,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "transition",
+              "time": 10224.099999999627,
+              "returnToHome": true,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "shrink",
+              "time": 10225.400000000373,
+              "target": "menuKnopf",
+              "targetRect": {
+                "x": 381.30401611328125,
+                "y": 114.75471496582031,
+                "width": 35.71038818359375,
+                "height": 35.71040344238281,
+                "top": 114.75471496582031,
+                "right": 417.014404296875,
+                "bottom": 150.46511840820312,
+                "left": 381.30401611328125
+              },
+              "oldRect": {
+                "x": 81.01199340820312,
+                "y": 87.79437255859375,
+                "width": 348.9880065917969,
+                "height": 756.4112548828125,
+                "top": 87.79437255859375,
+                "right": 430,
+                "bottom": 844.2056274414062,
+                "left": 81.01199340820312
+              }
+            },
+            {
+              "kind": "transition",
+              "time": 12543.400000000373,
+              "returnToHome": false,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "transition",
+              "time": 15138.099999999627,
+              "returnToHome": true,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "shrink",
+              "time": 15139,
+              "target": "menuKnopf",
+              "targetRect": {
+                "x": 381.30401611328125,
+                "y": 114.75471496582031,
+                "width": 35.71038818359375,
+                "height": 35.71040344238281,
+                "top": 114.75471496582031,
+                "right": 417.014404296875,
+                "bottom": 150.46511840820312,
+                "left": 381.30401611328125
+              },
+              "oldRect": {
+                "x": 81.01199340820312,
+                "y": 87.79437255859375,
+                "width": 348.9880065917969,
+                "height": 756.4112548828125,
+                "top": 87.79437255859375,
+                "right": 430,
+                "bottom": 844.2056274414062,
+                "left": 81.01199340820312
+              }
+            },
+            {
+              "kind": "transition",
+              "time": 17461.400000000373,
+              "returnToHome": false,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "transition",
+              "time": 20107,
+              "returnToHome": true,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "shrink",
+              "time": 20108.099999999627,
+              "target": "menuKnopf",
+              "targetRect": {
+                "x": 381.30401611328125,
+                "y": 114.75471496582031,
+                "width": 35.71038818359375,
+                "height": 35.71040344238281,
+                "top": 114.75471496582031,
+                "right": 417.014404296875,
+                "bottom": 150.46511840820312,
+                "left": 381.30401611328125
+              },
+              "oldRect": {
+                "x": 81.01199340820312,
+                "y": 87.79437255859375,
+                "width": 348.9880065917969,
+                "height": 756.4112548828125,
+                "top": 87.79437255859375,
+                "right": 430,
+                "bottom": 844.2056274414062,
+                "left": 81.01199340820312
+              }
+            },
+            {
+              "kind": "transition",
+              "time": 22428,
+              "returnToHome": false,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            }
+          ],
+          "warning": false,
+          "title": null
+        },
+        "end": {
+          "view": "home",
+          "scrollY": 0,
+          "homeScroll": 0,
+          "origin": null,
+          "point": null,
+          "appTransform": "none",
+          "appInlineTransform": "",
+          "clip": "",
+          "appClass": "",
+          "appRect": {
+            "x": 0,
+            "y": 0,
+            "width": 430,
+            "height": 1440.3125,
+            "top": 0,
+            "right": 430,
+            "bottom": 1440.3125,
+            "left": 0
+          },
+          "viewTransform": "none",
+          "preview": null,
+          "drag": null,
+          "temp": [],
+          "duplicates": [],
+          "highlighted": [],
+          "calls": [
+            {
+              "kind": "transition",
+              "time": 5232.700000001118,
+              "returnToHome": true,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "shrink",
+              "time": 5236,
+              "target": "menuKnopf",
+              "targetRect": {
+                "x": 381.30401611328125,
+                "y": 114.75471496582031,
+                "width": 35.71038818359375,
+                "height": 35.71040344238281,
+                "top": 114.75471496582031,
+                "right": 417.014404296875,
+                "bottom": 150.46511840820312,
+                "left": 381.30401611328125
+              },
+              "oldRect": {
+                "x": 81.01199340820312,
+                "y": 87.79437255859375,
+                "width": 348.9880065917969,
+                "height": 756.4112548828125,
+                "top": 87.79437255859375,
+                "right": 430,
+                "bottom": 844.2056274414062,
+                "left": 81.01199340820312
+              }
+            },
+            {
+              "kind": "transition",
+              "time": 7563.5999999996275,
+              "returnToHome": false,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "transition",
+              "time": 10224.099999999627,
+              "returnToHome": true,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "shrink",
+              "time": 10225.400000000373,
+              "target": "menuKnopf",
+              "targetRect": {
+                "x": 381.30401611328125,
+                "y": 114.75471496582031,
+                "width": 35.71038818359375,
+                "height": 35.71040344238281,
+                "top": 114.75471496582031,
+                "right": 417.014404296875,
+                "bottom": 150.46511840820312,
+                "left": 381.30401611328125
+              },
+              "oldRect": {
+                "x": 81.01199340820312,
+                "y": 87.79437255859375,
+                "width": 348.9880065917969,
+                "height": 756.4112548828125,
+                "top": 87.79437255859375,
+                "right": 430,
+                "bottom": 844.2056274414062,
+                "left": 81.01199340820312
+              }
+            },
+            {
+              "kind": "transition",
+              "time": 12543.400000000373,
+              "returnToHome": false,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "transition",
+              "time": 15138.099999999627,
+              "returnToHome": true,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "shrink",
+              "time": 15139,
+              "target": "menuKnopf",
+              "targetRect": {
+                "x": 381.30401611328125,
+                "y": 114.75471496582031,
+                "width": 35.71038818359375,
+                "height": 35.71040344238281,
+                "top": 114.75471496582031,
+                "right": 417.014404296875,
+                "bottom": 150.46511840820312,
+                "left": 381.30401611328125
+              },
+              "oldRect": {
+                "x": 81.01199340820312,
+                "y": 87.79437255859375,
+                "width": 348.9880065917969,
+                "height": 756.4112548828125,
+                "top": 87.79437255859375,
+                "right": 430,
+                "bottom": 844.2056274414062,
+                "left": 81.01199340820312
+              }
+            },
+            {
+              "kind": "transition",
+              "time": 17461.400000000373,
+              "returnToHome": false,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "transition",
+              "time": 20107,
+              "returnToHome": true,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "shrink",
+              "time": 20108.099999999627,
+              "target": "menuKnopf",
+              "targetRect": {
+                "x": 381.30401611328125,
+                "y": 114.75471496582031,
+                "width": 35.71038818359375,
+                "height": 35.71040344238281,
+                "top": 114.75471496582031,
+                "right": 417.014404296875,
+                "bottom": 150.46511840820312,
+                "left": 381.30401611328125
+              },
+              "oldRect": {
+                "x": 81.01199340820312,
+                "y": 87.79437255859375,
+                "width": 348.9880065917969,
+                "height": 756.4112548828125,
+                "top": 87.79437255859375,
+                "right": 430,
+                "bottom": 844.2056274414062,
+                "left": 81.01199340820312
+              }
+            },
+            {
+              "kind": "transition",
+              "time": 22428,
+              "returnToHome": false,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "transition",
+              "time": 25036.700000001118,
+              "returnToHome": true,
+              "ghost": true,
+              "alreadyMessage": false,
+              "origin": "#menuKnopf",
+              "point": null
+            },
+            {
+              "kind": "shrink",
+              "time": 25038.099999999627,
+              "target": "menuKnopf",
+              "targetRect": {
+                "x": 381.30401611328125,
+                "y": 114.75471496582031,
+                "width": 35.71038818359375,
+                "height": 35.71040344238281,
+                "top": 114.75471496582031,
+                "right": 417.014404296875,
+                "bottom": 150.46511840820312,
+                "left": 381.30401611328125
+              },
+              "oldRect": {
+                "x": 81.01199340820312,
+                "y": 87.79437255859375,
+                "width": 348.9880065917969,
+                "height": 756.4112548828125,
+                "top": 87.79437255859375,
+                "right": 430,
+                "bottom": 844.2056274414062,
+                "left": 81.01199340820312
+              }
+            }
+          ],
+          "warning": false,
+          "title": null
+        }
+      }
+    ],
+    "checks": {
+      "expectedView": true,
+      "noRest": true,
+      "uniqueIDs": true,
+      "noErrors": true,
+      "repeatsClean": true
+    },
+    "errors": []
+  }
+]
