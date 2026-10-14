@@ -46,7 +46,12 @@ Block 7, erster Teil, in 0.17.0T29: Timer und Drang tragen dichteres Glas (`--gl
 .78, Dunkel .8 statt .42/.40) bei gleicher Unschärfe — über einer vollen Terminliste schien
 der Text dahinter deutlich durch (James, 12). Lange Titel auf dem Dashboard brechen nach zwei
 Zeilen mit «…» ab; ganz stehen sie beim Bearbeiten, im Vorlesetext und in der Exportliste.
-Suite `gestaltung`. Offen in Block 7: Kleinteile und «10 von 12» als Bildvergleich zur Wahl.
+Suite `gestaltung`.
+
+0.17.0T30, Block 7 zu Ende — Kleinteile nach Bildvergleich, Wahl des Nutzers: «10 von 12» mit
+22 statt 26 px, bricht neben Woche/Monat nicht mehr um; Kalenderpunkte eine Stufe größer
+(Woche 9, Monat 7 px), Ring 2 px; ein Schalter aus ist in Hell gefaßt (Rand `--spur-rand`,
+Knauf `--knauf-schatten`), Dunkel bleibt.
 
 ## Abgenommen
 

@@ -3,6 +3,9 @@
 // vollen Liste —, aber nicht unschärfer, die Unschärfe ruckelt am Gerät.
 // Lange Titel auf dem Dashboard brechen nach zwei Zeilen mit «…» ab; ganz
 // stehen sie im Vorlesetext, beim Bearbeiten und in der Exportliste.
+// Kleinteile nach Bildvergleich (Wahl des Nutzers): «10 von 12» bleibt eine
+// Zeile, die Kalenderpunkte sind eine Stufe größer, ein Schalter aus ist in
+// Hell gefaßt.
 import { readFileSync } from 'node:fs';
 import { APP, suite } from '../helfer.mjs';
 const html = readFileSync(APP, 'utf8');
@@ -80,5 +83,32 @@ return warten(HINWEIS_DAUER + 3 * TROPFEN_DAUER + 400).then(function () {
   var ex = alle('#app .ex-zeile .tm-titel').filter(function (n) { return n.textContent === LANG; })[0];
   pruefe('T6 in der Exportliste steht der Titel ganz', !!ex && ex.scrollHeight <= ex.clientHeight + 1 &&
     ex.getBoundingClientRect().height > 2 * zeile, ex && ex.getBoundingClientRect().height);
+
+  // ── K · Kleinteile ─────────────────────────────────────────
+  frisch();
+  var h = heuteSchluessel();
+  state.gewohnheiten = [];
+  for (var i = 0; i < 12; i++) state.gewohnheiten.push(gewohnheitLesen({ id: 'g' + i, name: 'G' + i,
+    rhythmus: { art: 'taeglich' }, angelegt: tagPlus(h, -5), erledigt: i < 10 ? [h] : [] }));
+  zeige('home');
+  ausbewegt();
+  var z = q('#tagesZahl');
+  pruefe('K1 «10 von 12» steht auf einer Zeile', z.textContent === '10 von 12' &&
+    z.getBoundingClientRect().height <= parseFloat(cs(z).lineHeight) + 1, z.getBoundingClientRect().height);
+  pruefe('K2 die Zahl rückt nicht über die Karte', z.getBoundingClientRect().right <= q('.held-kopf .wahl').getBoundingClientRect().left);
+  var kp = alle('#app .kal-raster.woche .kp');
+  pruefe('K3 Punkte in der Woche 9 px, Ring 2 px', kp.length > 0 && kp.every(function (p) {
+    return p.getBoundingClientRect().width === 9 && (p.classList.contains('erledigt') || cs(p).boxShadow.indexOf('2px') !== -1);
+  }));
+  zeige('neu');
+  q('#gwErinnern .schalter-spur').style.transition = 'none';
+  var spur = function () { return cs(q('#gwErinnern .schalter-spur')).boxShadow; };
+  document.documentElement.setAttribute('data-thema', 'hell');
+  var hell = spur();
+  document.documentElement.setAttribute('data-thema', 'dunkel');
+  var dunkel = spur();
+  document.documentElement.removeAttribute('data-thema');
+  pruefe('K4 ein Schalter aus ist in Hell gefaßt, in Dunkel nicht', q('#gwErinnern').getAttribute('aria-checked') === 'false' &&
+    hell.indexOf('rgb(176, 174, 165)') !== -1 && dunkel.indexOf('rgba(255, 255, 255, 0)') !== -1, hell + ' / ' + dunkel);
 });
 `);

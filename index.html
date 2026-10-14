@@ -74,6 +74,9 @@
   --erhoben: #FAF9F5;
   --marke: #FAF9F5;
   --spur: #E8E6DC;
+  /* Ein Schalter aus: in Hell gefaßt, sonst verschwindet er im Grund (Block 7). */
+  --spur-rand: #B0AEA5;
+  --knauf-schatten: 0 1px 3px rgba(20, 20, 19, .25), 0 0 0 .5px rgba(20, 20, 19, .12);
   --rand-hell: rgba(255, 255, 255, 0);
   --fl-rand: #D6D3C9;
   --fl-hebung: 0;
@@ -106,6 +109,8 @@
     --erhoben: #2C2C29;
     --marke: #4A4A44;
     --spur: #4A4A44;
+    --spur-rand: rgba(255, 255, 255, 0);
+    --knauf-schatten: 0 1px 2px rgba(0, 0, 0, .3);
     --rand-hell: rgba(255, 255, 255, .12);
     --fl-rand: #85837B;
     --fl-hebung: 9;
@@ -135,6 +140,8 @@
   --erhoben: #2C2C29;
   --marke: #4A4A44;
   --spur: #4A4A44;
+  --spur-rand: rgba(255, 255, 255, 0);
+  --knauf-schatten: 0 1px 2px rgba(0, 0, 0, .3);
   --rand-hell: rgba(255, 255, 255, .12);
   --fl-rand: #85837B;
   --fl-hebung: 9;
@@ -479,11 +486,13 @@ svg.wm { display: block; flex: none; color: var(--text); overflow: visible; }
   letter-spacing: .06em;
   color: var(--text-2);
 }
+/* 22 px: «10 von 12» brach mit 26 px neben Woche/Monat um (Block 7). */
 .tr-zahl {
   font-family: var(--sans);
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 600;
   line-height: 1.2;
+  white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 .tr-satz { margin: 2px 0 0; font-size: 15px; color: var(--text-2); font-family: var(--serif, inherit); }
@@ -762,15 +771,16 @@ button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
   flex-wrap: wrap;
   justify-content: center;
   gap: 3px;
-  max-width: 42px;
-  min-height: 6px;
+  max-width: 46px;
+  min-height: 7px;
 }
-.kp { width: 6px; height: 6px; border-radius: 50%; }
-.kal-raster.woche .kp { width: 8px; height: 8px; }
+/* Am Gerät waren sie zu zart: eine Stufe größer, der Ring 2 px (Block 7). */
+.kp { width: 7px; height: 7px; border-radius: 50%; }
+.kal-raster.woche .kp { width: 9px; height: 9px; }
 .kp.erledigt { background: var(--erledigt); }
-.kp.offen { box-shadow: inset 0 0 0 1.5px var(--text-2); }
-.kp.verpasst { box-shadow: inset 0 0 0 1.5px var(--linie); }
-.kp.kommt { box-shadow: inset 0 0 0 1.5px var(--linie); opacity: .45; }
+.kp.offen { box-shadow: inset 0 0 0 2px var(--text-2); }
+.kp.verpasst { box-shadow: inset 0 0 0 2px var(--linie); }
+.kp.kommt { box-shadow: inset 0 0 0 2px var(--linie); opacity: .45; }
 /* Ein Tag, an dem alles erledigt ist, trägt seine Zahl in Grün. */
 .kal-tag.voll .kal-zahl { color: var(--erledigt); font-weight: 600; }
 .kal-tag.zukunft { color: var(--text-2); }
@@ -1008,7 +1018,8 @@ button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
   height: 31px;
   border-radius: 16px;
   background: var(--spur);
-  transition: background-color .2s ease;
+  box-shadow: inset 0 0 0 1.5px var(--spur-rand);
+  transition: background-color .2s ease, box-shadow .2s ease;
 }
 .schalter-knauf {
   position: absolute;
@@ -1018,10 +1029,10 @@ button.kal-titel { background: var(--flaeche-2); margin: 0 6px; }
   height: 27px;
   border-radius: 50%;
   background: var(--grund);
-  box-shadow: var(--schatten);
+  box-shadow: var(--knauf-schatten);
   transition: transform .25s cubic-bezier(.3, 1.4, .5, 1);
 }
-.schalter[aria-checked="true"] .schalter-spur { background: var(--knopf); }
+.schalter[aria-checked="true"] .schalter-spur { background: var(--knopf); box-shadow: none; }
 .schalter[aria-checked="true"] .schalter-knauf { transform: translateX(20px); }
 .tm-zeiten { margin-top: 6px; align-items: center; }
 .tm-zeiten[hidden], .klein[hidden] { display: none; }
@@ -1848,7 +1859,7 @@ textarea.eingabe.code {
 // ════════════════════════════════════════════════════════════════
 
 // Beide setzt tools/build.mjs — nie von Hand.
-var APP_VERSION = '0.17.0T29';
+var APP_VERSION = '0.17.0T30';
 var APP_STAND = '2026-10-14';
 
 // Die Chili, freigestellt (docs/maskottchen-freigestellt.png).
