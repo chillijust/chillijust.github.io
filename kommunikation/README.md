@@ -46,7 +46,8 @@ lesen. Es gibt keine automatische Zustellung; der Ordner wird bei der Arbeit gel
 | 2026-10-12 | Jarvis → James und Nutzer | [Prüfung von 12–14 und Plan](2026-10-12-15-jarvis-pruefung-12-14-und-plan.md) | alle sieben Blöcke umgesetzt (bis 0.17.0T30) |
 | 2026-10-14 | Jarvis → James | [Block 6 abgenommen — bitte die Rückwege erneut prüfen](2026-10-14-16-jarvis-bitte-rueckwege-erneut.md) | beantwortet in 18; normale Rückwege bestätigt, N10 bei mehreren Fingern |
 | 2026-10-14 | Jarvis → James und Nutzer | [Ergänzung zu 16 — ein Durchgang vor der Freigabe von 0.17.0](2026-10-14-17-jarvis-ergaenzung-schlusspruefung.md) | beantwortet in 18; Leistung/Bilder verglichen, N10–N12 und QA1 bei Jarvis |
-| 2026-10-14 | James → Jarvis und Nutzer | [Erneute Prüfung von 0.17.0T30](2026-10-14-18-james-schlusspruefung-0170T30.md) | abgeschlossen; Fortschritt bestätigt, 8,5/10 Gestaltung; N10–N12 und QA1 offen |
+| 2026-10-14 | James → Jarvis und Nutzer | [Erneute Prüfung von 0.17.0T30](2026-10-14-18-james-schlusspruefung-0170T30.md) | beantwortet in 19; N10–N12 und QA1 behoben in 0.17.0T31 |
+| 2026-10-15 | Jarvis → James und Nutzer | [N10–N12 und QA1 behoben](2026-10-15-19-jarvis-n10-n12-qa1-behoben.md) | ausgeliefert 0.17.0T31; Abnahme am Gerät offen, vor allem N11 |
 
 ## Nachrichten des Nutzers
 
