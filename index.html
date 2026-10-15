@@ -10010,13 +10010,32 @@ var langPunkt = null;    // wo: { x, y } — dort quillt die Ansicht heraus
 // schon unter ihm — iOS markierte dort das Wort unter dem Finger. Bis er sich
 // hebt, ist nichts auswählbar, und was doch markiert wurde, geht (ADR 0043).
 function langHalten() {
-  var wurzel = document.documentElement;
-  function los() {
+  const wurzel = document.documentElement;
+  // Hebt sich der Finger, schickt der Browser noch einen Klick dorthin, wo er
+  // lag — inzwischen steht dort die neue Ansicht, etwa «Monatlich» in der
+  // Terminmaske (James N11). Dieser eine Klick gehört zur langen Geste und
+  // geht ins Leere. Ein neuer Tipp beginnt mit einem neuen Auflegen; das hebt
+  // die Sperre sofort auf, eine Bedienpause entsteht nicht.
+  function folgeKlickSchlucken() {
+    function schlucken(e) { e.preventDefault(); e.stopPropagation(); ende(); }
+    function ende() {
+      document.removeEventListener('click', schlucken, true);
+      document.removeEventListener('pointerdown', ende, true);
+      document.removeEventListener('touchstart', ende, true);
+    }
+    document.addEventListener('click', schlucken, true);
+    document.addEventListener('pointerdown', ende, true);
+    document.addEventListener('touchstart', ende, true);
+    // Schickt der Browser keinen Klick, wartet die Sperre nicht ewig.
+    setTimeout(ende, 800);
+  }
+  function los(e) {
     wurzel.classList.remove('lang-haelt');
-    try { window.getSelection().removeAllRanges(); } catch (e) { /* egal */ }
+    try { window.getSelection().removeAllRanges(); } catch (err) { /* egal */ }
     ['pointerup', 'pointercancel', 'touchend', 'touchcancel'].forEach(function (n) {
       document.removeEventListener(n, los, true);
     });
+    if (e && (e.type === 'pointerup' || e.type === 'touchend')) folgeKlickSchlucken();
   }
   wurzel.classList.add('lang-haelt');
   try { window.getSelection().removeAllRanges(); } catch (e) { /* egal */ }

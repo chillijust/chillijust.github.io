@@ -117,6 +117,67 @@ return Promise.resolve()
     langGedrueckt = 0;
     return durch();
   }).then(function () {
+    // ── F · Der Klick, den der Browser beim Heben schickt (James N11) ──
+    // Nach dem langen Druck steht die Terminmaske unter dem Finger. Hebt er
+    // sich, landet der Klick des Browsers dort, etwa auf «Monatlich». Er gehört
+    // zur Geste und ändert nichts; ein neuer Tipp danach wirkt sofort.
+    aufbauen();
+    langGedrueckt = 0;
+    druck('#ansicht > .abschnitt [data-termin="T"]', punktIn('#ansicht > .abschnitt [data-termin="T"]'));
+    return warten(LANG_MS + 100);
+  }).then(function () {
+    var vorher = terminEntwurf && terminEntwurf.wiederholung;
+    document.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerType: 'touch' }));
+    document.dispatchEvent(new Event('touchend', { bubbles: true }));
+    q('[data-wdh="monatlich"]').click();
+    pruefe('F1 der Klick beim Heben wählt nichts in der Maske', ansicht === 'termin' && vorher === 'keine' &&
+      terminEntwurf.wiederholung === 'keine' && q('[data-wdh="keine"]').getAttribute('aria-pressed') === 'true',
+      vorher + ' ' + (terminEntwurf && terminEntwurf.wiederholung));
+    // Gleich danach ein bewußter Tipp: neues Auflegen, dann Klick.
+    var w = q('[data-wdh="woechentlich"]');
+    w.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, pointerType: 'touch' }));
+    w.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerType: 'touch' }));
+    w.click();
+    pruefe('F2 ein neuer Tipp gleich danach wirkt sofort', terminEntwurf.wiederholung === 'woechentlich');
+    q('[data-wdh="keine"]').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, pointerType: 'touch' }));
+    q('[data-wdh="keine"]').click();
+    q('#tmSpeichern').click();
+    pruefe('F3 Speichern ohne Änderung erhält den Termin', terminNach('T').wiederholung === 'keine' &&
+      terminNach('T').tag === '2026-10-14' && terminNach('T').von === '09:30' && terminNach('T').titel === 'Zahnarzt');
+    return durch();
+  }).then(function () {
+    // Dasselbe an der Gewohnheit: Ihr Formular steht nach dem langen Druck
+    // unter dem Finger.
+    aufbauen();
+    langGedrueckt = 0;
+    druck('[data-haken="A"]', punktIn('[data-haken="A"]'));
+    return warten(LANG_MS + 100);
+  }).then(function () {
+    var art = entwurf && entwurf.art, angekommen = 0;
+    var anders = alle('#ansicht [data-art]').filter(function (b) { return b.getAttribute('data-art') !== art; })[0];
+    function zaehlen() { angekommen++; }
+    document.addEventListener('click', zaehlen);
+    document.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerType: 'touch' }));
+    anders.click();
+    document.removeEventListener('click', zaehlen);
+    pruefe('F4 an der Gewohnheit geht der Klick beim Heben ebenso ins Leere', ansicht === 'bearbeiten' &&
+      !!art && angekommen === 0 && entwurf.art === art, art + ' ' + angekommen + ' ' + entwurf.art);
+    return durch();
+  }).then(function () {
+    // Schickt der Browser beim Heben keinen Klick, hebt sich die Sperre von
+    // selbst: Ein Klick ohne Auflegen (Tastatur, VoiceOver) wirkt danach.
+    aufbauen();
+    langGedrueckt = 0;
+    druck('#ansicht > .abschnitt [data-termin="T"]', punktIn('#ansicht > .abschnitt [data-termin="T"]'));
+    return warten(LANG_MS + 100);
+  }).then(function () {
+    document.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerType: 'touch' }));
+    return warten(1000);
+  }).then(function () {
+    q('[data-wdh="monatlich"]').click();
+    pruefe('F5 ohne Klick beim Heben bleibt keine Sperre zurück', terminEntwurf.wiederholung === 'monatlich');
+    return durch();
+  }).then(function () {
     frisch();
     speichern();
   });
