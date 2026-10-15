@@ -20,6 +20,13 @@ function finger(typ, x, y) {
   ziel.dispatchEvent(new TouchEvent(typ, { bubbles: true, touches: typ === 'touchend' || typ === 'touchcancel' ? [] : [t],
     changedTouches: [t] }));
 }
+// Mehrere Finger: [[x, y], …] liegen auf; der erste ist der vom Rand.
+function finger2(typ, punkte) {
+  var ziel = q('#ansicht'), ts = punkte.map(function (p, i) {
+    return new Touch({ identifier: 3 + i, target: ziel, clientX: p[0], clientY: p[1] });
+  });
+  ziel.dispatchEvent(new TouchEvent(typ, { bubbles: true, touches: typ === 'touchend' ? [] : ts, changedTouches: ts }));
+}
 function abbild() { return q('body > .abbild'); }
 function skala() {
   var m = /scale\(([-\d.]+)\)/.exec(q('#app').style.transform);
@@ -166,6 +173,27 @@ return warten(50).then(function () {
   finger('touchstart', 8, 400);
   finger('touchend', 8, 400);
   pruefe('A7a ein Tipp am Rand läßt kein Abbild zurück', sauber() && ansicht === 'journal');
+  // Ein zweiter Finger vor der Schwelle (James N10): Das vorbereitete Abbild
+  // geht sofort, auch dreimal hintereinander.
+  for (var i = 0; i < 3; i++) {
+    finger('touchstart', 6, 600);
+    finger2('touchstart', [[6, 600], [240, 610]]);
+    finger2('touchend', [[6, 600], [240, 610]]);
+  }
+  pruefe('M1 ein zweiter Finger vor dem Zug läßt kein Abbild zurück', sauber() && ansicht === 'journal' &&
+    !alle('body > .abbild').length && !wischVon, alle('body > .abbild').length);
+  // Mitten im Zug, ohne weitere Bewegung: Abbruch, nicht nach Hause.
+  finger('touchstart', 6, 600);
+  finger('touchmove', 96, 600);
+  finger('touchmove', 186, 600);
+  finger2('touchstart', [[186, 600], [300, 600]]);
+  pruefe('M2 ein zweiter Finger im Zug läßt die Ansicht sofort zurückfedern', !!rueckZug && !!rueckZug.federt);
+  finger2('touchend', [[186, 600], [300, 600]]);
+  pruefe('M3 und das Heben danach wechselt nicht', ansicht === 'journal', ansicht);
+  ausbewegt();
+  return warten(30);
+}).then(function () {
+  pruefe('M4 danach bleibt nichts zurück', sauber() && !alle('body > .abbild').length);
   // Ein kurzer, schneller Zug zählt wie ein weiter.
   finger('touchstart', 8, 400);
   finger('touchmove', 30, 400);

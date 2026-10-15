@@ -5177,8 +5177,17 @@ function kalWischFlaeche(el) {
 // Vom rechten Rand nach links, zum Menüknopf hin, öffnet das Menü — auf dem
 // Dashboard wie unterwegs (ADR 0025).
 function wischBeginnen(e) {
-  wischVon = null;
-  if (e.touches.length !== 1 || blattOffen()) return;
+  // Ein zweiter Finger bricht ab, auch ohne weitere Bewegung: Ein laufender
+  // Zug federt zurück, ein vorbereitetes Abbild geht. Erst danach wird der
+  // Finger vergessen — vorher fiel die Referenz aufs Abbild, und es blieb
+  // liegen (James N10).
+  if (e.touches.length !== 1) {
+    zugLoslassen(null);
+    wischVergessen();
+    return;
+  }
+  wischVergessen();
+  if (blattOffen()) return;
   const t = e.touches[0], breite = window.innerWidth || document.documentElement.clientWidth;
   if (t.clientX <= WISCH_RAND) wischVon = { x: t.clientX, y: t.clientY, rechts: false };
   else if (t.clientX >= breite - WISCH_RAND) wischVon = { x: t.clientX, y: t.clientY, rechts: true };
