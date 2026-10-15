@@ -49,7 +49,7 @@ Safari als Home-Bildschirm-App im Vollbild, hoch und quer (ADR 0056).
 | 6 · Rückblick: Heatmap, Journal | fertig (0.7.1) |
 | 7 · Sicherung, Einstellungen, Tickets | fertig (0.8.0) |
 | 8 · Feinschliff, Nachbesserungen am Gerät, Timer und Zähler, Termine abhaken | fertig (0.13.1) |
-| 9 · Flüssig wie iOS 26 je Stelle, Chilli als Standard (ADR 0053–0055) | im Bau (0.17.0T31) |
+| 9 · Flüssig wie iOS 26 je Stelle, Chilli als Standard (ADR 0053–0055) | fertig (0.17.0) |
 
 ## Wo was steht
 
@@ -167,13 +167,6 @@ node tools/pruefen.mjs                      # Vor-Push-Prüfung allein
 
 Was erledigt ist und was es am Gerät gemessen hat, steht in `docs/verlauf.md`.
 
-- **Abnahme am Gerät steht aus** für Flüssig 0.17.0T7–T25 (ADR 0054, 0055) und James' N1–N9
-  (0.17.0T10–T16). Abgenommen: T24 (Drangblatt), T26 (Auftropfen), T28 (Block 6, Rückwisch).
-- **James hat vor der Freigabe geprüft** (Nachricht 18): Fortschritt bestätigt, Gestaltung
-  8,5/10; seine Befunde N10–N12 und QA1 sind in 0.17.0T31 behoben (Antwort 19). Am Gerät
-  noch: N11 gegentesten (Termin lange drücken, loslassen — Wiederholung bleibt «keine»).
-  Danach gibt der Nutzer 0.17.0 frei: T weg, Abschnitt 9 «fertig».
-- **Block 7 (Gestaltung) ist ausgeliefert** (0.17.0T29–T30): Timer-Glas dichter, Titel auf
-  zwei Zeilen, «10 von 12» kleiner, Kalenderpunkte größer, Schalter aus in Hell gefaßt.
-  Abnahme am Gerät steht aus. Damit ist der Plan aus Nachricht 15 umgesetzt.
+- **0.17.0 freigegeben** am 2026-10-15 nach James' Prüfung (Nachrichten 18, 19); Abschnitt 9
+  fertig.
 - **Vorgemerkt:** Jedes Auflegen des Fingers kostet ein Bild (30–39 ms, kein Skript).

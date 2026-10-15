@@ -63,6 +63,8 @@ QA1 — `ankunft` H3 fragt im selben Augenblick statt 20 ms später. N10/N11 mit
 
 ## Abgenommen
 
+- **0.17.0 freigegeben** am 2026-10-15: Abschnitt 9 fertig, samt T7–T31 und James' N1–N12,
+  nach James' Schlußprüfung (Nachrichten 18, 19).
 - 0.17.0T28 · Block 6: Rückwisch folgt dem Finger auf iOS und wird dabei zum Tropfen, fließt
   in den Knopf; Terminzeile leuchtet bei der Rückkehr — am Gerät abgenommen am 2026-10-14.
 - 0.17.0T26 · Auftropfen beim Start auf iOS (kurzer Hals aus einer Perle, ohne Lichtkante,
