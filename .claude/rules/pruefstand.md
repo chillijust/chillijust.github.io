@@ -43,6 +43,9 @@ und Vorlage: `tools/pruefstand/README.md`; Vorgehen: Skill `pruefstand`.
 
 - **Der Läufer rechnet in virtueller Zeit ohne Bilder**: Animationen kommen nie von selbst
   an. Wer Lage oder Größe mißt, ruft vorher `ausbewegt()`, dann ein kurzes `setTimeout`.
+- **Was selbst fließt, hat keine Keyframes** (ADR 0062): Woher es quillt oder wohin es geht,
+  sagt die Feder (`el._fluss.o.quelle()`, `.p.ziel`, `.o.warten`); `ausbewegt()` bringt auch
+  sie ans Ende — wer den Weg sehen will, fragt vorher.
 - **Auf das Ende einer Bewegung wartet man aus ihrer Konstante** (`THEMA_TROPFEN + 500`),
   nie mit einer festen Zahl — lokal grün, auf GitHub rot (ADR 0039).
 - **Das virtuelle Budget ist 20 s** (`lauf.mjs`). Wartet eine Suite länger, kommt sie mit

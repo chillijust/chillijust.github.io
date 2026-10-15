@@ -8,13 +8,13 @@ const html = readFileSync(APP, 'utf8');
 
 suite('ankunft', html, String.raw`
 function warten(ms) { return new Promise(function (f) { setTimeout(f, ms); }); }
+// Bis eine Feder von iOS 26 ruht.
+function ruheZeit() { return Math.ceil(1000 * Math.log(1 / 0.0015) / (fpDaempfung(FP_IOS) * 2 * Math.PI / FP_IOS.tempo)) + 250; }
 function uebergaenge(el) {
   return el.getAnimations().filter(function (a) { return window.CSSTransition && a instanceof CSSTransition; });
 }
 frisch();
 state.gewohnheiten = [gewohnheitLesen({ id: 'A', name: 'A', rhythmus: { art: 'taeglich' }, angelegt: tagPlus(heuteSchluessel(), -3), erledigt: [] })];
-state.fluessig = { ios: { tag: true } };
-flDauernSetzen();
 zeige('home');
 ausbewegt();
 
@@ -34,8 +34,6 @@ return warten(900).then(function () {
     getComputedStyle(n).boxShadow !== 'none');
 
   // ── H · Der Abhaken-Tropfen ──────────────────────────────────
-  state.fluessig = { ios: { haken: true } };
-  flDauernSetzen();
   zeige('home');
   ausbewegt();
   q('#app [data-haken="A"]').click();
@@ -60,8 +58,6 @@ return warten(900).then(function () {
     q('#app .tagesring .tr-bild').getAnimations().map(function (a) { return a.playState + '@' + a.currentTime; }).join(' '));
 
   // ── W · Eine Zeile aus dem Wahlschalter ──────────────────────
-  state.fluessig = { ios: { ansichten: true } };
-  flDauernSetzen();
   zeige('terminNeu');
   ausbewegt();
   q('#app [data-wdh="woechentlich"]').click();
@@ -73,18 +69,7 @@ return warten(900).then(function () {
   pruefe('W2 ihr Platz geht auf der Feder des Tropfens auf, nicht erst nach doppelter Zeit', !!platz &&
     platz.effect.getTiming().duration <= TROPFEN_DAUER * 0.6 && String(platz.effect.getTiming().easing).indexOf('linear(') === 0);
 
-  // Chilli: dieselbe Hülle, derselbe Abstand.
-  state.fluessig = null;
-  flDauernSetzen();
-  zeige('terminNeu');
-  ausbewegt();
-  q('#app [data-wdh="taeglich"]').click();
-  var hc = alle('body > .tropfen-huelle').pop(), gc = hc && hc.querySelector('.geist');
-  pruefe('W3 auch in Chilli sitzt der Inhalt im Tropfen ohne Außenabstand', !!gc && getComputedStyle(gc.shadowRoot.lastChild).marginTop === '0px');
-
-  // ── B · Das Ticketblatt auf iOS: Glas erst am Ziel ───────────
-  state.fluessig = { ios: { hinweis: true } };
-  flDauernSetzen();
+  // ── B · Das Ticketblatt: Glas erst am Ziel ───────────────────
   zeige('home');
   ausbewegt();
   return warten(20);
@@ -93,10 +78,10 @@ return warten(900).then(function () {
   glasAmZiel = function () { glasAmZiel.mal = (glasAmZiel.mal || 0) + 1; return echt.apply(this, arguments); };
   q('#ticketKnopf').click();
   var hb = q('body > .tropfen-huelle.milchig');
-  pruefe('B1 auf iOS fließt das Blatt milchig, ohne Unschärfe, auch die wartende Karte', !!hb && !!hb._fluss &&
+  pruefe('B1 das Blatt fließt milchig, ohne Unschärfe, auch die wartende Karte', !!hb && !!hb._fluss &&
     !hb._fluss.o.farbeAmZiel && typeof hb._fluss.o.angekommen === 'function' &&
     !/blur/.test(getComputedStyle(hb).backdropFilter || '') && !/blur/.test(getComputedStyle(q('#ticketKarte')).backdropFilter || ''));
-  return warten(fpRuhe(FP_IOS) + 600).then(function () { ausbewegt(); return warten(20); }).then(function () {
+  return warten(ruheZeit() + 600).then(function () { ausbewegt(); return warten(20); }).then(function () {
     var kst = getComputedStyle(q('#ticketKarte'));
     pruefe('B2 am Ziel bekommt die Karte ihr Glas, einmal, und Hülle und Schicht sind fort', glasAmZiel.mal === 1 &&
       /blur/.test(kst.backdropFilter || '') && q('#ticketKarte').style.opacity === '' &&
@@ -105,11 +90,9 @@ return warten(900).then(function () {
     ticketBlattSchliessen();
     pruefe('B3 zu fließt es ebenso milchig', !!q('body > .tropfen-huelle.milchig') &&
       !/blur/.test(getComputedStyle(q('body > .tropfen-huelle.milchig')).backdropFilter || ''));
-    return warten(fpRuhe(FP_IOS) + 600);
+    return warten(ruheZeit() + 600);
   });
 }).then(function () {
   ausbewegt();
-  state.fluessig = null;
-  flDauernSetzen();
 });
 `);

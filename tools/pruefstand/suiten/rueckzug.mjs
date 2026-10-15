@@ -1,8 +1,7 @@
-// Der Rückwisch folgt dem Finger (ADR 0060, Block 6 aus Nachricht 15): Steht
-// «Ansichten» auf iOS, schiebt sich die Ansicht beim Wisch vom linken Rand mit,
-// darunter liegt ein stilles Abbild des Dashboards. Erst die bestätigte Geste
-// wechselt; kurz, senkrecht, abgebrochen oder gedreht federt sie zurück. Chilli,
-// Bewegung aus, offene Tastatur und ein Rückweg, der nicht nach Hause führt,
+// Der Rückwisch folgt dem Finger (ADR 0060, Block 6 aus Nachricht 15): Beim
+// Wisch vom linken Rand schiebt sich die Ansicht mit, darunter liegt ein
+// stilles Abbild des Dashboards. Erst die bestätigte Geste wechselt; kurz,
+// senkrecht, abgebrochen oder gedreht federt sie zurück. Bewegung aus, offene Tastatur und ein Rückweg, der nicht nach Hause führt,
 // wischen wie bisher beim Loslassen (ADR 0016). Dazu leuchtet eine Terminzeile
 // kurz auf, wenn eine Ansicht oder Meldung in sie zurückkommt.
 //
@@ -14,7 +13,9 @@ const html = readFileSync(APP, 'utf8');
 suite('rueckzug', html, String.raw`
 jetzt = function () { return new Date(2026, 9, 14, 8, 0); };
 function warten(ms) { return new Promise(function (f) { setTimeout(f, ms); }); }
-var RUHE = fpRuhe(FP_IOS) + 600, leuchtSpur = [];
+// Bis eine Feder von iOS 26 ruht.
+function ruheZeit() { return Math.ceil(1000 * Math.log(1 / 0.0015) / (fpDaempfung(FP_IOS) * 2 * Math.PI / FP_IOS.tempo)) + 250; }
+var RUHE = ruheZeit() + 600, leuchtSpur = [];
 function finger(typ, x, y) {
   var ziel = q('#ansicht'), t = new Touch({ identifier: 3, target: ziel, clientX: x, clientY: y });
   ziel.dispatchEvent(new TouchEvent(typ, { bubbles: true, touches: typ === 'touchend' || typ === 'touchcancel' ? [] : [t],
@@ -36,33 +37,19 @@ function sauber() {
   return !abbild() && !q('#app').classList.contains('zieht') && !q('#app').classList.contains('bereit') &&
     !q('#app').style.transform && !q('#app').style.clipPath && !q('body > .zug-schatten') && !rueckZug;
 }
-function aufbauen(ios) {
+function aufbauen() {
   frisch();
   kalTag = null;
   state.gewohnheiten = ['Lesen', 'Laufen', 'Wasser', 'Dehnen', 'Schreiben', 'Atmen', 'Gehen', 'Ruhe'].map(function (n, i) {
     return gewohnheitLesen({ id: 'g' + i, name: n, rhythmus: { art: 'taeglich' }, angelegt: '2026-10-01', erledigt: [] });
   });
   state.termine = [terminLesen({ id: 'T', titel: 'Zahnarzt', tag: '2026-10-14', von: '09:30' })];
-  state.fluessig = { ios: ios ? { ansichten: true } : {} };
-  flDauernSetzen();
   zeige('home');
   ausbewegt();
 }
 
-// ── C · Chilli: wie bisher ────────────────────────────────────
-aufbauen(false);
-zeige('einstellungen');
-ausbewegt();
-finger('touchstart', 8, 400);
-finger('touchmove', 60, 402);
-finger('touchmove', 140, 404);
-pruefe('C1 auf Chilli folgt die Ansicht nicht', !abbild() && !rueckZug && !q('#app').classList.contains('zieht'));
-finger('touchend', 140, 404);
-pruefe('C2 und der Wisch führt beim Loslassen nach Hause', ansicht === 'home', ansicht);
-ausbewegt();
-
-// ── Z · iOS: die Ansicht folgt dem Finger ─────────────────────
-aufbauen(true);
+// ── Z · Die Ansicht folgt dem Finger ──────────────────────────
+aufbauen();
 window.scrollTo(0, 200);
 var gerollt = window.pageYOffset;
 q('#menuKnopf').click();
@@ -235,7 +222,7 @@ return warten(50).then(function () {
   themaAnwenden();
 
   // ── L · Die Terminzeile leuchtet ────────────────────────────
-  aufbauen(true);
+  aufbauen();
   var zeile = q('[data-termin="T"]'), r = zeile.getBoundingClientRect();
   zeile.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, clientX: r.left + r.width * 0.8,
     clientY: r.top + r.height / 2, pointerType: 'touch' }));
@@ -263,9 +250,7 @@ return warten(50).then(function () {
     an > 0 && !leuchtSpur[an][1] && leuchtSpur.every(function (x) { return x[2] <= 1; }), JSON.stringify(leuchtSpur.slice(0, 40)));
   pruefe('L3 und hört wieder auf', !q('.leuchtet'));
 }).then(function () {
-  // Chilli, mit dem Pfeil
-  state.fluessig = { ios: {} };
-  flDauernSetzen();
+  // Mit dem Pfeil
   var z = q('[data-termin="T"]'), r2 = z.getBoundingClientRect();
   z.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, clientX: r2.left + r2.width * 0.8,
     clientY: r2.top + r2.height / 2, pointerType: 'touch' }));
@@ -274,11 +259,11 @@ return warten(50).then(function () {
   ausbewegt();
   q('#zurueckKnopf').click();
   ausbewegt();
-  return warten(TROPFEN_DAUER + 50);
+  leuchtSpur = [];
+  var spaeh = setInterval(function () { leuchtSpur.push(!!q('#ansicht [data-termin="T"].leuchtet')); }, 20);
+  return warten(RUHE + LEUCHT_DAUER).then(function () { clearInterval(spaeh); });
 }).then(function () {
-  pruefe('L4 auf Chilli leuchtet sie nach dem Pfeil ebenso', ansicht === 'home' &&
-    !!q('#ansicht [data-termin="T"].leuchtet'));
-  return warten(LEUCHT_DAUER + 50);
+  pruefe('L4 nach dem Pfeil leuchtet sie ebenso', ansicht === 'home' && leuchtSpur.indexOf(true) >= 0 && !q('.leuchtet'));
 }).then(function () {
   // Speichern: erst die Meldung, dann leuchtet die Zeile — kein zweites Zurückfließen.
   zeige('termin', 'T');

@@ -149,18 +149,18 @@ pruefe('B1 kurz ist schmal, lang breiter, höchstens wie ein Hinweis mit «OK»'
   lang <= mitOk + 0.5 && mitOk >= 300, [kurz, lang, mitOk].join());
 frisch();
 
-// ── S · Die Einträge tropfen nacheinander auf (ADR 0041) ─────
+// ── S · Die Einträge kommen mit dem Blatt (ADR 0054, 0062) ─────
+// Das Blatt fließt als Tropfen aus dem Knopf; seine Einträge blenden ein, wenn
+// es fast steht, statt einzeln aufzutropfen.
 menueSchliessen(true);
 ausbewegt();
 menueOeffnen();
-var zuege = alle('#menueListe .menue-eintrag').map(function (z) {
-  var a = z.getAnimations()[0];
-  return a ? { warten: a.effect.getTiming().delay, clip: a.effect.getKeyframes()[0].clipPath || '' } : null;
-});
-pruefe('S1 jeder Eintrag beginnt als Perle', zuege.every(function (z) { return z && /round/.test(z.clip); }));
-pruefe('S2 einer nach dem anderen', zuege.every(function (z, i) { return !i || z.warten > zuege[i - 1].warten; }) &&
-  zuege[zuege.length - 1].warten - zuege[0].warten < 700, zuege.map(function (z) { return z && z.warten; }).join());
+var sb = q('#menue .blatt');
+pruefe('S1 die Einträge kommen mit dem Blatt, unsichtbar, bis es fast steht', !!sb._fluss && sb._fluss.o.inhalt === q('#menueListe') &&
+  q('#menueListe').style.opacity === '0');
+pruefe('S2 kein Eintrag tropft für sich', alle('#menueListe .menue-eintrag').every(function (z) { return !z.getAnimations().length; }));
 ausbewegt();
+pruefe('S3 steht es, sind sie alle da', !sb._fluss && !q('#menueListe').style.opacity);
 menueSchliessen(true);
 ausbewegt();
 

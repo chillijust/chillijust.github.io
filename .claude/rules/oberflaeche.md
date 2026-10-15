@@ -34,9 +34,8 @@ fest.
 
 ## Aufbau
 
-- **Kopf in zwei Gestalten** (Dashboard, unterwegs), keine Reiterleiste; nur die
-  Einstellungen trennen Allgemein | Flüssig (`esReiter`, ADR 0053). Die Überschrift führt
-  immer zur Übersicht.
+- **Kopf in zwei Gestalten** (Dashboard, unterwegs), keine Reiterleiste, auch nicht in den
+  Einstellungen (ADR 0062). Die Überschrift führt immer zur Übersicht.
 - **Runde Knöpfe** (`.rund`) sind 44 × 44, Symbol aus `ICON`, mit `aria-label`.
 - **Eine ID aus dem Stand geht nur über `mitWert(attr, id)` in einen Selektor** — sie
   kann aus einem Sicherungscode kommen und Anführungszeichen tragen.
@@ -46,7 +45,7 @@ fest.
   Ein zweites Ziel gibt es nicht, außer dem «−» des Zählers. Nach einem langen Druck ist
   nichts markierbar, bis der Finger sich hebt (`langHalten`).
 - **Der Rückweg geht nur über `zurueckGehen()`** — Kopf und Wisch vom Rand
-  (`wischBeginnen`/`wischEnden`, auf iOS der Zug `zugLoslassen`) rufen es. Was unter dem
+  (`wischBeginnen`/`wischEnden`, der Zug `zugLoslassen`) rufen es. Was unter dem
   Zug liegt, ist ein Abbild ohne Ids im Dokument, nie eine zweite bedienbare Seite (ADR 0060).
 - **Was live läuft, schreibt `takt()` an Ort und Stelle** — kein `render()` im Sekundentakt.
 - **Quer ist das Bild 430 hoch** (ADR 0056): Keine Karte wird höher als ihr Blatt; was neu
@@ -63,25 +62,24 @@ fest.
   sich darüber. Was verschwindet, zeigt `geist(el)`; eine Zeile geht über
   `zeileGeht(el, liste, ersatz)`.
 - **Es gibt eine Tropfen-Mechanik**: `tropfenAuf`/`tropfenZu` mit `tropfenQuelle` — rund,
-  ohne Spitze, ohne Überschwingen. Was ein Knopf öffnet, tropft aus ihm und in ihn zurück;
+  ohne Spitze, die Hülle fließt selbst (`huelleFliesst`). Was ein Knopf öffnet, tropft aus ihm und in ihn zurück;
   ist die Herkunft fort, in den Menüknopf. Nach langem Druck aus dem Fingerpunkt
   (`punktFlaeche`).
-- **Standard ist die Chilli-Bewegung; iOS-Flüssig gilt je Stelle** (ADR 0054): Wer an einer
-  Stelle bewegt, fragt `flIos(stelle)` und nimmt dann `fluessigTakt`/`fliessen`. Feste
-  Dauern setzt nur `flDauernSetzen` — keine Zahl von Hand. Auf iOS ersetzt das Flüssige
-  die Chilli-Bewegung, es legt sich nicht darunter (`teilFliesst`); `fliessen` malt nur
-  Hals und Rest, nie das Teil. Was zurückfließt, blendet kein Vorfahr aus (am Menü nur
-  der Schleier); wer fremde Bewegung abwartet, fragt `eigeneBewegung` — der Übergang vom
-  Drücken zählt nicht.
+- **Jede Stelle fließt wie in iOS 26, es gibt keinen zweiten Weg** (ADR 0054, 0062): Wer
+  bewegt, nimmt `fluessigTakt`, `teilFliesst` und `fliessen`. Feste Dauern setzt nur
+  `flDauernSetzen` — keine Zahl von Hand. Das Teil fließt selbst, nichts legt sich darunter
+  (`teilFliesst`); `fliessen` malt nur Hals und Rest, nie das Teil. Was zurückfließt,
+  blendet kein Vorfahr aus (am Menü nur der Schleier); wer fremde Bewegung abwartet, fragt
+  `eigeneBewegung` — der Übergang vom Drücken zählt nicht.
 - **Teile über `teilZeigen(el, an, quelle)`, Knöpfe über `teilTropfen(el, an)`**, nie
   `el.hidden = …`. Ein Teil mit eigenem `display` braucht `[hidden] { display: none; }`.
   Eine neue `.wahl` bekommt ihre Marke von `wahlenSetzen()`.
 - **Glas** (`.glas`, im Tropfen `glas` im `opt`) haben Hinweis, Meldung, Ticketblatt und
   Fenster, keine Ansicht. **Kein Vorfahr von Glas blendet seine Deckkraft** — sonst bleibt
   es matt (ADR 0014). Glas an einer Gewohnheit beginnt und endet in ihrer Scheibe
-  (`scheibeVon`). Ein großes Blatt aus Glas (Ticketblatt, Timer) tropft `milchig`, auf iOS
-  schlicht, und bekommt sein Glas erst am Ziel — Unschärfe, Doppelschatten und Lichtkante
-  in jedem Bild ruckeln am Gerät (ADR 0054). Eine Ansicht fließt auf iOS ohne Lichtkante
+  (`scheibeVon`). Ein großes Blatt aus Glas (Ticketblatt, Timer) tropft `milchig` und
+  schlicht und bekommt sein Glas erst am Ziel — Unschärfe, Doppelschatten und Lichtkante
+  in jedem Bild ruckeln am Gerät (ADR 0054). Eine Ansicht fließt ohne Lichtkante
   (`gross`). Timer und Drang sind Blätter, keine Ansichten (ADR 0059). Ein Bildschritt mißt
   erst, dann schreibt er.
 - **Rückmeldung** — immer im Glas:

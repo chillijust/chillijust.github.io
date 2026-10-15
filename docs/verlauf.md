@@ -61,6 +61,11 @@ höchstens zwei Zeilen, langes Wort bricht um; der Rand für den Tonknopf galt n
 QA1 — `ankunft` H3 fragt im selben Augenblick statt 20 ms später. N10/N11 mit echten Touchfolgen
 über DevTools nachgestellt und nach dem Fix gegengeprüft; Abnahme am Gerät steht aus.
 
+0.19.0T, ADR 0062 — iOS ist das neue Chilli: Jede Stelle fließt wie in iOS 26, die Chilli-Bilder sind
+fort; die Einstellungen haben keinen Reiter mehr, «Ruckler messen» geht mit, `state.fluessig` entfällt.
+Das Menü kommt als ein Tropfen, seine Einträge blenden ein, statt einzeln aufzutropfen. `index.html`
+678 → 620 KB. Sicherung davor: `backup/chillinal-0.18.0T-2026-10-15`. Abnahme am Gerät steht aus.
+
 ## Abgenommen
 
 - **0.18.0 freigegeben** am 2026-10-15: Erinnerungen wie bei iOS, Abschnitt 10 fertig (ADR 0061).

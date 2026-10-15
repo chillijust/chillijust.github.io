@@ -13,8 +13,6 @@ function imBild(el) { var r = el.getBoundingClientRect(); return r.top >= -0.5 &
 function huelle() { var h = alle('body > .tropfen-huelle'); return h[h.length - 1] || null; }
 var bis = function () { return HINWEIS_DAUER + 3 * TROPFEN_DAUER + 400; };
 frisch();
-state.fluessig = { ios: { hinweis: true } };
-flDauernSetzen();
 state.abgewoehnen = [lasterLesen({ id: 'z', name: 'Zucker', start: zeitJetzt() - 864e5, rueckfaelle: [], draenge: [] })];
 state.gewohnheiten = [gewohnheitLesen({ id: 'g', name: 'Lesen', rhythmus: { art: 'taeglich' },
   angelegt: tagPlus(heuteSchluessel(), -3), erledigt: [], timer: { minuten: 10, stumm: true } })];

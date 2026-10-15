@@ -48,7 +48,7 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0038](0038-timer-und-zaehler.md) | Timer und Zähler: abhaken mit Zeit oder durch Zählen | gilt; Glas aus der Scheibe, Pause, Zählschritt seit 0040; Abbrechen fragt im Glas seit 0041 |
 | [0039](0039-pruefstand-wartet-aus-der-konstante.md) | Der Prüfstand wartet aus der Bewegungskonstante, nicht fest; Budget des Läufers 20 s | gilt |
 | [0040](0040-timer-klein-pause-zaehlschritt.md) | Glas aus der Scheibe, Timer mit Pause, Zähler in Schritten mit Einheit | gilt; Pause im Ring seit 0041 |
-| [0041](0041-termine-abhaken-fenster-wird-meldung.md) | Termine abhaken, Fenster wird Meldung, Menüknopf tropft herab, Einträge nacheinander, «Hinzufügen» aus dem Plus, Fragen im Glas | gilt; Termin wie Kachel, «Nein», Menüknopf rollt mit seit 0042; Aufbau des Timers abgelöst durch 0054 |
+| [0041](0041-termine-abhaken-fenster-wird-meldung.md) | Termine abhaken, Fenster wird Meldung, Menüknopf tropft herab, Einträge nacheinander, «Hinzufügen» aus dem Plus, Fragen im Glas | gilt; Einträge kommen seit 0062 mit dem Blatt; Termin wie Kachel, «Nein», Menüknopf rollt mit seit 0042; Aufbau des Timers abgelöst durch 0054 |
 | [0042](0042-termin-wie-kachel-nein-menue-rollt.md) | Termin wie eine Kachel, «Nein» in der Frage, Menüknopf rollt mit, Meldung ohne zweiten Tropfen | gilt; Gast erst aus der Ecke seit 0043; Wahl ohne «Abbrechen» seit 0044 |
 | [0043](0043-langdruck-ohne-markieren-gast-aus-der-ecke.md) | Langer Druck markiert nichts, der Gast des Menüknopfs tropft aus der Ecke, nie zwei Knöpfe | gilt |
 | [0044](0044-wahl-ohne-abbrechen-fassung-tropft-mit.md) | «Hinzufügen» ohne «Abbrechen»; die Zeile «Neue Fassung» tropft mit dem Dashboard auf | gilt |
@@ -60,12 +60,13 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0050](0050-kommunikation-nur-auf-eigenem-branch.md) | `kommunikation/` lebt nur auf `chatgpt/kommunikation`, nie auf `main`; nie zusammenführen | gilt |
 | [0051](0051-zeichen-neu-mit-puls-und-warnung.md) | Zeichen der Meldung neu bewegt, jedes endet mit dem Puls; eine Warnung für Fehlschläge | gilt |
 | [0052](0052-kalender-wischen.md) | Der Kalender folgt dem Finger (Tropfen, 1:1); Pfeile und «Heute» spielen dieselbe Bewegung | gilt; löst den Seitentropfen aus 0028 ab |
-| [0053](0053-fluessige-tropfen.md) | Die Tropfen fließen wie in iOS 26: Feder, Hals, Dehnen, Lichtkante, an jeder Stelle; Reiter «Flüssig» in den Einstellungen | Mechanik und Reiter gelten; Voreinstellung, Regler, Filter abgelöst durch 0054 |
-| [0054](0054-chilli-standard-ios-je-stelle.md) | Chilli ist Standard; iOS-Flüssig je Stelle im Reiter «Flüssig», mit Speichern; Pfad statt Filter; Drang und Timer mit Flüssigkeit und Chili | gilt; große Blätter fließen schlicht seit 0.17.0T18, Auftropfen mit kurzem Hals seit 0.17.0T26 |
+| [0053](0053-fluessige-tropfen.md) | Die Tropfen fließen wie in iOS 26: Feder, Hals, Dehnen, Lichtkante, an jeder Stelle; Reiter «Flüssig» in den Einstellungen | Mechanik gilt; Voreinstellung, Regler, Filter abgelöst durch 0054; Reiter abgelöst durch 0062 |
+| [0054](0054-chilli-standard-ios-je-stelle.md) | Chilli ist Standard; iOS-Flüssig je Stelle im Reiter «Flüssig», mit Speichern; Pfad statt Filter; Drang und Timer mit Flüssigkeit und Chili | Pfad, Drang und Timer gelten; «Chilli Standard, iOS je Stelle» und Reiter abgelöst durch 0062; große Blätter schlicht seit 0.17.0T18, Auftropfen mit kurzem Hals seit 0.17.0T26 |
 | [0055](0055-kontrast-in-dunkel.md) | Kontrast in Dunkel: Erhöhtes heller mit Rand, Saum am Flüssigen, Lichtkante ohne Schleier | gilt |
 | [0056](0056-querformat-zaehlt-mit.md) | Querformat zählt mit: keine Karte höher als das Bild, Timer quer nebeneinander, Menü rollt innen | gilt |
 | [0057](0057-worker-liefert-seinen-stand.md) | Der Worker liefert seinen Stand, holt nur Fehlendes, überschreibt nie; neu nur über «Jetzt laden» | gilt |
 | [0058](0058-pruefstand-im-fenster-des-iphones.md) | Der Prüfstand läuft im Fenster des iPhones (430 × 932) über DevTools, Bildlaufleiste ohne Platz, Schriften geladen | gilt |
 | [0059](0059-drang-als-blatt.md) | Der Drang ist ein Blatt aus Glas wie der Timer, keine eigene Ansicht; läuft geschlossen weiter, geht am Ende von selbst auf | gilt |
-| [0060](0060-rueckwisch-folgt-dem-finger.md) | Der Rückwisch folgt auf iOS dem Finger, darunter ein stilles Abbild des Dashboards; eine Terminzeile leuchtet bei der Rückkehr | gilt |
+| [0060](0060-rueckwisch-folgt-dem-finger.md) | Der Rückwisch folgt auf iOS dem Finger, darunter ein stilles Abbild des Dashboards; eine Terminzeile leuchtet bei der Rückkehr | gilt; seit 0062 immer |
 | [0061](0061-erinnerungen.md) | Erinnerungen wie bei iOS: offen, bis abgehakt, Verpaßtes zieht mit; mit Terminen in «Heute», Akzent als Farbe, Export in derselben .ics | gilt |
+| [0062](0062-ios-ist-das-neue-chilli.md) | iOS ist das neue Chilli: jede Stelle fließt wie in iOS 26; kein Reiter «Flüssig», keine Ruckler-Messung, kein `state.fluessig` | gilt |

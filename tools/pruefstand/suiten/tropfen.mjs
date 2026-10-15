@@ -13,8 +13,14 @@ jetzt = function () { return new Date(2026, 9, 14, 8, 0); };
 function warten(ms) { return new Promise(function (f) { setTimeout(f, ms); }); }
 function durch() { ausbewegt(); return warten(30); }
 function huellen() { return alle('body > .tropfen-huelle'); }
-function bilder(h) { var a = h && h.getAnimations()[0]; return a ? a.effect.getKeyframes() : []; }
-function mitte(b) { return { x: parseFloat(b.left) + parseFloat(b.width) / 2, y: parseFloat(b.top) + parseFloat(b.height) / 2 }; }
+// Die Hülle fließt selbst (ADR 0054): woher sie quillt oder wohin sie fließt,
+// sagt ihre Feder.
+function fluss(h) { return h && h._fluss ? h._fluss.o : null; }
+function quellMitte(h) {
+  var r = fluss(h) && fluss(h).quelle();
+  return r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: NaN, y: NaN };
+}
+function schatten(h) { var s = h && h.previousElementSibling; return s ? (s.style.filter.match(/drop-shadow/g) || []).length : 0; }
 function nahe(p, r) { return Math.abs(p.x - (r.left + r.width / 2)) < 2 && Math.abs(p.y - (r.top + r.height / 2)) < 2; }
 function alpha(farbe) { var m = /rgba?\(([^)]*)\)/.exec(farbe || ''); if (!m) return -1; var t = m[1].split(','); return t.length > 3 ? parseFloat(t[3]) : 1; }
 
@@ -29,20 +35,18 @@ knopf.style.cssText = 'position: fixed; left: 40px; top: 700px; width: 120px; he
 document.body.appendChild(knopf);
 hinweisZeigen('Hinzufügen', 'Was möchtest du an diesem Tag hinzufügen?', knopf.getBoundingClientRect(), knopf, { wahl: {
   knoepfe: [{ text: 'Termin', tun: function () {} }] } });
-var h = q('body > .tropfen-huelle.glas'), b = bilder(h);
-pruefe('G2 das Wahlfenster tropft aus dem Knopf, im Tempo von zuvor (ADR 0013)', !!h && nahe(mitte(b[0]), knopf.getBoundingClientRect()) &&
-  h.getAnimations()[0].effect.getTiming().duration === HINWEIS_DAUER);
-pruefe('G3 unterwegs ist die Hülle dicht, am Ziel so getönt wie die Karte',
-  b.length > 2 && alpha(b[1].backgroundColor) >= 0.8 && alpha(b[b.length - 1].backgroundColor) < 0.5,
-  b.map(function (x) { return x.backgroundColor; }).join(' | '));
-pruefe('G4 und trägt einen Rand und tieferen Schatten als die Karte', !!h &&
-  getComputedStyle(h).boxShadow.split('px').length > getComputedStyle(q('#hinweisKarte')).boxShadow.split('px').length,
-  h && getComputedStyle(h).boxShadow);
+var h = q('body > .tropfen-huelle.glas'), o = fluss(h);
+pruefe('G2 das Wahlfenster tropft aus dem Knopf, schneller als eine Ansicht (ADR 0013)', !!o &&
+  nahe(quellMitte(h), knopf.getBoundingClientRect()) && o.schnell === fpKlemme(HINWEIS_DAUER / fluessigTakt('hinweis').dauer, 0.4, 2) &&
+  o.schnell < 1);
+pruefe('G3 unterwegs ist die Hülle dicht, am Ziel so getönt wie die Karte', !!o && alpha(o.farbe) >= 0.8 && alpha(o.farbeAmZiel) < 0.5,
+  o && o.farbe + ' | ' + o.farbeAmZiel);
+pruefe('G4 und trägt einen doppelten Schatten, mit Saum ums Glas', !!o && o.glas && schatten(h) === 2);
 return durch().then(function () {
   hinweisSchliessen();
-  var z = q('body > .tropfen-huelle.glas'), zb = bilder(z);
-  pruefe('G5 zurück ebenso: dicht unterwegs, in den Knopf', !!z && alpha(zb[1].backgroundColor) >= 0.8 &&
-    nahe(mitte(zb[zb.length - 1]), knopf.getBoundingClientRect()));
+  var z = q('body > .tropfen-huelle.glas');
+  pruefe('G5 zurück ebenso: dicht unterwegs, in den Knopf', !!fluss(z) && alpha(fluss(z).farbe) >= 0.8 &&
+    nahe(quellMitte(z), knopf.getBoundingClientRect()));
   return durch();
 }).then(function () {
   knopf.remove();
@@ -55,11 +59,11 @@ return durch().then(function () {
   // des kopflosen Browsers die Knöpfe danach um ein paar Pixel.
   var wt = q('[data-art="wochentage"]'), wtr = wt.getBoundingClientRect();
   wt.click();
-  var h = huellen().slice(-1)[0], b = bilder(h);
-  pruefe('F1 «Wochentage»: die Tage tropfen aus dem Knopf', !q('#rhTage').hidden && !!h && nahe(mitte(b[0]), wtr) &&
-    q('#rhTage').style.opacity === '0', JSON.stringify([b[0], wtr]));
-  pruefe('F2 der Platz zieht sich im selben Takt auf', q('#rhTage').getAnimations().some(function (a) {
-    return a.effect.getTiming().duration === h.getAnimations()[0].effect.getTiming().duration; }));
+  var h = huellen().slice(-1)[0];
+  pruefe('F1 «Wochentage»: die Tage tropfen aus dem Knopf', !q('#rhTage').hidden && !!h && nahe(quellMitte(h), wtr) &&
+    q('#rhTage').style.opacity === '0', JSON.stringify([quellMitte(h), wtr]));
+  pruefe('F2 der Platz zieht sich auf der Feder des Tropfens auf', q('#rhTage').getAnimations().some(function (a) {
+    return a.effect.getTiming().duration === taktBisZiel(fluessigTakt('ansichten', true)).dauer; }));
   pruefe('F3 die Hülle trägt den Grund ihrer Umgebung, keine Kante', !!h && h.style.background !== '' && !h.classList.contains('glas'),
     h && h.style.background);
   return durch();
@@ -67,9 +71,9 @@ return durch().then(function () {
   pruefe('F4 danach steht das Teil, sichtbar, ohne Hülle', !q('#rhTage').hidden && q('#rhTage').style.opacity === '' && !huellen().length);
   var tg = q('[data-art="taeglich"]'), tgr = tg.getBoundingClientRect();
   tg.click();
-  var h = huellen().slice(-1)[0], b = bilder(h);
+  var h = huellen().slice(-1)[0];
   pruefe('F5 «Täglich»: die Tage tropfen in den Knopf zurück', q('#rhTage').hidden && !!h &&
-    nahe(mitte(b[b.length - 1]), tgr));
+    nahe(quellMitte(h), tgr));
   return durch();
 }).then(function () {
   pruefe('F6 danach ist aufgeräumt', !huellen().length && !alle('#app .geist').length);
@@ -77,7 +81,7 @@ return durch().then(function () {
   er.click();
   var h = huellen().slice(-1)[0];
   pruefe('F7 die Erinnerung: die Uhrzeit tropft aus dem Schalter', !q('#gwUhrTeil').hidden && !!h &&
-    nahe(mitte(bilder(h)[0]), err));
+    nahe(quellMitte(h), err));
   return durch();
 }).then(function () {
   zeige('terminNeu', '2026-10-14');
@@ -86,14 +90,14 @@ return durch().then(function () {
   wo.click();
   var h = huellen().slice(-1)[0];
   pruefe('F8 eine Wiederholung: «bis» tropft aus ihrem Knopf', !q('#tmEndeTeil').hidden && !!h &&
-    nahe(mitte(bilder(h)[0]), wor));
+    nahe(quellMitte(h), wor));
   return durch();
 }).then(function () {
   var gz = q('#tmGanz'), gzr = gz.getBoundingClientRect();
   gz.click();
-  var h = huellen().slice(-1)[0], b = bilder(h);
+  var h = huellen().slice(-1)[0];
   pruefe('F9 ganztags: die Zeiten tropfen in den Schalter', q('#tmZeiten').hidden && !!h &&
-    nahe(mitte(b[b.length - 1]), gzr));
+    nahe(quellMitte(h), gzr));
   return durch();
 }).then(function () {
   state.bewegung = 'aus';
@@ -109,9 +113,9 @@ return durch().then(function () {
   ausbewegt();
   var zelle = q('#hmRaster [data-hm-tag="2026-09-02"]'), zr = zelle.getBoundingClientRect();
   q('#hmRaster').dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: zr.left + zr.width / 2, clientY: zr.top + zr.height / 2 }));
-  var h = huellen().slice(-1)[0], b = bilder(h);
+  var h = huellen().slice(-1)[0];
   pruefe('H1 ein Tipp ins Raster: die Woche wechselt, ihre Tage tropfen aus dem Punkt', !!h &&
-    q('#hmWoche').textContent.indexOf('KW 36') !== -1 && nahe(mitte(b[0]), zr), q('#hmWoche').textContent.slice(0, 40));
+    q('#hmWoche').textContent.indexOf('KW 36') !== -1 && nahe(quellMitte(h), zr), q('#hmWoche').textContent.slice(0, 40));
   return durch();
 }).then(function () {
   pruefe('H2 danach stehen die Tage', !huellen().length && q('#hmWoche').style.opacity === '');

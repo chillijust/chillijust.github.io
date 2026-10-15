@@ -29,11 +29,21 @@ pruefe('A4 #app hält ihm unten Platz frei', parseFloat(getComputedStyle(q('#app
 pruefe('A5 das Blatt ist zu', blatt.hidden);
 
 // ── B · Das Blatt über einer Ansicht ────────────────────────
+// Eine Hülle fließt selbst (ADR 0054): woher sie quillt oder wohin sie
+// fließt, sagt ihre Feder.
+function quellMitte(el) {
+  var r = el && el._fluss ? el._fluss.o.quelle() : null;
+  return r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: NaN, y: NaN };
+}
+var glasEcht = glasAmZiel, amZiel = 0;
+glasAmZiel = function () { amZiel++; return glasEcht.apply(this, arguments); };
 zeige('einstellungen');
+var kr = knopf.getBoundingClientRect();
 knopf.click();
 var huelle = q('body > .tropfen-huelle');
 pruefe('B1 der Knopf öffnet das Blatt', !blatt.hidden && blatt.classList.contains('offen') && q('#tkKopf').textContent === 'Neues Ticket');
-pruefe('B2 es quillt als Tropfen aus dem Knopf', !!huelle && huelle.getAnimations().length > 0 &&
+pruefe('B2 es quillt als Tropfen aus dem Knopf', !!huelle && !!huelle._fluss && huelle._fluss.p.ziel === 1 &&
+  Math.abs(quellMitte(huelle).x - (kr.left + kr.width / 2)) < 2 && Math.abs(quellMitte(huelle).y - (kr.top + kr.height / 2)) < 2 &&
   q('#ticketKarte').style.opacity === '0');
 pruefe('B3 die Ansicht darunter bleibt stehen', ansicht === 'einstellungen' && !!q('#swKnopf'));
 pruefe('B4 der Ort ist vorgewählt: wo man stand', q('#tkOrt').value === 'einstellungen');
@@ -41,13 +51,11 @@ pruefe('B5 die Gestik schweigt bei offenem Blatt', blattOffen());
 pruefe('B5b der Tropfen fließt milchig, ohne Unschärfe; die Karte wartet ebenso ohne', !!huelle &&
   huelle.classList.contains('milchig') && !/blur/.test(getComputedStyle(huelle).backdropFilter || '') &&
   !/blur/.test(getComputedStyle(q('#ticketKarte')).backdropFilter || ''));
-// Angekommen blendet die Hülle über der Karte aus: eine Bewegung mehr.
+// Angekommen bekommt die Karte ihr Glas, und die Hülle blendet über ihr aus.
 return durch().then(function () {
-  pruefe('B5c angekommen hat die Karte ihr Glas, die Hülle blendet über ihr aus', !!q('body > .tropfen-huelle.milchig') &&
-    /blur/.test(getComputedStyle(q('#ticketKarte')).backdropFilter || '') && q('#ticketKarte').style.opacity === '' &&
-    q('body > .tropfen-huelle.milchig').getAnimations().some(function (a) {
-      var b = a.effect.getKeyframes(); return String(b[b.length - 1].opacity) === '0';
-    }));
+  pruefe('B5c angekommen hat die Karte ihr Glas, einmal', amZiel === 1 &&
+    /blur/.test(getComputedStyle(q('#ticketKarte')).backdropFilter || '') && q('#ticketKarte').style.opacity === '');
+  glasAmZiel = glasEcht;
   return durch();
 }).then(function () {
   pruefe('B6 danach ist der Tropfen weg und das Blatt sichtbar', !q('body > .tropfen-huelle') &&
@@ -88,10 +96,10 @@ return durch().then(function () {
   pruefe('B15 mit dem Stand der App', t.stand === APP_VERSION + ' · ' + APP_STAND && t.erstellt === zeitJetzt());
   pruefe('B16 gespeichert', JSON.parse(localStorage.getItem(SPEICHER)).tickets[0].titel === 'Knopf klemmt');
   pruefe('B17 der Entwurf ist verbraucht', ticketEntwurf === null && !knopf.classList.contains('hat-entwurf'));
-  var glasZu = alle('body > .tropfen-huelle.glas').slice(vorSichern), zb = glasZu.length ? glasZu[0].getAnimations()[0].effect.getKeyframes() : [];
+  var glasZu = alle('body > .tropfen-huelle.glas').slice(vorSichern), hin = quellMitte(glasZu[0]), her = quellMitte(glasZu[1]);
   pruefe('B18 das Blatt fließt nicht zurück, es wird selbst zur Bestätigung (ADR 0041)', !blatt.classList.contains('offen') &&
-    q('#hinweisBlatt').classList.contains('offen') && glasZu.length === 2 &&
-    Math.abs(parseFloat(zb[zb.length - 1].left) - parseFloat(glasZu[1].getAnimations()[0].effect.getKeyframes()[0].left)) < 1, glasZu.length);
+    q('#hinweisBlatt').classList.contains('offen') && glasZu.length === 2 && glasZu[0]._fluss.p.ziel === 0 &&
+    Math.abs(hin.x - her.x) < 1 && Math.abs(hin.y - her.y) < 1, glasZu.length + ' ' + JSON.stringify([hin, her]));
   return durch();
 }).then(function () {
   pruefe('B19 dann bestätigt das Glas', q('#hinweisBlatt').classList.contains('offen') &&
@@ -129,10 +137,9 @@ return durch().then(function () {
   var vorKopie = alle('body > .tropfen-huelle.glas').length, kopierKnopf = q('#tkKopieren').getBoundingClientRect();
   q('#tkKopieren').click();
   var kopieTropfen = alle('body > .tropfen-huelle.glas').slice(vorKopie)[0];
-  var kb = kopieTropfen ? kopieTropfen.getAnimations()[0].effect.getKeyframes()[0] : null;
-  pruefe('D2a «Kopiert» tropft aus dem Knopf, auch ohne Fokus (ADR 0041)', !!kb && /Kopiert/.test(q('#hinweisTitel').textContent) &&
-    Math.abs(parseFloat(kb.top) + parseFloat(kb.height) / 2 - (kopierKnopf.top + kopierKnopf.height / 2)) < 2,
-    kb ? kb.top : 'kein Tropfen');
+  pruefe('D2a «Kopiert» tropft aus dem Knopf, auch ohne Fokus (ADR 0041)', !!kopieTropfen && /Kopiert/.test(q('#hinweisTitel').textContent) &&
+    Math.abs(quellMitte(kopieTropfen).y - (kopierKnopf.top + kopierKnopf.height / 2)) < 2,
+    kopieTropfen ? quellMitte(kopieTropfen).y : 'kein Tropfen');
   pruefe('D3 der Text trägt Kopf und Nummern', kopiert.indexOf('# Chillinal · 2 Tickets\n\n## 1 · Fehler: Knopf klemmt\n\n' +
     'Er reagiert erst beim zweiten Mal.\n\n- Ort: Kalender\n- Art: Bedienung\n') === 0, kopiert);
   pruefe('D4 der Wunsch folgt, ohne leere Zeilen', kopiert.indexOf('## 2 · Wunsch: Zweite Erinnerung\n\n- Ort: Gewohnheit\n' +

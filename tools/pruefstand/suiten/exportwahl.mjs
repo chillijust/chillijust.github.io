@@ -19,6 +19,13 @@ function gw(id, name) {
 }
 function uids() { return (kalenderDatei(HEUTE, zeitJetzt()).match(/UID:[^@]+/g) || []).map(function (u) { return u.slice(4); }).sort().join(); }
 function zeile(id) { return q('[data-exwahl$=":' + id + '"]'); }
+// Ein kleines Teil fließt selbst (kleinFliesst, ADR 0054): woher, sagt seine Feder.
+function ausKnopf(el, r) {
+  var f = el && el._fluss, qr = f && f.o.quelle();
+  return !!qr && f.p.ziel === 1 && Math.abs(qr.left + qr.width / 2 - (r.left + r.width / 2)) < 2 &&
+    Math.abs(qr.top + qr.height / 2 - (r.top + r.height / 2)) < 2;
+}
+function verzug(el) { return el && el._fluss ? el._fluss.o.warten || 0 : -1; }
 function aufbauen() {
   frisch();
   exportWahl = {};
@@ -89,21 +96,20 @@ pruefe('S2 ein leerer Stand wählt nichts ab', JSON.stringify(stand({}).exportOh
 aufbauen();
 var kr = q('#exBearbeiten').getBoundingClientRect();
 q('#exBearbeiten').click();
-var h = q('#ansicht .ex-haken'), a = h && h.getAnimations()[0], k = a ? a.effect.getKeyframes() : [];
-var m = /translate\(([-\d.]+)px, ([-\d.]+)px\)/.exec(k[0] && k[0].transform || '');
-pruefe('T1 die Häkchen tropfen aus «Bearbeiten»', !!m && k[k.length - 1].transform === 'none' && /scale/.test(k[0].transform),
-  k[0] && k[0].transform);
-var sa = q('[data-exalle]').getAnimations();
-pruefe('T2 ebenso die Schalter, nacheinander', sa.length > 0 && alle('#ansicht .ex-haken').map(function (x) {
-  return x.getAnimations()[0].effect.getTiming().delay; }).some(function (d) { return d > 0; }));
+// Der Knopf heißt jetzt «Fertig» und ist schmaler; aus ihm tropfen sie.
+kr = q('#exBearbeiten').getBoundingClientRect();
+pruefe('T1 die Häkchen tropfen aus «Bearbeiten»', alle('#ansicht .ex-haken').every(function (h) { return ausKnopf(h, kr); }),
+  JSON.stringify([q('#ansicht .ex-haken')._fluss && q('#ansicht .ex-haken')._fluss.o.quelle(), kr]));
+pruefe('T2 ebenso die Schalter, nacheinander', ausKnopf(q('[data-exalle]'), kr) &&
+  alle('#ansicht .ex-haken').map(verzug).some(function (d) { return d > 0; }));
 return durch().then(function () {
   q('#exBearbeiten').click();
-  var geister = alle('body > .geist');
-  pruefe('T3 «Fertig»: sie fließen als Geister in den Knopf zurück', geister.length === 6 &&
-    geister.every(function (g) { return g.getAnimations().length > 0; }));
+  var huellen = alle('body > .tropfen-huelle');
+  pruefe('T3 «Fertig»: sie fließen als Geister in den Knopf zurück', huellen.length === 6 &&
+    huellen.every(function (h) { return !!h._fluss && h._fluss.p.ziel === 0 && !!h.querySelector('.geist'); }), huellen.length);
   return durch();
 }).then(function () {
-  pruefe('T4 danach ist aufgeräumt', !alle('body > .geist').length);
+  pruefe('T4 danach ist aufgeräumt', !alle('body > .geist').length && !alle('body > .tropfen-huelle').length);
 
   // «alle» tropft auch (ADR 0036): Was sich ändert, rollt als Perle aus dem
   // Schalter an seinen Platz; was bleibt, steht still. Der Knauf gleitet.
@@ -113,23 +119,19 @@ return durch().then(function () {
   sg.click();
   sg = q('[data-exalle="g"]');
   var hl = zeile('lesen').querySelector('.ex-haken'), hf = zeile('laufen').querySelector('.ex-haken');
-  var al = hl.getAnimations()[0], kl = al ? al.effect.getKeyframes() : [];
-  var ml = /translate\(([-\d.]+)px, ([-\d.]+)px\)/.exec(kl[0] && kl[0].transform || '');
-  var still = !q('[data-exwahl="t:kino"] .ex-haken').getAnimations().length && hf.getAnimations().length === 1;
+  var geht = ausKnopf(hl, sr), kino = q('[data-exwahl="t:kino"] .ex-haken');
+  var still = !kino._fluss && !kino.getAnimations().length && !!hf._fluss;
   var gleitet = sg.querySelector('.schalter-knauf').getAnimations().length === 1 &&
     sg.querySelector('.schalter-spur').getAnimations().length === 1;
   ausbewegt();
-  var hr = hl.getBoundingClientRect();
-  pruefe('T6 «alle» aus: das Häkchen, das geht, tropft aus dem Schalter', !!ml && /scale/.test(kl[0].transform) &&
-    Math.abs(hr.left + hr.width / 2 + parseFloat(ml[1]) - (sr.left + sr.width / 2)) < 3 &&
-    Math.abs(hr.top + hr.height / 2 + parseFloat(ml[2]) - (sr.top + sr.height / 2)) < 3, kl[0] && kl[0].transform);
+  pruefe('T6 «alle» aus: das Häkchen, das geht, tropft aus dem Schalter', geht);
   pruefe('T7 was sich nicht ändert, steht still', still);
   pruefe('T8 der Knauf gleitet hinüber, statt zu springen', gleitet);
   return durch();
 }).then(function () {
   q('[data-exalle="g"]').click();
-  pruefe('T9 «alle» an: beide Häkchen tropfen, nacheinander', alle('[data-exwahl^="g:"] .ex-haken').map(function (x) {
-    var a = x.getAnimations()[0]; return a ? a.effect.getTiming().delay : -1; }).join() === '0,45');
+  pruefe('T9 «alle» an: beide Häkchen tropfen, nacheinander', alle('[data-exwahl^="g:"] .ex-haken').map(verzug).join() === '0,45',
+    alle('[data-exwahl^="g:"] .ex-haken').map(verzug).join());
   ausbewegt();
   pruefe('T10 und stehen danach gewählt', alle('[data-exwahl^="g:"] .ex-haken.an').length === 2);
   q('#exBearbeiten').click();
@@ -137,7 +139,7 @@ return durch().then(function () {
 }).then(function () {
   state.bewegung = 'aus';
   q('#exBearbeiten').click();
-  pruefe('T5 ohne Bewegung steht alles sofort', !q('#ansicht .ex-haken').getAnimations().length);
+  pruefe('T5 ohne Bewegung steht alles sofort', !q('#ansicht .ex-haken').getAnimations().length && !q('#ansicht .ex-haken')._fluss);
   state.bewegung = 'auto';
   frisch();
   speichern();

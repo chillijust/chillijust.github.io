@@ -94,12 +94,26 @@ function pruefe(n, c, e) { log.push((c ? 'PASS ' : 'FAIL ') + n + (e !== undefin
 function q(s) { return document.querySelector(s); }
 function alle(s) { return Array.prototype.slice.call(document.querySelectorAll(s)); }
 // Laufende Bewegungen ans Ziel bringen — wer Lage und Größe mißt, fragt das
-// Ziel, nicht den Weg (ADR 0007). Endlose (die wippende Chili) bleiben.
+// Ziel, nicht den Weg (ADR 0007). Endlose (die wippende Chili) bleiben. Was
+// selbst fließt (teilFliesst, ADR 0054), springt ans Ende seiner Feder; was
+// sein Abschluß anstößt, kommt in der nächsten Runde ebenso ans Ziel.
 function ausbewegt() {
-  if (!document.getAnimations) return;
-  document.getAnimations().forEach(function (a) {
-    try { if (a.effect && a.effect.getTiming().iterations !== Infinity) a.finish(); } catch (e) { /* weiter */ }
-  });
+  for (var runde = 0; runde < 4; runde++) {
+    if (document.getAnimations) document.getAnimations().forEach(function (a) {
+      try { if (a.effect && a.effect.getTiming().iterations !== Infinity) a.finish(); } catch (e) { /* weiter */ }
+    });
+    if (typeof teilSchritt !== 'function') return;
+    var fliesst = Array.prototype.filter.call(document.querySelectorAll('*'), function (el) { return !!el._fluss; });
+    if (!fliesst.length) return;
+    fliesst.forEach(function (el) {
+      var f = el._fluss;
+      if (!f) return;
+      f.ab = 0;
+      f.p.x = f.p.ziel;
+      f.p.v = 0;
+      try { teilSchritt(el); } catch (e) { /* weiter */ }
+    });
+  }
 }
 // Jeder Blob merkt sich seinen Text; gelesen wird mit blobText(b), nie mit
 // b.text(). Das liest wirklich — und solange der Läufer darauf wartet, läuft

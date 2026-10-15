@@ -27,7 +27,18 @@ function seite(clip) {
   return !m ? '?' : +m[2] > 100 && +m[4] === 0 ? 'links' : +m[4] > 100 && +m[2] === 0 ? 'rechts' : 'mitte';
 }
 function letzteHuelle() { return alle('body > .tropfen-huelle').pop(); }
-function bilder(el) { var a = el && el.getAnimations()[0]; return a ? a.effect.getKeyframes() : []; }
+// Eine Hülle fließt selbst (ADR 0054): woher sie quillt oder wohin sie fließt,
+// sagt ihre Feder.
+function quelle(el) { return el && el._fluss ? el._fluss.o.quelle() : null; }
+function quellMitte(el) { var r = quelle(el); return r ? mitte(r) : { x: NaN, y: NaN }; }
+// Ein runder Tropfen: am Anfang der Feder ein Kreis, keine Spitze (ADR 0023).
+function rund(el) {
+  var f = el && el._fluss, r = quelle(el);
+  if (!f || !r) return false;
+  var t = fpTropfen({ x: r.left, y: r.top, w: r.width, h: r.height, r: Math.min(r.width, r.height) / 2 },
+    { x: 0, y: 0, w: 300, h: 500, r: f.o.rund || 0 }, 0, 0, f.o.d0, FP_IOS);
+  return t.w === t.h && t.r === t.w / 2;
+}
 function zuKlein(wo) {
   ausbewegt();
   return alle(wo + ' button').filter(function (k) {
@@ -110,11 +121,11 @@ pruefe('A2a ohne «Abbrechen» und ohne leere Knopfleiste: ab bricht, wer danebe
   getComputedStyle(q('#hinweisOk').parentNode).display === 'none' &&
   alle('#hinweisKarte button').filter(function (b) { return b.getClientRects().length; }).every(function (b) {
     return !/Abbrechen/.test(b.textContent); }));
-var a0 = auf ? auf.getAnimations()[0] : null, b0 = a0 ? a0.effect.getKeyframes()[0] : {}, plus = neu.querySelector('svg').getBoundingClientRect();
+var q0 = quelle(auf), plus = neu.querySelector('svg').getBoundingClientRect();
 pruefe('A3 es tropft aus «Hinzufügen»', !!auf && auf.classList.contains('glas'));
-pruefe('A3a wie der Timer: klein aus dem Plus, in dessen Tempo (ADR 0041)', parseFloat(b0.width) <= 48 &&
-  nah(mitte({ left: parseFloat(b0.left), top: parseFloat(b0.top), width: parseFloat(b0.width), height: parseFloat(b0.height) }),
-    mitte(plus)) && a0.effect.getTiming().duration === TROPFEN_DAUER, [b0.width, a0 && a0.effect.getTiming().duration].join());
+pruefe('A3a wie der Timer: klein aus dem Plus, im Takt der Ansichten (ADR 0041)', !!q0 && q0.width <= 48 &&
+  nah(mitte(q0), mitte(plus)) && auf._fluss.o.schnell === fpKlemme(TROPFEN_DAUER / fluessigTakt('hinweis').dauer, 0.4, 2),
+  JSON.stringify([q0, auf && auf._fluss && auf._fluss.o.schnell]));
 ausbewegt();
 pruefe('A4 groß genug, untereinander', knoepfe.every(function (k) { return k.getBoundingClientRect().height >= 44; }) &&
   knoepfe[2].getBoundingClientRect().top > knoepfe[0].getBoundingClientRect().bottom);
@@ -150,10 +161,9 @@ pruefe('A6 «Gewohnheit» öffnet das Formular zum Angewöhnen', ansicht === 'ne
 pruefe('A6a es wuchs als Tropfen aus dem Knopf', !!letzteHuelle());
 zurueckGehen();
 pruefe('A7 zurück liegt der Tag noch offen', ansicht === 'home' && kalTag === '2026-10-12' && !!q('#kalNeu'));
-var h = letzteHuelle(), z = bilder(h).slice(-2)[0] || {};
-pruefe('A8 und die Ansicht fließt als Tropfen in «Hinzufügen» zurück', !!h &&
-  nah(mitte({ left: parseFloat(z.left), top: parseFloat(z.top), width: parseFloat(z.width), height: parseFloat(z.height) }),
-    mitte(q('#kalNeu').getBoundingClientRect())), JSON.stringify(z));
+var h = letzteHuelle();
+pruefe('A8 und die Ansicht fließt als Tropfen in «Hinzufügen» zurück', !!h && nah(quellMitte(h), mitte(q('#kalNeu').getBoundingClientRect())),
+  JSON.stringify(quellMitte(h)));
 return durch().then(function () {
   q('#kalNeu').click();
   q('#hinweisWahl [data-neugw="ab"]').click();
@@ -264,14 +274,10 @@ return durch().then(function () {
 }).then(function () {
   pruefe('R1 die Ticketliste ist offen', ansicht === 'tickets');
   q('#zurueckKnopf').click();
-  var h = letzteHuelle(), b = bilder(h), z = b.slice(-2)[0] || {};
-  var kn = mitte(q('#ticketKnopf').getBoundingClientRect());
-  pruefe('R2 zurück fließt die Liste als Tropfen in den Ticketknopf', ansicht === 'home' && !!h &&
-    nah(mitte({ left: parseFloat(z.left), top: parseFloat(z.top), width: parseFloat(z.width), height: parseFloat(z.height) }), kn),
-    JSON.stringify(z));
-  pruefe('R3 der Tropfen ist rund, an keiner Station eine Spitze', b.length === 5 && b.every(function (f) {
-    return !/(^|\s)0%/.test(f.borderRadius);
-  }) && b[2].borderRadius === '50%', b.map(function (f) { return f.borderRadius; }).join(' | '));
+  var h = letzteHuelle(), kn = mitte(q('#ticketKnopf').getBoundingClientRect());
+  pruefe('R2 zurück fließt die Liste als Tropfen in den Ticketknopf', ansicht === 'home' && !!h && nah(quellMitte(h), kn),
+    JSON.stringify(quellMitte(h)));
+  pruefe('R3 der Tropfen ist rund, keine Spitze', rund(h));
   return durch();
 }).then(function () {
   // Ohne Herkunft — etwa über eine Funktion geöffnet, oder der Leerzustand,
@@ -282,17 +288,13 @@ return durch().then(function () {
   zeige('einstellungen');
   ausbewegt();
   q('#titelHeim').click();
-  var h = letzteHuelle(), z = bilder(h).slice(-2)[0] || {};
+  var h = letzteHuelle();
   pruefe('R4 ohne sichtbare Herkunft fließt die Ansicht in den Menüknopf', ansicht === 'home' && !!h &&
-    nah(mitte({ left: parseFloat(z.left), top: parseFloat(z.top), width: parseFloat(z.width), height: parseFloat(z.height) }),
-      mitte(q('#menuKnopf').getBoundingClientRect())), JSON.stringify(z));
+    nah(quellMitte(h), mitte(q('#menuKnopf').getBoundingClientRect())), JSON.stringify(quellMitte(h)));
   return durch();
 }).then(function () {
   menueOeffnen();
-  var erst = bilder(q('#menue .blatt'));
-  pruefe('R5 auch das Menü tropft rund', erst.length === 4 && erst.every(function (f) {
-    return !/(^|\s)0%/.test(f.borderRadius) && !/14%/.test(f.borderRadius);
-  }), erst.map(function (f) { return f.borderRadius; }).join(' | '));
+  pruefe('R5 auch das Menü tropft rund', rund(q('#menue .blatt')));
   ausbewegt();
   var probe = document.createElement('button');
   probe.className = 'knopf';

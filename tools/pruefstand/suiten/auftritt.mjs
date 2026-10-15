@@ -38,19 +38,24 @@ return Promise.resolve().then(function () {
     Math.abs(r2.left - platz.left) < 1 && Math.abs(r2.width - platz.width) < 1 && deckend('#ansicht') === 1);
   var karten = alle('#ansicht .held, #ansicht .abschnitt > h2, #ansicht .gw-liste > *').filter(function (k) {
     return k.getBoundingClientRect().top < innerHeight; });
-  function verzug(k) { var x = k.getAnimations()[0]; return x ? x.effect.getTiming().delay : -1; }
+  // Eine Karte fließt (teilFliesst) und wartet in ihrer Feder; eine
+  // Überschrift blendet ein, ein Viertel der Feder nach ihrer Karte.
+  var spaet = Math.round(fluessigTakt('perle').dauer * 0.25);
+  function verzug(k) {
+    if (k._fluss) return k._fluss.o.warten || 0;
+    var x = k.getAnimations()[0];
+    return x ? x.effect.getTiming().delay - spaet : -1;
+  }
   var warten = karten.map(verzug), mitGrund = karten.filter(eigenerGrund), wg = mitGrund.map(verzug);
   pruefe('A7 das Dashboard tropft als Kette auf, Karte für Karte, jede, wenn die vorige halb gewachsen ist',
     mitGrund.length >= 2 && wg[0] === 0 && wg.every(function (w, i) { return i === 0 || w - wg[i - 1] === perleTakt(); }) &&
-    karten.every(function (k) { var x = k.getAnimations()[0]; return x && /round/.test(x.effect.getKeyframes()[0].clipPath) &&
-      x.effect.getTiming().fill === 'backwards'; }), warten.join());
+    mitGrund.every(function (k) { return !!k._fluss && k._fluss.p.ziel === 1; }), warten.join());
   pruefe('A7b eine Überschrift kommt mit der Karte nach ihr', karten.some(function (k) { return !eigenerGrund(k); }) &&
     karten.every(function (k, i) {
       var n = eigenerGrund(k) ? null : karten.slice(i + 1).filter(eigenerGrund)[0];
       return !n || verzug(k) === verzug(n);
     }));
-  pruefe('A7c in Chilli löst sich die nächste nach vier Zehnteln, sechs Karten brauchen keine zwei Sekunden',
-    perleTakt() === Math.round(PERLE_DAUER * 0.4) && perleTakt() * 5 + PERLE_DAUER <= 2000);
+  pruefe('A7c sechs Karten lösen sich in keiner Sekunde', perleTakt() > 0 && perleTakt() * 5 < 1000, perleTakt());
   pruefe('A8 Datum, Schalter und Knöpfe blenden auf', ['#kopf .datum', '#themaKnopf', '#menuKnopf', '#ticketKnopf'].every(function (s) {
     return q(s).getAnimations().length > 0; }));
   ausbewegt();
@@ -62,20 +67,16 @@ return Promise.resolve().then(function () {
   pruefe('A14 meldet sich mitten im Auftritt eine neue Fassung, wartet ihre Zeile unsichtbar', !q('#swNeu').hidden &&
     deckend('#swNeu') === 0);
   auftrittEnde();
-  var sw = q('#swNeu').getAnimations()[0], erste = alle('#ansicht .held, #ansicht .abschnitt > h2, #ansicht .gw-liste > *')[0];
-  var ersteA = erste ? erste.getAnimations()[0] : null;
-  pruefe('A15 sie tropft als erste auf, die Karten im selben Takt danach', !!sw &&
-    /round/.test(sw.effect.getKeyframes()[0].clipPath) && sw.effect.getTiming().delay === 0 &&
-    sw.effect.getTiming().fill === 'backwards' && !!ersteA && ersteA.effect.getTiming().delay > 0 &&
-    ersteA.effect.getTiming().duration === sw.effect.getTiming().duration,
-    [sw && sw.effect.getTiming().delay, ersteA && ersteA.effect.getTiming().delay].join());
+  var sw = q('#swNeu')._fluss, erste = alle('#ansicht .held, #ansicht .abschnitt > h2, #ansicht .gw-liste > *')[0];
+  var ersteF = erste ? erste._fluss : null;
+  pruefe('A15 sie tropft als erste auf, die Karten im selben Takt danach', !!sw && (sw.o.warten || 0) === 0 &&
+    !!ersteF && ersteF.o.warten === perleTakt(), [sw && sw.o.warten, ersteF && ersteF.o.warten].join());
   ausbewegt();
   q('#swNeu').hidden = true;
   // Kommt sie erst danach, ploppt sie ebensowenig.
   swHinweisZeigen();
-  var sw2 = q('#swNeu').getAnimations()[0];
-  pruefe('A16 kommt sie später, tropft sie allein auf', !q('#swNeu').hidden && !!sw2 &&
-    /round/.test(sw2.effect.getKeyframes()[0].clipPath));
+  pruefe('A16 kommt sie später, tropft sie allein auf', !q('#swNeu').hidden && !!q('#swNeu')._fluss &&
+    q('#swNeu')._fluss.p.ziel === 1);
   ausbewegt();
   q('#swNeu').hidden = true;
   // Ein Tipp überspringt ihn.

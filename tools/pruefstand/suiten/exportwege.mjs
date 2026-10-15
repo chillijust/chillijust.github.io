@@ -13,7 +13,12 @@ suite('exportwege', html, String.raw`
 jetzt = function () { return new Date(2026, 9, 14, 8, 0); };
 function warten(ms) { return new Promise(function (f) { setTimeout(f, ms); }); }
 function durch() { ausbewegt(); return warten(30); }
-function laeuft(el) { return !!el && el.getAnimations().some(function (a) { return a.playState === 'running'; }); }
+// Läuft eine Bewegung? Auch, wenn das Teil selbst fließt (teilFliesst, ADR 0054).
+function laeuft(el) { return !!el && (!!el._fluss || el.getAnimations().some(function (a) { return a.playState === 'running'; })); }
+function quellMitte(el) {
+  var r = el && el._fluss ? el._fluss.o.quelle() : null;
+  return r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: NaN, y: NaN };
+}
 function geister() { return alle('body > .geist, #app .geist'); }
 function tm(id, tag) { return terminLesen({ id: id, titel: id, tag: tag, von: '10:00', wiederholung: 'keine' }); }
 function zeile(id) { return q('[data-termin="' + id + '"], [data-exwahl$=":' + id + '"]'); }
@@ -45,9 +50,10 @@ pruefe('W1 Neues: die Wege stehen offen, der Satz verborgen', !q('#exWege').hidd
 var vorher = q('#exLaden').getBoundingClientRect();
 laden();
 var karte = q('#hinweisKarte'), huelle = q('body > .tropfen-huelle');
-function bilder(el) { var a = el && el.getAnimations()[0]; return a ? a.effect.getKeyframes() : []; }
-function dauer(el) { var a = el && el.getAnimations()[0]; return a ? a.effect.getTiming().duration : 0; }
-var erstes = bilder(huelle)[0] || {}, letztes = bilder(huelle).slice(-1)[0] || {};
+// Der Hinweis fließt 60 % schneller als eine Ansicht (ADR 0013): seine Feder antwortet schneller.
+function hinweisTempo(el) {
+  return !!el && !!el._fluss && el._fluss.o.schnell === fpKlemme(HINWEIS_DAUER / fluessigTakt('hinweis').dauer, 0.4, 2);
+}
 pruefe('H1 statt der Meldung ein Hinweis, der wartet', offen() && q('#hinweisTitel').textContent === 'Datei geladen' &&
   /Öffne sie/.test(q('#hinweisText').textContent) && karte.getAttribute('role') === 'alertdialog' &&
   !q('#meldung').classList.contains('zeigt'));
@@ -56,11 +62,10 @@ pruefe('H2a auch der Tropfen ist Glas, der Geist darin klar', !!huelle && huelle
   /blur\(/.test(getComputedStyle(huelle).backdropFilter || getComputedStyle(huelle).webkitBackdropFilter || '') &&
   !!innen && innen.classList.contains('im-tropfen') && getComputedStyle(innen).backgroundImage === 'none' &&
   /rgba\(0, 0, 0, 0\)|transparent/.test(getComputedStyle(innen).backgroundColor));
-pruefe('H2 er quillt mit dem Tropfen der Ansichten aus «Als Datei laden»', laeuft(huelle) &&
-  dauer(huelle) === HINWEIS_DAUER && HINWEIS_DAUER === Math.round(TROPFEN_DAUER * 0.4) && bilder(huelle).length === 5 && Number(erstes.opacity) === 0 &&
-  erstes.borderRadius === TROPFEN && Math.abs(parseFloat(erstes.left) + parseFloat(erstes.width) / 2 -
-  (vorher.left + vorher.width / 2)) < 2 && letztes.borderRadius === '18px' && karte.style.opacity === '0',
-  JSON.stringify([erstes, letztes]));
+pruefe('H2 er quillt mit dem Tropfen der Ansichten aus «Als Datei laden»', laeuft(huelle) && hinweisTempo(huelle) &&
+  HINWEIS_DAUER === Math.round(TROPFEN_DAUER * 0.4) && huelle._fluss.p.ziel === 1 && huelle._fluss.o.rund === 18 &&
+  Math.abs(quellMitte(huelle).x - (vorher.left + vorher.width / 2)) < 2 && karte.style.opacity === '0',
+  JSON.stringify(quellMitte(huelle)));
 pruefe('H3 die Kachel hat ihre Knöpfe schon zugetropft', q('#exWege').hidden && !q('#exLaden').getClientRects().length &&
   !q('#exNichts').hidden &&
   !!q('#app .geist') && vorher.height > 0);
@@ -87,22 +92,19 @@ return durch().then(function () {
   pruefe('H7 nach vier Sekunden steht er noch', offen());
   var r0 = karte.getBoundingClientRect();
   q('#hinweisOk').click();
-  var zu = q('body > .tropfen-huelle'), z = q('#exZuletzt').getBoundingClientRect(), ende = bilder(zu)[3] || {};
-  pruefe('H8 «OK» schließt sofort, der Tropfen fließt in «Zuletzt»', !offen() && laeuft(zu) &&
-    dauer(zu) === HINWEIS_DAUER && (bilder(zu)[0] || {}).borderRadius === '18px' && ende.borderRadius === '50%' &&
-    Math.abs(parseFloat(ende.top) + parseFloat(ende.height) / 2 - (z.top + z.height / 2)) < 2 &&
-    karte.style.opacity === '0' && laeuft(q('#exZuletzt')) &&
-    getComputedStyle(q('#hinweisBlatt')).pointerEvents === 'none', JSON.stringify(ende));
-  var st = bilder(zu), form = (st[2] || {}).borderRadius;
-  pruefe('H8a kurz vor dem Ziel ist er schon ein Tropfen und bleibt es', st.length === 5 &&
-    st[2].offset === 0.4 && form === '50%' && form === st[3].borderRadius && form === st[4].borderRadius &&
-    st[3].offset === 0.86 && parseFloat(st[2].width) < r0.width * 0.65, JSON.stringify(st.map(function (b) {
-      return [b.offset, b.borderRadius, b.width]; })));
-  pruefe('H8b der Tropfen ist rund, keine Spitze zeigt irgendwohin (ADR 0023)', st.every(function (b) {
-    return !/(^|\s)0%/.test(b.borderRadius);
-  }) && typeof tropfenSpitzeZu === 'undefined');
-  pruefe('H8c die Ansichten behalten ihren Takt', TROPFEN_ZU_TAKT.join() === '0.38,0.7,0.9');
-  pruefe('H8d auch zurück tropft er als Glas', zu.classList.contains('glas'));
+  var zu = q('body > .tropfen-huelle'), z = q('#exZuletzt').getBoundingClientRect();
+  pruefe('H8 «OK» schließt sofort, der Tropfen fließt in «Zuletzt»', !offen() && laeuft(zu) && hinweisTempo(zu) &&
+    zu._fluss.p.ziel === 0 && Math.abs(quellMitte(zu).y - (z.top + z.height / 2)) < 2 &&
+    karte.style.opacity === '0' && getComputedStyle(q('#hinweisBlatt')).pointerEvents === 'none', JSON.stringify(quellMitte(zu)));
+  // Unterwegs ist er ein runder Tropfen, der zur Karte wächst: am Anfang der
+  // Feder ein Kreis, am Ende die Karte (ADR 0023).
+  var qz = { x: z.left, y: z.top, w: z.width, h: z.height, r: Math.min(z.width, z.height) / 2 };
+  var kz = { x: r0.left, y: r0.top, w: r0.width, h: r0.height, r: 18 };
+  var t0 = fpTropfen(qz, kz, 0, 0, zu._fluss.o.d0, FP_IOS), t1 = fpTropfen(qz, kz, 1, 0, zu._fluss.o.d0, FP_IOS);
+  pruefe('H8a am Knopf ist er ein runder Tropfen, an der Karte die Karte', t0.w === t0.h && t0.r === t0.w / 2 &&
+    Math.abs(t1.w - r0.width) < 0.5 && t1.r === 18, JSON.stringify([t0, t1]));
+  pruefe('H8b keine Spitze zeigt irgendwohin (ADR 0023)', typeof tropfenSpitzeZu === 'undefined');
+  pruefe('H8d auch zurück tropft er als Glas', zu.classList.contains('glas') && zu._fluss.o.glas);
   return durch();
 }).then(function () {
   pruefe('H9 danach ist er weg', q('#hinweisBlatt').hidden && !laeuft(karte) && geister().length === 0 &&
@@ -112,10 +114,9 @@ return durch().then(function () {
   return durch();
 }).then(function () {
   q('#hinweisOk').click();
-  var rueck = bilder(q('body > .tropfen-huelle'))[3] || {};
+  var rueck = quellMitte(q('body > .tropfen-huelle'));
   pruefe('H10 ist das Ziel nicht zu sehen, fließt er dorthin zurück, woher er kam',
-    Math.abs(parseFloat(rueck.left) + parseFloat(rueck.width) / 2 - 140) < 2 &&
-    Math.abs(parseFloat(rueck.top) + parseFloat(rueck.height) / 2 - 625) < 2, JSON.stringify(rueck));
+    Math.abs(rueck.x - 140) < 2 && Math.abs(rueck.y - 625) < 2, JSON.stringify(rueck));
   return durch();
 }).then(function () {
   pruefe('H11 auch dann räumt er auf', q('#hinweisBlatt').hidden && !q('body > .tropfen-huelle'));

@@ -278,17 +278,20 @@ q('#jrSpeichern').click();
 var neue = alle('body > .tropfen-huelle, body > .geist').slice(vorher);
 var huelle = neue.filter(function (h) { return h.matches('.tropfen-huelle.glas'); })[0];
 var zu = neue.filter(function (h) { return h.matches('.tropfen-huelle:not(.glas)'); })[0];
-var zuBilder = zu ? zu.getAnimations()[0].effect.getKeyframes() : [], aufZug = huelle ? huelle.getAnimations()[0] : null;
+// Beide fließen selbst (ADR 0054): Wohin der eine geht und woher der andere
+// quillt, sagt ihre Feder.
+function mitteVon(r) { return r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: NaN, y: NaN }; }
+var zuF = zu && zu._fluss, aufF = huelle && huelle._fluss;
+var hin = mitteVon(zuF && zuF.o.quelle()), her = mitteVon(aufF && aufF.o.quelle());
 pruefe('B1 gespeichert: das Glasfenster mit Haken, ohne «OK»', !q('#hinweisBlatt').hidden &&
   q('#hinweisKarte').classList.contains('bestaetigung') && q('#hinweisKarte').classList.contains('glas') &&
   !q('#hinweisHaken').hidden && !!q('#hinweisHaken svg') && q('#hinweisOk').hidden &&
   q('#hinweisKarte').getAttribute('role') === 'status' && q('#hinweisTitel').textContent === 'Gespeichert' &&
   !/Gespeichert/.test(q('#meldung').textContent));
 pruefe('B2 das Journal wird selbst zum Tropfen, aus dem die Bestätigung quillt (ADR 0041)', !!huelle && !!zu &&
-  Math.abs(parseFloat(zuBilder[0].width) - fenster.width) < 2 &&
-  Math.abs(parseFloat(zuBilder[zuBilder.length - 1].left) - parseFloat(aufZug.effect.getKeyframes()[0].left)) < 1 &&
-  Math.abs(parseFloat(zuBilder[zuBilder.length - 1].top) - parseFloat(aufZug.effect.getKeyframes()[0].top)) < 1 &&
-  aufZug.effect.getTiming().delay > 0, [zuBilder.length && zuBilder[0].width, fenster.width].join());
+  !!zuF && !!aufF && zuF.p.ziel === 0 && aufF.p.ziel === 1 && Math.abs(parseFloat(zu.style.width) - fenster.width) < 2 &&
+  Math.abs(hin.x - her.x) < 1 && Math.abs(hin.y - her.y) < 1 && aufF.o.warten > 0,
+  JSON.stringify([zu && zu.style.width, fenster.width, hin, her]));
 pruefe('B2a es fließt nicht noch einmal zurück — nur diese beiden Tropfen', neue.length === 2, neue.length);
 return warten(bestaetigungDauer('Gespeichert', 'Nachzulesen im Journal.') + MELDE_ZU + 100).then(function () {
   pruefe('B3 und geht von selbst', !q('#hinweisBlatt').classList.contains('offen'));

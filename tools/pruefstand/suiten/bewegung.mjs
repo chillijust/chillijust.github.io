@@ -17,7 +17,13 @@ function warten(ms) { return new Promise(function (f) { setTimeout(f, ms); }); }
 // Der kopflose Läufer rechnet in virtueller Zeit und zeichnet keine Bilder —
 // Animationen kämen nie an. Darum ans Ziel bringen und die Aufräumer abwarten.
 function durch() { ausbewegt(); return warten(30); }
-function laeuft(el) { return !!el && el.getAnimations().some(function (a) { return a.playState === 'running'; }); }
+// Läuft eine Bewegung? Auch, wenn das Teil selbst fließt (teilFliesst, ADR 0054).
+function laeuft(el) { return !!el && (!!el._fluss || el.getAnimations().some(function (a) { return a.playState === 'running'; })); }
+function mitteVon(r) { return r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: NaN, y: NaN }; }
+function auf(el, k) {
+  var m = mitteVon(el && el._fluss ? el._fluss.o.quelle() : null), n = mitteVon(k);
+  return Math.abs(m.x - n.x) < 2 && Math.abs(m.y - n.y) < 2;
+}
 function geister() { return alle('body > .geist, #app .geist'); }
 function aufbauen() {
   frisch();
@@ -115,9 +121,8 @@ return durch().then(function () {
   q('[data-kalender="monat"]').click();
   var m = q('.held .wahl-marke');
   pruefe('W2 Woche zu Monat: die Marke fließt', laeuft(m));
-  var mitte = m.getAnimations()[0].effect.getKeyframes()[1];
-  pruefe('W3 und streckt sich dabei über beide', parseFloat(mitte.width) > q('[data-kalender="monat"]').offsetWidth +
-    q('[data-kalender="woche"]').offsetWidth - 2, mitte.width);
+  var mitte = m.getAnimations()[0].effect.getKeyframes()[1], dehn = /scale\(([\d.]+)/.exec(mitte.transform || '');
+  pruefe('W3 und dehnt sich dabei in Laufrichtung', !!dehn && parseFloat(dehn[1]) > 1, mitte.transform);
   ausbewegt();
   pruefe('W4 am Ende liegt sie unter «Monat»', unter(m, q('[data-kalender="monat"]')));
   q('[data-kalender="woche"]').click();
@@ -157,18 +162,16 @@ return durch().then(function () {
   // ── D · Tropfen: Menü, runde Knöpfe, Woche | Monat (ADR 0008) ──
   menueOeffnen();
   var bl = q('#menue .blatt'), kn = q('#menuKnopf').getBoundingClientRect();
-  var erst = laeuft(bl) ? bl.getAnimations()[0].effect.getKeyframes()[0] : {};
-  pruefe('D1 das Menü quillt als Tropfen aus dem Knopf', laeuft(bl) && erst.borderRadius === TROPFEN && TROPFEN === '50%', erst.borderRadius);
+  pruefe('D1 das Menü quillt als Tropfen aus dem Knopf', !!bl._fluss && bl._fluss.p.ziel === 1 && auf(bl, q('#menuKnopf').getBoundingClientRect()));
   ausbewegt();
   var br = bl.getBoundingClientRect();
   pruefe('D2 es hängt unter dem Knopf, rechtsbündig', br.top >= kn.bottom && br.top - kn.bottom < 16 &&
     Math.abs(br.right - kn.right) < 1.5, br.top + ' ' + br.right + ' / ' + kn.bottom + ' ' + kn.right);
   menueSchliessen();
-  pruefe('D3 zu fließt es zurück in den Knopf', laeuft(bl) && !q('#menue').classList.contains('offen') && !q('#menue').hidden);
-  var zuBild = bl.getAnimations()[0], zuEnde = zuBild.effect.getKeyframes().slice(-1)[0];
-  pruefe('D3a zu ist auf an Dauer gleich und blendet am Knopf aus, statt zu verschwinden',
-    zuBild.effect.getTiming().duration === MENUE_DAUER && MENUE_DAUER === 338 && String(zuEnde.opacity) === '0' &&
-    zuEnde.borderRadius === TROPFEN, zuBild.effect.getTiming().duration + ' ' + zuEnde.opacity);
+  pruefe('D3 zu fließt es zurück in den Knopf', laeuft(bl) && !q('#menue').classList.contains('offen') && !q('#menue').hidden &&
+    bl._fluss.p.ziel === 0 && auf(bl, q('#menuKnopf').getBoundingClientRect()));
+  pruefe('D3a zu ist auf rückwärts: derselbe Tropfen, dieselbe Feder', bl._fluss.o.d0 === 36 && bl._fluss.o.rund === 18 &&
+    !bl._fluss.o.schnell);
   return durch();
 }).then(function () {
   pruefe('D4 danach ist es weg', q('#menue').hidden && !laeuft(q('#menue .blatt')));
@@ -185,14 +188,13 @@ return durch().then(function () {
 }).then(function () {
   pruefe('D8 danach ist die Hülle weg und die Ansicht sichtbar', !q('.tropfen-huelle') && q('#ansicht').style.opacity === '');
   q('#zurueckKnopf').click();
-  var h = q('.tropfen-huelle'), bilder = h ? h.getAnimations()[0].effect.getKeyframes() : [], z = bilder[bilder.length - 2] || {};
-  var k = q('#menuKnopf').getBoundingClientRect();
+  var h = q('.tropfen-huelle'), k = q('#menuKnopf').getBoundingClientRect();
+  var t = fpTropfen({ x: 0, y: 0, w: 44, h: 44, r: 22 }, { x: 0, y: 0, w: 400, h: 800, r: 20 }, 0, 0, 36, FP_IOS);
   pruefe('D9 zurück fließt die Ansicht als Tropfen in den Menüknopf', ansicht === 'home' && !!h && laeuft(h) &&
     !!h.querySelector('.geist'));
-  pruefe('D10 der Tropfen ist rund, ohne Spitze (ADR 0023)', z.borderRadius === '50%', z.borderRadius);
-  pruefe('D10a um 35 % schneller als zuerst', h.getAnimations()[0].effect.getTiming().duration === 416);
-  pruefe('D11 und landet auf dem Knopf', Math.abs(parseFloat(z.left) + parseFloat(z.width) / 2 - (k.left + k.width / 2)) < 2 &&
-    Math.abs(parseFloat(z.top) + parseFloat(z.height) / 2 - (k.top + k.height / 2)) < 2);
+  pruefe('D10 der Tropfen ist rund, ohne Spitze (ADR 0023)', t.w === t.h && t.r === t.w / 2 && !!h._fluss && h._fluss.o.d0 === 36);
+  pruefe('D10a im Takt der Ansichten', h._fluss.o.schnell === fpKlemme(TROPFEN_DAUER / fluessigTakt('ansichten').dauer, 0.4, 2));
+  pruefe('D11 und landet auf dem Knopf', auf(h, k));
   pruefe('D12 Kacheln bleiben Rechtecke', !tropfenQuelle(q('[data-haken]')) && !tropfenQuelle(q('[data-termin]')) &&
     tropfenQuelle(q('#menuKnopf')));
   return durch();

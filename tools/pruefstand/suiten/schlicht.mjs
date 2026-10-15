@@ -1,5 +1,5 @@
 // Große Blätter fließen schlicht (P1, Nachricht 15): Ticketblatt und Timer
-// fließen auf iOS mit einem Schatten statt zwei und ohne Lichtkante, beide
+// fließen mit einem Schatten statt zwei und ohne Lichtkante, beide
 // milchig, Glas erst am Ziel. Am Gerät verlor das Ticketblatt je Auf und Zu
 // rund 24 Bilder, weil Doppelschatten und Lichtkante als Filter über die
 // ganze Fläche in jedem Bild neu entstanden. Der kleine Hinweis aus Glas
@@ -15,9 +15,8 @@ function warten(ms) { return new Promise(function (f) { setTimeout(f, ms); }); }
 function huelle() { var h = alle('body > .tropfen-huelle'); return h[h.length - 1] || null; }
 function schicht(h) { var s = h && h.previousElementSibling; return s && s.classList.contains('fl-schicht') ? s : null; }
 function schatten(s) { return (s.style.filter.match(/drop-shadow/g) || []).length; }
-function aufbauen(ios) {
+function aufbauen() {
   frisch();
-  state.fluessig = ios ? { ios: { hinweis: true } } : null;
   state.gewohnheiten = [gewohnheitLesen({ id: 'a', name: 'Lesen', rhythmus: { art: 'taeglich' },
     angelegt: tagPlus(heuteSchluessel(), -5), erledigt: [], timer: { minuten: 20, stumm: true } })];
   flDauernSetzen();
@@ -25,11 +24,11 @@ function aufbauen(ios) {
 }
 var bis = function () { return HINWEIS_DAUER + 3 * TROPFEN_DAUER + 400; };
 
-// ── Ticketblatt auf iOS ───────────────────────────────────────
-aufbauen(true);
+// ── Ticketblatt ───────────────────────────────────────────────
+aufbauen();
 q('#ticketKnopf').click();
 var h = huelle(), s = schicht(h);
-pruefe('S1 das Ticketblatt fließt auf iOS milchig, die Karte wartet ohne Glas', !!h && h.classList.contains('milchig') &&
+pruefe('S1 das Ticketblatt fließt milchig, die Karte wartet ohne Glas', !!h && h.classList.contains('milchig') &&
   q('#ticketKarte').classList.contains('glas-wartet'));
 pruefe('S2 unterwegs ein Schatten statt zwei', !!s && schatten(s) === 1, s && s.style.filter);
 pruefe('S3 unterwegs keine Lichtkante', !!s && !s.querySelector('.fp-licht') && !s.querySelector('.fp-oben'));
@@ -68,30 +67,11 @@ return warten(bis()).then(function () {
   pruefe('S10 der Timer fließt ebenso schlicht zurück', !!h5 && h5.classList.contains('milchig') && !!s5 && schatten(s5) === 1);
   return warten(bis());
 }).then(function () {
-  // ── Chilli: milchig wie das Ticketblatt, ohne Flüssiges ──────
-  aufbauen(false);
-  timerStarten('a');
-  var h6 = huelle();
-  pruefe('S11 auf Chilli tropft der Timer milchig, ohne Schicht des Flüssigen', !!h6 && h6.classList.contains('milchig') &&
-    !schicht(h6) && q('#timerKarte').classList.contains('glas-wartet'));
-  return warten(bis());
-}).then(function () {
-  ausbewegt();
-  return warten(HINWEIS_DAUER + 200);
-}).then(function () {
-  ausbewegt();
-  return warten(100);
-}).then(function () {
-  pruefe('S12 auch auf Chilli hat der Timer am Ziel sein Glas', !q('#timerKarte').classList.contains('glas-wartet') &&
-    !q('body > .tropfen-huelle'));
-  timerSchliessen();
   ausbewegt();
   state.timer = null;
 
-  // ── Eine Ansicht fließt auf iOS ohne Lichtkante ──────────────
-  aufbauen(true);
-  state.fluessig = { ios: { ansichten: true } };
-  flDauernSetzen();
+  // ── Eine Ansicht fließt ohne Lichtkante ──────────────────────
+  aufbauen();
   zeige('einstellungen');
   ausbewegt();
   var vorher = alle('body > .tropfen-huelle');
@@ -121,6 +101,5 @@ return warten(bis()).then(function () {
   w.remove();
   zeige('home');
   ausbewegt();
-  state.fluessig = null;
 });
 `);

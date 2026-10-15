@@ -108,13 +108,14 @@ kachel('lesen').click();
 var start = state.timer && state.timer.start;
 pruefe('T1 ein Tipp startet den Timer, noch nicht abgehakt', !!state.timer && state.timer.id === 'lesen' &&
   state.timer.tag === HEUTE && state.timer.ms === 20 * MIN && !erledigtAm('lesen', HEUTE));
-var huelle = alle('body > .tropfen-huelle').pop(), b0 = huelle ? huelle.getAnimations()[0].effect.getKeyframes()[0] : {};
+// Die Hülle fließt selbst (ADR 0054): woher sie quillt, sagt ihre Feder.
+var huelle = alle('body > .tropfen-huelle').pop(), b0 = huelle && huelle._fluss ? huelle._fluss.o.quelle() : {};
 var sch = q('[data-haken="lesen"] .gw-scheibe').getBoundingClientRect();
 pruefe('T2 das Fenster tropft aus der Kachel, aus Glas', offen() && q('#timerKarte').classList.contains('glas') &&
   !!huelle && q('#timerName').textContent === 'lesen' && q('#timerKarte [data-timerrest]').textContent === '20:00');
-pruefe('T2a es beginnt klein, in der Scheibe — nicht so groß wie die Kachel (ADR 0040)', parseFloat(b0.width) <= 48 &&
-  Math.abs(parseFloat(b0.left) + parseFloat(b0.width) / 2 - (sch.left + sch.width / 2)) < 2 &&
-  Math.abs(parseFloat(b0.top) + parseFloat(b0.height) / 2 - (sch.top + sch.height / 2)) < 2, [b0.left, b0.top, b0.width].join());
+pruefe('T2a es beginnt klein, in der Scheibe — nicht so groß wie die Kachel (ADR 0040)', b0.width <= 48 &&
+  Math.abs(b0.left + b0.width / 2 - (sch.left + sch.width / 2)) < 2 &&
+  Math.abs(b0.top + b0.height / 2 - (sch.top + sch.height / 2)) < 2, [b0.left, b0.top, b0.width].join());
 ausbewegt();
 pruefe('T3 Fertig, Abbrechen, Pause, Ton — groß genug', ['#timerFertig', '#timerAbbrechen', '#timerPause', '#timerTon'].every(function (s) {
   var r = q(s).getBoundingClientRect(); return r.height >= 44 && r.width >= 44; }));
@@ -144,9 +145,9 @@ takt();
 pruefe('T4b weiter läuft sie von dort, wo sie stand', !state.timer.pausiert && q('#timerKarte [data-timerrest]').textContent === '14:00' &&
   q('#timerPause').getAttribute('aria-label') === 'Pause');
 q('#timerBlatt').click();
-var hin = alle('body > .tropfen-huelle').pop(), b1 = hin ? hin.getAnimations()[0].effect.getKeyframes() : [];
+var hin = alle('body > .tropfen-huelle').pop(), b1 = hin && hin._fluss ? hin._fluss.o.quelle() : null;
 pruefe('T5 danebentippen schließt das Fenster, der Timer läuft weiter', !offen() && !!state.timer);
-pruefe('T5a zu fließt es in die Scheibe', b1.length > 0 && parseFloat(b1[b1.length - 1].width) <= 48, b1.length ? b1[b1.length - 1].width : '');
+pruefe('T5a zu fließt es in die Scheibe', !!b1 && hin._fluss.p.ziel === 0 && b1.width <= 48, b1 ? b1.width : '');
 return durch().then(function () {
   kachel('lesen').click();
   pruefe('T6 ein Tipp auf die Kachel holt das Fenster zurück, derselbe Lauf', offen() && state.timer.start === start + 10 * MIN);

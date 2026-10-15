@@ -3,7 +3,7 @@
 *2026-10-10 · Wunsch des Nutzers, gewählt am Gerät aus der Flüssigprobe in 0.16.0T ·
 Version 0.17.0T, nachgebessert in 0.17.0T2 · Voreinstellung, Regler, Filter und Kopieren
 abgelöst durch 0054: Chilli ist Standard, iOS je Stelle · löst «ohne Überschwingen» aus 0008 ab, ergänzt 0023 (rund) · ändert die
-Regel «keine Reiterleiste» für die Einstellungen*
+Regel «keine Reiterleiste» für die Einstellungen · Reiter «Flüssig» abgelöst durch 0062: überall iOS, kein Reiter*
 
 ## Ausgangslage
 

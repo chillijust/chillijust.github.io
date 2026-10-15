@@ -1,7 +1,7 @@
 # 0060 · Der Rückwisch folgt dem Finger, die Terminzeile leuchtet
 
 *2026-10-13 · Stand 0.17.0T27, Gestalt beim Ziehen 0.17.0T28 · Block 6 aus Nachricht 15 (James, 14) · löst 0016 für
-Ansichten auf iOS ab; ergänzt 0041*
+Ansichten auf iOS ab; ergänzt 0041 · gilt seit 0062 immer, nicht mehr nur mit «Ansichten» auf iOS*
 
 ## Ausgangslage
 

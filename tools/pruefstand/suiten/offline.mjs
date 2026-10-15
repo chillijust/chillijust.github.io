@@ -196,7 +196,8 @@ swNeustart = function () { neuGeladen++; };
 swStand.wartet = { postMessage: function (m) { swStand.gesendet = m; } };
 swHinweisZeigen();
 pruefe('D3 wartet eine Fassung, zeigt sie sich', !leiste.hidden && getComputedStyle(leiste).display !== 'none');
-pruefe('D4 sie deckt nichts zu', getComputedStyle(leiste).position === 'static');
+pruefe('D4 sie deckt nichts zu: sie steht im Fluß, auch während sie auftropft',
+  ['static', 'relative'].indexOf(getComputedStyle(leiste).position) >= 0, getComputedStyle(leiste).position);
 q('#swLaden').click();
 pruefe('D5 «Jetzt laden» schickt dem Worker «uebernehmen»',
   swStand.gesendet && swStand.gesendet.art === 'uebernehmen');

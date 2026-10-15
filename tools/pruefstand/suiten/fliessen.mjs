@@ -1,19 +1,18 @@
-// Flüssig, die übrigen Stellen (ADR 0054): Auf iOS fließen auch Auftropfen und
-// Zeilen wie in ihren Proben — die Karten beim Start als Kette, die erste aus
-// dem Kopf, jede weitere aus der vorigen; eine gelöschte Zeile in den runden
-// Knopf oben, kleine Teile aus «Bearbeiten» und zurück hinein. Bis 0.17.0T7 liefen dort nur die Chilli-Bilder auf einer
-// Feder, und am Gerät sah man keinen Unterschied.
+// Flüssig, die übrigen Stellen (ADR 0054, 0062): Auch Auftropfen und Zeilen
+// fließen — die Karten beim Start als Kette, die erste aus dem Kopf, jede
+// weitere aus der vorigen; eine gelöschte Zeile in den runden Knopf oben,
+// kleine Teile aus «Bearbeiten» und zurück hinein.
 import { readFileSync } from 'node:fs';
 import { APP, suite } from '../helfer.mjs';
 const html = readFileSync(APP, 'utf8');
 
 suite('fliessen', html, String.raw`
 function warten(ms) { return new Promise(function (f) { setTimeout(f, ms); }); }
-var RUHE = fpRuhe(FP_IOS) + 600;
+// Bis eine Feder von iOS 26 ruht.
+function ruheZeit() { return Math.ceil(1000 * Math.log(1 / 0.0015) / (fpDaempfung(FP_IOS) * 2 * Math.PI / FP_IOS.tempo)) + 250; }
+var RUHE = ruheZeit() + 600;
 frisch();
 state.gewohnheiten = [gewohnheitLesen({ id: 'A', name: 'A', rhythmus: { art: 'taeglich' }, angelegt: tagPlus(heuteSchluessel(), -3), erledigt: [] })];
-state.fluessig = { ios: { perle: true, zeilen: true } };
-flDauernSetzen();
 zeige('home');
 ausbewegt();
 
@@ -55,7 +54,7 @@ return warten(perleTakt() * 3).then(function () {
     hals[riss][0] < 0.6, JSON.stringify(hals.slice(0, 30)));
   pruefe('P11 alle fließen in einem Bild: einmal fpBild je Bild', reihe >= 2 && bilder <= Math.ceil(perleTakt() * 3 / 16) + 2,
     bilder + ' Aufrufe, bis ' + reihe + ' Teile in einem Bild');
-  return warten(Math.round(fpRuhe(FP_IOS) * 0.45) - perleTakt() * 3);
+  return warten(Math.round(ruheZeit() * 0.45) - perleTakt() * 3);
 }).then(function () {
   pruefe('P7 sichtbar am Ziel trägt eine Karte ihren Schatten wieder, bevor die Feder ganz ruht', !!held._fluss &&
     held._fluss.p.x >= 0.97 && held.style.boxShadow === '');
@@ -126,8 +125,5 @@ return warten(perleTakt() * 3).then(function () {
       weg(probe);
     });
   });
-}).then(function () {
-  state.fluessig = null;
-  flDauernSetzen();
 });
 `);

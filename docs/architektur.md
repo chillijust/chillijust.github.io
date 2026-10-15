@@ -91,9 +91,7 @@ state = {
   gefeiert: { 'a…': 1791200000000 },     // Abgewöhnen: der Rückfall, nach dem der neue Rekord gefeiert ist
   exportOhne: { 't:…': true },          // auch 'g:…', 'e:…'          // Export: Neues, das bewußt draußen bleibt (ADR 0034)
   schwachHinweis: true,                  // der Hinweis ab drei ungefestigten Gewohnheiten
-  bewegung: 'auto',                      // | 'aus' — Bewegung reduzieren
-  fluessig: null                         // | { ios: { stelle: true } } — welche Stellen auf iOS-Flüssig stehen
-                                         //   (ADR 0054); nicht im Sicherungscode, bleibt beim Einlesen
+  bewegung: 'auto'                       // | 'aus' — Bewegung reduzieren
 }
 ```
 
@@ -116,7 +114,7 @@ state = {
   sich das Ergebnis je Gewohnheit (`auswertungen`, Schlüssel: Tag, Beginn, Rhythmus,
   erledigte Tage) und rechnet nur neu, wenn sich davon etwas änderte (P2, Suite `auswertung`).
 - Nur im Speicher der Seite, nie in `state`: `kalVersatz`, `kalTag`, `hm`, `entwurf`,
-  `terminEntwurf`, `erinnerungEntwurf`, `reflexionEntwurf`, `ticketEntwurf`, `rueckgaengig`, `flEntwurf`, `rucklerLetzte`, `rucklerAlle`.
+  `terminEntwurf`, `erinnerungEntwurf`, `reflexionEntwurf`, `ticketEntwurf`, `rueckgaengig`.
 
 ## Render-Zyklus
 
@@ -158,10 +156,9 @@ state = {
 | Sicherung | `sicherungsCode`, `codeLesen`, `standErsetzen`, `sicherungZurueck`, `kopieren` |
 | Tickets | `ticketBlattOeffnen`, `ticketBlattSchliessen`, `ticketSichern`, `ticketBlattWechseln`, `ticketTastatur` |
 | Meldungen, Fragen, Jubel | `melden`, `bestaetigen`, `hinweisZeigen`, `loeschenFragen`, `jubeln`, `hakenJubel`, `rekordFeiern` |
-| Bewegung | `tropfenAuf`, `tropfenZu`, `teilZeigen`, `teilTropfen`, `geist`, `zeileGeht`, `langDruecken`, `punktFlaeche`; iOS-Flüssig: `teilFliesst`, alle fließenden Teile messen und schreiben in einem Bild (`teilBild`); Rückwisch, der dem Finger folgt: `wischZiehen`, `zugBeginnen`/`zugLoslassen`, darunter `abbildDashboard`; `zeileLeuchtet` |
+| Bewegung | `tropfenAuf`, `tropfenZu`, `teilZeigen`, `teilTropfen`, `geist`, `zeileGeht`, `langDruecken`, `punktFlaeche`; alles fließt wie in iOS 26 (ADR 0062): `teilFliesst`, alle fließenden Teile messen und schreiben in einem Bild (`teilBild`); Rückwisch, der dem Finger folgt: `wischZiehen`, `zugBeginnen`/`zugLoslassen`, darunter `abbildDashboard`; `zeileLeuchtet` |
 | Menü | `MENUE`, `menueOeffnen`, `menueSchliessen`, `menueAnker`, `menueMitrollen` |
 | Hell/Dunkel | `themaSetzen`, `themaAnwenden` |
-| Ruckler messen | `rucklerStarten`, `rucklerBild`, `rucklerAuswerten`, `rucklerEnde`, `rucklerMelden`, `rucklerKopieren`; Spur: `RUCKLER_SPUR`, `rucklerUhrenAn` (Uhr um Funktionen und Ereignisse, nur während der Messung), `rucklerSpurAuswerten` |
 | Kaltstart, Schriftzug | `start`, `auftritt`, `auftrittEnde`, `dashboardAuftropfen`, `zeichneMarke` |
 | Service Worker | `swAnmelden`, `swNachsehen`, `swAuskunft`, `swAufraeumen`, `perleAuf` |
 | Uhr, Tage | `jetzt`, `tagSchluessel`, `tagPlus`, `wochenAnfang` |

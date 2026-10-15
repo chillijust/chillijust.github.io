@@ -33,11 +33,13 @@ function druck(sel, p) {
   q(sel).dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, clientX: p.x, clientY: p.y,
     pointerType: 'touch' }));
 }
-function bilder() {
-  var h = q('body > .tropfen-huelle');
-  return h && h.getAnimations().length ? h.getAnimations()[0].effect.getKeyframes() : [];
+// Die Hülle fließt selbst (ADR 0054): Woher sie quillt oder wohin sie
+// zurückfließt, sagt ihre Feder.
+function quelle() {
+  var h = alle('body > .tropfen-huelle').pop(), f = h && h._fluss;
+  return f ? f.o.quelle() : null;
 }
-function mitte(b) { return { x: parseFloat(b.left) + parseFloat(b.width) / 2, y: parseFloat(b.top) + parseFloat(b.height) / 2 }; }
+function mitte(r) { return r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: NaN, y: NaN }; }
 function nah(a, b) { return Math.abs(a.x - b.x) < 2 && Math.abs(a.y - b.y) < 2; }
 
 function fall(name, sel, ziel) {
@@ -47,16 +49,16 @@ function fall(name, sel, ziel) {
     p = punktIn(sel);
     druck(sel, p);
     return warten(LANG_MS + 100).then(function () {
-      var b = bilder(), erst = b[0] || {};
+      var r = quelle();
       pruefe(name + '1 lange drücken öffnet', ansicht === ziel, ansicht);
-      pruefe(name + '2 als Tropfen aus der Stelle unter dem Finger', !!b.length && nah(mitte(erst), p) &&
-        parseFloat(erst.width) === 44 && erst.borderRadius === TROPFEN, JSON.stringify(erst) + ' ' + JSON.stringify(p));
+      pruefe(name + '2 als Tropfen aus der Stelle unter dem Finger', !!r && nah(mitte(r), p) && r.width === 44 && r.height === 44,
+        JSON.stringify(r) + ' ' + JSON.stringify(p));
       return durch();
     }).then(function () {
       zurueckGehen();
-      var b = bilder(), an = b[b.length - 2] || {};
-      pruefe(name + '3 zurück fließt sie dorthin', ansicht === 'home' && !!b.length && nah(mitte(an), p),
-        JSON.stringify(an) + ' ' + JSON.stringify(p));
+      var r = quelle();
+      pruefe(name + '3 zurück fließt sie dorthin', ansicht === 'home' && !!r && nah(mitte(r), p),
+        JSON.stringify(r) + ' ' + JSON.stringify(p));
       return durch();
     }).then(function () {
       pruefe(name + '4 danach ist aufgeräumt', !q('body > .tropfen-huelle') && !alle('body > .geist').length);
