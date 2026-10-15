@@ -552,7 +552,13 @@ svg.wm { display: block; flex: none; color: var(--text); overflow: visible; }
 .gw-minus { flex: none; margin-right: 6px; background: var(--flaeche-2); color: var(--text); }
 .gw-kachel.zaehlt.gerade .gw-scheibe { animation: abgehakt var(--fl-haken-dauer, .5s) var(--fl-haken-kurve, cubic-bezier(.3, 1.6, .5, 1)); }
 /* Timer: Das Fenster ist Glas wie der Hinweis; groß der Ring mit der Restzeit. */
-.timer-karte h2 { margin: 4px 44px 0; font-family: var(--sans); font-size: 18px; font-weight: 600; }
+/* Der Name hält rechts Platz für den Tonknopf, links ebenso, damit er mittig
+   bleibt. Wie die Titel im Dashboard höchstens zwei Zeilen, dann «…»; ein
+   langes Wort bricht um (James N12). Ganz steht er im Vorlesetext und beim
+   Bearbeiten. Über beide Klassen: Allein verlor die Regel gegen das spätere
+   «.hinweis-karte h2», und der Name lief unter den Tonknopf. */
+.hinweis-karte.timer-karte h2 { margin: 0 44px 6px; overflow-wrap: anywhere; display: -webkit-box;
+  -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
 .timer-ton { position: absolute; top: 8px; right: 8px; background: transparent; }
 .timer-ton[aria-pressed="false"] { color: var(--text-2); }
 .timer-bild { position: relative; width: min(56vw, 210px); aspect-ratio: 1; margin: 12px auto 4px; }
@@ -582,7 +588,6 @@ svg.wm { display: block; flex: none; color: var(--text); overflow: visible; }
   .timer-karte > * { grid-column: 2; }
   .timer-karte > .timer-bild { grid-column: 1; grid-row: 1 / span 5; width: min(70vh, 200px); margin: 0; }
   .timer-karte > .timer-pause { justify-self: center; }
-  .timer-karte h2 { margin: 0 44px; }
 }
 .gw-kachel.erledigt .gw-scheibe { background: var(--erledigt); color: var(--grund); }
 .gw-kachel.gerade.erledigt .gw-scheibe { animation: abgehakt var(--fl-haken-dauer, .5s) var(--fl-haken-kurve, cubic-bezier(.3, 1.6, .5, 1)); }
