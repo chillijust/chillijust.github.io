@@ -50,7 +50,7 @@ Safari als Home-Bildschirm-App im Vollbild, hoch und quer (ADR 0056).
 | 7 · Sicherung, Einstellungen, Tickets | fertig (0.8.0) |
 | 8 · Feinschliff, Nachbesserungen am Gerät, Timer und Zähler, Termine abhaken | fertig (0.13.1) |
 | 9 · Flüssig wie iOS 26 je Stelle, Chilli als Standard (ADR 0053–0055) | fertig (0.17.0) |
-| 10 · Erinnerungen wie bei iOS, mit Export (ADR 0061) | im Bau (0.18.0T) |
+| 10 · Erinnerungen wie bei iOS, mit Export (ADR 0061) | fertig (0.18.0) |
 
 ## Wo was steht
 
@@ -168,8 +168,6 @@ node tools/pruefen.mjs                      # Vor-Push-Prüfung allein
 
 Was erledigt ist und was es am Gerät gemessen hat, steht in `docs/verlauf.md`.
 
-- **0.17.0 freigegeben** am 2026-10-15 nach James' Prüfung (Nachrichten 18, 19); Abschnitt 9
-  fertig.
-- **Erinnerungen (Abschnitt 10) ausgeliefert** in 0.18.0T, Abnahme am Gerät steht aus: anlegen
-  ohne und mit Tag, Mitziehen am nächsten Tag, Reihe abhaken, Export in den Kalender.
+- **0.18.0 freigegeben** am 2026-10-15: Erinnerungen (Abschnitt 10) fertig. Sicherung davor auf
+  `backup/chillinal-0.18.0T-2026-10-15`.
 - **Vorgemerkt:** Jedes Auflegen des Fingers kostet ein Bild (30–39 ms, kein Skript).

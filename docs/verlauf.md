@@ -63,6 +63,7 @@ QA1 — `ankunft` H3 fragt im selben Augenblick statt 20 ms später. N10/N11 mit
 
 ## Abgenommen
 
+- **0.18.0 freigegeben** am 2026-10-15: Erinnerungen wie bei iOS, Abschnitt 10 fertig (ADR 0061).
 - **0.17.0 freigegeben** am 2026-10-15: Abschnitt 9 fertig, samt T7–T31 und James' N1–N12,
   nach James' Schlußprüfung (Nachrichten 18, 19).
 - 0.17.0T28 · Block 6: Rückwisch folgt dem Finger auf iOS und wird dabei zum Tropfen, fließt
