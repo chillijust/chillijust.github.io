@@ -64,6 +64,52 @@ return warten(0).then(function () {
   pruefe('Q6 das Ticketblatt steht im Bild und rollt innen', imBild(q('#ticketKarte')) &&
     q('#ticketKarte .tk-rolle').scrollHeight > q('#ticketKarte .tk-rolle').clientHeight);
   ticketBlattSchliessen();
+
+  // ── N · Lange Namen im Timer- und Drangblatt (James N12) ──────
+  // Höchstens zwei Zeilen, nichts über die Karte oder den Tonknopf; ein
+  // Wort ohne Leerzeichen bricht um. Gemessen am Text selbst (Range), nicht an
+  // der Seite — die wird auch so nicht breiter.
+  function titelLage(h) {
+    var karte = h.closest('.timer-karte').getBoundingClientRect(), ton = q('#timerTon');
+    var t = ton && h.id === 'timerName' ? ton.getBoundingClientRect() : null;
+    var ganz = h.textContent;
+    h.textContent = 'W';
+    var zeile = h.getBoundingClientRect().height;
+    h.textContent = ganz;
+    var r = document.createRange();
+    r.selectNodeContents(h);
+    var sicht = h.getBoundingClientRect();
+    var drin = Array.prototype.every.call(r.getClientRects(), function (rc) {
+      if (rc.top >= sicht.bottom - 0.5) return true;
+      return rc.left >= karte.left - 0.5 && rc.right <= karte.right + 0.5 &&
+        (!t || rc.right <= t.left + 0.5 || rc.top >= t.bottom - 0.5);
+    });
+    return { drin: drin, zeilen: Math.round(sicht.height / zeile), ganz: ganz };
+  }
+  frisch();
+  state.bewegung = 'aus';
+  var WORT = new Array(NAME_MAX + 1).join(String.fromCharCode(87));
+  var SATZ = 'Jeden Morgen Dehnen auf der grünen Matte';
+  var N_OK = true, N_INFO = [];
+  [WORT, SATZ].forEach(function (name) {
+    state.gewohnheiten = [gewohnheitLesen({ id: 'n', name: name, rhythmus: { art: 'taeglich' },
+      angelegt: tagPlus(heuteSchluessel(), -2), erledigt: [], timer: { minuten: 10 } })];
+    state.abgewoehnen = [lasterLesen({ id: 'z', name: name, start: zeitJetzt() - 864e5, rueckfaelle: [], draenge: [] })];
+    zeige('home');
+    timerStarten('n');
+    var a = titelLage(q('#timerName'));
+    state.timer = null;
+    timerSchliessen();
+    render();
+    q('[data-drang="z"]').click();
+    var b = titelLage(q('#drangName'));
+    drangSchliessen(true);
+    welleAbbrechen();
+    [a, b].forEach(function (l) {
+      if (!l.drin || l.zeilen > 2 || l.ganz !== name) { N_OK = false; N_INFO.push(JSON.stringify(l)); }
+    });
+  });
+  pruefe('QN1 lange Namen bleiben in Timer- und Drangkarte, höchstens zwei Zeilen, ganz im Text', N_OK, N_INFO.join(' '));
   frisch();
 });
 `, { fenster: '932,430' });

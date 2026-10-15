@@ -53,6 +53,14 @@ Suite `gestaltung`.
 (Woche 9, Monat 7 px), Ring 2 px; ein Schalter aus ist in Hell gefaßt (Rand `--spur-rand`,
 Knauf `--knauf-schatten`), Dunkel bleibt.
 
+0.17.0T31, James' Schlußprüfung (Nachricht 18): N11 — nach langem Druck schickt das Heben einen
+echten Klick in die neue Ansicht, in der Terminmaske auf «Monatlich»; jetzt schluckt `langHalten`
+genau diesen einen Klick, ein neues Auflegen wirkt sofort. N10 — ein zweiter Finger bricht den
+Rückwisch schon bei `touchstart` ab, ohne liegengebliebenes Abbild. N12 — Name im Timer-/Drangblatt
+höchstens zwei Zeilen, langes Wort bricht um; der Rand für den Tonknopf galt nie (Spezifität).
+QA1 — `ankunft` H3 fragt im selben Augenblick statt 20 ms später. N10/N11 mit echten Touchfolgen
+über DevTools nachgestellt und nach dem Fix gegengeprüft; Abnahme am Gerät steht aus.
+
 ## Abgenommen
 
 - 0.17.0T28 · Block 6: Rückwisch folgt dem Finger auf iOS und wird dabei zum Tropfen, fließt
