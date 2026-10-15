@@ -46,11 +46,18 @@ return warten(900).then(function () {
     pts.length > 2 && pts.findIndex(function (v) { return v >= 0.99; }) >= pts.length - 2);
   pruefe('H2 im letzten Stück geht er auf', bilder.length > 2 && String(bilder[bilder.length - 1].opacity) === '0' &&
     String(bilder[0].opacity) === '1');
+  // Gefragt wird im selben Augenblick, nicht 20 ms später: Auf GitHub war
+  // der Ring dann einmal schon ein anderer (QA1, James 18) — ein Neuzeichnen
+  // dazwischen, etwa wenn die Schriften fertig sind, tauscht ihn aus.
+  // Endet der Tropfen, nickt der Ring in der nächsten Mikroaufgabe.
+  var ring = q('#app .tagesring .tr-bild');
   ausbewegt();
-  return warten(20);
-}).then(function () {
+  return Promise.resolve().then(function () { return ring; });
+}).then(function (ring) {
+  pruefe('H3a es ist noch derselbe Ring', ring === q('#app .tagesring .tr-bild'));
   pruefe('H3 und im selben Augenblick nickt der Ring', !q('body > .fl-perle') &&
-    q('#app .tagesring .tr-bild').getAnimations().length === 1);
+    q('#app .tagesring .tr-bild').getAnimations().length === 1, alle('body > .fl-perle').length + ' Perlen, ' +
+    q('#app .tagesring .tr-bild').getAnimations().map(function (a) { return a.playState + '@' + a.currentTime; }).join(' '));
 
   // ── W · Eine Zeile aus dem Wahlschalter ──────────────────────
   state.fluessig = { ios: { ansichten: true } };
