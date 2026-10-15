@@ -10043,19 +10043,27 @@ function langHalten() {
     // Schickt der Browser keinen Klick, wartet die Sperre nicht ewig.
     setTimeout(ende, 800);
   }
+  // Kam das Heben nie an und beginnt schon ein neuer Tipp, gehört das nächste
+  // Heben zu ihm — dann wird nichts geschluckt.
+  let neuerFinger = false;
+  function neu() { neuerFinger = true; }
   function los(e) {
     wurzel.classList.remove('lang-haelt');
     try { window.getSelection().removeAllRanges(); } catch (err) { /* egal */ }
     ['pointerup', 'pointercancel', 'touchend', 'touchcancel'].forEach(function (n) {
       document.removeEventListener(n, los, true);
     });
-    if (e && (e.type === 'pointerup' || e.type === 'touchend')) folgeKlickSchlucken();
+    document.removeEventListener('pointerdown', neu, true);
+    document.removeEventListener('touchstart', neu, true);
+    if (e && !neuerFinger && (e.type === 'pointerup' || e.type === 'touchend')) folgeKlickSchlucken();
   }
   wurzel.classList.add('lang-haelt');
   try { window.getSelection().removeAllRanges(); } catch (e) { /* egal */ }
   ['pointerup', 'pointercancel', 'touchend', 'touchcancel'].forEach(function (n) {
     document.addEventListener(n, los, true);
   });
+  document.addEventListener('pointerdown', neu, true);
+  document.addEventListener('touchstart', neu, true);
   // Kommt das Heben nie an (ein Rechtsklick, ein verschlucktes Ereignis),
   // bleibt die Seite trotzdem nicht für immer unauswählbar.
   setTimeout(los, 8000);

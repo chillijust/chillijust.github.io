@@ -178,6 +178,20 @@ return Promise.resolve()
     pruefe('F5 ohne Klick beim Heben bleibt keine Sperre zurück', terminEntwurf.wiederholung === 'monatlich');
     return durch();
   }).then(function () {
+    // Ging das Heben verloren und beginnt ein neuer Tipp, gehört sein Heben
+    // ihm: Sein Klick wirkt.
+    aufbauen();
+    langGedrueckt = 0;
+    druck('#ansicht > .abschnitt [data-termin="T"]', punktIn('#ansicht > .abschnitt [data-termin="T"]'));
+    return warten(LANG_MS + 100);
+  }).then(function () {
+    var w = q('[data-wdh="woechentlich"]');
+    w.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, pointerType: 'touch' }));
+    w.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerType: 'touch' }));
+    w.click();
+    pruefe('F6 ging das Heben verloren, wirkt der nächste Tipp trotzdem', terminEntwurf.wiederholung === 'woechentlich');
+    return durch();
+  }).then(function () {
     frisch();
     speichern();
   });
