@@ -68,3 +68,4 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0058](0058-pruefstand-im-fenster-des-iphones.md) | Der Prüfstand läuft im Fenster des iPhones (430 × 932) über DevTools, Bildlaufleiste ohne Platz, Schriften geladen | gilt |
 | [0059](0059-drang-als-blatt.md) | Der Drang ist ein Blatt aus Glas wie der Timer, keine eigene Ansicht; läuft geschlossen weiter, geht am Ende von selbst auf | gilt |
 | [0060](0060-rueckwisch-folgt-dem-finger.md) | Der Rückwisch folgt auf iOS dem Finger, darunter ein stilles Abbild des Dashboards; eine Terminzeile leuchtet bei der Rückkehr | gilt |
+| [0061](0061-erinnerungen.md) | Erinnerungen wie bei iOS: offen, bis abgehakt, Verpaßtes zieht mit; mit Terminen in «Heute», Akzent als Farbe, Export in derselben .ics | gilt |

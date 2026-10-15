@@ -15,10 +15,11 @@ pruefe('A3 es liegt über der Seite', getComputedStyle(huelle).position === 'fix
 pruefe('A4 und meldet sich als Dialog', q('#menue [role="dialog"]').getAttribute('aria-modal') === 'true');
 
 // ── B · Die Einträge in der Reihenfolge des Pflichtenhefts ──
-var SOLL = ['Neue Gewohnheit', 'Neuer Termin', 'Journal', 'Kalender-Export', 'Einstellungen',
+// «Neue Erinnerung» kam mit Abschnitt 10 dazu (ADR 0061).
+var SOLL = ['Neue Gewohnheit', 'Neuer Termin', 'Neue Erinnerung', 'Journal', 'Kalender-Export', 'Einstellungen',
   'Sicherung', 'Tickets'];
 var ist = alle('.menue-eintrag .name').map(function (n) { return n.textContent; });
-pruefe('B1 sieben Einträge, in dieser Reihenfolge', ist.join(' · ') === SOLL.join(' · '), ist.join(' · '));
+pruefe('B1 acht Einträge, in dieser Reihenfolge', ist.join(' · ') === SOLL.join(' · '), ist.join(' · '));
 pruefe('B2 jeder trägt ein Symbol', alle('.menue-eintrag').every(function (e) { return !!e.querySelector('svg'); }));
 // Was noch nicht gebaut ist, sagt das — und nur das.
 var gebaut = MENUE.filter(function (m) { return !!m.ziel; }).map(function (m) { return m.id; });

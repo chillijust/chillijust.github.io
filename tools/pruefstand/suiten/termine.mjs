@@ -85,7 +85,8 @@ state.termine = [tm({ id: 'z', titel: 'Zahnarzt', von: '09:30', bis: '10:15', or
 zeige('home');
 pruefe('D2 ein Termin allein reicht fürs Dashboard', !q('#ersteGewohnheit') && !!q('.held #kalRaster'));
 var abschnitte = alle('#ansicht h2').map(function (h) { return h.textContent; });
-pruefe('D3 «Termine heute» steht unter der Karte', abschnitte[0] === 'Termine heute' &&
+// Seit 0.18.0 heißt die Liste «Heute» und trägt auch die Erinnerungen (ADR 0061).
+pruefe('D3 «Heute» steht unter der Karte', abschnitte[0] === 'Heute' &&
   q('.held').nextElementSibling.querySelector('.tm-liste') !== null, abschnitte.join());
 var zeilen = alle('#ansicht > .abschnitt [data-termin]').map(function (z) { return z.getAttribute('data-termin'); });
 pruefe('D4 nur heute, ganztags zuerst', zeilen.join() === 'o,z', zeilen.join());

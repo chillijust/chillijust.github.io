@@ -101,9 +101,9 @@ pruefe('A1 der Knopf heißt «Hinzufügen», zu ist nichts offen', !!neu && neu.
   q('#hinweisBlatt').hidden && !/Termin an diesem Tag/.test(q('#kalLeiste').textContent));
 neu.click();
 var knoepfe = alle('#hinweisWahl .knopf'), auf = letzteHuelle();
-pruefe('A2 ein Tipp öffnet ein Fenster: Termin, Gewohnheit, Abgewöhnen (ADR 0025)', !q('#hinweisBlatt').hidden &&
+pruefe('A2 ein Tipp öffnet ein Fenster: Termin, Erinnerung, Gewohnheit, Abgewöhnen (ADR 0025, 0061)', !q('#hinweisBlatt').hidden &&
   q('#hinweisKarte').classList.contains('glas') && q('#hinweisTitel').textContent === 'Hinzufügen' &&
-  knoepfe.map(function (k) { return k.textContent; }).join() === 'Termin,Gewohnheit,Abgewöhnen' &&
+  knoepfe.map(function (k) { return k.textContent; }).join() === 'Termin,Erinnerung,Gewohnheit,Abgewöhnen' &&
   q('#hinweisOk').hidden);
 pruefe('A2a ohne «Abbrechen» und ohne leere Knopfleiste: ab bricht, wer danebentippt (ADR 0044)',
   q('#hinweisNein').hidden && q('#hinweisOk').parentNode.hidden &&

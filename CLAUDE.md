@@ -26,7 +26,7 @@ Lies CLAUDE.md.
 ## Projekt
 
 **Chillinal**, sichtbar **«Chilli Journal»** — Web-App zum An- und Abgewöhnen von
-Gewohnheiten, mit Terminen, offline, Daten nur auf dem Gerät. Gehostet über GitHub Pages
+Gewohnheiten, mit Terminen und Erinnerungen, offline, Daten nur auf dem Gerät. Gehostet über GitHub Pages
 unter https://chillijust.github.io/. **Einziges Zielgerät:** iPhone 15 Pro Max, iOS 26,
 Safari als Home-Bildschirm-App im Vollbild, hoch und quer (ADR 0056).
 
@@ -50,6 +50,7 @@ Safari als Home-Bildschirm-App im Vollbild, hoch und quer (ADR 0056).
 | 7 · Sicherung, Einstellungen, Tickets | fertig (0.8.0) |
 | 8 · Feinschliff, Nachbesserungen am Gerät, Timer und Zähler, Termine abhaken | fertig (0.13.1) |
 | 9 · Flüssig wie iOS 26 je Stelle, Chilli als Standard (ADR 0053–0055) | fertig (0.17.0) |
+| 10 · Erinnerungen wie bei iOS, mit Export (ADR 0061) | im Bau (0.18.0T) |
 
 ## Wo was steht
 
@@ -169,4 +170,6 @@ Was erledigt ist und was es am Gerät gemessen hat, steht in `docs/verlauf.md`.
 
 - **0.17.0 freigegeben** am 2026-10-15 nach James' Prüfung (Nachrichten 18, 19); Abschnitt 9
   fertig.
+- **Erinnerungen (Abschnitt 10) ausgeliefert** in 0.18.0T, Abnahme am Gerät steht aus: anlegen
+  ohne und mit Tag, Mitziehen am nächsten Tag, Reihe abhaken, Export in den Kalender.
 - **Vorgemerkt:** Jedes Auflegen des Fingers kostet ein Bild (30–39 ms, kein Skript).

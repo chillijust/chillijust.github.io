@@ -27,7 +27,8 @@ fest.
   iOS die Schrift darin färbt, zeigt nur das Gerät.
 - **Der Akzent ist kein Schriftgrund** (3,1 : 1). Hauptknöpfe nehmen `--knopf`, Schrift
   auf Akzent `--auf-akzent`.
-- **Grün heißt erledigt, Blau heißt Termin** — sonst nichts.
+- **Grün heißt erledigt, Blau heißt Termin, der Akzent als Strich und Punkt heißt Erinnerung**
+  (ADR 0061) — sonst nichts.
 - **Lora** 400, 400 kursiv, 600; **Poppins** 500, 600. Ein weiterer Schnitt nur über
   `SCHRIFTEN` in `tools/build.mjs`. Live-Ziffern bekommen `tabular-nums`.
 

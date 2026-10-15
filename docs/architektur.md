@@ -15,7 +15,7 @@ was findet. Wie sich eine Ansicht im Einzelnen verhält, steht im ADR und in der
 
 Im Skript, von oben: Version und Stand · `CHILI_BILD` · Hilfen (`esc`, `ICON`, Datum,
 `melden`, Tage) · Zustand und Speicher · Darstellung · Bewegung · Gewohnheiten ·
-Abgewöhnen · Termine · Kalender-Export · Ansichten · Sicherung · Tickets · Einstellungen ·
+Abgewöhnen · Termine · Erinnerungen · Kalender-Export · Ansichten · Sicherung · Tickets · Einstellungen ·
 Menü · Service Worker · Start. Die Abschnitte trennen Kommentarbalken `// ── Name ──`;
 `grep -n "^// ── " index.html` zeigt das Inhaltsverzeichnis.
 
@@ -59,6 +59,17 @@ state = {
     ort: '', notiz: '',
     erledigt: ['2026-10-16']             // abgehakte Tage, je Tag auch bei einer Reihe (ADR 0041)
   }],
+  erinnerungen: [{                     // ADR 0061
+    id: 'e…',
+    titel: 'Brief einwerfen',            // höchstens TITEL_MAX Zeichen
+    tag: null,                           // | Tag — ohne Tag gilt sie heute; bei einer Reihe ihr Beginn
+    uhr: null,                           // | 'HH:MM'
+    wiederholung: 'keine',               // | 'taeglich' | 'woechentlich' | 'monatlich'
+    notiz: '',
+    angelegt: '2026-10-15',
+    naechste: null,                      // nur Reihe: die offene Fälligkeit
+    erledigt: [{ am: '2026-10-15', war: null }]  // je Haken: wann, und was davor fällig war
+  }],
   journal: [{
     woche: '2026-10-05',                 // Montag der Woche, eine Reflexion je Woche
     gut: '', stoerte: '',                // höchstens JOURNAL_MAX Zeichen, nicht beide leer
@@ -78,7 +89,7 @@ state = {
   }],
   gesichert: null,                       // | Zeitpunkt in ms — wann zuletzt ein Sicherungscode kopiert wurde
   gefeiert: { 'a…': 1791200000000 },     // Abgewöhnen: der Rückfall, nach dem der neue Rekord gefeiert ist
-  exportOhne: { 't:…': true },          // Export: Neues, das bewußt draußen bleibt (ADR 0034)
+  exportOhne: { 't:…': true },          // auch 'g:…', 'e:…'          // Export: Neues, das bewußt draußen bleibt (ADR 0034)
   schwachHinweis: true,                  // der Hinweis ab drei ungefestigten Gewohnheiten
   bewegung: 'auto',                      // | 'aus' — Bewegung reduzieren
   fluessig: null                         // | { ios: { stelle: true } } — welche Stellen auf iOS-Flüssig stehen
@@ -105,7 +116,7 @@ state = {
   sich das Ergebnis je Gewohnheit (`auswertungen`, Schlüssel: Tag, Beginn, Rhythmus,
   erledigte Tage) und rechnet nur neu, wenn sich davon etwas änderte (P2, Suite `auswertung`).
 - Nur im Speicher der Seite, nie in `state`: `kalVersatz`, `kalTag`, `hm`, `entwurf`,
-  `terminEntwurf`, `reflexionEntwurf`, `ticketEntwurf`, `rueckgaengig`, `flEntwurf`, `rucklerLetzte`, `rucklerAlle`.
+  `terminEntwurf`, `erinnerungEntwurf`, `reflexionEntwurf`, `ticketEntwurf`, `rueckgaengig`, `flEntwurf`, `rucklerLetzte`, `rucklerAlle`.
 
 ## Render-Zyklus
 
@@ -139,6 +150,7 @@ state = {
 | Timer, Zähler | `timerStarten` (frischt nur die Kachel auf: `kachelNeu`), `timerOeffnen`, `timerPause`, `timerRest`, `zaehlen`, `zaehlStand` |
 | Abgewöhnen, Welle | `lasterAuswerten`, `rueckfallEintragen`, `welleBeginnen`, `welleGewonnen`, `welleAbbrechen`; das Blatt (ADR 0059): `drangOeffnen`, `drangSchliessen`, `drangTakt`, `zeichneDrangKarte` |
 | Termine | `terminAm`, `termineAm`, `terminAbhaken`, `zeichneTerminZeile`, `zeichneTerminFormular` |
+| Erinnerungen (ADR 0061) | `erinnerungenAm`, `erTag`, `erSeit`, `erinnerungAbhaken`, `zeichneErinnerungZeile`, `zeichneTagesListe`, `zeichneErinnerungFormular`, `erinnerungEreignis` |
 | Kalender | `zeichneKalender`, `bindeKalender`, `kalZeige`, `kalBlaettern`, `kalFliessen`, `zeichneTagesleiste`; Ziehen: `kalDruck`/`kalZug`/`kalLos`, `kalSetzen`, `kalWechselZeigen` |
 | Kalender-Export | `kalenderDatei`, `exportAuswahl`, `exportiertMerken`, `icsLaden`, `zeichneExport`, `bindeExport` |
 | Rückblick | `zeichneHeatmap`, `hmWocheWaehlen`, `hmTagZeigen` |
