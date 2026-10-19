@@ -175,3 +175,4 @@ Was erledigt ist und was es am Gerät gemessen hat, steht in `docs/verlauf.md`.
 - **iOS ist das neue Chilli** (Abschnitt 11) in 0.19.0T, Abnahme am Gerät steht aus: jede Stelle
   fließt, Einstellungen ohne Reiter, Menüeinträge kommen mit dem Blatt.
 - **Vorgemerkt:** Jedes Auflegen des Fingers kostet ein Bild (30–39 ms, kein Skript).
+- **Nach der Abnahme von 0.19.0T:** erst aufräumen, dann aufteilen (ADR 0063, Entwurf).
