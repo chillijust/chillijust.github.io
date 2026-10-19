@@ -5,18 +5,19 @@ Sicherung `backup/chillinal-0.19.0-…` · führt den Ausweg aus 0046 aus*
 
 ## Ausgangslage
 
-`index.html` hat 635 KB (0.19.0T); 0046 warnt ab 600 KB und hält bei 800 KB an. Die Grenze
-schützt nicht das Gerät, sondern den Überblick: Jarvis liest die Datei nur in Ausschnitten,
-und je größer sie wird, desto eher bleibt beim Ändern etwas Abhängiges ungesehen.
+`index.html` hat 620 KB (0.19.0T; KB zu 1024 Byte, wie `pruefen.mjs` zählt); 0046
+warnt ab 600 KB und hält bei 800 KB an. Die Grenze schützt nicht das Gerät, sondern den
+Überblick: Jarvis liest die Datei nur in Ausschnitten, und je größer sie wird, desto eher
+bleibt beim Ändern etwas Abhängiges ungesehen.
 
 Gemessen am 2026-10-19:
 
 | Teil | Größe | Befund |
 | --- | --- | --- |
-| Skript | 414 KB | 497 Funktionen auf oberster Ebene, keine tot; kaum doppelte Blöcke |
-| davon Kommentare | 104 KB | ganze Zeilen `//`, 163 ADR-Verweise — die Gebrauchsanweisung |
-| CSS ohne Schriften | 75 KB | 3 scheinbar tote Klassen, zur Laufzeit gebaut (`wm-a` + Nummer) |
-| Schriften | 109 KB | Lora kursiv 30 KB, an 5 Stellen benutzt — bleibt |
+| Skript | 405 KB | 497 Funktionen auf oberster Ebene, keine tot; kaum doppelte Blöcke |
+| davon Kommentare | 101 KB | ganze Zeilen `//`, 163 ADR-Verweise — die Gebrauchsanweisung |
+| CSS ohne Schriften | 73 KB | 3 scheinbar tote Klassen, zur Laufzeit gebaut (`wm-a` + Nummer) |
+| Schriften | 107 KB | Lora kursiv 30 KB, an 5 Stellen benutzt — bleibt |
 | Chili, Symbol | 32 KB | PNG |
 
 Aufräumen allein bringt wenig; das Gewicht liegt in den Kommentaren, und die dürfen im
@@ -35,7 +36,7 @@ Drei Schritte, je eine Sitzung, je grün gepusht.
   auf das *Warum* mit ADR-Verweis kürzen.
 - Chili und Symbol verlustfrei nachpressen, wenn ein Werkzeug dafür da ist.
 - Beweis: Prüfstand grün, Bildschirmfotos (`bild.mjs`) vorher und nachher gleich.
-- Erwartet: 615–625 KB.
+- Erwartet: 600–610 KB.
 
 **2a · Aufteilen**
 - Quelltext unter `src/`: `kopf.html`, `stil/*.css`, `koerper.html`, `skript/NN-*.js`,
@@ -50,7 +51,7 @@ Drei Schritte, je eine Sitzung, je grün gepusht.
 
 **2b · Schlanke Auslieferung**
 - `build.mjs` läßt ganze Kommentarzeilen aus der ausgelieferten `index.html` weg; im
-  Quelltext bleiben sie. Erwartet: rund 530 KB.
+  Quelltext bleiben sie. Erwartet: rund 520 KB.
 - Der Prüfstand läuft auf der schlanken Datei — die einzige Falle, eine Zeile `//` in
   einem Template-String, fällt dort auf.
 - `pruefen.mjs` mißt zusätzlich jede Quelldatei; die Schwelle setzt der Nutzer

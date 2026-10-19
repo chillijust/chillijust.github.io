@@ -46,7 +46,15 @@ if (!chrome) {
 
 // Ein Browser für alle Suiten; jede bekommt ihren eigenen Kontext (kopflos.mjs).
 // Hängt eine, wird er neu gestartet, damit die nächste nicht mit hängt.
-let browser = await browserStarten(chrome);
+// Auch der erste Start hat einen zweiten Versuch: Auf dem Läufer von GitHub
+// meldete sich Chromium einmal nicht, bevor eine Suite lief (Lauf 351).
+let browser;
+try {
+  browser = await browserStarten(chrome);
+} catch (e) {
+  console.error('Läufer: ' + e.message + ' — zweiter Versuch.');
+  browser = await browserStarten(chrome);
+}
 
 let gruen = 0;
 let rot = 0;
