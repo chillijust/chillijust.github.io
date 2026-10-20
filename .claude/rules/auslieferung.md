@@ -35,7 +35,7 @@ Gilt für Service Worker, Version und Eingebettetes. Ausführlich in `docs/deplo
 - **Nur in `VERSION` von Hand.** `node tools/build.mjs` stempelt `APP_VERSION`,
   `SW_VERSION` und `APP_STAND`; `--check` vergleicht nur.
 - Erste Ziffer: gespeicherte Daten werden anders gelesen. Zweite: etwas kommt dazu.
-  Dritte: alles Übrige.
+  Dritte: alles Übrige. Einzige Ausnahme: 1.0.0 war die erste Release (ADR 0064).
 - **Ein angehängtes `T` heißt «noch nicht abgenommen»** (`0.14.0T`) und gehört in die Zahl,
   weil der Cache nach ihr heißt. Zweite Nachbesserung an derselben angesagten Fassung:
   `0.14.0T2`. Fällt das T weg, ist die Fassung freigegeben.

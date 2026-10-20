@@ -68,6 +68,8 @@ Das Menü kommt als ein Tropfen, seine Einträge blenden ein, statt einzeln aufz
 
 ## Abgenommen
 
+- **1.0.0 freigegeben** am 2026-10-20 — die erste Release: 0.19.0T abgenommen, Abschnitt 11
+  fertig (ADR 0062, 0064).
 - **0.18.0 freigegeben** am 2026-10-15: Erinnerungen wie bei iOS, Abschnitt 10 fertig (ADR 0061).
 - **0.17.0 freigegeben** am 2026-10-15: Abschnitt 9 fertig, samt T7–T31 und James' N1–N12,
   nach James' Schlußprüfung (Nachrichten 18, 19).

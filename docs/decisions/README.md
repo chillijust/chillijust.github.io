@@ -70,4 +70,5 @@ Chillingos Entscheidungen (0001–0094 der alten Zählung) liegen auf
 | [0060](0060-rueckwisch-folgt-dem-finger.md) | Der Rückwisch folgt auf iOS dem Finger, darunter ein stilles Abbild des Dashboards; eine Terminzeile leuchtet bei der Rückkehr | gilt; seit 0062 immer |
 | [0061](0061-erinnerungen.md) | Erinnerungen wie bei iOS: offen, bis abgehakt, Verpaßtes zieht mit; mit Terminen in «Heute», Akzent als Farbe, Export in derselben .ics | gilt |
 | [0062](0062-ios-ist-das-neue-chilli.md) | iOS ist das neue Chilli: jede Stelle fließt wie in iOS 26; kein Reiter «Flüssig», keine Ruckler-Messung, kein `state.fluessig` | gilt |
-| [0063](0063-aufraeumen-und-aufteilen.md) | Erst aufräumen, dann aufteilen: Quelltext in `src/`, `index.html` baut `build.mjs`, Kommentare bleiben im Quelltext | Entwurf; beginnt nach Abnahme 0.19.0T |
+| [0063](0063-aufraeumen-und-aufteilen.md) | Erst aufräumen, dann aufteilen: Quelltext in `src/`, `index.html` baut `build.mjs`, Kommentare bleiben im Quelltext | beschlossen; beginnt nach 1.0.0 |
+| [0064](0064-erste-release-1-0-0.md) | Die erste Release heißt 1.0.0 — einmalige Ausnahme vom Versionsschema; Schema und Daten bleiben | gilt |

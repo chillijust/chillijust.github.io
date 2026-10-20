@@ -1,7 +1,7 @@
 # 0063 · Erst aufräumen, dann aufteilen: Quelltext in `src/`, `index.html` baut `build.mjs`
 
-*2026-10-19 · Entwurf, beschlossen vom Nutzer · beginnt nach der Abnahme von 0.19.0T, davor
-Sicherung `backup/chillinal-0.19.0-…` · führt den Ausweg aus 0046 aus*
+*2026-10-19 · beschlossen vom Nutzer · beginnt nach der Release 1.0.0 (ADR 0064), deren
+Stand auf `backup/chillinal-0.19.0T-2026-10-20` liegt · führt den Ausweg aus 0046 aus*
 
 ## Ausgangslage
 
@@ -27,7 +27,7 @@ Quelltext nicht fehlen.
 
 Drei Schritte, je eine Sitzung, je grün gepusht.
 
-**1 · Aufräumen** (0.19.1T)
+**1 · Aufräumen** (1.0.1T)
 - Das Flüssige an einen Ort: heute verteilt auf die Abschnitte ab Zeile 2685, 2831, 3244
   und 6065–6354. Nur verschieben.
 - Die größten Abschnitte auf Reste der zweiten Fassung (0062) durchsehen: Umschalter,

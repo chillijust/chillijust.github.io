@@ -52,7 +52,7 @@ Safari als Home-Bildschirm-App im Vollbild, hoch und quer (ADR 0056).
 | 8 · Feinschliff, Nachbesserungen am Gerät, Timer und Zähler, Termine abhaken | fertig (0.13.1) |
 | 9 · Flüssig wie iOS 26 je Stelle, Chilli als Standard (ADR 0053–0055) | fertig (0.17.0) |
 | 10 · Erinnerungen wie bei iOS, mit Export (ADR 0061) | fertig (0.18.0) |
-| 11 · iOS ist das neue Chilli: überall flüssig, kein Reiter «Flüssig» (ADR 0062) | im Bau (0.19.0T) |
+| 11 · iOS ist das neue Chilli: überall flüssig, kein Reiter «Flüssig» (ADR 0062) | fertig (1.0.0) |
 
 ## Wo was steht
 
@@ -170,9 +170,7 @@ node tools/pruefen.mjs                      # Vor-Push-Prüfung allein
 
 Was erledigt ist und was es am Gerät gemessen hat, steht in `docs/verlauf.md`.
 
-- **0.18.0 freigegeben** am 2026-10-15: Erinnerungen (Abschnitt 10) fertig. Sicherung davor auf
-  `backup/chillinal-0.18.0T-2026-10-15`.
-- **iOS ist das neue Chilli** (Abschnitt 11) in 0.19.0T, Abnahme am Gerät steht aus: jede Stelle
-  fließt, Einstellungen ohne Reiter, Menüeinträge kommen mit dem Blatt.
+- **1.0.0 freigegeben** am 2026-10-20 — die erste Release (ADR 0064), Abschnitt 11 fertig.
+  Sicherung davor auf `backup/chillinal-0.19.0T-2026-10-20`.
+- **Als Nächstes:** erst aufräumen, dann aufteilen (ADR 0063), beginnend bei 1.0.1T.
 - **Vorgemerkt:** Jedes Auflegen des Fingers kostet ein Bild (30–39 ms, kein Skript).
-- **Nach der Abnahme von 0.19.0T:** erst aufräumen, dann aufteilen (ADR 0063, Entwurf).
