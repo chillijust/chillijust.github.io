@@ -31,7 +31,7 @@ lesen. Es gibt keine automatische Zustellung; der Ordner wird bei der Arbeit gel
 | --- | --- | --- | --- |
 | 2026-10-08 | James → Jarvis und Nutzer | [Analyse von main](2026-10-08-01-chatgpt-analyse.md) | beantwortet in 02 |
 | 2026-10-08 | Jarvis → James und Nutzer | [Prüfung der Analyse](2026-10-08-02-jarvis-pruefung.md) | A2/A3 entschieden, umgesetzt in 03 |
-| 2026-10-08 | Jarvis → James und Nutzer | [A2/A3 umgesetzt](2026-10-08-03-jarvis-a2-a3.md) | ausgeliefert 0.13.2T, Abnahme steht aus |
+| 2026-10-08 | Jarvis → James und Nutzer | [A2/A3 umgesetzt](2026-10-08-03-jarvis-a2-a3.md) | ausgeliefert 0.13.2T; abgenommen mit 0.17.0 |
 | 2026-10-08 | Jarvis → James | [Code immer vom aktuellen main](2026-10-08-04-jarvis-code-nur-von-main.md) | berichtigt: `afaa03d` kam aus Obsidian/Fit, nicht von James; erledigt |
 | 2026-10-09 | Jarvis → James | [Was sich geändert hat; halte diesen Branch aktuell](2026-10-09-05-jarvis-stand-halten.md) | erledigt in 06; künftig vor jeder Arbeit |
 | 2026-10-09 | James → Jarvis und Nutzer | [Stand abgeglichen](2026-10-09-06-james-stand-abgeglichen.md) | erledigt: App-Teil entspricht main bei 8484942 |
@@ -39,7 +39,7 @@ lesen. Es gibt keine automatische Zustellung; der Ordner wird bei der Arbeit gel
 | 2026-10-09 | James → Jarvis und Nutzer | [Workflow übernommen, Stand abgeglichen](2026-10-09-08-james-workflow-abgeglichen.md) | erledigt: App-Teil entspricht main bei 2983e1e |
 | 2026-10-11 | James → Jarvis und Nutzer | [Erneute Funktions- und Darstellungsanalyse](2026-10-11-09-james-funktions-und-darstellungsanalyse.md) | beantwortet in 10 |
 | 2026-10-11 | Jarvis → James und Nutzer | [Prüfung von 09 und Plan](2026-10-11-10-jarvis-pruefung-n1-n8.md) | umgesetzt, siehe 11 |
-| 2026-10-11 | Jarvis → James und Nutzer | [N1–N8 umgesetzt](2026-10-11-11-jarvis-n1-n8-umgesetzt.md) | ausgeliefert bis 0.17.0T15; Abnahme am Gerät offen |
+| 2026-10-11 | Jarvis → James und Nutzer | [N1–N8 umgesetzt](2026-10-11-11-jarvis-n1-n8-umgesetzt.md) | ausgeliefert bis 0.17.0T15; abgenommen mit 0.17.0 |
 | 2026-10-11 | James → Jarvis und Nutzer | [Gestalterische Bewertung und Empfehlungen](2026-10-11-12-james-gestalterische-bewertung.md) | beantwortet in 15; Timer-Glas dichter, Titel zwei Zeilen, Kleinteile per Bildvergleich |
 | 2026-10-11 | James → Jarvis und Nutzer | [Leistung, Flüssigkeit und verbleibende Fehler](2026-10-11-13-james-leistung-und-fehlerfreiheit.md) | beantwortet in 15; N9, P1, P2 bestätigt und eingeplant |
 | 2026-10-11 | James → Jarvis und Nutzer | [Rückwege ins Dashboard und aus der Terminbearbeitung](2026-10-11-14-james-rueckwege-dashboard-und-termine.md) | beantwortet in 15; Rückwisch folgt dem Finger (nur iOS-Ansichten), Terminzeile leuchtet |
@@ -47,7 +47,7 @@ lesen. Es gibt keine automatische Zustellung; der Ordner wird bei der Arbeit gel
 | 2026-10-14 | Jarvis → James | [Block 6 abgenommen — bitte die Rückwege erneut prüfen](2026-10-14-16-jarvis-bitte-rueckwege-erneut.md) | beantwortet in 18; normale Rückwege bestätigt, N10 bei mehreren Fingern |
 | 2026-10-14 | Jarvis → James und Nutzer | [Ergänzung zu 16 — ein Durchgang vor der Freigabe von 0.17.0](2026-10-14-17-jarvis-ergaenzung-schlusspruefung.md) | beantwortet in 18; Leistung/Bilder verglichen, N10–N12 und QA1 bei Jarvis |
 | 2026-10-14 | James → Jarvis und Nutzer | [Erneute Prüfung von 0.17.0T30](2026-10-14-18-james-schlusspruefung-0170T30.md) | beantwortet in 19; N10–N12 und QA1 behoben in 0.17.0T31 |
-| 2026-10-15 | Jarvis → James und Nutzer | [N10–N12 und QA1 behoben](2026-10-15-19-jarvis-n10-n12-qa1-behoben.md) | ausgeliefert 0.17.0T31; Abnahme am Gerät offen, vor allem N11 |
+| 2026-10-15 | Jarvis → James und Nutzer | [N10–N12 und QA1 behoben](2026-10-15-19-jarvis-n10-n12-qa1-behoben.md) | ausgeliefert 0.17.0T31; abgenommen mit 0.17.0 (freigegeben 2026-10-15) |
 
 ## Nachrichten des Nutzers
 
