@@ -36,7 +36,13 @@ Drei Schritte, je eine Sitzung, je grün gepusht.
   auf das *Warum* mit ADR-Verweis kürzen.
 - Chili und Symbol verlustfrei nachpressen, wenn ein Werkzeug dafür da ist.
 - Beweis: Prüfstand grün, Bildschirmfotos (`bild.mjs`) vorher und nachher gleich.
-- Erwartet: 600–610 KB.
+- Erwartet: 600–610 KB. **Ergebnis (1.0.1T): 620 KB, unverändert.** Nichts war tot — keine
+  Funktion, auch nicht über Ecken, keine Animation, Klasse oder CSS-Variable, kein Zweig
+  der Chilli-Fassung; 0062 hatte gründlich geräumt. Das Flüssige steht jetzt beisammen
+  (Formen, Hälse, Federn vor «Bewegung: Tropfen»), zwei Kommentare erzählen keine
+  Geschichte mehr. Verweise wie «(James, N4)» bleiben — sie sind Fundstellen wie ADR-Nummern.
+  Für die Bilder war kein Werkzeug da; sie hätten wenige KB gebracht. 18 Bilder mit
+  Beispieldaten, hell und dunkel, sind vorher und nachher bitgleich. Gewicht nimmt erst 2b.
 
 **2a · Aufteilen**
 - Quelltext unter `src/`: `kopf.html`, `stil/*.css`, `koerper.html`, `skript/NN-*.js`,

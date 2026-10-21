@@ -172,5 +172,6 @@ Was erledigt ist und was es am Gerät gemessen hat, steht in `docs/verlauf.md`.
 
 - **1.0.0 freigegeben** am 2026-10-20 — die erste Release (ADR 0064), Abschnitt 11 fertig.
   Sicherung davor auf `backup/chillinal-0.19.0T-2026-10-20`.
-- **Als Nächstes:** erst aufräumen, dann aufteilen (ADR 0063), beginnend bei 1.0.1T.
+- **Aufgeräumt** in 1.0.1T (ADR 0063, Schritt 1): nichts Totes gefunden, das Flüssige steht
+  beisammen; sichtbar gleich. **Als Nächstes:** Schritt 2a, aufteilen in `src/`.
 - **Vorgemerkt:** Jedes Auflegen des Fingers kostet ein Bild (30–39 ms, kein Skript).
