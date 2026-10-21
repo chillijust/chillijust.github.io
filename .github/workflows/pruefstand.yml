@@ -53,5 +53,19 @@ jobs:
       - name: DOCTYPE, Fremdadressen, Syntax
         run: node tools/pruefen.mjs
 
+      # Der erste Start von Chromium auf einem frischen Läufer ist kalt — lokal 8 s
+      # statt 0,8 s. Dauerte er länger als die 30 s des Prüfstands, brach der ihn ab,
+      # und der zweite Versuch begann wieder kalt (Läufe 351, 353, 354). Hier darf er
+      # sich Zeit nehmen; das Protokoll nennt Chromium, Version und Dauer.
+      - name: Chromium vorwärmen
+        run: |
+          chrome=$(node --input-type=module -e "import { chromiumFinden } from './tools/pruefstand/helfer.mjs'; console.log(chromiumFinden() || '')")
+          echo "Chromium: $chrome"
+          "$chrome" --version || true
+          start=$(date +%s)
+          timeout 180 "$chrome" --headless --disable-gpu --no-sandbox --no-first-run --dump-dom about:blank > /dev/null 2>&1 \
+            || echo "::warning title=Chromium vorwärmen::endete mit $?"
+          echo "Kaltstart: $(( $(date +%s) - start )) s"
+
       - name: Prüfstand
         run: node tools/pruefstand/lauf.mjs
