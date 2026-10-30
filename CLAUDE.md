@@ -74,7 +74,8 @@ Nachschlagen **nur bei Bedarf**, nicht vorab:
 - `docs/decisions/README.md` — Index der ADRs; die Begründung jeder Regel steht im ADR
 - `docs/verlauf.md` — was jede Fassung von Abschnitt 9 brachte, mit Messwerten vom Gerät
 - `tools/pruefstand/README.md` — Aufbau des Prüfstands, Vorlage für eine Suite
-- `docs/stil-vorlage.md` — der Stil zum Übertragen auf andere Apps
+- `docs/stil-vorlage.md` — der Stil zum Übertragen auf andere Apps; die Bewegung dazu in
+  `docs/ios-bewegung.md`
 - Nachrichten zwischen Nutzer, Jarvis und James: Ordner `kommunikation/` **nur auf Branch
   `chatgpt/kommunikation`**, nie auf `main`, nie mit `main` zusammenführen; den App-Teil
   dort hält James aktuell (ADR 0050);

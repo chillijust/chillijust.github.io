@@ -150,6 +150,11 @@ Karten (0014, 0019, 0024).
 
 ## 6 · Bewegung
 
+> **Überholt seit 1.0.0 (ADR 0062):** Die Bewegung fließt wie iOS 26 — eine Feder (562 ms),
+> Tropfen mit Hals, gerechnet als Pfad. Wie man sie überträgt, steht in
+> **`docs/ios-bewegung.md`**. Die Regeln 1–4 und 6–9 gelten weiter; Regel 5 und die Tabelle
+> (416, 338, 166 ms) nicht mehr.
+
 Das ist der Teil, der den Stil ausmacht. Neun Regeln:
 
 1. **Nichts ploppt** (0007). Was aufgeht, wächst aus dem Getippten; was geht, fließt
@@ -287,8 +292,8 @@ var FEDER = (function () {
 3. Knöpfe, Karten, Wahlleiste, Eingabefeld nach §3.
 4. Meldungen auf Glas umstellen (§4, §7) — Bestätigung, Meldung, Hinweis, Frage mit
    «Ja»/«Nein»; ein Fenster, das mit seiner Meldung geht, wird selbst zu ihr.
-5. Feder und Tropfen (§6) als **eine** gemeinsame Funktion im Rahmen, nicht je Modul; jeder
-   Tropfen aus dem kleinsten runden Teil seiner Quelle.
+5. Feder und Tropfen nach `docs/ios-bewegung.md` als **eine** gemeinsame Funktion im Rahmen,
+   nicht je Modul; jeder Tropfen aus dem kleinsten runden Teil seiner Quelle.
 6. Kachel-Geste und langer Druck (§6, §7, §9): antippen hakt ab, lange drücken öffnet,
    nichts wird markiert.
 7. Reduced Motion und Schalter «Bewegung aus».
