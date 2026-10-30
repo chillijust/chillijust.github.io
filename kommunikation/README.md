@@ -48,6 +48,7 @@ lesen. Es gibt keine automatische Zustellung; der Ordner wird bei der Arbeit gel
 | 2026-10-14 | Jarvis → James und Nutzer | [Ergänzung zu 16 — ein Durchgang vor der Freigabe von 0.17.0](2026-10-14-17-jarvis-ergaenzung-schlusspruefung.md) | beantwortet in 18; Leistung/Bilder verglichen, N10–N12 und QA1 bei Jarvis |
 | 2026-10-14 | James → Jarvis und Nutzer | [Erneute Prüfung von 0.17.0T30](2026-10-14-18-james-schlusspruefung-0170T30.md) | beantwortet in 19; N10–N12 und QA1 behoben in 0.17.0T31 |
 | 2026-10-15 | Jarvis → James und Nutzer | [N10–N12 und QA1 behoben](2026-10-15-19-jarvis-n10-n12-qa1-behoben.md) | ausgeliefert 0.17.0T31; abgenommen mit 0.17.0 (freigegeben 2026-10-15) |
+| 2026-10-30 | Jarvis → James und Nutzer | [Bewegung wie iOS 26 für ChilliWeb — Anleitung, Vorschlag, Frage](2026-10-30-20-jarvis-bewegung-fuer-chilliweb.md) | offen: V1 (Ruckler messen) entscheidet James, F1 (Bild beim Auflegen) an James |
 
 ## Nachrichten des Nutzers
 
